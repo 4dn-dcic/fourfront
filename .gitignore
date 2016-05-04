@@ -14,7 +14,6 @@
 /node_modules/
 /ontology.json
 /parts/
-/production.ini
 /session-secret.b64
 /src/encoded/static/css/bootstrap.css
 /src/encoded/static/css/responsive.css

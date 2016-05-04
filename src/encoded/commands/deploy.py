@@ -90,7 +90,7 @@ def run(wale_s3_prefix, image_id, instance_type, elasticsearch,
     )
 
     instance = reservation[0]  # Instance:i-34edd56f
-    print(instance.id)
+    print("creating instance %s" % (instance.id))
     instance.wait_until_exists()
     instance.create_tags(Tags=[
         {'Key': 'Name', 'Value': name},
@@ -98,14 +98,13 @@ def run(wale_s3_prefix, image_id, instance_type, elasticsearch,
         {'Key': 'commit', 'Value': commit},
         {'Key': 'started_by', 'Value': username},
     ])
-    print('ssh %s' % (instance.id))
-    if domain == 'instance':
-        print('http://%s' % instance.id)
+
 
     print('pending...')
     instance.wait_until_running()
     print(instance.state['Name'])
-    print(instance.public_dns_name)
+    print('ssh -i ~/.ssh/%s ubuntu@%s' % (key_pair, instance.public_dns_name)) 
+    print('http://%s' % instance.public_dns_name)
 
 
 def main():
