@@ -11,7 +11,8 @@ def nameify(s):
 
 
 def run(wale_s3_prefix, image_id, instance_type, elasticsearch,
-        branch=None, name=None, role='demo', profile_name=None):
+        branch=None, name=None, role='demo', profile_name=None, iam_profile=None,
+        security_group=None, key_pair=None):
     if branch is None:
         branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('utf-8').strip()
 
@@ -67,11 +68,12 @@ def run(wale_s3_prefix, image_id, instance_type, elasticsearch,
             'COMMIT': commit,
             'ROLE': role,
         }
-        security_groups = ['ssh-http-https']
+        security_groups = [security_group,]
     else:
         user_data = subprocess.check_output(['git', 'show', commit + ':cloud-config-elasticsearch.yml']).decode('utf-8')
-        security_groups = ['elasticsearch-https']
+        security_groups = [security_group,]
 
+    print("secuirity groups are", security_group)
     reservation = ec2.create_instances(
         ImageId=image_id,
         MinCount=1,
@@ -80,14 +82,15 @@ def run(wale_s3_prefix, image_id, instance_type, elasticsearch,
         SecurityGroups=security_groups,
         UserData=user_data,
         BlockDeviceMappings=bdm,
+        KeyName=key_pair,
         InstanceInitiatedShutdownBehavior='terminate',
         IamInstanceProfile={
-            "Name": 'encoded-instance',
+            "Arn": iam_profile,
         }
     )
 
     instance = reservation[0]  # Instance:i-34edd56f
-    print('%s.%s.encodedcc.org' % (instance.id, domain))
+    print(instance.id)
     instance.wait_until_exists()
     instance.create_tags(Tags=[
         {'Key': 'Name', 'Value': name},
@@ -95,13 +98,14 @@ def run(wale_s3_prefix, image_id, instance_type, elasticsearch,
         {'Key': 'commit', 'Value': commit},
         {'Key': 'started_by', 'Value': username},
     ])
-    print('ssh %s.%s.encodedcc.org' % (name, domain))
+    print('ssh %s' % (instance.id))
     if domain == 'instance':
-        print('https://%s.demo.encodedcc.org' % name)
+        print('http://%s' % instance.id)
 
     print('pending...')
     instance.wait_until_running()
     print(instance.state['Name'])
+    print(instance.public_dns_name)
 
 
 def main():
@@ -118,7 +122,7 @@ def main():
     )
     parser.add_argument('-b', '--branch', default=None, help="Git branch or tag")
     parser.add_argument('-n', '--name', type=hostname, help="Instance name")
-    parser.add_argument('--wale-s3-prefix', default='s3://encoded-backups-prod/production')
+    parser.add_argument('--wale-s3-prefix', default='s3://encoded-4dn/production')
     parser.add_argument(
         '--candidate', action='store_const', default='demo', const='candidate', dest='role',
         help="Deploy candidate instance")
@@ -134,6 +138,9 @@ def main():
         "(m4.xlarge or c4.xlarge)")
     parser.add_argument('--profile-name', default=None, help="AWS creds profile")
     parser.add_argument('--elasticsearch', default=None, help="Launch an Elasticsearch instance")
+    parser.add_argument('--iam-profile', default='arn:aws:iam::643366669028:instance-profile/Developer', help='IAM Profile to create ec2')
+    parser.add_argument('--security-group', default='launch-wizard-1', help='security group for ec2')
+    parser.add_argument('--key-pair', default='4dn-encode', help='keypair to ssh into ec2')
     args = parser.parse_args()
 
     return run(**vars(args))
