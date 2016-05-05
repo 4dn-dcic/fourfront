@@ -103,7 +103,7 @@ def run(wale_s3_prefix, image_id, instance_type, elasticsearch,
     print('pending...')
     instance.wait_until_running()
     print(instance.state['Name'])
-    print('ssh -i ~/.ssh/%s ubuntu@%s' % (key_pair, instance.public_dns_name)) 
+    print('ssh -i ~/.ssh/%s.pem ubuntu@%s' % (key_pair, instance.public_dns_name)) 
     print('http://%s' % instance.public_dns_name)
 
 
