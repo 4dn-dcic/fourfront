@@ -3,6 +3,7 @@ import logging
 
 from pyramid.path import DottedNameResolver
 from pyramid.paster import get_app
+from encoded import configure_dbsession
 
 logger = logging.getLogger(__name__)
 EPILOG = __doc__
@@ -25,6 +26,8 @@ def main():
     #get the pyramids app
     app = get_app(args.config_uri, args.app_name)
 
+    #create db schema
+    configure_dbsession(app)
 
     load_test_data = app.registry.settings.get('snovault.load_test_data')
     load_test_data = DottedNameResolver().resolve(load_test_data)
