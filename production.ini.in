@@ -8,6 +8,10 @@ accession_factory = ${accession_factory}
 snp_search.server = ${region_search_instance}
 indexer.processes = ${indexer_processes}
 
+
+create_tables = true
+snovault.load_test_data = encoded.loadxl:load_test_data
+
 [composite:indexer]
 use = config:base.ini#indexer
 
