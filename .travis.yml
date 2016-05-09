@@ -12,19 +12,9 @@ addons:
     - bsdtar
     - elasticsearch
     - graphviz
-  sauce_connect:
-    username: j1z0-hms
-    access_key: fea91739-abb3-47e8-916c-927e9be48a94
+  sauce_connect: true
 env:
   global:
-  - secure: |-
-      CMKR45ew7fJWfF/rvaFkV4gNhWRDdM4y8wlj5p1qrEzJ214SENg03fjHJr6B
-      cvNf7vanTJKnVxpxUK9kH5Tn/uaJZtnbnJYehZ4YKwzbJQEAEJpWvCk4C54O
-      7diAxOq7YSxxqA2XdtLydkNlo85BWoucmc0yHEl3weNR9554UmM=
-  - secure: |-
-      WmE7J5Vxheir50Heuji0JVpEmoYH5iPkLMQFgnocY1UspO1ka1+8M7SOgsUH
-      SK5yLKZ/6oJyhlySqqTmCfYy3y/WXRNG76dy1kjVj/DEbx+n6Yu0nElw84ED
-      ZR5KkpFMaKLA505soY+4lJc4jRl5u0qwCB1Ad3UgTgfkI4QSaGM=
   - PATH="/usr/share/elasticsearch/bin:/usr/lib/postgresql/9.3/bin:$PATH"
   - secure: vovAkyWqRwZdzZYc061JuENHIPxnjek1t7TWnzeo8AwQdFQwhbt76z0XV9g5DvjYclUWdYxfOb7fiUyxc8M0M2wPfwU05uStewWTuBKILobaNqMdsWaxRQ9OSJ3NxqTLabnmIsAuCQPwHFqM6etyHXiMaAgK8EU+r23CRzklMY77vQMN/2Bs+3Y1ngZ17OVvdbmAwzlUS0uE7+P9X2YXz6QVeTvyPWnBr5SMZ/gyA1/LU+44svKLC85BLtG+2YWHwEOPl0+Jt8diOP+UMBVI0GkCl2cN0dLQhVP26Jcp479BpnPVMOsRqH+Ve9qxpfY6aesTjAVc3D7AJcKzlOnA9o7GTaVGj0pWV+eCv9n3pFacIJkTF1/JNI3lmqKlWyeRd1qMCgCi94mNXEKEgXfxVBSczALhZcxHWTMYo1jE1aDAaAj09yukMJ9UEIBVSQsAGywihlFvTtUTwZDpd0cSfl2RYx6z845HU5EX9oNASEYcbC237I83bObu232ljRokBixA5fo4y+TLNLwK97DsFNGocIXsPBKVBq8uCClD3S8kG9sB88vjM9bFnkenw7GfZLjJFChzd4Hw+x4xJQH0L99MbWeMYAl9R/ojqk3tVrpGEpXwmf/MOgTmVGPUEExgeRTSWUn95YrpenOx7FsJJQ4ZpD1rnVRev2X0A21l0H0=
   - secure: VaAvhzAtXo69D1TthYVabBSu/ESHj+/Wura9+XuFA6aG27tWQSZJ1FWPBN0nax2/vs4MkZfW19qbXgxFZBE671eYiu53iXvi4JbJRJU6efG08gQH4wpsOhxg0WF4+uWIpbIok5dCUPVLh0nTkHBpFAlcgTn6O/ST7hYFliEUxwcRATBe6fslJcLpR6fmsnNVs6kwkv1MvkMikje3fCbfj+V8/dHqQRobwCbMlgJMuxV+MWx4RUfKimQ/oUGCef6YCzcilTEgW4fAdPLsxqZiGn8wihC3lpjNYyGOfX/NCzPo8iVtX49X+Dp+sePRxKgWvovwLQDCWkomMBpxtdea/bkkPg7v92G0ivCcYX8hs14WCWjkqScCk6B0XACyMmE7dCE2Xte86sarxGbsp5lp39OvQxAbFbK+QBEKfPOdoxkcM3rrhf+kAnq+PsH1HrzzGe1F3L0BTpeS9F8w26skgrXmR/6X78mMzLk2TtHmXf3qPpPcFEP+fEOfiZyJSLEvfti9fVjZWSkCDUDEuvgF5haYpKy+cgzMHyHIgJZxfokyRvY7mEWwDZzqnSGvvVx/km0LjkQUY0RCvoT5xAtFSC2AguTfJ1C1RlZvuuYxBHa3a7tFn+ahPfRtdtFpcEGjwKBDRTNY5xzKrzozXLVQHpPVYhFQndPSF2n3+0JwE6M=
