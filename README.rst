@@ -7,7 +7,7 @@ ENCODE Metadata Database
 .. |Build status| image:: https://travis-ci.org/ENCODE-DCC/encoded.png?branch=master
 .. _Build status: https://travis-ci.org/ENCODE-DCC/encoded
 
-This is a fork from `ENCODE-DCC/encoded https://github.com/ENCODE-DCC/encoded`.  We are working to modularize the project and adapted to our needs for the 4D Nucleome project.
+This is a fork from `ENCODE-DCC/encoded <https://github.com/ENCODE-DCC/encoded>`_ .  We are working to modularize the project and adapted to our needs for the 4D Nucleome project.
 
 Step 1: Verify that homebrew is working properly::
 
