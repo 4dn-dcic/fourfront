@@ -3,6 +3,7 @@ from snovault import COLLECTIONS
 from snovault.calculated import calculate_properties
 from snovault.validation import ValidationFailure
 from snovault.validators import no_validate_item_content_post
+from snovault.storage import User
 from operator import itemgetter
 from pyramid.authentication import CallbackAuthenticationPolicy
 from pyramid.config import ConfigurationError
@@ -71,7 +72,7 @@ class PersonaAuthenticationPolicy(CallbackAuthenticationPolicy):
         if cached is not _marker:
             return cached
 
-        verifier = request.registry['persona.verifier']
+        '''verifier = request.registry['persona.verifier']
         try:
             assertion = request.json['assertion']
         except (ValueError, TypeError, KeyError):
@@ -92,7 +93,7 @@ class PersonaAuthenticationPolicy(CallbackAuthenticationPolicy):
                     request)
             request._persona_authenticated = None
             return None
-
+       ''' 
         email = request._persona_authenticated = data['email'].lower()
         return email
 
@@ -110,19 +111,29 @@ class PersonaAuthenticationPolicy(CallbackAuthenticationPolicy):
              permission=NO_PERMISSION_REQUIRED)
 def login(request):
     """View to check the persona assertion and remember the user"""
-    login = request.authenticated_userid
-    if login is None:
-        namespace = userid = None
-    else:
-        namespace, userid = login.split('.', 1)
+    #login = request.authenticated_userid
+    #if login is None:
+    #    namespace = userid = None
+    #else:
+    #    namespace, userid = login.split('.', 1)
 
-    if namespace != 'persona':
-        request.session.invalidate()
-        request.response.headerlist.extend(forget(request))
-        raise LoginDenied()
+    #if namespace != 'persona':
+    #    request.session.invalidate()
+    #    request.response.headerlist.extend(forget(request))
+    #    raise LoginDenied()
 
     request.session.invalidate()
     request.session.get_csrf_token()
+
+    #get the user
+    login = request.POST.get('login')
+    password = request.POST.get('password')
+
+    # invalid login
+    if not User.check_password(login, password):
+        request.response.headerlist.extend(forget(request))
+        raise LoginDenied()
+
     request.response.headerlist.extend(remember(request, 'mailto.' + userid))
 
     properties = request.embed('/session-properties', as_user=userid)

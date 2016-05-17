@@ -16,7 +16,11 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext import baked
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import collections
+from sqlalchemy.orm import (
+    collections,
+    scoped_session,
+    sessionmaker,
+)
 from sqlalchemy.orm.exc import (
     FlushError,
     NoResultFound,
@@ -514,6 +518,54 @@ class TransactionRecord(Base):
         'eager_defaults': True,
     }
 
+
+# User specific stuff
+from zope.sqlalchemy import ZopeTransactionExtension
+DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
+
+import cryptacular.bcrypt
+crypt = cryptacular.bcrypt.BCRYPTPasswordManager()
+
+def hash_password(password):
+    return unicode(crypt.encode(password))
+
+
+class User(Base):
+    """
+    Application's user model.  Use this if you want to store / manage your own user auth
+    """
+    __tablename__ = 'users'
+    user_id = Column(types.Integer, autoincrement=True, primary_key=True)
+    username = Column(types.Unicode(50), unique=True)
+    name = Column(types.Unicode(60))
+    email = Column(types.Unicode(60))
+
+    _password = Column('password', types.Unicode(60))
+
+    @property
+    def password(self):
+        return self._password
+
+    @password.setter
+    def password(self, password):
+        self._password = hash_password(password)
+
+    def __init__(self, username, password, name, email):
+        self.username = username
+        self.name = name
+        self.email = email
+        self.password = password
+    
+    @classmethod
+    def get_by_username(cls, username):
+        return DBSession.query(cls).filter(cls.username == username).first()
+
+    @classmethod
+    def check_password(cls, username, password):
+        user = cls.get_by_username(username)
+        if not user:
+            return False
+        return crypt.check(user.password, password)
 
 notify_ddl = DDL("""
     ALTER TABLE %(table)s ALTER COLUMN "xid" SET DEFAULT txid_current();

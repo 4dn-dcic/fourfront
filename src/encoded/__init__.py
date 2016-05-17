@@ -14,6 +14,9 @@ from pyramid.path import (
     AssetResolver,
     caller_package,
 )
+
+from pyramid.authentication import SessionAuthenticationPolicy
+from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.session import SignedCookieSessionFactory
 from pyramid.settings import (
     aslist,
@@ -199,21 +202,30 @@ def main(global_config, **local_config):
     hostname_command = settings.get('hostname_command', '').strip()
     if hostname_command:
         hostname = subprocess.check_output(hostname_command, shell=True).strip()
-        settings.setdefault('persona.audiences', '')
-        settings['persona.audiences'] += '\nhttp://%s' % hostname
-        settings['persona.audiences'] += '\nhttp://%s:6543' % hostname
+        #settings.setdefault('persona.audiences', '')
+        #settings['persona.audiences'] += '\nhttp://%s' % hostname
+        #settings['persona.audiences'] += '\nhttp://%s:6543' % hostname
 
-    config = Configurator(settings=settings)
+
+    #simple database auth
+    authn_policy = SessionAuthenticationPolicy()
+    authz_policy = ACLAuthorizationPolicy()
+
+
+    config = Configurator(settings=settings,
+                         authentication_policy=authn_policy,
+                         authorization_policy=authz_policy)
+
     from snovault.elasticsearch import APP_FACTORY
     config.registry[APP_FACTORY] = main  # used by mp_indexer
     config.include(app_version)
 
     config.include('pyramid_multiauth')  # must be before calling set_authorization_policy
-    from pyramid_localroles import LocalRolesAuthorizationPolicy
+    #from pyramid_localroles import LocalRolesAuthorizationPolicy
     # Override default authz policy set by pyramid_multiauth
-    config.set_authorization_policy(LocalRolesAuthorizationPolicy())
+    #config.set_authorization_policy(LocalRolesAuthorizationPolicy())
     config.include(session)
-    config.include('.persona')
+    #config.include('.persona')
 
     config.include(configure_dbsession)
     config.include('snovault')
