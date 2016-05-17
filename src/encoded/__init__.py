@@ -15,7 +15,6 @@ from pyramid.path import (
     caller_package,
 )
 
-from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.session import SignedCookieSessionFactory
 from pyramid.settings import (
@@ -208,13 +207,10 @@ def main(global_config, **local_config):
 
 
     #simple database auth
-    authn_policy = SessionAuthenticationPolicy()
     authz_policy = ACLAuthorizationPolicy()
 
 
-    config = Configurator(settings=settings,
-                         authentication_policy=authn_policy,
-                         authorization_policy=authz_policy)
+    config = Configurator(settings=settings, authorization_policy=authz_policy)
 
     from snovault.elasticsearch import APP_FACTORY
     config.registry[APP_FACTORY] = main  # used by mp_indexer
