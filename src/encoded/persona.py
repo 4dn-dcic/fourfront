@@ -65,6 +65,7 @@ class PersonaAuthenticationPolicy(CallbackAuthenticationPolicy):
     method = 'POST'
 
     def unauthenticated_userid(self, request):
+        import pdb; pdb.set_trace()
         if request.method != self.method or request.path != self.login_path:
             return None
 

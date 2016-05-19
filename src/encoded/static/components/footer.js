@@ -1,6 +1,97 @@
 'use strict';
 var React = require('react');
 
+var LoginFields = React.createClass({
+
+	getInitialState: function() {
+		return {username: '', password: ''};
+	},
+	handleUsernameChange: function(e) {
+		this.setState({username: e.target.value});
+	},
+	handlePasswordChange: function(e) {
+		this.setState({password: e.target.value});
+	},
+	handleSubmit: function(e) {
+		e.preventDefault();
+		var username = this.state.username.trim();
+		var password = this.state.password.trim();
+		if (!username || !password) {
+			return;
+		}
+		this.props.onLogin({username: username, password: password});
+		this.setState({username: '', password: ''});
+	},
+	render: function() {
+		var clr = {'color':'black'};
+		return ( 
+				
+				<div>
+				<label>Username:</label>
+				<input type="text" class="form-control" style={clr}
+							 placeholder="fred.underwood@whitehouse.gov"
+							 onChange={this.handleUsernameChange}
+							 value={this.state.username} />
+
+				<label>Password</label>
+				<input type="password" class="form-control" style={clr}
+							 onChange={this.handlePasswordChange}
+							 value={ this.state.password } />
+
+				<button class="btn btn_primary" onClick={ this.handleSubmit }>Login</button>
+				</div>
+		);
+	},
+})		
+
+
+var LoginForm = React.createClass({
+	contextTypes: {
+			fetch: React.PropTypes.func,
+			session: React.PropTypes.object
+	},
+
+	componentDidMount: function () {
+			var session_cookie = this.extractSessionCookie();
+			var session = this.parseSessionCookie(session_cookie);
+			if (session['auth.userid']) {
+					this.fetchSessionProperties();
+			}
+			this.setProps({
+					href: window.location.href,
+					session_cookie: session_cookie
+			});
+	},
+	loginToServer: function(data) {
+			console.log(data);
+			fetch('/login', {
+				method: "POST",
+				body: JSON.stringify(data),
+				headers: {
+					"Content-Type": "application/json",
+					"X-CSRF-Token": session._csrft_
+				},
+				credentials: "same-origin"
+			}).then(function(response) {
+				//response.status     //=> number 100–599
+				//response.statusText //=> String
+				//response.headers    //=> Headers
+				//response.url        //=> String
+				console.log("we got this response from server");
+				console.log(response);
+			}, function(error) {
+				console.log("we got an error during login", error);
+			})
+	},
+	render: function() {
+		return (
+				<form>
+				  <LoginFields onLogin={this.loginToServer} />
+				</form>
+		);
+	},
+});
+
 var Footer = React.createClass({
     contextTypes: {
         session: React.PropTypes.object
@@ -10,13 +101,18 @@ var Footer = React.createClass({
         version: React.PropTypes.string // App version number
     },
 
+		//login form
+		
+
     render: function() {
         var session = this.context.session;
         var disabled = !session;
         var userActionRender;
 
         if (!(session && session['auth.userid'])) {
-            userActionRender = <a href="#" data-trigger="login" disabled={disabled}>Submitter sign-in</a>;
+
+            //userActionRender = <a href="#" data-trigger="login" disabled={disabled}>Submitter sign-in</a>;
+						userActionRender = <LoginForm/>
         } else {
             userActionRender = <a href="#" data-trigger="logout">Submitter sign out</a>;
         }

@@ -176,7 +176,7 @@ module.exports.Persona = {
         if (this.state) {
             for (key in this.state) {
                 if (this.state[key] !== prevState[key]) {
-                    console.log('changed state: %s', key);
+                    console.log('changed state: %s', key, this.state[key]);
                 }
             }
         }
