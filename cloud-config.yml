@@ -133,6 +133,7 @@ packages:
 - libwebp-dev
 - libxml2-dev
 - libxslt1-dev
+- libffi-dev
 - lzop
 - nodejs
 - ntp
