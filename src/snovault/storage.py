@@ -538,9 +538,8 @@ class User(Base):
     """
     __tablename__ = 'users'
     user_id = Column(types.Integer, autoincrement=True, primary_key=True)
-    username = Column(types.Unicode(50), unique=True)
     name = Column(types.Unicode(60))
-    email = Column(types.Unicode(60))
+    email = Column(types.Unicode(60), unique=True)
 
     _password = Column('password', types.Unicode(60))
 
@@ -552,19 +551,18 @@ class User(Base):
     def password(self, password):
         self._password = hash_password(password)
 
-    def __init__(self, username, password, name, email):
-        self.username = username
+    def __init__(self, email, password, name):
         self.name = name
         self.email = email
         self.password = password
     
     @classmethod
-    def get_by_username(cls, username):
-        return _DBSESSION.query(cls).filter(cls.username == username).first()
+    def get_by_username(cls, email):
+        return _DBSESSION.query(cls).filter(cls.email == email).first()
 
     @classmethod
-    def check_password(cls, username, password):
-        user = cls.get_by_username(username)
+    def check_password(cls, email, password):
+        user = cls.get_by_username(email)
         if not user:
             return False
         return crypt.check(user.password, password)

@@ -2,7 +2,6 @@ from snovault import ROOT
 
 
 def groupfinder(login, request):
-    print("in groupfinder")
     if '.' not in login:
         return None
     namespace, localname = login.split('.', 1)
@@ -25,6 +24,7 @@ def groupfinder(login, request):
         try:
             user = users[localname]
         except KeyError:
+            print("in groupfinder user not found")
             return None
 
     elif namespace == 'accesskey':

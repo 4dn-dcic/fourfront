@@ -1,5 +1,7 @@
 import base64
 import os
+from operator import itemgetter
+
 from passlib.context import CryptContext
 from pyramid.authentication import (
     BasicAuthAuthenticationPolicy as _BasicAuthAuthenticationPolicy,
@@ -19,8 +21,14 @@ from pyramid.httpexceptions import (
 from pyramid.view import (
     view_config,
 )
+from pyramid.settings import (
+    asbool,
+    aslist,
+)
 from snovault import ROOT
 from snovault.storage import User
+from snovault import COLLECTIONS
+from snovault.calculated import calculate_properties
 
 CRYPT_CONTEXT = __name__ + ':crypt_context'
 
@@ -40,6 +48,8 @@ def includeme(config):
 
     # basic login route
     config.add_route('login', '/login')
+    config.add_route('logout', '/logout')
+    config.add_route('session-properties', '/session-properties')
     config.scan(__name__)
 
 
@@ -85,13 +95,10 @@ class NamespacedAuthenticationPolicy(object):
 
     def unauthenticated_userid(self, request):
         cls  = super(NamespacedAuthenticationPolicy, self) 
-        print("called unauth")
-        print(cls)
         userid = super(NamespacedAuthenticationPolicy, self) \
             .unauthenticated_userid(request)
         if userid is not None:
             userid = self._namespace_prefix + userid
-            print("userid is", userid)
         return userid
 
     def remember(self, request, principal, **kw):
@@ -110,16 +117,10 @@ class BasicAuthAuthenticationPolicy(_BasicAuthAuthenticationPolicy):
         #check = snovault_auth_check
         super(BasicAuthAuthenticationPolicy, self).__init__(check, *args, **kw)
 
-    def unauthenticated_userid(self, request):
-        print("called unauthenticated")
+    '''def unauthenticated_userid(self, request):
+        print("called unauthenticated with", request.json)
         return "user.admin"
-
-
-def snovault_auth_check(creds, request):
-    print("called auth check")
-    return ["user.admin"]
-
-
+    '''
 
 class LoginDenied(HTTPForbidden):
     title = 'Login failure'
@@ -127,15 +128,54 @@ class LoginDenied(HTTPForbidden):
 @view_config(route_name='login', request_method='POST',
              permission=NO_PERMISSION_REQUIRED)
 def login(request):
+    properties = {"login":"success"}
+
+    #username == email
     login = request.json.get("username")
     password = request.json.get("password")
     if not User.check_password(login, password):
         request.response.headerlist.extend(forget(request))
         raise LoginDenied()
     else: 
-        return {"login":"success"}
+        request.response.headerlist.extend(remember(request, 'mailto.' + login))
+        properties = request.embed('/session-properties', as_user=login)
+        if 'auth.userid' in request.session:
+            properties['auth.userid'] = request.session['auth.userid']
+    print(properties)
+    return properties
 
+@view_config(route_name='logout',
+             permission=NO_PERMISSION_REQUIRED, http_cache=0)
+def logout(request):
+    """View to forget the user"""
+    request.session.invalidate()
+    request.response.headerlist.extend(forget(request))
+    if asbool(request.params.get('redirect', True)):
+        raise HTTPFound(location=request.resource_path(request.root))
+    return {}
 
+@view_config(route_name='session-properties', request_method='GET',
+             permission=NO_PERMISSION_REQUIRED)
+def session_properties(request):
+    for principal in request.effective_principals:
+        if principal.startswith('userid.'):
+            break
+    else:
+        return {}
+
+    namespace, userid = principal.split('.', 1)
+    user = request.registry[COLLECTIONS]['user'][userid]
+    user_actions = calculate_properties(user, request, category='user_action')
+
+    properties = {
+        'user': request.embed(request.resource_path(user)),
+        'user_actions': [v for k, v in sorted(user_actions.items(), key=itemgetter(0))]
+    }
+
+    if 'auth.userid' in request.session:
+        properties['auth.userid'] = request.session['auth.userid']
+
+    return properties
 
 
 def basic_auth_check(username, password, request):
