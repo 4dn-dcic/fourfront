@@ -211,7 +211,7 @@ runcmd:
 - a2disconf other-vhosts-access-log
 - a2disconf serve-cgi-bin
 #since we are loading data from the log files initialize the db
-- sudo -u postgres bin/dev-servers production.ini --app-name app --load
+- sudo -u postgres bin/load_data production.ini --app-name app
 - if test "%(ROLE)s" = "demo"
 - then
 -   sudo -i -u encoded bin/batchupgrade production.ini --app-name app

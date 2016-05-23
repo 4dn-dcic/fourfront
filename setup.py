@@ -98,7 +98,7 @@ setup(
         index-annotations = encoded.commands.index_annotations:main
         migrate-attachments-aws = encoded.commands.migrate_attachments_aws:main
         migrate-dataset-type = encoded.commands.migrate_dataset_type:main
-        load-data = encoded.commands.load_data:main
+        load-data = snovault.load_data:main
 
         [paste.app_factory]
         main = encoded:main
