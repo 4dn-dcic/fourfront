@@ -2,6 +2,7 @@ from snovault import ROOT
 
 
 def groupfinder(login, request):
+    print("in groupfinder")
     if '.' not in login:
         return None
     namespace, localname = login.split('.', 1)

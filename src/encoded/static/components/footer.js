@@ -29,7 +29,7 @@ var LoginFields = React.createClass({
 				<div>
 				<label>Username:</label>
 				<input type="text" class="form-control" style={clr}
-							 placeholder="fred.underwood@whitehouse.gov"
+							 placeholder="fred.underwood"
 							 onChange={this.handleUsernameChange}
 							 value={this.state.username} />
 
@@ -48,20 +48,10 @@ var LoginFields = React.createClass({
 var LoginForm = React.createClass({
 	contextTypes: {
 			fetch: React.PropTypes.func,
-			session: React.PropTypes.object
+			session: React.PropTypes.object,
+      navigate: React.PropTypes.func
 	},
 
-	componentDidMount: function () {
-			var session_cookie = this.extractSessionCookie();
-			var session = this.parseSessionCookie(session_cookie);
-			if (session['auth.userid']) {
-					this.fetchSessionProperties();
-			}
-			this.setProps({
-					href: window.location.href,
-					session_cookie: session_cookie
-			});
-	},
 	loginToServer: function(data) {
 			console.log(data);
 			fetch('/login', {
@@ -69,19 +59,24 @@ var LoginForm = React.createClass({
 				body: JSON.stringify(data),
 				headers: {
 					"Content-Type": "application/json",
-					"X-CSRF-Token": session._csrft_
 				},
 				credentials: "same-origin"
-			}).then(function(response) {
-				//response.status     //=> number 100–599
-				//response.statusText //=> String
-				//response.headers    //=> Headers
-				//response.url        //=> String
-				console.log("we got this response from server");
-				console.log(response);
-			}, function(error) {
+      })
+      .then(response => {
+        if (!response.ok) throw response;
+        return response.json();
+      })
+      .then(session_properties => {
+          console.log("got session props as", session_properties);
+          this.context.session['auth.userid'] = data.username; 
+          var next_url = window.location.href;
+          if (window.location.hash == '#logged-out') {
+              next_url = window.location.pathname + window.location.search;
+          }
+          this.context.navigate(next_url, {replace: true});
+        },function(error) {
 				console.log("we got an error during login", error);
-			})
+      })
 	},
 	render: function() {
 		return (

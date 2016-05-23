@@ -8,7 +8,19 @@ from pyramid.path import (
     DottedNameResolver,
     caller_package,
 )
+from pyramid.security import (
+    NO_PERMISSION_REQUIRED,
+    remember,
+    forget,
+)
+from pyramid.httpexceptions import (
+    HTTPForbidden,
+)
+from pyramid.view import (
+    view_config,
+)
 from snovault import ROOT
+from snovault.storage import User
 
 CRYPT_CONTEXT = __name__ + ':crypt_context'
 
@@ -25,6 +37,10 @@ def includeme(config):
         passlib_settings = {'schemes': 'edw_hash, unix_disabled'}
     crypt_context = CryptContext(**passlib_settings)
     config.registry[CRYPT_CONTEXT] = crypt_context
+
+    # basic login route
+    config.add_route('login', '/login')
+    config.scan(__name__)
 
 
 class NamespacedAuthenticationPolicy(object):
@@ -68,10 +84,14 @@ class NamespacedAuthenticationPolicy(object):
         super(NamespacedAuthenticationPolicy, self).__init__(*args, **kw)
 
     def unauthenticated_userid(self, request):
+        cls  = super(NamespacedAuthenticationPolicy, self) 
+        print("called unauth")
+        print(cls)
         userid = super(NamespacedAuthenticationPolicy, self) \
             .unauthenticated_userid(request)
         if userid is not None:
             userid = self._namespace_prefix + userid
+            print("userid is", userid)
         return userid
 
     def remember(self, request, principal, **kw):
@@ -87,7 +107,35 @@ class BasicAuthAuthenticationPolicy(_BasicAuthAuthenticationPolicy):
         # Dotted name support makes it easy to configure with pyramid_multiauth
         name_resolver = DottedNameResolver(caller_package())
         check = name_resolver.maybe_resolve(check)
+        #check = snovault_auth_check
         super(BasicAuthAuthenticationPolicy, self).__init__(check, *args, **kw)
+
+    def unauthenticated_userid(self, request):
+        print("called unauthenticated")
+        return "user.admin"
+
+
+def snovault_auth_check(creds, request):
+    print("called auth check")
+    return ["user.admin"]
+
+
+
+class LoginDenied(HTTPForbidden):
+    title = 'Login failure'
+
+@view_config(route_name='login', request_method='POST',
+             permission=NO_PERMISSION_REQUIRED)
+def login(request):
+    login = request.json.get("username")
+    password = request.json.get("password")
+    if not User.check_password(login, password):
+        request.response.headerlist.extend(forget(request))
+        raise LoginDenied()
+    else: 
+        return {"login":"success"}
+
+
 
 
 def basic_auth_check(username, password, request):

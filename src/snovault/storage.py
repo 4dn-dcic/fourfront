@@ -36,10 +36,12 @@ import json
 import transaction
 import uuid
 
-
+_DBSESSION = None
 def includeme(config):
     registry = config.registry
     registry[STORAGE] = RDBStorage(registry[DBSESSION])
+    global _DBSESSION
+    _DBSESSION = registry[DBSESSION]
     if registry.settings.get('blob_bucket'):
         registry[BLOBS] = S3BlobStorage(
             registry.settings['blob_bucket'],
@@ -520,14 +522,14 @@ class TransactionRecord(Base):
 
 
 # User specific stuff
-from zope.sqlalchemy import ZopeTransactionExtension
-DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
+#from zope.sqlalchemy import ZopeTransactionExtension
+#DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 
 import cryptacular.bcrypt
 crypt = cryptacular.bcrypt.BCRYPTPasswordManager()
 
 def hash_password(password):
-    return unicode(crypt.encode(password))
+    return crypt.encode(password)
 
 
 class User(Base):
@@ -558,7 +560,7 @@ class User(Base):
     
     @classmethod
     def get_by_username(cls, username):
-        return DBSession.query(cls).filter(cls.username == username).first()
+        return _DBSESSION.query(cls).filter(cls.username == username).first()
 
     @classmethod
     def check_password(cls, username, password):
