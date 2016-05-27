@@ -114,13 +114,8 @@ class BasicAuthAuthenticationPolicy(_BasicAuthAuthenticationPolicy):
         # Dotted name support makes it easy to configure with pyramid_multiauth
         name_resolver = DottedNameResolver(caller_package())
         check = name_resolver.maybe_resolve(check)
-        #check = snovault_auth_check
         super(BasicAuthAuthenticationPolicy, self).__init__(check, *args, **kw)
 
-    '''def unauthenticated_userid(self, request):
-        print("called unauthenticated with", request.json)
-        return "user.admin"
-    '''
 
 class LoginDenied(HTTPForbidden):
     title = 'Login failure'
@@ -178,6 +173,14 @@ def session_properties(request):
     return properties
 
 
+def webuser_check(username, password, request):
+    #webusers have email address for username, thus, make sure we have an email address
+    if not '@' in username:
+        return None
+    if not User.check_password(username, password):
+        return None
+    return []
+
 def basic_auth_check(username, password, request):
     # We may get called before the context is found and the root set
     root = request.registry[ROOT]
@@ -204,11 +207,14 @@ def basic_auth_check(username, password, request):
 
 def generate_user():
     """ Generate a random user name with 64 bits of entropy
+        Used to generate access_key
+        remove @ to differentiate from web users, see webuser_check
     """
     # Take a random 5 char binary string (80 bits of
     # entropy) and encode it as upper cased base32 (8 chars)
     random_bytes = os.urandom(5)
     user = base64.b32encode(random_bytes).decode('ascii').rstrip('=').upper()
+    user = user.replace("@","")
     return user
 
 

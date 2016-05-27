@@ -201,25 +201,22 @@ def main(global_config, **local_config):
     hostname_command = settings.get('hostname_command', '').strip()
     if hostname_command:
         hostname = subprocess.check_output(hostname_command, shell=True).strip()
-        #settings.setdefault('persona.audiences', '')
-        #settings['persona.audiences'] += '\nhttp://%s' % hostname
-        #settings['persona.audiences'] += '\nhttp://%s:6543' % hostname
 
 
     #simple database auth
-    authz_policy = ACLAuthorizationPolicy()
+    #authz_policy = ACLAuthorizationPolicy()
 
-
-    config = Configurator(settings=settings, authorization_policy=authz_policy)
+    #config = Configurator(settings=settings, authorization_policy=authz_policy)
+    config = Configurator(settings=settings)
 
     from snovault.elasticsearch import APP_FACTORY
     config.registry[APP_FACTORY] = main  # used by mp_indexer
     config.include(app_version)
 
     config.include('pyramid_multiauth')  # must be before calling set_authorization_policy
-    #from pyramid_localroles import LocalRolesAuthorizationPolicy
+    from pyramid_localroles import LocalRolesAuthorizationPolicy
     # Override default authz policy set by pyramid_multiauth
-    #config.set_authorization_policy(LocalRolesAuthorizationPolicy())
+    config.set_authorization_policy(LocalRolesAuthorizationPolicy())
     config.include(session)
     #config.include('.persona')
 
