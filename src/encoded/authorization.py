@@ -24,7 +24,6 @@ def groupfinder(login, request):
         try:
             user = users[localname]
         except KeyError:
-            print("in groupfinder user not found")
             return None
 
     elif namespace == 'accesskey':

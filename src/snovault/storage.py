@@ -522,9 +522,6 @@ class TransactionRecord(Base):
 
 
 # User specific stuff
-#from zope.sqlalchemy import ZopeTransactionExtension
-#DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
-
 import cryptacular.bcrypt
 crypt = cryptacular.bcrypt.BCRYPTPasswordManager()
 

@@ -5,6 +5,7 @@ from operator import itemgetter
 from passlib.context import CryptContext
 from pyramid.authentication import (
     BasicAuthAuthenticationPolicy as _BasicAuthAuthenticationPolicy,
+    CallbackAuthenticationPolicy
 )
 from pyramid.path import (
     DottedNameResolver,
@@ -29,6 +30,7 @@ from snovault import ROOT
 from snovault.storage import User
 from snovault import COLLECTIONS
 from snovault.calculated import calculate_properties
+from snovault.validators import no_validate_item_content_post
 
 CRYPT_CONTEXT = __name__ + ':crypt_context'
 
@@ -49,6 +51,7 @@ def includeme(config):
     # basic login route
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
+    config.add_route('impersonate-user', '/impersonate-user')
     config.add_route('session-properties', '/session-properties')
     config.scan(__name__)
 
@@ -120,30 +123,75 @@ class BasicAuthAuthenticationPolicy(_BasicAuthAuthenticationPolicy):
 class LoginDenied(HTTPForbidden):
     title = 'Login failure'
 
+
+_fake_user = object()
+
+
+class WebUserAuthenticationPolicy(CallbackAuthenticationPolicy):
+
+    login_path = '/login'
+    method = 'POST'
+
+    def unauthenticated_userid(self, request):
+        '''
+        So basically this is used to do a login, instead of the actual
+        login view... not sure why, but yeah..
+        '''
+        # if we aren't posting to login just return None
+        if request.method != self.method or request.path != self.login_path:
+            return None
+
+        # otherwise do a login, if we aren't already logged in
+        cached = getattr(request, '_webuser_authenticated', _fake_user)
+        if cached is not _fake_user:
+            return cached
+
+        login = request.json.get("username")
+        password = request.json.get("password")
+        if not User.check_password(login, password):
+            request._webuser_authenticated = None
+            return None
+
+        request._webuser_authenticated = login
+        return login
+
+    def remember(self, request, principal, **kw):
+        return []
+
+    def forget(self, request):
+        return []
+
+
 @view_config(route_name='login', request_method='POST',
              permission=NO_PERMISSION_REQUIRED)
 def login(request):
-    properties = {"login":"success"}
+    login = request.authenticated_userid
+    if login is None:
+        namespace = userid = None
+    else:
+        namespace, userid = login.split('.', 1)
 
-    #username == email
-    login = request.json.get("username")
-    password = request.json.get("password")
-    if not User.check_password(login, password):
+    if namespace != 'webuser':
+        request.session.invalidate()
         request.response.headerlist.extend(forget(request))
         raise LoginDenied()
-    else: 
-        request.response.headerlist.extend(remember(request, 'mailto.' + login))
-        properties = request.embed('/session-properties', as_user=login)
-        if 'auth.userid' in request.session:
-            properties['auth.userid'] = request.session['auth.userid']
-    print(properties)
+
+    request.session.invalidate()
+    request.session.get_csrf_token()
+    request.response.headerlist.extend(remember(request, 'mailto.' + userid))
+
+    properties = request.embed('/session-properties', as_user=userid)
+    if 'auth.userid' in request.session:
+        properties['auth.userid'] = request.session['auth.userid']
     return properties
+
 
 @view_config(route_name='logout',
              permission=NO_PERMISSION_REQUIRED, http_cache=0)
 def logout(request):
     """View to forget the user"""
     request.session.invalidate()
+    request.session.get_csrf_token()
     request.response.headerlist.extend(forget(request))
     if asbool(request.params.get('redirect', True)):
         raise HTTPFound(location=request.resource_path(request.root))
@@ -204,6 +252,30 @@ def basic_auth_check(username, password, request):
 
     return []
 
+@view_config(route_name='impersonate-user', request_method='POST',
+             validators=[no_validate_item_content_post],
+             permission='impersonate')
+def impersonate_user(request):
+    """As an admin, impersonate a different user."""
+    userid = request.validated['userid']
+    users = request.registry[COLLECTIONS]['user']
+
+    try:
+        user = users[userid]
+    except KeyError:
+        raise ValidationFailure('body', ['userid'], 'User not found.')
+
+    if user.properties.get('status') != 'current':
+        raise ValidationFailure('body', ['userid'], 'User is not enabled.')
+
+    request.session.invalidate()
+    request.session.get_csrf_token()
+    request.response.headerlist.extend(remember(request, 'mailto.' + userid))
+    user_properties = request.embed('/session-properties', as_user=userid)
+    if 'auth.userid' in request.session:
+        user_properties['auth.userid'] = request.session['auth.userid']
+
+    return user_properties
 
 def generate_user():
     """ Generate a random user name with 64 bits of entropy

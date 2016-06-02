@@ -1,5 +1,3 @@
-from past.builtins import basestring
-from pyramid.settings import asbool
 from pyramid.traversal import (
     find_resource,
 )
@@ -8,6 +6,7 @@ from uuid import (
     UUID,
     uuid4,
 )
+from pyramid.settings import asbool
 from .etag import if_match_tid
 from .interfaces import (
     COLLECTIONS,
@@ -58,7 +57,7 @@ def update_children(context, request, propname_children):
 
         # Add or update children included in properties
         for i, child_props in enumerate(children):
-            if isinstance(child_props, basestring):  # IRI of (existing) child
+            if isinstance(child_props, str):  # IRI of (existing) child
                 child = find_resource(child_collection, child_props)
             else:
                 child_props = child_props.copy()

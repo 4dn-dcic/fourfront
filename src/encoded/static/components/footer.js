@@ -38,7 +38,7 @@ var LoginFields = React.createClass({
 							 onChange={this.handlePasswordChange}
 							 value={ this.state.password } />
 
-				<button class="btn btn_primary" onClick={ this.handleSubmit }>Login</button>
+				<button id="loginbtn" class="btn btn_primary" onClick={ this.handleSubmit }>Login</button>
 				</div>
 		);
 	},
