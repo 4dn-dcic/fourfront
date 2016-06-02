@@ -4,8 +4,8 @@ ENCODE Metadata Database
 
 |Build status|_
 
-.. |Build status| image:: https://travis-ci.org/ENCODE-DCC/encoded.png?branch=master
-.. _Build status: https://travis-ci.org/ENCODE-DCC/encoded
+.. |Build status| image:: https://travis-ci.org/hms-dbmi/encoded.png?branch=master
+.. _Build status: https://travis-ci.org/hms-dbmi/encoded
 
 This is a fork from `ENCODE-DCC/encoded <https://github.com/ENCODE-DCC/encoded>`_ .  We are working to modularize the project and adapted to our needs for the 4D Nucleome project.
 
