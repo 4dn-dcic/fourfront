@@ -20,9 +20,8 @@ env:
   - secure: VaAvhzAtXo69D1TthYVabBSu/ESHj+/Wura9+XuFA6aG27tWQSZJ1FWPBN0nax2/vs4MkZfW19qbXgxFZBE671eYiu53iXvi4JbJRJU6efG08gQH4wpsOhxg0WF4+uWIpbIok5dCUPVLh0nTkHBpFAlcgTn6O/ST7hYFliEUxwcRATBe6fslJcLpR6fmsnNVs6kwkv1MvkMikje3fCbfj+V8/dHqQRobwCbMlgJMuxV+MWx4RUfKimQ/oUGCef6YCzcilTEgW4fAdPLsxqZiGn8wihC3lpjNYyGOfX/NCzPo8iVtX49X+Dp+sePRxKgWvovwLQDCWkomMBpxtdea/bkkPg7v92G0ivCcYX8hs14WCWjkqScCk6B0XACyMmE7dCE2Xte86sarxGbsp5lp39OvQxAbFbK+QBEKfPOdoxkcM3rrhf+kAnq+PsH1HrzzGe1F3L0BTpeS9F8w26skgrXmR/6X78mMzLk2TtHmXf3qPpPcFEP+fEOfiZyJSLEvfti9fVjZWSkCDUDEuvgF5haYpKy+cgzMHyHIgJZxfokyRvY7mEWwDZzqnSGvvVx/km0LjkQUY0RCvoT5xAtFSC2AguTfJ1C1RlZvuuYxBHa3a7tFn+ahPfRtdtFpcEGjwKBDRTNY5xzKrzozXLVQHpPVYhFQndPSF2n3+0JwE6M=
 matrix:
   include:
-# currently sauce not working
-#- python: '3.4'
-#    env: BROWSER=Chrome
+  - python: '3.4'
+    env: BROWSER=Chrome
   - python: '3.4'
     env: BROWSER=
 before_install:
