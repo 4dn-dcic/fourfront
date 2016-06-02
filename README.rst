@@ -91,6 +91,10 @@ Run the Browser tests with::
 
     $ bin/test -m bdd -v --splinter-webdriver chrome
 
+Note: to run against chrome you should first::
+
+    $ brew install chromedriver
+
 Run the Javascript tests with::
 
     $ npm test
