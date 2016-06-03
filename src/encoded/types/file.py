@@ -49,7 +49,7 @@ def external_creds(bucket, key, name, profile_name=None):
         ]
     }
     boto.set_stream_logger('boto')
-    conn = boto.connect_sts(profile_name=profile_name)
+    conn = boto.connect_sts(aws_access_key_id='AKIAJ5SRWTLRF3ZFC6TA' , aws_secret_access_key='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')
     token = conn.get_federation_token(name, policy=json.dumps(policy))
     # 'access_key' 'secret_key' 'expiration' 'session_token'
     credentials = token.credentials.to_dict()
@@ -385,7 +385,6 @@ def download(context, request):
             })
     else:
         raise ValueError(external.get('service'))
-
     if asbool(request.params.get('soft')):
         expires = int(parse_qs(urlparse(location).query)['Expires'][0])
         return {

@@ -211,7 +211,7 @@ runcmd:
 - a2disconf localized-error-pages
 - a2disconf other-vhosts-access-log
 - a2disconf serve-cgi-bin
-#since we are loading data from the log files initialize the db
+#since we aren't loading data from the log files initialize the db
 - sudo -u postgres bin/load-data production.ini --app-name app
 - if test "%(ROLE)s" = "demo"
 - then
