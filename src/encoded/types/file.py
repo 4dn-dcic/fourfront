@@ -377,7 +377,6 @@ def download(context, request):
 
     external = context.propsheets.get('external', {})
     if external.get('service') == 's3':
-        
         conn = boto.connect_s3()
         location = conn.generate_url(
             36*60*60, request.method, external['bucket'], external['key'],
