@@ -49,7 +49,7 @@ def external_creds(bucket, key, name, profile_name=None):
         ]
     }
     boto.set_stream_logger('boto')
-    conn = boto.connect_sts(aws_access_key_id='AKIAJ5SRWTLRF3ZFC6TA' , aws_secret_access_key='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')
+    conn = boto.connect_sts(profile_name=profile_name)
     token = conn.get_federation_token(name, policy=json.dumps(policy))
     # 'access_key' 'secret_key' 'expiration' 'session_token'
     credentials = token.credentials.to_dict()
@@ -377,7 +377,7 @@ def download(context, request):
 
     external = context.propsheets.get('external', {})
     if external.get('service') == 's3':
-        conn = boto.connect_sts(aws_access_key_id='AKIAJ5SRWTLRF3ZFC6TA' , aws_secret_access_key='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')
+        conn = boto.connect_s3()
         location = conn.generate_url(
             36*60*60, request.method, external['bucket'], external['key'],
             force_http=proxy or use_download_proxy, response_headers={
