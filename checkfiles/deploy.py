@@ -31,7 +31,7 @@ def run(image_id, instance_type,
     if name is None:
         name = nameify('checkfiles-%s-%s-%s' % (branch, commit, username))
 
-    session = boto3.Session(region_name='us-west-2', profile_name=profile_name)
+    session = boto3.Session(region_name='us-east-1', profile_name=profile_name)
     ec2 = session.resource('ec2')
 
     domain = 'production' if profile_name == 'production' else 'instance'

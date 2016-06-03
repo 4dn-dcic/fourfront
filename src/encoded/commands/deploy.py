@@ -28,7 +28,7 @@ def run(wale_s3_prefix, image_id, instance_type, elasticsearch,
         if elasticsearch == 'yes':
             name = 'elasticsearch-' + name
 
-    session = boto3.Session(region_name='us-west-2', profile_name=profile_name)
+    session = boto3.Session(region_name='us-east-1', profile_name=profile_name)
     ec2 = session.resource('ec2')
 
     domain = 'production' if profile_name == 'production' else 'instance'
