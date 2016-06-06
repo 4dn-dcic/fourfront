@@ -96,8 +96,11 @@ def main():
         '-b', '--branch', default=None, help="Git branch or tag")
     parser.add_argument(
         '-n', '--name', type=hostname, help="Instance name")
+
+    # ami with base ubuntu -- ami-4b37d42b
+    # ami with base ubuntu + packages pre-installed ami-e3639d8e
     parser.add_argument(
-        '--image-id', default='ami-4b37d42b',
+        '--image-id', default='ami-e3639d8e',
         help="ubuntu/images/hvm-ssd/ubuntu-wily-15.10-amd64-server-20160217.1")
     parser.add_argument(
         '--instance-type', default='c4.xlarge',

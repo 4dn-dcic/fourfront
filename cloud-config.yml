@@ -115,40 +115,40 @@ bootcmd:
 package_upgrade: true
 
 packages:
-- apache2-mpm-worker
-- bsdtar
-- build-essential
-- elasticsearch
-- git
-- graphviz
-- libapache2-mod-wsgi-py3
-- libevent-dev
-- libfreetype6-dev
-- libjpeg-dev
-- liblcms2-dev
-- libmagic-dev
-- libpq-dev
-- libssl-dev
-- libtiff5-dev
-- libwebp-dev
-- libxml2-dev
-- libxslt1-dev
-- libffi-dev
-- lzop
-- nodejs
-- ntp
-- oracle-java8-installer
-- oracle-java8-set-default
-- postgresql-9.3
-- pv
-- python2.7-dev
-- python3.4-dev
-- python-software-properties
-- python-virtualenv
-- ruby-dev
-- unattended-upgrades
-- update-notifier-common
-- zlib1g-dev
+#- apache2-mpm-worker
+#- bsdtar
+#- build-essential
+#- elasticsearch
+#- git
+#- graphviz
+#- libapache2-mod-wsgi-py3
+#- libevent-dev
+#- libfreetype6-dev
+#- libjpeg-dev
+#- liblcms2-dev
+#- libmagic-dev
+#- libpq-dev
+#- libssl-dev
+#- libtiff5-dev
+#- libwebp-dev
+#- libxml2-dev
+#- libxslt1-dev
+#- libffi-dev
+#- lzop
+#- nodejs
+#- ntp
+#- oracle-java8-installer
+#- oracle-java8-set-default
+#- postgresql-9.3
+#- pv
+#- python2.7-dev
+#- python3.4-dev
+#- python-software-properties
+#- python-virtualenv
+#- ruby-dev
+#- unattended-upgrades
+#- update-notifier-common
+#- zlib1g-dev
 
 power_state:
   mode: reboot
@@ -159,77 +159,77 @@ output:
 runcmd:
 # Ideally this would build as a different user so encoded only has read
 # permissions
-#- set -ex
-#- update-rc.d elasticsearch defaults
-#- service elasticsearch start
-#- chown postgres:postgres /etc/postgresql/9.3/main/*.conf
-#- echo "include 'custom.conf'" >> /etc/postgresql/9.3/main/postgresql.conf
-#- if test "%(ROLE)s" = "demo"
-#- then
-#-   echo "standby_mode = off" >> /etc/postgresql/9.3/main/recovery.conf
-#-   echo "include 'demo.conf'" >> /etc/postgresql/9.3/main/postgresql.conf
-#- fi
-#- sudo -u postgres createuser encoded
-#- sudo -u postgres createdb --owner=encoded encoded
-#- mkdir /srv/encoded
-#- chown encoded:encoded /srv/encoded
-#- cd /srv/encoded
-#- sudo -u encoded git clone --no-checkout https://github.com/hms-dbmi/encode.git .
-#- sudo -u encoded git checkout %(COMMIT)s
-#- mkdir /opt/cloudwatchmon
-#- chown build:build /opt/cloudwatchmon
-#- sudo -u build virtualenv --python=python2.7 /opt/cloudwatchmon
-#- sudo -u build /opt/cloudwatchmon/bin/pip install -r cloudwatchmon-requirements.txt
-#- mkdir /opt/wal-e
-#- chown postgres:postgres /opt/wal-e
-#- sudo -u postgres virtualenv --python=python2.7 /opt/wal-e
-#- sudo -u postgres /opt/wal-e/bin/pip install -r wal-e-requirements.txt
-#  #wal-e restore stuff, but we have nothing to restore at this point
-#  #- /etc/init.d/postgresql stop
-#  #- sudo -u postgres /opt/wal-e/bin/wal-e --aws-instance-profile --s3-prefix="$(cat /etc/postgresql/9.3/main/wale_s3_prefix)" backup-fetch /var/lib/postgresql/9.3/main LATEST
-#  #- sudo -u postgres ln -s /etc/postgresql/9.3/main/recovery.conf /var/lib/postgresql/9.3/main/
-#  #- /etc/init.d/postgresql start
-#- sudo -u encoded python3.4 bootstrap.py --buildout-version 2.4.1 --setuptools-version 18.1
-#- sudo -u encoded LANG=en_US.UTF-8 bin/buildout -c %(ROLE)s.cfg
-#- sudo -u encoded bin/aws s3 cp --recursive s3://encoded-4dn-conf-prod/.aws .aws
-#- cp -r .aws /var/lib/postgresql/.aws
-#- until sudo -u postgres psql postgres -c ""; do sleep 10; done
-#- sudo -u encoded sh -c 'cat /dev/urandom | head -c 256 | base64 > session-secret.b64'
-#- sudo -u encoded bin/create-mapping production.ini --app-name app
-#- sudo -u encoded bin/index-annotations production.ini --app-name app
-#- ln -s /srv/encoded/etc/encoded-apache.conf /etc/apache2/sites-available/encoded.conf
-#- ln -s /srv/encoded/etc/logging-apache.conf /etc/apache2/conf-available/logging.conf
-#- a2enmod headers
-#- a2enmod proxy_http
-#- a2enmod rewrite
-#- a2enmod ssl
-#- a2ensite encoded.conf
-#- a2dissite 000-default
-#- a2enconf logging
-#- a2disconf charset
-#- a2disconf security
-#- a2disconf localized-error-pages
-#- a2disconf other-vhosts-access-log
-#- a2disconf serve-cgi-bin
-##since we are loading data from the log files initialize the db
-#- sudo su postgres
-#- sudo -u postgres bin/load-data production.ini --app-name app
-#- exit 
-#- if test "%(ROLE)s" = "demo"
-#- then
-#-   sudo -i -u encoded bin/batchupgrade production.ini --app-name app
-#- fi
-#- service apache2 restart
-## - sleep 10
-## - sudo -u postgres echo "include 'master.conf'" >> /etc/postgresql/9.3/main/postgresql.conf
-## - pg_ctlcluster 9.3 main reload
-## - pg_ctlcluster 9.3 main promote
-## - sudo -u encoded bin/update-keys-links production.ini --app-name app
-## - sudo -u encoded bin/upgrade production.ini --app-name app
-## - sudo -i -u postgres /opt/wal-e/bin/envfile --config ~postgres/.aws/credentials --section default --upper -- /opt/wal-e/bin/wal-e --s3-prefix="$(cat /etc/postgresql/9.3/main/wale_s3_prefix)" backup-push /var/lib/postgresql/9.3/main
-## - sleep 60
-## - sudo -i -u encoded PATH="/usr/share/elasticsearch/bin:/usr/lib/postgresql/9.3/bin:$PATH" bin/test -m "not bdd" > tests.out
-#
+- set -ex
+- update-rc.d elasticsearch defaults
+- service elasticsearch start
+- chown postgres:postgres /etc/postgresql/9.3/main/*.conf
+- echo "include 'custom.conf'" >> /etc/postgresql/9.3/main/postgresql.conf
+- if test "%(ROLE)s" = "demo"
+- then
+-   echo "standby_mode = off" >> /etc/postgresql/9.3/main/recovery.conf
+-   echo "include 'demo.conf'" >> /etc/postgresql/9.3/main/postgresql.conf
+- fi
+- sudo -u postgres createuser encoded
+- sudo -u postgres createdb --owner=encoded encoded
+- mkdir /srv/encoded
+- chown encoded:encoded /srv/encoded
+- cd /srv/encoded
+- sudo -u encoded git clone --no-checkout https://github.com/hms-dbmi/encode.git .
+- sudo -u encoded git checkout %(COMMIT)s
+- mkdir /opt/cloudwatchmon
+- chown build:build /opt/cloudwatchmon
+- sudo -u build virtualenv --python=python2.7 /opt/cloudwatchmon
+- sudo -u build /opt/cloudwatchmon/bin/pip install -r cloudwatchmon-requirements.txt
+- mkdir /opt/wal-e
+- chown postgres:postgres /opt/wal-e
+- sudo -u postgres virtualenv --python=python2.7 /opt/wal-e
+- sudo -u postgres /opt/wal-e/bin/pip install -r wal-e-requirements.txt
+  #wal-e restore stuff, but we have nothing to restore at this point
+  #- /etc/init.d/postgresql stop
+  #- sudo -u postgres /opt/wal-e/bin/wal-e --aws-instance-profile --s3-prefix="$(cat /etc/postgresql/9.3/main/wale_s3_prefix)" backup-fetch /var/lib/postgresql/9.3/main LATEST
+  #- sudo -u postgres ln -s /etc/postgresql/9.3/main/recovery.conf /var/lib/postgresql/9.3/main/
+  #- /etc/init.d/postgresql start
+- sudo -u encoded python3.4 bootstrap.py --buildout-version 2.4.1 --setuptools-version 18.1
+- sudo -u encoded LANG=en_US.UTF-8 bin/buildout -c %(ROLE)s.cfg
+- sudo -u encoded bin/aws s3 cp --recursive s3://encoded-4dn-conf-prod/.aws .aws
+- cp -r .aws /var/lib/postgresql/.aws
+- until sudo -u postgres psql postgres -c ""; do sleep 10; done
+- sudo -u encoded sh -c 'cat /dev/urandom | head -c 256 | base64 > session-secret.b64'
+- sudo -u encoded bin/create-mapping production.ini --app-name app
+- sudo -u encoded bin/index-annotations production.ini --app-name app
+- ln -s /srv/encoded/etc/encoded-apache.conf /etc/apache2/sites-available/encoded.conf
+- ln -s /srv/encoded/etc/logging-apache.conf /etc/apache2/conf-available/logging.conf
+- a2enmod headers
+- a2enmod proxy_http
+- a2enmod rewrite
+- a2enmod ssl
+- a2ensite encoded.conf
+- a2dissite 000-default
+- a2enconf logging
+- a2disconf charset
+- a2disconf security
+- a2disconf localized-error-pages
+- a2disconf other-vhosts-access-log
+- a2disconf serve-cgi-bin
+#since we are loading data from the log files initialize the db
+- sudo su postgres
+- sudo -u postgres bin/load-data production.ini --app-name app
+- exit 
+- if test "%(ROLE)s" = "demo"
+- then
+-   sudo -i -u encoded bin/batchupgrade production.ini --app-name app
+- fi
+- service apache2 restart
+# - sleep 10
+# - sudo -u postgres echo "include 'master.conf'" >> /etc/postgresql/9.3/main/postgresql.conf
+# - pg_ctlcluster 9.3 main reload
+# - pg_ctlcluster 9.3 main promote
+# - sudo -u encoded bin/update-keys-links production.ini --app-name app
+# - sudo -u encoded bin/upgrade production.ini --app-name app
+# - sudo -i -u postgres /opt/wal-e/bin/envfile --config ~postgres/.aws/credentials --section default --upper -- /opt/wal-e/bin/wal-e --s3-prefix="$(cat /etc/postgresql/9.3/main/wale_s3_prefix)" backup-push /var/lib/postgresql/9.3/main
+# - sleep 60
+# - sudo -i -u encoded PATH="/usr/share/elasticsearch/bin:/usr/lib/postgresql/9.3/bin:$PATH" bin/test -m "not bdd" > tests.out
+
 users:
 - default
 - name: build
