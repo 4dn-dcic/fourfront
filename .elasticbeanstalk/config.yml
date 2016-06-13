@@ -1,0 +1,11 @@
+branch-defaults:
+  aws_beanstalk:
+    environment: 4dn-web-dev
+    group_suffix: null
+global:
+  application_name: 4dn-web
+  default_ec2_keyname: 4dn-encode
+  default_platform: Python 3.4
+  default_region: us-east-1
+  profile: 4dn
+  sc: git
