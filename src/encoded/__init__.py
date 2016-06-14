@@ -209,12 +209,12 @@ def main(global_config, **local_config):
 
     # ugly hack to get database from AWS
     if 'RDS_DB_NAME' in os.environ:
-        db = os.environ['RDS_DB_NAME'],
-        user = os.environ['RDS_USERNAME'],
-        pwd =  os.environ['RDS_PASSWORD'],
-        host = os.environ['RDS_HOSTNAME'],
-        post = os.environ['RDS_PORT'],
-        settings['sqlalchemy.url'] = "postgresql://%s:%s@%s:%s/%s" % (user, pwd, host, port,db)
+        db = os.environ['RDS_DB_NAME']
+        user = os.environ['RDS_USERNAME']
+        pwd =  os.environ['RDS_PASSWORD']
+        host = os.environ['RDS_HOSTNAME']
+        port = os.environ['RDS_PORT']
+        settings['sqlalchemy.url'] = "postgresql://%s:%s@%s:%s/%s" % (user, pwd, host, port, db)
 
 
     #simple database auth
