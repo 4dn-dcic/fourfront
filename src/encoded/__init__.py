@@ -179,12 +179,15 @@ def app_version(config):
     import hashlib
     import os
     import subprocess
-    version = subprocess.check_output(
-        ['git', '-C', os.path.dirname(__file__), 'describe']).decode('utf-8').strip()
-    diff = subprocess.check_output(
-        ['git', '-C', os.path.dirname(__file__), 'diff', '--no-ext-diff'])
-    if diff:
-        version += '-patch' + hashlib.sha1(diff).hexdigest()[:7]
+    if 'ENCODED_VERSION' in os.environ:
+        version = os.environ['ENCODED_VERSION']
+    else:
+        version = subprocess.check_output(
+            ['git', '-C', os.path.dirname(__file__), 'describe']).decode('utf-8').strip()
+        diff = subprocess.check_output(
+            ['git', '-C', os.path.dirname(__file__), 'diff', '--no-ext-diff'])
+        if diff:
+            version += '-patch' + hashlib.sha1(diff).hexdigest()[:7]
     config.registry.settings['snovault.app_version'] = version
 
 
