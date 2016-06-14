@@ -68,6 +68,8 @@ def changelogs(config):
 
 def configure_engine(settings):
     engine_url = settings['sqlalchemy.url']
+
+    print(engine_url)
     engine_opts = {}
     if engine_url.startswith('postgresql'):
         if settings.get('indexer_worker'):
@@ -204,6 +206,15 @@ def main(global_config, **local_config):
     hostname_command = settings.get('hostname_command', '').strip()
     if hostname_command:
         hostname = subprocess.check_output(hostname_command, shell=True).strip()
+
+    # ugly hack to get database from AWS
+    if 'RDS_DB_NAME' in os.environ:
+        db = os.environ['RDS_DB_NAME'],
+        user = os.environ['RDS_USERNAME'],
+        pwd =  os.environ['RDS_PASSWORD'],
+        host = os.environ['RDS_HOSTNAME'],
+        post = os.environ['RDS_PORT'],
+        settings['sqlalchemy.url'] = "postgresql://%s:%s@%s:%s/%s" % (user, pwd, host, port,db)
 
 
     #simple database auth

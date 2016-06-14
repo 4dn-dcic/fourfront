@@ -35,10 +35,11 @@ def deploy():
     p = subprocess.Popen(['eb', 'deploy'], stderr=subprocess.PIPE)
     while True:
         out = p.stderr.read(1)
-        if out == '' and p.poll() == None:
+        out = out.decode('utf-8')
+        if out == '' and p.poll() != None:
             break
         if out != '':
-            sys.stdout.write(out.decode('utf-8'))
+            sys.stdout.write(out)
             sys.stdout.flush()
 
 if __name__ == "__main__":

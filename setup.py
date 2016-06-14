@@ -2,6 +2,7 @@ import os
 import sys
 from setuptools import setup, find_packages
 
+# variables used in buildout
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.rst')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
