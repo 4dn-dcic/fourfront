@@ -12,13 +12,14 @@ def get_git_version():
         version += '-patch' + hashlib.sha1(diff).hexdigest()[:7]
     return version
 
-def update_version_in_ebextension(version):
-    filename = '.ebextensions/01_packages.config'
-    regex = 's/ENCODED_VERSION.*/ENCODED_VERSION\" : \"%s\"/' % (version)
+def update_version(version):
+    filename = 'buildout.cfg'
+    regex = 's/encoded_version.*/encoded_version = %s/' % (version)
 
-    print("updated ebextensions with version", version)
+    print("updated buildout.cfg with version", version)
     subprocess.check_output(
         ['sed', '-i', '', regex, filename])
+
     print("adding file to git")
     subprocess.check_output(
         ['git', 'add', filename])
@@ -44,5 +45,5 @@ def deploy():
 
 if __name__ == "__main__":
     ver = get_git_version()
-    update_version_in_ebextension(ver)
+    update_version(ver)
     deploy()

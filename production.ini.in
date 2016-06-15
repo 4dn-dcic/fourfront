@@ -8,6 +8,7 @@ accession_factory = ${accession_factory}
 snp_search.server = ${region_search_instance}
 indexer.processes = ${indexer_processes}
 elasticsearch.server = ${elasticsearch_instance} 
+snovault.app_version = ${encoded_version}
 
 
 create_tables = true

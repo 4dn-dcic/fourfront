@@ -181,16 +181,17 @@ def app_version(config):
     import hashlib
     import os
     import subprocess
-    if 'ENCODED_VERSION' in os.environ:
-        version = os.environ['ENCODED_VERSION']
-    else:
+    if not config.registry.settings.get['snovault.app_version']:
+        # we update version as part of deployment process `deploy_beanstalk.py`
+        # but if we didn't get it from git
         version = subprocess.check_output(
             ['git', '-C', os.path.dirname(__file__), 'describe']).decode('utf-8').strip()
         diff = subprocess.check_output(
             ['git', '-C', os.path.dirname(__file__), 'diff', '--no-ext-diff'])
         if diff:
             version += '-patch' + hashlib.sha1(diff).hexdigest()[:7]
-    config.registry.settings['snovault.app_version'] = version
+
+        config.registry.settings['snovault.app_version'] = version
 
 
 def main(global_config, **local_config):
@@ -206,16 +207,6 @@ def main(global_config, **local_config):
     hostname_command = settings.get('hostname_command', '').strip()
     if hostname_command:
         hostname = subprocess.check_output(hostname_command, shell=True).strip()
-
-    # ugly hack to get database from AWS
-    if 'RDS_DB_NAME' in os.environ:
-        db = os.environ['RDS_DB_NAME']
-        user = os.environ['RDS_USERNAME']
-        pwd =  os.environ['RDS_PASSWORD']
-        host = os.environ['RDS_HOSTNAME']
-        port = os.environ['RDS_PORT']
-        settings['sqlalchemy.url'] = "postgresql://%s:%s@%s:%s/%s" % (user, pwd, host, port, db)
-
 
     #simple database auth
     #authz_policy = ACLAuthorizationPolicy()

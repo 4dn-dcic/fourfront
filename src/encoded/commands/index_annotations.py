@@ -27,9 +27,13 @@ def index_settings():
     }
 
 
-def run(app):
+def run(app, check_first=False):
     registry = app.registry
     es = app.registry[ELASTIC_SEARCH]
+    if check_first:
+        if es.indices.exists(index=index):
+            print("index %s exists skipping creation" % (indexa))
+            return
     try:
         es.indices.create(index=index, body=index_settings())
     except RequestError:
@@ -73,6 +77,8 @@ def main():
     )
     parser.add_argument('--app-name', help="Pyramid app name in configfile")
     parser.add_argument('config_uri', help="path to configfile")
+    parser.add_argument('--check-first', action='store_true',
+                        help="check if index exists first before attempting creation")
     args = parser.parse_args()
 
     logging.basicConfig()
@@ -81,7 +87,7 @@ def main():
     # Loading app will have configured from config file. Reconfigure here:
     logging.getLogger('encoded').setLevel(logging.DEBUG)
 
-    return run(app)
+    return run(app, args._check_first)
 
 
 if __name__ == '__main__':

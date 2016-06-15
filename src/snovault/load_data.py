@@ -16,6 +16,11 @@ def main():
     )
     parser.add_argument('--app-name', help="Pyramid app name in configfile")
     parser.add_argument('config_uri', help="path to configfile")
+    parser.add_argument('--check-first', action='store_true',
+                        help="check if tables / data exists first before attempting creation")
+    parser.add_argument('--tables-only', action='store_true',
+                        help="don't load data, just create tables")
+
     args = parser.parse_args()
 
     logging.basicConfig()
@@ -31,7 +36,7 @@ def main():
 
     load_test_data = app.registry.settings.get('snovault.load_test_data')
     load_test_data = DottedNameResolver().resolve(load_test_data)
-    load_test_data(app)
+    load_test_data(app, args.tables_only, args.check_first)
 
 if __name__ == "__main__":
     main()
