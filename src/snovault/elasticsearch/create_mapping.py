@@ -514,7 +514,7 @@ def main():
     parser.add_argument(
         '--dry-run', action='store_true', help="Don't post to ES, just print")
     parser.add_argument('config_uri', help="path to configfile")
-    parser.add_argument('--check_first', default=False,
+    parser.add_argument('--check_first', action='store_true',
                         help="check if index exists first before attempting creation")
     args = parser.parse_args()
 
