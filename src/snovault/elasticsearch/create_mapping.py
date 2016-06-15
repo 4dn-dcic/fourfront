@@ -466,7 +466,7 @@ def run(app, collections=None, dry_run=False, check_first=False):
         try:
             exists = False
             if check_first:
-                exists = es.indicies.exists(index=index)
+                exists = es.indices.exists(index=index)
             if not exists:
                 es.indices.create(index=index, body=index_settings())
         except RequestError:
@@ -514,7 +514,7 @@ def main():
     parser.add_argument(
         '--dry-run', action='store_true', help="Don't post to ES, just print")
     parser.add_argument('config_uri', help="path to configfile")
-    parser.add_argument('--check_first', action='store_true',
+    parser.add_argument('--check-first', action='store_true',
                         help="check if index exists first before attempting creation")
     args = parser.parse_args()
 
