@@ -458,13 +458,17 @@ def type_mapping(types, item_type, embed=True):
     return mapping
 
 
-def run(app, collections=None, dry_run=False):
+def run(app, collections=None, dry_run=False, check_first=False):
     index = app.registry.settings['snovault.elasticsearch.index']
     registry = app.registry
     if not dry_run:
         es = app.registry[ELASTIC_SEARCH]
         try:
-            es.indices.create(index=index, body=index_settings())
+            exists = False
+            if check_first:
+                exists = es.indicies.exists(index=index)
+            if not exists:
+                es.indices.create(index=index, body=index_settings())
         except RequestError:
             if collections is None:
                 es.indices.delete(index=index)
@@ -510,6 +514,8 @@ def main():
     parser.add_argument(
         '--dry-run', action='store_true', help="Don't post to ES, just print")
     parser.add_argument('config_uri', help="path to configfile")
+    parser.add_argument('--check_first', default=False,
+                        help="check if index exists first before attempting creation")
     args = parser.parse_args()
 
     logging.basicConfig()
@@ -518,7 +524,7 @@ def main():
     # Loading app will have configured from config file. Reconfigure here:
     logging.getLogger('encoded').setLevel(logging.DEBUG)
 
-    return run(app, args.item_type, args.dry_run)
+    return run(app, args.item_type, args.dry_run, args.check_first)
 
 
 if __name__ == '__main__':
