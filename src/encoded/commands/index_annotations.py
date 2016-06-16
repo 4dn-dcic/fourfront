@@ -32,7 +32,7 @@ def run(app, check_first=False):
     es = app.registry[ELASTIC_SEARCH]
     if check_first:
         if es.indices.exists(index=index):
-            print("index %s exists skipping creation" % (indexa))
+            print("index %s exists skipping creation" % (index))
             return
     try:
         es.indices.create(index=index, body=index_settings())
@@ -87,7 +87,7 @@ def main():
     # Loading app will have configured from config file. Reconfigure here:
     logging.getLogger('encoded').setLevel(logging.DEBUG)
 
-    return run(app, args._check_first)
+    return run(app, args.check_first)
 
 
 if __name__ == '__main__':

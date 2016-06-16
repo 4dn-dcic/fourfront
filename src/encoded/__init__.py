@@ -69,7 +69,6 @@ def changelogs(config):
 def configure_engine(settings):
     engine_url = settings['sqlalchemy.url']
 
-    print(engine_url)
     engine_opts = {}
     if engine_url.startswith('postgresql'):
         if settings.get('indexer_worker'):
@@ -181,7 +180,7 @@ def app_version(config):
     import hashlib
     import os
     import subprocess
-    if not config.registry.settings.get['snovault.app_version']:
+    if not config.registry.settings.get('snovault.app_version'):
         # we update version as part of deployment process `deploy_beanstalk.py`
         # but if we didn't get it from git
         version = subprocess.check_output(

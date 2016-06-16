@@ -469,6 +469,8 @@ def run(app, collections=None, dry_run=False, check_first=False):
                 exists = es.indices.exists(index=index)
             if not exists:
                 es.indices.create(index=index, body=index_settings())
+            else:
+                print("index %s already exists no need to create mapping" % (index))
         except RequestError:
             if collections is None:
                 es.indices.delete(index=index)

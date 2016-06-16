@@ -36,7 +36,7 @@ def main():
 
     load_test_data = app.registry.settings.get('snovault.load_test_data')
     load_test_data = DottedNameResolver().resolve(load_test_data)
-    load_test_data(app, args.tables_only, args.check_first)
+    load_test_data(app)
 
 if __name__ == "__main__":
     main()
