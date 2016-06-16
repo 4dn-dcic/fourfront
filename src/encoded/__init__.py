@@ -109,15 +109,19 @@ def set_postgresql_statement_timeout(engine, timeout=20 * 1000):
             dbapi_connection.commit()
 
 
-def configure_dbsession(config):
+def configure_dbsession(config, clear_data=False):
     from snovault import DBSESSION
     settings = config.registry.settings
     DBSession = settings.pop(DBSESSION, None)
     if DBSession is None:
         engine = configure_engine(settings)
 
+        from snovault.storage import Base
+        # useful for test instances where we want to clear the data
+        if clear_data:
+            Base.metadata.drop_all(engine)
+
         if asbool(settings.get('create_tables', False)):
-            from snovault.storage import Base
             Base.metadata.create_all(engine)
 
         import snovault.storage
