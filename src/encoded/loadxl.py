@@ -690,6 +690,9 @@ def load_test_data(app):
     #load web-users authentication info
     db = app.registry['dbsession']
     create_user(db,'admin@admin.com', 'admin', 'admin')
+    create_user(db,'wrangler@wrangler.com', 'wrangler', 'wrangler')
+    create_user(db,'viewer@viewer.com', 'wrangler', 'wrangler')
+    create_user(db,'submitter@submitter.com', 'wrangler', 'wrangler')
 
     # one transaction to rule them all
     import transaction

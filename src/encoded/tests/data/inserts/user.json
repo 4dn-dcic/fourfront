@@ -1,6 +1,6 @@
 [
     {
-        "email": "netus.lorem@risus.lobortis",
+        "email": "viewer@viewer.com",
         "fax": "000-000-0000",
         "first_name": "Ali",
         "google": "google",
@@ -42,7 +42,7 @@
         "uuid": "0d48e8c4-5954-4bf5-8c75-1e386eb27e31"
     },
     {
-        "email": "ipsum.mi@torquent.eleifend",
+        "email": "submitter@submitter.com",
         "fax": "000-000-0000",
         "first_name": "Mi",
         "google": "google",
@@ -156,12 +156,11 @@
         "uuid": "860c4750-8d3c-40f5-8f2c-90c5e5d19e88"
     },
     {
-        "email": "cricketsloan@stanford.edu",
+        "email": "wrangler@wrangler.com",
         "fax": "000-000-0000",
         "first_name": "Elit",
         "google": "google",
         "groups": [
-            "admin",
             "wrangler"
         ],
         "job_title": "Data Wrangler",
