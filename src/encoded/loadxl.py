@@ -685,14 +685,14 @@ def load_test_data(app):
     inserts = resource_filename('encoded', 'tests/data/inserts/')
     docsdir = [resource_filename('encoded', 'tests/data/documents/')]
     # temp comment out below
-    #load_all(testapp, inserts, docsdir)
+    load_all(testapp, inserts, docsdir)
 
     #load web-users authentication info
     db = app.registry['dbsession']
     create_user(db,'admin@admin.com', 'admin', 'admin')
     create_user(db,'wrangler@wrangler.com', 'wrangler', 'wrangler')
-    create_user(db,'viewer@viewer.com', 'wrangler', 'wrangler')
-    create_user(db,'submitter@submitter.com', 'wrangler', 'wrangler')
+    create_user(db,'viewer@viewer.com', 'viewer', 'viewer')
+    create_user(db,'submitter@submitter.com', 'submitter', 'submitter')
 
     # one transaction to rule them all
     import transaction
