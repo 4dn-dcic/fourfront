@@ -1,4 +1,3 @@
-This is a test by Carl.
 ========================
 ENCODE Metadata Database
 ========================
