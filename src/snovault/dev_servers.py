@@ -97,6 +97,7 @@ def main():
 
     if args.init:
         app = get_app(args.config_uri, args.app_name)
+        print("trying to call create_mapping")
         create_mapping.run(app)
 
     if args.load:
