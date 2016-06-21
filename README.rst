@@ -1,4 +1,3 @@
-This shouldn't change master
 ========================
 ENCODE Metadata Database
 ========================
@@ -34,13 +33,13 @@ Step 3: Run buildout::
     $ python3 bootstrap.py --buildout-version 2.4.1 --setuptools-version 18.1
     $ bin/buildout
 
-    NOTE:  
-    If you have issues with postgres or the python interface to it (psycogpg2) you probably need to install postgresql 
+    NOTE:
+    If you have issues with postgres or the python interface to it (psycogpg2) you probably need to install postgresql
     via homebrew (as above)
     If you have issues with Pillow you may need to install new xcode command line tools:
     - First update Xcode from AppStore (reboot)
-    $ xcode-select install 
-    
+    $ xcode-select install
+
 
 
 If you wish to completely rebuild the application, or have updated dependencies:
@@ -72,12 +71,12 @@ Running tests
 =============
 
 To run specific tests locally::
-    
+
     $ bin/test -k test_name
-    
+
 To run with a debugger::
-    
-    $ bin/test --pdb 
+
+    $ bin/test --pdb
 
 Specific tests to run locally for schema changes::
 
