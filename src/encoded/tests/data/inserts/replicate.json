@@ -147,7 +147,7 @@
         "biological_replicate_number": 2,
         "experiment": "ENCSR000AJK",
         "library": "14fd8295-1ffd-416f-c9c6-6ff18c3b0290",
-        "submitted_by": "netus.lorem@risus.lobortis",
+        "submitted_by": "viewer@viewer.com",
         "technical_replicate_number": 2,
         "uuid": "380dc621-8574-498e-a133-9fc162464007"
     },
@@ -155,7 +155,7 @@
         "biological_replicate_number": 2,
         "experiment": "ENCSR000AJK",
         "library": "14fd8295-1ffd-416f-c9c6-6ff18c3b0290",
-        "submitted_by": "netus.lorem@risus.lobortis",
+        "submitted_by": "viewer@viewer.com",
         "technical_replicate_number": 1,
         "uuid": "f07d37ee-316e-4a5d-a282-91cd2304fe19"
     },
@@ -163,7 +163,7 @@
         "biological_replicate_number": 1,
         "experiment": "ENCSR000AJK",
         "library": "88760932-54b6-46fe-951d-fc80e89a0d77",
-        "submitted_by": "netus.lorem@risus.lobortis",
+        "submitted_by": "viewer@viewer.com",
         "technical_replicate_number": 1,
         "uuid": "369cb03a-a428-47e7-ba56-88945afda41c"
     },

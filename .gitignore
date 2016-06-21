@@ -29,5 +29,5 @@
 .python-version
 ~$*
 .~*#
-/production.ini
+production.ini
 .python-version
