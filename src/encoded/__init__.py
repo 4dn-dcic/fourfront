@@ -187,12 +187,15 @@ def app_version(config):
     if not config.registry.settings.get('snovault.app_version'):
         # we update version as part of deployment process `deploy_beanstalk.py`
         # but if we didn't get it from git
-        version = subprocess.check_output(
-            ['git', '-C', os.path.dirname(__file__), 'describe']).decode('utf-8').strip()
-        diff = subprocess.check_output(
-            ['git', '-C', os.path.dirname(__file__), 'diff', '--no-ext-diff'])
-        if diff:
-            version += '-patch' + hashlib.sha1(diff).hexdigest()[:7]
+        try:
+            version = subprocess.check_output(
+                ['git', '-C', os.path.dirname(__file__), 'describe']).decode('utf-8').strip()
+            diff = subprocess.check_output(
+                ['git', '-C', os.path.dirname(__file__), 'diff', '--no-ext-diff'])
+            if diff:
+                version += '-patch' + hashlib.sha1(diff).hexdigest()[:7]
+        except:
+            version = "test"
 
         config.registry.settings['snovault.app_version'] = version
 
