@@ -73,7 +73,7 @@ after_script:
   fi
 after_success:
 - |
-  if ["$BUILD_LEADER" = "YES" ]; then
+  if [ "$BUILD_LEADER" = "YES" ]; then
      if [ "$TRAVIS_BRANCH" = "master" ]; then
          echo "Job succeeded! PUBLISHING..."
          pip install awsebcli
