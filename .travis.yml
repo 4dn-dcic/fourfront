@@ -77,6 +77,8 @@ after_success:
      if [ "$TRAVIS_BRANCH" = "master" ]; then
          echo "Job succeeded! PUBLISHING..."
          pip install awsebcli
+         git config --global user.email "travis@builder.com"
+         git config --global user.name "Travis"
          python deploy_beanstalk.py
       fi
   fi
