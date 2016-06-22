@@ -58,7 +58,7 @@ before_script:
     while test -f "$SC_PIDFILE" && test ! -f "$SC_READYFILE"; do sleep .5; done
   fi
 script:
-        #- if test -z "$BROWSER"; then npm test; fi
+        - if test -z "$BROWSER"; then npm test; fi
         #- if test -z "$BROWSER"; then bin/test -v -v --timeout=200 -m "not bdd"; fi
         #- |
   #if test -n "$BROWSER"; then
