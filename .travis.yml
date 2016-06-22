@@ -26,7 +26,7 @@ env:
 matrix:
   include:
   - python: '3.4'
-    env: BROWSER=Chrome
+    env: BROWSER=Chrome BUILD_LEADER=YES
   - python: '3.4'
     env: BROWSER=
 before_install:
@@ -59,10 +59,8 @@ before_script:
     while test -f "$SC_PIDFILE" && test ! -f "$SC_READYFILE"; do sleep .5; done
   fi
 script:
-- curl -Lo travis_after_all.py https://raw.github.com/dmakhno/travis_after_all/master/travis_after_all.py
 - if test -z "$BROWSER"; then npm test; fi
 after_script:
-- echo leader=$BUILD_LEADER status=$BUILD_AGGREGATE_STATUS
 - |
   if test -f "$SC_PIDFILE"; then
     SAUCE_JOB_ID=`grep -m 1 /session/ "$HOME/sauce-connect.log" | cut -d / -f 7`
@@ -74,9 +72,11 @@ after_script:
     wait $(cat "$SC_PIDFILE")
   fi
 after_success:
-- python travis_after_all.py https://api.travis-ci.com
-- export $(cat .to_export_back)
-- "if [ \"$BUILD_LEADER\" = \"YES\" ]; then\n  if [ \"$BUILD_AGGREGATE_STATUS\" =
-  \"others_succeeded\" ]; then\n     if [ \"$TRAVIS_BRANCH\" = \"master\" ]; then
-  \n        echo \"All jobs succeeded! PUBLISHING...\"\n        pip install awsebcli\n
-  \       python deploy_beanstalk.py \n     fi\n  fi\nfi\n"
+- |
+  if ["$BUILD_LEADER" = "YES" ]; then
+     if [ "$TRAVIS_BRANCH" = "master" ]; then
+         echo "Job succeeded! PUBLISHING..."
+         pip install awsebcli
+         python deploy_beanstalk.py
+      fi
+  fi
