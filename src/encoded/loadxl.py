@@ -5,6 +5,8 @@ import io
 import logging
 import os.path
 
+from snovault.storage import User
+
 text = type(u'')
 
 logger = logging.getLogger('encoded')
@@ -687,12 +689,23 @@ def load_test_data(app):
 
     #load web-users authentication info
     db = app.registry['dbsession']
-    from snovault.storage import User
-    admin = User('admin@admin.com', 'admin', 'admin')
-    db.add(admin)
+    create_user(db,'admin@admin.com', 'admin', 'admin')
+    create_user(db,'wrangler@wrangler.com', 'wrangler', 'wrangler')
+    create_user(db,'viewer@viewer.com', 'viewer', 'viewer')
+    create_user(db,'submitter@submitter.com', 'submitter', 'submitter')
 
+    # one transaction to rule them all
     import transaction
     transaction.commit()
 
-    print("create admin user")
+def create_user(db, email, name, pwd):
+    '''
+    create user if user not in database
+    '''
+    if User.get_by_username(email) is None:
+        print('creating user ',email) 
+        new_user = User(email, name, pwd)
+        db.add(new_user)
+    else:
+        print('user %s already exists, skipping' % (email))
 

@@ -68,6 +68,7 @@ def changelogs(config):
 
 def configure_engine(settings):
     engine_url = settings['sqlalchemy.url']
+
     engine_opts = {}
     if engine_url.startswith('postgresql'):
         if settings.get('indexer_worker'):
@@ -108,15 +109,19 @@ def set_postgresql_statement_timeout(engine, timeout=20 * 1000):
             dbapi_connection.commit()
 
 
-def configure_dbsession(config):
+def configure_dbsession(config, clear_data=False):
     from snovault import DBSESSION
     settings = config.registry.settings
     DBSession = settings.pop(DBSESSION, None)
     if DBSession is None:
         engine = configure_engine(settings)
 
+        from snovault.storage import Base
+        # useful for test instances where we want to clear the data
+        if clear_data:
+            Base.metadata.drop_all(engine)
+
         if asbool(settings.get('create_tables', False)):
-            from snovault.storage import Base
             Base.metadata.create_all(engine)
 
         import snovault.storage
@@ -179,13 +184,20 @@ def app_version(config):
     import hashlib
     import os
     import subprocess
-    version = subprocess.check_output(
-        ['git', '-C', os.path.dirname(__file__), 'describe']).decode('utf-8').strip()
-    diff = subprocess.check_output(
-        ['git', '-C', os.path.dirname(__file__), 'diff', '--no-ext-diff'])
-    if diff:
-        version += '-patch' + hashlib.sha1(diff).hexdigest()[:7]
-    config.registry.settings['snovault.app_version'] = version
+    if not config.registry.settings.get('snovault.app_version'):
+        # we update version as part of deployment process `deploy_beanstalk.py`
+        # but if we didn't get it from git
+        try:
+            version = subprocess.check_output(
+                ['git', '-C', os.path.dirname(__file__), 'describe']).decode('utf-8').strip()
+            diff = subprocess.check_output(
+                ['git', '-C', os.path.dirname(__file__), 'diff', '--no-ext-diff'])
+            if diff:
+                version += '-patch' + hashlib.sha1(diff).hexdigest()[:7]
+        except:
+            version = "test"
+
+        config.registry.settings['snovault.app_version'] = version
 
 
 def main(global_config, **local_config):
@@ -201,7 +213,6 @@ def main(global_config, **local_config):
     hostname_command = settings.get('hostname_command', '').strip()
     if hostname_command:
         hostname = subprocess.check_output(hostname_command, shell=True).strip()
-
 
     #simple database auth
     #authz_policy = ACLAuthorizationPolicy()
