@@ -85,4 +85,4 @@ after_script:
     wait $(cat "$SC_PIDFILE")
   fi
 after_success:
-- python deploy_beanstalk.py
+- if [ "$TRAVIS_BRANCH" == "master" ]; then eb deploy; fi 
