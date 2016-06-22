@@ -2,6 +2,8 @@ branch-defaults:
   aws_beanstalk:
     environment: 4dn-web-dev
     group_suffix: null
+  master:
+    environment: 4dn-web-dev
 global:
   application_name: 4dn-web
   default_ec2_keyname: 4dn-encode

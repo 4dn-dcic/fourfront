@@ -79,6 +79,7 @@ after_success:
          pip install awsebcli
          git config --global user.email "travis@builder.com"
          git config --global user.name "Travis"
+         eb use 4dn-web-dev
          python deploy_beanstalk.py
       fi
   fi
