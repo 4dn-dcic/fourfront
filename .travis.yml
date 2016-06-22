@@ -62,7 +62,7 @@ before_script:
     while test -f "$SC_PIDFILE" && test ! -f "$SC_READYFILE"; do sleep .5; done
   fi
 script:
-- curl -Lo travis_after_all.py https://raw.github.com/dmakhno/travis_after_all/master/travis_after_all.py
+        #- curl -Lo travis_after_all.py https://raw.github.com/dmakhno/travis_after_all/master/travis_after_all.py
 - if test -z "$BROWSER"; then npm test; fi
 after_script:
 - echo leader=$BUILD_LEADER status=$BUILD_AGGREGATE_STATUS
