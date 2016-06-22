@@ -77,7 +77,7 @@ after_script:
     wait $(cat "$SC_PIDFILE")
   fi
 after_success:
-- python travis_after_all.py https://api.travis-ci.com
+- python travis_after_all.py https://api.travis-ci.org
 - export $(cat .to_export_back) >> /dev/null
 - |
   if [ "$BUILD_LEADER" = "YES" ]; then
@@ -93,6 +93,6 @@ after_success:
     fi
   fi
 after_failure:
-- python travis_after_all.py https://api.travis-ci.com
+- python travis_after_all.py https://api.travis-ci.org
 - export $(cat .to_export_back) >> /dev/null
 
