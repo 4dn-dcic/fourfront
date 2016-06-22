@@ -81,7 +81,7 @@ after_success:
   - |
     if [ "$BUILD_LEADER" = "YES" ]; then
       if [ "$BUILD_AGGREGATE_STATUS" = "others_succeeded" ]; then
-        if [ "$TRAVIS_BRANCH" == "master" ];  
+        if [ "$TRAVIS_BRANCH" == "master" ]; then 
           echo "All jobs succeeded! PUBLISHING..."
           pip install awsebcli
           python deploy_beanstalk.py 
