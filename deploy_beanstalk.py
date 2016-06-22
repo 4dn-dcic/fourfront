@@ -20,7 +20,7 @@ def update_version(version):
 
     print("updated buildout.cfg with version", version)
     subprocess.check_output(
-        ['sed', '-i', '', regex, filename])
+        ['sed', '-i', regex, filename])
 
     print("adding file to git")
     subprocess.check_output(
