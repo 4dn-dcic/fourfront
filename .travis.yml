@@ -84,5 +84,14 @@ after_script:
     kill $(cat "$SC_PIDFILE")
     wait $(cat "$SC_PIDFILE")
   fi
-after_success:
-- if [ "$TRAVIS_BRANCH" == "master" ]; then eb deploy; fi 
+deploy:
+    provider: elasticbeanstalk
+    region: us-east-1
+    app: 4dn-web
+    env: 4dn-web-dev
+    bucket-name: $ELASTIC_BEANSTALK_BUCKET
+    access_key_id: $AWS_ACCESS_KEY_ID
+    secret_access_key: $AWS_SECRET_ACCESS_KEY
+    on:
+        repo: hms-dbmi/encode  
+        branch: master
