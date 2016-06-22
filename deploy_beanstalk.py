@@ -4,12 +4,14 @@ import subprocess
 import hashlib
 
 def get_git_version():
-    version = subprocess.check_output(
-        ['git', '-C', os.path.dirname(__file__), 'describe']).decode('utf-8').strip()
-    diff = subprocess.check_output(
-        ['git', '-C', os.path.dirname(__file__), 'diff', '--no-ext-diff'])
-    if diff:
-        version += '-patch' + hashlib.sha1(diff).hexdigest()[:7]
+    version = os.environ.get("TRAVIS_COMMIT", None)
+    if not version:
+        version = subprocess.check_output(
+            ['git', '-C', os.path.dirname(__file__), 'describe']).decode('utf-8').strip()
+        diff = subprocess.check_output(
+            ['git', '-C', os.path.dirname(__file__), 'diff', '--no-ext-diff'])
+        if diff:
+            version += '-patch' + hashlib.sha1(diff).hexdigest()[:7]
     return version
 
 def update_version(version):
