@@ -32,7 +32,7 @@
             "title": "Taxon ID",
             "description": "The NCBI taxon ID for the organism (e.g. 10090).",
             "type": "string",
-            "format": "^[0-9]+$"
+            "pattern": "^[0-9]+$"
         }
     },
     "boost_values": {
