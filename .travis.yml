@@ -1,9 +1,11 @@
 language: python
 sudo: false
-cache:
+cache: 
+  pip: true
   directories:
   - eggs
   - ".npm"
+  - node_modules
 addons:
   apt:
     sources:
@@ -40,6 +42,7 @@ install:
 - python bootstrap.py --buildout-version 2.4.1 --setuptools-version 18.1
 - bin/buildout -c buildout-travis.cfg || (echo "Retrying buildout" && bin/buildout
   -c buildout-travis.cfg)
+- pip install awsebcli
 before_script:
 - |
   if test -n "$BROWSER"; then
@@ -76,7 +79,7 @@ after_success:
   if [ "$BUILD_LEADER" = "YES" ]; then
      if [ "$TRAVIS_BRANCH" = "master" ]; then
          echo "Job succeeded! PUBLISHING..."
-         pip install awsebcli
+         git checkout master
          git config --global user.email "travis@builder.com"
          git config --global user.name "Travis"
          eb use 4dn-web-dev
