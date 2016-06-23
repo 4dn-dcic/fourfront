@@ -11,12 +11,14 @@ var plugins = [];
 // don't include momentjs locales (large)
 plugins.push(new webpack.IgnorePlugin(/^\.\/locale$/, [/moment$/]));
 var chunkFilename = '[name].js';
+var sourceMapType = null;
 
 if (env === 'production') {
 	// uglify code for production
 	plugins.push(new webpack.optimize.UglifyJsPlugin({minimize: true}));
 	// add chunkhash to chunk names for production only (it's slower)
 	chunkFilename = '[name].[chunkhash].js';
+	sourceMapType = 'source-map';
 }
 
 var preLoaders = [
@@ -63,7 +65,7 @@ module.exports = [
 			preLoaders: preLoaders,
 			loaders: loaders,
 		},
-		devtool: 'source-map',
+		devtool: sourceMapType,
 		plugins: plugins,
 		debug: true
 	},
@@ -96,7 +98,7 @@ module.exports = [
 			preLoaders: preLoaders,
 			loaders: loaders,
 		},
-		devtool: 'source-map',
+		devtool: sourceMapType,
 		plugins: plugins,
 		debug: true
 	}

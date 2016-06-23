@@ -6,9 +6,14 @@ var webpack = require('webpack');
 gulp.task('default', ['webpack', 'watch']);
 gulp.task('dev', ['default']);
 gulp.task('build', ['set-production', 'webpack']);
+gulp.task('build-quick', ['set-quick', 'webpack']);
 
 gulp.task('set-production', [], function () {
   process.env.NODE_ENV = 'production';
+});
+
+gulp.task('set-quick', [], function () {
+  process.env.NODE_ENV = 'quick';
 });
 
 var webpackOnBuild = function (done) {

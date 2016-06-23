@@ -5,6 +5,7 @@
   "scripts": {
     "test": "jest",
     "build": "gulp build",
+    "build-quick": "gulp build-quick",
     "dev": "gulp dev"
   },
   "author": "",
