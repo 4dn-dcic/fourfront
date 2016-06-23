@@ -30,7 +30,9 @@ matrix:
   - python: '3.4'
     env: BROWSER=Chrome
   - python: '3.4'
-    env: BROWSER=
+    env: UNIT=Test
+  - python: '3.4'
+    env: NPM=Test
 before_install:
 - postgres --version
 - initdb --version
@@ -63,8 +65,8 @@ before_script:
   fi
 script:
         #- curl -Lo travis_after_all.py https://raw.github.com/dmakhno/travis_after_all/master/travis_after_all.py
-- if test -z "$BROWSER"; then npm test; fi
-- if test -z "$BROWSER"; then bin/test -v -v --timeout=200 -m "not bdd"; fi
+- if test -n "$NPM"; then npm test; fi
+- if test -n "$UNIT"; then bin/test -v -v --timeout=200 -m "not bdd"; fi
 - |
    if test -n "$BROWSER"; then
      test -f "$SC_PIDFILE" && bin/test -v -v --timeout=200 -m "bdd" --tb=short \
