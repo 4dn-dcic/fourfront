@@ -1,5 +1,5 @@
 import pytest
-
+pytestmark = pytest.mark.setone
 
 def replicate(submitter, award, lab, experiment):
     return {

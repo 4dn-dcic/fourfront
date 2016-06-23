@@ -1,4 +1,5 @@
 import pytest
+pytestmark = pytest.mark.setone
 
 
 def test_audit_publication(testapp, publication_data):

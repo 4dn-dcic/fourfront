@@ -1,4 +1,5 @@
 import pytest
+pytestmark = pytest.mark.setone
 
 @pytest.fixture(scope='session')
 def test_user():

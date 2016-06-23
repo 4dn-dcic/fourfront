@@ -1,5 +1,5 @@
 import pytest
-
+pytestmark = pytest.mark.setone
 
 @pytest.fixture
 def treatment():

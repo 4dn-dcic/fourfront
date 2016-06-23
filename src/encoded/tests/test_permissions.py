@@ -1,4 +1,5 @@
 import pytest
+pytestmark = pytest.mark.setone
 
 
 def remote_user_testapp(app, remote_user):

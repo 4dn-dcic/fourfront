@@ -1,4 +1,5 @@
 import pytest
+pytestmark = pytest.mark.setone
 
 @pytest.fixture
 def biosample(submitter, lab, award, source, human):

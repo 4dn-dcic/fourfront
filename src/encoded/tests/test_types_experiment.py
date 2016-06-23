@@ -1,4 +1,5 @@
 import pytest
+pytestmark = pytest.mark.setone
 
 @pytest.fixture
 def base_experiment(testapp, lab, award):

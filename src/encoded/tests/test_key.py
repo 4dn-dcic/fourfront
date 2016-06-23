@@ -1,4 +1,5 @@
 import pytest
+pytestmark = pytest.mark.setone
 
 items = [
     {'name': 'one', 'accession': 'TEST1'},

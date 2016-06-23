@@ -6,7 +6,7 @@ elasticsearch running as subprocesses.
 
 import pytest
 
-pytestmark = [pytest.mark.indexing]
+pytestmark = [pytest.mark.indexing, pytest.mark.seton]
 
 
 @pytest.fixture(scope='session')

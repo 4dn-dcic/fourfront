@@ -66,7 +66,8 @@ before_script:
 script:
         #- curl -Lo travis_after_all.py https://raw.github.com/dmakhno/travis_after_all/master/travis_after_all.py
 - if test -n "$NPM"; then npm test; fi
-- if test -n "$UNIT"; then bin/test -v -v --timeout=200 -m "not bdd"; fi
+- if test -n "$NPM"; then bin/test -v -v --timeout=200 -m "not bdd and setone"; fi
+- if test -n "$UNIT"; then bin/test -v -v --timeout=200 -m "not bdd and not setone"; fi
 - |
    if test -n "$BROWSER"; then
      test -f "$SC_PIDFILE" && bin/test -v -v --timeout=200 -m "bdd" --tb=short \
