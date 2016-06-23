@@ -29,7 +29,9 @@ matrix:
   - python: '3.4'
     env: BROWSER=Chrome
   - python: '3.4'
-    env: BROWSER=
+    env: NPM=Test
+  - python: '3.4'
+    env: UNIT=Test
 before_install:
 - postgres --version
 - initdb --version
