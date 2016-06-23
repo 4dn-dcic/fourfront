@@ -6,8 +6,7 @@ elasticsearch running as subprocesses.
 
 import pytest
 
-pytestmark = [pytest.mark.indexing, pytest.mark.seton]
-
+pytestmark = [pytest.mark.indexing]
 
 @pytest.fixture(scope='session')
 def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server):

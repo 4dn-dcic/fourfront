@@ -1,4 +1,5 @@
 import pytest
+pytestmark = pytest.mark.setone
 
 
 def _type_length():

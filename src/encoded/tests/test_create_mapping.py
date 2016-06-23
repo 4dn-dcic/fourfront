@@ -1,6 +1,5 @@
 import pytest
 from ..loadxl import ORDER
-pytestmark = pytest.mark.setone
 
 
 @pytest.mark.parametrize('item_type', ORDER)

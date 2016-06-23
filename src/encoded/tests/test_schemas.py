@@ -1,6 +1,5 @@
 import pytest
 from pkg_resources import resource_listdir
-pytestmark = pytest.mark.setone
 
 SCHEMA_FILES = [
     f for f in resource_listdir('encoded', 'schemas')

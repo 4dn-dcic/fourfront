@@ -1,5 +1,4 @@
 import pytest
-pytestmark = pytest.mark.setone
 
 
 def raising_checker(value, system):

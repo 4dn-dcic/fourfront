@@ -1,6 +1,5 @@
 from base64 import b64decode
 import pytest
-pytestmark = pytest.mark.setone
 
 
 RED_DOT = """data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA

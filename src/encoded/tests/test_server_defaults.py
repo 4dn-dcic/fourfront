@@ -1,6 +1,5 @@
 from pytest import fixture
 import pytest
-pytestmark = pytest.mark.setone
 
 
 def test_server_defaults(admin, anontestapp):

@@ -1,5 +1,4 @@
 import pytest
-pytestmark = pytest.mark.setone
 
 TEST_HASHES = {
     "test": "Jnh+8wNnELksNFVbxkya8RDrxJNL13dUWTXhp5DCx/quTM2/cYn7azzl2Uk3I2zc",

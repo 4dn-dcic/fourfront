@@ -1,5 +1,4 @@
 import pytest
-pytestmark = pytest.mark.setone
 
 
 def test_reference_file_by_md5(testapp, file):
