@@ -22,23 +22,23 @@ from pyramid.view import (
 )
 
 
-@collection(
-    name='antibody-approvals',
-    properties={
-        'title': 'Antibody Approvals',
-        'description': 'Listing of characterization approvals for ENCODE antibodies',
-    })
-class AntibodyApproval(Item):
-    schema = load_schema('encoded:schemas/antibody_approval.json')
-    item_type = 'antibody_approval'
-
-    __acl__ = DELETED
-
-    def unique_keys(self, properties):
-        keys = super(AntibodyApproval, self).unique_keys(properties)
-        value = u'{antibody}/{target}'.format(**properties)
-        keys.setdefault('antibody_approval:lot_target', []).append(value)
-        return keys
+# @collection(
+#     name='antibody-approvals',
+#     properties={
+#         'title': 'Antibody Approvals',
+#         'description': 'Listing of characterization approvals for ENCODE antibodies',
+#     })
+# class AntibodyApproval(Item):
+#     schema = load_schema('encoded:schemas/antibody_approval.json')
+#     item_type = 'antibody_approval'
+#
+#     __acl__ = DELETED
+#
+#     def unique_keys(self, properties):
+#         keys = super(AntibodyApproval, self).unique_keys(properties)
+#         value = u'{antibody}/{target}'.format(**properties)
+#         keys.setdefault('antibody_approval:lot_target', []).append(value)
+#         return keys
 
 
 @view_config(context=AntibodyApproval, permission=NO_PERMISSION_REQUIRED,
