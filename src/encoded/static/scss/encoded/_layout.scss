@@ -27,17 +27,17 @@
 ********************************************************** */
 
 .page-footer {
-	color: rgb(255, 255, 255);
-	background-color: #a4afb8; // for IE8
+	color: #000000;
+	background-color: #ffffff; // for IE8
 	background-color: $footerBackground; // overwrite previous line for CSS3 browsers
 	//height: $footerHeight;
-	@include text-shadow(0 1px rgba(0, 0, 0, 0.3));
+	border-top: 5px solid #cc0000;
+	@include font-size(1.2);
 	//line-height: 0;
 	text-align: center;
 	overflow: hidden;
-	a { 
-		color: rgb(255, 255, 255); 
-		font-weight: bold;
+	a {
+		color: #262626;
 	}
 	ul {
 	    list-style: none;
@@ -47,9 +47,8 @@
 }
 
 .footer-links {
-    margin: 15px 0;
+    margin: 10px 0;
     text-align: center;
-
     @media (min-width: $screen-sm-min) {
         text-align: right;
 
@@ -57,40 +56,35 @@
             padding-right: 0;
         }
     }
-
     a {
         display: block;
-        margin: 0 0 8px;
-        padding: 10px 15px;
+        margin: 0 0 10px;
+        padding: 5px 5px;
         background-color: darken($footerBackground, 0.1%);
         @include border-radius(3px);
+		text-decoration: none !important;
     }
-    a:hover { 
-        text-decoration: none; 
-        background-color: darken($footerBackground, 6%);   
-    }
-    a:active {
-        background-color: darken($footerBackground, 15%);
+    a:hover {
+		color: #cc0000;
+		text-decoration: none;
     }
 }
 
 .footer-logos {
-    margin: 10px 0;
+    margin-top: 10px;
     text-align: center;
-
     @media (min-width: $screen-sm-min) {
         text-align: left;
     }
 
     li {
-        margin: 0 0 15px;
+        margin-bottom: 10px;
     }
 }
 
 
 .copy-notice {
     text-align: center;
-
     @media (min-width: $screen-sm-min) {
         text-align: right;
     }
@@ -146,4 +140,97 @@
             line-height: 30px;  // 50px - 20px of vertical padding
         }
     }
+}
+/* *********************************************************
+		CARL'S LOGIN
+********************************************************** */
+.login-box{
+    width: 300px;
+    border: 4px solid #000000;
+    background-color: #f0f0f0;
+    padding: 5px;
+    margin: 25px;
+	display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+.sexy-btn{
+    background-color: #ffffff;
+    border: 2px solid #000099;
+    padding: 5px 10px;
+    text-align: center;
+    font-size: 16px;
+    cursor: pointer;
+}
+.sexy-btn:hover{
+  background-color: #cce6ff;
+}
+.sexy-btn span{
+  display: inline-block;
+  position: relative;
+  transition: 0.5s;
+}
+.sexy-btn span:after {
+  content: '»';
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  right: -20px;
+  transition: 0.5s;
+}
+
+.sexy-btn:hover span {
+  padding-right: 25px;
+}
+
+.sexy-btn:hover span:after {
+  opacity: 1;
+  right: 0;
+}
+.links {
+    padding-left: 0px;
+}
+.links li{
+    margin-top: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+.links a{
+        text-decoration: none;
+        font-family: "Arial", Arial, sans-serif;
+        padding: 5px 10px;
+        border: 2px solid #000099;
+        background-color: #ffffff;
+        color: #000000;
+		font-size: 16px;
+}
+.links a:hover {
+        background-color: #cce6ff;
+}
+.fill-label{
+    display: block;
+    font-family: "Arial", Arial, sans-serif;
+    text-align: center;
+}
+.text-box {
+    padding: 12px 20px;
+    margin: 8px 0 8px;
+    box-sizing: border-box;
+    width: 70%;
+    border: 2px solid #000099 !important;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 14px;
+    font-family: "Arial", Arial, sans-serif;
+}
+.text-box:focus {
+    background-color: #cce6ff !important;
+}
+.title{
+    text-align: center;
+    font-family: "Arial", Arial, sans-serif;
 }

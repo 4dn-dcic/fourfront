@@ -23,26 +23,27 @@ var LoginFields = React.createClass({
 		this.setState({username: '', password: ''});
 	},
 	render: function() {
-		var clr = {'color':'black'};
-		return ( 
-				
+		var clr = {'color':'red'};
+		return (
+
 				<div>
 				<label>Username:</label>
 				<input type="text" class="form-control" style={clr}
-							 placeholder="fred.underwood"
+							 placeholder="Username"
 							 onChange={this.handleUsernameChange}
 							 value={this.state.username} />
 
 				<label>Password</label>
 				<input type="password" class="form-control" style={clr}
+							 placeholder="Password"
 							 onChange={this.handlePasswordChange}
 							 value={ this.state.password } />
-
+						 <button id="loginbtn" class="btn btn_primary" onClick={ this.handleSubmit }>Poop</button>
 				<button id="loginbtn" class="btn btn_primary" onClick={ this.handleSubmit }>Login</button>
 				</div>
 		);
 	},
-})		
+})
 
 
 var LoginForm = React.createClass({
@@ -68,7 +69,7 @@ var LoginForm = React.createClass({
       })
       .then(session_properties => {
           console.log("got session props as", session_properties);
-          this.context.session['auth.userid'] = data.username; 
+          this.context.session['auth.userid'] = data.username;
           var next_url = window.location.href;
           if (window.location.hash == '#logged-out') {
               next_url = window.location.pathname + window.location.search;
@@ -88,7 +89,10 @@ var LoginForm = React.createClass({
 });
 
 var Footer = React.createClass({
-    contextTypes: {
+	getInitialState: function() {
+	   return({testCond: false});
+	},
+	contextTypes: {
         session: React.PropTypes.object
     },
 
@@ -96,24 +100,33 @@ var Footer = React.createClass({
         version: React.PropTypes.string // App version number
     },
 
-		//login form
-		
-
+	handleTestChange: function(e) {
+		var curVal = this.state.testCond;
+		this.setState({testCond: !curVal});
+	},
     render: function() {
         var session = this.context.session;
         var disabled = !session;
         var userActionRender;
+		var testRend;
+		if(this.state.testCond){
+            testRend = <LoginBoxes  closeWin={this.handleTestChange}/>
+
+        }
 
         if (!(session && session['auth.userid'])) {
 
             //userActionRender = <a href="#" data-trigger="login" disabled={disabled}>Submitter sign-in</a>;
-						userActionRender = <LoginForm/>
+						userActionRender = <LoginForm />
         } else {
             userActionRender = <a href="#" data-trigger="logout">Submitter sign out</a>;
         }
         return (
             <footer id="page-footer">
                 <div className="container">
+					<div id="login-local" className="row">
+						{testRend}
+					</div>
                     <div className="row">
                         <div className="app-version">{this.props.version}</div>
                     </div>
@@ -125,16 +138,16 @@ var Footer = React.createClass({
                                 <ul className="footer-links">
                                     <li><a href="mailto:encode-help@lists.stanford.edu">Contact</a></li>
                                     <li><a href="http://www.stanford.edu/site/terms.html">Terms of Use</a></li>
-                                    <li id="user-actions-footer">{userActionRender}</li>
+									<li><button onClick={this.handleTestChange}>Test</button></li>
+									{/* Enable footer login bar...*/}
+	                                {/* <li id="user-actions-footer">{userActionRender}</li>*/}
                                 </ul>
-                                <p className="copy-notice">&copy;{new Date().getFullYear()} Stanford University.</p>
+                                <p className="copy-notice">&copy;{new Date().getFullYear()} Harvard University.</p>
                             </div>
-
                             <div className="col-sm-6 col-sm-pull-6">
                                 <ul className="footer-logos">
-                                    <li><a href="/"><img src="/static/img/encode-logo-small-2x.png" alt="ENCODE" id="encode-logo" height="45px" width="78px" /></a></li>
-                                    <li><a href="http://www.ucsc.edu"><img src="/static/img/ucsc-logo-white-alt-2x.png" alt="UC Santa Cruz" id="ucsc-logo" width="107px" height="42px" /></a></li>
-                                    <li><a href="http://www.stanford.edu"><img src="/static/img/su-logo-white-2x.png" alt="Stanford University" id="su-logo" width="105px" height="49px" /></a></li>
+                                    <li><a href="https://commonfund.nih.gov/4dnucleome/index"><img src="/static/img/4DN-logo.png" alt="4DN" id="encode-logo" height="60px" width="106px" /></a></li>
+                                    <li><a href="http://hms.harvard.edu"><img src="/static/img/Harvard-logo.png" alt="Harvard" id="ucsc-logo" width="160px" height="40px" /></a></li>
                                 </ul>
                             </div>
                         </div>
@@ -143,6 +156,82 @@ var Footer = React.createClass({
             </footer>
         );
     }
+
+/*
+CARL'S CODE ------------------------------
+*/
+
+});
+var LoginBoxes = React.createClass({
+  getInitialState: function() {
+  	return {username: '', password: ''};
+  },
+  usernameFill: function(v) {
+  	this.setState({username: v});
+  },
+  passwordFill: function(v) {
+  	this.setState({password: v});
+  },
+  handleSubmit: function(e){
+    e.preventDefault();
+    var username = this.state.username.trim();
+	var password = this.state.password.trim();
+  	if (username === '' || password === '') {
+    	return;
+    }
+    // do something
+    this.setState({username: '', password: ''});
+    console.log('EXIT THE PAGE NOW');
+  },
+  handleClose: function(e){
+      e.preventDefault();
+      this.props.closeWin(e);
+      console.log('CLOSE THE WINDOW NOW');
+  },
+  render: function(){
+    return(
+        <div className="login-box">
+        <h1 className="title">Your Account</h1>
+      	<label className="fill-label">Username:</label>
+        <TextBox default="Username" fill={this.usernameFill} tType="text"/>
+        <label className="fill-label">Password:</label>
+        <TextBox default="Password" fill={this.passwordFill} tType="password"/>
+        <ul className="links">
+            <li><button id="loginbtn" className="sexy-btn"
+                onClick={this.handleSubmit}><span>Sign in</span></button></li>
+			{/*<li><button id="regbtn" className="sexy-btn"
+                onClick="location.href='http://google.com';">
+				<span>Register</span></button></li>
+			<li><button id="passbtn" className="sexy-btn"
+                onClick="location.href='http://google.com';">
+				<span>Change password</span></button></li>*/}
+			<li><a href="https://www.google.com/">Register</a></li>
+            <li><a href="https://www.google.com/">New password</a></li>
+            <li><button id="closebtn" className="sexy-btn"
+                onClick={this.handleClose}><span>Close</span></button></li>
+        </ul>
+      </div>
+    );
+  },
 });
 
+var TextBox = React.createClass({
+  getInitialState: function() {
+  	return({data: ''});
+  },
+  handleFill: function(e) {
+
+  	this.setState({data: e.target.value});
+    this.props.fill(e.target.value);
+  },
+  render: function() {
+  	return(
+    	<div>
+    		<input type={this.props.tType} className="text-box"
+    		placeholder={this.props.default} onChange={this.handleFill}
+    		value={this.state.data} />
+    	</div>
+  	);
+  },
+});
 module.exports = Footer;
