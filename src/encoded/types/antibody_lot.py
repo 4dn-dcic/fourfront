@@ -9,45 +9,45 @@ from .base import (
 )
 
 
-# @collection(
-#     name='antibodies',
-#     unique_key='accession',
-#     properties={
-#         'title': 'Antibodies Registry',
-#         'description': 'Listing of ENCODE antibodies',
-#     })
-# class AntibodyLot(SharedItem):
-#     item_type = 'antibody_lot'
-#     schema = load_schema('encoded:schemas/antibody_lot.json')
-#     name_key = 'accession'
-#     rev = {
-#         'characterizations': ('AntibodyCharacterization', 'characterizes'),
-#     }
-#     embedded = [
-#         'source',
-#         'host_organism',
-#         'targets',
-#         'targets.organism',
-#         'characterizations.award',
-#         'characterizations.documents',
-#         'characterizations.lab',
-#         'characterizations.submitted_by',
-#         'characterizations.target.organism',
-#         'lot_reviews.targets',
-#         'lot_reviews.targets.organism',
-#         'lot_reviews.organisms'
-#     ]
-#     audit_inherit = [
-#         'source',
-#         'host_organism',
-#         'targets',
-#         'targets.organism',
-#         'characterizations',
-#         'characterizations.documents',
-#         'lot_reviews.targets',
-#         'lot_reviews.targets.organism',
-#         'lot_reviews.organisms'
-#     ]
+@collection(
+    name='antibodies',
+    unique_key='accession',
+    properties={
+        'title': 'Antibodies Registry',
+        'description': 'Listing of ENCODE antibodies',
+    })
+class AntibodyLot(SharedItem):
+    item_type = 'antibody_lot'
+    schema = load_schema('encoded:schemas/antibody_lot.json')
+    name_key = 'accession'
+    rev = {
+        'characterizations': ('AntibodyCharacterization', 'characterizes'),
+    }
+    embedded = [
+        'source',
+        'host_organism',
+        'targets',
+        'targets.organism',
+        'characterizations.award',
+        'characterizations.documents',
+        'characterizations.lab',
+        'characterizations.submitted_by',
+        'characterizations.target.organism',
+        'lot_reviews.targets',
+        'lot_reviews.targets.organism',
+        'lot_reviews.organisms'
+    ]
+    audit_inherit = [
+        'source',
+        'host_organism',
+        'targets',
+        'targets.organism',
+        'characterizations',
+        'characterizations.documents',
+        'lot_reviews.targets',
+        'lot_reviews.targets.organism',
+        'lot_reviews.organisms'
+    ]
 
     def unique_keys(self, properties):
         keys = super(AntibodyLot, self).unique_keys(properties)
@@ -175,7 +175,7 @@ def lot_reviews(characterizations, targets, request):
     primary_chars = []
     secondary_chars = []
 
-    # Since characterizations can only take one target (not an array), primary characterizations for
+    # Since characterizations can only take one target (not an array), primary characterizations for 
     # histone modifications may be done in multiple species, so we really need to check lane.organism
     # against the antibody.targets.organism list to determine eligibility of use in that organism.
 
@@ -192,7 +192,7 @@ def lot_reviews(characterizations, targets, request):
             histone_mod_target = True
 
         # instead of adding to the target_organism list with whatever they put in the characterization
-        # we need to instead compare the lane organism to see if it's in the target_organism list.
+        # we need to instead compare the lane organism to see if it's in the target_organism list. 
         # If not, will need to indicate that they characterized an organism not in the antibody_lot.targets
         # list so it'll have to be reviewed and added if legitimate.
         # organisms.add(organism)

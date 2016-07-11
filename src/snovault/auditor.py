@@ -150,17 +150,13 @@ class Auditor(object):
 
 # Imperative configuration
 def add_audit_checker(config, checker, type_, condition=None, frame='embedded'):
-    types = config.registry[TYPES]
+    def callback():
+        types = config.registry[TYPES]
+        ti = types[type_]
+        auditor = config.registry[AUDITOR]
+        auditor.add_audit_checker(checker, ti.name, condition, frame)
 
-    if type_ in types:
-
-        def callback():
-            types = config.registry[TYPES]
-            ti = types[type_]
-            auditor = config.registry[AUDITOR]
-            auditor.add_audit_checker(checker, ti.name, condition, frame)
-
-        config.action(None, callback)
+    config.action(None, callback)
 
 
 # Declarative configuration
