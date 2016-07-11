@@ -123,5 +123,88 @@
             "serverDefault": "userid",
             "permission": "import_items"
         }
-    }
+    },
+    "references": {
+        "references": {
+            "title": "References",
+            "description": "The publications that provide more information about the object.",
+            "type": "array",
+            "default": [],
+            "uniqueItems": true,
+            "items": {
+                "title": "Reference",
+                "description": "A publication that provide smore information about the object.",
+                "type": "string",
+                "linkTo": "Publication"
+            }
+        }
+    },
+    "attribution": {
+        "lab": {
+            "title": "Lab",
+             "description": "Lab associated with the submission.",
+            "comment": "See lab.json for list of available identifiers.",
+            "type": "string",
+            "linkTo": "Lab",
+            "linkSubmitsFor": true
+        },
+        "award": {
+            "title": "Grant",
+            "description": "Grant associated with the submission.",
+            "comment": "See award.json for list of available identifiers.",
+            "type": "string",
+            "linkTo": "Award"
+        }
+    },
+    "notes": {
+        "notes": {
+            "title": "Notes",
+            "description": "DCC internal notes.",
+            "type": "string",
+            "permission": "import_items",
+            "elasticsearch_mapping_index_type": {
+                "title": "Field mapping index type",
+                "description": "Defines one of three types of indexing available",
+                "type": "string",
+                "default": "analyzed",
+                "enum": [
+                    "analyzed",
+                    "not_analyzed",
+                    "no"
+                ]
+            }
+        }
+    },
+    "documents": {
+      "documents": {
+          "title": "Documents",
+          "description": "Documents that provide additional information (not data file).",
+          "type": "array",
+          "default": [],
+          "uniqueItems": true,
+          "items": {
+              "title": "Document",
+              "description": "A document that provides additional information (not data file).",
+              "type": "string",
+              "comment": "See document.json for available identifiers.",
+              "linkTo": "Document"
+          }
+      }
+    },
+    "dbxrefs": {
+      "dbxrefs": {
+            "@type": "@id",
+            "rdfs:subPropertyOf": "rdfs:seeAlso",
+            "title": "External identifiers",
+            "description": "Unique identifiers from external resources.",
+            "type": "array",
+            "default": [],
+            "uniqueItems": true,
+            "items": {
+                "title": "External identifier",
+                "description": "A unique identifier from external resource.",
+                "type":  "string"
+            }
+        }
+      }
 }

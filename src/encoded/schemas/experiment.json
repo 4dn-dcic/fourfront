@@ -1,0 +1,104 @@
+{
+    "title": "Experiment",
+    "description": "Schema for submitting metadata for an assay.",
+    "comment": "Experiment is the main organizing object for metadata on a single assay, it's associated protocols, files and subsequent analyses.",
+    "id": "/profiles/experiment.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["award", "lab","experiment_type"],
+    "approvalRequired": [],
+    "identifyingProperties": ["uuid", "accession" , "aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/accession" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/references" },
+        { "$ref": "mixins.json#/dbxrefs" },
+        { "$ref": "mixins.json#/documents" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "description": {
+            "title": "description",
+            "description": "A short description of the experiment",
+            "type": "string",
+        },
+        "experiment_type": {
+            "type": "string",
+            "description": "A controlled term specifying the type of experiment.",
+            "comment":"required ontology term",
+            "default": "",
+            "title": "Experiment Type",
+            "enum": [
+                "in situ Hi-C",
+                "dilution Hi-C",
+                "micro-C",
+                "DNase Hi-c",
+                "Microscopy (placeholder)"
+            ]
+        },
+        "protocol": {
+            "title": "Reference Protocol",
+            "description": "Reference Protocol Document.",
+            "type": "string",
+            "linkTo": "Document"
+        },
+
+        "documents": {
+            "description": "Protocols or other documents that describe the assay or the results (not data files)."
+        },
+        "internal_status": {
+            "type": "string",
+            "description": "The status of an experiment in the DCC process.",
+            "comment":"unreviewed:wrangler has not evaluated, unrunable:experiment requires more metadata to run, pipeline ready:experiment is ready for the pipeline, processing:pipeline is running, pipeline completed: pipeline has run through completion, requires lab review:there are QC concerns about this data, release ready:DCC feels that this is ready for release",
+            "default": "unreviewed",
+            "permission": "import_items",
+            "title": "Status",
+            "enum": [
+                "unreviewed",
+                "no available pipeline",
+                "unrunnable",
+                "pipeline ready",
+                "processing",
+                "pipeline completed",
+                "requires lab review",
+                "release ready"
+            ]
+        }
+    },
+    "facets": {
+        "status": {
+            "title": "Experiment status"
+        },
+        "month_released": {
+            "title": "Date released"
+        },
+        "lab.title": {
+            "title": "Lab"
+        },
+    },
+    "columns": {
+        "accession": {
+            "title": "Accession"
+        },
+        "description": {
+            "title": "Description"
+        },
+        "lab.title": {
+            "title": "Lab"
+        },
+        "status": {
+            "title": "Status"
+        },
+    },
+    "boost_values": {
+        "notes": 1.0
+    }
+}
