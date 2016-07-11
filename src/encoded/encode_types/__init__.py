@@ -15,33 +15,33 @@ def includeme(config):
     config.scan()
 
 
-@collection(
-    name='labs',
-    unique_key='lab:name',
-    properties={
-        'title': 'Labs',
-        'description': 'Listing of ENCODE DCC labs',
-    })
-class Lab(Item):
-    item_type = 'lab'
-    schema = load_schema('encoded:schemas/lab.json')
-    name_key = 'name'
-    embedded = ['awards']
-
-
-@collection(
-    name='awards',
-    unique_key='award:name',
-    properties={
-        'title': 'Awards (Grants)',
-        'description': 'Listing of awards (aka grants)',
-    })
-class Award(Item):
-    item_type = 'award'
-    schema = load_schema('encoded:schemas/award.json')
-    name_key = 'name'
-    embedded = ['pi']
-
+# @collection(
+#     name='labs',
+#     unique_key='lab:name',
+#     properties={
+#         'title': 'Labs',
+#         'description': 'Listing of ENCODE DCC labs',
+#     })
+# class Lab(Item):
+#     item_type = 'lab'
+#     schema = load_schema('encoded:schemas/lab.json')
+#     name_key = 'name'
+#     embedded = ['awards']
+#
+#
+# @collection(
+#     name='awards',
+#     unique_key='award:name',
+#     properties={
+#         'title': 'Awards (Grants)',
+#         'description': 'Listing of awards (aka grants)',
+#     })
+# class Award(Item):
+#     item_type = 'award'
+#     schema = load_schema('encoded:schemas/award.json')
+#     name_key = 'name'
+#     embedded = ['pi']
+#
 #
 # @collection(
 #     name='organisms',

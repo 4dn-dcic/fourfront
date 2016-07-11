@@ -167,15 +167,17 @@ def add_upgrade(config, type_, version, finalizer=None):
 
 def add_upgrade_step(config, type_, step, source='', dest=None):
 
-    def callback():
-        types = config.registry[TYPES]
-        ti = types[type_]
-        upgrader = config.registry[UPGRADER]
-        upgrader[ti.name].add_upgrade_step(step, source, dest)
+    types = config.registry[TYPES]
+    if type_ in types:
 
-    config.action(
-        ('add_upgrade_step', type_, parse_version(source)),
-        callback)
+        def callback():
+            ti = types[type_]
+            upgrader = config.registry[UPGRADER]
+            upgrader[ti.name].add_upgrade_step(step, source, dest)
+
+        config.action(
+            ('add_upgrade_step', type_, parse_version(source)),
+            callback)
 
 
 def set_upgrade_finalizer(config, type_, finalizer):

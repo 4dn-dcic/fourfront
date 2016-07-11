@@ -51,9 +51,9 @@ class User(Item):
     item_type = 'user'
     schema = load_schema('encoded:schemas/user.json')
     # Avoid access_keys reverse link so editing access keys does not reindex content.
-    #embedded = [
-    #    'lab',
-    #]
+    embedded = [
+        'lab',
+    ]
     STATUS_ACL = {
         'current': [(Allow, 'role.owner', ['edit', 'view_details'])] + USER_ALLOW_CURRENT,
         'deleted': USER_DELETED,

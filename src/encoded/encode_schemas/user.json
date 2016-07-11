@@ -31,6 +31,54 @@
             "description": "The user's last (family) name.",
             "type": "string"
         },
+        "lab": {
+            "title": "Affiliation",
+            "description": "Lab user is primarily associated with.",
+            "comment": "See lab.json for available identifiers.",
+            "permission": "import-items",
+            "type": "string",
+            "linkTo": "Lab"
+        },
+        "submits_for": {
+            "title": "Submits for",
+            "description": "Labs user is authorized to submit data for.",
+            "type": "array",
+            "default": [],
+            "uniqueItems": true,
+            "permission": "import-items",
+            "items": {
+                "description": "A lab user is authorized to submit for.",
+                "comment": "See lab.json for available identifiers.",
+                "type": "string",
+                "linkTo": "Lab"
+            }
+        },
+        "groups": {
+            "title": "Groups",
+            "description": "Additional access control groups",
+            "type": "array",
+            "default": [],
+            "uniqueItems": true,
+            "permission": "import-items",
+            "items": {
+                "type": "string"
+            }
+        },
+        "viewing_groups": {
+            "title": "View access group",
+            "description": "The group that determines which set of data the user has permission to view.",
+            "type": "array",
+            "uniqueItems": true,
+            "permission": "import-items",
+            "items": {
+                "type": "string",
+                "enum": [
+                    "ENCODE",
+                    "GGR",
+                    "REMC"
+                ]
+            }
+        },
         "job_title": {
             "title": "Job title",
             "type": "string"
@@ -70,6 +118,7 @@
         }
     },
     "boost_values": {
-        "title": 1.0
+        "title": 1.0,
+        "lab": 1.0
     }
 }
