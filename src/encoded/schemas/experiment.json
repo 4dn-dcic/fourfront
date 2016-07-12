@@ -5,7 +5,7 @@
     "id": "/profiles/experiment.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["award", "lab","experiment_type"],
+    "required": ["award", "lab","experiment_type", "biosample"],
     "approvalRequired": [],
     "identifyingProperties": ["uuid", "accession" , "aliases"],
     "additionalProperties": false,
@@ -50,9 +50,38 @@
             "type": "string",
             "linkTo": "Document"
         },
+        "experiment_variables": {
+            "title": "Experimental Variables",
+            "description": "Items that can vary between experiments and may be different from the reference protocol",
+            "type":"string"
 
-        "documents": {
-            "description": "Protocols or other documents that describe the assay or the results (not data files)."
+        },
+        "biosample": {
+            "title": "Biological Sample",
+            "description": "Starting biological material.",
+            "type": "string",
+        },
+        "files": {
+            "title": "Data files",
+            "description": "Information about the data files associated with the experiment.",
+            "type": "array",
+            "items": {
+                "title": "File or Fileset",
+                "comment": "Can we do this?",
+                "description": "File or Fileset metadata.",
+                "type": "string",
+            }
+        },
+        "related_experiments": {
+            "title": "Related Experiments",
+            "description": "Related experiments and how they are related to this experiment.",
+            "type": "array",
+            "items": {
+                "title": "Related experiment",
+                "description": "An experiment that is related to this experiment with a specified type of relationship.",
+                "type": "string",
+                "linkTo": "ExperimentRelation"
+            }
         },
         "internal_status": {
             "type": "string",
@@ -72,33 +101,5 @@
                 "release ready"
             ]
         }
-    },
-    "facets": {
-        "status": {
-            "title": "Experiment status"
-        },
-        "month_released": {
-            "title": "Date released"
-        },
-        "lab.title": {
-            "title": "Lab"
-        },
-    },
-    "columns": {
-        "accession": {
-            "title": "Accession"
-        },
-        "description": {
-            "title": "Description"
-        },
-        "lab.title": {
-            "title": "Lab"
-        },
-        "status": {
-            "title": "Status"
-        },
-    },
-    "boost_values": {
-        "notes": 1.0
     }
 }
