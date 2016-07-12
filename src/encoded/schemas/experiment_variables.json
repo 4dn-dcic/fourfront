@@ -1,0 +1,40 @@
+{
+    "title": "Experiment Variables",
+    "description": "Base object for experimental variables.",
+    "comment": "Only protocol documents are added directly to this object - variables specific to a class of experiments are added to the specific object",
+    "id": "/profiles/experiment_variables.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["award", "lab"],
+    "approvalRequired": [],
+    "identifyingProperties": ["uuid", "accession" , "aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/accession" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/references" },
+        { "$ref": "mixins.json#/dbxrefs" },
+        { "$ref": "mixins.json#/documents" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "protocol": {
+            "title": "Protocol Documents",
+            "description": "Protocol Documents Describing the variations in the protocol from reference.",
+            "type": "array",
+            "items": {
+                "title": "Document",
+                "description": "A document associated with the specific experimental protocol.",
+                "type": "string",
+                "linkTo": "Document"
+            }
+        }
+    }
+}
