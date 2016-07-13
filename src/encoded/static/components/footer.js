@@ -1,5 +1,7 @@
 'use strict';
 var React = require('react');
+var Modal = require('react-bootstrap/lib/Modal');
+var OverlayMixin = require('react-bootstrap/lib/OverlayMixin');
 
 var LoginFields = React.createClass({
 
@@ -89,9 +91,6 @@ var LoginForm = React.createClass({
 });
 
 var Footer = React.createClass({
-	getInitialState: function() {
-	   return({testCond: false});
-	},
 	contextTypes: {
         session: React.PropTypes.object
     },
@@ -99,20 +98,10 @@ var Footer = React.createClass({
     propTypes: {
         version: React.PropTypes.string // App version number
     },
-
-	handleTestChange: function(e) {
-		var curVal = this.state.testCond;
-		this.setState({testCond: !curVal});
-	},
     render: function() {
         var session = this.context.session;
         var disabled = !session;
         var userActionRender;
-		var testRend;
-		if(this.state.testCond){
-            testRend = <LoginBoxes  closeWin={this.handleTestChange}/>
-
-        }
 
         if (!(session && session['auth.userid'])) {
 
@@ -124,9 +113,6 @@ var Footer = React.createClass({
         return (
             <footer id="page-footer">
                 <div className="container">
-					<div id="login-local" className="row">
-						{testRend}
-					</div>
                     <div className="row">
                         <div className="app-version">{this.props.version}</div>
                     </div>
@@ -136,9 +122,9 @@ var Footer = React.createClass({
                         <div className="row">
                             <div className="col-sm-6 col-sm-push-6">
                                 <ul className="footer-links">
+									<li><LoginBoxes /></li>
                                     <li><a href="mailto:encode-help@lists.stanford.edu">Contact</a></li>
                                     <li><a href="http://www.stanford.edu/site/terms.html">Terms of Use</a></li>
-									<li><button onClick={this.handleTestChange}>Test</button></li>
 									{/* Enable footer login bar...*/}
 	                                {/* <li id="user-actions-footer">{userActionRender}</li>*/}
                                 </ul>
@@ -163,14 +149,20 @@ CARL'S CODE ------------------------------
 
 });
 var LoginBoxes = React.createClass({
+  mixins: [OverlayMixin],
   getInitialState: function() {
-  	return {username: '', password: ''};
+  	return {username: '', password: '', isOpen: false};
   },
   usernameFill: function(v) {
   	this.setState({username: v});
   },
   passwordFill: function(v) {
   	this.setState({password: v});
+  },
+  handleToggle: function () {
+	  this.setState({
+		  isOpen: !this.state.isOpen
+	  });
   },
   handleSubmit: function(e){
     e.preventDefault();
@@ -183,34 +175,40 @@ var LoginBoxes = React.createClass({
     this.setState({username: '', password: ''});
     console.log('EXIT THE PAGE NOW');
   },
-  handleClose: function(e){
-      e.preventDefault();
-      this.props.closeWin(e);
-      console.log('CLOSE THE WINDOW NOW');
-  },
-  render: function(){
-    return(
+  render: function () {
+	return (
+	  <div>
+		  <a className="btn btn-info btn-sm" onClick={this.handleToggle}>Log in</a>
+	 </div>
+ );
+ },
+
+	 renderOverlay: function () {
+         if (!this.state.isOpen) {
+             return <span/>;
+         }
+         return (
+	  <Modal onRequestHide={this.handleToggle} dialogClassName="login-modal">
         <div className="login-box">
-        <h1 className="title">Your Account</h1>
-      	<label className="fill-label">Username:</label>
-        <TextBox default="Username" fill={this.usernameFill} tType="text"/>
-        <label className="fill-label">Password:</label>
-        <TextBox default="Password" fill={this.passwordFill} tType="password"/>
-        <ul className="links">
-            <li><button id="loginbtn" className="sexy-btn"
-                onClick={this.handleSubmit}><span>Sign in</span></button></li>
-			{/*<li><button id="regbtn" className="sexy-btn"
-                onClick="location.href='http://google.com';">
-				<span>Register</span></button></li>
-			<li><button id="passbtn" className="sexy-btn"
-                onClick="location.href='http://google.com';">
-				<span>Change password</span></button></li>*/}
-			<li><a href="https://www.google.com/">Register</a></li>
-            <li><a href="https://www.google.com/">New password</a></li>
-            <li><button id="closebtn" className="sexy-btn"
-                onClick={this.handleClose}><span>Close</span></button></li>
-        </ul>
-      </div>
+        	<h1 className="title">Your Account</h1>
+      		<label className="fill-label">Username:</label>
+        	<TextBox default="Username" fill={this.usernameFill} tType="text"/>
+        	<label className="fill-label">Password:</label>
+        	<TextBox default="Password" fill={this.passwordFill} tType="password"/>
+        	<ul className="links">
+            	<li><button id="loginbtn" className="sexy-btn"
+	                onClick={this.handleSubmit}><span>Sign in</span></button></li>
+				<li><form action='http://google.com'><button id="regbtn" className="sexy-btn">
+					<span>Register</span></button></form></li>
+				<li><form action='http://google.com'><button id="passbtn" className="sexy-btn">
+					<span>Change password</span></button></form></li>
+				{/*<li><a href="https://www.google.com/">Register</a></li>
+	            <li><a href="https://www.google.com/">New password</a></li>*/}
+	            <li><button id="closebtn" className="sexy-btn"
+	                onClick={this.handleToggle}><span>Close</span></button></li>
+        	</ul>
+      	</div>
+  	   </Modal>
     );
   },
 });

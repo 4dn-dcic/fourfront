@@ -73,18 +73,20 @@ thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td
     }
 }
 
-
 /* Table Controls */
 .table-responsive {
     position: relative;
     overflow-x: auto;
+    overflow-y: auto;
+    max-height: 500px !important;
     background-image: inline-image("../img/checker.svg");
     background-size: 16px 16px;
 }
-
 table thead tr th button {
+    display: block;
     float: left;
 }
+
 
 form.table-filter {
     position: absolute;
@@ -270,7 +272,7 @@ th.rotate90 {
             -webkit-transform-origin: left bottom 0;
             transform-origin: left bottom 0;
             top: 80px;
-            left: 16px;        
+            left: 16px;
         }
     }
 }

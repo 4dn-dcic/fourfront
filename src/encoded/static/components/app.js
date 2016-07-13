@@ -40,11 +40,6 @@ var portal = {
             {id: 'news', title: 'News', url: '/news'},
             {id: 'acknowledgements', title: 'Acknowledgements', url: '/acknowledgements/'},
             {id: 'contact', title: 'Contact', url: '/help/contacts/'}
-        ]},
-        {id: 'account', title: 'Account', children: [
-            {id: 'signin', title: 'Sign in', url: '/help/getting-started/'},
-            {id: 'register', title: 'Register', url: '/help/rest-api/'},
-            {id: 'changepass', title: 'Change password', url: '/help/contacts/'}
         ]}
     ]
 };
