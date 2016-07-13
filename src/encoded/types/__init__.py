@@ -42,18 +42,18 @@ class Award(Item):
     name_key = 'name'
     embedded = ['pi']
 
-#
-# @collection(
-#     name='organisms',
-#     unique_key='organism:name',
-#     properties={
-#         'title': 'Organisms',
-#         'description': 'Listing of all registered organisms',
-#     })
-# class Organism(Item):
-#     item_type = 'organism'
-#     schema = load_schema('encoded:schemas/organism.json')
-#     name_key = 'name'
+
+@collection(
+    name='organisms',
+    unique_key='organism:name',
+    properties={
+        'title': 'Organisms',
+        'description': 'Listing of all registered organisms',
+    })
+class Organism(Item):
+    item_type = 'organism'
+    schema = load_schema('encoded:schemas/organism.json')
+    name_key = 'name'
 #
 #
 # @collection(
