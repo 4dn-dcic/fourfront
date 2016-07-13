@@ -1,0 +1,158 @@
+{
+    "title": "Data file",
+    "description": "Schema for submitting metadata for a data file.",
+    "id": "/profiles/file.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["file_format", "file_type", "md5sum", "award", "lab"],
+    "identifyingProperties": ["uuid", "aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/accession" },
+        { "$ref": "mixins.json#/accessioned_status" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "filename": {
+            "title": "File name",
+            "description": "The local file name used at time of submission.",
+            "type": "string",
+            "comment": "what ends up being displayed? - accession perhaps"
+        },
+        "file_format": {
+            "title": "File format",
+            "type": "string",
+            "oneOf": [
+                {
+                    "enum": [
+                        "bam",
+                        "bed",
+                        "bigBed",
+                        "bigWig",
+                        "fasta",
+                        "fastq",
+                        "gff",
+                        "gtf",
+                        "hdf5",
+                        "idat",
+                        "rcc",
+                        "CEL",
+                        "tsv",
+                        "csv",
+                        "sam",
+                        "tar",
+                        "tagAlign",
+                        "vcf",
+                        "wig",
+                        "bedpe"
+                    ]
+                }
+            ]
+        },
+        "file_type": {
+            "title": "General File Type",
+            "description": "General Type of File (raw, processed, alignments)",
+            "type": "string",
+            "enum": [
+                "raw file",
+                "processed file"
+                "alignment file"
+                "pairs file"
+              ]
+        },
+        "file_format_specifications": {
+            "title": "File format specifications documents",
+            "description": "Text or pdf files that further explain the file format",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                    "comment": "See document.json for a list of available identifiers.",
+                    "type": "string",
+                    "linkTo": "Document"
+                    }
+        },
+        "md5sum": {
+            "title": "MD5sum",
+            "description": "The md5sum of the file being transferred.",
+            "comment": "This can vary for files of same content gzipped at different times",
+            "type": "string",
+            "format": "hex"
+        },
+        "content_md5sum": {
+            "title": "Content MD5sum",
+            "description": "The MD5sum of the uncompressed file.",
+            "comment": "This is only relavant for gzipped files.",
+            "type": "string",
+            "format": "hex"
+        },
+        "file_size": {
+            "title": "File size",
+            "comment": "File size is specified in bytes - presumably this can be a calculated property as well",
+            "type": "integer"
+        },
+        "experiments": {
+            "title": "Experiments",
+            "description": "The experiments that this file is associated with",
+            "type": "array",
+            "items": {
+                "title": "Experiment",
+                "description": "Associated experiment.",
+                "type": "string",
+                "linkTo": "Experiment"
+            }
+        },
+        "related_files": {
+            "title": "Related Files",
+            "description": "Related files and how they are related to this file.",
+            "type": "array",
+            "items": {
+                "title": "Related File",
+                "description": "A file that is related to this file with a specified type of relationship.",
+                "type": "string",
+                "linkTo": "FileRelation"
+            }
+        },
+        "fileset": {
+              "title": "File Set",
+              "description": "File Set to which this file belongs to.",
+              "type": "string"
+        },
+        "Qc_metrics": {
+            "title": "QC metrics",
+            "description": "base for specific file type qc metrics",
+            "type": "string",
+            "comment": "LinkTo qc metric to get and then to specific types"
+        },
+        "restricted": {
+            "title": "Restricted file",
+            "description": "A flag to indicate whether this file is subject to restricted access",
+            "type": "boolean"
+        },
+        "status": {
+            "title": "Status",
+            "type": "string",
+            "default": "uploading",
+            "enum" : [
+                "uploading",
+                "uploaded",
+                "upload failed",
+                "format check failed",
+                "in progress",
+                "deleted",
+                "replaced",
+                "revoked",
+                "archived",
+                "released"
+                ]
+        },
+
+    }
+}

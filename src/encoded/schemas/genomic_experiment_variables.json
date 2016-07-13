@@ -1,0 +1,124 @@
+{
+    "title": "Genomic Experiment Variables",
+    "description": "Experimental variables specific for a genomic experiment.",
+    "id": "/profiles/genomic_experiment_variables.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [],
+    "approvalRequired": [],
+    "identifyingProperties": ["uuid", "aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "experiment_variables.json#/properties" },
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/references" },
+        { "$ref": "mixins.json#/dbxrefs" },
+        { "$ref": "mixins.json#/documents" }
+    ],
+    "dependencies": {
+      "crosslinking_temperature": ["crosslinking_method", "crosslinking_time"],
+      "crosslinking_time": ["crosslinking_method", "crosslinking_temperature"],
+      "digestion_temperature": ["digestion_enzyme", "digestion_time"],
+      "digestion_time": ["digestion_enzyme", "digestion_temperature"]
+    },
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "crosslinking_method": {
+            "title": "Crosslinking Method",
+            "description": "Term used for the method for crosslinking chromatin",
+            "type": "string",
+            "enum": [
+                "none",
+                "formaldehyde"
+            ]
+        },
+        "crosslinking_time": {
+            "title": "Crosslinking Time",
+            "description": "Time of crosslinking step in minutes",
+            "type": "number"
+        },
+        "crosslinking_temperature": {
+            "title": "Crosslinking Temperature",
+            "description": "Temperature of crosslinking step in degrees Celsius",
+            "type": "number"
+        },
+        "digestion_enzyme": {
+            "title": "Digestion Enzyme",
+            "description": "The enzyme used for digestion of the DNA.",
+            "comment": "See enzyme.json for available identifiers.",
+            "type": "string",
+            "linkTo": "Enzyme"
+        },
+        "enzyme_lot_number": {
+            "title": "Enzyme Lot Number",
+            "description": "Lot number of batch of enzyme used to digest DNA",
+            "type": "string",
+            "comment": "may want to add a regex bit to this?"
+        },
+        "digestion_time": {
+            "title": "Digestion Time",
+            "description": "Time of digestion step in minutes",
+            "type": "number"
+        },
+        "digestion_temperature": {
+            "title": "Digestion Temperature",
+            "description": "Temperature of digestion step in degrees Celsius",
+            "type": "number"
+        },
+        "tagging_method": {
+            "title": "Tagging Method",
+            "description": "Information on the biotinylated base used or other tagging info",
+            "type": "string",
+            "comment": "should this be a controlled CV?"
+        },
+        "ligation_time": {
+            "title": "Ligation Time",
+            "description": "Time of ligation step in minutes",
+            "type": "number"
+        },
+        "ligation_temperature": {
+            "title": "Ligation Temperature",
+            "description": "Temperature of ligation step in degrees Celsius",
+            "type": "number"
+        },
+        "fragmentation_method": {
+            "title": "Fragmentation Method",
+            "description": "Information on the method used to fragment the DNA post ligation",
+            "type": "string",
+            "comment": "should this be a controlled CV?"
+        },
+        "average_fragment_size": {
+            "title": "Average Fragment Size",
+            "description": "Size of average fragment in base pairs after fragmentation step",
+            "type": "integer"
+        },
+        "instrument": {
+            "title": "Sequencer",
+            "description": "Instrument used for sequencing",
+            "type": "string",
+            "comment": "should this be a controlled CV with enum?"
+        },
+        "pairing": {
+            "type": "string",
+            "description": "A single or paired end experiment",
+            "default": "",
+            "title": "Pairing",
+            "enum": [
+                "single end",
+                "paired end",
+            ]
+        },
+        "read_length": {
+            "title": "Sequencing read length",
+            "description": "Length of sequencing reads in base pairs",
+            "type": "integer"
+        }
+    }
+}
