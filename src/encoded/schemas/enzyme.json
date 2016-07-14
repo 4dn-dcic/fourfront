@@ -36,7 +36,7 @@
             "title": "Enzyme Source",
             "description": "The Lab or Vendor that provided the enzyme.",
             "type": "string",
-            "comment": "LinkTo Vendor"
+            "linkTo": "Vendor"
         },
         "recognition_sequence": {
             "title": "Cut Sequence",

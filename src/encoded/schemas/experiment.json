@@ -53,8 +53,8 @@
         "experiment_variables": {
             "title": "Experimental Variables",
             "description": "Items that can vary between experiments and may be different from the reference protocol",
-            "type":"string"
-
+            "type": "string",
+            "linkTo": "ExperimentVariables"
         },
         "biosample": {
             "title": "Biological Sample",
@@ -68,7 +68,8 @@
             "items": {
                 "title": "File",
                 "description": "File metadata.",
-                "type": "string"
+                "type": "string",
+                "linkTo": "File"
             }
         },
         "filesets": {

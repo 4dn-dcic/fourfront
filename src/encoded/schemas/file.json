@@ -129,7 +129,7 @@
             "title": "QC metrics",
             "description": "base for specific file type qc metrics",
             "type": "string",
-            "comment": "LinkTo qc metric to get and then to specific types"
+            "linkTo": "QualityMetric"
         },
         "restricted": {
             "title": "Restricted file",
