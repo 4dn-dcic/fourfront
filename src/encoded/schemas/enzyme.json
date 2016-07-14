@@ -25,18 +25,33 @@
             "description": "The name of the digestion enzyme.",
             "type": "string",
             "enum": [
-                "Dpn II",
-                "Nco I",
-                "Mbo I",
-                "DNase I",
-                "Micrococcal nuclease"
-            ]
+              "HindIII",
+              "DpnII",
+              "NcoI",
+              "MboI",
+              "DNase_I",
+              "Micrococcal_nuclease"
+            ],
+            "uniqueKey": "enzyme:name"
+        },
+        "description": {
+            "title": "Description",
+            "description": "A plain text description of the enzyme.",
+            "type": "string",
+            "default": ""
         },
         "enzyme_source": {
             "title": "Enzyme Source",
             "description": "The Lab or Vendor that provided the enzyme.",
+            "permission": "import-items",
             "type": "string",
-            "linkTo": "Vendor"
+            "comment": "LinkTo Vendor",
+            "LinkTo": "Vendor"
+        },
+        "catalog_number": {
+            "title": "Product Catalog Number",
+            "description": "A plain text for catalog description.",
+            "type": "string",
         },
         "recognition_sequence": {
             "title": "Cut Sequence",
@@ -52,7 +67,7 @@
         },
         "cut_position": {
           "title": "Cut position",
-          "description": "The position in the provided recognition sequence at which the enzyme cuts - relative to base 1 of site.",
+          "description": "The position in the provided recognition sequence at which the enzyme cuts AFTER - relative to base 1 of site.",
           "type": "integer",
           "comment": "has a dependency on either cut_sequence or site_length"
         },

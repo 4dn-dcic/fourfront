@@ -1,7 +1,7 @@
 {
-    "title": "Source",
+    "title": "Vendor",
     "description": "Schema for submitting an originating lab or vendor.",
-    "id": "/profiles/source.json",
+    "id": "/profiles/vendor.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["title"],
@@ -16,7 +16,7 @@
     ],
     "properties": {
         "schema_version": {
-            "default": "3"
+            "default": "1"
         },
         "description": {
             "title": "Description",

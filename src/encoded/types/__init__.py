@@ -94,6 +94,7 @@ class Document(ItemWithAttachment, Item):
     embedded = ['lab', 'award', 'submitted_by']
 
 
+<<<<<<< HEAD
 # removing vendor bit from here and to it's own vendor.py
 # @collection(
 #     name='vendors',
@@ -106,6 +107,31 @@ class Document(ItemWithAttachment, Item):
 #     item_type = 'vendor'
 #     schema = load_schema('encoded:schemas/vendor.json')
 #     name_key = 'name'
+=======
+#@collection(
+#    name='vendors',
+#     unique_key='vendor:name',
+#     properties={
+#         'title': 'Vendors',
+#         'description': 'Listing of sources and vendors for 4DN material',
+#     })
+# class Vendor(Item):
+#     item_type = 'vendor'
+#     schema = load_schema('encoded:schemas/vendor.json')
+#     name_key = 'name'
+
+@collection(
+    name='enzymes',
+    unique_key='enzyme:name',
+    properties={
+        'title': 'Enzymes',
+        'description': 'Listing of enzymes',
+    })
+class Enzyme(Item):
+    item_type = 'enzyme'
+    schema = load_schema('encoded:schemas/enzyme.json')
+    name_key = 'name'
+>>>>>>> 83b5349104956fe6d64c25e8711c7c28d0d00493
 #
 #
 # @collection(
