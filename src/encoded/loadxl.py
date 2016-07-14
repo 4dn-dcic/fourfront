@@ -21,6 +21,7 @@ ORDER = [
     # 'target',
     'publication',
     'document',
+    'vendor',
     # 'antibody_lot',
     # 'antibody_characterization',
     # 'antibody_approval',
