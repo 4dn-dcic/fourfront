@@ -40,7 +40,7 @@
                 "in situ Hi-C",
                 "dilution Hi-C",
                 "micro-C",
-                "DNase Hi-c",
+                "DNase Hi-C",
                 "Microscopy (placeholder)"
             ]
         },
@@ -95,7 +95,7 @@
         },
         "internal_status": {
             "type": "string",
-            "description": "The status of an experiment in the DCC process.",
+            "description": "The status of an experiment in the DCIC process.",
             "comment":"unreviewed:wrangler has not evaluated, unrunable:experiment requires more metadata to run, pipeline ready:experiment is ready for the pipeline, processing:pipeline is running, pipeline completed: pipeline has run through completion, requires lab review:there are QC concerns about this data, release ready:DCC feels that this is ready for release",
             "default": "unreviewed",
             "permission": "import_items",
