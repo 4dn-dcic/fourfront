@@ -13,14 +13,14 @@ logger = logging.getLogger('encoded')
 logger.setLevel(logging.INFO)  # doesn't work to shut off sqla INFO
 
 ORDER = [
-    'user'
-    #'award',
-    #'lab',
-    #'organism',
-    #'source',
+    'user',
+    'award',
+    'lab',
+    'organism',
+    # 'source',
     # 'target',
-    # 'publication',
-    # 'document',
+    'publication',
+    'document',
     # 'antibody_lot',
     # 'antibody_characterization',
     # 'antibody_approval',
@@ -34,6 +34,7 @@ ORDER = [
     # 'fly_donor',
     # 'worm_donor',
     # 'human_donor',
+    'individual_human'
     # 'donor_characterization',
     # 'biosample',
     # 'biosample_characterization',

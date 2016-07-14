@@ -159,7 +159,7 @@
     "notes": {
         "notes": {
             "title": "Notes",
-            "description": "DCC internal notes.",
+            "description": "DCIC internal notes.",
             "type": "string",
             "permission": "import_items",
             "elasticsearch_mapping_index_type": {
@@ -190,6 +190,58 @@
               "linkTo": "Document"
           }
       }
+    },
+    "attachment": {
+        "attachment": {
+            "title": "Document file metadata",
+            "type": "object",
+            "additionalProperties": false,
+            "formInput": "file",
+            "attachment": true,
+            "properties": {
+                "download": {
+                    "title": "File Name",
+                    "type": "string"
+                },
+                "href": {
+                    "comment": "Internal webapp URL for document file",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "MIME type",
+                    "type": "string",
+                    "enum": [
+                        "application/pdf",
+                        "text/plain",
+                        "text/tab-separated-values",
+                        "image/jpeg",
+                        "image/tiff",
+                        "image/gif",
+                        "text/html",
+                        "image/png",
+                        "image/svs",
+                        "text/autosql"
+                    ]
+                },
+                "md5sum": {
+                    "title": "MD5sum",
+                    "type": "string",
+                    "format": "md5sum"
+                },
+                "size": {
+                    "title": "File size",
+                    "type": "integer"
+                },
+                "width": {
+                    "title": "Image width",
+                    "type": "integer"
+                },
+                "height": {
+                    "title": "Image height",
+                    "type": "integer"
+                }
+            }
+        }
     },
     "dbxrefs": {
       "dbxrefs": {

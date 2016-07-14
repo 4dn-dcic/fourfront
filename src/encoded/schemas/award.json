@@ -27,7 +27,7 @@
             "type": "string",
             "pattern": "^[A-Za-z0-9\\-]+$",
             "uniqueKey": true
-       },
+        },
         "description": {
             "rdfs:subPropertyOf": "dc:description",
             "title": "Description",

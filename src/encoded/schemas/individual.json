@@ -1,0 +1,40 @@
+{
+    "title": "Individual",
+    "description": "DEL REF Base schema for individuals.",
+    "id": "/profiles/individual.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [ "award", "lab", "organism"],
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/accession" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/accessioned_status" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/documents" },
+        { "$ref": "mixins.json#/notes" }
+    ],
+    "properties": {
+        "schema_version": {
+            "hidden comment": "Bump the default in the subclasses."
+        },
+        "accession": {
+            "accessionType": "DO"
+        },
+        "organism": {
+            "title": "Organism",
+            "description": "Organism of the individual.",
+            "comment": "Do not submit, value is assigned by the object.",
+            "type": "string",
+            "linkTo": "Organism"
+        },
+        "url": {
+            "title": "URL",
+            "description": "An external resource with additional information about the individual.",
+            "type": "string",
+            "format": "uri"
+        }
+    }
+}

@@ -20,7 +20,7 @@ def includeme(config):
     unique_key='lab:name',
     properties={
         'title': 'Labs',
-        'description': 'Listing of ENCODE DCC labs',
+        'description': 'Listing of 4D Nucleome labs',
     })
 class Lab(Item):
     item_type = 'lab'
@@ -54,6 +54,46 @@ class Organism(Item):
     item_type = 'organism'
     schema = load_schema('encoded:schemas/organism.json')
     name_key = 'name'
+
+
+@collection(
+    name='publications',
+    unique_key='publication:identifier',
+    properties={
+        'title': 'Publications',
+        'description': 'Publication pages',
+    })
+class Publication(Item):
+    item_type = 'publication'
+    schema = load_schema('encoded:schemas/publication.json')
+    # embedded = ['datasets']
+
+    def unique_keys(self, properties):
+        keys = super(Publication, self).unique_keys(properties)
+        if properties.get('identifiers'):
+            keys.setdefault('alias', []).extend(properties['identifiers'])
+        return keys
+
+    @calculated_property(condition='date_published', schema={
+        "title": "Publication year",
+        "type": "string",
+    })
+    def publication_year(self, date_published):
+        return date_published.partition(' ')[0]
+
+
+@collection(
+    name='documents',
+    properties={
+        'title': 'Documents',
+        'description': 'Listing of Documents',
+    })
+class Document(ItemWithAttachment, Item):
+    item_type = 'document'
+    schema = load_schema('encoded:schemas/document.json')
+    embedded = ['lab', 'award', 'submitted_by']
+
+
 #
 #
 # @collection(
@@ -219,30 +259,6 @@ class Organism(Item):
 #         return paths_filtered_by_status(request, characterizations)
 #
 #
-# @collection(
-#     name='publications',
-#     unique_key='publication:identifier',
-#     properties={
-#         'title': 'Publications',
-#         'description': 'Publication pages',
-#     })
-# class Publication(Item):
-#     item_type = 'publication'
-#     schema = load_schema('encoded:schemas/publication.json')
-#     embedded = ['datasets']
-#
-#     def unique_keys(self, properties):
-#         keys = super(Publication, self).unique_keys(properties)
-#         if properties.get('identifiers'):
-#             keys.setdefault('alias', []).extend(properties['identifiers'])
-#         return keys
-#
-#     @calculated_property(condition='date_published', schema={
-#         "title": "Publication year",
-#         "type": "string",
-#     })
-#     def publication_year(self, date_published):
-#         return date_published.partition(' ')[0]
 #
 #
 # @collection(

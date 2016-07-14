@@ -43,8 +43,8 @@ USER_DELETED = [
     name='users',
     unique_key='user:email',
     properties={
-        'title': 'DCC Users',
-        'description': 'Listing of current ENCODE DCC users',
+        'title': '4D Nucleome Users',
+        'description': 'Listing of current 4D Nucleome DCIC users',
     },
     acl=[])
 class User(Item):
