@@ -94,18 +94,18 @@ class Document(ItemWithAttachment, Item):
     embedded = ['lab', 'award', 'submitted_by']
 
 
-
-@collection(
-    name='vendors',
-    unique_key='vendor:name',
-    properties={
-        'title': 'Vendors',
-        'description': 'Listing of sources and vendors for 4DN material',
-    })
-class Vendor(Item):
-    item_type = 'vendor'
-    schema = load_schema('encoded:schemas/vendor.json')
-    name_key = 'name'
+# removing vendor bit from here and to it's own vendor.py
+# @collection(
+#     name='vendors',
+#     unique_key='vendor:name',
+#     properties={
+#         'title': 'Vendors',
+#         'description': 'Listing of sources and vendors for 4DN material',
+#     })
+# class Vendor(Item):
+#     item_type = 'vendor'
+#     schema = load_schema('encoded:schemas/vendor.json')
+#     name_key = 'name'
 #
 #
 # @collection(
