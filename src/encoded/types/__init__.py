@@ -94,7 +94,6 @@ class Document(ItemWithAttachment, Item):
     embedded = ['lab', 'award', 'submitted_by']
 
 
-
 @collection(
     name='vendors',
     unique_key='vendor:name',
@@ -105,6 +104,18 @@ class Document(ItemWithAttachment, Item):
 class Vendor(Item):
     item_type = 'vendor'
     schema = load_schema('encoded:schemas/vendor.json')
+    name_key = 'name'
+
+@collection(
+    name='enzymes',
+    unique_key='enzyme:name',
+    properties={
+        'title': 'Enzymes',
+        'description': 'Listing of enzymes',
+    })
+class Enzyme(Item):
+    item_type = 'enzyme'
+    schema = load_schema('encoded:schemas/enzyme.json')
     name_key = 'name'
 #
 #

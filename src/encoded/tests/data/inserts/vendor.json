@@ -1,9 +1,20 @@
 [
     {
-        "title": "John Stamatoyannopoulos",
-        "name": "john-stamatoyannopoulos",
-        "description": "Some Dude!",
-        "url": "localhost"
-
+        "title": "Worthington Biochemical",
+        "name": "worthington-biochemical",
+        "description": "",
+        "url": "http://www.worthington-biochem.com"
+    },
+    {
+        "title": "New England Biolabs",
+        "name": "newengland-biolabs",
+        "description": "",
+        "url": "https://www.neb.com"
+    },
+    {
+        "title": "ThermoFisher Scientific",
+        "name": "thermo-fisher",
+        "description": "previously also Fermentas",
+        "url": "https://www.thermofisher.com/us/en/home/brands/thermo-scientific.html#/legacy=www.fermentas.com"
     }
 ]

@@ -1,0 +1,36 @@
+[
+    {
+        "name": "HindIII",
+        "enzyme_source": "newengland-biolabs",
+        "description": "from Liberman et al 2009 Science",
+        "catalog_number":"R0104",
+        "recognition_sequence": "AAGCTT",
+        "site_length": 6,
+        "cut_position": 1,
+        "url": "https://www.neb.com/products/r0104-hindiii"
+    },
+    {
+        "name": "DNase_I",
+        "enzyme_source": "thermo-fisher",
+        "description": "from Ma et al 2015 Nature Methods",
+        "catalog_number":"EN052",
+        "url": "https://www.thermofisher.com/order/catalog/product/EN0525"
+    },
+    {
+        "name": "MboI",
+        "enzyme_source": "newengland-biolabs",
+        "description": "from Rao et al 2014 Cell",
+        "catalog_number":"R0147",
+        "recognition_sequence": "GATC",
+        "site_length": 4,
+        "cut_position": 0,
+        "url": "https://www.neb.com/products/r0147-mboi"
+    },
+    {
+        "name": "Micrococcal_nuclease",
+        "enzyme_source": "worthington-biochemical",
+        "description": "from Liu et al 2005 Plos Biology",
+        "catalog_number":"LS004798",
+        "url": "http://www.worthington-biochem.com/nfcp/default.html"
+    }
+]
