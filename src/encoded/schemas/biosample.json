@@ -43,32 +43,12 @@
             "type": "string",
             "linkTo": "Individual"
         },
-        "constructs": {
-            "title": "DNA constructs",
-            "description": "Expression or targeting vectors stably or transiently transfected (not RNAi or TALEN).",
-            "type": "array",
-            "default": [],
-            "uniqueItems": true,
-            "items": {
-                "title": "DNA Constructs",
-                "description": "An expression or targeting vector stably or transiently transfected (not RNAi).",
-                "comment": "See contstruct.json for available identifiers.",
-                "type":  "string",
-                "linkTo": "Construct"
-            }
-        },
-
-        "treatments": {
-            "title": "Treatments",
-            "type": "array",
-            "default": [],
-            "uniqueItems": true,
-            "items": {
-                "title": "Treatment",
-                "comment": "See treatment.json for available identifiers.",
-                "type": "string",
-                "linkTo": "Treatment"
-            }
+        "biosource": {
+          "title": "Biosource",
+          "description": "The cell line or tissue type used in the experiment",
+          "comment": "See biosource.json for available identifiers?",
+          "type": "string",
+          "linkTo": "Biosource"
         },
         "protocol_documents": {
             "title": "Protocol documents",
@@ -82,6 +62,52 @@
                 "comment": "See document.json for available identifiers.",
                 "type": "string",
                 "linkTo": "Document"
+            }
+        },
+        "biosample_protocol_variables": {
+            "title": "Biosample Protocol Variables",
+            "description": "Information about variables in biosample preparation protocols.",
+            "type": "array",
+            "items": {
+                "title": "Protocol Variables",
+                "description": "Specific variable information for protocols",
+                "type": "string",
+                "comment": "Link To biosample_protocol_variables"
+            }
+        },
+        "modifications": {
+            "title": "Stable genomic modifications",
+            "description": "Expression or targeting vectors stably transfected to generate Crispr'ed or other genomic modification",
+            "type": "array",
+            "default": [],
+            "uniqueItems": true,
+            "items": {
+                "title": "Modifications",
+                "description": "A single genomic modification of the biosample.",
+                "type":  "string",
+                "comment": "Link To modification"
+            }
+        },
+        "treatments": {
+            "title": "Treatments",
+            "type": "array",
+            "default": [],
+            "uniqueItems": true,
+            "items": {
+                "title": "Treatment",
+                "type": "string",
+                "comment": "Link To Treatment - that will link to specific types of treatments eg. drug or rnai"
+            }
+        },
+        "related_biosamples": {
+            "title": "Related Biosamples",
+            "description": "Related biosample and how they are related to this biosample.",
+            "type": "array",
+            "items": {
+                "title": "Related biosample",
+                "description": "An biosample that is related to this biosample with a specified type of relationship.",
+                "type": "string",
+                "linkTo": "BiosampleRelation"
             }
         },
         "status": {

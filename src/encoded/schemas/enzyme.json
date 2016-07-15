@@ -46,12 +46,12 @@
             "permission": "import-items",
             "type": "string",
             "comment": "LinkTo Vendor",
-            "LinkTo": "Vendor"
+            "linkTo": "Vendor"
         },
         "catalog_number": {
             "title": "Product Catalog Number",
             "description": "A plain text for catalog description.",
-            "type": "string",
+            "type": "string"
         },
         "recognition_sequence": {
             "title": "Cut Sequence",

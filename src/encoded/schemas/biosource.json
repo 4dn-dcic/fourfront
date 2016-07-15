@@ -49,14 +49,13 @@
               "title": "Tissue name",
               "description": "Anatomy (UBERON) Ontology term for the tissue used.",
               "type":  "string",
-              "comment": "enforce UBERON ontology term for a tissue type?"            
+              "comment": "enforce UBERON ontology term for a tissue type?"
           },
           "biosource_vendor": {
                 "title": "Biosource Vendor",
                 "description": "The Lab or Vendor that provided the biosource.",
                 "type": "string",
                 "linkTo": "Vendor"
-            },
           },
           "url": {
               "title": "URL",
