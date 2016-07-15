@@ -13,7 +13,7 @@
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/references" },
-        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/notes" }
     ],
     "properties": {
         "schema_version": {
@@ -23,7 +23,7 @@
             "title": "Description",
             "description": "A plain text description of the biosource.",
             "type": "string",
-            "default": "",
+            "default": ""
         },
         "biosource_type": {
             "title": "Biosource type",

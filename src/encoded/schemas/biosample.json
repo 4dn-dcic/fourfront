@@ -16,10 +16,8 @@
         { "$ref": "mixins.json#/accessioned_status" },
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/references" },
-        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/notes" }
     ],
-    "dependencies": {
-    },
     "properties": {
         "schema_version": {
             "default": "1"
@@ -28,7 +26,7 @@
             "title": "Description",
             "description": "A plain text description of the biosample. Do not include experiment details, constructs or treatments.",
             "type": "string",
-            "default": "",
+            "default": ""
         },
         "organism": {
             "title": "Organism",
