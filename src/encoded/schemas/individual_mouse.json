@@ -1,7 +1,7 @@
 {
-    "title": "Human Individual",
-    "description": "DEL REF Schema for submitting a human individual.",
-    "id": "/profiles/individual_human.json",
+    "title": "Mouse Individual",
+    "description": "DEL REF Schema for submitting a mouse individual.",
+    "id": "/profiles/individual_mouse.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": [ "award", "lab"],
@@ -20,33 +20,31 @@
         { "$ref": "mixins.json#/notes" }
     ],
     "dependencies": {
-      "age": ["age_units"]
+      "age": [ "age_units"]
     },
     "properties": {
-        "ethnicity": {
-            "title": "Ethnicity",
-            "type": "string"
-        },
-        "health_status": {
-            "title": "Individual health status",
-            "type": "string"
-        },
-        "life_stage": {
+        "mouse_life_stage": {
             "title": "Life stage",
             "type": "string",
             "enum": [
-                "fetal",
-                "newborn",
-                "child",
-                "adult",
-                "unknown",
-                "embryonic",
-                "postnatal"
+              "pup",
+              "fetus",
+              "adult"
             ]
         },
         "organism": {
-            "default": "7745b647-ff15-4ff3-9ced-b897d4e2983c",
-            "linkEnum": ["7745b647-ff15-4ff3-9ced-b897d4e2983c"]
+            "default": "3413218c-3d86-498b-a0a2-9a406638e786",
+            "linkEnum": ["3413218c-3d86-498b-a0a2-9a406638e786"]
+        },
+        "mouse_strain":{
+          "title": "Mouse Strain",
+          "type": "string",
+          "description": "Can be an object of straing with dbxref for strain"
+        },
+        "mouse_vendor":{
+          "title": "Vendor for the mouse individual",
+          "type": "string",
+          "linkTo": "Vendor"
         },
         "dbxrefs": {
             "@type": "@id",
@@ -60,7 +58,7 @@
                 "title": "External identifier",
                 "description": "A unique identifier from external resource.",
                 "type":  "string",
-                "pattern": "^((PGP:hu[\\S\\s\\d]+)|(GTEx:[a-zA-Z0-9\\-_]+)|(GEO:SAMN\\d+))$"
+                "pattern": "^(GEO:SAMN\\d+)$"
             }
         }
     }

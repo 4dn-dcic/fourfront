@@ -43,10 +43,8 @@
         "enzyme_source": {
             "title": "Enzyme Source",
             "description": "The Lab or Vendor that provided the enzyme.",
-            "permission": "import-items",
             "type": "string",
-            "comment": "LinkTo Vendor",
-            "linkTo": "Vendor"
+            "LinkTo": "Vendor"
         },
         "catalog_number": {
             "title": "Product Catalog Number",

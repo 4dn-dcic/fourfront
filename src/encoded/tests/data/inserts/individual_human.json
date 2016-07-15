@@ -1,7 +1,7 @@
 [
     {
-        "accession": "ENCDO000AAK",
-        "age": "53",
+        "accession": "ENCDO000AAQ",
+        "age": 53,
         "age_units": "year",
         "aliases": [
             "encode:donor_of_GM12878",

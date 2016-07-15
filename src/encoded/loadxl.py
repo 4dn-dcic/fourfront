@@ -36,6 +36,7 @@ ORDER = [
     # 'worm_donor',
     # 'human_donor',
     'individual_human',
+    'individual_mouse',
     'enzyme'
     # 'donor_characterization',
     # 'biosample',
@@ -332,6 +333,7 @@ def request_url(item_type, method):
             yield row
 
     return component
+
 
 def make_request(testapp, item_type, method):
     json_method = getattr(testapp, method.lower() + '_json')

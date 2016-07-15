@@ -16,10 +16,10 @@
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/notes" }
     ],
+    "dependencies": {
+      "age": [ "age_units"]
+    },
     "properties": {
-        "schema_version": {
-            "hidden comment": "Bump the default in the subclasses."
-        },
         "accession": {
             "accessionType": "DO"
         },
@@ -29,6 +29,32 @@
             "comment": "Do not submit, value is assigned by the object.",
             "type": "string",
             "linkTo": "Organism"
+        },
+        "age": {
+            "title": "Donor age",
+            "description": " The age or age range of the donor when biological material was sampled.",
+            "type": "number"
+        },
+        "age_units": {
+            "title": "Donor age units",
+            "type": "string",
+            "enum": [
+                "day",
+                "week",
+                "month",
+                "year"
+            ]
+        },
+        "sex": {
+            "title": "Sex",
+            "type": "string",
+            "default": "unknown",
+            "enum": [
+                "male",
+                "female",
+                "unknown",
+                "mixed"
+            ]
         },
         "url": {
             "title": "URL",

@@ -22,6 +22,8 @@ from .base import (
 class Individual(Item):
     base_types = ['Individual'] + Item.base_types
     embedded = ['organism']
+    name_key = 'accession'
+
     #     'characterizations',
     #     'characterizations.award',
     #     'characterizations.lab',
@@ -31,9 +33,6 @@ class Individual(Item):
     #     'documents.lab',
     #     'documents.submitted_by'
     # ]
-
-    name_key = 'accession'
-
     # rev = {
     #     'characterizations': ('DonorCharacterization', 'characterizes'),
     # }
@@ -61,7 +60,19 @@ class IndividualHuman(Individual):
     item_type = 'individual_human'
     schema = load_schema('encoded:schemas/individual_human.json')
     embedded = Individual.embedded
-    #  + ['references']
+
+
+@collection(
+    name='individuals-mouse',
+    unique_key='accession',
+    properties={
+        'title': 'Individuals-Mice',
+        'description': 'Listing Biosample Mouse Individuals',
+    })
+class IndividualMouse(Individual):
+    item_type = 'individual_mouse'
+    schema = load_schema('encoded:schemas/individual_mouse.json')
+    embedded = Individual.embedded + ['mouse_vendor']
 
 # @collection(
 #     name='mouse-donors',
