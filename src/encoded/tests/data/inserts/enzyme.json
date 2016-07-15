@@ -1,7 +1,7 @@
 [
     {
         "name": "HindIII",
-        "enzyme_source": "newengland-biolabs",
+        "enzyme_source": "new-england-biolabs",
         "description": "from Liberman et al 2009 Science",
         "catalog_number":"R0104",
         "recognition_sequence": "AAGCTT",
@@ -11,14 +11,14 @@
     },
     {
         "name": "DNase_I",
-        "enzyme_source": "thermo-fisher",
+        "enzyme_source": "thermo-fisher-scientific",
         "description": "from Ma et al 2015 Nature Methods",
         "catalog_number":"EN052",
         "url": "https://www.thermofisher.com/order/catalog/product/EN0525"
     },
     {
         "name": "MboI",
-        "enzyme_source": "newengland-biolabs",
+        "enzyme_source": "new-england-biolabs",
         "description": "from Rao et al 2014 Cell",
         "catalog_number":"R0147",
         "recognition_sequence": "GATC",
