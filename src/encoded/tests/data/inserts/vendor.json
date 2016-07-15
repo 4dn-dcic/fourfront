@@ -7,13 +7,13 @@
     },
     {
         "title": "New England Biolabs",
-        "name": "newengland-biolabs",
+        "name": "new-england-biolabs",
         "description": "",
         "url": "https://www.neb.com"
     },
     {
         "title": "ThermoFisher Scientific",
-        "name": "thermo-fisher",
+        "name": "thermofisher-scientific",
         "description": "previously also Fermentas",
         "url": "https://www.thermofisher.com/us/en/home/brands/thermo-scientific.html#/legacy=www.fermentas.com"
     }

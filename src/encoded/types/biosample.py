@@ -23,6 +23,7 @@ from .base import (
 class Biosample(Item): #, CalculatedBiosampleSlims, CalculatedBiosampleSynonyms):
     item_type = 'biosample'
     schema = load_schema('encoded:schemas/biosample.json')
+    name_key = 'accession'
 #     name_key = 'accession'
 # #    rev = {
 # #        'characterizations': ('BiosampleCharacterization', 'characterizes'),
