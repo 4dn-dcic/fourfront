@@ -1,5 +1,7 @@
 'use strict';
 var React = require('react');
+var Modal = require('react-bootstrap/lib/Modal');
+var OverlayMixin = require('react-bootstrap/lib/OverlayMixin');
 
 var LoginFields = React.createClass({
 
@@ -24,8 +26,8 @@ var LoginFields = React.createClass({
 	},
 	render: function() {
 		var clr = {'color':'black'};
-		return ( 
-				
+		return (
+
 				<div>
 				<label>Username:</label>
 				<input type="text" class="form-control" style={clr}
@@ -42,7 +44,7 @@ var LoginFields = React.createClass({
 				</div>
 		);
 	},
-})		
+})
 
 
 var LoginForm = React.createClass({
@@ -68,7 +70,7 @@ var LoginForm = React.createClass({
       })
       .then(session_properties => {
           console.log("got session props as", session_properties);
-          this.context.session['auth.userid'] = data.username; 
+          this.context.session['auth.userid'] = data.username;
           var next_url = window.location.href;
           if (window.location.hash == '#logged-out') {
               next_url = window.location.pathname + window.location.search;
@@ -97,13 +99,14 @@ var Footer = React.createClass({
     },
 
 		//login form
-		
+
 
     render: function() {
         var session = this.context.session;
         var disabled = !session;
         var userActionRender;
 
+		//userActionRender removed below
         if (!(session && session['auth.userid'])) {
 
             //userActionRender = <a href="#" data-trigger="login" disabled={disabled}>Submitter sign-in</a>;
@@ -123,18 +126,18 @@ var Footer = React.createClass({
                         <div className="row">
                             <div className="col-sm-6 col-sm-push-6">
                                 <ul className="footer-links">
+									<li><LoginBoxes/></li>
                                     <li><a href="mailto:encode-help@lists.stanford.edu">Contact</a></li>
                                     <li><a href="http://www.stanford.edu/site/terms.html">Terms of Use</a></li>
-                                    <li id="user-actions-footer">{userActionRender}</li>
+                                    {/*<li id="user-actions-footer">{userActionRender}</li>*/}
                                 </ul>
-                                <p className="copy-notice">&copy;{new Date().getFullYear()} Stanford University.</p>
+                                <p className="copy-notice">&copy;{new Date().getFullYear()} Harvard University.</p>
                             </div>
 
                             <div className="col-sm-6 col-sm-pull-6">
                                 <ul className="footer-logos">
-                                    <li><a href="/"><img src="/static/img/encode-logo-small-2x.png" alt="ENCODE" id="encode-logo" height="45px" width="78px" /></a></li>
-                                    <li><a href="http://www.ucsc.edu"><img src="/static/img/ucsc-logo-white-alt-2x.png" alt="UC Santa Cruz" id="ucsc-logo" width="107px" height="42px" /></a></li>
-                                    <li><a href="http://www.stanford.edu"><img src="/static/img/su-logo-white-2x.png" alt="Stanford University" id="su-logo" width="105px" height="49px" /></a></li>
+									<li><a href="https://commonfund.nih.gov/4dnucleome/index"><img src="/static/img/4DN-logo.png" alt="4DN" id="encode-logo" height="60px" width="106px" /></a></li>
+									<li><a href="http://hms.harvard.edu"><img src="/static/img/Harvard-logo.png" alt="Harvard" id="ucsc-logo" width="160px" height="40px" /></a></li>
                                 </ul>
                             </div>
                         </div>
@@ -143,6 +146,93 @@ var Footer = React.createClass({
             </footer>
         );
     }
+});
+
+// Carl's login box
+
+var LoginBoxes = React.createClass({
+  mixins: [OverlayMixin],
+  getInitialState: function() {
+  	return {username: '', password: '', isOpen: false};
+  },
+  usernameFill: function(v) {
+  	this.setState({username: v});
+  },
+  passwordFill: function(v) {
+  	this.setState({password: v});
+  },
+  handleToggle: function () {
+	  this.setState({
+		  isOpen: !this.state.isOpen
+	  });
+  },
+  handleSubmit: function(e){
+    e.preventDefault();
+    var username = this.state.username.trim();
+	var password = this.state.password.trim();
+  	if (username === '' || password === '') {
+    	return;
+    }
+    // do something
+    this.setState({username: '', password: ''});
+    console.log('EXIT THE PAGE NOW');
+  },
+  render: function () {
+	return (
+	  <div>
+		  <a className="btn btn-info btn-sm" onClick={this.handleToggle}>Log in</a>
+	 </div>
+ );
+ },
+
+	 renderOverlay: function () {
+         if (!this.state.isOpen) {
+             return <span/>;
+         }
+         return (
+	  <Modal onRequestHide={this.handleToggle} dialogClassName="login-modal">
+        <div className="login-box">
+        	<h1 className="title">Your Account</h1>
+      		<label className="fill-label">Username:</label>
+        	<TextBox default="Username" fill={this.usernameFill} tType="text"/>
+        	<label className="fill-label">Password:</label>
+        	<TextBox default="Password" fill={this.passwordFill} tType="password"/>
+        	<ul className="links">
+            	<li><button id="loginbtn" className="sexy-btn"
+	                onClick={this.handleSubmit}><span>Sign in</span></button></li>
+				<li><form action='http://google.com'><button id="regbtn" className="sexy-btn">
+					<span>Register</span></button></form></li>
+				<li><form action='http://google.com'><button id="passbtn" className="sexy-btn">
+					<span>Change password</span></button></form></li>
+				{/*<li><a href="https://www.google.com/">Register</a></li>
+	            <li><a href="https://www.google.com/">New password</a></li>*/}
+	            <li><button id="closebtn" className="sexy-btn"
+	                onClick={this.handleToggle}><span>Close</span></button></li>
+        	</ul>
+      	</div>
+  	   </Modal>
+    );
+  },
+});
+
+var TextBox = React.createClass({
+  getInitialState: function() {
+  	return({data: ''});
+  },
+  handleFill: function(e) {
+
+  	this.setState({data: e.target.value});
+    this.props.fill(e.target.value);
+  },
+  render: function() {
+  	return(
+    	<div>
+    		<input type={this.props.tType} className="text-box"
+    		placeholder={this.props.default} onChange={this.handleFill}
+    		value={this.state.data} />
+    	</div>
+  	);
+  },
 });
 
 module.exports = Footer;
