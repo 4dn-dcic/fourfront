@@ -1,24 +1,19 @@
 [
   {
-    "protocol": "/documents/dcf15d5e-40aa-43bc-b81c-32c70c9afb01/",
     "fragmentation_method": "chemical",
     "experiment_type": "dilution Hi-C",
     "enzyme_lot_number": "123456",
-    "documents": ["/documents/dcf15d5e-40aa-43bc-b81c-32c70c9afb01/"],
     "average_fragment_size": 100,
     "digestion_time": 30,
     "ligation_time": 30,
-    "digestion_enzyme": "/enzymes/Micrococcal_nuclease/",
+    "digestion_enzyme": "Micrococcal_nuclease",
     "digestion_temperature": 37,
     "tagging_method": "Biotinylated ATP",
-    "submitted_by": "/users/986b362f-4eb6-4a9c-8173-3ab267307e3b/",
     "crosslinking_time": 30,
-    "references": ["/publications/52e85c70-fe2d-11e3-9191-0800200c9a66/"],
     "internal_status": "release ready",
     "instrument": "Illumina HiSeq",
     "notes": "sample dcic notes",
-    "lab": "/labs/ali-mortazavi/",
-    "protocol_variation": "/documents/dcf15d5e-40aa-43bc-b81c-32c70c9afb01/",
+    "lab": "ali-mortazavi",
     "aliases": ["labsample:alias"],
     "files": [],
     "read_length": 100,
@@ -26,8 +21,9 @@
     "ligation_temperature": 37,
     "pairing": "single end",
     "crosslinking_temperature": 37,
-    "award": "/awards/U41HG007355/",
+    "award": "U41HG007355",
     "dbxrefs": ["sample ext id"],
-    "crosslinking_method": "formaldehyde"
+    "crosslinking_method": "formaldehyde",
+    "uuid": "75041e2f-3e43-4388-8bbb-e861f209c4fa"
   }
-]  
+]
