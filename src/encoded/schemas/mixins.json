@@ -193,7 +193,7 @@
     },
     "attachment": {
         "attachment": {
-            "title": "Document file metadata",
+            "title": "Attached Document",
             "type": "object",
             "additionalProperties": false,
             "formInput": "file",
@@ -240,6 +240,21 @@
                     "title": "Image height",
                     "type": "integer"
                 }
+            }
+        }
+    },
+    "attachments": {
+        "attachments": {
+            "title": "Attached Documents",
+            "type": "array",
+            "additionalProperties": false,
+            "uniqueItems": true,
+            "items": {
+                "title": "Attached Document",
+                "description": "A document to upload.",
+                "type":  { "$ref": "#/attachment" },
+                "formInput": "file",
+                "attachment": true
             }
         }
     },

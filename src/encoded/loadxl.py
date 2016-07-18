@@ -37,6 +37,7 @@ ORDER = [
     # 'human_donor',
     'individual_human',
     'individual_mouse',
+    'biosource'
     'enzyme',
     # 'donor_characterization',
     # 'biosample',
