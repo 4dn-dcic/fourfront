@@ -38,5 +38,6 @@ class ExperimentHiC(Experimend):
     item_type = 'experiment_hic'
     schema = load_schema('encoded:schemas/experiment_hic.json')
     embedded = Experimend.embedded + [
+     "digestion_enzyme",
      "digestion_enzyme.enzyme_source"
      ]
