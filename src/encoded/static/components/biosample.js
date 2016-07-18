@@ -264,7 +264,7 @@ var Biosample = module.exports.Biosample = React.createClass({
                                         </div>
                                     : null}
 
-                                    {context.description ? 
+                                    {context.description ?
                                         <div data-test="description">
                                             <dt>Description</dt>
                                             <dd className="sentence-case">{context.description}</dd>

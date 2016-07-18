@@ -6,14 +6,14 @@ var globals = require('./globals');
 var audit = require('./audit');
 var form = require('./form');
 var _ = require('underscore');
-
 var cx = require('react/lib/cx');
+var panel = require('../libs/bootstrap/panel');
 var AuditIndicators = audit.AuditIndicators;
 var AuditDetail = audit.AuditDetail;
 var AuditMixin = audit.AuditMixin;
 var JSONSchemaForm = form.JSONSchemaForm;
 var Table = collection.Table;
-
+var {Panel, PanelBody, PanelHeading} = panel;
 
 var Fallback = module.exports.Fallback = React.createClass({
     contextTypes: {
@@ -49,7 +49,7 @@ var Item = module.exports.Item = React.createClass({
         var context = this.props.context;
         var itemClass = globals.itemClass(context, 'view-item');
         var title = globals.listing_titles.lookup(context)({context: context});
-        var Panel = globals.panel_views.lookup(context);
+        var IPanel = globals.panel_views.lookup(context);
 
         // Make string of alternate accessions
         var altacc = context.alternate_accessions ? context.alternate_accessions.join(', ') : undefined;
@@ -67,10 +67,7 @@ var Item = module.exports.Item = React.createClass({
                 </header>
                 <AuditDetail context={context} key="biosample-audit" />
                 <div className="row item-row">
-                    <div className="col-sm-12">
-                        {context.description ? <p className="description">{context.description}</p> : null}
-                    </div>
-                    <Panel {...this.props} />
+                    <IPanel {...this.props} />
                 </div>
             </div>
         );
@@ -86,26 +83,71 @@ globals.content_views.fallback = function () {
 };
 
 
-var Panel = module.exports.Panel = React.createClass({
+var IPanel = module.exports.IPanel = React.createClass({
     render: function() {
         var context = this.props.context;
         var itemClass = globals.itemClass(context, 'view-detail panel');
+        var title = globals.listing_titles.lookup(context)({context: context});
+        // OLD TECHNIQUE: stringify
+        // return (
+        //     <section className="col-sm-12">
+        //         <div className={itemClass}>
+        //             <pre>{JSON.stringify(context, null, 4)}</pre>
+        //         </div>
+        //     </section>
+        // );
+        // NEW TECHNIQUE: RETURN A FORMATTED PANNEL
         return (
-            <section className="col-sm-12">
-                <div className={itemClass}>
-                    <pre>{JSON.stringify(context, null, 4)}</pre>
-                </div>
-            </section>
+            <div className={itemClass}>
+            <Panel addClasses="data-display">
+                <PanelBody addClasses="panel-body-with-header">
+                    <div className="flexrow">
+                        <div className="flexcol-sm-6">
+                            <div className="flexcol-heading experiment-heading"><h4>{title}</h4></div>
+
+                            <dl className="key-value">
+                                {Object.keys(context).map(function(key, val){
+                                    return (
+                                      <div data-test="term-name">
+                                        <dt>{key}</dt>
+                                        <dd>{formString(context[key])}</dd>
+                                      </div>
+                                    );
+                                })}
+                            </dl>
+
+                        </div>
+                    </div>
+
+                </PanelBody>
+            </Panel>
+            </div>
         );
     }
 });
 
-globals.panel_views.register(Panel, 'Item');
+// <Panel addClasses="data-display">
+//     <PanelBody addClasses="panel-body-with-header">
+//         <div className="flexrow">
+//             <div className="flexcol-sm-6">
+//                 <div className="flexcol-heading experiment-heading"><h4>Summary</h4></div>
+//                 <dl className="key-value">
+//                     <div data-test="term-name">
+//                         <dt>Term name</dt>
+//                         <dd>{context.biosample_term_name}</dd>
+//                     </div>
+//
+//
+//     </PanelBody>
+// </Panel>
+
+
+globals.panel_views.register(IPanel, 'Item');
 
 
 // Also use this view as a fallback for anything we haven't registered
 globals.panel_views.fallback = function () {
-    return Panel;
+    return IPanel;
 };
 
 
@@ -214,3 +256,11 @@ var RelatedItems = module.exports.RelatedItems = React.createClass({
         );
     },
 });
+
+var formString = function (item) {
+    if(item.constructor === Array) {
+        return item.join(", ");
+    }else{
+        return item;
+    }
+};
