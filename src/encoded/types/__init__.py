@@ -125,205 +125,24 @@ class Biosource(Item):
 class BiosampleRelation(Item):
     item_type = 'biosample_relation'
     schema = load_schema('encoded:schemas/biosample_relation.json')
-#
-#
-# @collection(
-#     name='treatments',
-#     properties={
-#         'title': 'Treatments',
-#         'description': 'Listing Biosample Treatments',
-#     })
-# class Treatment(Item):
-#     item_type = 'treatment'
-#     schema = load_schema('encoded:schemas/treatment.json')
-#     # XXX 'treatment_name' as key?
-#
-#
-# @collection(
-#     name='constructs',
-#     properties={
-#         'title': 'Constructs',
-#         'description': 'Listing of Biosample Constructs',
-#     })
-# class Construct(Item):
-#     item_type = 'construct'
-#     schema = load_schema('encoded:schemas/construct.json')
-#     # XXX 'vector_name' as key?
-#     rev = {
-#         'characterizations': ('ConstructCharacterization', 'characterizes'),
-#     }
-#     embedded = ['target']
-#
-#     @calculated_property(schema={
-#         "title": "Characterizations",
-#         "type": "array",
-#         "items": {
-#             "type": "string",
-#             "linkTo": "ConstructCharacterization",
-#         },
-#     })
-#     def characterizations(self, request, characterizations):
-#         return paths_filtered_by_status(request, characterizations)
-#
-#
-# @collection(
-#     name='talens',
-#     unique_key='talen:name',
-#     properties={
-#         'title': 'TALENs',
-#         'description': 'Listing of TALEN Constructs',
-#     })
-# class TALEN(Item):
-#     item_type = 'talen'
-#     schema = load_schema('encoded:schemas/talen.json')
-#     name_key = 'name'
-#     rev = {
-#         'characterizations': ('ConstructCharacterization', 'characterizes'),
-#     }
-#     embedded = [
-#         'lab',
-#         'submitted_by',
-#         'documents',
-#         'documents.award',
-#         'documents.lab',
-#         'documents.submitted_by'
-#     ]
-#
-#     @calculated_property(schema={
-#         "title": "Characterizations",
-#         "type": "array",
-#         "items": {
-#             "type": "string",
-#             "linkTo": "ConstructCharacterization",
-#         },
-#     })
-#     def characterizations(self, request, characterizations):
-#         return paths_filtered_by_status(request, characterizations)
-#
-#
-# @collection(
-#     name='documents',
-#     properties={
-#         'title': 'Documents',
-#         'description': 'Listing of Biosample Documents',
-#     })
-# class Document(ItemWithAttachment, Item):
-#     item_type = 'document'
-#     schema = load_schema('encoded:schemas/document.json')
-#     embedded = ['lab', 'award', 'submitted_by']
-#
-#
-# @collection(
-#     name='platforms',
-#     unique_key='platform:term_id',
-#     properties={
-#         'title': 'Platforms',
-#         'description': 'Listing of Platforms',
-#     })
-# class Platform(Item):
-#     item_type = 'platform'
-#     schema = load_schema('encoded:schemas/platform.json')
-#     name_key = 'term_id'
-#
-#     @calculated_property(schema={
-#         "title": "Title",
-#         "type": "string",
-#     })
-#     def title(self, term_name):
-#         return term_name
-#
-#
-# @collection(
-#     name='libraries',
-#     unique_key='accession',
-#     properties={
-#         'title': 'Libraries',
-#         'description': 'Listing of Libraries',
-#     })
-# class Library(Item):
-#     item_type = 'library'
-#     schema = load_schema('encoded:schemas/library.json')
-#     name_key = 'accession'
-#     embedded = [
-#         'biosample',
-#         'biosample.donor',
-#         'biosample.donor.organism',
-#     ]
-#
-#
-# @collection(
-#     name='rnais',
-#     properties={
-#         'title': 'RNAi',
-#         'description': 'Listing of RNAi',
-#     })
-# class RNAi(Item):
-#     item_type = 'rnai'
-#     schema = load_schema('encoded:schemas/rnai.json')
-#     embedded = ['source', 'documents', 'target']
-#     rev = {
-#         'characterizations': ('RNAiCharacterization', 'characterizes'),
-#     }
-#
-#     @calculated_property(schema={
-#         "title": "Characterizations",
-#         "type": "array",
-#         "items": {
-#             "type": "string",
-#             "linkTo": "RNAiCharacterization",
-#         },
-#     })
-#     def characterizations(self, request, characterizations):
-#         return paths_filtered_by_status(request, characterizations)
-#
-#
-#
-#
-# @collection(
-#     name='software',
-#     unique_key='software:name',
-#     properties={
-#         'title': 'Software',
-#         'description': 'Software pages',
-#     })
-# class Software(Item):
-#     item_type = 'software'
-#     schema = load_schema('encoded:schemas/software.json')
-#     name_key = 'name'
-#     embedded = [
-#         'references',
-#         'versions'
-#     ]
-#     rev = {
-#         'versions': ('SoftwareVersion', 'software')
-#     }
-#
-#     @calculated_property(schema={
-#         "title": "Versions",
-#         "type": "array",
-#         "items": {
-#             "type": "string",
-#             "linkTo": "SoftwareVersion",
-#         },
-#     })
-#     def versions(self, request, versions):
-#         return paths_filtered_by_status(request, versions)
-#
-#
-# @collection(
-#     name='software-versions',
-#     properties={
-#         'title': 'Software version',
-#         'description': 'Software version pages',
-#     })
-# class SoftwareVersion(Item):
-#     item_type = 'software_version'
-#     schema = load_schema('encoded:schemas/software_version.json')
-#     embedded = ['software', 'software.references']
-#
-#     def __ac_local_roles__(self):
-#         # Use lab/award from parent software object for access control.
-#         properties = self.upgrade_properties()
-#         root = find_root(self)
-#         software = root.get_by_uuid(properties['software'])
-#         return software.__ac_local_roles__()
+
+@collection(
+    name='constructs',
+    properties={
+        'title': 'Constructs',
+        'description': 'Listing of Constructs',
+    })
+class Construct(Item):
+    item_type = 'construct'
+    schema = load_schema('encoded:schemas/construct.json')
+
+@collection(
+    name='modifications',
+    properties={
+        'title': 'Modifications',
+        'description': 'Listing of Stable Genomic Modifications',
+    })
+class Modification(Item):
+    item_type = 'modification'
+    schema = load_schema('encoded:schemas/modification.json')
+#    embedded = ['construct'] 

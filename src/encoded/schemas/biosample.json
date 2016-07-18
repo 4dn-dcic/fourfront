@@ -51,29 +51,16 @@
           "type": "string",
           "linkTo": "Biosource"
         },
-        "protocol_documents": {
-            "title": "Protocol documents",
-            "description": "Documents that describe the biosample preparation.",
-            "type": "array",
-            "default": [],
-            "uniqueItems": true,
-            "items": {
-                "title": "Protocol document",
-                "description": "A document that describes the biosample preparation.",
-                "comment": "See document.json for available identifiers.",
-                "type": "string",
-                "linkTo": "Document"
-            }
-        },
-        "biosample_protocol_variables": {
-            "title": "Biosample Protocol Variables",
-            "description": "Information about variables in biosample preparation protocols.",
+        "biosample_protocols": {
+            "title": "Biosample Protocols",
+            "description": "Information about biosample preparation protocols.",
             "type": "array",
             "items": {
-                "title": "Protocol Variables",
-                "description": "Specific variable information for protocols",
+                "title": "Protocols",
+                "description": "Specific information for specific types of protocols",
                 "type": "string",
-                "comment": "Link To biosample_protocol_variables"
+                "comment": "eg. can have cell culture protocol info",
+                "linkTo": "Protocol"
             }
         },
         "modifications": {
@@ -86,7 +73,7 @@
                 "title": "Modifications",
                 "description": "A single genomic modification of the biosample.",
                 "type":  "string",
-                "comment": "Link To modification"
+                "linkTo": "Modification"
             }
         },
         "treatments": {
@@ -97,7 +84,7 @@
             "items": {
                 "title": "Treatment",
                 "type": "string",
-                "comment": "Link To Treatment - that will link to specific types of treatments eg. drug or rnai"
+                "linkTo": "Treatment"
             }
         },
         "related_biosamples": {

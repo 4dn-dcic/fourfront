@@ -1,0 +1,66 @@
+{
+    "title": "RNAi Treatment",
+    "description": "Schema for submitting a RNAi treatment.",
+    "id": "/profiles/treatment_rnai.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["rnai_type"],
+    "identifyingProperties": ["uuid","aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/references" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/documents" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "rnai_type": {
+            "title": "Type of RNAi",
+            "type": "string",
+            "enum": [
+                "shRNA",
+                "siRNA"
+            ]
+        },
+        "target": {
+            "title": "Target",
+            "description": "The targeted gene or genomic region that is targeted by the modification.",
+            "type": "string"
+        },
+        "target_sequence": {
+            "title": "Target Sequence",
+            "description": "The nucleotide sequence of the target region.",
+            "type": "string",
+            "pattern": "^[ATGCN]+$"
+        },
+        "rnai_vendor": {
+              "title": "Source of RNAi",
+              "description": "RNAi center that provided the RNAi.",
+              "type": "string",
+              "linkTo": "Vendor"
+        },
+        "rnai_constructs": {
+            "title": "Constructs",
+            "description": "Recombinant constructs used for RNAi",
+            "type":  "array",
+            "items": {
+                "title": "Constructs",
+                "description": "A recombinant construct.",
+                "type": "string",
+                "comment": "linkTo Construct"
+            }
+        },
+        "url": {
+            "title": "URL",
+            "description": "An external resource with additional information about the construct.",
+            "type": "string",
+            "format": "uri"
+        }
+    }
+}

@@ -1,0 +1,69 @@
+{
+    "title": "Chemical Treatment",
+    "description": "Schema for submitting a chemical or drug treatment.",
+    "id": "/profiles/treatment_chemical.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["chemical"],
+    "identifyingProperties": ["uuid","aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/references" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/documents" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "chemical": {
+            "title": "Drug or Chemical",
+            "type": "string",
+            "comment": "restricted to chEBI terms - validate against IDs?"
+        },
+        "concentration": {
+            "title": "Concentration",
+            "type": "number"
+        },
+        "concentration_units": {
+            "title": "Concentration units",
+            "type": "string",
+            "enum": [
+                "pM",
+                "nM",
+                "μM",
+                "μg/mL",
+                "mM",
+                "mg/mL",
+                "ng/mL",
+                "M",
+                "percent",
+                "units",
+                "U/mL"
+              ]
+        },
+        "duration": {
+            "title": "Duration",
+            "type": "number"
+        },
+        "duration_units": {
+            "title": "Duration units",
+            "type": "string",
+            "enum": [
+                "second",
+                "minute",
+                "hour",
+                "day"
+            ]
+        },
+        "temperature": {
+            "title": "Temperature",
+            "type": "number",
+            "comment": "degrees Centigrade"
+        }
+    }
+}

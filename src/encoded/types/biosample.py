@@ -43,7 +43,7 @@ class Biosample(Item): #, CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
          'biosource.biosource_vendor',
          'organism',
          'references',
-         'biosample_protocol_variables',
+         'biosample_protocols',
          'related_biosamples'
     ]
     # audit_inherit = [
