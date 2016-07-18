@@ -6,10 +6,11 @@
     "type": "object",
     "required": [],
     "approvalRequired": [],
-    "identifyingProperties": ["uuid", "aliases"],
+    "identifyingProperties": ["uuid", "accession", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/accession" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/attribution" },
@@ -40,12 +41,12 @@
             ]
         },
         "crosslinking_time": {
-            "title": "Crosslinking Time",
+            "title": "Crosslinking Time (min)",
             "description": "Time of crosslinking step in minutes",
             "type": "number"
         },
         "crosslinking_temperature": {
-            "title": "Crosslinking Temperature",
+            "title": "Crosslinking Temperature (°C)",
             "description": "Temperature of crosslinking step in degrees Celsius",
             "type": "number"
         },
@@ -59,16 +60,15 @@
         "enzyme_lot_number": {
             "title": "Enzyme Lot Number",
             "description": "Lot number of batch of enzyme used to digest DNA",
-            "type": "string",
-            "comment": "may want to add a regex bit to this?"
+            "type": "string"
         },
         "digestion_time": {
-            "title": "Digestion Time",
+            "title": "Digestion Time (min)",
             "description": "Time of digestion step in minutes",
             "type": "number"
         },
         "digestion_temperature": {
-            "title": "Digestion Temperature",
+            "title": "Digestion Temperature (°C)",
             "description": "Temperature of digestion step in degrees Celsius",
             "type": "number"
         },
@@ -79,12 +79,12 @@
             "comment": "should this be a controlled CV?"
         },
         "ligation_time": {
-            "title": "Ligation Time",
+            "title": "Ligation Time (min)",
             "description": "Time of ligation step in minutes",
             "type": "number"
         },
         "ligation_temperature": {
-            "title": "Ligation Temperature",
+            "title": "Ligation Temperature (°C)",
             "description": "Temperature of ligation step in degrees Celsius",
             "type": "number"
         },
@@ -95,7 +95,7 @@
             "comment": "should this be a controlled CV?"
         },
         "average_fragment_size": {
-            "title": "Average Fragment Size",
+            "title": "Average Fragment Size (bp)",
             "description": "Size of average fragment in base pairs after fragmentation step",
             "type": "integer"
         },
@@ -116,7 +116,7 @@
             ]
         },
         "read_length": {
-            "title": "Sequencing read length",
+            "title": "Sequencing read length (bp)",
             "description": "Length of sequencing reads in base pairs",
             "type": "integer"
         }

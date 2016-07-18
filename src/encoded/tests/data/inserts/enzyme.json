@@ -11,7 +11,7 @@
     },
     {
         "name": "DNase_I",
-        "enzyme_source": "thermo-fisher-scientific",
+        "enzyme_source": "thermofisher-scientific",
         "description": "from Ma et al 2015 Nature Methods",
         "catalog_number":"EN052",
         "url": "https://www.thermofisher.com/order/catalog/product/EN0525"

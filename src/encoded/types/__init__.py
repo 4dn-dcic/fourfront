@@ -105,6 +105,7 @@ class Enzyme(Item):
     item_type = 'enzyme'
     schema = load_schema('encoded:schemas/enzyme.json')
     name_key = 'name'
+    embedded = []
 
 @collection(
     name='biosources',
