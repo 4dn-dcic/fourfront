@@ -2,7 +2,7 @@
     "title": "Experiment",
     "description": "Schema for submitting metadata for an assay.",
     "comment": "Experiment is the main organizing object for metadata on a single assay, it's associated protocols, files and subsequent analyses.",
-    "id": "/profiles/experiment.json",
+    "id": "/profiles/experimend.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["award", "lab","experiment_type", "biosample"],
@@ -28,7 +28,7 @@
         "description": {
             "title": "description",
             "description": "A short description of the experiment",
-            "type": "string",
+            "type": "string"
         },
         "experiment_type": {
             "type": "string",
@@ -50,11 +50,16 @@
             "type": "string",
             "linkTo": "Document"
         },
-        "experiment_variables": {
-            "title": "Experimental Variables",
-            "description": "Items that can vary between experiments and may be different from the reference protocol",
-            "type": "string",
-            "linkTo": "ExperimentVariables"
+        "protocol_variation": {
+            "title": "Protocol Documents",
+            "description": "Protocol Documents Describing the variations in the protocol from reference.",
+            "type": "array",
+            "items": {
+                "title": "Document",
+                "description": "A document associated with the specific experimental protocol.",
+                "type": "string",
+                "linkTo": "Document"
+              }
         },
         "biosample": {
             "title": "Biological Sample",
@@ -88,15 +93,14 @@
             "type": "array",
             "items": {
                 "title": "Related experiment",
-                "description": "An experiment that is related to this experiment with a specified type of relationship.",
-                "type": "string",
-                "linkTo": "ExperimentRelation"
+                "description": "linkTo: ExperimentRelation An experiment that is related to this experiment with a specified type of relationship.",
+                "type": "string"
             }
         },
         "internal_status": {
             "type": "string",
             "description": "The status of an experiment in the DCIC process.",
-            "comment":"unreviewed:wrangler has not evaluated, unrunable:experiment requires more metadata to run, pipeline ready:experiment is ready for the pipeline, processing:pipeline is running, pipeline completed: pipeline has run through completion, requires lab review:there are QC concerns about this data, release ready:DCC feels that this is ready for release",
+            "comment":"unreviewed:wrangler has not evaluated, unrunable:experiment requires more metadata to run, pipeline ready:experiment is ready for the pipeline, processing:pipeline is running, pipeline completed: pipeline has run through completion, requires lab review:there are QC concerns about this data, release ready:DCIC feels that this is ready for release",
             "default": "unreviewed",
             "permission": "import_items",
             "title": "Status",

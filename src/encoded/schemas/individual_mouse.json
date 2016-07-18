@@ -24,7 +24,7 @@
     },
     "properties": {
         "mouse_life_stage": {
-            "title": "Life stage",
+            "title": "Mouse Life stage",
             "type": "string",
             "enum": [
               "pup",

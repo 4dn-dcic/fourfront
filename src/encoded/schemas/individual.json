@@ -31,12 +31,12 @@
             "linkTo": "Organism"
         },
         "age": {
-            "title": "Donor age",
-            "description": " The age or age range of the donor when biological material was sampled.",
+            "title": "Age of the Individual",
+            "description": " The age of the individual when biological material was sampled.",
             "type": "number"
         },
         "age_units": {
-            "title": "Donor age units",
+            "title": "Age units",
             "type": "string",
             "enum": [
                 "day",

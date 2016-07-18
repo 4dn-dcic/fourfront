@@ -37,13 +37,13 @@ ORDER = [
     # 'human_donor',
     'individual_human',
     'individual_mouse',
-    'enzyme'
+    'enzyme',
     # 'donor_characterization',
     # 'biosample',
     # 'biosample_characterization',
     # 'platform',
     # 'library',
-    # 'experiment',
+    'experiment_hic'
     # 'replicate',
     # 'annotation',
     # 'project',
