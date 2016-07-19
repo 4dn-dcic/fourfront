@@ -8,6 +8,7 @@
     "identifyingProperties": ["uuid","aliases"],
     "additionalProperties": false,
     "mixinProperties": [
+        { "$ref": "treatment.json#/properties" },      
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/aliases" },

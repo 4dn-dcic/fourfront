@@ -3,18 +3,21 @@
         "title": "Worthington Biochemical",
         "name": "worthington-biochemical",
         "description": "",
-        "url": "http://www.worthington-biochem.com"
+        "url": "http://www.worthington-biochem.com",
+        "uuid": "b31106bc-8535-4448-903e-854af460b21d"
     },
     {
         "title": "New England Biolabs",
         "name": "new-england-biolabs",
         "description": "",
-        "url": "https://www.neb.com"
+        "url": "https://www.neb.com",
+        "uuid": "b31106bc-8535-4448-903e-854af460b21e"
     },
     {
         "title": "ThermoFisher Scientific",
         "name": "thermofisher-scientific",
         "description": "previously also Fermentas",
-        "url": "https://www.thermofisher.com/us/en/home/brands/thermo-scientific.html#/legacy=www.fermentas.com"
+        "url": "https://www.thermofisher.com/us/en/home/brands/thermo-scientific.html#/legacy=www.fermentas.com",
+        "uuid": "b31106bc-8535-4448-903e-854af460b21f"
     }
 ]

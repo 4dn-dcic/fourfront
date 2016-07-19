@@ -4,8 +4,8 @@
     "id": "/profiles/construct.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["construct_type", "description", "vendor"],
-    "identifyingProperties": ["uuid","aliases"],
+    "required": ["name", "construct_type"],
+    "identifyingProperties": ["uuid","aliases","name"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -19,6 +19,12 @@
     "properties": {
         "schema_version": {
             "default": "1"
+        },
+        "name": {
+            "title": "Name",
+            "description": "Short name for construct - letters, numbers, hyphens or underscores allowed (no spaces)",
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]+$"
         },
         "description": {
             "title": "Description",
@@ -55,7 +61,7 @@
               "title": "Insert Sequence",
               "description": "Nucleotide Sequence of the Insert",
               "type":  "string",
-              "pattern": "^ATGCN$"
+              "pattern": "^[ATGCN]+$"
           },
           "construct_vendor": {
               "title": "Construct Vendor",

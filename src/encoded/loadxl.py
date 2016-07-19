@@ -34,6 +34,8 @@ ORDER = [
     'individual_mouse',
     'biosource',
     'enzyme',
+    'construct',
+    'treatment_rnai',
     # 'donor_characterization',
     # 'biosample',
     # 'biosample_characterization',
