@@ -33,7 +33,7 @@ class TreatmentChemical(Treatment):
     embedded = Treatment.embedded
 
 @collection(
-    name='treatment_rnai',
+    name='treatments-rnai',
     properties={
         'title': 'Treatments-RNAi',
         'description': 'Listing RNAi Treatments',
@@ -42,4 +42,3 @@ class TreatmentRnai(Treatment):
     item_type = 'treatment_rnai'
     schema = load_schema('encoded:schemas/treatment_rnai.json')
     embedded = Treatment.embedded
-    #+ ['rnai_vendor', 'rnai_constructs']

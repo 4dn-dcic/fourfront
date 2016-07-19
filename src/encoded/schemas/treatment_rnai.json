@@ -53,7 +53,7 @@
                 "title": "Constructs",
                 "description": "A recombinant construct.",
                 "type": "string",
-                "comment": "linkTo Construct"
+                "linkTo": "Construct"
             }
         },
         "url": {
