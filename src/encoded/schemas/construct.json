@@ -22,7 +22,7 @@
         },
         "description": {
             "title": "Description",
-            "description": "A plain text description of the biosource.",
+            "description": "A plain text description of the construct.",
             "type": "string"
         },
         "construct_type": {
@@ -71,7 +71,7 @@
           },
           "url": {
               "title": "URL",
-              "description": "An external resource with additional information about the biosource.",
+              "description": "An external resource with additional information about the construct.",
               "type": "string",
               "format": "uri"
           }

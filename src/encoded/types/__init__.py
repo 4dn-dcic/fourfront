@@ -146,4 +146,4 @@ class Construct(Item):
 class Modification(Item):
     item_type = 'modification'
     schema = load_schema('encoded:schemas/modification.json')
-#    embedded = ['construct'] 
+    embedded = ['constructs']
