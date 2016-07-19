@@ -1,6 +1,8 @@
 """The type file for the collection Vendor (Encode Source).
-    moving this out of __init.py__ and into it's own file as
-    add logic for autopopulating 'name' upon update or create"""
+
+moving this out of __init.py__ and into it's own file as
+add logic for autopopulating 'name' upon update or create
+"""
 from snovault import (
     calculated_property,
     collection,
@@ -9,6 +11,7 @@ from snovault import (
 from .base import (
     Item,
 )
+
 
 @collection(
     name='vendors',
@@ -24,6 +27,6 @@ class Vendor(Item):
 
     def _update(self, properties, sheets=None):
         # set name based on what is entered into title
-        properties['name'] = properties['title'].replace(' ','-').lower()
+        properties['name'] = properties['title'].replace(' ', '-').lower()
 
         super(Vendor, self)._update(properties, sheets)

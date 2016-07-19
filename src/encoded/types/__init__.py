@@ -105,7 +105,7 @@ class Enzyme(Item):
     item_type = 'enzyme'
     schema = load_schema('encoded:schemas/enzyme.json')
     name_key = 'name'
-    embedded = []
+
 
 @collection(
     name='biosources',
@@ -117,6 +117,7 @@ class Biosource(Item):
     item_type = 'biosource'
     schema = load_schema('encoded:schemas/biosource.json')
 
+
 @collection(
     name='biosample_relations',
     properties={
@@ -127,6 +128,7 @@ class BiosampleRelation(Item):
     item_type = 'biosample_relation'
     schema = load_schema('encoded:schemas/biosample_relation.json')
 
+
 @collection(
     name='constructs',
     properties={
@@ -136,6 +138,7 @@ class BiosampleRelation(Item):
 class Construct(Item):
     item_type = 'construct'
     schema = load_schema('encoded:schemas/construct.json')
+
 
 @collection(
     name='modifications',

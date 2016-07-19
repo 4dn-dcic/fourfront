@@ -28,7 +28,7 @@ class Experimend(Item):
 
 
 @collection(
-    name='experiments_hic',
+    name='experiments-hic',
     unique_key='accession',
     properties={
         'title': 'Experiments Hi-C',
@@ -38,6 +38,5 @@ class ExperimentHiC(Experimend):
     item_type = 'experiment_hic'
     schema = load_schema('encoded:schemas/experiment_hic.json')
     embedded = Experimend.embedded + [
-     "digestion_enzyme",
-     "digestion_enzyme.enzyme_source"
+     "digestion_enzyme"
      ]
