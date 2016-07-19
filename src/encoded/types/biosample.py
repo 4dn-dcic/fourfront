@@ -30,15 +30,11 @@ class Biosample(Item): #, CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
 # #        'parent_of': ('Biosample', 'part_of'),
 # #    }
     embedded = [
-         'submitted_by',
-         'lab',
-         'award',
          'individual',
          'individual.organism',
          'individual.documents',
          'individual.documents.award',
          'individual.documents.lab',
-         'individual.documents.submitted_by',
          'biosource',
          'biosource.biosource_vendor',
          'organism',

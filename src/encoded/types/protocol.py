@@ -18,6 +18,7 @@ from .base import (
         'description': 'Listing of protocols',
     })
 class Protocol(Item):
+    base_types = ['Protocol'] + Item.base_types
     item_type = 'protocol'
     schema = load_schema('encoded:schemas/protocol.json')
 

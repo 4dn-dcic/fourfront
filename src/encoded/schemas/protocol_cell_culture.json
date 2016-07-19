@@ -22,11 +22,6 @@
         "schema_version": {
             "default": "1"
         },
-        "amount": {
-            "title": "Number of Cells",
-            "description": "Quantity of cells used in biosample preparation",
-            "type": "number"
-        },
         "culture_start_date": {
             "title": "Culture start date",
             "description": "For cultured samples, the date the culture was started. For cell lines, the date this particular growth was started, not the date the line was established.",
@@ -52,8 +47,7 @@
             "description": "The initial quantity of cells or tissue obtained.",
             "comment": "The pattern is only enforced when the value supplied is a string.",
             "type": ["number", "string"],
-            "minimum":0,
-            "pattern": "^unknown$"
+            "minimum":0
         },
         "starting_amount_units": {
             "title": "Starting amount units",
