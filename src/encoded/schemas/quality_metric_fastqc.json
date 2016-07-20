@@ -3,17 +3,13 @@
     "id": "/profiles/fastqc_quality_metric.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["step_run", "award", "lab"],
+    "required": [],
     "additionalProperties": false,
     "identifyingProperties": ["uuid"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "quality_metric.json#/properties" },
         { "$ref": "mixins.json#/uuid" },
-        { "$ref": "mixins.json#/submitted"},
-        { "$ref": "mixins.json#/standard_status"},
-        { "$ref": "mixins.json#/assay" },
-        { "$ref": "mixins.json#/attribution" }
    ],
     "properties": {
         "schema_version": {

@@ -120,14 +120,20 @@
                 "linkTo": "FileRelation"
             }
         },
-        "fileset": {
-              "title": "File Set",
+        "filesets": {
+              "title": "File Sets",
               "description": "File Set to which this file belongs to.",
-              "type": "string"
+              "type": "array",
+              "items": {
+                  "title": "File Set",
+                  "description": "A file set to be associated with this file.",
+                  "type": "string",
+                  "linkTo": "FileSet"
+              }
         },
-        "Qc_metrics": {
-            "title": "QC metrics",
-            "description": "base for specific file type qc metrics",
+        "quality_metric": {
+            "title": "QC Metric",
+            "description": "A particular QC metric associated with this flag.",
             "type": "string",
             "linkTo": "QualityMetric"
         },
