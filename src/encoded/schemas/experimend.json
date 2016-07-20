@@ -108,9 +108,9 @@
             "type": "array",
             "items": {
                 "title": "Flag",
-                "description": "An flag for this experiment with link to associated QC info.",
+                "description": "A flag for this experiment with link to associated QC info.",
                 "type": "string",
-                "comment": "linkTo quality_metric_flag"
+                "linkTo": "QualityMetricFlag"
             }
         },
         "internal_status": {

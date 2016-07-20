@@ -1,5 +1,6 @@
 """The type file for the collection Quality Metric."""
 from snovault import (
+    abstract_collection,
     calculated_property,
     collection,
     load_schema,
@@ -11,7 +12,7 @@ from .base import (
 )
 
 
-@collection(
+@abstract_collection(
     name='quality-metrics',
     properties={
         'title': 'Quality Metrics',

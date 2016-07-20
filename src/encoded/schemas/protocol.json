@@ -34,7 +34,7 @@
         },
         "description": {
             "title": "Description",
-            "description": "A short description of the document",
+            "description": "A short description of the protocol",
             "type": "string",
             "default": ""
         }
