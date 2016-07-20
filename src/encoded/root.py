@@ -77,6 +77,9 @@ class EncodedRoot(Root):
                 return resource
         return default
 
+    def get_by_uuid(self, uuid, default=None):
+        return self.connection.get_by_uuid(uuid, default)
+
     @calculated_property(schema={
         "title": "Application version",
         "type": "string",
