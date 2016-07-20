@@ -85,7 +85,6 @@ var LoginBoxes = React.createClass({
 
 			// update error msg from fetch
 			var updateError = function(msg) {
-				console.log("updating error to " + msg);
 				this.setState({errormsg : msg});
 			}
 
@@ -122,7 +121,7 @@ var LoginBoxes = React.createClass({
   handleSubmit: function(e){
     e.preventDefault();
     var username = this.state.username.trim();
-	var password = this.state.password.trim();
+		var password = this.state.password.trim();
   	if (username === '' || password === '') {
     	return;
     }
@@ -130,9 +129,10 @@ var LoginBoxes = React.createClass({
     this.setState({username: '', password: ''});
   },
   render: function () {
+		/* href="" will cause mouse pointer to change to the finger on hover */
 	return (
 	  <div>
-		  <a id="loginbtn" href onClick={this.handleToggle}>Log in</a>
+		  <a id="loginbtn" href="" onClick={this.handleToggle}>Log in</a>
 	 </div>
  );
  },
