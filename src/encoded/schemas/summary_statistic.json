@@ -8,11 +8,17 @@
     "identifyingProperties": ["uuid"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
-        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/uuid" }
    ],
     "properties": {
         "schema_version": {
             "hidden comment": "Bump the default in the subclasses."
+        },
+        "description": {
+            "title": "Description",
+            "description": "A short description of the summary statistic",
+            "type": "string",
+            "default": ""
         },
         "attachment": {
             "title": "Summary statistic document metadata",

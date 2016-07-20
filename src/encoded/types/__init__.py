@@ -150,3 +150,13 @@ class Modification(Item):
     item_type = 'modification'
     schema = load_schema('encoded:schemas/modification.json')
     embedded = ['constructs']
+
+@collection(
+    name='quality_metric_flags',
+    properties={
+        'title': 'Quality Metric Flags'
+    })
+class QualityMetricFlag(Item):
+    item_type = 'quality_metric_flag'
+    schema = load_schema('encoded:schemas/quality_metric_flag.json')
+    embedded = ['quality_metrics']
