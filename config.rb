@@ -1,5 +1,8 @@
 # Require any additional compass plugins here.
 
+# make compass play nice with utf-8
+Encoding.default_external = 'utf-8'
+
 # Set this to the root of your project when deployed:
 http_path = "/"
 css_dir = "src/encoded/static/css"
