@@ -10,7 +10,6 @@
     "digestion_temperature": 37,
     "tagging_method": "Biotinylated ATP",
     "crosslinking_time": 30,
-    "internal_status": "release ready",
     "instrument": "Illumina HiSeq",
     "notes": "sample dcic notes",
     "lab": "ali-mortazavi",

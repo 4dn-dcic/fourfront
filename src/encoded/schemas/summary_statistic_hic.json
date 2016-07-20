@@ -9,6 +9,7 @@
     "mixinProperties": [
         { "$ref": "summary_statistic.json#/properties" },
         { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/uuid" }
    ],
     "properties": {
