@@ -77,7 +77,8 @@
             "items": {
                 "title": "Fileset",
                 "description": "Metadata on a set of files.",
-                "type": "string"
+                "type": "string",
+                "linkTo": "FileSet"
             }
         },
         "related_experiments": {
@@ -99,6 +100,17 @@
                 "description": "An experiment set that is associated wtih this experiment.",
                 "type": "string",
                 "linkTo": "ExperimentSet"
+            }
+        },
+        "quality_metric_flags": {
+            "title": "Quality Metric Flags",
+            "description": "Flags and associated info for flagging experiments with possible issues",
+            "type": "array",
+            "items": {
+                "title": "Flag",
+                "description": "An flag for this experiment with link to associated QC info.",
+                "type": "string",
+                "comment": "linkTo quality_metric_flag"
             }
         },
         "internal_status": {
