@@ -50,6 +50,7 @@ class Target(SharedItem):
 
     def _name(self, properties):
         root = find_root(self)
+        import pdb; pdb.set_trace()
         organism = root.get_by_uuid(properties['organism'])
         organism_props = organism.upgrade_properties()
         return u'{}-{}'.format(properties['label'], organism_props['name'])
