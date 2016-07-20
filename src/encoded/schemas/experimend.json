@@ -90,6 +90,17 @@
                 "type": "string"
             }
         },
+        "experiment_sets": {
+            "title": "Experiment Sets",
+            "description": "Experiment Sets that are associated with this experiment.",
+            "type": "array",
+            "items": {
+                "title": "Experiment Set",
+                "description": "An experiment set that is associated wtih this experiment.",
+                "type": "string",
+                "linkTo": "ExperimentSet"
+            }
+        },
         "internal_status": {
             "type": "string",
             "description": "The status of an experiment in the DCIC process.",
