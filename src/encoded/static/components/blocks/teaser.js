@@ -35,7 +35,6 @@ var TeaserCore = React.createClass({
         return (
             <div className="teaser thumbnail clearfix">
                 {this.renderImage()}
-                <div className="caption" dangerouslySetInnerHTML={{__html: this.props.value.body}}></div>
             </div>
         );
     }

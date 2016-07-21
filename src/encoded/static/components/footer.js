@@ -25,11 +25,6 @@ var Footer = React.createClass({
         }
         return (
             <footer id="page-footer">
-                <div className="container">
-                    <div className="row">
-                        <div className="app-version">{this.props.version}</div>
-                    </div>
-                </div>
                 <div className="page-footer">
                     <div className="container">
                         <div className="row">
@@ -39,14 +34,12 @@ var Footer = React.createClass({
                                     <li><a href="http://www.stanford.edu/site/terms.html">Terms of Use</a></li>
                                     <li id="user-actions-footer">{userActionRender}</li>
                                 </ul>
-                                <p className="copy-notice">&copy;{new Date().getFullYear()} Harvard University.</p>
                             </div>
-
-                            <div className="col-sm-6 col-sm-pull-6">
-                                <ul className="footer-logos">
-									<li><a href="https://commonfund.nih.gov/4dnucleome/index"><img src="/static/img/4DN-logo.png" alt="4DN" id="encode-logo" height="60px" width="106px" /></a></li>
-									<li><a href="http://hms.harvard.edu"><img src="/static/img/Harvard-logo.png" alt="Harvard" id="ucsc-logo" width="160px" height="40px" /></a></li>
-                                </ul>
+                            <div className="col-sm-3 col-sm-pull-2">
+                                <div className="app-version">{this.props.version}</div>
+                            </div>
+                            <div className="col-sm-3 col-sm-pull-9">
+                                <div className="copy-notice">&copy;{new Date().getFullYear()} Harvard University</div>
                             </div>
                         </div>
                     </div>
@@ -108,7 +101,7 @@ var LoginBoxes = React.createClass({
       })
       .then(session_properties => {
           console.log("got session props as", session_properties);
-          this.context.session['auth.userid'] = data.username; 
+          this.context.session['auth.userid'] = data.username;
           var next_url = window.location.href;
           if (window.location.hash == '#logged-out') {
               next_url = window.location.pathname + window.location.search;
