@@ -98,13 +98,15 @@ after_success:
 - |
   if [ "$BUILD_LEADER" = "YES" ]; then
     if [ "$BUILD_AGGREGATE_STATUS" = "others_succeeded" ]; then
-      if [ "$TRAVIS_BRANCH" = "master" ]; then
-         echo "Job succeeded! PUBLISHING..."
-         git checkout master
-         git config --global user.email "travis@builder.com"
-         git config --global user.name "Travis"
-         eb use 4dn-web-dev
-         python deploy_beanstalk.py
+      if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+        if [ "$TRAVIS_BRANCH" = "master" ]; then
+          echo "Job succeeded! PUBLISHING..."
+          git checkout master
+          git config --global user.email "travis@builder.com"
+          git config --global user.name "Travis"
+          eb use 4dn-web-dev
+          python deploy_beanstalk.py
+        fi
       fi
     fi
   fi

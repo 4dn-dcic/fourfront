@@ -2,7 +2,10 @@
     padding: 10px;
     border: 1px #ccc solid;
     border-radius: 3px;
-    overflow: hidden;
+    overflow-x: auto;
+    // Carl's changes
+    overflow-y: auto;
+    max-height: 600px !important;
 }
 
 @media screen and (max-width: $screen-sm-min) {
@@ -217,11 +220,11 @@ div.meta-status {
     display: inline;
     list-style-type: none;
     border: none;
-    margin-right: 5px;  
+    margin-right: 5px;
 }
 
 .data-row ul li a{
-    display: inline;    
+    display: inline;
 }
 
 .data-row img {
@@ -265,7 +268,7 @@ div.meta-status {
     }
 }
 
- 
+
 .main-panel {
     position: relative;
     z-index: 0;

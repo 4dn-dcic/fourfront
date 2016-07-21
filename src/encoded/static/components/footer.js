@@ -1,91 +1,7 @@
 'use strict';
 var React = require('react');
-
-var LoginFields = React.createClass({
-
-	getInitialState: function() {
-		return {username: '', password: ''};
-	},
-	handleUsernameChange: function(e) {
-		this.setState({username: e.target.value});
-	},
-	handlePasswordChange: function(e) {
-		this.setState({password: e.target.value});
-	},
-	handleSubmit: function(e) {
-		e.preventDefault();
-		var username = this.state.username.trim();
-		var password = this.state.password.trim();
-		if (!username || !password) {
-			return;
-		}
-		this.props.onLogin({username: username, password: password});
-		this.setState({username: '', password: ''});
-	},
-	render: function() {
-		var clr = {'color':'black'};
-		return ( 
-				
-				<div>
-				<label>Username:</label>
-				<input type="text" class="form-control" style={clr}
-							 placeholder="fred.underwood"
-							 onChange={this.handleUsernameChange}
-							 value={this.state.username} />
-
-				<label>Password</label>
-				<input type="password" class="form-control" style={clr}
-							 onChange={this.handlePasswordChange}
-							 value={ this.state.password } />
-
-				<button id="loginbtn" class="btn btn_primary" onClick={ this.handleSubmit }>Login</button>
-				</div>
-		);
-	},
-})		
-
-
-var LoginForm = React.createClass({
-	contextTypes: {
-			fetch: React.PropTypes.func,
-			session: React.PropTypes.object,
-      navigate: React.PropTypes.func
-	},
-
-	loginToServer: function(data) {
-			console.log(data);
-			fetch('/login', {
-				method: "POST",
-				body: JSON.stringify(data),
-				headers: {
-					"Content-Type": "application/json",
-				},
-				credentials: "same-origin"
-      })
-      .then(response => {
-        if (!response.ok) throw response;
-        return response.json();
-      })
-      .then(session_properties => {
-          console.log("got session props as", session_properties);
-          this.context.session['auth.userid'] = data.username; 
-          var next_url = window.location.href;
-          if (window.location.hash == '#logged-out') {
-              next_url = window.location.pathname + window.location.search;
-          }
-          this.context.navigate(next_url, {replace: true});
-        },function(error) {
-				console.log("we got an error during login", error);
-      })
-	},
-	render: function() {
-		return (
-				<form>
-				  <LoginFields onLogin={this.loginToServer} />
-				</form>
-		);
-	},
-});
+var Modal = require('react-bootstrap/lib/Modal');
+var OverlayMixin = require('react-bootstrap/lib/OverlayMixin');
 
 var Footer = React.createClass({
     contextTypes: {
@@ -96,19 +12,15 @@ var Footer = React.createClass({
         version: React.PropTypes.string // App version number
     },
 
-		//login form
-		
-
     render: function() {
         var session = this.context.session;
         var disabled = !session;
         var userActionRender;
 
+        // first case is if user is not logged in
         if (!(session && session['auth.userid'])) {
-
-            //userActionRender = <a href="#" data-trigger="login" disabled={disabled}>Submitter sign-in</a>;
-						userActionRender = <LoginForm/>
-        } else {
+						userActionRender = <LoginBoxes/>
+        } else { //if logged in give them a logout link
             userActionRender = <a href="#" data-trigger="logout">Submitter sign out</a>;
         }
         return (
@@ -127,14 +39,13 @@ var Footer = React.createClass({
                                     <li><a href="http://www.stanford.edu/site/terms.html">Terms of Use</a></li>
                                     <li id="user-actions-footer">{userActionRender}</li>
                                 </ul>
-                                <p className="copy-notice">&copy;{new Date().getFullYear()} Stanford University.</p>
+                                <p className="copy-notice">&copy;{new Date().getFullYear()} Harvard University.</p>
                             </div>
 
                             <div className="col-sm-6 col-sm-pull-6">
                                 <ul className="footer-logos">
-                                    <li><a href="/"><img src="/static/img/encode-logo-small-2x.png" alt="ENCODE" id="encode-logo" height="45px" width="78px" /></a></li>
-                                    <li><a href="http://www.ucsc.edu"><img src="/static/img/ucsc-logo-white-alt-2x.png" alt="UC Santa Cruz" id="ucsc-logo" width="107px" height="42px" /></a></li>
-                                    <li><a href="http://www.stanford.edu"><img src="/static/img/su-logo-white-2x.png" alt="Stanford University" id="su-logo" width="105px" height="49px" /></a></li>
+									<li><a href="https://commonfund.nih.gov/4dnucleome/index"><img src="/static/img/4DN-logo.png" alt="4DN" id="encode-logo" height="60px" width="106px" /></a></li>
+									<li><a href="http://hms.harvard.edu"><img src="/static/img/Harvard-logo.png" alt="Harvard" id="ucsc-logo" width="160px" height="40px" /></a></li>
                                 </ul>
                             </div>
                         </div>
@@ -143,6 +54,136 @@ var Footer = React.createClass({
             </footer>
         );
     }
+});
+
+// LoginBox Popup
+var LoginBoxes = React.createClass({
+	contextTypes: {
+			fetch: React.PropTypes.func,
+			session: React.PropTypes.object,
+      navigate: React.PropTypes.func
+	},
+  mixins: [OverlayMixin],
+  getInitialState: function() {
+  	return {username: '', password: '', isOpen: false, errormsg: ''};
+  },
+  usernameFill: function(v) {
+  	this.setState({username: v});
+  },
+  passwordFill: function(v) {
+  	this.setState({password: v});
+  },
+  handleToggle: function () {
+	  this.setState({
+		  isOpen: !this.state.isOpen
+	  });
+  },
+	loginToServer: function(data) {
+			console.log(data);
+			// clear any error messages
+			this.setState({errormsg : ""});
+
+			// update error msg from fetch
+			var updateError = function(msg) {
+				this.setState({errormsg : msg});
+			}
+
+			fetch('/login', {
+				method: "POST",
+				body: JSON.stringify(data),
+				headers: {
+					"Content-Type": "application/json",
+				},
+				credentials: "same-origin"
+      })
+      .then(response => {
+				console.log("got response" + response.ok);
+        if (!response.ok){
+					console.log("we got an error during login");
+					this.setState({errormsg : "Invalid Login"});
+					throw response;
+				}
+				return response.json();
+
+      })
+      .then(session_properties => {
+          console.log("got session props as", session_properties);
+          this.context.session['auth.userid'] = data.username; 
+          var next_url = window.location.href;
+          if (window.location.hash == '#logged-out') {
+              next_url = window.location.pathname + window.location.search;
+          }
+          this.context.navigate(next_url, {replace: true});
+        },function(error) {
+					console.log("got an error" + error);
+      })
+	},
+  handleSubmit: function(e){
+    e.preventDefault();
+    var username = this.state.username.trim();
+		var password = this.state.password.trim();
+  	if (username === '' || password === '') {
+    	return;
+    }
+		this.loginToServer({username: username, password: password});
+    this.setState({username: '', password: ''});
+  },
+  render: function () {
+		/* href="" will cause mouse pointer to change to the finger on hover */
+	return (
+	  <div>
+		  <a id="loginbtn" href="" onClick={this.handleToggle}>Log in</a>
+	 </div>
+ );
+ },
+
+	 renderOverlay: function () {
+         if (!this.state.isOpen) {
+             return <span/>;
+         }
+				 var error_span = '';
+				 if (this.state.errormsg) {
+					 error_span = <div className="error">{this.state.errormsg}</div>;
+				 }
+         return (
+	  <Modal onRequestHide={this.handleToggle} dialogClassName="login-modal">
+        <div className="login-box">
+        	<h1 className="title">Your Account</h1>
+					{error_span}
+      		<label className="fill-label">Username:</label>
+        	<TextBox default="Username" fill={this.usernameFill} tType="text"/>
+        	<label className="fill-label">Password:</label>
+        	<TextBox default="Password" fill={this.passwordFill} tType="password"/>
+        	<ul className="links">
+            	<li><button id="popuploginbtn" className="sexy-btn"
+	                onClick={this.handleSubmit}><span>Sign in</span></button></li>
+	            <li><button id="closebtn" className="sexy-btn"
+	                onClick={this.handleToggle}><span>Close</span></button></li>
+        	</ul>
+      	</div>
+  	   </Modal>
+    );
+  },
+});
+
+var TextBox = React.createClass({
+  getInitialState: function() {
+  	return({data: ''});
+  },
+  handleFill: function(e) {
+
+  	this.setState({data: e.target.value});
+    this.props.fill(e.target.value);
+  },
+  render: function() {
+  	return(
+    	<div>
+    		<input type={this.props.tType} className="text-box"
+    		placeholder={this.props.default} onChange={this.handleFill}
+    		value={this.state.data} />
+    	</div>
+  	);
+  },
 });
 
 module.exports = Footer;
