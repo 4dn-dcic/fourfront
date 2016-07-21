@@ -257,6 +257,8 @@ var RelatedItems = module.exports.RelatedItems = React.createClass({
     },
 });
 
+// Currently handles arrays (represented as strings separated by commas),
+// objects, and all other cases as strings
 var formString = function (item) {
     if(Array.isArray(item)) {
         return item.join(", ");
@@ -269,33 +271,36 @@ var formString = function (item) {
 
 var SubIPannel = React.createClass({
     getInitialState: function() {
-    	return {isOpen: false, btnText: "Open"};
+    	return {isOpen: false};
     },
     handleToggle: function (e) {
       e.preventDefault();
-      var useText;
-      if (this.state.btnText === "Open"){
-          useText = "Close";
-      }else{
-          useText = "Open";
-      }
       this.setState({
   		  isOpen: !this.state.isOpen,
-          btnText: useText
   	  });
     },
     render: function() {
         var item = this.props.content;
+        if (item.hasOwnProperty("accession")){
+            var title = item.accession;
+        }else if (item.hasOwnProperty("name")){
+            var title = item.name;
+        }else{
+            var title = "Open";
+        }
         var toggleRender;
+        var toggleLink;
         if (!this.state.isOpen) {
+            toggleLink = <a href="" onClick={this.handleToggle}>{title}</a>
             toggleRender = <span/>;
         }else{
+            toggleLink = <a href="" onClick={this.handleToggle}>Close</a>
             toggleRender = <Subview content={item}/>;
         }
         return (
     	  <div>
               <div>
-    		        <a href="" onClick={this.handleToggle}>{this.state.btnText}</a>
+                  {toggleLink}
               </div>
               {toggleRender}
     	 </div>
@@ -306,7 +311,6 @@ var SubIPannel = React.createClass({
 var Subview = React.createClass({
     render: function(){
         var item = this.props.content;
-        console.log(item);
         return(
             <div className="flexcol-sm-6">
               <Panel addClasses="data-display">
