@@ -88,15 +88,6 @@ var IPanel = module.exports.IPanel = React.createClass({
         var context = this.props.context;
         var itemClass = globals.itemClass(context, 'view-detail panel');
         var title = globals.listing_titles.lookup(context)({context: context});
-        // OLD TECHNIQUE: stringify
-        // return (
-        //     <section className="col-sm-12">
-        //         <div className={itemClass}>
-        //             <pre>{JSON.stringify(context, null, 4)}</pre>
-        //         </div>
-        //     </section>
-        // );
-        // NEW TECHNIQUE: RETURN A FORMATTED PANNEL
         return (
             <section className="flexcol-sm-12">
             <div className={itemClass}>
@@ -125,22 +116,6 @@ var IPanel = module.exports.IPanel = React.createClass({
         );
     }
 });
-
-// <Panel addClasses="data-display">
-//     <PanelBody addClasses="panel-body-with-header">
-//         <div className="flexrow">
-//             <div className="flexcol-sm-6">
-//                 <div className="flexcol-heading experiment-heading"><h4>Summary</h4></div>
-//                 <dl className="key-value">
-//                     <div data-test="term-name">
-//                         <dt>Term name</dt>
-//                         <dd>{context.biosample_term_name}</dd>
-//                     </div>
-//
-//
-//     </PanelBody>
-// </Panel>
-
 
 globals.panel_views.register(IPanel, 'Item');
 
@@ -281,6 +256,7 @@ var SubIPannel = React.createClass({
     },
     render: function() {
         var item = this.props.content;
+        // TODO: understand registries and make this generic (i.e. use lookup)
         if (item.hasOwnProperty("accession")){
             var title = item.accession;
         }else if (item.hasOwnProperty("name")){
