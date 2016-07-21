@@ -8,7 +8,7 @@ var Footer = require('./footer');
 var url = require('url');
 
 var portal = {
-    portal_title: 'ENCODE',
+    portal_title: '4D Nucleome',
     global_sections: [
         {id: 'data', title: 'Data', children: [
             {id: 'assaymatrix', title: 'Matrix', url: '/matrix/?type=Experiment'},
