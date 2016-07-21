@@ -193,7 +193,7 @@ var Table = module.exports.Table = React.createClass({
         var rows = data.map(row => RowView({row: row}));
         var table_class = "sticky-area collection-table";
         return (
-            <div className="table-responsive">            
+            <div className="table-responsive">
                 <table className={table_class + " table table-striped table-hover table-panel"}>
                     <StickyHeader>
                         <thead className="sticky-header">
@@ -363,7 +363,7 @@ var Report = React.createClass({
         var parsed_url = url.parse(this.context.location_href, true);
         parsed_url.query.sort = sort;
         delete parsed_url.search;
-        this.context.navigate(url.format(parsed_url));        
+        this.context.navigate(url.format(parsed_url));
     },
 
     loadMore: function() {
