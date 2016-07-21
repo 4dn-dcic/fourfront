@@ -98,19 +98,19 @@ var IPanel = module.exports.IPanel = React.createClass({
         // );
         // NEW TECHNIQUE: RETURN A FORMATTED PANNEL
         return (
+            <section className="flexcol-sm-12">
             <div className={itemClass}>
             <Panel addClasses="data-display">
                 <PanelBody addClasses="panel-body-with-header">
                     <div className="flexrow">
                         <div className="flexcol-sm-6">
                             <div className="flexcol-heading experiment-heading"><h4>{title}</h4></div>
-
                             <dl className="key-value">
-                                {Object.keys(context).map(function(key, val){
+                                {Object.keys(context).map(function(ikey, val){
                                     return (
-                                      <div data-test="term-name">
-                                        <dt>{key}</dt>
-                                        <dd>{formString(context[key])}</dd>
+                                      <div key={ikey} data-test="term-name">
+                                        <dt>{ikey}</dt>
+                                        <dd>{formString(context[ikey])}</dd>
                                       </div>
                                     );
                                 })}
@@ -118,10 +118,10 @@ var IPanel = module.exports.IPanel = React.createClass({
 
                         </div>
                     </div>
-
                 </PanelBody>
             </Panel>
             </div>
+        </section>
         );
     }
 });
@@ -258,9 +258,76 @@ var RelatedItems = module.exports.RelatedItems = React.createClass({
 });
 
 var formString = function (item) {
-    if(item.constructor === Array) {
+    if(Array.isArray(item)) {
         return item.join(", ");
+    }else if (typeof item === 'object') {
+        return(<SubIPannel content={item}/>);
     }else{
         return item;
     }
 };
+
+var SubIPannel = React.createClass({
+    getInitialState: function() {
+    	return {isOpen: false, btnText: "Open"};
+    },
+    handleToggle: function (e) {
+      e.preventDefault();
+      var useText;
+      if (this.state.btnText === "Open"){
+          useText = "Close";
+      }else{
+          useText = "Open";
+      }
+      this.setState({
+  		  isOpen: !this.state.isOpen,
+          btnText: useText
+  	  });
+    },
+    render: function() {
+        var item = this.props.content;
+        var toggleRender;
+        if (!this.state.isOpen) {
+            toggleRender = <span/>;
+        }else{
+            toggleRender = <Subview content={item}/>;
+        }
+        return (
+    	  <div>
+              <div>
+    		        <a href="" onClick={this.handleToggle}>{this.state.btnText}</a>
+              </div>
+              {toggleRender}
+    	 </div>
+        );
+        },
+});
+
+var Subview = React.createClass({
+    render: function(){
+        var item = this.props.content;
+        console.log(item);
+        return(
+            <div className="flexcol-sm-6">
+              <Panel addClasses="data-display">
+                  <PanelBody addClasses="panel-body-with-header">
+                      <div className="flexrow">
+                          <div className="flexcol-sm-6">
+                              <dl className="key-value">
+                                  {Object.keys(item).map(function(ikey, val){
+                                      return (
+                                        <div key={ikey} data-test="term-name">
+                                          <dt>{ikey}</dt>
+                                          <dd>{formString(item[ikey])}</dd>
+                                        </div>
+                                      );
+                                  })}
+                              </dl>
+                          </div>
+                      </div>
+                  </PanelBody>
+              </Panel>
+            </div>
+        );
+    }
+});
