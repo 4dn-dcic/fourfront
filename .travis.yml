@@ -65,11 +65,11 @@ before_script:
 script:
         #- curl -Lo travis_after_all.py https://raw.github.com/dmakhno/travis_after_all/master/travis_after_all.py
 - if test -n "$NPM"; then npm test; fi
-- if test -n "$NPM"; then bin/test -v -v --timeout=200 -m "not bdd and setone"; fi
-- if test -n "$UNIT"; then bin/test -v -v --timeout=200 -m "not bdd and not setone"; fi
+- if test -n "$NPM"; then bin/test -v -v --timeout=400 -m "not bdd and setone"; fi
+- if test -n "$UNIT"; then bin/test -v -v --timeout=400 -m "not bdd and not setone"; fi
 - |
    if test -n "$BROWSER"; then
-     test -f "$SC_PIDFILE" && bin/test -v -v --timeout=200 -m "bdd" --tb=short \
+     test -f "$SC_PIDFILE" && bin/test -v -v --timeout=400 -m "bdd" --tb=short \
        --splinter-implicit-wait 10 \
        --splinter-webdriver remote \
        --splinter-remote-url "http://$SAUCE_USERNAME:$SAUCE_ACCESS_KEY@localhost:4445/wd/hub" \
