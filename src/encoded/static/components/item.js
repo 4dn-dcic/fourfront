@@ -88,29 +88,20 @@ var IPanel = module.exports.IPanel = React.createClass({
         var context = this.props.context;
         var itemClass = globals.itemClass(context, 'view-detail panel');
         var title = globals.listing_titles.lookup(context)({context: context});
-        // OLD TECHNIQUE: stringify
-        // return (
-        //     <section className="col-sm-12">
-        //         <div className={itemClass}>
-        //             <pre>{JSON.stringify(context, null, 4)}</pre>
-        //         </div>
-        //     </section>
-        // );
-        // NEW TECHNIQUE: RETURN A FORMATTED PANNEL
         return (
+            <section className="flexcol-sm-12">
             <div className={itemClass}>
             <Panel addClasses="data-display">
                 <PanelBody addClasses="panel-body-with-header">
                     <div className="flexrow">
                         <div className="flexcol-sm-6">
                             <div className="flexcol-heading experiment-heading"><h4>{title}</h4></div>
-
                             <dl className="key-value">
-                                {Object.keys(context).map(function(key, val){
+                                {Object.keys(context).map(function(ikey, val){
                                     return (
-                                      <div data-test="term-name">
-                                        <dt>{key}</dt>
-                                        <dd>{formString(context[key])}</dd>
+                                      <div key={ikey} data-test="term-name">
+                                        <dt>{ikey}</dt>
+                                        <dd>{formString(context[ikey])}</dd>
                                       </div>
                                     );
                                 })}
@@ -118,28 +109,13 @@ var IPanel = module.exports.IPanel = React.createClass({
 
                         </div>
                     </div>
-
                 </PanelBody>
             </Panel>
             </div>
+        </section>
         );
     }
 });
-
-// <Panel addClasses="data-display">
-//     <PanelBody addClasses="panel-body-with-header">
-//         <div className="flexrow">
-//             <div className="flexcol-sm-6">
-//                 <div className="flexcol-heading experiment-heading"><h4>Summary</h4></div>
-//                 <dl className="key-value">
-//                     <div data-test="term-name">
-//                         <dt>Term name</dt>
-//                         <dd>{context.biosample_term_name}</dd>
-//                     </div>
-//
-//
-//     </PanelBody>
-// </Panel>
 
 
 globals.panel_views.register(IPanel, 'Item');
@@ -257,10 +233,82 @@ var RelatedItems = module.exports.RelatedItems = React.createClass({
     },
 });
 
+// Currently handles arrays (represented as strings separated by commas),
+// objects, and all other cases as strings
 var formString = function (item) {
-    if(item.constructor === Array) {
+    if(Array.isArray(item)) {
         return item.join(", ");
+    }else if (typeof item === 'object') {
+        return(<SubIPannel content={item}/>);
     }else{
         return item;
     }
 };
+
+var SubIPannel = React.createClass({
+    getInitialState: function() {
+    	return {isOpen: false};
+    },
+    handleToggle: function (e) {
+      e.preventDefault();
+      this.setState({
+  		  isOpen: !this.state.isOpen,
+  	  });
+    },
+    render: function() {
+        var item = this.props.content;
+        // TODO: make this process generic using lookup with registry
+        if (item.hasOwnProperty("accession")){
+            var title = item.accession;
+        }else if (item.hasOwnProperty("name")){
+            var title = item.name;
+        }else{
+            var title = "Open";
+        }
+        var toggleRender;
+        var toggleLink;
+        if (!this.state.isOpen) {
+            toggleLink = <a href="" onClick={this.handleToggle}>{title}</a>
+            toggleRender = <span/>;
+        }else{
+            toggleLink = <a href="" onClick={this.handleToggle}>Close</a>
+            toggleRender = <Subview content={item}/>;
+        }
+        return (
+    	  <div>
+              <div>
+                  {toggleLink}
+              </div>
+              {toggleRender}
+    	 </div>
+        );
+        },
+});
+
+var Subview = React.createClass({
+    render: function(){
+        var item = this.props.content;
+        return(
+            <div className="flexcol-sm-6">
+              <Panel addClasses="data-display">
+                  <PanelBody addClasses="panel-body-with-header">
+                      <div className="flexrow">
+                          <div className="flexcol-sm-6">
+                              <dl className="key-value">
+                                  {Object.keys(item).map(function(ikey, val){
+                                      return (
+                                        <div key={ikey} data-test="term-name">
+                                          <dt>{ikey}</dt>
+                                          <dd>{formString(item[ikey])}</dd>
+                                        </div>
+                                      );
+                                  })}
+                              </dl>
+                          </div>
+                      </div>
+                  </PanelBody>
+              </Panel>
+            </div>
+        );
+    }
+});
