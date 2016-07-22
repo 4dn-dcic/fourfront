@@ -37,7 +37,7 @@ def audit_file_assembly(value, system):
         detail = 'Processed file {} '.format(value['@id']) + \
                  'does not have assembly specified.'
         yield AuditFailure('missing assembly',
-                           detail, level='DCC_ACTION')
+                           detail, level='INTERNAL_ACTION')
         return
     if 'derived_from' not in value:
         return
@@ -51,7 +51,7 @@ def audit_file_assembly(value, system):
                          f['@id']) + \
                     'it was derived from.'
                 yield AuditFailure('mismatched assembly',
-                                   detail, level='DCC_ACTION')
+                                   detail, level='INTERNAL_ACTION')
                 return
 
 
@@ -155,7 +155,7 @@ def audit_file_read_length(value, system):
 
     if 'read_length' not in value:
         detail = 'Reads file {} missing read_length'.format(value['@id'])
-        yield AuditFailure('missing read_length', detail, level='DCC_ACTION')
+        yield AuditFailure('missing read_length', detail, level='INTERNAL_ACTION')
         return
 
 
@@ -233,7 +233,7 @@ def audit_file_controlled_by(value, system):
                                                                pe_file['paired_with']['@id']) + \
                      'that is not included in the controlled_by list'
             yield AuditFailure('missing paired_with in controlled_by', detail,
-                               level='DCC_ACTION')
+                               level='INTERNAL_ACTION')
 
     if value['dataset'].get('assay_term_name') not in ['shRNA knockdown followed by RNA-seq',
                                                        'CRISPR genome editing followed by RNA-seq']:
@@ -374,7 +374,7 @@ def audit_paired_with(value, system):
         detail = 'File {} has paired_end = {}. It requires a replicate'.format(
             value['@id'],
             value['paired_end'])
-        raise AuditFailure('missing replicate', detail, level='DCC_ACTION')
+        raise AuditFailure('missing replicate', detail, level='INTERNAL_ACTION')
 
     if value['replicate'] != value['paired_with']['replicate']:
         detail = 'File {} has replicate {}. It is paired_with file {} with replicate {}'.format(
@@ -465,7 +465,7 @@ def audit_file_size(value, system):
 
     if 'file_size' not in value:
         detail = 'File {} requires a value for file_size'.format(value['@id'])
-        raise AuditFailure('missing file_size', detail, level='DCC_ACTION')
+        raise AuditFailure('missing file_size', detail, level='INTERNAL_ACTION')
 
 
 @audit_checker('file', frame=['file_format_specifications'],)
@@ -700,32 +700,32 @@ def audit_file_read_depth(value, system):
     if 'analysis_step_version' not in value:
         detail = 'ENCODE Processed alignment file {} has '.format(value['@id']) + \
                  'no analysis step version'
-        yield AuditFailure('missing analysis step version', detail, level='DCC_ACTION')
+        yield AuditFailure('missing analysis step version', detail, level='INTERNAL_ACTION')
         return
 
     if 'analysis_step' not in value['analysis_step_version']:
         detail = 'ENCODE Processed alignment file {} has '.format(value['@id']) + \
                  'no analysis step in {}'.format(value['analysis_step_version']['@id'])
-        yield AuditFailure('missing analysis step', detail, level='DCC_ACTION')
+        yield AuditFailure('missing analysis step', detail, level='INTERNAL_ACTION')
         return
 
     if 'pipelines' not in value['analysis_step_version']['analysis_step']:
         detail = 'ENCODE Processed alignment file {} has '.format(value['@id']) + \
                  'no pipelines in {}'.format(value['analysis_step_version']['analysis_step']['@id'])
-        yield AuditFailure('missing pipelines in analysis step', detail, level='DCC_ACTION')
+        yield AuditFailure('missing pipelines in analysis step', detail, level='INTERNAL_ACTION')
         return
 
     if 'software_versions' not in value['analysis_step_version']:
         detail = 'ENCODE Processed alignment file {} has '.format(value['@id']) + \
                  'no software_versions in {}'.format(value['analysis_step_version']['@id'])
-        yield AuditFailure('missing software versions', detail, level='DCC_ACTION')
+        yield AuditFailure('missing software versions', detail, level='INTERNAL_ACTION')
         return
 
     if value['analysis_step_version']['software_versions'] == []:
         detail = 'ENCODE Processed alignment file {} has no '.format(value['@id']) + \
                  'softwares listed in software_versions,' + \
                  ' under {}'.format(value['analysis_step_version']['@id'])
-        yield AuditFailure('missing software', detail, level='DCC_ACTION')
+        yield AuditFailure('missing software', detail, level='INTERNAL_ACTION')
         return
 
     '''
@@ -748,14 +748,14 @@ def audit_file_read_depth(value, system):
     if ('quality_metrics' not in value) or (quality_metrics is None) or (quality_metrics == []):
         detail = 'ENCODE Processed alignment file {} has no quality_metrics'.format(
             value['@id'])
-        yield AuditFailure('missing quality metrics', detail, level='DCC_ACTION')
+        yield AuditFailure('missing quality metrics', detail, level='INTERNAL_ACTION')
         return
 
     derived_from_files = value.get('derived_from')
     if (derived_from_files is None) or (derived_from_files == []):
         detail = 'ENCODE Processed alignment file {} has no derived_from files'.format(
             value['@id'])
-        yield AuditFailure('missing derived_from files', detail, level='DCC_ACTION')
+        yield AuditFailure('missing derived_from files', detail, level='INTERNAL_ACTION')
         return
 
     paring_status_detected = False
@@ -768,7 +768,7 @@ def audit_file_read_depth(value, system):
     if paring_status_detected is False:
         detail = 'ENCODE Processed alignment file {} has no run_type in derived_from files'.format(
             value['@id'])
-        yield AuditFailure('missing run_type in derived_from files', detail, level='DCC_ACTION')
+        yield AuditFailure('missing run_type in derived_from files', detail, level='INTERNAL_ACTION')
 
     special_assay_name = 'empty'
     target_name = 'empty'
@@ -791,7 +791,7 @@ def audit_file_read_depth(value, system):
     if read_depth is False:
         detail = 'ENCODE Processed alignment file {} has no read depth information'.format(
             value['@id'])
-        yield AuditFailure('missing read depth', detail, level='DCC_ACTION')
+        yield AuditFailure('missing read depth', detail, level='INTERNAL_ACTION')
         return
 
     for pipeline in value['analysis_step_version']['analysis_step']['pipelines']:
