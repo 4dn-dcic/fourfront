@@ -54,6 +54,33 @@
                 "linkTo": "Document"
               }
         },
+        "experiment_relation": {
+            "title": "Experiment relations",
+            "description": "All related experiments",
+            "type": "array",
+            "items": {
+                "title": "Experiment relation",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "relationship_type": {
+                        "type": "string",
+                        "description": "A controlled term specifying the relationship between experiments.",
+                        "title": "Relationship Type",
+                        "enum": [
+                            "controlled by",
+                            "control for",
+                            "derived from"
+                        ]
+                    },
+                    "experiment": {
+                      "type": "string",
+                      "description": "The related experiment",
+                      "linkTo": "Experimend"
+                    }
+                }
+            }
+        },
         "biosample": {
             "title": "Biological Sample",
             "description": "Starting biological material.",

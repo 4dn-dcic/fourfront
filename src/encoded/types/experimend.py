@@ -22,7 +22,8 @@ class Experimend(Item):
     base_types = ['Experimend'] + Item.base_types
     embedded = [
      "protocol",
-     "protocol_variation"
+     "protocol_variation",
+     "lab"
     ]
     name_key = 'accession'
 
