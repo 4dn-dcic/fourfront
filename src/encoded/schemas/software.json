@@ -1,0 +1,105 @@
+{
+    "title": "Software",
+    "description": "Schema for submitting analysis software.",
+    "id": "/profiles/software.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["name", "description", "title"],
+    "additionalProperties": false,
+    "identifyingProperties": ["uuid", "alias", "title", "name"],
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/references" },
+        { "$ref": "mixins.json#/attribution" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "3"
+        },
+        "software_type": {
+            "title": "Types",
+            "description": "The classification of the software",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "Type",
+                "type": "string",
+                "enum": [
+                    "aligner",
+                    "quality metric",
+                    "peak caller",
+                    "filtering",
+                    "file format conversion",
+                    "matrix generation",
+                    "database",
+                    "variant annotation",
+                    "genome segmentation",
+                    "qualification",
+                    "transcript identification",
+                    "transcriptome assembly",
+                    "other"
+                ]
+            }
+        },
+        "name": {
+            "title": "Name",
+            "description": "Unique name of the software package, lower cased version of title.",
+            "type": "string",
+            "pattern": "^[a-z0-9\\-\\_]+",
+            "uniqueKey": "software:name"
+        },
+        "title": {
+            "title": "Title",
+            "description": "The preferred viewable name of the software.",
+            "type": "string"
+        },
+        "version": {
+            "title": "Version",
+            "description": "The software version number.",
+            "type": "string"
+        },
+        "bug_tracker_url": {
+            "title": "Bug tracker URL",
+            "description": "An external resource to track bugs for the software.",
+            "type": "string",
+            "format": "uri"
+        },
+        "source_url": {
+            "title": "Source URL",
+            "description": "An external resource to the code base.",
+            "type": "string",
+            "format": "uri"
+        },
+        "url": {
+            "title": "URL",
+            "description": "An external resource with additional information about the software.",
+            "type": "string",
+            "format": "uri"
+        },
+        "purpose": {
+            "title": "Purpose in project",
+            "description": "The purpose that the software was used for in the project.",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "Purpose",
+                "type": "string",
+                "enum": [
+                    "Hi-C",
+                    "microscopy",
+                    "data QC",
+                    "integrative analysis",
+                    "community resource"
+                ]
+            }
+        },
+        "description": {
+            "title": "Description",
+            "description": "A plain text description of the software.",
+            "type": "string"
+        }
+    }
+}
