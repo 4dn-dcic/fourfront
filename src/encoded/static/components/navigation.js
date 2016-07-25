@@ -1,6 +1,7 @@
 'use strict';
 var React = require('react');
 var url = require('url');
+var Login = require('./login');
 var {Navbars, Navbar, Nav, NavItem} = require('../libs/bootstrap/navbar');
 var {DropdownMenu} = require('../libs/bootstrap/dropdown-menu');
 var productionHost = require('./globals').productionHost;
@@ -48,6 +49,7 @@ var Navigation = module.exports = React.createClass({
                         <UserActions />
                         <ContextActions />
                         <Search />
+                        <NavLogin />
                     </Navbar>
                 </div>
                 {this.state.testWarning ?
@@ -184,6 +186,17 @@ var UserActions = React.createClass({
     }
 });
 
+var NavLogin = React.createClass({
+    render: function() {
+            return (
+                <Nav right>
+                    <NavItem>
+                            <Login />
+                    </NavItem>
+                </Nav>
+            );
+        }
+});
 
 // Display breadcrumbs with contents given in 'crumbs' object.
 // Each crumb in the crumbs array: {
