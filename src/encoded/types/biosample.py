@@ -1,16 +1,18 @@
+"""Collection for the Biosample object."""
 from snovault import (
-    calculated_property,
+    # calculated_property,
     collection,
     load_schema,
 )
 from .base import (
-    Item,
-    paths_filtered_by_status,
+    Item
+    # paths_filtered_by_status,
 )
-#from .shared_calculated_properties import (
+
+# from .shared_calculated_properties import (
 #    CalculatedBiosampleSlims,
 #    CalculatedBiosampleSynonyms
-#)
+# )
 
 
 @collection(
@@ -20,7 +22,9 @@ from .base import (
         'title': 'Biosamples',
         'description': 'Biosamples used in the 4DN project',
     })
-class Biosample(Item): #, CalculatedBiosampleSlims, CalculatedBiosampleSynonyms):
+class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms):
+    """Biosample class."""
+
     item_type = 'biosample'
     schema = load_schema('encoded:schemas/biosample.json')
     name_key = 'accession'
