@@ -1,6 +1,7 @@
 'use strict';
 var React = require('react');
 var url = require('url');
+var Login = require('./login');
 var {Navbars, Navbar, Nav, NavItem} = require('../libs/bootstrap/navbar');
 var {DropdownMenu} = require('../libs/bootstrap/dropdown-menu');
 var productionHost = require('./globals').productionHost;
@@ -39,14 +40,16 @@ var Navigation = module.exports = React.createClass({
 
     render: function() {
         var portal = this.context.portal;
+        var img = <img src="/static/img/4DN-Nils.png" height= "50px" width="170px"/>
         return (
             <div id="navbar" className="navbar navbar-fixed-top navbar-inverse">
                 <div className="container">
-                    <Navbar brand={portal.portal_title} brandlink="/" label="main" navClasses="navbar-main">
+                    <Navbar brand={img} brandlink="/" label="main" navClasses="navbar-main">
                         <GlobalSections />
                         <UserActions />
                         <ContextActions />
                         <Search />
+                        <NavLogin />
                     </Navbar>
                 </div>
                 {this.state.testWarning ?
@@ -141,11 +144,11 @@ var Search = React.createClass({
         return (
             <form className="navbar-form navbar-right" action="/search/">
                 <div className="search-wrapper">
-                    <input className="form-control search-query" id="navbar-search" type="text" placeholder="Search..." 
+                    <input className="form-control search-query" id="navbar-search" type="text" placeholder="Search..."
                         ref="searchTerm" name="searchTerm" defaultValue={searchTerm} key={searchTerm} />
                 </div>
             </form>
-        );  
+        );
     }
 });
 
@@ -183,6 +186,17 @@ var UserActions = React.createClass({
     }
 });
 
+var NavLogin = React.createClass({
+    render: function() {
+            return (
+                <Nav right>
+                    <NavItem>
+                            <Login />
+                    </NavItem>
+                </Nav>
+            );
+        }
+});
 
 // Display breadcrumbs with contents given in 'crumbs' object.
 // Each crumb in the crumbs array: {

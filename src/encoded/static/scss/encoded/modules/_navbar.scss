@@ -1,27 +1,33 @@
 /* NavBar */
 .navbar-inverse {
     border: none;
-    border-bottom: 0px solid #4e7294;
-    background: #0a253d;
-    @include box-shadow(0px 0px 30px 2px rgba(170, 170, 170, .9));
+    // border-bottom: 0px solid #4e7294;
+    background: #ffffff;
+    // @include box-shadow(0px 0px 30px 2px rgba(170, 170, 170, .9));
 
     .navbar-brand {
+        padding: 0px !important;
         margin-left: -15px;
-        color: #fff;
-        @include font-size(1.4);
+        color: $navbar-default-brand-color;
+        font-size: 1.7em;
         font-weight: 200;
-        text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+        // text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
 
         &:hover {
-            @include text-shadow(0px 0px 8px rgba(255, 255, 255, 0.8));
+            @include text-shadow(0px 0px 8px rgba(0, 153, 153, 0.8));
+            color: #000000 !important;
+        }
+        &:active{
+            color: #000000 !important;
         }
     }
 
     .nav > li > a {
-        color: #fff;   
+        font-size: 1.4em;
+        font-weight: 200;
         &:focus,
         &:hover {
-            background-color: #2f4961;
+            color: #000000;
         }
 
         /* Disabled sign-in link */
@@ -53,6 +59,9 @@
 
 .navbar-main {
     margin-bottom: 0;
+    &:active{
+        color: #000000 !important;
+    }
 }
 
 .test-warning {
@@ -105,13 +114,12 @@
 
 
 .dropdown-menu {
-    background-color: #fff;
-    @include background-image(linear-gradient(top,  #ffffff 0%,#f0f0f0 100%));
+    background-color: #ffffff;
+    border: 1px solid #000000;
+    // @include background-image(linear-gradient(top,  #0a253d 0%,#1d6baf 100%));
 
     &>li {
         &>a {
-            padding: 5px 20px;
-            color: #444 !important;
             font-weight: 300;
         }
     }
@@ -125,14 +133,14 @@
             &>a {
                 padding: 2px 30px 2px 20px;
                 @include font-size(1.1);
-                color: #444 !important;
+                color: #999999 !important;
                 border-top: 1px solid transparent;
                 border-bottom: 1px solid transparent;
                 letter-spacing: 1px;
 
                 &:hover,&:active {
-                    border-top: 1px solid darken($navbar-inverse-link-active-bg,20%);
-                    border-bottom: 1px solid darken($navbar-inverse-link-active-bg,20%);
+                    // border-top: 1px solid darken($navbar-inverse-link-active-bg,20%);
+                    // border-bottom: 1px solid darken($navbar-inverse-link-active-bg,20%);
                     background-color: $navbar-inverse-link-active-bg;
                     color: $navbar-inverse-link-active-color !important;
                 }

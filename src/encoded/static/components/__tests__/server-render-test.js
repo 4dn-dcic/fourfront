@@ -14,7 +14,7 @@ describe("Server rendering", function () {
     var home = {
         "@id": "/",
         "@type": ["Portal"],
-        "portal_title": "ENCODE",
+        "portal_title": "4D Nucleome",
         "title": "Home"
     };
 
