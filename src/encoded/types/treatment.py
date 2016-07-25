@@ -1,14 +1,14 @@
 """The type file for the collection Treatment."""
 from snovault import (
     abstract_collection,
-    calculated_property,
+    # calculated_property,
     collection,
     load_schema,
 )
-from pyramid.security import Authenticated
+# from pyramid.security import Authenticated
 from .base import (
-    Item,
-    paths_filtered_by_status
+    Item
+    # paths_filtered_by_status
 )
 
 
@@ -19,7 +19,10 @@ from .base import (
         'description': 'Listing of all types of treatments.',
     })
 class Treatment(Item):
+    """Treatment class."""
+
     base_types = ['Treatment'] + Item.base_types
+
 
 @collection(
     name='treatments-chemical',
@@ -28,9 +31,12 @@ class Treatment(Item):
         'description': 'Listing Chemical or Drug Treatments',
     })
 class TreatmentChemical(Treatment):
+    """Subclass of treatment for chemical treatments."""
+
     item_type = 'treatment_chemical'
     schema = load_schema('encoded:schemas/treatment_chemical.json')
     embedded = Treatment.embedded
+
 
 @collection(
     name='treatments-rnai',
@@ -39,6 +45,8 @@ class TreatmentChemical(Treatment):
         'description': 'Listing RNAi Treatments',
     })
 class TreatmentRnai(Treatment):
+    """Subclass of treatment for RNAi treatments."""
+
     item_type = 'treatment_rnai'
     schema = load_schema('encoded:schemas/treatment_rnai.json')
     embedded = ['rnai_vendor', 'rnai_constructs']

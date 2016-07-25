@@ -1,14 +1,14 @@
 """The type file for the collection Individual (Encode Donor)."""
 from snovault import (
     abstract_collection,
-    calculated_property,
+    # calculated_property,
     collection,
     load_schema,
 )
-from pyramid.security import Authenticated
+# from pyramid.security import Authenticated
 from .base import (
-    Item,
-    paths_filtered_by_status
+    Item
+    # paths_filtered_by_status
 )
 
 
@@ -20,6 +20,8 @@ from .base import (
         'description': 'Listing of all types of individuals.',
     })
 class Individual(Item):
+    """the base class for individual collection."""
+
     base_types = ['Individual'] + Item.base_types
     embedded = ['organism']
     name_key = 'accession'
@@ -33,6 +35,8 @@ class Individual(Item):
         'description': 'Listing Biosample Human Individuals',
     })
 class IndividualHuman(Individual):
+    """the sub class of individuals for human species."""
+
     item_type = 'individual_human'
     schema = load_schema('encoded:schemas/individual_human.json')
     embedded = Individual.embedded
@@ -46,6 +50,8 @@ class IndividualHuman(Individual):
         'description': 'Listing Biosample Mouse Individuals',
     })
 class IndividualMouse(Individual):
+    """the sub class of individuals for mouse species."""
+
     item_type = 'individual_mouse'
     schema = load_schema('encoded:schemas/individual_mouse.json')
     embedded = Individual.embedded + ['mouse_vendor']

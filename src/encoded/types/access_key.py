@@ -1,3 +1,5 @@
+"""Access_key types file."""
+
 from pyramid.security import effective_principals
 from pyramid.view import view_config
 from pyramid.security import (
@@ -46,6 +48,8 @@ from snovault.validators import (
         (Deny, Everyone, 'list'),
     ])
 class AccessKey(Item):
+    """AccessKey class."""
+
     item_type = 'access_key'
     schema = load_schema('encoded:schemas/access_key.json')
     name_key = 'access_key_id'
@@ -56,15 +60,18 @@ class AccessKey(Item):
     }
 
     def __ac_local_roles__(self):
+        """grab and return user as owner."""
         owner = 'userid.%s' % self.properties['user']
         return {owner: 'role.owner'}
 
     def __json__(self, request):
+        """delete the secret access key has from the object when used."""
         properties = super(AccessKey, self).__json__(request)
         del properties['secret_access_key_hash']
         return properties
 
     def update(self, properties, sheets=None):
+        """smth."""
         # make sure PUTs preserve the secret access key hash
         if 'secret_access_key_hash' not in properties:
             new_properties = self.properties.copy()
@@ -79,6 +86,7 @@ class AccessKey(Item):
 @view_config(context=AccessKey.Collection, permission='add', request_method='POST',
              validators=[validate_item_content_post])
 def access_key_add(context, request):
+    """smth."""
     crypt_context = request.registry[CRYPT_CONTEXT]
 
     if 'access_key_id' not in request.validated:
@@ -111,6 +119,7 @@ def access_key_add(context, request):
 @view_config(name='reset-secret', context=AccessKey, permission='edit',
              request_method='POST', subpath_segments=0)
 def access_key_reset_secret(context, request):
+    """smth."""
     request.validated = context.properties.copy()
     crypt_context = request.registry[CRYPT_CONTEXT]
     password = generate_password()
@@ -125,6 +134,7 @@ def access_key_reset_secret(context, request):
 @view_config(context=AccessKey, permission='view_raw', request_method='GET',
              name='raw')
 def access_key_view_raw(context, request):
+    """smth."""
     if asbool(request.params.get('upgrade', True)):
         properties = context.upgrade_properties()
     else:
