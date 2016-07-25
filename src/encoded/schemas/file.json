@@ -63,8 +63,8 @@
             "type": "string",
             "enum": [
                 "raw file",
-                "processed file"
-                "alignment file"
+                "processed file",
+                "alignment file",
                 "pairs file"
               ]
         },
@@ -111,13 +111,30 @@
         },
         "related_files": {
             "title": "Related Files",
-            "description": "Related files and how they are related to this file.",
+            "description": "Files related to this one",
             "type": "array",
             "items": {
                 "title": "Related File",
-                "description": "A file that is related to this file with a specified type of relationship.",
-                "type": "string",
-                "linkTo": "FileRelation"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "relationship_type": {
+                        "type": "string",
+                        "description": "A controlled term specifying the relationship between files.",
+                        "title": "Relationship Type",
+                        "enum": [
+                            "supercedes",
+                            "is superceded by",
+                            "derived from",
+                            "paired with"
+                        ]
+                    },
+                    "experiment": {
+                      "type": "string",
+                      "description": "The related file",
+                      "linkTo": "File"
+                    }
+                }
             }
         },
         "filesets": {

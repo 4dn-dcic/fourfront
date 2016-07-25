@@ -84,7 +84,8 @@
         "biosample": {
             "title": "Biological Sample",
             "description": "Starting biological material.",
-            "type": "string"
+            "type": "string",
+            "linkTo": "Biosample"
         },
         "files": {
             "title": "Data files",

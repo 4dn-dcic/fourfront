@@ -87,15 +87,31 @@
                 "linkTo": "Treatment"
             }
         },
-        "related_biosamples": {
-            "title": "Related Biosamples",
-            "description": "Related biosample and how they are related to this biosample.",
+        "biosample_relation": {
+            "title": "Biosample relations",
+            "description": "Related biosamples",
             "type": "array",
             "items": {
-                "title": "Related biosample",
-                "description": "An biosample that is related to this biosample with a specified type of relationship.",
-                "type": "string",
-                "linkTo": "BiosampleRelation"
+                "title": "Biosample relation",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "relationship_type": {
+                        "type": "string",
+                        "description": "A controlled term specifying the relationship between biosamples.",
+                        "title": "Relationship Type",
+                        "enum": [
+                            "derived from",
+                            "pooled from",
+                            "part of"
+                        ]
+                    },
+                    "experiment": {
+                      "type": "string",
+                      "description": "The related biosample",
+                      "linkTo": "Biosample"
+                    }
+                }
             }
         }
     }
