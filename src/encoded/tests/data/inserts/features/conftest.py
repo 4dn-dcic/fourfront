@@ -1,8 +1,8 @@
 import pytest
 
 pytest_plugins = [
-    'encoded.tests.features.browsersteps',
-    'encoded.tests.features.customsteps',
+    'encoded.tests.data.inserts.features.browsersteps',
+    'encoded.tests.data.inserts.features.customsteps',
 ]
 
 
