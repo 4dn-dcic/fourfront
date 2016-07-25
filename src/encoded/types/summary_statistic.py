@@ -1,13 +1,13 @@
-"""The type file for the collection Quality Metric."""
+"""The type file for the collection Summary statistics."""
 from snovault import (
-    calculated_property,
+    # calculated_property,
     collection,
     load_schema,
 )
-from pyramid.security import Authenticated
+# from pyramid.security import Authenticated
 from .base import (
-    Item,
-    paths_filtered_by_status
+    Item
+    # paths_filtered_by_status
 )
 
 
@@ -18,9 +18,12 @@ from .base import (
         'description': 'Listing of summary statistics',
     })
 class SummaryStatistic(Item):
+    """Summary statistics class."""
+
     base_types = ['SummaryStatistic'] + Item.base_types
     item_type = 'summary_statistic'
     schema = load_schema('encoded:schemas/summary_statistic.json')
+
 
 @collection(
     name='summary-statistics-hic',
@@ -29,6 +32,8 @@ class SummaryStatistic(Item):
         'description': 'Listing of Hi-C summary statistics',
     })
 class SummaryStatisticHic(SummaryStatistic):
+    """the sub class of summary statistics for Hi-C experiments."""
+
     item_type = 'summary-statistic-hic'
     schema = load_schema('encoded:schemas/summary_statistic_hic.json')
     embedded = SummaryStatistic.embedded

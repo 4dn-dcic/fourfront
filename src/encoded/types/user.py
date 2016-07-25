@@ -1,3 +1,4 @@
+"""The user collection."""
 # -*- coding: utf-8 -*-
 
 from pyramid.view import (
@@ -48,12 +49,14 @@ USER_DELETED = [
     },
     acl=[])
 class User(Item):
+    """The user class."""
+
     item_type = 'user'
     schema = load_schema('encoded:schemas/user.json')
     # Avoid access_keys reverse link so editing access keys does not reindex content.
-    #embedded = [
-    #    'lab',
-    #]
+    # embedded = [
+    #     'lab',
+    # ]
     STATUS_ACL = {
         'current': [(Allow, 'role.owner', ['edit', 'view_details'])] + USER_ALLOW_CURRENT,
         'deleted': USER_DELETED,
@@ -66,9 +69,11 @@ class User(Item):
         "type": "string",
     })
     def title(self, first_name, last_name):
+        """return first and last name."""
         return u'{} {}'.format(first_name, last_name)
 
     def __ac_local_roles__(self):
+        """return the owner user."""
         owner = 'userid.%s' % self.uuid
         return {owner: 'role.owner'}
 
@@ -81,6 +86,7 @@ class User(Item):
         },
     }, category='page')
     def access_keys(self, request):
+        """smth."""
         if not request.has_permission('view_details'):
             return
         uuids = self.registry[CONNECTION].get_rev_links(self.model, 'user', 'AccessKey')
@@ -90,6 +96,7 @@ class User(Item):
 
 @view_config(context=User, permission='view', request_method='GET', name='page')
 def user_page_view(context, request):
+    """smth."""
     if request.has_permission('view_details'):
         properties = item_view_object(context, request)
     else:
@@ -105,6 +112,7 @@ def user_page_view(context, request):
 @view_config(context=User, permission='view', request_method='GET',
              name='object')
 def user_basic_view(context, request):
+    """smth."""
     properties = item_view_object(context, request)
     filtered = {}
     for key in ['@id', '@type', 'uuid', 'lab', 'title']:
@@ -117,6 +125,7 @@ def user_basic_view(context, request):
 
 @calculated_property(context=User, category='user_action')
 def impersonate(request):
+    """smth."""
     # This is assuming the user_action calculated properties
     # will only be fetched from the current_user view,
     # which ensures that the user represented by 'context' is also an effective principal
@@ -130,6 +139,7 @@ def impersonate(request):
 
 @calculated_property(context=User, category='user_action')
 def profile(context, request):
+    """smth."""
     return {
         'id': 'profile',
         'title': 'Profile',
@@ -139,6 +149,7 @@ def profile(context, request):
 
 @calculated_property(context=User, category='user_action')
 def signout(context, request):
+    """smth."""
     return {
         'id': 'signout',
         'title': 'Sign out',

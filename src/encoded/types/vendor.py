@@ -4,7 +4,7 @@ moving this out of __init.py__ and into it's own file as
 add logic for autopopulating 'name' upon update or create
 """
 from snovault import (
-    calculated_property,
+    # calculated_property,
     collection,
     load_schema,
 )
@@ -21,6 +21,8 @@ from .base import (
         'description': 'Listing of sources and vendors for 4DN material',
     })
 class Vendor(Item):
+    """The Vendor class that contains the company/lab sources for reagents/cells... used."""
+
     item_type = 'vendor'
     schema = load_schema('encoded:schemas/vendor.json')
     name_key = 'name'

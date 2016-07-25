@@ -1,3 +1,5 @@
+"""The type file for image collection."""
+
 from snovault import (
     collection,
     load_schema,
@@ -16,6 +18,8 @@ from snovault.attachment import ItemWithAttachment
         'description': 'Listing of portal images',
     })
 class Image(ItemWithAttachment, Item):
+    """Class image,defines accepted file types."""
+
     item_type = 'image'
     schema = load_schema('encoded:schemas/image.json')
     schema['properties']['attachment']['properties']['type']['enum'] = [
@@ -26,6 +30,7 @@ class Image(ItemWithAttachment, Item):
     embedded = ['submitted_by']
 
     def unique_keys(self, properties):
+        """smth."""
         keys = super(Image, self).unique_keys(properties)
         value = properties['attachment']['download']
         keys.setdefault('image:filename', []).append(value)
