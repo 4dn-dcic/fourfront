@@ -20,51 +20,23 @@
                     "cols": [
                         {"blocks": ["#block3"]}
                     ]
-                },
-                {
-                    "cols": [
-                        {"blocks": ["#block4"]},
-                        {"blocks": ["#block5"]},
-                        {"blocks": ["#block6"]}
-                    ]
                 }
             ],
             "blocks": [
                 {
                     "@id": "#block1",
                     "@type": "richtextblock",
-                    "body": "<div class=\"project-info site-title\">\n    <h1 style='text-align:center'>4D Nucleome: DCIC</h1>\n</div>\n<div id=\"info-box\" class=\"project-info text-panel\">\n  <p>The 4D Nucleome (4DN) Data Coordination and Integration Center (DCIC) aims to collect, store, curate, display, and analyze data generated in the 4DN Network. The DCIC is a collaboration of two centers from three institutions: Harvard University, Massachusetts Institute of Technology (MIT), and The Washington University in St. Louis (WashU). The Harvard/MIT DCIC is tasked with building the infrastructure for data collection and integration. The Harvard/MIT and WashU centers will collaborate on the development and incorporation of novel data visualization tools.</p>\n</div>"
+                    "body": "<div class=\"fourDN-header fourDN-title\"><h1>4D Nucleome</h1></div>"
                 },
                 {
                     "@id": "#block2",
                     "@type": "richtextblock",
-                    "body": "<h2>News</h2>\n<p>Sweet news updates will go here...</p>"
+                    "body": "<h2 class=\"fourDN-header\">Announcements</h2>\n<table class=\"fourDN-section\"><tr><td class=\"fourDN-section-title\">Redesigned Data Portal Released</td><td class=\"fourDN-section-info\">Posted by DCIC Staff</td></tr></table><div class=\"fourDN-content\"><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus tristique, nisl nec imperdiet commodo, magna lorem placerat mauris, eu semper odio ipsum eget lectus. In eu libero ante. Mauris consectetur est venenatis tortor gravida, vitae fringilla orci facilisis. Aenean ante libero, sollicitudin ac ipsum vel, hendrerit porttitor quam.</p></div>\n<table class=\"fourDN-section\"><tr><td class=\"fourDN-section-title\">Now Accepting Data Submissions</td><td class=\"fourDN-section-info\">Posted by DCIC Staff</td></tr></table><div class=\"fourDN-content\"><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus tristique, nisl nec imperdiet commodo, magna lorem placerat mauris, eu semper odio ipsum eget lectus. In eu libero ante. Mauris consectetur est venenatis tortor gravida, vitae fringilla orci facilisis. Aenean ante libero, sollicitudin ac ipsum vel, hendrerit porttitor quam.</p></div>"
                 },
                 {
                     "@id": "#block3",
                     "@type": "richtextblock",
-                    "body": "<h2>Getting Started</h2>\n<p>Instructions for getting started and relevant routes placed here.</p>"
-                },
-                {
-                    "@id": "#block4",
-                    "@type": "teaserblock",
-                    "image": "/images/6e4bca66-a415-4823-9d48-d9a18b81aaa1/",
-                    "body": "<h3>4D Nucleome</h3>",
-                    "href": "https://commonfund.nih.gov/4dnucleome/index"
-                },
-                {
-                    "@id": "#block5",
-                    "@type": "teaserblock",
-                    "image": "/images/6e4bca66-a415-4823-9d48-d9a18b81aaa2/",
-                    "body": "<h3>Harvard University</h3>",
-                    "href": "http://www.harvard.edu"
-                },
-                {
-                    "@id": "#block6",
-                    "@type": "teaserblock",
-                    "image": "/images/6e4bca66-a415-4823-9d48-d9a18b81aaa3/",
-                    "body": "<h3>Massachusetts Institute of Technology</h3>",
-                    "href": "http://www.mit.edu"
+                    "body": "<h2 class=\"fourDN-header\">Getting Started</h2>\n<table class=\"fourDN-section\"><tr><td class=\"fourDN-section-title\">Data Access</td></tr></table><div class=\"fourDN-content\"><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus tristique, nisl nec imperdiet commodo, magna lorem placerat mauris, eu semper odio ipsum eget lectus. In eu libero ante. Mauris consectetur est venenatis tortor gravida, vitae fringilla orci facilisis. Aenean ante libero, sollicitudin ac ipsum vel, hendrerit porttitor quam.</p></div>\n<table class=\"fourDN-section\"><tr><td class=\"fourDN-section-title\">Tutorials</td></tr></table><div class=\"fourDN-content\"><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus tristique, nisl nec imperdiet commodo, magna lorem placerat mauris, eu semper odio ipsum eget lectus. In eu libero ante. Mauris consectetur est venenatis tortor gravida, vitae fringilla orci facilisis. Aenean ante libero, sollicitudin ac ipsum vel, hendrerit porttitor quam.</p></div>"
                 }
             ]
         }

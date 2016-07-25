@@ -262,6 +262,8 @@ var SubIPannel = React.createClass({
             var title = item.accession;
         }else if (item.hasOwnProperty("name")){
             var title = item.name;
+        }else if (item.hasOwnProperty("title")){
+            var title = item.title;
         }else{
             var title = "Open";
         }
