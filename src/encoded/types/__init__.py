@@ -1,17 +1,20 @@
+"""init.py lists all the collections that do not have a dedicated types file."""
+
 from snovault.attachment import ItemWithAttachment
 from snovault import (
     calculated_property,
     collection,
     load_schema,
 )
-from pyramid.traversal import find_root
+# from pyramid.traversal import find_root
 from .base import (
-    Item,
-    paths_filtered_by_status,
+     Item
+     # paths_filtered_by_status,
 )
 
 
 def includeme(config):
+    """include me method."""
     config.scan()
 
 
@@ -23,6 +26,8 @@ def includeme(config):
         'description': 'Listing of 4D Nucleome labs',
     })
 class Lab(Item):
+    """Lab class."""
+
     item_type = 'lab'
     schema = load_schema('encoded:schemas/lab.json')
     name_key = 'name'
@@ -37,6 +42,8 @@ class Lab(Item):
         'description': 'Listing of awards (aka grants)',
     })
 class Award(Item):
+    """Award class."""
+
     item_type = 'award'
     schema = load_schema('encoded:schemas/award.json')
     name_key = 'name'
@@ -51,6 +58,8 @@ class Award(Item):
         'description': 'Listing of all registered organisms',
     })
 class Organism(Item):
+    """Organism class."""
+
     item_type = 'organism'
     schema = load_schema('encoded:schemas/organism.json')
     name_key = 'name'
@@ -64,11 +73,14 @@ class Organism(Item):
         'description': 'Publication pages',
     })
 class Publication(Item):
+    """Publication class."""
+
     item_type = 'publication'
     schema = load_schema('encoded:schemas/publication.json')
     # embedded = ['datasets']
 
     def unique_keys(self, properties):
+        """unique keys."""
         keys = super(Publication, self).unique_keys(properties)
         if properties.get('identifiers'):
             keys.setdefault('alias', []).extend(properties['identifiers'])
@@ -79,6 +91,7 @@ class Publication(Item):
         "type": "string",
     })
     def publication_year(self, date_published):
+        """publication year."""
         return date_published.partition(' ')[0]
 
 
@@ -89,6 +102,8 @@ class Publication(Item):
         'description': 'Listing of Documents',
     })
 class Document(ItemWithAttachment, Item):
+    """Document class."""
+
     item_type = 'document'
     schema = load_schema('encoded:schemas/document.json')
     embedded = ['lab', 'award', 'submitted_by']
@@ -102,6 +117,8 @@ class Document(ItemWithAttachment, Item):
         'description': 'Listing of enzymes',
     })
 class Enzyme(Item):
+    """Enzyme class."""
+
     item_type = 'enzyme'
     schema = load_schema('encoded:schemas/enzyme.json')
     name_key = 'name'
@@ -114,6 +131,8 @@ class Enzyme(Item):
         'description': 'Cell lines and tissues used for biosamples',
     })
 class Biosource(Item):
+    """Biosource class."""
+
     item_type = 'biosource'
     schema = load_schema('encoded:schemas/biosource.json')
 
@@ -125,6 +144,8 @@ class Biosource(Item):
         'description': 'Relationships between biosamples',
     })
 class BiosampleRelation(Item):
+    """Biosample relation class."""
+
     item_type = 'biosample_relation'
     schema = load_schema('encoded:schemas/biosample_relation.json')
 
@@ -136,6 +157,8 @@ class BiosampleRelation(Item):
         'description': 'Listing of Constructs',
     })
 class Construct(Item):
+    """Construct class."""
+
     item_type = 'construct'
     schema = load_schema('encoded:schemas/construct.json')
 
@@ -147,6 +170,8 @@ class Construct(Item):
         'description': 'Listing of Stable Genomic Modifications',
     })
 class Modification(Item):
+    """Modification class."""
+
     item_type = 'modification'
     schema = load_schema('encoded:schemas/modification.json')
     embedded = ['constructs']
@@ -158,6 +183,8 @@ class Modification(Item):
         'title': 'Quality Metric Flags'
     })
 class QualityMetricFlag(Item):
+    """Quality Metrics Flag class."""
+
     item_type = 'quality_metric_flag'
     schema = load_schema('encoded:schemas/quality_metric_flag.json')
     embedded = ['quality_metrics']
