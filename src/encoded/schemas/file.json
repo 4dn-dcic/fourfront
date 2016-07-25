@@ -21,6 +21,9 @@
         "schema_version": {
             "default": "1"
         },
+        "accession": {
+            "accessionType": "FI"
+        },
         "filename": {
             "title": "File name",
             "description": "The local file name used at time of submission.",

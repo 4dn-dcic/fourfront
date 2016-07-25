@@ -42,7 +42,7 @@
               "unspecified",
               "replicates",
               "biological replicates",
-              "technical repllicates",
+              "technical repllicates"
             ]
         },
         "description": {
@@ -50,6 +50,6 @@
             "description": "A description of why experiments are part of the set.",
             "type": "string",
             "default": ""
-        },
+        }
     }
 }

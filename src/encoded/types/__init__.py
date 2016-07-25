@@ -138,19 +138,6 @@ class Biosource(Item):
 
 
 @collection(
-    name='biosample_relations',
-    properties={
-        'title': 'Biosample relationships',
-        'description': 'Relationships between biosamples',
-    })
-class BiosampleRelation(Item):
-    """Biosample relation class."""
-
-    item_type = 'biosample_relation'
-    schema = load_schema('encoded:schemas/biosample_relation.json')
-
-
-@collection(
     name='constructs',
     properties={
         'title': 'Constructs',
