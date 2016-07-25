@@ -99,10 +99,10 @@ var IPanel = module.exports.IPanel = React.createClass({
                             <dl className="key-value">
                                 {Object.keys(context).map(function(ikey, val){
                                     return (
-                                      <div key={ikey} data-test="term-name">
-                                        <dt>{ikey}</dt>
-                                        <dd>{formString(context[ikey])}</dd>
-                                      </div>
+                                        <div key={ikey} data-test="term-name">
+                                          <dt>{ikey}</dt>
+                                          <dd>{formValue(context[ikey])}</dd>
+                                        </div>
                                     );
                                 })}
                             </dl>
@@ -233,16 +233,23 @@ var RelatedItems = module.exports.RelatedItems = React.createClass({
     },
 });
 
-// Currently handles arrays (represented as strings separated by commas),
-// objects, and all other cases as strings
-var formString = function (item) {
+// Formats the correct display for each metadata field
+var formValue = function (item) {
+    var toReturn = [];
     if(Array.isArray(item)) {
-        return item.join(", ");
+        for (var i=0; i < item.length; i++){
+            toReturn.push(formValue(item[i]));
+            console.log(item[i]);
+            console.log(typeof item[i]);
+        }
     }else if (typeof item === 'object') {
-        return(<SubIPannel content={item}/>);
+        toReturn.push(<SubIPannel content={item}/>);
     }else{
-        return item;
+        toReturn.push(item);
     }
+    return(
+        <div>{toReturn}</div>
+    );
 };
 
 var SubIPannel = React.createClass({
@@ -301,7 +308,7 @@ var Subview = React.createClass({
                                       return (
                                         <div key={ikey} data-test="term-name">
                                           <dt>{ikey}</dt>
-                                          <dd>{formString(item[ikey])}</dd>
+                                          <dd>{formValue(item[ikey])}</dd>
                                         </div>
                                       );
                                   })}
