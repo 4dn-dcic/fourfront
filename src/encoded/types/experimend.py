@@ -27,7 +27,8 @@ class Experimend(Item):
     embedded = [
      "protocol",
      "protocol_variation",
-     "lab"
+     "lab",
+     "experiment_relation"
     ]
     name_key = 'accession'
 
