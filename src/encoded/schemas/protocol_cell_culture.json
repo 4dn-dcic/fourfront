@@ -4,8 +4,6 @@
     "id": "/profiles/protocol_cell_culture.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [],
-    "approvalRequired": [],
     "identifyingProperties": ["uuid", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [

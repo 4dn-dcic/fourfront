@@ -26,8 +26,7 @@
             "title": "User",
             "comment": "Only admins are allowed to set this value.",
             "type": "string",
-            "linkTo": "User",
-            "permission": "import_items"
+            "linkTo": "User"
         },
         "description": {
             "title": "Description",
@@ -38,14 +37,12 @@
             "title": "Access key ID",
             "comment": "Only admins are allowed to set this value.",
             "type": "string",
-            "permission": "import_items",
             "uniqueKey": true
         },
         "secret_access_key_hash": {
             "title": "Secret access key Hash",
             "comment": "Only admins are allowed to set this value.",
-            "type": "string",
-            "permission": "import_items"
+            "type": "string"
         }
     }
 }

@@ -19,9 +19,6 @@
         "schema_version": {
             "default": "1"
         },
-        "status": {
-            "default": "released"
-        },
         "caption": {
             "title": "Caption",
             "type": "string"

@@ -4,7 +4,7 @@
     "id": "/profiles/file_set.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [ "award", "lab"],
+    "required": [ "award", "lab", "fileset_type"],
     "identifyingProperties": ["uuid", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -44,7 +44,7 @@
               "alignment files",
               "contact matrices",
               "image files (channels)",
-              "image files (z-series)",
+              "image files (z-series)"
             ]
         },
         "description": {
@@ -52,6 +52,6 @@
             "description": "A description of what files are part of the set.",
             "type": "string",
             "default": ""
-        },
+        }
     }
 }

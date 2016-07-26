@@ -5,8 +5,7 @@
     "id": "/profiles/experimend.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [],
-    "approvalRequired": [],
+    "required": ["experiment_type", "biosample", "award", "lab"],
     "identifyingProperties": ["uuid", "accession" , "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -107,16 +106,6 @@
                 "description": "Metadata on a set of files.",
                 "type": "string",
                 "linkTo": "FileSet"
-            }
-        },
-        "related_experiments": {
-            "title": "Related Experiments",
-            "description": "Related experiments and how they are related to this experiment.",
-            "type": "array",
-            "items": {
-                "title": "Related experiment",
-                "description": "linkTo: ExperimentRelation An experiment that is related to this experiment with a specified type of relationship.",
-                "type": "string"
             }
         },
         "experiment_sets": {

@@ -175,3 +175,24 @@ class QualityMetricFlag(Item):
     item_type = 'quality_metric_flag'
     schema = load_schema('encoded:schemas/quality_metric_flag.json')
     embedded = ['quality_metrics']
+
+
+@collection(
+    name='softwares',
+    unique_key='software:name',
+    properties={
+        'title': 'Softwares',
+        'description': 'Listing of software for 4DN analyses',
+    })
+class Software(Item):
+    """The Software class that contains the software... used."""
+
+    item_type = 'software'
+    schema = load_schema('encoded:schemas/software.json')
+    name_key = 'name'
+
+    def _update(self, properties, sheets=None):
+        # set name based on what is entered into title
+        properties['name'] = properties['title'].replace(' ', '-').lower()
+
+        super(Software, self)._update(properties, sheets)

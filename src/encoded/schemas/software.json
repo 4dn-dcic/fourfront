@@ -4,9 +4,9 @@
     "id": "/profiles/software.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["name", "description", "title"],
+    "required": ["title", "software_type"],
     "additionalProperties": false,
-    "identifyingProperties": ["uuid", "alias", "title", "name"],
+    "identifyingProperties": ["uuid", "alias", "name"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },

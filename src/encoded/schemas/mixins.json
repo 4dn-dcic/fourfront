@@ -15,7 +15,6 @@
             "type": "string",
             "format": "uuid",
             "serverDefault": "uuid4",
-            "permission": "import_items",
             "requestMethod": "POST"
         }
     },
@@ -26,15 +25,13 @@
             "comment": "Only admins are allowed to set or update this value.",
             "type": "string",
             "format": "accession",
-            "serverDefault": "accession",
-            "permission": "import_items"
+            "serverDefault": "accession"
         },
         "alternate_accessions": {
             "title": "Alternate accessions",
             "description": "Accessions previously assigned to objects that have been merged with this object.",
             "type": "array",
             "default": [],
-            "permission": "import_items",
             "items": {
                 "title": "Alternate Accession",
                 "description": "An accession previously assigned to an object that has been merged with this object.",
@@ -86,8 +83,7 @@
                 {"format": "date-time"},
                 {"format": "date"}
             ],
-            "serverDefault": "now",
-            "permission": "import_items"
+            "serverDefault": "now"
         },
         "submitted_by": {
             "rdfs:subPropertyOf": "dc:creator",
@@ -95,8 +91,7 @@
             "comment": "Do not submit, value is assigned by the server. The user that created the object.",
             "type": "string",
             "linkTo": "User",
-            "serverDefault": "userid",
-            "permission": "import_items"
+            "serverDefault": "userid"
         }
     },
     "references": {
@@ -136,7 +131,7 @@
             "title": "Notes",
             "description": "DCIC internal notes.",
             "type": "string",
-            "permission": "import_items",
+
             "elasticsearch_mapping_index_type": {
                 "title": "Field mapping index type",
                 "description": "Defines one of three types of indexing available",
