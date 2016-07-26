@@ -69,7 +69,8 @@
                         "enum": [
                             "controlled by",
                             "control for",
-                            "derived from"
+                            "derived from",
+                            "source for"
                         ]
                     },
                     "experiment": {
