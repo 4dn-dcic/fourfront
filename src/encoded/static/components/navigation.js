@@ -45,6 +45,7 @@ var Navigation = module.exports = React.createClass({
             <div id="navbar" className="navbar navbar-fixed-top navbar-inverse">
                 <div className="container">
                     <Navbar brand={img} brandlink="/" label="main" navClasses="navbar-main">
+                        <a href="/" className="non-vis">4D Nucleome</a>
                         <GlobalSections />
                         <UserActions />
                         <ContextActions />

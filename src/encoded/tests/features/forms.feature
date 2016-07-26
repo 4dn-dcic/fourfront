@@ -26,11 +26,11 @@ Feature: Edit forms
         When I visit "/antibodies/ENCAB728YTO/#!edit"
         And I wait for an element with the css selector "form.rf-Form" to load
         And I fill in "antigen_description" with "It's not a very nice antigen"
-        And I click the link with text "ENCODE"
+        And I click the link with text "4D Nucleome"
         And I dismiss the alert
         Then field "antigen_description" should have the value "It's not a very nice antigen"
         # Make sure we don't leave a dirty form that will interfere with subsequent tests
-        When I click the link with text "ENCODE"
+        When I click the link with text "4D Nucleome"
         And I accept the alert
 
     Scenario: Validation errors are shown in context
@@ -41,7 +41,7 @@ Feature: Edit forms
         And I wait for an element with the css selector "input[name=date_created] + .rf-Message" to load
         Then I should see "'bogus' is not valid under any of the given schemas" within 2 seconds
         # Make sure we don't leave a dirty form that will interfere with subsequent tests
-        When I click the link with text "ENCODE"
+        When I click the link with text "4D Nucleome"
         And I accept the alert
 
 # To add:
