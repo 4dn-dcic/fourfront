@@ -4,16 +4,14 @@
     "id": "/profiles/software.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["name", "description", "title", "award", "lab"],
+    "required": ["title", "software_type"],
     "additionalProperties": false,
-    "identifyingProperties": ["uuid", "alias", "title", "name"],
+    "identifyingProperties": ["uuid", "alias", "name"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/aliases" },
-        { "$ref": "mixins.json#/standard_status" },
         { "$ref": "mixins.json#/notes" },
-        { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/references" },
         { "$ref": "mixins.json#/attribution" }
     ],
@@ -35,6 +33,7 @@
                     "peak caller",
                     "filtering",
                     "file format conversion",
+                    "matrix generation",
                     "database",
                     "variant annotation",
                     "genome segmentation",
@@ -55,6 +54,11 @@
         "title": {
             "title": "Title",
             "description": "The preferred viewable name of the software.",
+            "type": "string"
+        },
+        "version": {
+            "title": "Version",
+            "description": "The software version number.",
             "type": "string"
         },
         "bug_tracker_url": {
@@ -84,29 +88,11 @@
                 "title": "Purpose",
                 "type": "string",
                 "enum": [
-                    "ChIP-seq",
-                    "DNase-seq",
-                    "RNA-seq",
+                    "Hi-C",
+                    "microscopy",
                     "data QC",
                     "integrative analysis",
-                    "variant analysis",
                     "community resource"
-                ]
-            }
-        },
-        "used_by": {
-            "title": "Used by project",
-            "type": "array",
-            "uniqueItems": true,
-            "items": {
-                "title": "Used by",
-                "type": "string",
-                "enum": [
-                    "modERN",
-                    "ENCODE",
-                    "mouseENCODE",
-                    "modENCODE",
-                    "community"
                 ]
             }
         },
@@ -115,57 +101,5 @@
             "description": "A plain text description of the software.",
             "type": "string"
         }
-    },
-    "facets": {
-        "software_type": {
-            "title": "Software type"
-        },
-        "purpose": {
-            "title": "Purpose in project"
-        },
-        "references.published_by": {
-            "title": "Created by"
-        }
-    },
-   "columns": {
-        "title": {
-            "title": "Title"
-        },
-        "name": {
-            "title": "Name"
-        },
-        "status": {
-            "title": "Publication status"
-        },
-        "url": {
-            "title": "URL"
-        },
-        "description": {
-            "title": "Description"
-        },
-        "source_url": {
-            "title": "Source URL"
-        },
-        "references": {
-            "title": "references"
-        },
-        "used_by": {
-            "title": "Use by project"
-        },
-        "software_type": {
-            "title": "The classification of the software"
-        },
-        "purpose": {
-            "title": "Purpose in project"
-        }
-    },
-    "boost_values": {
-        "title": 1.0,
-        "name": 1.0,
-        "purpose": 1.0,
-        "used_by": 1.0,
-        "software_type": 1.0,
-        "references.title": 1.0,
-        "references.identifiers": 1.0
     }
 }

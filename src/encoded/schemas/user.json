@@ -9,27 +9,11 @@
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
-        { "$ref": "mixins.json#/shared_status" }
+        { "$ref": "mixins.json#/status" }
     ],
     "properties": {
         "schema_version": {
-            "default": "3"
-        },
-        "email": {
-            "title": "Email",
-            "type": "string",
-            "format": "email",
-            "uniqueKey": true
-        },
-        "first_name": {
-            "title": "First name",
-            "description": "The user's first (given) name.",
-            "type": "string"
-        },
-        "last_name": {
-            "title": "Last name",
-            "description": "The user's last (family) name.",
-            "type": "string"
+            "default": "1"
         },
         "lab": {
             "title": "Affiliation",
@@ -64,20 +48,21 @@
                 "type": "string"
             }
         },
-        "viewing_groups": {
-            "title": "View access group",
-            "description": "The group that determines which set of data the user has permission to view.",
-            "type": "array",
-            "uniqueItems": true,
-            "permission": "import-items",
-            "items": {
-                "type": "string",
-                "enum": [
-                    "ENCODE",
-                    "GGR",
-                    "REMC"
-                ]
-            }
+        "email": {
+            "title": "Email",
+            "type": "string",
+            "format": "email",
+            "uniqueKey": true
+        },
+        "first_name": {
+            "title": "First name",
+            "description": "The user's first (given) name.",
+            "type": "string"
+        },
+        "last_name": {
+            "title": "Last name",
+            "description": "The user's last (family) name.",
+            "type": "string"
         },
         "job_title": {
             "title": "Job title",
@@ -118,7 +103,6 @@
         }
     },
     "boost_values": {
-        "title": 1.0,
-        "lab": 1.0
+        "title": 1.0
     }
 }

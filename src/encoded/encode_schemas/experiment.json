@@ -70,7 +70,7 @@
                 "title": "External identifier",
                 "description": "A unique identifier from external resource.",
                 "type":  "string",
-                "pattern": "^(UCSC-ENCODE-mm9:wgEncodeEM\\d+|UCSC-ENCODE-hg19:wgEncodeEH\\d+|GEO:(GSM|GSE)\\d+)$"
+                "pattern": "^GEO:(GSM|GSE)\\d+)$"
             }
         },
         "documents": {
@@ -194,7 +194,7 @@
         "replication_type": {
             "title": "Replication type"
         }
-        
+
     },
     "columns": {
         "accession": {
@@ -265,7 +265,7 @@
         },
         "replicates.library.biosample.post_synchronization_time_units": {
             "title": "Post-synchronization time units"
-        },       
+        },
         "replicates.length": {
             "title": "Replicates"
         },

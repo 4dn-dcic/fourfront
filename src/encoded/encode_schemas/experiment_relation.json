@@ -1,0 +1,37 @@
+{
+    "title": "Experiment Relation",
+    "description": "Schema for capturing relationships.",
+    "comment": "Use as mixin.  Do not make stand alone objects",
+    "id": "/profiles/experiment_relation.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["relationship_type","experiment"],
+    "approvalRequired": [],
+    "identifyingProperties": ["uuid"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/status" }
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/notes" },
+    ],
+    "properties": {
+        "relationship_type": {
+            "type": "string",
+            "description": "A controlled term specifying the relationship between experiments.",
+            "title": "Relationship Type",
+            "enum": [
+                "controlled by",
+                "control for",
+                "derived from"
+            ]
+        },
+        "experiment": {
+          "type": "string",
+          "description": "The related experiment",
+          "linkTo": "Experimend"
+        }
+    }
+}

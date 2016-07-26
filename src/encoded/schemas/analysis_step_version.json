@@ -11,8 +11,6 @@
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/uuid" },
-        { "$ref": "mixins.json#/standard_status" },
-        { "$ref": "mixins.json#/submitted"},
         { "$ref": "mixins.json#/notes"}
     ],
     "properties": {
@@ -32,14 +30,14 @@
             "linkTo": "AnalysisStep"
         },
         "software_versions": {
-            "title": "Software version",
-            "description": "The software version used in the analysis.",
+            "title": "Software",
+            "description": "The software used in the analysis.",
             "type": "array",
             "uniqueItems": true,
             "items": {
-                "comment": "See software_version.json for a list of available identifiers.",
+                "comment": "See software.json for a list of available identifiers.",
                 "type": "string",
-                "linkTo": "SoftwareVersion"
+                "linkTo": "Software"
             }
         }
     }

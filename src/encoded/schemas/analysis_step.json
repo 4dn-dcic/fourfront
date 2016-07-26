@@ -1,10 +1,10 @@
-{ 
+{
     "title": "Analysis step",
-    "description": "Schema for submitting a computational analysis steps as a subobject of pipeline that transforms input files to output files.",
+    "description": "Schema for submitting a computational analysis steps as a part of a workflow.",
     "id": "/profiles/analysis_step.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["name", "title", "analysis_step_types", "input_file_types"],
+    "required": ["name", "title", "analysis_step_types"],
     "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases", "name"],
     "mixinProperties": [
@@ -31,6 +31,11 @@
         "title": {
             "title": "Title",
             "description": "The preferred viewable name of the analysis step, likely the same as the name.",
+            "type": "string"
+        },
+        "description": {
+            "title": "Description",
+            "description": "A plain text description of the software.",
             "type": "string"
         },
         "analysis_step_types": {
@@ -111,7 +116,7 @@
                     "hotspots",
                     "long range chromatin interactions",
                     "peaks",
-                    "RNA-binding protein associated mRNAs",           
+                    "RNA-binding protein associated mRNAs",
                     "splice junctions",
                     "transcription start sites",
                     "predicted enhancers",
@@ -185,7 +190,7 @@
                     "long range chromatin interactions",
                     "open chromatin regions",
                     "peaks",
-                    "RNA-binding protein associated mRNAs",           
+                    "RNA-binding protein associated mRNAs",
                     "splice junctions",
                     "transcription start sites",
                     "predicted enhancers",

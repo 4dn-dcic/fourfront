@@ -1,17 +1,20 @@
+"""init.py lists all the collections that do not have a dedicated types file."""
+
 from snovault.attachment import ItemWithAttachment
 from snovault import (
     calculated_property,
     collection,
     load_schema,
 )
-from pyramid.traversal import find_root
+# from pyramid.traversal import find_root
 from .base import (
-    Item,
-    paths_filtered_by_status,
+     Item
+     # paths_filtered_by_status,
 )
 
 
 def includeme(config):
+    """include me method."""
     config.scan()
 
 
@@ -20,9 +23,11 @@ def includeme(config):
     unique_key='lab:name',
     properties={
         'title': 'Labs',
-        'description': 'Listing of ENCODE DCC labs',
+        'description': 'Listing of 4D Nucleome labs',
     })
 class Lab(Item):
+    """Lab class."""
+
     item_type = 'lab'
     schema = load_schema('encoded:schemas/lab.json')
     name_key = 'name'
@@ -37,6 +42,8 @@ class Lab(Item):
         'description': 'Listing of awards (aka grants)',
     })
 class Award(Item):
+    """Award class."""
+
     item_type = 'award'
     schema = load_schema('encoded:schemas/award.json')
     name_key = 'name'
@@ -51,172 +58,11 @@ class Award(Item):
         'description': 'Listing of all registered organisms',
     })
 class Organism(Item):
+    """Organism class."""
+
     item_type = 'organism'
     schema = load_schema('encoded:schemas/organism.json')
     name_key = 'name'
-
-
-@collection(
-    name='sources',
-    unique_key='source:name',
-    properties={
-        'title': 'Sources',
-        'description': 'Listing of sources and vendors for ENCODE material',
-    })
-class Source(Item):
-    item_type = 'source'
-    schema = load_schema('encoded:schemas/source.json')
-    name_key = 'name'
-
-
-@collection(
-    name='treatments',
-    properties={
-        'title': 'Treatments',
-        'description': 'Listing Biosample Treatments',
-    })
-class Treatment(Item):
-    item_type = 'treatment'
-    schema = load_schema('encoded:schemas/treatment.json')
-    # XXX 'treatment_name' as key?
-
-
-@collection(
-    name='constructs',
-    properties={
-        'title': 'Constructs',
-        'description': 'Listing of Biosample Constructs',
-    })
-class Construct(Item):
-    item_type = 'construct'
-    schema = load_schema('encoded:schemas/construct.json')
-    # XXX 'vector_name' as key?
-    rev = {
-        'characterizations': ('ConstructCharacterization', 'characterizes'),
-    }
-    embedded = ['target']
-
-    @calculated_property(schema={
-        "title": "Characterizations",
-        "type": "array",
-        "items": {
-            "type": "string",
-            "linkTo": "ConstructCharacterization",
-        },
-    })
-    def characterizations(self, request, characterizations):
-        return paths_filtered_by_status(request, characterizations)
-
-
-@collection(
-    name='talens',
-    unique_key='talen:name',
-    properties={
-        'title': 'TALENs',
-        'description': 'Listing of TALEN Constructs',
-    })
-class TALEN(Item):
-    item_type = 'talen'
-    schema = load_schema('encoded:schemas/talen.json')
-    name_key = 'name'
-    rev = {
-        'characterizations': ('ConstructCharacterization', 'characterizes'),
-    }
-    embedded = [
-        'lab',
-        'submitted_by',
-        'documents',
-        'documents.award',
-        'documents.lab',
-        'documents.submitted_by'
-    ]
-
-    @calculated_property(schema={
-        "title": "Characterizations",
-        "type": "array",
-        "items": {
-            "type": "string",
-            "linkTo": "ConstructCharacterization",
-        },
-    })
-    def characterizations(self, request, characterizations):
-        return paths_filtered_by_status(request, characterizations)
-
-
-@collection(
-    name='documents',
-    properties={
-        'title': 'Documents',
-        'description': 'Listing of Biosample Documents',
-    })
-class Document(ItemWithAttachment, Item):
-    item_type = 'document'
-    schema = load_schema('encoded:schemas/document.json')
-    embedded = ['lab', 'award', 'submitted_by']
-
-
-@collection(
-    name='platforms',
-    unique_key='platform:term_id',
-    properties={
-        'title': 'Platforms',
-        'description': 'Listing of Platforms',
-    })
-class Platform(Item):
-    item_type = 'platform'
-    schema = load_schema('encoded:schemas/platform.json')
-    name_key = 'term_id'
-
-    @calculated_property(schema={
-        "title": "Title",
-        "type": "string",
-    })
-    def title(self, term_name):
-        return term_name
-
-
-@collection(
-    name='libraries',
-    unique_key='accession',
-    properties={
-        'title': 'Libraries',
-        'description': 'Listing of Libraries',
-    })
-class Library(Item):
-    item_type = 'library'
-    schema = load_schema('encoded:schemas/library.json')
-    name_key = 'accession'
-    embedded = [
-        'biosample',
-        'biosample.donor',
-        'biosample.donor.organism',
-    ]
-
-
-@collection(
-    name='rnais',
-    properties={
-        'title': 'RNAi',
-        'description': 'Listing of RNAi',
-    })
-class RNAi(Item):
-    item_type = 'rnai'
-    schema = load_schema('encoded:schemas/rnai.json')
-    embedded = ['source', 'documents', 'target']
-    rev = {
-        'characterizations': ('RNAiCharacterization', 'characterizes'),
-    }
-
-    @calculated_property(schema={
-        "title": "Characterizations",
-        "type": "array",
-        "items": {
-            "type": "string",
-            "linkTo": "RNAiCharacterization",
-        },
-    })
-    def characterizations(self, request, characterizations):
-        return paths_filtered_by_status(request, characterizations)
 
 
 @collection(
@@ -227,11 +73,14 @@ class RNAi(Item):
         'description': 'Publication pages',
     })
 class Publication(Item):
+    """Publication class."""
+
     item_type = 'publication'
     schema = load_schema('encoded:schemas/publication.json')
-    embedded = ['datasets']
+    # embedded = ['datasets']
 
     def unique_keys(self, properties):
+        """unique keys."""
         keys = super(Publication, self).unique_keys(properties)
         if properties.get('identifiers'):
             keys.setdefault('alias', []).extend(properties['identifiers'])
@@ -242,54 +91,108 @@ class Publication(Item):
         "type": "string",
     })
     def publication_year(self, date_published):
+        """publication year."""
         return date_published.partition(' ')[0]
 
 
 @collection(
-    name='software',
-    unique_key='software:name',
+    name='documents',
     properties={
-        'title': 'Software',
-        'description': 'Software pages',
+        'title': 'Documents',
+        'description': 'Listing of Documents',
     })
-class Software(Item):
-    item_type = 'software'
-    schema = load_schema('encoded:schemas/software.json')
-    name_key = 'name'
-    embedded = [
-        'references',
-        'versions'
-    ]
-    rev = {
-        'versions': ('SoftwareVersion', 'software')
-    }
+class Document(ItemWithAttachment, Item):
+    """Document class."""
 
-    @calculated_property(schema={
-        "title": "Versions",
-        "type": "array",
-        "items": {
-            "type": "string",
-            "linkTo": "SoftwareVersion",
-        },
-    })
-    def versions(self, request, versions):
-        return paths_filtered_by_status(request, versions)
+    item_type = 'document'
+    schema = load_schema('encoded:schemas/document.json')
+    embedded = ['lab', 'award', 'submitted_by']
 
 
 @collection(
-    name='software-versions',
+    name='enzymes',
+    unique_key='enzyme:name',
     properties={
-        'title': 'Software version',
-        'description': 'Software version pages',
+        'title': 'Enzymes',
+        'description': 'Listing of enzymes',
     })
-class SoftwareVersion(Item):
-    item_type = 'software_version'
-    schema = load_schema('encoded:schemas/software_version.json')
-    embedded = ['software', 'software.references']
+class Enzyme(Item):
+    """Enzyme class."""
 
-    def __ac_local_roles__(self):
-        # Use lab/award from parent software object for access control.
-        properties = self.upgrade_properties()
-        root = find_root(self)
-        software = root.get_by_uuid(properties['software'])
-        return software.__ac_local_roles__()
+    item_type = 'enzyme'
+    schema = load_schema('encoded:schemas/enzyme.json')
+    name_key = 'name'
+
+
+@collection(
+    name='biosources',
+    properties={
+        'title': 'Biosources',
+        'description': 'Cell lines and tissues used for biosamples',
+    })
+class Biosource(Item):
+    """Biosource class."""
+
+    item_type = 'biosource'
+    schema = load_schema('encoded:schemas/biosource.json')
+
+
+@collection(
+    name='constructs',
+    properties={
+        'title': 'Constructs',
+        'description': 'Listing of Constructs',
+    })
+class Construct(Item):
+    """Construct class."""
+
+    item_type = 'construct'
+    schema = load_schema('encoded:schemas/construct.json')
+
+
+@collection(
+    name='modifications',
+    properties={
+        'title': 'Modifications',
+        'description': 'Listing of Stable Genomic Modifications',
+    })
+class Modification(Item):
+    """Modification class."""
+
+    item_type = 'modification'
+    schema = load_schema('encoded:schemas/modification.json')
+    embedded = ['constructs']
+
+
+@collection(
+    name='quality_metric_flags',
+    properties={
+        'title': 'Quality Metric Flags'
+    })
+class QualityMetricFlag(Item):
+    """Quality Metrics Flag class."""
+
+    item_type = 'quality_metric_flag'
+    schema = load_schema('encoded:schemas/quality_metric_flag.json')
+    embedded = ['quality_metrics']
+
+
+@collection(
+    name='softwares',
+    unique_key='software:name',
+    properties={
+        'title': 'Softwares',
+        'description': 'Listing of software for 4DN analyses',
+    })
+class Software(Item):
+    """The Software class that contains the software... used."""
+
+    item_type = 'software'
+    schema = load_schema('encoded:schemas/software.json')
+    name_key = 'name'
+
+    def _update(self, properties, sheets=None):
+        # set name based on what is entered into title
+        properties['name'] = properties['title'].replace(' ', '-').lower()
+
+        super(Software, self)._update(properties, sheets)

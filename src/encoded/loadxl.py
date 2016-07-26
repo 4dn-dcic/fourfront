@@ -17,69 +17,74 @@ ORDER = [
     'award',
     'lab',
     'organism',
-    'source',
-    'target',
+    # 'target',
     'publication',
     'document',
-    'antibody_lot',
-    'antibody_characterization',
-    'antibody_approval',
-    'treatment',
+    'vendor',
+    'protocol',
+    'protocol_cell_culture',
+    # 'antibody_lot',
+    # 'antibody_characterization',
+    # 'antibody_approval',
+    # 'treatment',
+    # 'construct',
+    # 'construct_characterization',
+    # 'rnai',
+    # 'rnai_characterization',
+    # 'talen',
+    'individual_human',
+    'individual_mouse',
+    'biosource',
+    'enzyme',
     'construct',
-    'construct_characterization',
-    'rnai',
-    'rnai_characterization',
-    'talen',
-    'mouse_donor',
-    'fly_donor',
-    'worm_donor',
-    'human_donor',
-    'donor_characterization',
+    'treatment_rnai',
+    'modification',
+    # 'donor_characterization',
     'biosample',
-    'biosample_characterization',
-    'platform',
-    'library',
-    'experiment',
-    'replicate',
-    'annotation',
-    'project',
-    'publication_data',
-    'reference',
-    'ucsc_browser_composite',
-    'matched_set',
-    'treatment_time_series',
-    'treatment_concentration_series',
-    'organism_development_series',
-    'replication_timing_series',
-    'reference_epigenome',
-    'software',
-    'software_version',
-    'analysis_step',
-    'analysis_step_version',
-    'pipeline',
-    'analysis_step_run',
-    'file',
-    'star_quality_metric',
-    'bismark_quality_metric',
-    'cpg_correlation_quality_metric',
-    'chipseq_filter_quality_metric',
-    'encode2_chipseq_quality_metric',
-    'fastqc_quality_metric',
-    'samtools_flagstats_quality_metric',
-    'mad_quality_metric',
-    'bigwigcorrelate_quality_metric',
-    'dnase_peak_quality_metric',
-    'edwbamstats_quality_metric',
-    'edwcomparepeaks_quality_metric',
-    'hotspot_quality_metric',
-    'idr_summary_quality_metric',
-    'pbc_quality_metric',
-    'phantompeaktools_spp_quality_metric',
-    'samtools_stats_quality_metric',
-    'idr_quality_metric',
-    'generic_quality_metric',
-    'image',
-    'page'
+    # 'biosample_characterization',
+    # 'platform',
+    # 'library',
+    'experiment_hic'
+    # 'replicate',
+    # 'annotation',
+    # 'project',
+    # 'publication_data',
+    # 'reference',
+    # 'ucsc_browser_composite',
+    # 'matched_set',
+    # 'treatment_time_series',
+    # 'treatment_concentration_series',
+    # 'organism_development_series',
+    # 'replication_timing_series',
+    # 'reference_epigenome',
+    # 'software',
+    # 'software_version',
+    # 'analysis_step',
+    # 'analysis_step_version',
+    # 'pipeline',
+    # 'analysis_step_run',
+    # 'file',
+    # 'star_quality_metric',
+    # 'bismark_quality_metric',
+    # 'cpg_correlation_quality_metric',
+    # 'chipseq_filter_quality_metric',
+    # 'encode2_chipseq_quality_metric',
+    # 'fastqc_quality_metric',
+    # 'samtools_flagstats_quality_metric',
+    # 'mad_quality_metric',
+    # 'bigwigcorrelate_quality_metric',
+    # 'dnase_peak_quality_metric',
+    # 'edwbamstats_quality_metric',
+    # 'edwcomparepeaks_quality_metric',
+    # 'hotspot_quality_metric',
+    # 'idr_summary_quality_metric',
+    # 'pbc_quality_metric',
+    # 'phantompeaktools_spp_quality_metric',
+    # 'samtools_stats_quality_metric',
+    # 'idr_quality_metric',
+    # 'generic_quality_metric',
+    # 'image',
+    # 'page'
 ]
 
 IS_ATTACHMENT = [
@@ -330,6 +335,7 @@ def request_url(item_type, method):
 
     return component
 
+
 def make_request(testapp, item_type, method):
     json_method = getattr(testapp, method.lower() + '_json')
 
@@ -554,6 +560,9 @@ PHASE1_PIPELINES = {
     'experiment': [
         remove_keys('possible_controls', 'related_files'),
     ],
+    'experiment_hic': [
+        remove_keys('experiment_relation'),
+    ],
     'publication': [
         remove_keys('datasets'),
     ],
@@ -612,6 +621,9 @@ PHASE2_PIPELINES = {
     ],
     'experiment': [
         skip_rows_missing_all_keys('related_files', 'possible_controls'),
+    ],
+    'experiment_hic': [
+        skip_rows_missing_all_keys('experiment_relation'),
     ],
     'annotation': [
         skip_rows_missing_all_keys('related_files', 'software_used'),
@@ -703,9 +715,8 @@ def create_user(db, email, name, pwd):
     create user if user not in database
     '''
     if User.get_by_username(email) is None:
-        print('creating user ',email) 
+        print('creating user ',email)
         new_user = User(email, name, pwd)
         db.add(new_user)
     else:
         print('user %s already exists, skipping' % (email))
-
