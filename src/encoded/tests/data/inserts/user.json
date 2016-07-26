@@ -2,12 +2,10 @@
     {
         "email": "admin@admin.com",
         "first_name": "Ali",
-        "groups": [
-            "admin"
-        ],
+        "groups": ["admin"],
         "job_title": "Software Engineer",
         "lab": "ali-mortazavi",
-        "last_name": "Mortazavvi",
+        "last_name": "Mortazavi",
         "status": "current",
         "submits_for": ["ali-mortazavi"],
         "timezone": "US/Pacific",
