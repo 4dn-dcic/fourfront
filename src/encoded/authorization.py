@@ -1,4 +1,4 @@
-from snovault import COLLECTIONS 
+from snovault import ROOT
 
 
 def groupfinder(login, request):
@@ -6,8 +6,8 @@ def groupfinder(login, request):
         return None
     namespace, localname = login.split('.', 1)
     user = None
-
-    collections = request.registry[COLLECTIONS]
+    # We may get called before the context is found and the root set
+    root = request.registry[ROOT]
 
     if namespace == 'remoteuser':
         if localname in ['EMBED', 'INDEXER']:
@@ -20,7 +20,7 @@ def groupfinder(login, request):
             return ['viewing_group.ENCODE']
 
     if namespace in ('mailto', 'remoteuser', 'webuser'):
-        users = collections.by_item_type['user']
+        users = root.by_item_type['user']
         try:
             user = users[localname]
         except KeyError:
@@ -28,7 +28,7 @@ def groupfinder(login, request):
 
     elif namespace == 'accesskey':
 
-        access_keys = collections.by_item_type['access_key']
+        access_keys = root.by_item_type['access_key']
         try:
             access_key = access_keys[localname]
         except KeyError:
@@ -38,7 +38,7 @@ def groupfinder(login, request):
             return None
 
         userid = access_key.properties['user']
-        user = collections.by_item_type['user'][userid]
+        user = root.by_item_type['user'][userid]
 
     if user is None:
         return None
