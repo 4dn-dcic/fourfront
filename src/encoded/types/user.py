@@ -176,10 +176,10 @@ def profile(context, request):
     }
 
 
-@calculated_property(context=User, category='user_action')
-def signout(context, request):
-    return {
-        'id': 'signout',
-        'title': 'Sign out',
-        'trigger': 'logout',
-    }
+# @calculated_property(context=User, category='user_action')
+# def signout(context, request):
+#     return {
+#         'id': 'signout',
+#         'title': 'Sign out',
+#         'trigger': 'logout',
+#     }

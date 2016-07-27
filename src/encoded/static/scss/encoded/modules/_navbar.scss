@@ -134,27 +134,17 @@
     @media screen and (min-width: $grid-float-breakpoint) {
         left: -1px;
         margin-top: -1px !important;
-        padding: 10px 0;
+        padding: 10px 0 10px 0;
 
         &>li {
-            &>a,&>div {
-                padding: 2px 30px 2px 20px;
+            .global-entry {
+                border-radius: 0px !important;
+                padding: 4px 30px 4px 20px;
                 @include font-size(1.1);
                 color: #999999 !important;
-                border-top: 1px solid transparent;
-                border-bottom: 1px solid transparent;
                 letter-spacing: 1px;
-
-                // for login specifically
-                &>a {
-                    color: #999999 !important;
-                    text-decoration: none;
-                    &:hover,&:active {
-                        background-color: $navbar-inverse-link-active-bg;
-                        color: $navbar-inverse-link-active-color !important;
-                    }
-                }
-
+                font-weight: 300;
+                text-decoration: none;
                 &:hover,&:active {
                     background-color: $navbar-inverse-link-active-bg;
                     color: $navbar-inverse-link-active-color !important;
@@ -204,6 +194,11 @@
           color: #999999;
         padding: 5px 15px 5px 25px;
       }
+      > li > div > div > a,
+      .dropdown-header {
+          color: #999999;
+        padding: 5px 15px 5px 25px;
+      }
       > li > a {
         line-height: $line-height-computed;
         &:hover,
@@ -211,7 +206,15 @@
           color: #000000 !important;
         }
       }
-      > li > div > a {
+      > li > div > a{
+          line-height: $line-height-computed;
+          &:hover,
+          &:focus {
+            text-decoration: none !important;
+            color: #000000 !important;
+          }
+      }
+      > li > div > div > a{
           line-height: $line-height-computed;
           &:hover,
           &:focus {
