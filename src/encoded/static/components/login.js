@@ -17,9 +17,9 @@ var Login = React.createClass({
         if (!(session && session['auth.userid'])) {
 						userActionRender = <LoginBoxes/>
         } else { //if logged in give them a logout link
-            userActionRender = <a href="#" data-trigger="logout">Submitter sign out</a>;
+            userActionRender = <a href="#" data-trigger="logout">Sign out</a>;
         }
-        return (<div id="user-actions-footer">{userActionRender}</div>);
+        return (<div>{userActionRender}</div>);
     }
 });
 
@@ -40,8 +40,9 @@ var LoginBoxes = React.createClass({
   passwordFill: function(v) {
   	this.setState({password: v});
   },
-  handleToggle: function () {
-	  this.setState({
+  handleToggle: function (e) {
+      e.preventDefault();
+      this.setState({
 		  isOpen: !this.state.isOpen
 	  });
   },
@@ -98,14 +99,13 @@ var LoginBoxes = React.createClass({
   render: function () {
 		/* href="" will cause mouse pointer to change to the finger on hover */
 	return (
-	  <div>
-		  <a id="loginbtn" href="" onClick={this.handleToggle}>Log in</a>
-	 </div>
+	       <a id="loginbtn" href="" onClick={this.handleToggle}>Sign in</a>
  );
  },
 
 	 renderOverlay: function () {
          if (!this.state.isOpen) {
+             console.log('something happened!');
              return <span/>;
          }
 				 var error_span = '';
@@ -138,7 +138,7 @@ var TextBox = React.createClass({
   	return({data: ''});
   },
   handleFill: function(e) {
-
+    e.preventDefault();
   	this.setState({data: e.target.value});
     this.props.fill(e.target.value);
   },

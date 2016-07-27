@@ -40,7 +40,12 @@ var portal = {
             {id: 'news', title: 'News', url: '/news'},
             {id: 'acknowledgements', title: 'Acknowledgements', url: '/acknowledgements/'},
             {id: 'contact', title: 'Contact', url: '/help/contacts/'}
-        ]}
+        ]},
+        {id: 'account', title: 'Account', children: [
+            {id: 'login', title: 'Log in', url: '/'},
+            {id: 'profile', title: 'Profile', url: '/'},
+            {id: 'settings', title: 'Settings', url: '/'}
+        ]},
     ]
 };
 
@@ -107,6 +112,7 @@ var App = React.createClass({
             var name = this.currentAction();
             var context_actions = [];
             Array.prototype.push.apply(context_actions, context.actions || []);
+
             if (!name && context.default_page) {
                 context = context.default_page;
                 var actions = context.actions || [];

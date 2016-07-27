@@ -55,6 +55,10 @@
 
 .navbar-toggle {
     margin-right: 0;
+    background-color: #999999;
+    &:hover {
+      background-color: $navbar-inverse-toggle-hover-bg;
+    }
 }
 
 .navbar-main {
@@ -122,6 +126,9 @@
         &>a {
             font-weight: 300;
         }
+        &>div>a {
+            font-weight: 300;
+        }
     }
 
     @media screen and (min-width: $grid-float-breakpoint) {
@@ -130,7 +137,7 @@
         padding: 10px 0;
 
         &>li {
-            &>a {
+            &>a,&>div {
                 padding: 2px 30px 2px 20px;
                 @include font-size(1.1);
                 color: #999999 !important;
@@ -138,9 +145,17 @@
                 border-bottom: 1px solid transparent;
                 letter-spacing: 1px;
 
+                // for login specifically
+                &>a {
+                    color: #999999 !important;
+                    text-decoration: none;
+                    &:hover,&:active {
+                        background-color: $navbar-inverse-link-active-bg;
+                        color: $navbar-inverse-link-active-color !important;
+                    }
+                }
+
                 &:hover,&:active {
-                    // border-top: 1px solid darken($navbar-inverse-link-active-bg,20%);
-                    // border-bottom: 1px solid darken($navbar-inverse-link-active-bg,20%);
                     background-color: $navbar-inverse-link-active-bg;
                     color: $navbar-inverse-link-active-color !important;
                 }
@@ -157,4 +172,58 @@
             right: -1px;
         }
     }
+}
+
+// Drop down styles when window is constrained
+.navbar-nav {
+  margin: ($navbar-padding-vertical / 2);
+  margin-left: 20px !important;
+
+  > li > a {
+    padding-top:    10px;
+    padding-bottom: 10px;
+    line-height: $line-height-computed;
+  }
+
+  @media (max-width: $grid-float-breakpoint-max) {
+    // Dropdowns get custom display when collapsed
+    .open .dropdown-menu {
+      position: static;
+      float: none;
+      width: auto;
+      margin-top: 0;
+      background-color: transparent;
+      border: 0;
+      box-shadow: none;
+      > li > a,
+      .dropdown-header {
+        padding: 5px 15px 5px 25px;
+      }
+      > li > div > a,
+      .dropdown-header {
+          color: #999999;
+        padding: 5px 15px 5px 25px;
+      }
+      > li > a {
+        line-height: $line-height-computed;
+        &:hover,
+        &:focus {
+          color: #000000 !important;
+        }
+      }
+      > li > div > a {
+          line-height: $line-height-computed;
+          &:hover,
+          &:focus {
+            text-decoration: none !important;
+            color: #000000 !important;
+          }
+      }
+    }
+  }
+}
+
+.nav-img{
+    display: block;
+    margin: auto;
 }

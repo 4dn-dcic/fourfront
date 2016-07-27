@@ -40,17 +40,15 @@ var Navigation = module.exports = React.createClass({
 
     render: function() {
         var portal = this.context.portal;
-        var img = <img src="/static/img/4DN-Nils.png" height= "50px" width="170px"/>
+        var img = <img src="/static/img/4DN-Nils.png" height= "50px" width="170px" className="nav-img"/>
         return (
             <div id="navbar" className="navbar navbar-fixed-top navbar-inverse">
                 <div className="container">
-                    <Navbar brand={img} brandlink="/" label="main" navClasses="navbar-main">
-                        <a href="/" className="non-vis">4D Nucleome</a>
+                    <Navbar brand={img} id="navbar-icon" brandlink="/" label="main" navClasses="navbar-main">
                         <GlobalSections />
                         <UserActions />
                         <ContextActions />
                         <Search />
-                        <NavLogin />
                     </Navbar>
                 </div>
                 {this.state.testWarning ?
@@ -81,11 +79,17 @@ var GlobalSections = React.createClass({
                 <NavItem key={action.id} dropdownId={action.id} dropdownTitle={action.title}>
                     {action.children ?
                         <DropdownMenu label={action.id}>
-                            {action.children.map(action =>
-                                <a href={action.url || ''} key={action.id}>
-                                    {action.title}
-                                </a>
-                            )}
+                            {action.children.map(function(action){
+                                if (action.id === "login"){
+                                    return(<Login />);
+                                }else{
+                                    return(
+                                        <a href={action.url || ''} key={action.id}>
+                                            {action.title}
+                                        </a>
+                                    );
+                                }
+                            })}
                         </DropdownMenu>
                     : null}
                 </NavItem>
@@ -185,18 +189,6 @@ var UserActions = React.createClass({
             </Nav>
         );
     }
-});
-
-var NavLogin = React.createClass({
-    render: function() {
-            return (
-                <Nav right>
-                    <NavItem>
-                            <Login />
-                    </NavItem>
-                </Nav>
-            );
-        }
 });
 
 // Display breadcrumbs with contents given in 'crumbs' object.
