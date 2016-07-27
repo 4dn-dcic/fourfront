@@ -86,8 +86,12 @@ globals.content_views.fallback = function () {
 var IPanel = module.exports.IPanel = React.createClass({
     render: function() {
         var context = this.props.context;
+        var schema = context.schema;
+        console.log("_____");
+        console.log(schema);
         var itemClass = globals.itemClass(context, 'view-detail panel');
         var title = globals.listing_titles.lookup(context)({context: context});
+        var sortKeys = Object.keys(context).sort();
         return (
             <section className="flexcol-sm-12">
             <div className={itemClass}>
@@ -97,10 +101,10 @@ var IPanel = module.exports.IPanel = React.createClass({
                         <div className="flexcol-sm-6">
                             <div className="flexcol-heading experiment-heading"><h4>{title}</h4></div>
                             <dl className="key-value">
-                                {Object.keys(context).map(function(ikey, val){
+                                {sortKeys.map(function(ikey, val){
                                     return (
                                         <div key={ikey} data-test="term-name">
-                                          <dt>{ikey}</dt>
+                                          <dt>{formKey(context,ikey)}</dt>
                                           <dd>{formValue(context[ikey])}</dd>
                                         </div>
                                     );
@@ -243,7 +247,11 @@ var formValue = function (item) {
     }else if (typeof item === 'object') {
         toReturn.push(<SubIPannel content={item}/>);
     }else{
-        toReturn.push(item);
+        if (typeof item === 'string' && item.charAt(0) === '/') {
+            toReturn.push(<a href={item}>{item}</a>)
+        }else{
+            toReturn.push(item);
+        }
     }
     return(
         <div>{toReturn}</div>
@@ -275,10 +283,10 @@ var SubIPannel = React.createClass({
         var toggleRender;
         var toggleLink;
         if (!this.state.isOpen) {
-            toggleLink = <a href="" onClick={this.handleToggle}>{title}</a>
+            toggleLink = <a href="" className="item-toggle-link" onClick={this.handleToggle}>{title}</a>
             toggleRender = <span/>;
         }else{
-            toggleLink = <a href="" onClick={this.handleToggle}>Close</a>
+            toggleLink = <a href="" className="item-toggle-link" onClick={this.handleToggle}>Close</a>
             toggleRender = <Subview content={item}/>;
         }
         return (
@@ -319,3 +327,8 @@ var Subview = React.createClass({
         );
     }
 });
+
+var formKey = function(context, key){
+    // console.log(schema);
+    return({key});
+};

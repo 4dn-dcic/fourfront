@@ -287,6 +287,10 @@
 	margin-bottom: 40px;
 }
 
-.non-vis{
-	display: none;
+.item-toggle-link{
+	padding: 10px;
+	color: #ff0000; // temporary?
+	&:hover,&:focus {
+		color: #ff0000;
+	}
 }
