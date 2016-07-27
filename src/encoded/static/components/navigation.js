@@ -1,6 +1,7 @@
 'use strict';
 var React = require('react');
 var url = require('url');
+var Login = require('./login');
 var {Navbars, Navbar, Nav, NavItem} = require('../libs/bootstrap/navbar');
 var {DropdownMenu} = require('../libs/bootstrap/dropdown-menu');
 var productionHost = require('./globals').productionHost;
@@ -39,12 +40,12 @@ var Navigation = module.exports = React.createClass({
 
     render: function() {
         var portal = this.context.portal;
+        var img = <img src="/static/img/4DN-Nils.png" height= "50px" width="170px" className="nav-img"/>
         return (
             <div id="navbar" className="navbar navbar-fixed-top navbar-inverse">
                 <div className="container">
-                    <Navbar brand={portal.portal_title} brandlink="/" label="main" navClasses="navbar-main">
+                    <Navbar brand={img} brandlink="/" label="main" navClasses="navbar-main" navID="navbar-icon">
                         <GlobalSections />
-                        <UserActions />
                         <ContextActions />
                         <Search />
                     </Navbar>
@@ -77,11 +78,19 @@ var GlobalSections = React.createClass({
                 <NavItem key={action.id} dropdownId={action.id} dropdownTitle={action.title}>
                     {action.children ?
                         <DropdownMenu label={action.id}>
-                            {action.children.map(action =>
-                                <a href={action.url || ''} key={action.id}>
-                                    {action.title}
-                                </a>
-                            )}
+                            {action.children.map(function(action){
+                                if (action.id === "login"){
+                                    return(<Login />);
+                                }else if (action.id === "profile") {
+                                    return(<UserActions/>);
+                                }else{
+                                    return(
+                                        <a href={action.url || ''} key={action.id} className="global-entry">
+                                            {action.title}
+                                        </a>
+                                    );
+                                }
+                            })}
                         </DropdownMenu>
                     : null}
                 </NavItem>
@@ -141,11 +150,11 @@ var Search = React.createClass({
         return (
             <form className="navbar-form navbar-right" action="/search/">
                 <div className="search-wrapper">
-                    <input className="form-control search-query" id="navbar-search" type="text" placeholder="Search..." 
+                    <input className="form-control search-query" id="navbar-search" type="text" placeholder="Search..."
                         ref="searchTerm" name="searchTerm" defaultValue={searchTerm} key={searchTerm} />
                 </div>
             </form>
-        );  
+        );
     }
 });
 
@@ -160,29 +169,25 @@ var UserActions = React.createClass({
         var session_properties = this.context.session_properties;
         if (!session_properties['auth.userid']) {
             // Logged out, so no user menu at all
-            return null;
+            return(<a href="#"/>);
         }
         var actions = this.context.listActionsFor('user').map(function (action) {
             return (
-                <a href={action.href || ''} key={action.id} data-bypass={action.bypass} data-trigger={action.trigger}>
-                    {action.title}
-                </a>
+                <div key={action.id} >
+                    <a href={action.href || ''} key={action.id} data-bypass={action.bypass} data-trigger={action.trigger} className="global-entry">
+                        {action.title}
+                    </a>
+                </div>
             );
         });
         var user = session_properties.user;
         var fullname = (user && user.title) || 'unknown';
+        console.log(actions);
         return (
-            <Nav right>
-                <NavItem dropdownId="useractions" dropdownTitle={fullname}>
-                    <DropdownMenu label="useractions">
-                        {actions}
-                    </DropdownMenu>
-                </NavItem>
-            </Nav>
+            <div>{actions}</div>
         );
     }
 });
-
 
 // Display breadcrumbs with contents given in 'crumbs' object.
 // Each crumb in the crumbs array: {

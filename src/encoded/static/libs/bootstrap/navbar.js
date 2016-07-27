@@ -81,7 +81,8 @@ var Navbar = module.exports.Navbar = React.createClass({
         ]),
         brandlink: React.PropTypes.string, // href for clicking brand
         label: React.PropTypes.string.isRequired, // id for nav; unique on page
-        navClasses: React.PropTypes.string // CSS classes for <nav> in addition to "navbar"; default to "navbar-default"
+        navClasses: React.PropTypes.string, // CSS classes for <nav> in addition to "navbar"; default to "navbar-default"
+        navID: React.PropTypes.string
     },
 
     getInitialState: function() {
@@ -89,7 +90,7 @@ var Navbar = module.exports.Navbar = React.createClass({
             expanded: false // True if mobile version of menu is expanded
         };
     },
-    
+
     collapseClick: function(e) {
         // Click on the Navbar mobile "collapse" button
         console.log('collapse: %s', this.state.expanded);
@@ -97,7 +98,7 @@ var Navbar = module.exports.Navbar = React.createClass({
     },
 
     render: function() {
-        var {brand, brandlink, label, navClasses} = this.props;
+        var {brand, brandlink, label, navClasses, navID} = this.props;
 
         return (
             <nav className={'navbar ' + (navClasses ? navClasses : 'navbar-default')}>
@@ -109,10 +110,10 @@ var Navbar = module.exports.Navbar = React.createClass({
                         <span className="icon-bar"></span>
                     </a>
                     {brand ?
-                        <a className="navbar-brand" href={brandlink}>{brand}</a>
+                        <a className="navbar-brand" id={navID} href={brandlink}>{brand}</a>
                     : null}
                 </div>
-                
+
                 <div className={'collapse navbar-collapse' + (this.state.expanded ? ' in' : '')} id={label}>
                     {this.props.children}
                 </div>

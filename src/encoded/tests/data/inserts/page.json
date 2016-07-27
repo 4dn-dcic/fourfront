@@ -13,9 +13,12 @@
                 },
                 {
                     "cols": [
-                        {"blocks": ["#block2"]},
-                        {"blocks": ["#block3"]},
-                        {"blocks": ["#block4"]}
+                        {"blocks": ["#block2"]}
+                    ]
+                },
+                {
+                    "cols": [
+                        {"blocks": ["#block3"]}
                     ]
                 }
             ],
@@ -23,24 +26,20 @@
                 {
                     "@id": "#block1",
                     "@type": "richtextblock",
-                    "body": "<div class=\"project-info site-title\">\n    <h1>ENCODE: The Encyclopedia of DNA Elements</h1>\n</div>\n<div id=\"info-box\" class=\"project-info text-panel\">\n  <p>The ENCODE project dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat.</p>\n</div>"
+                    "className": "home-title",
+                    "body": "<div class=\"fourDN-header fourDN-title\"><h1>4D Nucleome</h1></div>"
                 },
                 {
                     "@id": "#block2",
                     "@type": "richtextblock",
-                    "body": "<h2>Transcriptome</h2>\n<p>Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.</p>"
+                    "className": "home-announcements",
+                    "body": "<h2 class=\"fourDN-header\">Announcements</h2>\n<table class=\"fourDN-section\"><tr><td class=\"fourDN-section-title\">Redesigned Data Portal Released</td><td class=\"fourDN-section-info\">Posted by DCIC Staff</td></tr></table><div class=\"fourDN-content\"><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus tristique, nisl nec imperdiet commodo, magna lorem placerat mauris, eu semper odio ipsum eget lectus. In eu libero ante. Mauris consectetur est venenatis tortor gravida, vitae fringilla orci facilisis. Aenean ante libero, sollicitudin ac ipsum vel, hendrerit porttitor quam.</p></div>\n<table class=\"fourDN-section\"><tr><td class=\"fourDN-section-title\">Now Accepting Data Submissions</td><td class=\"fourDN-section-info\">Posted by DCIC Staff</td></tr></table><div class=\"fourDN-content\"><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus tristique, nisl nec imperdiet commodo, magna lorem placerat mauris, eu semper odio ipsum eget lectus. In eu libero ante. Mauris consectetur est venenatis tortor gravida, vitae fringilla orci facilisis. Aenean ante libero, sollicitudin ac ipsum vel, hendrerit porttitor quam.</p></div>"
                 },
                 {
                     "@id": "#block3",
                     "@type": "richtextblock",
-                    "body": "<h2>Regulation</h2>\n<p>Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet doming id quod mazim placerat facer possim assum.</p>"
-                },
-                {
-                    "@id": "#block4",
-                    "@type": "teaserblock",
-                    "image": "/images/8a91ae78-731a-4a92-ae7c-273214be408a/",
-                    "body": "<h2>Chromatin Structure</h2>",
-                    "href": "/about/chromatin-structure"
+                    "className": "home-getting-started",
+                    "body": "<h2 class=\"fourDN-header\">Getting Started</h2>\n<table class=\"fourDN-section\"><tr><td class=\"fourDN-section-title\">Data Access</td></tr></table><div class=\"fourDN-content\"><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus tristique, nisl nec imperdiet commodo, magna lorem placerat mauris, eu semper odio ipsum eget lectus. In eu libero ante. Mauris consectetur est venenatis tortor gravida, vitae fringilla orci facilisis. Aenean ante libero, sollicitudin ac ipsum vel, hendrerit porttitor quam.</p></div>\n<table class=\"fourDN-section\"><tr><td class=\"fourDN-section-title\">Tutorials</td></tr></table><div class=\"fourDN-content\"><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus tristique, nisl nec imperdiet commodo, magna lorem placerat mauris, eu semper odio ipsum eget lectus. In eu libero ante. Mauris consectetur est venenatis tortor gravida, vitae fringilla orci facilisis. Aenean ante libero, sollicitudin ac ipsum vel, hendrerit porttitor quam.</p></div>"
                 }
             ]
         }

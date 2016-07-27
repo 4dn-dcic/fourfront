@@ -1,13 +1,13 @@
 /* Variables */
-$mainThemeColor: 			#e8ecef; /* i.e. the background color ..for now */
+$mainThemeColor: 			#ffffff; /* i.e. the background color ..for now */
 
-$appVersionHeight:          30px;
-$footerHeight: 				80px + $appVersionHeight;
+$appVersionHeight:          0px;
+$footerHeight: 				50px + $appVersionHeight;
 $footerTopBorderHeight:		0px;
-$footerBackground:          rgba(10,37,61,0.3) !default;
-$footerBackgroundHighlight: #294b6a !default;
+$footerBackground:          #ffffff !default;
+$footerBackgroundHighlight: #000000 !default;
 
-$tableHeadFootBackgroundColor: #f5f5f5;
+$tableHeadFootBackgroundColor: #000000;
 
 $mobile-font-factor: 1.2;
 
