@@ -44,7 +44,7 @@ var Navigation = module.exports = React.createClass({
         return (
             <div id="navbar" className="navbar navbar-fixed-top navbar-inverse">
                 <div className="container">
-                    <Navbar brand={img} id="navbar-icon" brandlink="/" label="main" navClasses="navbar-main">
+                    <Navbar brand={img} brandlink="/" label="main" navClasses="navbar-main" navID="navbar-icon">
                         <GlobalSections />
                         <UserActions />
                         <ContextActions />

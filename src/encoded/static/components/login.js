@@ -82,6 +82,7 @@ var LoginBoxes = React.createClass({
               next_url = window.location.pathname + window.location.search;
           }
           this.context.navigate(next_url, {replace: true});
+          console.log('LOGOUT COMPLETE!!!');
         },function(error) {
 					console.log("got an error" + error);
       })
@@ -105,7 +106,6 @@ var LoginBoxes = React.createClass({
 
 	 renderOverlay: function () {
          if (!this.state.isOpen) {
-             console.log('something happened!');
              return <span/>;
          }
 				 var error_span = '';
