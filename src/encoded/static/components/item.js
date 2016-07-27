@@ -239,8 +239,6 @@ var formValue = function (item) {
     if(Array.isArray(item)) {
         for (var i=0; i < item.length; i++){
             toReturn.push(formValue(item[i]));
-            console.log(item[i]);
-            console.log(typeof item[i]);
         }
     }else if (typeof item === 'object') {
         toReturn.push(<SubIPannel content={item}/>);
@@ -284,7 +282,7 @@ var SubIPannel = React.createClass({
             toggleRender = <Subview content={item}/>;
         }
         return (
-    	  <div>
+    	  <div className="flexrow">
               <div>
                   {toggleLink}
               </div>
