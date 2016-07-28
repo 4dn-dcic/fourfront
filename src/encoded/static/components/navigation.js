@@ -169,7 +169,7 @@ var UserActions = React.createClass({
         var session_properties = this.context.session_properties;
         if (!session_properties['auth.userid']) {
             // Logged out, so no user menu at all
-            return(<a href="#"/>);
+            return(<a href="#" className="invis"/>);
         }
         var actions = this.context.listActionsFor('user').map(function (action) {
             return (
@@ -184,7 +184,7 @@ var UserActions = React.createClass({
         var fullname = (user && user.title) || 'unknown';
         console.log(actions);
         return (
-            <div>{actions}</div>
+            <div className="custom-entry">{actions}</div>
         );
     }
 });

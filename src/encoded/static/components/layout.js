@@ -434,13 +434,13 @@ var Layout = module.exports.Layout = React.createClass({
             return true;
         } else if (types.contains && types.contains('application/x-encoded-block')) {
             return true;
-        }   
+        }
         e.preventDefault();
     },
 
     drop: function(e) {
         if (this._isBlockDragEvent(e)) {
-            e.preventDefault();            
+            e.preventDefault();
         } else {
             return;
         }
@@ -554,7 +554,7 @@ var Layout = module.exports.Layout = React.createClass({
 
     dragOver: function(e, target) {
         if (this._isBlockDragEvent(e)) {
-            e.preventDefault();            
+            e.preventDefault();
         } else {
             return;
         }

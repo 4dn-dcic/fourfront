@@ -116,11 +116,20 @@
     }
 }
 
+// this is a bit janky
+.custom-entry {
+    height: 58px !important;
+    &>div{
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+}
 
 .dropdown-menu {
     background-color: #ffffff;
     border: 1px solid #000000;
     // @include background-image(linear-gradient(top,  #0a253d 0%,#1d6baf 100%));
+
 
     &>li {
         &>a {
@@ -145,6 +154,7 @@
                 letter-spacing: 1px;
                 font-weight: 300;
                 text-decoration: none;
+                white-space: nowrap !important;
                 &:hover,&:active {
                     background-color: $navbar-inverse-link-active-bg;
                     color: $navbar-inverse-link-active-color !important;
