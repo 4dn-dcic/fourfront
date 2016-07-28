@@ -99,6 +99,11 @@
     }
 }
 
+.flexcol-sm-12 {
+	@extend .col-sm-12;
+	border: none;
+}
+
 .flexcol-sm-6 {
     @extend .col-sm-6;
 
@@ -106,11 +111,6 @@
         .flexbox & {
             flex: 1 1 0px;
             width: auto;
-            // border-left: 1px solid #c0c0c0;
-
-            &:first-child {
-                border-left: none;
-            }
         }
     }
 }
