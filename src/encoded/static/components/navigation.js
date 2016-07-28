@@ -69,13 +69,25 @@ var Navigation = module.exports = React.createClass({
 // Main navigation menus
 var GlobalSections = React.createClass({
     contextTypes: {
-        listActionsFor: React.PropTypes.func
+        listActionsFor: React.PropTypes.func,
+        session_properties: React.PropTypes.object
     },
-
+    createTitle: function(title, session_props){
+        if(title !== "Account"){
+            return title;
+        }else{
+            if (session_props['auth.userid']) {
+                return session_props.user.title;
+            }else{
+                return "Account";
+            }
+        }
+    },
     render: function() {
+        var session_properties = this.context.session_properties;
         var actions = this.context.listActionsFor('global_sections').map(action => {
             return (
-                <NavItem key={action.id} dropdownId={action.id} dropdownTitle={action.title}>
+                <NavItem key={action.id} dropdownId={action.id} dropdownTitle={this.createTitle(action.title, session_properties)}>
                     {action.children ?
                         <DropdownMenu label={action.id}>
                             {action.children.map(function(action){
