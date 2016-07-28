@@ -7,8 +7,6 @@ var Navigation = require('./navigation');
 var Footer = require('./footer');
 var url = require('url');
 
-var test = "Carl";
-
 var portal = {
     portal_title: '4D Nucleome',
     global_sections: [
