@@ -86,8 +86,12 @@ globals.content_views.fallback = function () {
 var IPanel = module.exports.IPanel = React.createClass({
     render: function() {
         var context = this.props.context;
+        var schema = context.schema;
+        console.log("_____");
+        console.log(schema);
         var itemClass = globals.itemClass(context, 'view-detail panel');
         var title = globals.listing_titles.lookup(context)({context: context});
+        var sortKeys = Object.keys(context).sort();
         return (
             <section className="flexcol-sm-12">
             <div className={itemClass}>
@@ -97,12 +101,12 @@ var IPanel = module.exports.IPanel = React.createClass({
                         <div className="flexcol-sm-6">
                             <div className="flexcol-heading experiment-heading"><h4>{title}</h4></div>
                             <dl className="key-value">
-                                {Object.keys(context).map(function(ikey, val){
+                                {sortKeys.map(function(ikey, val){
                                     return (
-                                      <div key={ikey} data-test="term-name">
-                                        <dt>{ikey}</dt>
-                                        <dd>{formString(context[ikey])}</dd>
-                                      </div>
+                                        <div key={ikey} data-test="term-name">
+                                          <dt>{formKey(context,ikey)}</dt>
+                                          <dd>{formValue(context[ikey])}</dd>
+                                        </div>
                                     );
                                 })}
                             </dl>
@@ -233,16 +237,25 @@ var RelatedItems = module.exports.RelatedItems = React.createClass({
     },
 });
 
-// Currently handles arrays (represented as strings separated by commas),
-// objects, and all other cases as strings
-var formString = function (item) {
+// Formats the correct display for each metadata field
+var formValue = function (item) {
+    var toReturn = [];
     if(Array.isArray(item)) {
-        return item.join(", ");
+        for (var i=0; i < item.length; i++){
+            toReturn.push(formValue(item[i]));
+        }
     }else if (typeof item === 'object') {
-        return(<SubIPannel content={item}/>);
+        toReturn.push(<SubIPannel content={item}/>);
     }else{
-        return item;
+        if (typeof item === 'string' && item.charAt(0) === '/') {
+            toReturn.push(<a href={item}>{item}</a>)
+        }else{
+            toReturn.push(item);
+        }
     }
+    return(
+        <div>{toReturn}</div>
+    );
 };
 
 var SubIPannel = React.createClass({
@@ -270,14 +283,14 @@ var SubIPannel = React.createClass({
         var toggleRender;
         var toggleLink;
         if (!this.state.isOpen) {
-            toggleLink = <a href="" onClick={this.handleToggle}>{title}</a>
+            toggleLink = <a href="" className="item-toggle-link" onClick={this.handleToggle}>{title}</a>
             toggleRender = <span/>;
         }else{
-            toggleLink = <a href="" onClick={this.handleToggle}>Close</a>
+            toggleLink = <a href="" className="item-toggle-link" onClick={this.handleToggle}>Close</a>
             toggleRender = <Subview content={item}/>;
         }
         return (
-    	  <div>
+    	  <div className="flexrow">
               <div>
                   {toggleLink}
               </div>
@@ -301,7 +314,7 @@ var Subview = React.createClass({
                                       return (
                                         <div key={ikey} data-test="term-name">
                                           <dt>{ikey}</dt>
-                                          <dd>{formString(item[ikey])}</dd>
+                                          <dd>{formValue(item[ikey])}</dd>
                                         </div>
                                       );
                                   })}
@@ -314,3 +327,8 @@ var Subview = React.createClass({
         );
     }
 });
+
+var formKey = function(context, key){
+    // console.log(schema);
+    return({key});
+};

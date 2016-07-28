@@ -82,7 +82,7 @@ module.exports.uniqueObjectsArray = objects => _(objects).uniq(object =>  object
 module.exports.bindEvent = function (el, eventName, eventHandler) {
     if (el.addEventListener) {
         // Modern browsers
-        el.addEventListener(eventName, eventHandler, false); 
+        el.addEventListener(eventName, eventHandler, false);
     } else if (el.attachEvent) {
         // IE8 specific
         el.attachEvent('on' + eventName, eventHandler);
@@ -92,7 +92,7 @@ module.exports.bindEvent = function (el, eventName, eventHandler) {
 module.exports.unbindEvent = function (el, eventName, eventHandler) {
     if (el.removeEventListener) {
         // Modern browsers
-        el.removeEventListener(eventName, eventHandler, false); 
+        el.removeEventListener(eventName, eventHandler, false);
     } else if (el.detachEvent) {
         // IE8 specific
         el.detachEvent('on' + eventName, eventHandler);
