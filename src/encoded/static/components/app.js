@@ -10,18 +10,18 @@ var url = require('url');
 var portal = {
     portal_title: '4D Nucleome',
     global_sections: [
-        {id: 'data', title: 'Data', children: [
+        {id: 'data', sid:'sData', title: 'Data', children: [
             {id: 'assaymatrix', title: 'Matrix', url: '/matrix/?type=Experiment'},
             {id: 'assaysearch', title: 'Search', url: '/search/?type=Experiment'},
             {id: 'region-search', title: 'Search by region', url: '/region-search/'},
             {id: 'publications', title: 'Publications', url: '/publications/'}
         ]},
-        {id: 'encyclopedia', title: 'Encyclopedia', children: [
+        {id: 'encyclopedia', sid:'sEncylocopedia', title: 'Encyclopedia', children: [
             {id: 'aboutannotations', title: 'About', url: '/data/annotations/'},
             {id: 'annotationmatrix', title: 'Matrix', url: '/matrix/?type=Annotation'},
             {id: 'annotationsearch', title: 'Search', url: '/search/?type=Annotation'}
         ]},
-        {id: 'materialsmethods', title: 'Materials & Methods', children: [
+        {id: 'materialsmethods', sid:'sMaterialsmethods', title: 'Materials & Methods', children: [
             {id: 'antibodies', title: 'Antibodies', url: '/search/?type=AntibodyLot'},
             {id: 'biosamples', title: 'Biosamples', url: '/search/?type=Biosample'},
             {id: 'datastandards', title: 'Standards and guidelines', url: '/data-standards/'},
@@ -32,7 +32,7 @@ var portal = {
             {id: 'datause', title: 'Release policy', url: '/about/data-use-policy/'},
             {id: 'dataaccess', title: 'Data access', url: '/about/data-access/'}
         ]},
-        {id: 'help', title: 'Help', children: [
+        {id: 'help', sid:'sHelp', title: 'Help', children: [
             {id: 'gettingstarted', title: 'Getting started', url: '/help/getting-started/'},
             {id: 'restapi', title: 'REST API', url: '/help/rest-api/'},
             {id: 'projectoverview', title: 'Project overview', url: '/about/contributors/'},
@@ -41,7 +41,7 @@ var portal = {
             {id: 'acknowledgements', title: 'Acknowledgements', url: '/acknowledgements/'},
             {id: 'contact', title: 'Contact', url: '/help/contacts/'}
         ]},
-        {id: 'account', title: 'Account', children: [
+        {id: 'account', sid:'sAccount', title: 'Account', children: [
             {id: 'login', title: 'Log in', url: '/'},
             {id: 'profile', title: 'Profile', url: '/'},
             {id: 'settings', title: 'Settings', url: '/'}
