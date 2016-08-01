@@ -1,6 +1,6 @@
+"""The user collection."""
 # -*- coding: utf-8 -*-
 
-from pyramid.httpexceptions import HTTPUnprocessableEntity
 from pyramid.view import (
     view_config,
 )
@@ -21,9 +21,6 @@ from snovault import (
 from snovault.calculated import calculate_properties
 from snovault.resource_views import item_view_object
 from snovault.util import expand_path
-from snovault.crud_views import collection_add
-from snovault.schema_utils import validate_request
-from snovault.storage import User as AuthUser
 
 
 ONLY_ADMIN_VIEW_DETAILS = [
@@ -47,17 +44,19 @@ USER_DELETED = [
     name='users',
     unique_key='user:email',
     properties={
-        'title': 'DCC Users',
-        'description': 'Listing of current ENCODE DCC users',
+        'title': '4D Nucleome Users',
+        'description': 'Listing of current 4D Nucleome DCIC users',
     },
     acl=[])
 class User(Item):
+    """The user class."""
+
     item_type = 'user'
     schema = load_schema('encoded:schemas/user.json')
     # Avoid access_keys reverse link so editing access keys does not reindex content.
-    embedded = [
-        'lab',
-    ]
+    # embedded = [
+    #     'lab',
+    # ]
     STATUS_ACL = {
         'current': [(Allow, 'role.owner', ['edit', 'view_details'])] + USER_ALLOW_CURRENT,
         'deleted': USER_DELETED,
@@ -70,9 +69,11 @@ class User(Item):
         "type": "string",
     })
     def title(self, first_name, last_name):
+        """return first and last name."""
         return u'{} {}'.format(first_name, last_name)
 
     def __ac_local_roles__(self):
+        """return the owner user."""
         owner = 'userid.%s' % self.uuid
         return {owner: 'role.owner'}
 
@@ -85,6 +86,7 @@ class User(Item):
         },
     }, category='page')
     def access_keys(self, request):
+        """smth."""
         if not request.has_permission('view_details'):
             return
         uuids = self.registry[CONNECTION].get_rev_links(self.model, 'user', 'AccessKey')
@@ -94,6 +96,7 @@ class User(Item):
 
 @view_config(context=User, permission='view', request_method='GET', name='page')
 def user_page_view(context, request):
+    """smth."""
     if request.has_permission('view_details'):
         properties = item_view_object(context, request)
     else:
@@ -109,6 +112,7 @@ def user_page_view(context, request):
 @view_config(context=User, permission='view', request_method='GET',
              name='object')
 def user_basic_view(context, request):
+    """smth."""
     properties = item_view_object(context, request)
     filtered = {}
     for key in ['@id', '@type', 'uuid', 'lab', 'title']:
@@ -119,43 +123,9 @@ def user_basic_view(context, request):
     return filtered
 
 
-@view_config(context=User.Collection, permission='add', request_method='POST',
-             physical_path="/users")
-def user_add(context,request):
-    '''
-    if we have a password in our request, create and auth entry
-    for the user as well
-    '''
-    #do we have valid data
-    pwd = request.json.get('password', None)
-    pwd_less_data = request.json.copy()
-
-    if pwd is not None:
-        del pwd_less_data['password']
-
-    validate_request(context.type_info.schema, request, pwd_less_data)
-
-    if request.errors:
-        return HTTPUnprocessableEntity(json={'errors':request.errors},
-                                     content_type='application/json')
-
-    result = collection_add(context, request)
-    if result:
-        email = request.json.get('email')
-        pwd = request.json.get('password', None)
-        name = request.json.get('first_name')
-        if pwd is not None:
-            auth_user = AuthUser(email, pwd, name)
-            db = request.registry['dbsession']
-            db.add(auth_user)
-
-            import transaction
-            transaction.commit()
-
-    return result
-
 @calculated_property(context=User, category='user_action')
 def impersonate(request):
+    """smth."""
     # This is assuming the user_action calculated properties
     # will only be fetched from the current_user view,
     # which ensures that the user represented by 'context' is also an effective principal
@@ -169,6 +139,7 @@ def impersonate(request):
 
 @calculated_property(context=User, category='user_action')
 def profile(context, request):
+    """smth."""
     return {
         'id': 'profile',
         'title': 'Profile',
@@ -176,10 +147,11 @@ def profile(context, request):
     }
 
 
-# @calculated_property(context=User, category='user_action')
-# def signout(context, request):
-#     return {
-#         'id': 'signout',
-#         'title': 'Sign out',
-#         'trigger': 'logout',
-#     }
+@calculated_property(context=User, category='user_action')
+def signout(context, request):
+    """smth."""
+    return {
+        'id': 'signout',
+        'title': 'Sign out',
+        'trigger': 'logout',
+    }

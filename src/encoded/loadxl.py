@@ -1,3 +1,4 @@
+"""Load collections and determine the order."""
 from past.builtins import basestring
 from .typedsheets import cast_row_values
 from functools import reduce
@@ -17,69 +18,75 @@ ORDER = [
     'award',
     'lab',
     'organism',
-    'source',
-    'target',
+    # 'target',
     'publication',
     'document',
-    'antibody_lot',
-    'antibody_characterization',
-    'antibody_approval',
-    'treatment',
+    'vendor',
+    'protocol',
+    'protocol_cell_culture',
+    # 'antibody_lot',
+    # 'antibody_characterization',
+    # 'antibody_approval',
+    # 'treatment',
+    # 'construct',
+    # 'construct_characterization',
+    # 'rnai',
+    # 'rnai_characterization',
+    # 'talen',
+    'individual_human',
+    'individual_mouse',
+    'biosource',
+    'enzyme',
     'construct',
-    'construct_characterization',
-    'rnai',
-    'rnai_characterization',
-    'talen',
-    'mouse_donor',
-    'fly_donor',
-    'worm_donor',
-    'human_donor',
-    'donor_characterization',
+    'treatment_rnai',
+    'modification',
+    # 'donor_characterization',
     'biosample',
-    'biosample_characterization',
-    'platform',
-    'library',
-    'experiment',
-    'replicate',
-    'annotation',
-    'project',
-    'publication_data',
-    'reference',
-    'ucsc_browser_composite',
-    'matched_set',
-    'treatment_time_series',
-    'treatment_concentration_series',
-    'organism_development_series',
-    'replication_timing_series',
-    'reference_epigenome',
-    'software',
-    'software_version',
-    'analysis_step',
-    'analysis_step_version',
-    'pipeline',
-    'analysis_step_run',
-    'file',
-    'star_quality_metric',
-    'bismark_quality_metric',
-    'cpg_correlation_quality_metric',
-    'chipseq_filter_quality_metric',
-    'encode2_chipseq_quality_metric',
-    'fastqc_quality_metric',
-    'samtools_flagstats_quality_metric',
-    'mad_quality_metric',
-    'bigwigcorrelate_quality_metric',
-    'dnase_peak_quality_metric',
-    'edwbamstats_quality_metric',
-    'edwcomparepeaks_quality_metric',
-    'hotspot_quality_metric',
-    'idr_summary_quality_metric',
-    'pbc_quality_metric',
-    'phantompeaktools_spp_quality_metric',
-    'samtools_stats_quality_metric',
-    'idr_quality_metric',
-    'generic_quality_metric',
-    'image',
-    'page'
+    # 'biosample_characterization',
+    # 'platform',
+    # 'library',
+    'experiment_hic',
+    'experiment_set'
+    # 'replicate',
+    # 'annotation',
+    # 'project',
+    # 'publication_data',
+    # 'reference',
+    # 'ucsc_browser_composite',
+    # 'matched_set',
+    # 'treatment_time_series',
+    # 'treatment_concentration_series',
+    # 'organism_development_series',
+    # 'replication_timing_series',
+    # 'reference_epigenome',
+    # 'software',
+    # 'software_version',
+    # 'analysis_step',
+    # 'analysis_step_version',
+    # 'pipeline',
+    # 'analysis_step_run',
+    # 'file',
+    # 'star_quality_metric',
+    # 'bismark_quality_metric',
+    # 'cpg_correlation_quality_metric',
+    # 'chipseq_filter_quality_metric',
+    # 'encode2_chipseq_quality_metric',
+    # 'fastqc_quality_metric',
+    # 'samtools_flagstats_quality_metric',
+    # 'mad_quality_metric',
+    # 'bigwigcorrelate_quality_metric',
+    # 'dnase_peak_quality_metric',
+    # 'edwbamstats_quality_metric',
+    # 'edwcomparepeaks_quality_metric',
+    # 'hotspot_quality_metric',
+    # 'idr_summary_quality_metric',
+    # 'pbc_quality_metric',
+    # 'phantompeaktools_spp_quality_metric',
+    # 'samtools_stats_quality_metric',
+    # 'idr_quality_metric',
+    # 'generic_quality_metric',
+    # 'image',
+    # 'page'
 ]
 
 IS_ATTACHMENT = [
@@ -330,6 +337,7 @@ def request_url(item_type, method):
 
     return component
 
+
 def make_request(testapp, item_type, method):
     json_method = getattr(testapp, method.lower() + '_json')
 
@@ -357,8 +365,7 @@ def make_request(testapp, item_type, method):
 
 
 def trim(value):
-    """ Shorten excessively long fields in error log
-    """
+    """Shorten excessively long fields in error log."""
     if isinstance(value, dict):
         return {k: trim(v) for k, v in value.items()}
     if isinstance(value, list):
@@ -426,6 +433,7 @@ def pipeline_logger(item_type, phase):
 
 
 def find_doc(docsdir, filename):
+    """smth."""
     path = None
     for dirpath in docsdir:
         candidate = os.path.join(dirpath, filename)
@@ -441,10 +449,7 @@ def find_doc(docsdir, filename):
 
 
 def attachment(path):
-    """ Create an attachment upload object from a filename
-
-    Embeds the attachment as a data url.
-    """
+    """Create an attachment upload object from a filename Embeds the attachment as a data url."""
     import magic
     import mimetypes
     from PIL import Image
@@ -491,19 +496,18 @@ def attachment(path):
 
 
 def combine(source, pipeline):
-    """ Construct a combined generator from a source and pipeline
-    """
+    """Construct a combined generator from a source and pipeline."""
     return reduce(lambda x, y: y(x), pipeline, source)
 
 
 def process(rows):
-    """ Pull rows through the pipeline
-    """
+    """Pull rows through the pipeline."""
     for row in rows:
         pass
 
 
 def get_pipeline(testapp, docsdir, test_only, item_type, phase=None, method=None):
+    """smth."""
     pipeline = [
         skip_rows_with_all_key_value(test='skip'),
         skip_rows_with_all_key_value(_test='skip'),
@@ -553,6 +557,9 @@ PHASE1_PIPELINES = {
     ],
     'experiment': [
         remove_keys('possible_controls', 'related_files'),
+    ],
+    'experiment_hic': [
+        remove_keys('experiment_relation', 'experiment_sets'),
     ],
     'publication': [
         remove_keys('datasets'),
@@ -613,6 +620,9 @@ PHASE2_PIPELINES = {
     'experiment': [
         skip_rows_missing_all_keys('related_files', 'possible_controls'),
     ],
+    'experiment_hic': [
+        skip_rows_missing_all_keys('experiment_relation', 'experiment_sets'),
+    ],
     'annotation': [
         skip_rows_missing_all_keys('related_files', 'software_used'),
     ],
@@ -653,6 +663,7 @@ PHASE2_PIPELINES = {
 
 
 def load_all(testapp, filename, docsdir, test=False):
+    """smth."""
     for item_type in ORDER:
         try:
             source = read_single_sheet(filename, item_type)
@@ -674,6 +685,7 @@ def load_all(testapp, filename, docsdir, test=False):
 
 
 def load_test_data(app):
+    """smth."""
     from webtest import TestApp
     environ = {
         'HTTP_ACCEPT': 'application/json',
@@ -687,25 +699,23 @@ def load_test_data(app):
     # temp comment out below
     load_all(testapp, inserts, docsdir)
 
-    #load web-users authentication info
+    # load web-users authentication info
     db = app.registry['dbsession']
-    create_user(db,'admin@admin.com', 'admin', 'admin')
-    create_user(db,'wrangler@wrangler.com', 'wrangler', 'wrangler')
-    create_user(db,'viewer@viewer.com', 'viewer', 'viewer')
-    create_user(db,'submitter@submitter.com', 'submitter', 'submitter')
+    create_user(db, 'admin@admin.com', 'admin', 'admin')
+    create_user(db, 'wrangler@wrangler.com', 'wrangler', 'wrangler')
+    create_user(db, 'viewer@viewer.com', 'viewer', 'viewer')
+    create_user(db, 'submitter@submitter.com', 'submitter', 'submitter')
 
     # one transaction to rule them all
     import transaction
     transaction.commit()
 
+
 def create_user(db, email, name, pwd):
-    '''
-    create user if user not in database
-    '''
+    """create user if user not in database."""
     if User.get_by_username(email) is None:
-        print('creating user ',email) 
+        print('creating user ', email)
         new_user = User(email, name, pwd)
         db.add(new_user)
     else:
         print('user %s already exists, skipping' % (email))
-

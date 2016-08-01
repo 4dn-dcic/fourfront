@@ -1,0 +1,11 @@
+[
+    {
+        "uuid": "431106bc-8535-4448-903e-854af460b254",
+        "description": "Gonna cut your gene!",
+        "modification_type": "Crispr",
+        "constructs": ["131106bc-8535-4448-903e-854af460b211"],
+        "genomic_site": "200000000..200000001",
+        "target": "MFG",
+        "url": "https://www.cyclingnews.com"
+    }
+]

@@ -13,12 +13,9 @@
                 },
                 {
                     "cols": [
-                        {"blocks": ["#block2"]}
-                    ]
-                },
-                {
-                    "cols": [
-                        {"blocks": ["#block3"]}
+                        {"blocks": ["#block2"]},
+                        {"blocks": ["#block3"]},
+                        {"blocks": ["#block4"]}
                     ]
                 }
             ],
@@ -26,20 +23,24 @@
                 {
                     "@id": "#block1",
                     "@type": "richtextblock",
-                    "className": "home-title",
-                    "body": "<div class=\"fourDN-header fourDN-title\"><h1>4D Nucleome</h1></div>"
+                    "body": "<div class=\"project-info site-title\">\n    <h1>ENCODE: The Encyclopedia of DNA Elements</h1>\n</div>\n<div id=\"info-box\" class=\"project-info text-panel\">\n  <p>The ENCODE project dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat.</p>\n</div>"
                 },
                 {
                     "@id": "#block2",
                     "@type": "richtextblock",
-                    "className": "home-announcements",
-                    "body": "<h2 class=\"fourDN-header\">Announcements</h2>\n<table class=\"fourDN-section\"><tr><td class=\"fourDN-section-title\">Redesigned Data Portal Released</td><td class=\"fourDN-section-info\">Posted by DCIC Staff</td></tr></table><div class=\"fourDN-content\"><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus tristique, nisl nec imperdiet commodo, magna lorem placerat mauris, eu semper odio ipsum eget lectus. In eu libero ante. Mauris consectetur est venenatis tortor gravida, vitae fringilla orci facilisis. Aenean ante libero, sollicitudin ac ipsum vel, hendrerit porttitor quam.</p></div>\n<table class=\"fourDN-section\"><tr><td class=\"fourDN-section-title\">Now Accepting Data Submissions</td><td class=\"fourDN-section-info\">Posted by DCIC Staff</td></tr></table><div class=\"fourDN-content\"><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus tristique, nisl nec imperdiet commodo, magna lorem placerat mauris, eu semper odio ipsum eget lectus. In eu libero ante. Mauris consectetur est venenatis tortor gravida, vitae fringilla orci facilisis. Aenean ante libero, sollicitudin ac ipsum vel, hendrerit porttitor quam.</p></div>"
+                    "body": "<h2>Transcriptome</h2>\n<p>Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.</p>"
                 },
                 {
                     "@id": "#block3",
                     "@type": "richtextblock",
-                    "className": "home-getting-started",
-                    "body": "<h2 class=\"fourDN-header\">Getting Started</h2>\n<table class=\"fourDN-section\"><tr><td class=\"fourDN-section-title\">Data Access</td></tr></table><div class=\"fourDN-content\"><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus tristique, nisl nec imperdiet commodo, magna lorem placerat mauris, eu semper odio ipsum eget lectus. In eu libero ante. Mauris consectetur est venenatis tortor gravida, vitae fringilla orci facilisis. Aenean ante libero, sollicitudin ac ipsum vel, hendrerit porttitor quam.</p></div>\n<table class=\"fourDN-section\"><tr><td class=\"fourDN-section-title\">Tutorials</td></tr></table><div class=\"fourDN-content\"><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus tristique, nisl nec imperdiet commodo, magna lorem placerat mauris, eu semper odio ipsum eget lectus. In eu libero ante. Mauris consectetur est venenatis tortor gravida, vitae fringilla orci facilisis. Aenean ante libero, sollicitudin ac ipsum vel, hendrerit porttitor quam.</p></div>"
+                    "body": "<h2>Regulation</h2>\n<p>Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet doming id quod mazim placerat facer possim assum.</p>"
+                },
+                {
+                    "@id": "#block4",
+                    "@type": "teaserblock",
+                    "image": "/images/8a91ae78-731a-4a92-ae7c-273214be408a/",
+                    "body": "<h2>Chromatin Structure</h2>",
+                    "href": "/about/chromatin-structure"
                 }
             ]
         }
@@ -47,9 +48,9 @@
     {
         "name": "test-section",
         "title": "Test Section",
-        "lab": "thomas-gingeras",
+        "lab": "ali-mortazavi",
         "status": "released",
-        "submitted_by": "dignissim.euismod@amet.habitant",
+        "submitted_by": "hitz@stanford.edu",
         "uuid": "41c4ea4e-7a8e-4b91-8fe3-384d0adc8735",
         "layout": {
             "rows": [
@@ -76,8 +77,8 @@
         "name": "subpage",
         "title": "Subpage",
         "status": "released",
-        "lab": "thomas-gingeras",
-        "submitted_by": "dignissim.euismod@amet.habitant",
+        "lab": "ali-mortazavi",
+        "submitted_by": "hitz@stanford.edu",
         "uuid": "331928f7-d8f7-4ea6-b4e0-8d380fb22974",
         "layout": {
             "rows": [
@@ -100,8 +101,8 @@
         "parent": "/test-section",
         "name": "subpage-in-progress",
         "title": "Subpage in progress not visible to users",
-        "lab": "thomas-gingeras",
-        "submitted_by": "dignissim.euismod@amet.habitant",
+        "lab": "ali-mortazavi",
+        "submitted_by": "hitz@stanford.edu",
         "status": "in progress",
         "uuid": "83173355-31ff-4ca7-a259-e4af0f3a0169",
         "layout": {
@@ -124,9 +125,9 @@
     {
         "name": "permission-test",
         "title": "Permission Test",
-        "lab": "thomas-gingeras",
+        "lab": "ali-mortazavi",
         "status": "in progress",
-        "submitted_by": "dignissim.euismod@amet.habitant",
+        "submitted_by": "hitz@stanford.edu",
         "uuid": "2efb5ffe-5a7b-4a44-9071-2e0651a566e0",
         "layout": {
             "rows": [

@@ -1,0 +1,74 @@
+{
+    "title": "Workflow Run",
+    "description": "Schema for submitting metadata on the executation of a computational analysis workflow composed of tasks.",
+    "id": "/profiles/analysis_step.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["workflow"],
+    "additionalProperties": false,
+    "identifyingProperties": ["uuid", "aliases"],
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/status" },
+        { "$ref": "mixins.json#/submitted"},
+        { "$ref": "mixins.json#/documents" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/notes"}
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "title": {
+            "title": "Title",
+            "description": "The preferred viewable name of the run of the workflow.",
+            "type": "string"
+        },
+        "description": {
+            "title": "Description",
+            "description": "A plain text description of the task.",
+            "type": "string"
+        },
+        "input_files": {
+            "title": "Input files",
+            "description": "The files used as initial input for the workflow.",
+            "type": "array",
+            "items": {
+                "title": "Input file",
+                "description": "A file used as input for the workflow.",
+                "type": "string",
+                "linkTo": "File"
+            }
+        },
+        "output_files": {
+            "title": "Output files",
+            "description": "All files that are saved as output of the workflow",
+            "type": "array",
+            "items": {
+                "title": "Output file",
+                "description": "A file output by the workflow.",
+                "type": "string",
+                "linkTo": "File"
+            }
+        },
+        "workflow": {
+            "title": "Workflow",
+            "description": "The workflow that was run.",
+            "type": "string",
+            "linkTo": "Workflow"
+        },
+        "run_status": {
+            "title": "Status",
+            "type": "string",
+            "default": "waiting",
+            "enum" : [
+                "waiting",
+                "running",
+                "finished",
+                "error"
+            ]
+        }
+    }
+}

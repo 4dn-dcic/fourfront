@@ -1,6 +1,6 @@
 {
     "title": "Publication",
-    "description": "Schema for a publication page.",
+      "description": "LINKTO DATASET DELETED Schema for a publication page.",
     "id": "/profiles/publication.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -11,11 +11,12 @@
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/attribution" }
     ],
     "properties": {
         "schema_version": {
-            "default": "3"
+            "default": "1"
         },
         "title": {
             "title": "Title",
@@ -102,8 +103,7 @@
                 "title": "Datasets",
                 "description": "A datasets referred to by the publication.",
                 "comment": "See dataset.json for available identifiers.",
-                "type":  "string",
-                "linkTo": "Dataset"
+                "type":  "string"
             }
         },
         "supplementary_data": {
@@ -182,7 +182,7 @@
                     "genomic annotations",
                     "production"
                 ]
-            }      
+            }
         },
         "published_by": {
             "title": "Published by",
@@ -283,7 +283,7 @@
         "publication_year": {
             "ignore_unmapped": true,
             "order": "desc",
-            "missing": "_last" 
+            "missing": "_last"
         }
     }
 }

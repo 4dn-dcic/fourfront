@@ -1,0 +1,10 @@
+[
+    {
+        "uuid": "431106bc-8535-4448-903e-854af460b260",
+        "description": "Sample experiment set",
+        "experimentset_type": "biological replicates",
+        "experiments_in_set": ["ENCEX067APU"],
+        "lab": "ali-mortazavi",
+        "award": "U41HG007355"
+    }
+]
