@@ -87,8 +87,6 @@ var IPanel = module.exports.IPanel = React.createClass({
     render: function() {
         var context = this.props.context;
         var schema = context.schema;
-        console.log("_____");
-        console.log(schema);
         var itemClass = globals.itemClass(context, 'view-detail panel');
         var title = globals.listing_titles.lookup(context)({context: context});
         var sortKeys = Object.keys(context).sort();

@@ -7,6 +7,7 @@ var Navigation = require('./navigation');
 var Footer = require('./footer');
 var url = require('url');
 
+//sid is to allow addition of supplementary ids to navbar link headings
 var portal = {
     portal_title: '4D Nucleome',
     global_sections: [

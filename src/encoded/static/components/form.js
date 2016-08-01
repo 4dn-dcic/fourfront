@@ -512,7 +512,7 @@ var Form = module.exports.Form = React.createClass({
                         } else {
                             // we've reached a scalar; stop and show error here
                             description = name.slice(i).join('/') + ': ' + description;
-                            break;                            
+                            break;
                         }
                         v = v.children[name[i]];
                     }

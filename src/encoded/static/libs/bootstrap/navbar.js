@@ -157,7 +157,6 @@ var NavItem = module.exports.NavItem = React.createClass({
     render: function() {
         var {dropdownId, dropdownTitle, dropdownSId} = this.props;
         var dropdownOpen = dropdownId && (this.context.openDropdown === dropdownId);
-
         return (
             <li className={dropdownId ? ('dropdown' + (dropdownOpen ? ' open' : '')) : ''}>
                 {dropdownTitle ?
