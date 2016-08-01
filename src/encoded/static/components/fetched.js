@@ -135,7 +135,7 @@ var FetchedData = module.exports.FetchedData = React.createClass({
                     // Still communicating with server if handleFetch not yet called
                     if (this.state[child.props.name] === undefined) {
                         communicating = true;
-                    }                    
+                    }
                 } else {
                     // Some non-<Param> child; just push it unmodified onto `children` array
                     children.push(child);
@@ -207,7 +207,7 @@ var Items = React.createClass({
 
 
 var FetchedItems = module.exports.FetchedItems = React.createClass({
-    
+
     render: function() {
         return (
             <FetchedData ignoreErrors={this.props.ignoreErrors}>

@@ -3,9 +3,6 @@
     border: 1px #ccc solid;
     border-radius: 3px;
     overflow-x: auto;
-    // Carl's changes
-    overflow-y: auto;
-    max-height: 600px !important;
 }
 
 @media screen and (max-width: $screen-sm-min) {
