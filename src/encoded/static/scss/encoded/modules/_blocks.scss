@@ -6,10 +6,10 @@
 // Applies to all block types, and specific blog styles nest inside
 .block {
     margin-bottom: 10px;
-    @include box-shadow(0 0 6px rgba(195, 202, 211, 0.5));
+    // @include box-shadow(0 0 6px rgba(195, 202, 211, 0.5));
 
     @media screen and (min-width: $screen-md-min) {
-        margin-bottom: 20px;
+        margin-bottom: 10px;
     }
 
     &.richtextblock {
@@ -29,7 +29,7 @@
 
         .col-md-12 & {
             @media screen and (min-width: $screen-md-min) {
-                padding: 20px 10%;
+                padding: 20px 2%;
             }
 
             &.full-width {
@@ -283,7 +283,7 @@ img.fig-align-center {
 
 .teaser {
     position: relative;
-    padding: 0;
+    padding: 5;
     @include border-radius(0);
     border: 4px solid #fff;
 

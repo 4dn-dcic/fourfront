@@ -105,7 +105,7 @@ def test_hub_field(testapp, workbook, expected):
 
 def test_visualize_ucsc(testapp, workbook):
     expected = {
-        'GRCh38': 'http://genome.ucsc.edu/cgi-bin/hgTracks?hubClear=http://localhost/experiments/ENCSR000AEN/@@hub/hub.txt&db=hg38', 
+        'GRCh38': 'http://genome.ucsc.edu/cgi-bin/hgTracks?hubClear=http://localhost/experiments/ENCSR000AEN/@@hub/hub.txt&db=hg38',
         'hg19': 'http://genome.ucsc.edu/cgi-bin/hgTracks?hubClear=http://localhost/experiments/ENCSR000AEN/@@hub/hub.txt&db=hg19'
     }
     res = testapp.get("/experiments/ENCSR000AEN/")

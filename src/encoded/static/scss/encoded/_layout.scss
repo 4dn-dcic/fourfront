@@ -15,13 +15,13 @@
 	h1,h2,h3,h4 {
 		@include text-shadow(rgba(255,255,255,1) 1px 1px 0);
 	}
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 	display: block;
 	@include font-size(1.3);
 }
 
 .text-panel {
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
 /* *********************************************************
@@ -30,15 +30,16 @@
 
 .page-footer {
 	color: rgb(255, 255, 255);
-	background-color: #a4afb8; // for IE8
+	background-color: #ffffff; // for IE8
 	background-color: $footerBackground; // overwrite previous line for CSS3 browsers
 	//height: $footerHeight;
-	@include text-shadow(0 1px rgba(0, 0, 0, 0.3));
+	// @include text-shadow(0 1px rgba(0, 0, 0, 0.3));
 	//line-height: 0;
 	text-align: center;
 	overflow: hidden;
-	a {
-		color: rgb(255, 255, 255);
+	font-family: 'Work Sans', sans-serif;
+	a{
+		color: #bfbfbf;
 		font-weight: bold;
 	}
 	ul {
@@ -51,7 +52,7 @@
 .footer-links {
     margin: 15px 0;
     text-align: center;
-
+	color: #bfbfbf;
     @media (min-width: $screen-sm-min) {
         text-align: right;
 
@@ -64,37 +65,22 @@
         display: block;
         margin: 0 0 8px;
         padding: 10px 15px;
-        background-color: darken($footerBackground, 0.1%);
-        @include border-radius(3px);
     }
-    a:hover {
-        text-decoration: none;
-        background-color: darken($footerBackground, 6%);
-    }
-    a:active {
-        background-color: darken($footerBackground, 15%);
-    }
-}
-
-.footer-logos {
-    margin: 10px 0;
-    text-align: center;
-
-    @media (min-width: $screen-sm-min) {
-        text-align: left;
-    }
-
-    li {
-        margin: 0 0 15px;
+    a:hover, a:active {
+        text-decoration: none !important;
+        color: #000000;
     }
 }
 
 
 .copy-notice {
-    text-align: center;
-
-    @media (min-width: $screen-sm-min) {
-        text-align: right;
+	margin: 0 0 8px;
+	text-align: center;
+	display: block;
+	padding: 15px 15px;
+	color: #bfbfbf;
+	@media (min-width: $screen-sm-min) {
+		text-align: left;
     }
 }
 
@@ -120,7 +106,7 @@
         .flexbox & {
             flex: 1 1 0px;
             width: auto;
-            border-left: 1px solid #c0c0c0;
+            // border-left: 1px solid #c0c0c0;
 
             &:first-child {
                 border-left: none;
@@ -156,8 +142,8 @@
 .login-box{
     width: inherit;
 	height: inherit;
-    border: 4px solid #000000;
-    background-color: #f0f0f0;
+    border: 2px solid #000000;
+    background-color: #ffffff;
     padding: 5px;
 	display: block;
     margin-left: auto;
@@ -165,15 +151,18 @@
 }
 .sexy-btn{
     background-color: #ffffff;
-    border: 2px solid #000099;
+	color: #b3b3b3;
+    border: 2px solid #b3b3b3;
     padding: 5px 10px;
     text-align: center;
     font-size: 16px;
     cursor: pointer;
+	font-family: 'Work Sans', sans-serif;
 	// outline: none;
 }
 .sexy-btn:hover, .sexy-btn:focus {
-  background-color: #cce6ff;
+  color: #000000;
+  border: 2px solid #000000;
 }
 
 .sexy-btn span{
@@ -213,7 +202,7 @@
 
 .fill-label{
     display: block;
-    font-family: "Arial", Arial, sans-serif;
+    font-family: 'Work Sans', sans-serif;
     text-align: center;
 }
 .text-box {
@@ -221,25 +210,87 @@
     margin: 8px 0 8px;
     box-sizing: border-box;
     width: 70%;
-    border: 2px solid #000099 !important;
+    border: 2px solid #b3b3b3 !important;
     display: block;
     margin-left: auto;
     margin-right: auto;
     font-size: 14px;
-    font-family: "Arial", Arial, sans-serif;
+    font-family: 'Work Sans', sans-serif;
 }
-.text-box:focus {
-    background-color: #cce6ff !important;
+
+.text-box:hover, .text-box:focus{
+	outline: none;
+	border: 2px solid #000000 !important;
 }
+
 .title{
     text-align: center;
-    font-family: "Arial", Arial, sans-serif;
+    font-family: 'Work Sans', sans-serif;
 }
 .error{
     text-align: center;
-    font-family: "Arial", Arial, sans-serif;
+    font-family: 'Work Sans', sans-serif;
     color: red;
 }
 .login-modal{
 	width: 70% !important;
+}
+
+/* *********************************************************
+		CARL'S RANDOM CHANGES
+********************************************************** */
+
+.fourDN-header{
+	font-family: 'Work Sans', sans-serif;
+	font-weight: bold;
+	margin-bottom: 20px;
+}
+
+.fourDN-title{
+	text-align: center;
+}
+
+.fourDN-section{
+	font-family: 'Work Sans', sans-serif;
+	padding-bottom: 10px;
+	margin: 0px;
+	width: 100%;
+}
+
+.fourDN-section td{
+	vertical-align: bottom;
+	padding: 0px !important;
+}
+.fourDN-section tr{
+	border-bottom: 2px solid #009999;
+}
+.fourDN-section-title{
+	color: #999999 !important;
+	font-weight: 200;
+	font-size: 1.7em !important;
+}
+
+.fourDN-section-info{
+	color: #b3b3b3 !important;
+	text-align: right;
+	font-weight: 200;
+	font-size: 1.4em;
+}
+
+
+.fourDN-content{
+	padding-top: 5px;
+	padding-left: 20%;
+	font-family: 'Yrsa', serif;
+	line-height: 130%;
+	font-size: 1.5em;
+	margin-bottom: 40px;
+}
+
+.item-toggle-link{
+	padding: 10px;
+	color: #ff0000; // temporary?
+	&:hover,&:focus {
+		color: #ff0000;
+	}
 }
