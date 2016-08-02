@@ -58,8 +58,6 @@ var Item = module.exports.Item = React.createClass({
             <div className={itemClass}>
                 <header className="row">
                     <div className="col-sm-12">
-                        <h2>{title}</h2>
-                        {altacc ? <h4 className="repl-acc">Replaces {altacc}</h4> : null}
                         <div className="status-line">
                             <AuditIndicators context={context} key="biosample-audit" />
                         </div>
