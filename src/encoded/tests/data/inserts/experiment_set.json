@@ -4,7 +4,7 @@
         "description": "Sample experiment set",
         "experimentset_type": "biological replicates",
         "experiments_in_set": ["4DNEX067APU1"],
-        "lab": "ali-mortazavi",
+        "lab": "ali-mortazavi-lab",
         "award": "U41HG007355"
     }
 ]

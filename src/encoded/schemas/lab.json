@@ -4,7 +4,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["name", "title"],
-    "identifyingProperties": ["uuid", "title", "name"],
+    "identifyingProperties": ["name", "uuid", "title"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -17,14 +17,14 @@
         },
         "name": {
             "title": "Name",
-            "description": "A short unique name for the lab, current convention is lower cased and hyphen delimited of PI's first and last name (e.g. john-doe).",
+            "description": "A short unique name for the lab, use lower cased and hyphen delimited PI name and lab(e.g. john-doe-lab).",
             "type": "string",
-            "pattern": "^[a-z0-9\\-]+$",
+            "pattern": "^[a-z0-9\\-]+lab$",
             "uniqueKey": "lab:name"
         },
         "title": {
             "title": "Title",
-            "description": "A unique name for affiliation identification, current convention is comma separated PI's first & last name and institute label. (e.g. John Doe, UNI).",
+            "description": "A unique name for lab & affiliation use PI's first & last name, Lab, comma, and institute label. (e.g. John Doe Lab, UNI).",
             "type": "string",
             "uniqueKey": "lab:name"
         },

@@ -2,9 +2,9 @@
     {
         "accession":"4DNFI067APU1",
         "notes": "sample dcic notes",
-        "lab": "ali-mortazavi",
+        "lab": "ali-mortazavi-lab",
         "submitted_by": "admin@admin.com",
-        "lab": "ali-mortazavi",
+        "lab": "ali-mortazavi-lab",
         "award": "U41HG007355",
         "file_format":"fastq",
         "experiments":["4DNEX067APT1"],

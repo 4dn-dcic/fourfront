@@ -48,7 +48,7 @@
     {
         "name": "test-section",
         "title": "Test Section",
-        "lab": "ali-mortazavi",
+        "lab": "ali-mortazavi-lab",
         "status": "released",
         "submitted_by": "hitz@stanford.edu",
         "uuid": "41c4ea4e-7a8e-4b91-8fe3-384d0adc8735",
@@ -77,7 +77,7 @@
         "name": "subpage",
         "title": "Subpage",
         "status": "released",
-        "lab": "ali-mortazavi",
+        "lab": "ali-mortazavi-lab",
         "submitted_by": "hitz@stanford.edu",
         "uuid": "331928f7-d8f7-4ea6-b4e0-8d380fb22974",
         "layout": {
@@ -101,7 +101,7 @@
         "parent": "/test-section",
         "name": "subpage-in-progress",
         "title": "Subpage in progress not visible to users",
-        "lab": "ali-mortazavi",
+        "lab": "ali-mortazavi-lab",
         "submitted_by": "hitz@stanford.edu",
         "status": "in progress",
         "uuid": "83173355-31ff-4ca7-a259-e4af0f3a0169",
@@ -125,7 +125,7 @@
     {
         "name": "permission-test",
         "title": "Permission Test",
-        "lab": "ali-mortazavi",
+        "lab": "ali-mortazavi-lab",
         "status": "in progress",
         "submitted_by": "hitz@stanford.edu",
         "uuid": "2efb5ffe-5a7b-4a44-9071-2e0651a566e0",

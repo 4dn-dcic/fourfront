@@ -4,10 +4,10 @@
         "first_name": "Ali",
         "groups": ["admin"],
         "job_title": "Software Engineer",
-        "lab": "ali-mortazavi",
+        "lab": "ali-mortazavi-lab",
         "last_name": "Mortazavi",
         "status": "current",
-        "submits_for": ["ali-mortazavi"],
+        "submits_for": ["ali-mortazavi-lab"],
         "timezone": "US/Pacific",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267307e3b"
     }
