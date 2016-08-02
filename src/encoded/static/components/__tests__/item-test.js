@@ -6,47 +6,48 @@ jest.autoMockOff();
 jest.dontMock('react');
 jest.dontMock('underscore');
 
-// Use for testing item.js view
 
-describe('Typical Item made from a library', function() {
-    var React, TestUtils, context, testItem, defTerms, defDescs;
+describe('Experiment Page', function() {
+    var React, item, Item, TestUtils, FetchContext, context, schemas, _;
 
     beforeEach(function() {
         React = require('react');
         TestUtils = require('react/lib/ReactTestUtils');
-        var Subview = require('../item').Subview;
-        var fetched = require('../fetched');
-
-        // Set up context object to be rendered
-        // context = require('../testdata/library/sid38806');
-        context = require('../testdata/platform');
-
-        // Render platform panel into jsnode
-
-        testItem = TestUtils.renderIntoDocument(
-            <fetched.FetchedData>
-                <fetched.Param name="schemas" url="/profiles/" />
-                <Subview content={context} />
-            </fetched.FetchedData>
-        );
-        console.log(testItem);
-        // Get the <dt> and <dd> terms needed for all tests
-        // defTerms = TestUtils.scryRenderedDOMComponentsWithTag(testItem, 'dt');
-        // defDescs = TestUtils.scryRenderedDOMComponentsWithTag(testItem, 'dd');
-        defTerms = TestUtils.scryRenderedDOMComponentsWithTag(testItem, 'div');
-        defDescs = TestUtils.findRenderedDOMComponentWithClass(testItem, 'flexcol-sm-6').getDOMNode();
+        _ = require('underscore');
+        item = require('../item');
+        Item = item.IPanel;
+        context = require('../testdata/library/sid38806');
+        schemas = require('../testdata/schemas');
+        FetchContext = {
+            fetch: function(url, options) {
+                return Promise.resolve({json: () => ({'@graph': []})});
+            }
+        };
     });
 
-    it('has nineteen <dt> and <dd> elements', function() {
-        // expect(defTerms.length).toEqual(19);
-        // expect(defDescs.length).toEqual(19);
-        expect(defTerms.length).toEqual(2);
-        expect(defDescs.getAttribute('href')).toEqual('/nonsense/');
-    });
+    describe('Testing basic subview using a library', function() {
+        var testItem, definitions, defTerms, defDescs;
 
-    it('has a good title', function() {
-        var titleLine = TestUtils.findRenderedDOMComponentWithClass(testItem, 'experiment-heading');
-        var exptHeading = titleLine.getDOMNode();
-        expect(exptHeading.textContent).toEqual('ENCLB055ZZZ');
+        beforeEach(function() {
+            testItem = React.withContext(FetchContext, function() {
+                return TestUtils.renderIntoDocument(
+                    <Item schemas={schemas} context={context} />
+                );
+            });
+            definitions = TestUtils.findRenderedDOMComponentWithClass(testItem, 'key-value');
+            defTerms = TestUtils.scryRenderedDOMComponentsWithTag(definitions, 'dt');
+            defDescs = TestUtils.scryRenderedDOMComponentsWithTag(definitions, 'dd');
+        });
+
+        it('has the correct number of def terms and def descriptions', function() {
+            expect(defTerms.length).toEqual(19);
+            expect(defDescs.length).toEqual(19);
+        });
+
+        it('has a good title', function() {
+            var titleLine = TestUtils.findRenderedDOMComponentWithClass(testItem, 'experiment-heading');
+            var exptHeading = titleLine.getDOMNode();
+            expect(exptHeading.textContent).toEqual('ENCLB055ZZZ');
+        });
     });
 });

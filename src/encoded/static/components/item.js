@@ -250,7 +250,7 @@ var formValue = function (schemas, item) {
         if(item['@type']){
             var type = item['@type'][0];
         }
-        toReturn.push(<SubIPannel schemas={schemas} content={item}/>);
+        toReturn.push(<SubIPannel schemas={schemas} context={item}/>);
     }else{
         if (typeof item === 'string' && item.charAt(0) === '/') {
             toReturn.push(<a href={item}>{item}</a>)
@@ -275,7 +275,7 @@ var SubIPannel = React.createClass({
     },
     render: function() {
         var schemas = this.props.schemas;
-        var item = this.props.content;
+        var item = this.props.context;
         // TODO: make this process generic using lookup with registry
         var title = item.title || item.name || item.accession || item['@id'] || "Open";
         var toggleRender;
@@ -285,7 +285,7 @@ var SubIPannel = React.createClass({
             toggleRender = <span/>;
         }else{
             toggleLink = <a href="" className="item-toggle-link" onClick={this.handleToggle}>Close</a>
-            toggleRender = <Subview schemas={schemas} content={item}/>;
+            toggleRender = <Subview schemas={schemas} context={item}/>;
         }
         return (
     	  <div className="flexrow">
@@ -301,7 +301,7 @@ var SubIPannel = React.createClass({
 var Subview = module.exports.Subview = React.createClass({
     render: function(){
         var schemas = this.props.schemas;
-        var item = this.props.content;
+        var item = this.props.context;
         var tips = tipsFromSchema(schemas, item);
         return(
             <div className="flexcol-sm-6" href="/nonsense/">
