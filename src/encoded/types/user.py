@@ -145,13 +145,3 @@ def profile(context, request):
         'title': 'Profile',
         'href': request.resource_path(context),
     }
-
-
-@calculated_property(context=User, category='user_action')
-def signout(context, request):
-    """smth."""
-    return {
-        'id': 'signout',
-        'title': 'Sign out',
-        'trigger': 'logout',
-    }
