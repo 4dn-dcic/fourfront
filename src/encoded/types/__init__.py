@@ -136,6 +136,7 @@ class Biosource(Item):
 
     item_type = 'biosource'
     schema = load_schema('encoded:schemas/biosource.json')
+    embedded = ["individual"]
 
 
 @collection(

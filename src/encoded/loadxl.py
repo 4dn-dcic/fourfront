@@ -33,6 +33,7 @@ ORDER = [
     # 'rnai',
     # 'rnai_characterization',
     # 'talen',
+    # 'individual',
     'individual_human',
     'individual_mouse',
     'biosource',

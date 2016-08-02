@@ -4,7 +4,7 @@
     "id": "/profiles/biosample.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [ "organism"],
+    "required": [ "biosource"],
     "identifyingProperties": ["uuid","accession","aliases"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -30,19 +30,6 @@
             "description": "A plain text description of the biosample. Do not include experiment details, constructs or treatments.",
             "type": "string",
             "default": ""
-        },
-        "organism": {
-            "title": "Organism",
-            "comment": "See organism.json for available identifiers.",
-            "type": "string",
-            "linkTo": "Organism"
-        },
-        "individual": {
-            "title": "Individual",
-            "description": "Information on donor or individual mouse or other organism.",
-            "comment": "For human biosamples, see human_donor.json for available identifiers. For mouse biosamples, see mouse_donor.json for available identifiers.",
-            "type": "string",
-            "linkTo": "Individual"
         },
         "biosource": {
           "title": "Biosource",
@@ -100,13 +87,13 @@
                         "type": "string",
                         "description": "A controlled term specifying the relationship between biosamples.",
                         "title": "Relationship Type",
+                        "comment": "if you want the relationship to be updated on the other end, modify biosample.py",
                         "enum": [
                             "derived from",
-                            "pooled from",
-                            "part of"
+                            "parent of"
                         ]
                     },
-                    "experiment": {
+                    "biosample": {
                       "type": "string",
                       "description": "The related biosample",
                       "linkTo": "Biosample"
