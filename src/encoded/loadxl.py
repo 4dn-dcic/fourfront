@@ -562,8 +562,11 @@ PHASE1_PIPELINES = {
         remove_keys('possible_controls', 'related_files'),
     ],
     'file': [
-        remove_keys('experiments'),
+        remove_keys('experiments', 'filesets'),
     ],
+    # 'file_set': [
+    #     remove_keys('files_in_set'),
+    # ],
     'experiment_hic': [
         remove_keys('experiment_relation', 'experiment_sets'),
     ],
@@ -624,8 +627,11 @@ PHASE2_PIPELINES = {
         skip_rows_missing_all_keys('related_files', 'possible_controls'),
     ],
     'file': [
-        skip_rows_missing_all_keys('experiments'),
+        skip_rows_missing_all_keys('experiments', 'filesets'),
     ],
+    # 'file_set': [
+    #     skip_rows_missing_all_keys('files_in_set'),
+    # ],
     'experiment_hic': [
         skip_rows_missing_all_keys('experiment_relation', 'experiment_sets'),
     ],

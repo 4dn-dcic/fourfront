@@ -6,7 +6,8 @@
         "lab": "ali-mortazavi-lab",
         "award": "U41HG007355",
         "fileset_type": "sequence files",
-        "files_in_set":["4DNFI067APU1","4DNFI067APU2"],
-        "uuid": "4d6ecff9-7c67-4096-bca8-515246767feb"
+        "files_in_set":["4DNFI067APU1"],
+        "uuid": "4d6ecff9-7c67-4096-bca8-515246767feb",
+        "accession": "4DNFS40D5WL1"
     }
 ]
