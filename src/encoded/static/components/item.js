@@ -277,15 +277,7 @@ var SubIPannel = React.createClass({
         var schemas = this.props.schemas;
         var item = this.props.content;
         // TODO: make this process generic using lookup with registry
-        if (item.hasOwnProperty("accession")){
-            var title = item.accession;
-        }else if (item.hasOwnProperty("name")){
-            var title = item.name;
-        }else if (item.hasOwnProperty("title")){
-            var title = item.title;
-        }else{
-            var title = "Open";
-        }
+        var title = item.title || item.name || item.accession || item['@id'] || "Open";
         var toggleRender;
         var toggleLink;
         if (!this.state.isOpen) {
@@ -310,8 +302,6 @@ var Subview = React.createClass({
     render: function(){
         var schemas = this.props.schemas;
         var item = this.props.content;
-        console.log(item);
-        console.log(schemas);
         var tips = tipsFromSchema(schemas, item);
         return(
             <div className="flexcol-sm-6">
