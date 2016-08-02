@@ -105,9 +105,8 @@ def remc_member(testapp, remc_lab):
 def award(testapp):
     item = {
         'name': 'encode3-award',
-        'rfa': 'ENCODE3',
-        'project': 'ENCODE',
-        'viewing_group': 'ENCODE',
+        'description': 'ENCODE test award',
+        'viewing_group': '4DN',
     }
     return testapp.post_json('/award', item).json['@graph'][0]
 
