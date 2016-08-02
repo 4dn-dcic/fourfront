@@ -62,15 +62,15 @@ def accession(instance, subschema):
     raise AssertionError("Free accession not found in %d attempts" % ATTEMPTS)
 
 
-FDN_ACCESSION_FORMAT = (digits, digits, digits, ascii_uppercase, ascii_uppercase, ascii_uppercase)
-
+#FDN_ACCESSION_FORMAT = (digits, digits, digits, ascii_uppercase, ascii_uppercase, ascii_uppercase)
+FDN_ACCESSION_FORMAT = ['ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789']*7
 
 def enc_accession(accession_type):
     random_part = ''.join(random.choice(s) for s in FDN_ACCESSION_FORMAT)
     return '4DN' + accession_type + random_part
 
 
-TEST_ACCESSION_FORMAT = (digits, ) * 6
+TEST_ACCESSION_FORMAT = (digits, ) * 7
 
 
 def test_accession(accession_type):
