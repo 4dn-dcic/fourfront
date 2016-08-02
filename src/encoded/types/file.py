@@ -132,6 +132,40 @@ class File(Item):
         # 'quality_metrics.step_run.analysis_step_version.analysis_step',
     ]
 
+    def _update(self, properties, sheets=None):
+        # update self first to ensure 'related_files' are stored in self.properties
+        super(File, self)._update(properties, sheets)
+        DicRefRelation = {
+             "derived from": "parent of",
+             "parent of": "derived from",
+             "supercedes": "is superceded by",
+             "is superceded by": "supercedes",
+             "paired with": "paired with"
+             }
+        acc = str(self.uuid)
+        if 'related_files' in properties.keys():
+            for relation in properties["related_files"]:
+                switch = relation["relationship_type"]
+                rev_switch = DicRefRelation[switch]
+                related_fl = relation["file"]
+                relationship_entry = {"relationship_type": rev_switch, "file": acc}
+                rel_dic = {'related_files': [relationship_entry, ]}
+
+                target_fl = self.collection.get(related_fl)
+                # case one we don't have relations
+                if 'related_files' not in target_fl.properties.keys():
+                    target_fl.properties.update(rel_dic)
+                    target_fl.update(target_fl.properties)
+                else:
+                    # case two we have relations but not the one we need
+                    for target_relation in target_fl.properties['related_files']:
+                        if target_relation['file'] == acc:
+                            break
+                    else:
+                        # make data for new related_files
+                        target_fl.properties['related_files'].append(relationship_entry)
+                        target_fl.update(target_fl.properties)
+
     @property
     def __name__(self):
         properties = self.upgrade_properties()

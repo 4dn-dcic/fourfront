@@ -9,5 +9,17 @@
         "file_format":"fastq",
         "experiments":["4DNEX067APT1"],
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faf3"
+    },
+    {
+        "accession":"4DNFI067APU2",
+        "notes": "sample dcic notes",
+        "lab": "ali-mortazavi-lab",
+        "submitted_by": "admin@admin.com",
+        "lab": "ali-mortazavi-lab",
+        "award": "U41HG007355",
+        "file_format":"fastq",
+        "experiments":["4DNEX067APT1"],
+        "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faf4",
+        "related_files":[{"relationship_type":"derived from","file":"4DNFI067APU1"}]
     }
 ]

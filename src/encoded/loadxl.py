@@ -567,9 +567,6 @@ PHASE1_PIPELINES = {
     'experiment_hic': [
         remove_keys('experiment_relation', 'experiment_sets'),
     ],
-    'publication': [
-        remove_keys('datasets'),
-    ],
     'annotation': [
         remove_keys('related_files', 'software_used'),
     ],
@@ -664,9 +661,6 @@ PHASE2_PIPELINES = {
     ],
     'matched_set': [
         skip_rows_missing_all_keys('related_datasets'),
-    ],
-    'publication': [
-        skip_rows_missing_all_keys('datasets'),
     ],
 }
 

@@ -128,6 +128,7 @@
                           "description": "A controlled term specifying the type of relationship between the 'parent' software and the one listed here.",
                           "title": "Relationship Type",
                           "enum": [
+                              "parent of",
                               "derived from",
                               "container for",
                               "contained in"

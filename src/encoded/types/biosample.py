@@ -36,6 +36,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'references',
         'biosample_protocols',
     ]
+
     def _update(self, properties, sheets=None):
         # update self first to ensure 'biosample_relation' are stored in self.properties
         super(Biosample, self)._update(properties, sheets)
