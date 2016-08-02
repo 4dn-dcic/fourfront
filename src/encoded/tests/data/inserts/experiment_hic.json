@@ -1,6 +1,6 @@
 [
     {
-        "accession":"ENCEX067APU",
+        "accession":"4DNEX067APU",
         "fragmentation_method": "chemical",
         "experiment_type": "dilution Hi-C",
         "enzyme_lot_number": "123456",
@@ -31,7 +31,7 @@
         "experiment_sets":["431106bc-8535-4448-903e-854af460b260"]
     },
     {
-        "accession":"ENCEX067APT",
+        "accession":"4DNEX067APT",
         "fragmentation_method": "chemical",
         "experiment_type": "dilution Hi-C",
         "enzyme_lot_number": "123456",
@@ -57,7 +57,7 @@
         "crosslinking_method": "formaldehyde",
         "uuid": "75041e2f-3e43-4388-8bbb-e861f209c4fb",
         "protocol": "dcf15d5e-40aa-43bc-b81c-32c70c9afb01",
-        "experiment_relation":[{"relationship_type":"controlled by","experiment":"ENCEX067APU"}],
+        "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEX067APU"}],
         "submitted_by": "admin@admin.com",
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"]
     }
