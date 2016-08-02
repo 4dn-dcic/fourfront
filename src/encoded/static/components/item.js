@@ -298,13 +298,13 @@ var SubIPannel = React.createClass({
         },
 });
 
-var Subview = React.createClass({
+var Subview = module.exports.Subview = React.createClass({
     render: function(){
         var schemas = this.props.schemas;
         var item = this.props.content;
         var tips = tipsFromSchema(schemas, item);
         return(
-            <div className="flexcol-sm-6">
+            <div className="flexcol-sm-6" href="/nonsense/">
               <Panel addClasses="data-display">
                   <PanelBody addClasses="panel-body-with-header">
                       <div className="flexrow">
