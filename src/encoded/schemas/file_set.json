@@ -15,11 +15,15 @@
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/notes" },
-        { "$ref": "mixins.json#/documents" }
+        { "$ref": "mixins.json#/documents" },
+        { "$ref": "mixins.json#/accession" }
     ],
     "properties": {
         "schema_version": {
             "hidden comment": "Bump the default in the subclasses."
+        },
+        "accession": {
+            "accessionType": "FS"
         },
         "files_in_set": {
             "title": "Sets of data files",

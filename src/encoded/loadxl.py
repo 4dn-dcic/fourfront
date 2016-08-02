@@ -45,6 +45,8 @@ ORDER = [
     # 'biosample_characterization',
     # 'platform',
     # 'library',
+    'file',
+    'file_set',
     'experiment_hic',
     'experiment_set'
     # 'replicate',
@@ -558,6 +560,9 @@ PHASE1_PIPELINES = {
     'experiment': [
         remove_keys('possible_controls', 'related_files'),
     ],
+    'file': [
+        remove_keys('experiments'),
+    ],
     'experiment_hic': [
         remove_keys('experiment_relation', 'experiment_sets'),
     ],
@@ -619,6 +624,9 @@ PHASE2_PIPELINES = {
     ],
     'experiment': [
         skip_rows_missing_all_keys('related_files', 'possible_controls'),
+    ],
+    'file': [
+        skip_rows_missing_all_keys('experiments'),
     ],
     'experiment_hic': [
         skip_rows_missing_all_keys('experiment_relation', 'experiment_sets'),

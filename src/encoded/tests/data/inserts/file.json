@@ -1,0 +1,13 @@
+[
+    {
+        "accession":"4DNFI067APU",
+        "notes": "sample dcic notes",
+        "lab": "ali-mortazavi",
+        "submitted_by": "admin@admin.com",
+        "lab": "ali-mortazavi",
+        "award": "U41HG007355",
+        "file_format":"fastq",
+        "experiments":["4DNEX067APT"],
+        "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faf3"
+    }
+]
