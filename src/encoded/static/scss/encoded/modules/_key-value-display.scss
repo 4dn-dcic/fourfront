@@ -27,10 +27,6 @@ dl.key-value, dl.key-value-doc {
 
     dt {
         font-weight: bold;
-
-        &:after {
-            content: ":";
-        }
     }
 
     dd {
@@ -237,4 +233,3 @@ dd ul, .multi-value {
         background-color: #e0e0e0;
     }
 }
-
