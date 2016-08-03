@@ -1,5 +1,8 @@
 'use strict';
 
+/* Written by Carl, used to test the IPannel of item.js. Statically uses a library
+and a json of all schemas (such as is called by <fetched.Param name="schemas" url="/profiles/")>*/
+
 jest.autoMockOff();
 
 // Fixes https://github.com/facebook/jest/issues/78
