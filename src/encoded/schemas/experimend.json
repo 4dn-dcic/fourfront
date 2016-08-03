@@ -113,6 +113,7 @@
             "title": "Experiment Sets",
             "description": "Experiment Sets that are associated with this experiment.",
             "type": "array",
+            "uniqueItems": true,
             "items": {
                 "title": "Experiment Set",
                 "description": "An experiment set that is associated wtih this experiment.",

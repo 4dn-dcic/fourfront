@@ -160,6 +160,7 @@
               "title": "File Sets",
               "description": "File Set to which this file belongs to.",
               "type": "array",
+              "uniqueItems": true,
               "items": {
                   "title": "File Set",
                   "description": "A file set to be associated with this file.",
