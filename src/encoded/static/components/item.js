@@ -302,15 +302,15 @@ var Subview = module.exports.Subview = React.createClass({
         var item = this.props.context;
         var tips = tipsFromSchema(schemas, item);
         return(
-            <div className="flexcol-sm-6" href="/nonsense/">
-              <Panel addClasses="data-display">
+            <div className="flexcol-sm-6 subview">
+              <Panel addClasses="sub-panel data-display">
                   <PanelBody addClasses="panel-body-with-header">
                       <div className="flexrow">
                           <div className="flexcol-sm-6">
-                              <dl className="key-value">
+                              <dl className="key-value sub-descriptions">
                                   {Object.keys(item).map(function(ikey, val){
                                       return (
-                                        <div key={ikey} data-test="term-name">
+                                        <div className="sub-entry" key={ikey} data-test="term-name">
                                           {formKey(tips,ikey)}
                                           <dd>{formValue(schemas, item[ikey])}</dd>
                                         </div>
