@@ -13,7 +13,8 @@ class Registry {
     }
 
     register(view, for_, name) {
-        name = name || '';
+        name = 'Item';
+        // name = name || '';
         var views = this.views[name];
         if (!views) {
             this.views[name] = views = {};

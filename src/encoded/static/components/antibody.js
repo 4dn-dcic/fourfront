@@ -209,7 +209,7 @@ var Lot = module.exports.Lot = React.createClass({
                                     <dd>{context.aliases.join(", ")}</dd>
                                 </div>
                             : null}
-                            
+
                             {context.dbxrefs && context.dbxrefs.length ?
                                 <div data-test="dbxrefs">
                                     <dt>External resources</dt>
