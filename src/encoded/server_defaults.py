@@ -63,7 +63,7 @@ def accession(instance, subschema):
 
 
 #FDN_ACCESSION_FORMAT = (digits, digits, digits, ascii_uppercase, ascii_uppercase, ascii_uppercase)
-FDN_ACCESSION_FORMAT = ['ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789']*7
+FDN_ACCESSION_FORMAT = ['ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789']*7
 
 def enc_accession(accession_type):
     random_part = ''.join(random.choice(s) for s in FDN_ACCESSION_FORMAT)
