@@ -88,28 +88,30 @@ def property_closure(request, propname, root_uuid):
         'description': 'Listing of File Sets',
     })
 class FileSet(Item):
+    """Collection of files stored under fileset."""
+
     item_type = 'file_set'
     schema = load_schema('encoded:schemas/file_set.json')
     name_key = 'accession'
 
-    # def _update(self, properties, sheets=None):
-    #     # update self first
-    #     super(FileSet, self)._update(properties, sheets)
-    #     FSacc = str(self.uuid)
-    #     if 'files_in_set' in properties.keys():
-    #         for File in properties["files_in_set"]:
-    #             target_file = self.collection.get(File)
-    #             # is there any fileset in the file
-    #             if 'filesets' not in target_file.properties.keys():
-    #                 target_file.properties.update({'filesets': [FSacc, ]})
-    #                 target_file.update(target_file.properties)
-    #             else:
-    #                 # incase file already has the fileset_type
-    #                 if FSacc in target_file.properties['filesets']:
-    #                     break
-    #                 else:
-    #                     target_file.properties['filesets'].append(FSacc)
-    #                     target_file.update(target_file.properties)
+    def _update(self, properties, sheets=None):
+        # update self first
+        super(FileSet, self)._update(properties, sheets)
+        fsacc = str(self.uuid)
+        if 'files_in_set' in properties.keys():
+            for eachfile in properties["files_in_set"]:
+                target_file = self.collection.get(eachfile)
+                # is there any fileset in the file
+                if 'filesets' not in target_file.properties.keys():
+                    target_file.properties.update({'filesets': [fsacc, ]})
+                    target_file.update(target_file.properties)
+                else:
+                    # incase file already has the fileset_type
+                    if fsacc in target_file.properties['filesets']:
+                        break
+                    else:
+                        target_file.properties['filesets'].append(fsacc)
+                        target_file.update(target_file.properties)
 
 
 @collection(
@@ -120,6 +122,8 @@ class FileSet(Item):
         'description': 'Listing of Files',
     })
 class File(Item):
+    """Collection for individual files."""
+
     item_type = 'file'
     schema = load_schema('encoded:schemas/file.json')
     name_key = 'accession'
@@ -163,6 +167,7 @@ class File(Item):
              "paired with": "paired with"
              }
         acc = str(self.uuid)
+
         if 'related_files' in properties.keys():
             for relation in properties["related_files"]:
                 switch = relation["relationship_type"]
