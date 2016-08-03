@@ -41,9 +41,9 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         # update self first to ensure 'biosample_relation' are stored in self.properties
         super(Biosample, self)._update(properties, sheets)
         DicRefRelation = {
-             "derived from": "parent of",
-             "parent of": "derived from"
-             }
+            "derived from": "parent of",
+            "parent of": "derived from"
+        }
         acc = str(self.uuid)
         if 'biosample_relation' in properties.keys():
             for relation in properties["biosample_relation"]:

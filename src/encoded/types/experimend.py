@@ -12,6 +12,8 @@ from .base import (
     # paths_filtered_by_status,
 )
 
+from .dataset import Dataset
+
 
 @abstract_collection(
     name='experimends',
@@ -20,22 +22,22 @@ from .base import (
         'title': "Experiments",
         'description': 'Listing of all types of experiments.',
     })
-class Experimend(Item):
-    """The main expeperiment class."""
+class Experimend(Dataset):
+    """The main expperiment class."""
 
-    base_types = ['Experimend'] + Item.base_types
-    embedded = ["protocol", "protocol_variation", "lab", "award"]
+    item_type = 'experiment'
+    embedded = Dataset.embedded + ["protocol", "protocol_variation", "lab", "award"]
     name_key = 'accession'
 
     def _update(self, properties, sheets=None):
         # update self first to ensure 'experiment_relation' are stored in self.properties
         super(Experimend, self)._update(properties, sheets)
         DicRefRelation = {
-             "controlled by": "control for",
-             "derived from": "source for",
-             "control for": "controlled by",
-             "source for": "derived from"
-             }
+            "controlled by": "control for",
+            "derived from": "source for",
+            "control for": "controlled by",
+            "source for": "derived from"
+        }
         acc = str(self.uuid)
         if 'experiment_relation' in properties.keys():
             for relation in properties["experiment_relation"]:

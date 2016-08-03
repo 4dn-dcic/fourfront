@@ -1,7 +1,7 @@
 {
     "title": "Workflow Run",
     "description": "Schema for submitting metadata on the executation of a computational analysis workflow composed of tasks.",
-    "id": "/profiles/analysis_step.json",
+    "id": "/profiles/workflow_run.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["workflow"],
