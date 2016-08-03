@@ -101,7 +101,6 @@ after_success:
       if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
         if [ "$TRAVIS_BRANCH" = "master" ]; then
           echo "Job succeeded! PUBLISHING..."
-          git checkout master
           git config --global user.email "travis@builder.com"
           git config --global user.name "Travis"
           eb use 4dn-web-dev
