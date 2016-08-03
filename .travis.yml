@@ -26,10 +26,10 @@ env:
   - secure: CzDicgJ/x6ZaNWf7uqWpPsLRSC7gkQ6ssWUY1kRxtIYWbM7vEDGbq9MbuvnDOLAgs2tgkkXi5DzjfmrFWe5cK+OrOaqakZhrRf9yHmpgOFqlBXYutUMV4SOwGcUaTa+SVtryOqCBZkGtZaury5wIkHMz93gTKo1fhPU1xL5KTLg4xqhkfw2ppdSm+Zjj1M26GKd1/aKDIdTAmRs9ryiGb5vDnU7NEWzt2j+VT67a03cI7NDgncNknBoMrdbNYDQTnnsaIHhS6dRZYl6tfbYyV+ugKJMApLksrsnpXoKKQ58bYZHyDPmmwzHHaoULf+HojBTokz7Y9W0ATJ0Sip42tsfcLq5ij/XO2/Q/PnWOn0RneUCzzV/7H7+PNzJoN8dN97vS/8QLcLij/wbPQX3efpwUEdz2UbMy0Ybx8KgTS4MOoiDk+7dDHP9ksW6pGpto86iTBEX6dWyjbdMCGbD1SdSPH76XS1vizQ3+Fai1E/B8sjhxX1xGoAhhoxXgQ0mkgPEFfqKj/7+j4VC0EY+S6jZBaOoWR8AFt2eelJlFba+zk43DFKMK3aRMpqwrRjUo1QJvAd50pBOOuyqgrHVOLM6BIIe9TgMfUSnoMgUGgzyVWxYdb+0/5SNAozCoS1S+ZGBUkUHzq3gANU7soNMhsXmcNgxKKMhNG7ZIDaD52+0=
 matrix:
   include:
-#  - python: '3.4'
-#    env: BROWSER=Chrome
-#  - python: '3.4'
-#    env: NPM=Test
+  - python: '3.4'
+    env: BROWSER=Chrome
+  - python: '3.4'
+    env: NPM=Test
   - python: '3.4'
     env: UNIT=Test
 before_install:
@@ -103,6 +103,7 @@ after_success:
           echo "Job succeeded! PUBLISHING..."
           git config --global user.email "travis@builder.com"
           git config --global user.name "Travis"
+          git checkout master
           eb use 4dn-web-dev
           python deploy_beanstalk.py
         fi
