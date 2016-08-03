@@ -8,8 +8,8 @@ from snovault import (
 )
 # from pyramid.traversal import find_root
 from .base import (
-    Item
-    # paths_filtered_by_status,
+     Item
+     # paths_filtered_by_status,
 )
 
 
@@ -188,6 +188,7 @@ class QualityMetricFlag(Item):
     })
 class Software(Item):
     """The Software class that contains the software... used."""
+
     item_type = 'software'
     schema = load_schema('encoded:schemas/software.json')
     name_key = 'name'
@@ -195,7 +196,7 @@ class Software(Item):
     def _update(self, properties, sheets=None):
         # update self first to ensure 'software_relation' are stored in self.properties
         properties['name'] = properties['title'].replace(' ', '-').lower()
-        super(Software, self)._update(properties, sheets)
+        super(software, self)._update(properties, sheets)
         # DicRefRelation = {
         #      "derived from": "parent of",
         #      "parent of": "derived from",
@@ -258,9 +259,9 @@ class Task(Item):
 @collection(
     name='workflows',
     properties={
-        'title': 'Workflows',
-        'description': 'Listing of 4DN analysis workflows',
-    })
+            'title': 'Workflows',
+            'description': 'Listing of 4DN analysis workflows',
+        })
 class Workflow(Item):
     """The Workflow class that describes a workflow and steps in it."""
 
@@ -272,9 +273,9 @@ class Workflow(Item):
 @collection(
     name='workflow_runs',
     properties={
-        'title': 'Workflow Runs',
-        'description': 'Listing of executions of 4DN analysis workflows',
-    })
+            'title': 'Workflow Runs',
+            'description': 'Listing of executions of 4DN analysis workflows',
+        })
 class WorkflowRun(Item):
     """The WorkflowRun class that describes execution of a workflow and tasks in it."""
 
