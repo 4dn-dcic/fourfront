@@ -124,7 +124,7 @@
                 "title": "Experiment",
                 "description": "Associated experiment.",
                 "type": "string",
-                "linkTo": "Experimend"
+                "linkTo": "Experiment"
             }
         },
         "related_files": {

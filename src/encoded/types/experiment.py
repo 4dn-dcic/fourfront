@@ -14,22 +14,22 @@ from .base import (
 
 
 @abstract_collection(
-    name='experimends',
+    name='experiments',
     unique_key='accession',
     properties={
         'title': "Experiments",
         'description': 'Listing of all types of experiments.',
     })
-class Experimend(Item):
+class Experiment(Item):
     """The main expeperiment class."""
 
-    base_types = ['Experimend'] + Item.base_types
+    base_types = ['Experiment'] + Item.base_types
     embedded = ["protocol", "protocol_variation", "lab", "award"]
     name_key = 'accession'
 
     def _update(self, properties, sheets=None):
         # update self first to ensure 'experiment_relation' are stored in self.properties
-        super(Experimend, self)._update(properties, sheets)
+        super(Experiment, self)._update(properties, sheets)
         DicRefRelation = {
              "controlled by": "control for",
              "derived from": "source for",
@@ -114,9 +114,9 @@ class ExperimentSet(Item):
         'title': 'Experiments Hi-C',
         'description': 'Listing Hi-C Experiments',
     })
-class ExperimentHiC(Experimend):
+class ExperimentHiC(Experiment):
     """The experiment class for Hi-C experiments."""
 
     item_type = 'experiment_hic'
     schema = load_schema('encoded:schemas/experiment_hic.json')
-    embedded = Experimend.embedded + ["digestion_enzyme", "submitted_by"]
+    embedded = Experiment.embedded + ["digestion_enzyme", "submitted_by"]

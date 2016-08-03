@@ -421,7 +421,7 @@ def search_result_actions(request, doc_types, es_results, position=None):
 
     # generate batch hub URL for experiments
     # TODO we could enable them for Datasets as well here, but not sure how well it will work
-    if doc_types == ['Experiment']:
+    if doc_types == ['ExperimentXXXX']:
         for bucket in aggregations['assembly']['assembly']['buckets']:
             if bucket['doc_count'] > 0:
                 assembly = bucket['key']
@@ -435,7 +435,7 @@ def search_result_actions(request, doc_types, es_results, position=None):
                     if 'region-search' in request.url and position is not None:
                         actions.setdefault('batch_hub', {})[assembly] = hgConnect + hub + '&db=' + ucsc_assembly + '&position={}'.format(position)
                     else:
-                        actions.setdefault('batch_hub', {})[assembly] = hgConnect + hub + '&db=' + ucsc_assembly 
+                        actions.setdefault('batch_hub', {})[assembly] = hgConnect + hub + '&db=' + ucsc_assembly
 
     # generate batch download URL for experiments
     # TODO we could enable them for Datasets as well here, but not sure how well it will work
