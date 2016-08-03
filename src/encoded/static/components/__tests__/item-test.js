@@ -57,4 +57,14 @@ describe('Testing item.js', function() {
         // there should be 25 entries within the biosample object subview
         expect(objEntries.length).toEqual(25);
     });
+
+    it('opens and closes tooltips correctly', function(){
+        var objTriggers = TestUtils.scryRenderedDOMComponentsWithClass(testItem, 'tooltip-trigger');
+        TestUtils.SimulateNative.mouseOver(objTriggers[0].getDOMNode());
+        var openTooltips = TestUtils.scryRenderedDOMComponentsWithClass(testItem, 'tooltip-open');
+        expect(openTooltips.length > 0).toBeTruthy();
+        TestUtils.SimulateNative.mouseOut(objTriggers[0].getDOMNode());
+        var openTooltips = TestUtils.scryRenderedDOMComponentsWithClass(testItem, 'tooltip-open');
+        expect(openTooltips.length).toEqual(0);
+    });
 });
