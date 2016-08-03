@@ -4,7 +4,7 @@
     "id": "/profiles/software.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["title", "software_type"],
+    "required": ["title", "software_type", "version"],
     "additionalProperties": false,
     "identifyingProperties": ["uuid", "alias", "name"],
     "mixinProperties": [
@@ -69,6 +69,29 @@
             "description": "A plain text description of the software.",
             "type": "string"
         },
+        "docker_info": {
+            "title": "Docker Container Information",
+            "description": "A short description of the docker container",
+            "type": "Object",
+            "properties": {
+                "docker_registry_url": {
+                    "title": "Docker Registry URL",
+                    "description": "Docker Hub or 7 bridges registry URL.",
+                    "type": "string",
+                    "format": "uri"
+                },
+                "docker_image_name": {
+                    "title": "Image Name",
+                    "description": "The name of the image that is downloaded",
+                    "type": "string"
+                },
+                "docker_image_version": {
+                    "title": "Image Version",
+                    "description": "The version of the image that is downloaded",
+                    "type": "string"
+                }
+            }
+        },
         "source_url": {
             "title": "Source URL",
             "description": "An external resource to the code base.",
@@ -103,15 +126,6 @@
                     "Visualization",
                     "Community Resource"
                 ]
-            }
-        },
-        "available_parameters": {
-            "title": "Available Parameters",
-            "description": "A list of parameters that can be used with the software and a short description or default value",
-            "type": "array",
-            "items": {
-                "title": "Parameter",
-                "type": {"$ref": "mixins.json#/parameter"}
             }
         },
         "software_relation": {
