@@ -32,11 +32,18 @@
             "default": ""
         },
         "biosource": {
-          "title": "Biosource",
-          "description": "The cell line or tissue type used in the experiment",
+          "title": "Biosources",
+          "description": "The cell lines or tissue types used in the experiment",
           "comment": "See biosource.json for available identifiers?",
-          "type": "string",
-          "linkTo": "Biosource"
+          "type": "array",
+          "default":[],
+          "uniqueItems": true,
+          "items": {
+              "title": "Biosource",
+              "comment": "use accessions",
+              "type": "string",
+              "linkTo": "Biosource"
+          }
         },
         "biosample_protocols": {
             "title": "Biosample Protocols",
