@@ -13,8 +13,7 @@ class Registry {
     }
 
     register(view, for_, name) {
-        name = 'Item';
-        // name = name || '';
+        name = name || '';
         var views = this.views[name];
         if (!views) {
             this.views[name] = views = {};
@@ -38,7 +37,8 @@ class Registry {
 
         var provided = this.providedBy(obj);
         for (var i = 0, len = provided.length; i < len; i++) {
-            var view = views[provided[i]];
+            // var view = views[provided[i]];
+            var view = views['Item'];
             if (view) {
                 return view;
             }
