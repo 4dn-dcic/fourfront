@@ -42,22 +42,30 @@ var Fallback = module.exports.Fallback = React.createClass({
     }
 });
 
-
-var Item = module.exports.Item = React.createClass({
+var ItemLoader = React.createClass({
     mixins: [AuditMixin],
+    render: function() {
+        return (
+            <fetched.FetchedData>
+                <fetched.Param name="schemas" url="/profiles/" />
+                <Item context={this.props.context} />
+            </fetched.FetchedData>
+        );
+    }
+});
+
+
+var Item = React.createClass({
     render: function() {
         var context = this.props.context;
         var itemClass = globals.itemClass(context, 'view-item');
         var title = globals.listing_titles.lookup(context)({context: context});
         var IPanel = globals.panel_views.lookup(context);
         // Make string of alternate accessions
-        var altacc = context.alternate_accessions ? context.alternate_accessions.join(', ') : undefined;
-
         return (
             <div className={itemClass}>
                 <header className="row">
                     <div className="col-sm-12">
-                        <h2>{title}</h2>
                         <div className="status-line">
                             <AuditIndicators context={context} key="biosample-audit" />
                         </div>
@@ -65,17 +73,14 @@ var Item = module.exports.Item = React.createClass({
                 </header>
                 <AuditDetail context={context} key="biosample-audit" />
                 <div className="row item-row">
-                    <fetched.FetchedData>
-                        <fetched.Param name="schemas" url="/profiles/" />
-                        <IPanel {...this.props} />
-                    </fetched.FetchedData>
+                     <IPanel {...this.props}/>
                 </div>
             </div>
         );
     }
 });
 
-globals.content_views.register(Item, 'Item');
+globals.content_views.register(ItemLoader, 'Item');
 
 
 // Also use this view as a fallback for anything we haven't registered
@@ -110,7 +115,6 @@ var IPanel = module.exports.IPanel = React.createClass({
                                     );
                                 })}
                             </dl>
-
                         </div>
                     </div>
                 </PanelBody>
@@ -127,7 +131,7 @@ globals.panel_views.register(IPanel, 'Item');
 
 // Also use this view as a fallback for anything we haven't registered
 globals.panel_views.fallback = function () {
-    return IPanel;
+    return ItemLoader;
 };
 
 
