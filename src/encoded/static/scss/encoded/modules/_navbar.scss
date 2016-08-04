@@ -118,9 +118,10 @@
 
 // this is a bit janky
 .custom-entry {
-    height: 58px !important;
+    margin-top: 4px;
     &>div{
-        margin-top: 10px;
+        height: 19px !important;
+        padding-top: 4px;
         margin-bottom: 10px;
     }
 }

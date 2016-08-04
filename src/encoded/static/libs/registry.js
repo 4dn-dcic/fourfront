@@ -1,6 +1,12 @@
 'use strict';
 var _ = require('underscore');
 
+// Objects that will be forced to use item.js object view
+var typesToItem = ['AntibodyLot', 'Biosample', 'Donor', 'Annotation',
+    'PublicationData', 'Reference', 'Project', 'UscsBrowserComposite', 'Series',
+    'Experiment', 'Image', 'Pipeline', 'Publication', 'region-search', 'Report',
+    'JSONSchema', 'Software', 'TALEN', 'Target', 'User'];
+
 class Registry {
     constructor(options) {
         // May provide custom providedBy and fallback functions
@@ -37,7 +43,11 @@ class Registry {
 
         var provided = this.providedBy(obj);
         for (var i = 0, len = provided.length; i < len; i++) {
-            var view = views[provided[i]];
+            if(_.contains(typesToItem, provided[i])){
+                var view = views['Item'];
+            }else{
+                var view = views[provided[i]];
+            }
             if (view) {
                 return view;
             }
