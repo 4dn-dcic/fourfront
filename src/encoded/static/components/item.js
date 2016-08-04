@@ -50,7 +50,6 @@ var Item = module.exports.Item = React.createClass({
         var itemClass = globals.itemClass(context, 'view-item');
         var title = globals.listing_titles.lookup(context)({context: context});
         var IPanel = globals.panel_views.lookup(context);
-
         // Make string of alternate accessions
         var altacc = context.alternate_accessions ? context.alternate_accessions.join(', ') : undefined;
 
@@ -58,6 +57,7 @@ var Item = module.exports.Item = React.createClass({
             <div className={itemClass}>
                 <header className="row">
                     <div className="col-sm-12">
+                        <h2>{title}</h2>
                         <div className="status-line">
                             <AuditIndicators context={context} key="biosample-audit" />
                         </div>
@@ -103,7 +103,7 @@ var IPanel = module.exports.IPanel = React.createClass({
                             <dl className="key-value">
                                 {sortKeys.map(function(ikey, val){
                                     return (
-                                        <div key={ikey} data-test="term-name">
+                                        <div key={ikey.id} data-test="term-name">
                                           {formKey(tips,ikey)}
                                           <dd>{formValue(schemas,context[ikey])}</dd>
                                         </div>
@@ -237,6 +237,8 @@ var RelatedItems = module.exports.RelatedItems = React.createClass({
     },
 });
 
+// ******* Refined item.js code below... *******
+
 // Formats the correct display for each metadata field
 var formValue = function (schemas, item) {
     var toReturn = [];
@@ -248,7 +250,7 @@ var formValue = function (schemas, item) {
         if(item['@type']){
             var type = item['@type'][0];
         }
-        toReturn.push(<SubIPannel schemas={schemas} context={item}/>);
+        toReturn.push(<SubIPannel schemas={schemas} content={item}/>);
     }else{
         if (typeof item === 'string' && item.charAt(0) === '/') {
             toReturn.push(<a href={item}>{item}</a>)
@@ -273,8 +275,7 @@ var SubIPannel = React.createClass({
     },
     render: function() {
         var schemas = this.props.schemas;
-        var item = this.props.context;
-        // TODO: make this process generic using lookup with registry
+        var item = this.props.content;
         var title = item.title || item.name || item.accession || item['@id'] || "Open";
         var toggleRender;
         var toggleLink;
@@ -283,7 +284,7 @@ var SubIPannel = React.createClass({
             toggleRender = <span/>;
         }else{
             toggleLink = <a href="" className="item-toggle-link" onClick={this.handleToggle}>Close</a>
-            toggleRender = <Subview schemas={schemas} context={item}/>;
+            toggleRender = <Subview schemas={schemas} content={item}/>;
         }
         return (
     	  <div className="flexrow">
@@ -296,10 +297,10 @@ var SubIPannel = React.createClass({
         },
 });
 
-var Subview = module.exports.Subview = React.createClass({
+var Subview = React.createClass({
     render: function(){
         var schemas = this.props.schemas;
-        var item = this.props.context;
+        var item = this.props.content;
         var tips = tipsFromSchema(schemas, item);
         return(
             <div className="flexcol-sm-6 subview">
@@ -310,7 +311,7 @@ var Subview = module.exports.Subview = React.createClass({
                               <dl className="key-value sub-descriptions">
                                   {Object.keys(item).map(function(ikey, val){
                                       return (
-                                        <div className="sub-entry" key={ikey} data-test="term-name">
+                                        <div className="sub-entry" key={ikey.id} data-test="term-name">
                                           {formKey(tips,ikey)}
                                           <dd>{formValue(schemas, item[ikey])}</dd>
                                         </div>
@@ -327,11 +328,13 @@ var Subview = module.exports.Subview = React.createClass({
 });
 
 //Return the properties dictionary from a schema for use as tooltips
-var tipsFromSchema = function(schemas, context){
+var tipsFromSchema = function(schemas, content){
     var tips = {};
-    if(context['@type']){
-        var type = context['@type'][0];
-        tips = schemas[type]['properties'];
+    if(content['@type']){
+        var type = content['@type'][0];
+        if(schemas[type]){
+            tips = schemas[type]['properties'];
+        }
     }
     return tips;
 };
