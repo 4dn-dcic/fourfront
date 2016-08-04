@@ -7,10 +7,10 @@
             "encode:donor_of_GM12878",
             "encode:donor of GM12878"
         ],
-        "award": "U41HG007355",
+        "award": "1U01CA200059-01",
         "ethnicity": "Caucasian",
         "health_status": "unknown",
-        "lab": "ali-mortazavi-lab",
+        "lab": "4dn-dcic-lab",
         "life_stage": "adult",
         "organism": "human",
         "sex": "female",

@@ -1,20 +1,20 @@
 [
     {
-        "address1": "School of Biological Sciences",
-        "address2": "2218 Biological Sciences III",
-        "awards": ["U41HG007355"],
-        "city": "Irvine",
+        "address2": "10 Schattuck Street",
+        "address1": "Biomedical Bioinfotics",
+        "awards": ["1U01CA200059-01"],
+        "city": "Boston",
         "country": "USA",
         "fax": "000-000-0000",
-        "institute_label": "UCI",
-        "institute_name": "University of California at Irvine",
-        "name": "ali-mortazavi-lab",
+        "institute_label": "HMS",
+        "institute_name": "Harvard Medical School",
+        "name": "4dn-dcic-lab",
         "phone1": "000-000-0000",
         "phone2": "000-000-0000",
         "pi": "admin@admin.com",
-        "postal_code": "92697-2300",
-        "state": "CA",
-        "title": "Ali Mortazavi Lab, UCI",
-        "uuid": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc987"
+        "postal_code": "02115",
+        "state": "MA",
+        "title": "4DN DCIC Lab, HMS",
+        "uuid": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc988"
     }
 ]

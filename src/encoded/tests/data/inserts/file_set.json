@@ -1,10 +1,10 @@
 [
     {
         "notes": "sample dcic notes",
-        "lab": "ali-mortazavi-lab",
+        "lab": "4dn-dcic-lab",
         "submitted_by": "admin@admin.com",
-        "lab": "ali-mortazavi-lab",
-        "award": "U41HG007355",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
         "fileset_type": "sequence files",
         "files_in_set":["4DNFI067APU1"],
         "uuid": "4d6ecff9-7c67-4096-bca8-515246767feb",
