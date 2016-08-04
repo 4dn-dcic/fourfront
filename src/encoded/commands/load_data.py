@@ -11,7 +11,7 @@ EPILOG = __doc__
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Run development servers", epilog=EPILOG,
+        description="Load Test Data", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument('--app-name', help="Pyramid app name in configfile")
