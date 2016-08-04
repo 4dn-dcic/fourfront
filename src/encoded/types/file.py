@@ -66,6 +66,7 @@ def external_creds(bucket, key, name, profile_name=None):
         'upload_credentials': credentials,
     }
 
+
 def property_closure(request, propname, root_uuid):
     # Must avoid cycles
     conn = request.registry[CONNECTION]
@@ -79,6 +80,7 @@ def property_closure(request, propname, root_uuid):
             next_remaining.update(obj.__json__(request).get(propname, ()))
         remaining = next_remaining - seen
     return seen
+
 
 @collection(
     name='file-sets',
@@ -127,34 +129,6 @@ class File(Item):
     item_type = 'file'
     schema = load_schema('encoded:schemas/file.json')
     name_key = 'accession'
-
-    rev = {
-        # 'paired_with': ('File', 'paired_with'),
-        # 'quality_metrics': ('QualityMetric', 'quality_metric_of'),
-    }
-
-    embedded = [
-        # 'replicate',
-        # 'replicate.experiment',
-        # 'replicate.experiment.lab',
-        # 'replicate.experiment.target',
-        # 'replicate.library',
-        # 'replicate.experiment.lab',
-        # 'replicate.experiment.target',
-        # 'lab',
-        # 'derived_from',
-        # 'derived_from.analysis_step_version.software_versions',
-        # 'derived_from.analysis_step_version.software_versions.software',
-        # 'submitted_by',
-        # 'analysis_step_version.analysis_step',
-        # 'analysis_step_version.analysis_step.pipelines',
-        # 'analysis_step_version.analysis_step.versions',
-        # 'analysis_step_version.analysis_step.versions.software_versions',
-        # 'analysis_step_version.analysis_step.versions.software_versions.software',
-        # 'analysis_step_version.software_versions',
-        # 'analysis_step_version.software_versions.software',
-        # 'quality_metrics.step_run.analysis_step_version.analysis_step',
-    ]
 
     def _update(self, properties, sheets=None):
         # update self first to ensure 'related_files' are stored in self.properties

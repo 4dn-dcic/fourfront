@@ -552,15 +552,6 @@ PHASE1_PIPELINES = {
     'user': [
         remove_keys('lab', 'submits_for'),
     ],
-    'biosample': [
-        remove_keys('derived_from', 'pooled_from', 'part_of'),
-    ],
-    'library': [
-        remove_keys('spikeins_used'),
-    ],
-    'experiment': [
-        remove_keys('possible_controls', 'related_files'),
-    ],
     'file': [
         remove_keys('experiments', 'filesets'),
     ],
@@ -572,39 +563,6 @@ PHASE1_PIPELINES = {
     ],
     'experiment_set': [
         remove_keys('experiments_in_set'),
-    ],
-    'annotation': [
-        remove_keys('related_files', 'software_used'),
-    ],
-    'project': [
-        remove_keys('related_files'),
-    ],
-    'publication_data': [
-        remove_keys('related_files'),
-    ],
-    'reference': [
-        remove_keys('related_files', 'software_used'),
-    ],
-    'ucsc_browser_composite': [
-        remove_keys('related_files'),
-    ],
-    'treatment_time_series': [
-        remove_keys('related_datasets'),
-    ],
-    'treatment_concentration_series': [
-        remove_keys('related_datasets'),
-    ],
-    'organism_development_series': [
-        remove_keys('related_datasets'),
-    ],
-    'replication_timing_series': [
-        remove_keys('related_datasets'),
-    ],
-    'reference_epigenome': [
-        remove_keys('related_datasets'),
-    ],
-    'matched_set': [
-        remove_keys('related_datasets'),
     ]
 }
 
@@ -620,15 +578,6 @@ PHASE2_PIPELINES = {
     'user': [
         skip_rows_missing_all_keys('lab', 'submits_for'),
     ],
-    'biosample': [
-        skip_rows_missing_all_keys('derived_from', 'pooled_from', 'part_of'),
-    ],
-    'library': [
-        skip_rows_missing_all_keys('spikeins_used'),
-    ],
-    'experiment': [
-        skip_rows_missing_all_keys('related_files', 'possible_controls'),
-    ],
     'file': [
         skip_rows_missing_all_keys('experiments', 'filesets'),
     ],
@@ -640,40 +589,7 @@ PHASE2_PIPELINES = {
     ],
     'experiment_set': [
         skip_rows_missing_all_keys('experiments_in_set'),
-    ],
-    'annotation': [
-        skip_rows_missing_all_keys('related_files', 'software_used'),
-    ],
-    'project': [
-        skip_rows_missing_all_keys('related_files'),
-    ],
-    'publication_data': [
-        skip_rows_missing_all_keys('related_files'),
-    ],
-    'reference': [
-        skip_rows_missing_all_keys('related_files', 'software_used'),
-    ],
-    'ucsc_browser_composite': [
-        skip_rows_missing_all_keys('related_files'),
-    ],
-    'treatment_time_series': [
-        skip_rows_missing_all_keys('related_datasets'),
-    ],
-    'treatment_concentration_series': [
-        skip_rows_missing_all_keys('related_datasets'),
-    ],
-    'organism_development_series': [
-        skip_rows_missing_all_keys('related_datasets'),
-    ],
-    'replication_timing_series': [
-        skip_rows_missing_all_keys('related_datasets'),
-    ],
-    'reference_epigenome': [
-        skip_rows_missing_all_keys('related_datasets'),
-    ],
-    'matched_set': [
-        skip_rows_missing_all_keys('related_datasets'),
-    ],
+    ]
 }
 
 
