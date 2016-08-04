@@ -2,7 +2,7 @@
     "title": "Experiment",
     "description": "Schema for submitting metadata for an assay.",
     "comment": "Experiment is the main organizing object for metadata on a single assay, it's associated protocols, files and subsequent analyses.",
-    "id": "/profiles/experimend.json",
+    "id": "/profiles/experiment.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["experiment_type", "biosample", "award", "lab"],
@@ -76,7 +76,7 @@
                     "experiment": {
                       "type": "string",
                       "description": "The related experiment",
-                      "linkTo": "Experimend"
+                      "linkTo": "Experiment"
                     }
                 }
             }
@@ -113,6 +113,7 @@
             "title": "Experiment Sets",
             "description": "Experiment Sets that are associated with this experiment.",
             "type": "array",
+            "uniqueItems": true,
             "items": {
                 "title": "Experiment Set",
                 "description": "An experiment set that is associated wtih this experiment.",

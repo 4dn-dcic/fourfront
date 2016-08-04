@@ -564,11 +564,14 @@ PHASE1_PIPELINES = {
     'file': [
         remove_keys('experiments', 'filesets'),
     ],
-    # 'file_set': [
-    #     remove_keys('files_in_set'),
-    # ],
+    'file_set': [
+        remove_keys('files_in_set'),
+    ],
     'experiment_hic': [
         remove_keys('experiment_relation', 'experiment_sets'),
+    ],
+    'experiment_set': [
+        remove_keys('experiments_in_set'),
     ],
     'annotation': [
         remove_keys('related_files', 'software_used'),
@@ -629,11 +632,14 @@ PHASE2_PIPELINES = {
     'file': [
         skip_rows_missing_all_keys('experiments', 'filesets'),
     ],
-    # 'file_set': [
-    #     skip_rows_missing_all_keys('files_in_set'),
-    # ],
+    'file_set': [
+        skip_rows_missing_all_keys('files_in_set'),
+    ],
     'experiment_hic': [
         skip_rows_missing_all_keys('experiment_relation', 'experiment_sets'),
+    ],
+    'experiment_set': [
+        skip_rows_missing_all_keys('experiments_in_set'),
     ],
     'annotation': [
         skip_rows_missing_all_keys('related_files', 'software_used'),

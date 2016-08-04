@@ -14,22 +14,22 @@ from .base import (
 
 
 @abstract_collection(
-    name='experimends',
+    name='experiments',
     unique_key='accession',
     properties={
         'title': "Experiments",
         'description': 'Listing of all types of experiments.',
     })
-class Experimend(Item):
+class Experiment(Item):
     """The main expeperiment class."""
 
-    base_types = ['Experimend'] + Item.base_types
+    base_types = ['Experiment'] + Item.base_types
     embedded = ["protocol", "protocol_variation", "lab", "award"]
     name_key = 'accession'
 
     def _update(self, properties, sheets=None):
         # update self first to ensure 'experiment_relation' are stored in self.properties
-        super(Experimend, self)._update(properties, sheets)
+        super(Experiment, self)._update(properties, sheets)
         DicRefRelation = {
              "controlled by": "control for",
              "derived from": "source for",
@@ -60,6 +60,18 @@ class Experimend(Item):
                         target_exp.properties['experiment_relation'].append(relationship_entry)
                         target_exp.update(target_exp.properties)
 
+        # this part is for experiment_set
+        if 'experiment_sets' in properties.keys():
+            for exp_set in properties['experiment_sets']:
+                target_exp_set = self.collection.get(exp_set)
+                # look at the experiments inside the set
+                if acc in target_exp_set.properties["experiments_in_set"]:
+                    break
+                else:
+                    # incase it is not in the list of files
+                    target_exp_set.properties["experiments_in_set"].append(acc)
+                    target_exp_set.update(target_exp_set.properties)
+
 
 @collection(
     name='experiment-sets',
@@ -75,6 +87,25 @@ class ExperimentSet(Item):
     schema = load_schema('encoded:schemas/experiment_set.json')
     name_key = "uuid"
 
+    def _update(self, properties, sheets=None):
+        # update self first
+        super(ExperimentSet, self)._update(properties, sheets)
+        esacc = str(self.uuid)
+        if "experiments_in_set" in properties.keys():
+            for each_exp in properties["experiments_in_set"]:
+                target_exp = self.collection.get(each_exp)
+                # are there any experiment sets in the experiment
+                if 'experiment_sets' not in target_exp.properties.keys():
+                    target_exp.properties.update({'experiment_sets': [esacc, ]})
+                    target_exp.update(target_exp.properties)
+                else:
+                    # incase file already has the fileset_type
+                    if esacc in target_exp.properties['experiment_sets']:
+                        break
+                    else:
+                        target_exp.properties['experiment_sets'].append(esacc)
+                        target_exp.update(target_exp.properties)
+
 
 @collection(
     name='experiments-hic',
@@ -83,9 +114,9 @@ class ExperimentSet(Item):
         'title': 'Experiments Hi-C',
         'description': 'Listing Hi-C Experiments',
     })
-class ExperimentHiC(Experimend):
+class ExperimentHiC(Experiment):
     """The experiment class for Hi-C experiments."""
 
     item_type = 'experiment_hic'
     schema = load_schema('encoded:schemas/experiment_hic.json')
-    embedded = Experimend.embedded + ["digestion_enzyme", "submitted_by"]
+    embedded = Experiment.embedded + ["digestion_enzyme", "submitted_by"]

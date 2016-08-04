@@ -31,7 +31,7 @@
                 "title": "Experiment",
                 "comment": "use accessions for identifiers.",
                 "type": "string",
-                "linkTo": "Experimend"
+                "linkTo": "Experiment"
             }
         },
         "experimentset_type": {
