@@ -11,8 +11,6 @@
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/uuid" },
-        { "$ref": "mixins.json#/status" },
-        { "$ref": "mixins.json#/submitted"},
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/notes"}
@@ -58,6 +56,17 @@
             "description": "The workflow that was run.",
             "type": "string",
             "linkTo": "Workflow"
+        },
+        "tasks": {
+            "title": "Run Tasks",
+            "description": "The tasks that make up a run of a workflow.",
+            "type": "array",
+            "items": {
+                "title": "Task",
+                "description": "A task of the run.",
+                "type": "string",
+                "linkTo": "Task"
+            }
         },
         "run_status": {
             "title": "Status",
