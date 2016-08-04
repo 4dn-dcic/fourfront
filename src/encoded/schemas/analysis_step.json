@@ -214,12 +214,6 @@
                         "description": "a default value for the specified parameter",
                         "comment": "can we specify either number or string?",
                         "type": "string"
-                    },
-                    "value": {
-                        "title": "Value",
-                        "description": "a specified value for the specified parameter as used in a task",
-                        "comment": "can we specify either number or string?",
-                        "type": "string"
                     }
                 }
             }

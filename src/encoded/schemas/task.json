@@ -36,6 +36,15 @@
             "description": "7BG specifies a unique task id for each task run",
             "type": "string"
         },
+        "task_platform": {
+            "title": "Platform",
+            "description": "The platform that the task is run on",
+            "type": "string",
+            "enum" : [
+                "7 bridges",
+                "Tibanna"
+            ]
+        },
         "analysis_step": {
             "title": "Analysis Step",
              "description": "The analysis step that is executed as part of the task",
@@ -62,6 +71,34 @@
                 "description": "A file output by the task.",
                 "type": "string",
                 "linkTo": "File"
+            }
+        },
+        "task_parameters": {
+            "title": "Task Parameters",
+            "description": "The parameters that are used by the analysis step - not all of which are necessarily passed to listed software",
+            "type": "array",
+            "items": {
+                "title": "Parameter",
+                "type": "object",
+                "additionalProperties": "false",
+                "properties": {
+                    "parameter": {
+                        "title": "Parameter name",
+                        "description": "the name or flag of the parameter as passed to the software",
+                        "type": "string"
+                    },
+                    "description": {
+                        "title": "Description",
+                        "description": "Short description of the parameter",
+                        "type": "string"
+                    },
+                    "value": {
+                        "title": "Value",
+                        "description": "a specified value for the specified parameter as used in a task",
+                        "comment": "can we specify either number or string?",
+                        "type": "string"
+                    }
+                }
             }
         },
         "task_parameters": {
