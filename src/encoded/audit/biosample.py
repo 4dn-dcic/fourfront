@@ -50,7 +50,7 @@ model_organism_terms = ['model_organism_mating_status',
 
 
 
-@audit_checker('biosample', frame=['organism'])
+#@audit_checker('biosample', frame=['organism'])
 def audit_biosample_human_no_model_organism_properties(value, system):
     '''
     human bioamples shouldn't have model organism properties initiated
@@ -78,7 +78,7 @@ def audit_biosample_human_no_model_organism_properties(value, system):
         return
 
 
-@audit_checker('biosample', frame=['source', 'part_of', 'donor'])
+#@audit_checker('biosample', frame=['source', 'part_of', 'donor'])
 def audit_biosample_gtex_children(value, system):
     '''
     GTEX children biosamples have to be properly registered.
@@ -145,7 +145,7 @@ def audit_biosample_gtex_children(value, system):
     return
 
 
-@audit_checker('biosample', frame='object')
+#@audit_checker('biosample', frame='object')
 def audit_biosample_term(value, system):
     '''
     Biosample_term_id and biosample_term_name
@@ -198,7 +198,7 @@ def audit_biosample_term(value, system):
         yield AuditFailure('mismatched ontology term', detail, level='ERROR')
         return
 
-@audit_checker('biosample', frame='object')
+#@audit_checker('biosample', frame='object')
 def audit_biosample_culture_date(value, system):
     '''
     A culture_harvest_date should not precede
@@ -219,7 +219,7 @@ def audit_biosample_culture_date(value, system):
             value['culture_start_date'])
         raise AuditFailure('invalid dates', detail, level='ERROR')
 
-@audit_checker('biosample', frame=['organism', 'donor', 'donor.organism', 'donor.mutated_gene', 'donor.mutated_gene.organism'])
+#@audit_checker('biosample', frame=['organism', 'donor', 'donor.organism', 'donor.mutated_gene', 'donor.mutated_gene.organism'])
 def audit_biosample_donor(value, system):
     '''
     A biosample should have a donor.
@@ -264,7 +264,7 @@ def audit_biosample_donor(value, system):
                 donor['mutated_gene']['name'])
             raise AuditFailure('invalid donor mutated_gene', detail, level='ERROR')
 
-@audit_checker('biosample', frame='object')
+#@audit_checker('biosample', frame='object')
 def audit_biosample_subcellular_term_match(value, system):
     '''
     The subcellular_fraction_term_name and subcellular_fraction_term_id
@@ -286,7 +286,7 @@ def audit_biosample_subcellular_term_match(value, system):
         raise AuditFailure('mismatched subcellular_fraction_term', detail, level='ERROR')
 
 
-@audit_checker('biosample', frame='object')
+#@audit_checker('biosample', frame='object')
 def audit_biosample_depleted_term_match(value, system):
     '''
     The depleted_in_term_name and depleted_in_term_name
@@ -314,7 +314,7 @@ def audit_biosample_depleted_term_match(value, system):
             raise AuditFailure('mismatched depleted_in_term', detail, level='ERROR')
 
 
-@audit_checker('biosample', frame='object')
+#@audit_checker('biosample', frame='object')
 def audit_biosample_transfection_type(value, system):
     '''
     A biosample with constructs or rnais should have a
@@ -344,7 +344,7 @@ def is_part_of(term_id, part_of_term_id, ontology):
         return any(parents)
 
 
-@audit_checker('biosample', frame=['part_of'])
+#@audit_checker('biosample', frame=['part_of'])
 def audit_biosample_part_of_consistency(value, system):
     if 'part_of' not in value:
         return
