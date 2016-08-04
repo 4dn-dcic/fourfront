@@ -38,7 +38,8 @@
             "enum": [
                 "Hi-C data analysis",
                 "Image processing",
-                "Visualization processing"
+                "Visualization processing",
+                "Other"
             ]
         },
         "cwl_pointer": {
@@ -48,13 +49,32 @@
         },
         "analysis_steps": {
             "title": "Analysis Steps",
-            "description": "The steps that comprise the workflow.",
+            "description": "The steps that comprise the workflow with info on who are their parents.",
             "type": "array",
             "items": {
-                "description": "A step in the workflow.",
-                "comment": "See analysis_step.json for available identifiers.",
-                "type": "string",
-                "linkTo": "AnalysisStep"
+                "description": "A step in the workflow and whose its parent are.",
+                "title": "Step Info",
+                "type": "object",
+                "additionalProperties": "false",
+                "properties": {
+                    "step": {
+                        "title": "Analysis Step",
+                        "description": "A step in the workflow.",
+                        "type": "string",
+                        "linkTo": "AnalysisStep"
+                    },
+                    "parents": {
+                        "title": "Step parents",
+                        "description": "The analysis step(s) that directly preceed the step",
+                        "type": "array",
+                        "items": {
+                            "title": "Parent Step",
+                          "description": "An analysis step that immediately preceeds this step.",
+                          "type": "string",
+                          "linkTo": "AnalysisStep"
+                        }
+                    }
+                }
             }
         }
     }
