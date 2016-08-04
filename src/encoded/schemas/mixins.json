@@ -271,36 +271,5 @@
                 "type":  "string"
             }
         }
-    },
-    "parameter": {
-        "parameter": {
-            "title": "Parameter",
-            "description": "a parameter with a description and/or default value as part of an analysis step or value used in a task",
-            "additionalProperties": false,
-            "properties": {
-                "parameter": {
-                    "title": "Parameter name",
-                    "description": "the name or flag of the parameter as passed to the software",
-                    "type": "string"
-                },
-                "description": {
-                    "title": "Description",
-                    "description": "Short description of the parameter",
-                    "type": "string"
-                },
-                "default_value": {
-                    "title": "Default Value",
-                    "description": "a default value for the specified parameter",
-                    "comment": "can we specify either number or string?",
-                    "type": "string"
-                },
-                "value": {
-                    "title": "Value",
-                    "description": "a specified value for the specified parameter as used in a task",
-                    "comment": "can we specify either number or string?",
-                    "type": "string"
-                }
-            }
-        }
     }
 }

@@ -4,7 +4,7 @@
     "id": "/profiles/analysis_step.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["name", "version"],
+    "required": ["name", "version", "software_used"],
     "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases", "name"],
     "mixinProperties": [
@@ -50,7 +50,7 @@
             "type": "string"
         },
         "analysis_step_types": {
-            "title": "Types",
+            "title": "Purpose",
              "description": "The classification of the analysis step",
              "type": "array",
              "uniqueItems": true,
@@ -83,65 +83,111 @@
         },
         "software_used": {
             "title": "Software used",
-            "description": "The software used in this step",
+            "description": "The software used in this step - generally this will be a single docker container",
+            "type": "string",
+            "linkTo": "Software",
+            "comment": "Soo suggested a single software and use software_relation to associated containerized software"
+        },
+        "input_file_info": {
+            "title": "Input File Info",
+            "description": "Information about the files used as input to this analysis step",
             "type": "array",
-            "comment": "even though Soo suggested a single software and then use software_relation to group software",
-            "comment": "I think leaving this an array gives us flexibility if someone doesn't dockerize their analysis step",
-            "comment": "Or would it be better to enforce needing 'single' software per analysis step?",
             "items": {
-                "title": "Software",
-                "type": "string",
-                "linkTo": "Software"
+                "type": "object",
+                "additionalProperties": "false",
+                "properties": {
+                    "input_file_type": {
+                        "title": "Input file type",
+                        "description": "A file type used as input for the analysis.",
+                        "type": "string",
+                        "enum": [
+                            "reads",
+                            "read pairs",
+                            "intensity values",
+                            "alignments",
+                            "unfiltered alignments",
+                            "contact matrix",
+                            "normalized contact matrix",
+                            "long range chromatin interactions",
+                            "peaks",
+                            "genome reference",
+                            "genome index",
+                            "blacklisted regions"
+                        ]
+                    },
+                    "input_file_format": {
+                        "title": "File format",
+                        "type": "string",
+                        "enum": [
+                            "bam",
+                            "bai",
+                            "bed",
+                            "bigBed",
+                            "bigWig",
+                            "fasta",
+                            "fastq",
+                            "gff",
+                            "gtf",
+                            "hdf5",
+                            "tsv",
+                            "csv",
+                            "tar",
+                            "tagAlign",
+                            "wig"
+                        ]
+                    }
+                }
             }
         },
-        "input_file_types": {
-            "title": "Input file types",
-            "description": "The file types used as input for the analysis.",
+        "output_file_info": {
+            "title": "Output File Info",
+            "description": "Information about the files output from this analysis step",
             "type": "array",
-            "uniqueItems": true,
             "items": {
-                "title": "Input file type",
-                "description": "A file type used as input for the analysis.",
-                "type": "string",
-                "enum": [
-                    "reads",
-                    "read pairs",
-                    "intensity values",
-                    "alignments",
-                    "unfiltered alignments",
-                    "contact matrix",
-                    "normalized contact matrix",
-                    "long range chromatin interactions",
-                    "peaks",
-                    "genome reference",
-                    "genome index",
-                    "blacklisted regions"
-                ]
-            }
-        },
-        "output_file_types": {
-            "title": "Output file types",
-            "description": "The file types generated as output for the analysis.",
-            "type": "array",
-            "uniqueItems": true,
-            "items": {
-                "title": "Output file type",
-                "description": "A file type generated as output for the analysis.",
-                "type": "string",
-                "enum": [
-                    "reads",
-                    "read pairs",
-                    "intensity values",
-                    "alignments",
-                    "unfiltered alignments",
-                    "contact matrix",
-                    "normalized contact matrix",
-                    "long range chromatin interactions",
-                    "peaks",
-                    "genome reference",
-                    "genome index",
-                    "blacklisted regions"
-                ]
+                "type": "object",
+                "additionalProperties": "false",
+                "properties": {
+                    "output_file_type": {
+                        "title": "Output file type",
+                        "description": "A file type output from the analysis step.",
+                        "type": "string",
+                        "enum": [
+                            "reads",
+                            "read pairs",
+                            "intensity values",
+                            "alignments",
+                            "unfiltered alignments",
+                            "contact matrix",
+                            "normalized contact matrix",
+                            "long range chromatin interactions",
+                            "peaks",
+                            "genome reference",
+                            "genome index",
+                            "blacklisted regions"
+                        ]
+                    },
+                    "output_file_format": {
+                        "title": "File format",
+                        "type": "string",
+                        "enum": [
+                            "bam",
+                            "bai",
+                            "bed",
+                            "bigBed",
+                            "bigWig",
+                            "fasta",
+                            "fastq",
+                            "gff",
+                            "gtf",
+                            "hdf5",
+                            "tsv",
+                            "csv",
+                            "tar",
+                            "tagAlign",
+                            "wig"
+                        ]
+                    }
+                }
             }
         },
         "step_parameters": {
@@ -149,8 +195,33 @@
             "description": "The parameters that are used by the analysis step - not all of which are necessarily passed to listed software",
             "type": "array",
             "items": {
-              "title": "Parameter",
-              "type": {"$ref": "mixins.json#/parameter"}
+                "title": "Parameter",
+                "type": "object",
+                "additionalProperties": "false",
+                "properties": {
+                    "parameter": {
+                        "title": "Parameter name",
+                        "description": "the name or flag of the parameter as passed to the software",
+                        "type": "string"
+                    },
+                    "description": {
+                        "title": "Description",
+                        "description": "Short description of the parameter",
+                        "type": "string"
+                    },
+                    "default_value": {
+                        "title": "Default Value",
+                        "description": "a default value for the specified parameter",
+                        "comment": "can we specify either number or string?",
+                        "type": "string"
+                    },
+                    "value": {
+                        "title": "Value",
+                        "description": "a specified value for the specified parameter as used in a task",
+                        "comment": "can we specify either number or string?",
+                        "type": "string"
+                    }
+                }
             }
         },
         "qa_stats_generated": {
@@ -163,19 +234,6 @@
                 "description": "A QA statistic generated by the analysis.",
                 "type": "string",
                 "linkTo": "Document"
-            }
-        },
-        "parents": {
-            "title": "Parents",
-            "description": "The precursor steps.",
-            "comment": "Soo thought that this might not be the best way to 'order' the analysis steps in a workflow",
-            "comment": "I'm leaving this like this for now and we need to figure out if and how we generate workflow graphs",
-            "type": "array",
-            "items": {
-                "description": "A precusor step.",
-                "comment": "See analysis_step.json for available identifiers.",
-                "type": "string",
-                "linkTo": "AnalysisStep"
             }
         }
     }
