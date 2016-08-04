@@ -194,7 +194,6 @@ var UserActions = React.createClass({
         });
         var user = session_properties.user;
         var fullname = (user && user.title) || 'unknown';
-        console.log(actions);
         return (
             <div className="custom-entry">{actions}</div>
         );
