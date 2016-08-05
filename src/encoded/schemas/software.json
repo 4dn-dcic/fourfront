@@ -72,7 +72,7 @@
         "docker_info": {
             "title": "Docker Container Information",
             "description": "A short description of the docker container",
-            "type": "Object",
+            "type": "object",
             "properties": {
                 "docker_registry_url": {
                     "title": "Docker Registry URL",

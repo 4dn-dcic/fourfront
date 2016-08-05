@@ -49,7 +49,8 @@ ORDER = [
     'file',
     'file_set',
     'experiment_hic',
-    'experiment_set'
+    'experiment_set',
+    'software'
     # 'replicate',
     # 'annotation',
     # 'project',
