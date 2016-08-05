@@ -421,7 +421,7 @@ def search_result_actions(request, doc_types, es_results, position=None):
 
     # generate batch hub URL for experiments
     # TODO we could enable them for Datasets as well here, but not sure how well it will work
-    if doc_types == ['ExperimentXXXX']:
+    if doc_types == ['Experiment']:
         for bucket in aggregations['assembly']['assembly']['buckets']:
             if bucket['doc_count'] > 0:
                 assembly = bucket['key']
@@ -632,7 +632,6 @@ def search(context, request, search_type=None, return_generator=False):
     elif len(doc_types) != 1:
         del query['query']['query_string']['fields']
         query['query']['query_string']['fields'] = ['_all', '*.uuid', '*.md5sum', '*.submitted_file_name']
-
 
     # Set sort order
     has_sort = set_sort_order(request, search_term, types, doc_types, query, result)
