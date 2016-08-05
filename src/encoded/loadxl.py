@@ -50,7 +50,7 @@ ORDER = [
     'file_set',
     'experiment_hic',
     'experiment_set',
-    'software'
+    'software',
     # 'replicate',
     # 'annotation',
     # 'project',
@@ -90,7 +90,7 @@ ORDER = [
     # 'idr_quality_metric',
     # 'generic_quality_metric',
     # 'image',
-    # 'page'
+    'page'
 ]
 
 IS_ATTACHMENT = [
