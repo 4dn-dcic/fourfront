@@ -25,7 +25,7 @@ def test_audit_item_schema_upgrade_failure(testapp, organism):
 def test_audit_item_schema_upgrade_ok(testapp, organism):
     patch = {
         'schema_version': '1',
-        'status': 'CURRENT',
+        'status': 'current',
     }
     testapp.patch_json(organism['@id'] + '?validate=false', patch)
     res = testapp.get(organism['@id'] + '@@index-data')
