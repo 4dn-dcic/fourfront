@@ -18,7 +18,7 @@ def no_login_submitter(testapp, lab, award):
         'last_name': 'Submitter',
         'email': 'no_login_submitter@example.org',
         'submits_for': [lab['@id']],
-        'status': 'disabled',
+        'status': 'revoked',
     }
     # User @@object view has keys omitted.
     res = testapp.post_json('/user', item)
@@ -68,7 +68,7 @@ def test_access_key_principals(anontestapp, execute_counter, access_key, submitt
         'system.Authenticated',
         'system.Everyone',
         'userid.%s' % submitter['uuid'],
-        'viewing_group.ENCODE',
+        'viewing_group.4DN',
     ]
 
 

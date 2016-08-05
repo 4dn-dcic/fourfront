@@ -123,7 +123,7 @@ class Item(snovault.Item):
 
         # shared_status
         'current': ALLOW_CURRENT,
-        'disabled': ONLY_ADMIN_VIEW,
+        'revoked': ONLY_ADMIN_VIEW,
 
         # file
         'obsolete': ONLY_ADMIN_VIEW,
