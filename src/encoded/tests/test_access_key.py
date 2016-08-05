@@ -11,7 +11,7 @@ def auth_header(access_key):
     return basic_auth(access_key['access_key_id'], access_key['secret_access_key'])
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def no_login_submitter(testapp, lab, award):
     item = {
         'first_name': 'ENCODE',
@@ -25,7 +25,7 @@ def no_login_submitter(testapp, lab, award):
     return testapp.get(res.location).json
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def no_login_access_key(testapp, no_login_submitter):
     description = 'My programmatic key'
     item = {
