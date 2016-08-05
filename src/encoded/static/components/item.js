@@ -42,24 +42,30 @@ var Fallback = module.exports.Fallback = React.createClass({
     }
 });
 
-
-var Item = module.exports.Item = React.createClass({
+var ItemLoader = React.createClass({
     mixins: [AuditMixin],
+    render: function() {
+        return (
+            <fetched.FetchedData>
+                <fetched.Param name="schemas" url="/profiles/" />
+                <Item context={this.props.context} />
+            </fetched.FetchedData>
+        );
+    }
+});
+
+
+var Item = React.createClass({
     render: function() {
         var context = this.props.context;
         var itemClass = globals.itemClass(context, 'view-item');
         var title = globals.listing_titles.lookup(context)({context: context});
         var IPanel = globals.panel_views.lookup(context);
-
         // Make string of alternate accessions
-        var altacc = context.alternate_accessions ? context.alternate_accessions.join(', ') : undefined;
-
         return (
             <div className={itemClass}>
                 <header className="row">
                     <div className="col-sm-12">
-                        <h2>{title}</h2>
-                        {altacc ? <h4 className="repl-acc">Replaces {altacc}</h4> : null}
                         <div className="status-line">
                             <AuditIndicators context={context} key="biosample-audit" />
                         </div>
@@ -67,14 +73,14 @@ var Item = module.exports.Item = React.createClass({
                 </header>
                 <AuditDetail context={context} key="biosample-audit" />
                 <div className="row item-row">
-                    <IPanel {...this.props} />
+                     <IPanel {...this.props}/>
                 </div>
             </div>
         );
     }
 });
 
-globals.content_views.register(Item, 'Item');
+globals.content_views.register(ItemLoader, 'Item');
 
 
 // Also use this view as a fallback for anything we haven't registered
@@ -85,11 +91,12 @@ globals.content_views.fallback = function () {
 
 var IPanel = module.exports.IPanel = React.createClass({
     render: function() {
+        var schemas = this.props.schemas;
         var context = this.props.context;
-        var schema = context.schema;
         var itemClass = globals.itemClass(context, 'view-detail panel');
         var title = globals.listing_titles.lookup(context)({context: context});
         var sortKeys = Object.keys(context).sort();
+        var tips = tipsFromSchema(schemas, context);
         return (
             <section className="flexcol-sm-12">
             <div className={itemClass}>
@@ -101,14 +108,13 @@ var IPanel = module.exports.IPanel = React.createClass({
                             <dl className="key-value">
                                 {sortKeys.map(function(ikey, val){
                                     return (
-                                        <div key={ikey} data-test="term-name">
-                                          <dt>{formKey(context,ikey)}</dt>
-                                          <dd>{formValue(context[ikey])}</dd>
+                                        <div key={ikey.id} data-test="term-name">
+                                          {formKey(tips,ikey)}
+                                          <dd>{formValue(schemas,context[ikey])}</dd>
                                         </div>
                                     );
                                 })}
                             </dl>
-
                         </div>
                     </div>
                 </PanelBody>
@@ -125,7 +131,7 @@ globals.panel_views.register(IPanel, 'Item');
 
 // Also use this view as a fallback for anything we haven't registered
 globals.panel_views.fallback = function () {
-    return IPanel;
+    return ItemLoader;
 };
 
 
@@ -235,15 +241,20 @@ var RelatedItems = module.exports.RelatedItems = React.createClass({
     },
 });
 
+// ******* Refined item.js code below... *******
+
 // Formats the correct display for each metadata field
-var formValue = function (item) {
+var formValue = function (schemas, item) {
     var toReturn = [];
     if(Array.isArray(item)) {
         for (var i=0; i < item.length; i++){
-            toReturn.push(formValue(item[i]));
+            toReturn.push(formValue(schemas, item[i]));
         }
     }else if (typeof item === 'object') {
-        toReturn.push(<SubIPannel content={item}/>);
+        if(item['@type']){
+            var type = item['@type'][0];
+        }
+        toReturn.push(<SubIPannel schemas={schemas} content={item}/>);
     }else{
         if (typeof item === 'string' && item.charAt(0) === '/') {
             toReturn.push(<a href={item}>{item}</a>)
@@ -267,17 +278,9 @@ var SubIPannel = React.createClass({
   	  });
     },
     render: function() {
+        var schemas = this.props.schemas;
         var item = this.props.content;
-        // TODO: make this process generic using lookup with registry
-        if (item.hasOwnProperty("accession")){
-            var title = item.accession;
-        }else if (item.hasOwnProperty("name")){
-            var title = item.name;
-        }else if (item.hasOwnProperty("title")){
-            var title = item.title;
-        }else{
-            var title = "Open";
-        }
+        var title = item.title || item.name || item.accession || item['@id'] || "Open";
         var toggleRender;
         var toggleLink;
         if (!this.state.isOpen) {
@@ -285,7 +288,7 @@ var SubIPannel = React.createClass({
             toggleRender = <span/>;
         }else{
             toggleLink = <a href="" className="item-toggle-link" onClick={this.handleToggle}>Close</a>
-            toggleRender = <Subview content={item}/>;
+            toggleRender = <Subview schemas={schemas} content={item}/>;
         }
         return (
     	  <div className="flexrow">
@@ -300,19 +303,21 @@ var SubIPannel = React.createClass({
 
 var Subview = React.createClass({
     render: function(){
+        var schemas = this.props.schemas;
         var item = this.props.content;
+        var tips = tipsFromSchema(schemas, item);
         return(
-            <div className="flexcol-sm-6">
-              <Panel addClasses="data-display">
+            <div className="flexcol-sm-6 subview">
+              <Panel addClasses="sub-panel data-display">
                   <PanelBody addClasses="panel-body-with-header">
                       <div className="flexrow">
                           <div className="flexcol-sm-6">
-                              <dl className="key-value">
+                              <dl className="key-value sub-descriptions">
                                   {Object.keys(item).map(function(ikey, val){
                                       return (
-                                        <div key={ikey} data-test="term-name">
-                                          <dt>{ikey}</dt>
-                                          <dd>{formValue(item[ikey])}</dd>
+                                        <div className="sub-entry" key={ikey.id} data-test="term-name">
+                                          {formKey(tips,ikey)}
+                                          <dd>{formValue(schemas, item[ikey])}</dd>
                                         </div>
                                       );
                                   })}
@@ -326,7 +331,70 @@ var Subview = React.createClass({
     }
 });
 
-var formKey = function(context, key){
-    // console.log(schema);
-    return({key});
+//Return the properties dictionary from a schema for use as tooltips
+var tipsFromSchema = function(schemas, content){
+    var tips = {};
+    if(content['@type']){
+        var type = content['@type'][0];
+        if(schemas[type]){
+            tips = schemas[type]['properties'];
+        }
+    }
+    return tips;
 };
+
+var formKey =  function(tips, key){
+    var tooltip = '';
+    if (tips[key]){
+        var info = tips[key];
+        if(info['description']){
+            tooltip = info['description'];
+        }
+    }
+    return(
+        <DescriptorField field={key} description={tooltip}/>
+    );
+};
+
+// Display the item field with a tooltip showing the field description from
+// schema, if available
+var DescriptorField = React.createClass({
+    propTypes: {
+        field: React.PropTypes.string.isRequired,
+        description: React.PropTypes.string.isRequired
+    },
+    getInitialState: function() {
+        return {
+            active: false
+        };
+    },
+
+    handleHover: function(b) {
+        this.setState({active: b});
+    },
+
+    render: function() {
+        var {field, description} = this.props;
+        var active = this.state.active;
+        var header;
+        if (description === ""){
+            header = <span>{field}</span>;
+        }else{
+            header = (
+                <div className="tooltip-trigger"
+                    onMouseEnter={this.handleHover.bind(null, true)}
+                    onMouseLeave={this.handleHover.bind(null, false)}>
+                    <span>{field}</span>
+                    <i className="icon icon-info-circle item-icon"/>
+                    <div className={'tooltip bottom' + (active ? ' tooltip-open' : '')}>
+                        <div className="tooltip-arrow"></div>
+                        <div className="tooltip-inner">
+                            <span>{description}</span>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        return (<dt>{header}</dt>);
+    }
+});

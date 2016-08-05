@@ -29,7 +29,6 @@ require('./target');
 require('./publication');
 require('./pipeline');
 require('./software');
-require('./testing');
 require('./edit');
 require('./inputs');
 require('./blocks');

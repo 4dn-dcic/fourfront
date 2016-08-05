@@ -283,13 +283,18 @@
 
 .item-toggle-link{
 	padding: 10px;
-	color: #ff0000; // temporary?
+	color: #00cca3; // temporary?
 	&:hover,&:focus {
-		color: #ff0000;
+		color: #00cca3;
 	}
 }
 
 // simply used to hide elements
 .invis{
 	display: none !important;
+}
+
+// used in item.js
+.item-icon{
+	padding-left: 4px;
 }

@@ -267,15 +267,6 @@ class TestingDependencies(Item):
     }
 
 
-@view_config(name='testing-render-error', request_method='GET')
-def testing_render_error(request):
-    return {
-        '@type': ['TestingRenderError', 'Item'],
-        '@id': request.path,
-        'title': 'Item triggering a render error',
-    }
-
-
 @view_config(context=TestingPostPutPatch, name='testing-retry')
 def testing_retry(context, request):
     from sqlalchemy import inspect
