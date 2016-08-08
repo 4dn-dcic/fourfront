@@ -35,6 +35,8 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'biosource.biosource_vendor',
         'references',
         'biosample_protocols',
+        'modifications',
+        'treatments',
     ]
 
     def _update(self, properties, sheets=None):

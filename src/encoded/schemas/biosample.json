@@ -108,5 +108,22 @@
                 }
             }
         }
+    },
+    "columns": {
+        "accession": {
+            "title": "Accession"
+        },
+        "description": {
+            "title": "Description"
+        },
+        "biosource": {
+            "title": "Biosource"
+        },
+        "modifications": {
+            "title": "Modifications"
+        },
+        "treatments": {
+            "title": "Treatments"
+        }
     }
 }
