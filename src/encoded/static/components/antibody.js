@@ -43,8 +43,11 @@ var Lot = module.exports.Lot = React.createClass({
         ];
 
         // Build antibody status panel
-        var PanelView = globals.panel_views.lookup(context);
-        var antibodyStatuses = <PanelView context={context} key={context['@id']} />;
+        // var PanelView = globals.panel_views.lookup(context);
+        // var antibodyStatuses = <PanelView context={context} key={context['@id']} />;
+        // FIX FOR REMOVED AntibodyLot OBJECT FROM REGISTRY...
+
+        var antibodyStatuses = <AntibodyStatus context={context} key={context['@id']} />;
 
         // Make an array of targets with no falsy entries and no repeats
         var targets = {};
