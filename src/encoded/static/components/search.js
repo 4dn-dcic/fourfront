@@ -820,7 +820,7 @@ var FacetList = search.FacetList = React.createClass({
             width = (100 / facets.length) + '%';
         }
 
-        // See if we need the Clear Filters link or not. context.clear_filters 
+        // See if we need the Clear Filters link or not. context.clear_filters
         var clearButton; // JSX for the clear button
         var searchQuery = context && context['@id'] && url.parse(context['@id']).search;
         if (searchQuery) {

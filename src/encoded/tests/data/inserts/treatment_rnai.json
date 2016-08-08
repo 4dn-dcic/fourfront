@@ -1,0 +1,13 @@
+[
+    {
+        "uuid": "686b362f-4eb6-4a9c-8173-3ab267307e3b",
+        "aliases": ["Awesome:Treatment"],
+        "description": "RNAi treatment to change the world!",
+        "rnai_type":"siRNA",
+        "target": "Pokemon",
+        "target_sequence": "ATGCATGC",
+        "rnai_constructs": ["131106bc-8535-4448-903e-854af460b211"],
+        "rnai_vendor": "b31106bc-8535-4448-903e-854af460b21d",
+        "url": "https://www.cyclingnews.com"
+    }
+]

@@ -1,0 +1,84 @@
+{
+    "title": "Workflow",
+    "description": "Schema for submitting a computational analysis workflow that is composed of analysis step(s).",
+    "id": "/profiles/workflow.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["name"],
+    "additionalProperties": false,
+    "identifyingProperties": ["uuid", "aliases", "accession"],
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/status" },
+        { "$ref": "mixins.json#/submitted"},
+        { "$ref": "mixins.json#/documents" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/accession" },
+        { "$ref": "mixins.json#/notes"}
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "accession": {
+            "accessionType": "WF"
+        },
+        "title": {
+            "title": "Title",
+            "description": "The preferred viewable name of the workflow.",
+            "type": "string"
+        },
+        "description": {
+            "title": "Description",
+            "description": "A short text description of the workflow.",
+            "type": "string"
+        },
+        "workflow_type": {
+            "title": "Workflow Type",
+            "type": "string",
+            "enum": [
+                "Hi-C data analysis",
+                "Image processing",
+                "Visualization processing",
+                "Other"
+            ]
+        },
+        "cwl_pointer": {
+            "title": "CWL Path",
+            "description": "Path to the CWL file for the workflow - URL or directory path",
+            "type": "string"
+        },
+        "analysis_steps": {
+            "title": "Analysis Steps",
+            "description": "The steps that comprise the workflow with info on who are their parents.",
+            "type": "array",
+            "items": {
+                "description": "A step in the workflow and whose its parent are.",
+                "title": "Step Info",
+                "type": "object",
+                "additionalProperties": "false",
+                "properties": {
+                    "step": {
+                        "title": "Analysis Step",
+                        "description": "A step in the workflow.",
+                        "type": "string",
+                        "linkTo": "AnalysisStep"
+                    },
+                    "parents": {
+                        "title": "Step parents",
+                        "description": "The analysis step(s) that directly preceed the step",
+                        "type": "array",
+                        "items": {
+                            "title": "Parent Step",
+                          "description": "An analysis step that immediately preceeds this step.",
+                          "type": "string",
+                          "linkTo": "AnalysisStep"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

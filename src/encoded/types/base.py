@@ -1,10 +1,11 @@
+"""base class creation for all the schemas that exist."""
 from functools import lru_cache
 from pyramid.security import (
-    ALL_PERMISSIONS,
+    # ALL_PERMISSIONS,
     Allow,
     Authenticated,
     Deny,
-    DENY_ALL,
+    # DENY_ALL,
     Everyone,
 )
 from pyramid.traversal import (
@@ -12,7 +13,7 @@ from pyramid.traversal import (
     traverse,
 )
 import snovault
-from ..schema_formats import is_accession
+# from ..schema_formats import is_accession
 
 
 @lru_cache()
@@ -57,7 +58,6 @@ DELETED = [
     (Deny, Everyone, 'visible_for_edit')
 ] + ONLY_ADMIN_VIEW
 
-
 # Collection acls
 
 ALLOW_SUBMITTER_ADD = [
@@ -65,8 +65,8 @@ ALLOW_SUBMITTER_ADD = [
 ]
 
 
-
 def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), include=None):
+    """smth."""
     if include is not None:
         return [
             path for path in paths
@@ -80,7 +80,10 @@ def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), in
 
 
 class AbstractCollection(snovault.AbstractCollection):
+    """smth."""
+
     def get(self, name, default=None):
+        """smth."""
         resource = super(AbstractCollection, self).get(name, None)
         if resource is not None:
             return resource
@@ -94,7 +97,10 @@ class AbstractCollection(snovault.AbstractCollection):
 
 
 class Collection(snovault.Collection, AbstractCollection):
+    """smth."""
+
     def __init__(self, *args, **kw):
+        """smth."""
         super(Collection, self).__init__(*args, **kw)
         if hasattr(self, '__acl__'):
             return
@@ -105,6 +111,8 @@ class Collection(snovault.Collection, AbstractCollection):
 
 
 class Item(snovault.Item):
+    """smth."""
+
     AbstractCollection = AbstractCollection
     Collection = Collection
     STATUS_ACL = {
@@ -115,7 +123,7 @@ class Item(snovault.Item):
 
         # shared_status
         'current': ALLOW_CURRENT,
-        'disabled': ONLY_ADMIN_VIEW,
+        'revoked': ONLY_ADMIN_VIEW,
 
         # file
         'obsolete': ONLY_ADMIN_VIEW,
@@ -146,6 +154,7 @@ class Item(snovault.Item):
 
     @property
     def __name__(self):
+        """smth."""
         if self.name_key is None:
             return self.uuid
         properties = self.upgrade_properties()
@@ -154,12 +163,14 @@ class Item(snovault.Item):
         return properties.get(self.name_key, None) or self.uuid
 
     def __acl__(self):
+        """smth."""
         # Don't finalize to avoid validation here.
         properties = self.upgrade_properties().copy()
         status = properties.get('status')
         return self.STATUS_ACL.get(status, ALLOW_LAB_SUBMITTER_EDIT)
 
     def __ac_local_roles__(self):
+        """smth."""
         roles = {}
         properties = self.upgrade_properties().copy()
         if 'lab' in properties:
@@ -173,6 +184,7 @@ class Item(snovault.Item):
         return roles
 
     def unique_keys(self, properties):
+        """smth."""
         keys = super(Item, self).unique_keys(properties)
         if 'accession' not in self.schema['properties']:
             return keys
@@ -183,9 +195,10 @@ class Item(snovault.Item):
 
 
 class SharedItem(Item):
-    ''' An Item visible to all authenticated users while "proposed" or "in progress".
-    '''
+    """An Item visible to all authenticated users while "proposed" or "in progress"."""
+
     def __ac_local_roles__(self):
+        """smth."""
         roles = {}
         properties = self.upgrade_properties().copy()
         if 'lab' in properties:
@@ -197,6 +210,7 @@ class SharedItem(Item):
 
 @snovault.calculated_property(context=Item.Collection, category='action')
 def add(context, request):
+    """smth."""
     if request.has_permission('add'):
         return {
             'name': 'add',
@@ -208,6 +222,7 @@ def add(context, request):
 
 @snovault.calculated_property(context=Item, category='action')
 def edit(context, request):
+    """smth."""
     if request.has_permission('edit'):
         return {
             'name': 'edit',
@@ -219,6 +234,7 @@ def edit(context, request):
 
 @snovault.calculated_property(context=Item, category='action')
 def edit_json(context, request):
+    """smth."""
     if request.has_permission('edit'):
         return {
             'name': 'edit-json',

@@ -42,9 +42,11 @@ describe('Antibody', function() {
 
             // Render antibody into jsnode
             antibody = React.withContext(Context, function() {
-                return TestUtils.renderIntoDocument(
+                var data =  TestUtils.renderIntoDocument(
                     <Antibody context={context} />
                 );
+								console.dir(window.document);
+								return data;
             });
         });
 
