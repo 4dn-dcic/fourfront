@@ -9,6 +9,16 @@ def base_experiment(testapp, lab, award):
     }
     return testapp.post_json('/experiment', item, status=201).json['@graph'][0]
 
+@pytest.fixture
+def base_experimend(testapp, lab, award):
+    item = {
+        'award': award['uuid'],
+        'lab': lab['uuid'],
+        'status': 'in progress'
+    }
+    return testapp.post_json('/experiment_hic', item, status=201).json['@graph'][0]
+
+
 def test_isogenic_replicate_type(testapp, base_experiment, donor_1, donor_2,biosample_1, biosample_2, library_1, library_2, replicate_1_1, replicate_2_1 ):
     testapp.patch_json(donor_1['@id'], {'age_units': 'year', 'age': '55' })
     testapp.patch_json(donor_1['@id'], {'sex': 'female' })
@@ -85,3 +95,6 @@ def test_anisogenic_replicate_type(testapp, base_experiment, donor_1, donor_2,bi
     testapp.patch_json(base_experiment['@id'], {'replicates': [replicate_1_1['@id'], replicate_2_1['@id']]})
     res = testapp.get(base_experiment['@id']+'@@index-data') 
     assert res.json['object']['replication_type']=='anisogenic'     
+
+def test_experimend_update_experiment_relation(testapp, base_experimend):
+    print(base_experimend)

@@ -435,12 +435,12 @@ def search_result_actions(request, doc_types, es_results, position=None):
                     if 'region-search' in request.url and position is not None:
                         actions.setdefault('batch_hub', {})[assembly] = hgConnect + hub + '&db=' + ucsc_assembly + '&position={}'.format(position)
                     else:
-                        actions.setdefault('batch_hub', {})[assembly] = hgConnect + hub + '&db=' + ucsc_assembly 
+                        actions.setdefault('batch_hub', {})[assembly] = hgConnect + hub + '&db=' + ucsc_assembly
 
     # generate batch download URL for experiments
     # TODO we could enable them for Datasets as well here, but not sure how well it will work
     # batch download disabled for region-search results
-    if '/region-search/' not in request.url:
+    if '/region-search/' not in request.url and aggregations.get('files-file_type'):
         if doc_types == ['Experiment'] and any(
                 bucket['doc_count'] > 0
                 for bucket in aggregations['files-file_type']['files-file_type']['buckets']):
@@ -632,7 +632,6 @@ def search(context, request, search_type=None, return_generator=False):
     elif len(doc_types) != 1:
         del query['query']['query_string']['fields']
         query['query']['query_string']['fields'] = ['_all', '*.uuid', '*.md5sum', '*.submitted_file_name']
-
 
     # Set sort order
     has_sort = set_sort_order(request, search_term, types, doc_types, query, result)

@@ -315,7 +315,7 @@ var Experiment = module.exports.Experiment = React.createClass({
 
         // Determine this experiment's ENCODE version
         var encodevers = globals.encodeVersion(context);
-    
+
         // Make list of statuses
         var statuses = [{status: context.status, title: "Status"}];
 
@@ -1803,7 +1803,7 @@ var QcDetailsView = function(metrics) {
                 <div className="col-md-4 col-sm-6 col-xs-12">
                     <h4 className="quality-metrics-title">Quality metrics of {metrics.parent.accession}</h4>
                     <dl className="key-value-flex">
-                        {sortedKeys.map(key => 
+                        {sortedKeys.map(key =>
                             (typeof metrics.ref[key] === 'string' || typeof metrics.ref[key] === 'number') ?
                                 <div key={key}>
                                     <dt>{key}</dt>

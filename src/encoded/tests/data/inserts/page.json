@@ -47,9 +47,9 @@
     {
         "name": "test-section",
         "title": "Test Section",
-        "lab": "thomas-gingeras",
+        "lab": "4dn-dcic-lab",
         "status": "released",
-        "submitted_by": "dignissim.euismod@amet.habitant",
+        "submitted_by": "admin@admin.com",
         "uuid": "41c4ea4e-7a8e-4b91-8fe3-384d0adc8735",
         "layout": {
             "rows": [
@@ -76,8 +76,8 @@
         "name": "subpage",
         "title": "Subpage",
         "status": "released",
-        "lab": "thomas-gingeras",
-        "submitted_by": "dignissim.euismod@amet.habitant",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "admin@admin.com",
         "uuid": "331928f7-d8f7-4ea6-b4e0-8d380fb22974",
         "layout": {
             "rows": [
@@ -100,8 +100,8 @@
         "parent": "/test-section",
         "name": "subpage-in-progress",
         "title": "Subpage in progress not visible to users",
-        "lab": "thomas-gingeras",
-        "submitted_by": "dignissim.euismod@amet.habitant",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "admin@admin.com",
         "status": "in progress",
         "uuid": "83173355-31ff-4ca7-a259-e4af0f3a0169",
         "layout": {
@@ -124,9 +124,9 @@
     {
         "name": "permission-test",
         "title": "Permission Test",
-        "lab": "thomas-gingeras",
+        "lab": "4dn-dcic-lab",
         "status": "in progress",
-        "submitted_by": "dignissim.euismod@amet.habitant",
+        "submitted_by": "admin@admin.com",
         "uuid": "2efb5ffe-5a7b-4a44-9071-2e0651a566e0",
         "layout": {
             "rows": [

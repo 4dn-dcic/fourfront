@@ -83,6 +83,40 @@ def property_closure(request, propname, root_uuid):
 
 
 @collection(
+    name='file-sets',
+    unique_key='accession',
+    properties={
+        'title': 'File Sets',
+        'description': 'Listing of File Sets',
+    })
+class FileSet(Item):
+    """Collection of files stored under fileset."""
+
+    item_type = 'file_set'
+    schema = load_schema('encoded:schemas/file_set.json')
+    name_key = 'accession'
+
+    def _update(self, properties, sheets=None):
+        # update self first
+        super(FileSet, self)._update(properties, sheets)
+        fsacc = str(self.uuid)
+        if 'files_in_set' in properties.keys():
+            for eachfile in properties["files_in_set"]:
+                target_file = self.collection.get(eachfile)
+                # is there any fileset in the file
+                if 'filesets' not in target_file.properties.keys():
+                    target_file.properties.update({'filesets': [fsacc, ]})
+                    target_file.update(target_file.properties)
+                else:
+                    # incase file already has the fileset_type
+                    if fsacc in target_file.properties['filesets']:
+                        break
+                    else:
+                        target_file.properties['filesets'].append(fsacc)
+                        target_file.update(target_file.properties)
+
+
+@collection(
     name='files',
     unique_key='accession',
     properties={
@@ -90,37 +124,57 @@ def property_closure(request, propname, root_uuid):
         'description': 'Listing of Files',
     })
 class File(Item):
+    """Collection for individual files."""
+
     item_type = 'file'
     schema = load_schema('encoded:schemas/file.json')
     name_key = 'accession'
 
-    rev = {
-        'paired_with': ('File', 'paired_with'),
-        'quality_metrics': ('QualityMetric', 'quality_metric_of'),
-    }
+    def _update(self, properties, sheets=None):
+        # update self first to ensure 'related_files' are stored in self.properties
+        super(File, self)._update(properties, sheets)
+        DicRefRelation = {
+             "derived from": "parent of",
+             "parent of": "derived from",
+             "supercedes": "is superceded by",
+             "is superceded by": "supercedes",
+             "paired with": "paired with"
+             }
+        acc = str(self.uuid)
 
-    embedded = [
-        'replicate',
-        'replicate.experiment',
-        'replicate.experiment.lab',
-        'replicate.experiment.target',
-        'replicate.library',
-        'replicate.experiment.lab',
-        'replicate.experiment.target',
-        'lab',
-        'derived_from',
-        'derived_from.analysis_step_version.software_versions',
-        'derived_from.analysis_step_version.software_versions.software',
-        'submitted_by',
-        'analysis_step_version.analysis_step',
-        'analysis_step_version.analysis_step.pipelines',
-        'analysis_step_version.analysis_step.versions',
-        'analysis_step_version.analysis_step.versions.software_versions',
-        'analysis_step_version.analysis_step.versions.software_versions.software',
-        'analysis_step_version.software_versions',
-        'analysis_step_version.software_versions.software',
-        'quality_metrics.step_run.analysis_step_version.analysis_step',
-    ]
+        if 'related_files' in properties.keys():
+            for relation in properties["related_files"]:
+                switch = relation["relationship_type"]
+                rev_switch = DicRefRelation[switch]
+                related_fl = relation["file"]
+                relationship_entry = {"relationship_type": rev_switch, "file": acc}
+                rel_dic = {'related_files': [relationship_entry, ]}
+
+                target_fl = self.collection.get(related_fl)
+                # case one we don't have relations
+                if 'related_files' not in target_fl.properties.keys():
+                    target_fl.properties.update(rel_dic)
+                    target_fl.update(target_fl.properties)
+                else:
+                    # case two we have relations but not the one we need
+                    for target_relation in target_fl.properties['related_files']:
+                        if target_relation['file'] == acc:
+                            break
+                    else:
+                        # make data for new related_files
+                        target_fl.properties['related_files'].append(relationship_entry)
+                        target_fl.update(target_fl.properties)
+        # this part is for fileset
+        if 'filesets' in properties.keys():
+            for fileset in properties['filesets']:
+                target_fileset = self.collection.get(fileset)
+                # look at the files inside the set
+                if acc in target_fileset.properties["files_in_set"]:
+                    break
+                else:
+                    # incase it is not in the list of files
+                    target_fileset.properties["files_in_set"].append(acc)
+                    target_fileset.update(target_fileset.properties)
 
     @property
     def __name__(self):
@@ -138,8 +192,8 @@ class File(Item):
                 value = 'md5:{md5sum}'.format(**properties)
                 keys.setdefault('alias', []).append(value)
             # Ensure no files have multiple reverse paired_with
-            if 'paired_with' in properties:
-                keys.setdefault('file:paired_with', []).append(properties['paired_with'])
+            # if 'paired_with' in properties:
+            #     keys.setdefault('file:paired_with', []).append(properties['paired_with'])
         return keys
 
     @calculated_property(schema={
@@ -176,86 +230,6 @@ class File(Item):
         external = self.propsheets.get('external', None)
         if external is not None:
             return external['upload_credentials']
-
-    @calculated_property(schema={
-        "title": "Read length units",
-        "type": "string",
-        "enum": [
-            "nt"
-        ]
-    })
-    def read_length_units(self, read_length=None):
-        if read_length is not None:
-            return "nt"
-
-    @calculated_property(schema={
-        "title": "Biological replicates",
-        "type": "array",
-        "items": {
-            "title": "Biological replicate number",
-            "description": "The identifying number of each relevant biological replicate",
-            "type": "integer",
-        }
-    })
-    def biological_replicates(self, request, registry, root, replicate=None):
-        if replicate is not None:
-            replicate_obj = traverse(root, replicate)['context']
-            replicate_biorep = replicate_obj.__json__(request)['biological_replicate_number']
-            return [replicate_biorep]
-
-        conn = registry[CONNECTION]
-        derived_from_closure = property_closure(request, 'derived_from', self.uuid)
-        dataset_uuid = self.__json__(request)['dataset']
-        obj_props = (conn.get_by_uuid(uuid).__json__(request) for uuid in derived_from_closure)
-        replicates = {
-            props['replicate']
-            for props in obj_props
-            if props['dataset'] == dataset_uuid and 'replicate' in props
-        }
-        bioreps = {
-            conn.get_by_uuid(uuid).__json__(request)['biological_replicate_number']
-            for uuid in replicates
-        }
-        return sorted(bioreps)
-
-    @calculated_property(schema={
-        "title": "Analysis Step Version",
-        "type": "string",
-        "linkTo": "AnalysisStepVersion"
-    })
-    def analysis_step_version(self, request, root, step_run=None):
-        if step_run is None:
-            return
-        step_run_obj = traverse(root, step_run)['context']
-        step_version_uuid = step_run_obj.__json__(request).get('analysis_step_version')
-        if step_version_uuid is not None:
-            return request.resource_path(root[step_version_uuid])
-
-    @calculated_property(schema={
-        "title": "Output category",
-        "type": "string",
-        "enum": [
-            "raw data",
-            "alignment",
-            "signal",
-            "annotation",
-            "quantification",
-            "reference"
-        ]
-    })
-    def output_category(self, output_type):
-        return self.schema['output_type_output_category'].get(output_type)
-
-    @calculated_property(schema={
-        "title": "QC Metric",
-        "type": "array",
-        "items": {
-            "type": ['string', 'object'],
-            "linkFrom": "QualityMetric.quality_metric_of",
-        },
-    })
-    def quality_metrics(self, request, quality_metrics):
-        return paths_filtered_by_status(request, quality_metrics)
 
     @calculated_property(schema={
         "title": "File type",

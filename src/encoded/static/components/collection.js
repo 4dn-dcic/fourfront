@@ -62,7 +62,7 @@ var lookup_column = function (result, column) {
             reverse = !!reverse;
             if (this.sortedOn === sortColumn && this.reversed === reverse) return;
             this.sortedOn = sortColumn;
-            this.reversed = reverse;            
+            this.reversed = reverse;
             this.rows.sort(function (rowA, rowB) {
                 var a = '' + rowA.cells[sortColumn].sortable;
                 var b = '' + rowB.cells[sortColumn].sortable;
@@ -304,7 +304,7 @@ var lookup_column = function (result, column) {
                 );
             }
             return (
-                <div className="table-responsive">            
+                <div className="table-responsive">
                     <table className={table_class + " table table-striped table-hover table-panel"}>
                       <StickyHeader>
                         <thead className="sticky-header">
@@ -312,12 +312,12 @@ var lookup_column = function (result, column) {
                                 <th colSpan={columns.length}>
                                     {loading_or_total}
                                     {actions}
-                                    <form ref="form" className="table-filter" onKeyUp={this.handleKeyUp} 
+                                    <form ref="form" className="table-filter" onKeyUp={this.handleKeyUp}
                                         data-skiprequest="true" data-removeempty="true">
-                                        <input ref="q" disabled={this.state.communicating || undefined} 
-                                            name="q" type="search" defaultValue={searchTerm} 
-                                            placeholder="Filter table by..." className="filter form-control" 
-                                            id="table-filter" /> 
+                                        <input ref="q" disabled={this.state.communicating || undefined}
+                                            name="q" type="search" defaultValue={searchTerm}
+                                            placeholder="Filter table by..." className="filter form-control"
+                                            id="table-filter" />
                                         <i className="icon icon-times-circle-o clear-input-icon" hidden={!searchTerm} onClick={this.clearFilter}></i>
                                         <input ref="sorton" type="hidden" name="sorton" defaultValue={sortOn !== defaultSortOn ? sortOn : ''} />
                                         <input ref="reversed" type="hidden" name="reversed" defaultValue={!!reversed || ''} />
@@ -393,11 +393,11 @@ var lookup_column = function (result, column) {
             var event = new Event('submit', {bubbles: true, cancelable: true});
             target.dispatchEvent(event);
         },
-        
+
         clearFilter: function (event) {
             this.refs.q.getDOMNode().value = '';
             this.submitTimer = setTimeout(this.submit);
-        }, 
+        },
 
         componentWillUnmount: function () {
             if (typeof this.submitTimer != 'undefined') {

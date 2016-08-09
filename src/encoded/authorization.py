@@ -34,7 +34,7 @@ def groupfinder(login, request):
         except KeyError:
             return None
 
-        if access_key.properties.get('status') in ('deleted', 'disabled'):
+        if access_key.properties.get('status') in ('deleted', 'revoked'):
             return None
 
         userid = access_key.properties['user']
@@ -45,7 +45,7 @@ def groupfinder(login, request):
 
     user_properties = user.properties
 
-    if user_properties.get('status') in ('deleted', 'disabled'):
+    if user_properties.get('status') in ('deleted', 'revoked'):
         return None
 
     principals = ['userid.%s' % user.uuid]

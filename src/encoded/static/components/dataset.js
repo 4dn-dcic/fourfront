@@ -203,7 +203,7 @@ var Annotation = React.createClass({
                                             <dd>{context.lab.title}</dd>
                                         </div>
                                     : null}
-                                    
+
                                     {context.aliases.length ?
                                         <div data-test="aliases">
                                             <dt>Aliases</dt>
@@ -352,7 +352,7 @@ var PublicationData = React.createClass({
                                             <dd>{context.lab.title}</dd>
                                         </div>
                                     : null}
-                                    
+
                                     <div data-test="externalresources">
                                         <dt>External resources</dt>
                                         <dd>
@@ -486,7 +486,7 @@ var Reference = React.createClass({
                                             <dd>{context.lab.title}</dd>
                                         </div>
                                     : null}
-                                    
+
                                     {context.aliases.length ?
                                         <div data-test="aliases">
                                             <dt>Aliases</dt>
@@ -654,7 +654,7 @@ var Project = React.createClass({
                                             <dd>{context.lab.title}</dd>
                                         </div>
                                     : null}
-                                    
+
                                     {context.aliases.length ?
                                         <div data-test="aliases">
                                             <dt>Aliases</dt>
@@ -809,7 +809,7 @@ var UcscBrowserComposite = React.createClass({
                                             <dd>{context.lab.title}</dd>
                                         </div>
                                     : null}
-                                    
+
                                     {context.aliases.length ?
                                         <div data-test="aliases">
                                             <dt>Aliases</dt>
@@ -1423,7 +1423,7 @@ var FileTable = module.exports.FileTable = React.createClass({
 
     cv: {
         maxWidthRef: '', // ref key of table with this.state.maxWidth width
-        maxWidthNode: null // DOM node of table with this.state.maxWidth width 
+        maxWidthNode: null // DOM node of table with this.state.maxWidth width
     },
 
     // Configuration for raw file table

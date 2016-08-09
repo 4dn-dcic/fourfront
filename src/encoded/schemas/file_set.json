@@ -4,28 +4,30 @@
     "id": "/profiles/file_set.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [ "award", "lab"],
-    "identifyingProperties": ["uuid", "accession" , "aliases"],
+    "required": [ "award", "lab", "fileset_type"],
+    "identifyingProperties": ["uuid", "aliases", "accession"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
-        { "$ref": "mixins.json#/accession" },
         { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/attribution" },
-        { "$ref": "mixins.json#/accessioned_status" },
         { "$ref": "mixins.json#/submitted" },
-        { "$ref": "mixins.json#/references" },
         { "$ref": "mixins.json#/notes" },
-        { "$ref": "mixins.json#/documents" }
+        { "$ref": "mixins.json#/documents" },
+        { "$ref": "mixins.json#/accession" }
     ],
     "properties": {
         "schema_version": {
             "hidden comment": "Bump the default in the subclasses."
         },
-        "related_files": {
-            "title": "Additional data files",
-            "description": "List of data files to be associated with the dataset.",
+        "accession": {
+            "accessionType": "FS"
+        },
+        "files_in_set": {
+            "title": "Sets of data files",
+            "description": "List of data files to be associated with the experiment.",
             "type": "array",
             "default": [],
             "uniqueItems": true,
@@ -35,6 +37,25 @@
                 "type": "string",
                 "linkTo": "File"
             }
+        },
+        "fileset_type": {
+            "title": "Fileset type",
+            "description": "The categorization of the set of files.",
+            "type": "string",
+            "enum" : [
+              "unspecified",
+              "sequence files",
+              "alignment files",
+              "contact matrices",
+              "image files (channels)",
+              "image files (z-series)"
+            ]
+        },
+        "description": {
+            "title": "Description",
+            "description": "A description of what files are part of the set.",
+            "type": "string",
+            "default": ""
         }
-    }   
+    }
 }

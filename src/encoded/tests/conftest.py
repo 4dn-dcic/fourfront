@@ -192,7 +192,7 @@ def htmltestapp(app):
     return TestApp(app, environ)
 
 
-@fixture
+@fixture(scope="module")
 def testapp(app):
     '''TestApp with JSON accept header.
     '''
