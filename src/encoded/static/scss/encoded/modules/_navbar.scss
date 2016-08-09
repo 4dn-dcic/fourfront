@@ -176,7 +176,7 @@
 
 // Drop down styles when window is constrained
 .navbar-nav {
-  font-family: 'Work Sans', sans-serif
+  font-family: 'Work Sans', sans-serif;
   // margin: ($navbar-padding-vertical / 2);
   margin: 20px !important;
 
@@ -240,4 +240,8 @@
 .nav-img{
     display: block;
     margin: auto;
+}
+
+.navbar-form{
+    margin: 0px;
 }

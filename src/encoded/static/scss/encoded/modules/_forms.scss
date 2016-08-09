@@ -31,11 +31,17 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 
 // Navbar search
 #navbar-search {
+	font-family: 'Work Sans', sans-serif;
 	width: 150px;
 	font-size: 1em;
 	border-radius: 0px;
+	border-top: none;
+	border-left: none;
+	border-right: none;
 	height: 30px;
-	padding: 5px 5px 0px 5px;
+	padding: 2px 5px 0px 5px;
+	margin-top: 25px;
+	margin-bottom: 25px;
 	-ms-transition: width 0.3s ease-out;
 	-moz-transition: width 0.3s ease-out;
 	-webkit-transition: width 0.3s ease-out;
@@ -46,6 +52,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 	}
 	&:focus {
 		width: 250px;
+		color: #000000;
 		@include transition(width 0.3s ease-out);
 	}
 }

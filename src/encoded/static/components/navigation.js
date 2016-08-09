@@ -87,7 +87,7 @@ var GlobalSections = React.createClass({
         var session_properties = this.context.session_properties;
         var actions = this.context.listActionsFor('global_sections').map(action => {
             return (
-                <NavItem key={action.id} dropdownId={action.id} dropdownSId={action.sid} dropdownTitle={this.createTitle(action.title, session_properties)}>
+                <NavItem key={action.id} dropdownId={action.id} dropdownTitle={this.createTitle(action.title, session_properties)} dropdownSId={action.sid} dropdownLink={action.url ? action.url : null}>
                     {action.children ?
                         <DropdownMenu label={action.id}>
                             {action.children.map(function(action){
