@@ -107,6 +107,9 @@ var App = React.createClass({
             }
             return context_actions;
         }
+        if (category === 'user') {
+            return this.state.session_properties.user_actions || [];
+        }
         if (category === 'global_sections') {
             return portal.global_sections;
         }
