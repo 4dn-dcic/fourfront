@@ -50,14 +50,18 @@ audit_facets = [
 
 
 DEFAULT_DOC_TYPES = [
-    'AntibodyLot',
+    #'AntibodyLot',
     'Biosample',
-    'Dataset',
+    'Biosource',
+    #'Dataset',
+    'Experiment',
     'Page',
-    'Pipeline',
+    #'Pipeline',
+    'Workflow',
     'Publication',
     'Software',
-    'Target',
+    'File',
+    #'Target',
 ]
 
 
