@@ -1,8 +1,8 @@
 /*     FORMS      */
 /* Input Fields */
-$inputBorder: darken(#fff, 20%) !default;
-$inputFocusBgColor: darken(#fff, 2%) !default;
-$inputFocusBorderColor: darken(#fff, 26%) !default;
+$inputBorder: #999999;
+$inputFocusBgColor: #ffffff;
+$inputFocusBorderColor: #000000;
 
 #content form {
 	margin-bottom: 1em;
@@ -17,13 +17,10 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 	font-family: inherit;
 	@include font-size(1);
 	font-weight: normal;
-	border: 1px solid $inputBorder;
-	@include box-shadow(inset 0 1px 2px rgba(0,0,0,0.1), 0 0 1px rgba(0,0,0,0.1));
+	border-bottom: 2px solid $inputBorder;
 	@include transition(all 0.15s linear);
 		&:focus {
-			background: $inputFocusBgColor;
 			border-color: $inputFocusBorderColor;
-			box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
 		}
 		&[disabled] { background-color: #ddd; }
 
@@ -34,20 +31,21 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 
 // Navbar search
 #navbar-search {
-	width: 180px;
-	border-radius: 14px;
-	height: 27px;
-	padding: 3px 26px 4px 14px;
-	padding-top: 3px;
-	padding-bottom: 4px;
-	margin-top: 3px;
+	width: 150px;
+	font-size: 1em;
+	border-radius: 0px;
+	height: 30px;
+	padding: 5px 5px 0px 5px;
 	-ms-transition: width 0.3s ease-out;
 	-moz-transition: width 0.3s ease-out;
 	-webkit-transition: width 0.3s ease-out;
 	transition: width 0.3s ease-out;
-
+	@media (min-width: $screen-sm-min) {
+		font-size: 1.4em;
+		margin-left: 30px;
+	}
 	&:focus {
-		width: 230px;
+		width: 250px;
 		@include transition(width 0.3s ease-out);
 	}
 }
@@ -56,24 +54,10 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 .navbar-form {
 	.form-control {
 		display: inline-block;
+		outline: none !important;
+		box-shadow: none;
 	}
-}
 
-.search-wrapper {
-	position: 0;
-
-	&:after {
-		font-family: "FontAwesome";
-		content: "\f002";
-		position: relative;
-		top: 0;
-		left: -24px;
-		color: gray;	
-
-		@media(min-width: $screen-sm-min) {
-			top: 2px;
-		}
-	}
 }
 
 // large text inputBorder
@@ -127,7 +111,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 	@extend .form-control;
 	height: auto;
 	.item-picker-preview {
-		overflow: hidden;		
+		overflow: hidden;
 		.result-table > li {
 			margin: 4px 6px;
 			border: none;

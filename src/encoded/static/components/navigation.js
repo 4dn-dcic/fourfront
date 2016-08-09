@@ -40,7 +40,7 @@ var Navigation = module.exports = React.createClass({
 
     render: function() {
         var portal = this.context.portal;
-        var img = <img src="/static/img/4DN-Nils.png" height= "50px" width="170px" className="nav-img"/>
+        var img = <img src="/static/img/4DN-Nils.png" height= "70px" width="238px" className="nav-img"/>
         return (
             <div id="navbar" className="navbar navbar-fixed-top navbar-inverse">
                 <div className="container">
@@ -161,10 +161,8 @@ var Search = React.createClass({
         var searchTerm = id.query['searchTerm'] || '';
         return (
             <form className="navbar-form navbar-right" action="/search/">
-                <div className="search-wrapper">
-                    <input className="form-control search-query" id="navbar-search" type="text" placeholder="Search..."
-                        ref="searchTerm" name="searchTerm" defaultValue={searchTerm} key={searchTerm} />
-                </div>
+                <input className="form-control search-query" id="navbar-search" type="text" placeholder="Search..."
+                    ref="searchTerm" name="searchTerm" defaultValue={searchTerm} key={searchTerm} />
             </form>
         );
     }
