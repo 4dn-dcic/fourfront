@@ -24,19 +24,7 @@
     }
 
     &.richtextblock, .teaser .caption {
-        padding: 20px;
         line-height: 1.6;
-
-        .col-md-12 & {
-            @media screen and (min-width: $screen-md-min) {
-                padding: 20px 2%;
-            }
-
-            &.full-width {
-                padding-left: 20px;
-                padding-right: 20px;
-            }
-        }
 
         pre {
             display: block;

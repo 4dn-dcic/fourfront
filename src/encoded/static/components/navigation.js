@@ -40,7 +40,7 @@ var Navigation = module.exports = React.createClass({
 
     render: function() {
         var portal = this.context.portal;
-        var img = <img src="/static/img/4DN-Nils.png" height= "50px" width="170px" className="nav-img"/>
+        var img = <img src="/static/img/4DN-Nils.png" height= "70px" width="238px" className="nav-img"/>
         return (
             <div id="navbar" className="navbar navbar-fixed-top navbar-inverse">
                 <div className="container">
@@ -87,7 +87,7 @@ var GlobalSections = React.createClass({
         var session_properties = this.context.session_properties;
         var actions = this.context.listActionsFor('global_sections').map(action => {
             return (
-                <NavItem key={action.id} dropdownId={action.id} dropdownSId={action.sid} dropdownTitle={this.createTitle(action.title, session_properties)}>
+                <NavItem key={action.id} dropdownId={action.id} dropdownTitle={this.createTitle(action.title, session_properties)} dropdownSId={action.sid} dropdownLink={action.url ? action.url : null}>
                     {action.children ?
                         <DropdownMenu label={action.id}>
                             {action.children.map(function(action){
@@ -161,10 +161,8 @@ var Search = React.createClass({
         var searchTerm = id.query['searchTerm'] || '';
         return (
             <form className="navbar-form navbar-right" action="/search/">
-                <div className="search-wrapper">
-                    <input className="form-control search-query" id="navbar-search" type="text" placeholder="Search..."
-                        ref="searchTerm" name="searchTerm" defaultValue={searchTerm} key={searchTerm} />
-                </div>
+                <input className="form-control search-query" id="navbar-search" type="text" placeholder="Search..."
+                    ref="searchTerm" name="searchTerm" defaultValue={searchTerm} key={searchTerm} />
             </form>
         );
     }
