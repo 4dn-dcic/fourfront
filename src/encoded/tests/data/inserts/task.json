@@ -1,0 +1,22 @@
+[
+    {
+        "title": "STAR task",
+        "description": "Task to Run STAR (Spliced Transcript Alignment to a Reference) aligns short and long RNA-seq reads to a reference genome using uncompressed suffix arrays.",
+        "task_id": "1111111",
+        "task_platform": "7 bridges",
+        "uuid": "0ada6080-1c08-11e4-8c21-0800200c9a44",
+        "analysis_step": "0afb6080-1c08-11e4-8c21-0800200c9a44",
+        "input_files": ["46e82a90-49e5-4c33-afab-9ec90d65faf3", "46e82a90-49e5-4c33-afab-9ec90d65faf4"],
+        "output_files": ["46e82a90-49e5-4c33-afab-9ec90d65faf3"],
+        "task_parameters":
+          [
+            {"parameter": "--runThreadN", "description": "number of threads", "value": "10"},
+            {"parameter": "--genomeDir", "description": "path to the index files", "value": "path/to/indexes"},
+            {"parameter": "--readFilesIn", "description": "path to the read files", "value": "path/to/reads"}
+          ],
+        "additional_task_run_details": {
+            "key1": "a",
+            "key2": "b",
+            "key3": "c"}
+    }
+]

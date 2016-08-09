@@ -1,0 +1,25 @@
+[
+    {
+        "name": "star_step",
+        "version": 7,
+        "title": "STAR run",
+        "description": "Step to Run STAR (Spliced Transcript Alignment to a Reference) aligns short and long RNA-seq reads to a reference genome using uncompressed suffix arrays.",
+        "cwl_pointer": "http:fake/path/to/step.cwl",
+        "analysis_step_types": ["alignment"],
+        "software_used": "0afb6080-1c08-11e4-8c21-0800200c9a66",
+        "input_file_info":
+            [
+                {"input_file_type": "reads", "inputfile_format": "fastq"},
+                {"input_file_type": "genome index", "inputfile_format": "bai"}
+            ],
+        "output_file_info": [{"output_file_type": "unfiltered alignments", "outputfile_format": "bam"}],
+        "step_parameters":
+            [
+                {"parameter": "--runThreadN", "description": "number of threads"},
+                {"parameter": "--genomeDir", "description": "path to the index files"},
+                {"parameter": "--readFilesIn", "description": "path to the read files"}
+            ],
+        "qa_stats_generated": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
+        "uuid": "0afb6080-1c08-11e4-8c21-0800200c9a44"
+    }
+]

@@ -190,7 +190,7 @@ class AnalysisStep(Item):
 
     item_type = 'analysis_step'
     schema = load_schema('encoded:schemas/analysis_step.json')
-    embedded = ['software_used']
+    embedded = ['software_used', 'qa_stats_generated']
 
 
 @collection(
