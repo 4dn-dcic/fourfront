@@ -26,12 +26,12 @@ env:
   - secure: CzDicgJ/x6ZaNWf7uqWpPsLRSC7gkQ6ssWUY1kRxtIYWbM7vEDGbq9MbuvnDOLAgs2tgkkXi5DzjfmrFWe5cK+OrOaqakZhrRf9yHmpgOFqlBXYutUMV4SOwGcUaTa+SVtryOqCBZkGtZaury5wIkHMz93gTKo1fhPU1xL5KTLg4xqhkfw2ppdSm+Zjj1M26GKd1/aKDIdTAmRs9ryiGb5vDnU7NEWzt2j+VT67a03cI7NDgncNknBoMrdbNYDQTnnsaIHhS6dRZYl6tfbYyV+ugKJMApLksrsnpXoKKQ58bYZHyDPmmwzHHaoULf+HojBTokz7Y9W0ATJ0Sip42tsfcLq5ij/XO2/Q/PnWOn0RneUCzzV/7H7+PNzJoN8dN97vS/8QLcLij/wbPQX3efpwUEdz2UbMy0Ybx8KgTS4MOoiDk+7dDHP9ksW6pGpto86iTBEX6dWyjbdMCGbD1SdSPH76XS1vizQ3+Fai1E/B8sjhxX1xGoAhhoxXgQ0mkgPEFfqKj/7+j4VC0EY+S6jZBaOoWR8AFt2eelJlFba+zk43DFKMK3aRMpqwrRjUo1QJvAd50pBOOuyqgrHVOLM6BIIe9TgMfUSnoMgUGgzyVWxYdb+0/5SNAozCoS1S+ZGBUkUHzq3gANU7soNMhsXmcNgxKKMhNG7ZIDaD52+0=
 matrix:
   include:
-  - python: '3.4'
-    env: BROWSER=Chrome
+  #- python: '3.4'
+  #  env: BROWSER=Chrome
   - python: '3.4'
     env: NPM=Test
-  - python: '3.4'
-    env: UNIT=Test
+  #- python: '3.4'
+  #  env: UNIT=Test
 notifications:
   slack:
     secure: J/KlvQ0eGRwdPFzVhmIVhcMWyrJ7BgfyXdUM0EMZ/R8MgpZT/yp5SkNTDpszPYSEX2wblrMfRnzldJIietJ/z2fs5zagGHbqKRpdBoFri3SCIBDlDA+St8y36TJAsCxdM/Tn+Hw66NDy0boHqz6FVSaFG7kEFHgmd+u3zeKjaChzhvpk7Z8wENyTW+Gl+f5YCxE8kG5gelJ2Ic+aD4lU5J7xcMaQNG0cWKDx4s861jNdEMNGIBCZshmwF3Z+TiwQ1c/ygALtxxBQkw7gLFr6mFJbUhWtA989ekxiQ58/HceUb9broIk/tQqM3dHIYG1SOu9oYs4Fl7llnl0tMMkYqyVhn/tzB31nXPVUV7LzhmG1SHEavEWEBJolPe7OxI5stP4QBKywglz+Bp9RinGxW2AtDuVshwsiKlt9AEvSggnOUk0RimmH3ephWOnyb5ZR4Z6Dh1SU3rTXnCzZeK1kYZSt05joEDXRJG5eiGdgVTdwQkulDXBv9KcpqgNRrr7xvjrRRHtJL26TEv5QuYNxt68lkVpnc38q/BXLojIRIfKVc4aAynZa4Era9noxnTBvxj8ogQ/yMPN6hJXP0xIUyL5j1LyCtHxnoSSq/VX1batEeY7NTHKtT98H5YMRfLMleMRmKV8tMcC81MbsKQXiIoCwMjA4uSstmXQTvmLr65A=
@@ -67,7 +67,7 @@ before_script:
   fi
 script:
 - if test -n "$NPM"; then npm test; fi
-- if test -n "$NPM"; then bin/test -v -v --timeout=400 -m "not bdd and setone"; fi
+  #- if test -n "$NPM"; then bin/test -v -v --timeout=400 -m "not bdd and setone"; fi
 - if test -n "$UNIT"; then bin/test -v -v --timeout=400 -m "not bdd and not setone";
   fi
 - |
