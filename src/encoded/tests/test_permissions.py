@@ -11,13 +11,13 @@ def remote_user_testapp(app, remote_user):
 
 
 @pytest.fixture
-def disabled_user(testapp, lab, award):
+def revoked_user(testapp, lab, award):
     item = {
         'first_name': 'ENCODE',
         'last_name': 'Submitter',
         'email': 'no_login_submitter@example.org',
         'submits_for': [lab['@id']],
-        'status': 'disabled',
+        'status': 'revoked',
     }
     # User @@object view has keys omitted.
     res = testapp.post_json('/user', item)
@@ -243,16 +243,16 @@ def test_wrangler_patch_viewing_groups_disallowed(submitter, other_lab, wrangler
     wrangler_testapp.patch_json(res.json['@id'], vgroups, status=200)
 
 
-def test_disabled_user_denied_authenticated(authenticated_testapp, disabled_user):
-    authenticated_testapp.get(disabled_user['@id'], status=403)
+def test_revoked_user_denied_authenticated(authenticated_testapp, revoked_user):
+    authenticated_testapp.get(revoked_user['@id'], status=403)
 
 
-def test_disabled_user_denied_submitter(submitter_testapp, disabled_user):
-    submitter_testapp.get(disabled_user['@id'], status=403)
+def test_revoked_user_denied_submitter(submitter_testapp, revoked_user):
+    submitter_testapp.get(revoked_user['@id'], status=403)
 
 
-def test_disabled_user_wrangler(wrangler_testapp, disabled_user):
-    wrangler_testapp.get(disabled_user['@id'], status=200)
+def test_revoked_user_wrangler(wrangler_testapp, revoked_user):
+    wrangler_testapp.get(revoked_user['@id'], status=200)
 
 
 def test_labs_view_wrangler(wrangler_testapp, other_lab):

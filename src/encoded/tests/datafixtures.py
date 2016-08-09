@@ -1,7 +1,7 @@
 import pytest
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def lab(testapp):
     item = {
         'name': 'encode-lab',
@@ -101,13 +101,12 @@ def remc_member(testapp, remc_lab):
     return testapp.get(res.location).json
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def award(testapp):
     item = {
         'name': 'encode3-award',
-        'rfa': 'ENCODE3',
-        'project': 'ENCODE',
-        'viewing_group': 'ENCODE',
+        'description': 'ENCODE test award',
+        'viewing_group': '4DN',
     }
     return testapp.post_json('/award', item).json['@graph'][0]
 

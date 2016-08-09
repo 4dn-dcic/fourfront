@@ -119,7 +119,7 @@ var AdvSearch = React.createClass({
                                 return <input type="hidden" name={key} value={this.state.terms[key]} />;
                             }, this)}
                             <input ref="annotation" defaultValue={region} name="region" type="text" className="form-control" onChange={this.handleChange}
-                            
+
                                 placeholder="Enter any one of human Gene name, Symbol, Synonyms, Gene ID, HGNC ID, coordinates, rsid, Ensemble ID" />
                             {(this.state.showAutoSuggest && this.state.searchTerm) ?
                                 <FetchedData loadingComplete={true}>
@@ -192,7 +192,7 @@ var RegionSearch = module.exports.RegionSearch = React.createClass({
                                 <h4>
                                     Showing {results.length} of {total}
                                 </h4>
-                                <div className="results-table-control">  
+                                <div className="results-table-control">
                                     {total > results.length && searchBase.indexOf('limit=all') === -1 ?
                                             <a rel="nofollow" className="btn btn-info btn-sm"
                                                  href={searchBase ? searchBase + '&limit=all' : '?limit=all'}
@@ -231,9 +231,9 @@ var RegionSearch = module.exports.RegionSearch = React.createClass({
                                       </DropdownButton>
                                     : null}
 
-                                </div>  
+                                </div>
                               </div>
-                            
+
                             <hr />
                             <ul className="nav result-table" id="result-table">
                                 {results.map(function (result) {

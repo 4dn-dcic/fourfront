@@ -95,7 +95,7 @@ def test_indexing_workbook(testapp, indexer_testapp):
     assert res.json['indexed']
 
     res = testapp.get('/search/?type=Biosample')
-    assert res.json['total'] > 5
+    assert res.json['total'] > 1
 
 
 def test_indexing_simple(testapp, indexer_testapp):
