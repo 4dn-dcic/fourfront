@@ -40,7 +40,7 @@ var Navigation = module.exports = React.createClass({
 
     render: function() {
         var portal = this.context.portal;
-        var img = <img src="/static/img/4DN-Nils.png" height= "70px" width="238px" className="nav-img"/>
+        var img = <img src="/static/img/4dn_logo.svg" height= "70px" width="238px" className="nav-img"/>
         return (
             <div id="navbar" className="navbar navbar-fixed-top navbar-inverse">
                 <div className="container">
