@@ -1,24 +1,38 @@
 import pytest
 
+@pytest.fixture
+def fdn_biosample(testapp, award, lab):
+    print(dir(testapp))
+    import pdb;pdb.set_trace()
+
+
+def test_got_mixins(testapp, fdn_biosample, mouse):
+    #assert_mixins(fdn_biosample, "schema_verion", "uuid", "aliases")
+
+    import pdb;pdb.set_trace()
+
+    #testapp.patch_json(biosample['@id'], {'organism': mouse['@id']})
+    #res = testapp.get(biosample['@id'] + '@@index-data')
+    #assert res.json['object']['sex'] == 'unknown'
+
+### KILL BELOW HERE
+
 
 @pytest.fixture
-def human_donor(testapp, award, lab, human):
+def human_donor(testapp, award, lab):
     item = {
         'award': award['@id'],
         'lab': lab['@id'],
-        'organism': human['@id'],
     }
-    return testapp.post_json('/human_donor', item).json['@graph'][0]
-
+    return testapp.post_json('/individual_human', item).json['@graph'][0]
 
 @pytest.fixture
-def mouse_donor(testapp, award, lab, mouse):
+def mouse_donor(testapp, award, lab):
     item = {
         'award': award['@id'],
         'lab': lab['@id'],
-        'organism': mouse['@id'],
     }
-    return testapp.post_json('/mouse_donor', item).json['@graph'][0]
+    return testapp.post_json('/individual_mouse', item).json['@graph'][0]
 
 
 def test_undefined_sex_model_organism(testapp, biosample, mouse):
