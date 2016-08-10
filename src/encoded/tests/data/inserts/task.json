@@ -9,14 +9,19 @@
         "input_files": ["46e82a90-49e5-4c33-afab-9ec90d65faf3", "46e82a90-49e5-4c33-afab-9ec90d65faf4"],
         "output_files": ["46e82a90-49e5-4c33-afab-9ec90d65faf3"],
         "task_parameters":
-          [
-            {"parameter": "--runThreadN", "description": "number of threads", "value": "10"},
-            {"parameter": "--genomeDir", "description": "path to the index files", "value": "path/to/indexes"},
-            {"parameter": "--readFilesIn", "description": "path to the read files", "value": "path/to/reads"}
-          ],
+            [
+                {"parameter": "--runThreadN", "description": "number of threads", "value": "10"},
+                {"parameter": "--genomeDir", "description": "path to the index files", "value": "path/to/indexes"},
+                {"parameter": "--readFilesIn", "description": "path to the read files", "value": "path/to/reads"}
+            ],
         "additional_task_run_details": {
             "key1": "a",
             "key2": "b",
-            "key3": "c"}
+            "key3": "c"},
+        "started_running": "2016-01-01T00:00:00.001Z",
+        "stopped_running": "2016-08-01T23:59:00.001Z",
+        "job_status": "finished",
+        "created_by": "Andy",
+        "executed_by": "No one"
     }
 ]
