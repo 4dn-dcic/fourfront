@@ -251,9 +251,6 @@ var formValue = function (schemas, item) {
             toReturn.push(formValue(schemas, item[i]));
         }
     }else if (typeof item === 'object') {
-        if(item['@type']){
-            var type = item['@type'][0];
-        }
         toReturn.push(<SubIPanel schemas={schemas} content={item}/>);
     }else{
         if (typeof item === 'string' && item.charAt(0) === '/') {
@@ -280,7 +277,7 @@ var SubIPanel = React.createClass({
     render: function() {
         var schemas = this.props.schemas;
         var item = this.props.content;
-        var title = item.title || item.name || item.accession || item['@id'] || "Open";
+        var title = item.title || item.name || item.accession || item.uuid || item['@id'] || "Open";
         var toggleRender;
         var toggleLink;
         if (!this.state.isOpen) {

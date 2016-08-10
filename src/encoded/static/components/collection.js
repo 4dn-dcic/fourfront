@@ -188,11 +188,16 @@ var lookup_column = function (result, column) {
                         value = factory({context: item});
                     } else if (value == null) {
                         value = '';
+                    } else if (value[0]['@type']) {
+                        if(value[0]['description']){
+                            // add case for long description
+                            value = value[0]['description'];
+                        }else{
+                            factory = globals.listing_titles.lookup(value[0]);
+                            value = factory({context: value[0]});
+                        }
                     } else if (value instanceof Array) {
                         value = value;
-                    } else if (value['@type']) {
-                        factory = globals.listing_titles.lookup(value);
-                        value = factory({context: value});
                     }
                     var sortable = ('' + value).toLowerCase();
                     return new Cell(value, sortable);
