@@ -8,6 +8,12 @@
             <stop stop-color="#238BAE" offset="0%"></stop>
             <stop stop-color="#9FCA52" offset="100%"></stop>
         </linearGradient>
+        <style type="text/css">
+            @font-face {
+                font-family: Work Sans;
+                src: url('https://fonts.googleapis.com/css?family=Work+Sans');
+                }
+        </style>
     </defs>
     <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <g id="Logo">

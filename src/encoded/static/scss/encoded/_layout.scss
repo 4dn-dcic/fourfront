@@ -305,3 +305,13 @@
  padding: 5px !important;
  margin-top: 30px;
 }
+
+//make headers use work sans
+h1, h2, h3, h4, h5, h6 {
+	font-family: 'Work Sans', sans-serif;
+}
+
+//make all else use ysra
+p, input {
+	font-family: 'Yrsa', serif;
+}
