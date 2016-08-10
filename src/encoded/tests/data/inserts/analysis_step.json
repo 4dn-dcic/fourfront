@@ -21,5 +21,17 @@
             ],
         "qa_stats_generated": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
         "uuid": "0afb6080-1c08-11e4-8c21-0800200c9a44"
+    },
+    {
+        "name": "filter_step",
+        "version": 1,
+        "title": "filter",
+        "description": "Dummy filter",
+        "cwl_pointer": "http:fake/path/to/filter.cwl",
+        "analysis_step_types": ["filtering"],
+        "software_used": "7868f960-50ac-11e4-916c-0800200c9a66",
+        "input_file_info": [{"input_file_type": "unfiltered alignments", "inputfile_format": "bam"}],
+        "output_file_info": [{"output_file_type": "alignments", "outputfile_format": "bam"}],
+        "uuid": "0bdb6080-1c08-11e4-8c21-0800200c9a44"
     }
 ]

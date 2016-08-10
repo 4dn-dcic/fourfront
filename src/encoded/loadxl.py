@@ -38,6 +38,7 @@ ORDER = [
     'software',
     'analysis_step',
     'task',
+    'workflow',
     'page'
 ]
 
