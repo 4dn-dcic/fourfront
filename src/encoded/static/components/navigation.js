@@ -46,7 +46,6 @@ var Navigation = module.exports = React.createClass({
                 <div className="container">
                     <Navbar brand={img} brandlink="/" label="main" navClasses="navbar-main" navID="navbar-icon">
                         <GlobalSections />
-                        <ContextActions />
                         <Search />
                     </Navbar>
                 </div>
@@ -95,6 +94,8 @@ var GlobalSections = React.createClass({
                                     return(<Login />);
                                 }else if (action.id === "profile") {
                                     return(<UserActions/>);
+                                }else if (action.id === "contextactions") {
+                                    return(<ContextActions/>);
                                 }else{
                                     return(
                                         <a href={action.url || ''} key={action.id} className="global-entry">
@@ -122,32 +123,20 @@ var ContextActions = React.createClass({
     render: function() {
         var actions = this.context.listActionsFor('context').map(function(action) {
             return (
-                <a href={action.href} key={action.name}>
-                    <i className="icon icon-pencil"></i> {action.title}
-                </a>
+                <div>
+                    <a href={action.href} key={action.name} className="global-entry">
+                        <i className="icon icon-pencil"></i> {action.title}
+                    </a>
+                </div>
             );
         });
 
-        // No action menu
         if (actions.length === 0) {
-            return null;
+            // No actions
+            return(<a href="#" className="invis"/>);
         }
 
-        // Action menu with editing dropdown menu
-        if (actions.length > 1) {
-            return (
-                <Nav right>
-                    <NavItem dropdownId="context" dropdownTitle={<i className="icon icon-gear"></i>}>
-                        <DropdownMenu label="context">
-                            {actions}
-                        </DropdownMenu>
-                    </NavItem>
-                </Nav>
-            );
-        }
-
-        // Action menu without a dropdown menu
-        return <Nav right><NavItem>{actions}</NavItem></Nav>;
+        return (<div className="custom-entry">{actions}</div>);
     }
 });
 
