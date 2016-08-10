@@ -232,4 +232,4 @@ class WorkflowRun(Item):
 
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
-    embedded = ['workflow']
+    embedded = ['workflow', 'tasks']

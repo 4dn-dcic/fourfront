@@ -39,6 +39,7 @@ ORDER = [
     'analysis_step',
     'task',
     'workflow',
+    'workflow_run',
     'page'
 ]
 
