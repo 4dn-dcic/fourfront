@@ -1,7 +1,7 @@
 [
     {
         "name": "homepage",
-        "title": "The ENCODE Project",
+        "title": "DCIC",
         "status": "released",
         "uuid": "27f9abd9-0081-4ade-8c82-95ec12b3a7dd",
         "layout": {
@@ -27,7 +27,7 @@
                     "@id": "#block1",
                     "@type": "richtextblock",
                     "className": "home-title",
-                    "body": "<div class=\"fourDN-header fourDN-title\"><h1>4D Nucleome</h1></div>"
+                    "body": "<div class=\"fourDN-header fourDN-title\"><h1>Data Coordination and Integration Center</h1></div>"
                 },
                 {
                     "@id": "#block2",

@@ -104,7 +104,7 @@ var IPanel = module.exports.IPanel = React.createClass({
                 <PanelBody addClasses="panel-body-with-header">
                     <div className="flexrow">
                         <div className="flexcol-sm-6">
-                            <div className="flexcol-heading experiment-heading"><h4>{title}</h4></div>
+                            <div className="flexcol-heading experiment-heading"><h5>{title}</h5></div>
                             <dl className="key-value">
                                 {sortKeys.map(function(ikey, val){
                                     return (
@@ -254,7 +254,7 @@ var formValue = function (schemas, item) {
         if(item['@type']){
             var type = item['@type'][0];
         }
-        toReturn.push(<SubIPannel schemas={schemas} content={item}/>);
+        toReturn.push(<SubIPanel schemas={schemas} content={item}/>);
     }else{
         if (typeof item === 'string' && item.charAt(0) === '/') {
             toReturn.push(<a href={item}>{item}</a>)
@@ -267,7 +267,7 @@ var formValue = function (schemas, item) {
     );
 };
 
-var SubIPannel = React.createClass({
+var SubIPanel = React.createClass({
     getInitialState: function() {
     	return {isOpen: false};
     },
@@ -288,7 +288,7 @@ var SubIPannel = React.createClass({
             toggleRender = <span/>;
         }else{
             toggleLink = <a href="" className="item-toggle-link" onClick={this.handleToggle}>Close</a>
-            toggleRender = <Subview schemas={schemas} content={item}/>;
+            toggleRender = <Subview schemas={schemas} content={item} title={title}/>;
         }
         return (
     	  <div className="flexrow">
@@ -305,15 +305,18 @@ var Subview = React.createClass({
     render: function(){
         var schemas = this.props.schemas;
         var item = this.props.content;
+        var title = this.props.title;
         var tips = tipsFromSchema(schemas, item);
+        var sortKeys = Object.keys(item).sort();
         return(
             <div className="flexcol-sm-6 subview">
               <Panel addClasses="sub-panel data-display">
                   <PanelBody addClasses="panel-body-with-header">
                       <div className="flexrow">
                           <div className="flexcol-sm-6">
+                              <div className="flexcol-heading experiment-heading"><h5>{title}</h5></div>
                               <dl className="key-value sub-descriptions">
-                                  {Object.keys(item).map(function(ikey, val){
+                                  {sortKeys.map(function(ikey, val){
                                       return (
                                         <div className="sub-entry" key={ikey.id} data-test="term-name">
                                           {formKey(tips,ikey)}

@@ -5,7 +5,8 @@ var _ = require('underscore');
 var typesToItem = ['AntibodyLot', 'Biosample', 'Donor', 'Annotation',
     'PublicationData', 'Reference', 'Project', 'UscsBrowserComposite', 'Series',
     'Experiment', 'Image', 'Pipeline', 'Publication', 'region-search', 'Report',
-    'JSONSchema', 'Software', 'TALEN', 'Target'];
+    'JSONSchema', 'Software', 'TALEN', 'Target', 'FileSet', 'File', 'Individual',
+    'Protocol', 'QualityMetric', 'SummaryStatistic', 'Treatment', 'Vendor'];
 
 class Registry {
     constructor(options) {

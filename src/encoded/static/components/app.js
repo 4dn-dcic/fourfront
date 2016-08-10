@@ -11,8 +11,8 @@ var url = require('url');
 var portal = {
     portal_title: '4D Nucleome',
     global_sections: [
-        {id: 'data', sid:'sData', title: 'Data', url: '/search/'},
-        {id: 'tools', sid:'sTools', title: 'Tools', url: '/search/'},
+        {id: 'data', sid:'sData', title: 'Data', url: '/search/?type=Experiment&type=Biosample'},
+        {id: 'tools', sid:'sTools', title: 'Tools', url: '/search/?type=Protocol&type=Software'},
         {id: 'help', sid:'sHelp', title: 'Help', children: [
             {id: 'gettingstarted', title: 'Getting started', url: '/help/getting-started/'},
             {id: 'restapi', title: 'REST API', url: '/help/rest-api/'},
@@ -25,6 +25,7 @@ var portal = {
         {id: 'account', sid:'sAccount', title: 'Account', children: [
             {id: 'login', title: 'Log in', url: '/'},
             {id: 'profile', title: 'Profile', url: '/'},
+            {id: 'contextactions', title: 'Actions', url: '/'},
             {id: 'settings', title: 'Settings', url: '/'}
         ]},
     ]

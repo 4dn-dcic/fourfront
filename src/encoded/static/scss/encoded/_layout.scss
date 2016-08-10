@@ -123,10 +123,11 @@
 
     // For the Experiment Summary header
     &.experiment-heading {
-        height: 50px;
+		font-family: 'Work Sans', sans-serif;
+        height: 40px;
 
         h1, h2, h3, h4, h5, h6 {
-            line-height: 30px;  // 50px - 20px of vertical padding
+            line-height: 20px;  // 50px - 20px of vertical padding
         }
     }
 }
