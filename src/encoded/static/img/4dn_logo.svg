@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="165px" height="42px" viewBox="0 0 165 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 39.1 (31720) - http://www.bohemiancoding.com/sketch -->
+    <title>Logo</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="0.25781251%" y1="49.7500002%" x2="101.257813%" y2="49.7500002%" id="linearGradient-1">
+            <stop stop-color="#238BAE" offset="0%"></stop>
+            <stop stop-color="#9FCA52" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Logo">
+            <circle id="Oval" fill="url(#linearGradient-1)" cx="21" cy="21" r="21"></circle>
+            <text id="Nucleome" font-family="Work Sans, sans-serif" font-size="24" font-weight="normal" fill="#000000">
+                <tspan x="48.3671875" y="29">Nucleome</tspan>
+            </text>
+            <text id="4D" font-family="Work Sans, sans-serif" font-size="24" font-weight="normal" fill="#FFFFFF">
+                <tspan x="5" y="29">4D</tspan>
+            </text>
+        </g>
+    </g>
+</svg>
