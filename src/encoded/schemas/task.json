@@ -99,15 +99,6 @@
                 }
             }
         },
-        "task_parameters": {
-            "title": "Task Parameters",
-            "description": "The parameters with their actual values that are used by the task",
-            "type": "array",
-            "items": {
-              "title": "Parameter",
-              "type": {"$ref": "mixins.json#/parameter"}
-            }
-        },
         "started_running": {
             "title": "Start time",
             "description": "When the task was started",
