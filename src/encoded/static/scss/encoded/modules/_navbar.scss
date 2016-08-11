@@ -49,12 +49,12 @@
     margin-right: 0;
     background-color: #ffffff;
     .icon-bar{
-        background-color: #999999;
+        background-color: #999999 !important;
     }
     &:hover {
       border-color: #000000;
       .icon-bar{
-          background-color: #000000;
+          background-color: #000000 !important;
       }
     }
 }

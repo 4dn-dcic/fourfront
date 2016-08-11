@@ -8,21 +8,15 @@
             <stop stop-color="#238BAE" offset="0%"></stop>
             <stop stop-color="#9FCA52" offset="100%"></stop>
         </linearGradient>
-        <style type="text/css">
-            @font-face {
-                font-family: Work Sans;
-                src: url('https://fonts.googleapis.com/css?family=Work+Sans');
-                }
-        </style>
     </defs>
     <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <g id="Logo">
             <circle id="Oval" fill="url(#linearGradient-1)" cx="21" cy="21" r="21"></circle>
-            <text id="Nucleome" font-family="Work Sans, sans-serif" font-size="24" font-weight="normal" fill="#000000">
-                <tspan x="48.3671875" y="29">Nucleome</tspan>
+            <text id="Nucleome" font-family="WorkSans-SemiBold, Work Sans" font-size="24" font-weight="500" fill="#000000">
+                <tspan x="43.056" y="28">Nucleome</tspan>
             </text>
-            <text id="4D" font-family="Work Sans, sans-serif" font-size="24" font-weight="normal" fill="#FFFFFF">
-                <tspan x="5" y="29">4D</tspan>
+            <text id="4D" font-family="WorkSans-SemiBold, Work Sans" font-size="24" font-weight="500" fill="#FFFFFF">
+                <tspan x="5" y="28">4D</tspan>
             </text>
         </g>
     </g>

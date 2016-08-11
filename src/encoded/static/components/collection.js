@@ -190,8 +190,13 @@ var lookup_column = function (result, column) {
                         value = '';
                     } else if (value[0]['@type']) {
                         if(value[0]['description']){
-                            // add case for long description
-                            value = value[0]['description'];
+                            var str = value[0]['description'];
+                            // If str length is > 100 characters, split at closest word and concat '...'
+                            if (str.length > 100){
+                                value = (str.match(/^.{80}\w*/))[0].concat(' ...');
+                            }else{
+                                value = str;
+                            }
                         }else{
                             factory = globals.listing_titles.lookup(value[0]);
                             value = factory({context: value[0]});
