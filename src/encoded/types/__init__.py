@@ -218,7 +218,6 @@ class Workflow(Item):
 
     item_type = 'workflow'
     schema = load_schema('encoded:schemas/workflow.json')
-    #embedded = ['analysis_steps']
 
 
 @collection(

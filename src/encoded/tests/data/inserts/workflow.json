@@ -5,8 +5,8 @@
         "workflow_type": "Other",
         "cwl_pointer": "http:fake/path/to/workflow.cwl",
         "uuid": "96b9b39a-9254-44f5-a051-872aec7136c0",
-        "analysis_steps": [
-            {"parents": ["0afb6080-1c08-11e4-8c21-0800200c9a44"], "step": "0afb6080-1c08-11e4-8c21-0800200c9a44"},
+        "workflow_steps": [
+            {"parents": ["0afb6080-1c08-11e4-8c21-0800200c9a44", "0afb6080-1c08-11e4-8c21-0800200c9a44"], "step": "0afb6080-1c08-11e4-8c21-0800200c9a44"},
             {"step": "0afb6080-1c08-11e4-8c21-0800200c9a44"}
         ]
     }
