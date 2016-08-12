@@ -1,0 +1,12 @@
+[
+    {
+        "title": "Dummy Workflow run",
+        "description": "A dummy run of workflow with 2 steps",
+        "workflow": "96b9b39a-9254-44f5-a051-872aec7136c0",
+        "input_files": ["46e82a90-49e5-4c33-afab-9ec90d65faf3", "46e82a90-49e5-4c33-afab-9ec90d65faf4"],
+        "output_files": ["46e82a90-49e5-4c33-afab-9ec90d65faf4"],
+        "tasks": ["0ada6080-1c08-11e4-8c21-0800200c9a44", "0ada6080-1c08-11e4-8c21-0800200c9a45"],
+        "run_status": "finished",
+        "uuid": "0ada6080-2d08-11e4-8c21-0800200c9a44"
+    }
+]

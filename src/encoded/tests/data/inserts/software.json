@@ -1,6 +1,6 @@
 [
     {
-        "title": "STAR",
+        "name": "STAR",
         "version": "2.5.1b",
         "description": "STAR (Spliced Transcript Alignment to a Reference) aligns short and long RNA-seq reads to a reference genome using uncompressed suffix arrays.",
         "software_type": ["aligner"],
@@ -13,7 +13,7 @@
         "uuid": "0afb6080-1c08-11e4-8c21-0800200c9a66"
     },
     {
-        "title": "DOCKER STAR",
+        "name": "DOCKER STAR",
         "version": "1",
         "description": "Docker container for star",
         "software_type": ["docker container"],
@@ -35,7 +35,7 @@
           ]
     },
     {
-        "title": "TopHat",
+        "name": "TopHat",
         "version": "2.5",
         "software_type": ["other"],
         "description": "Fast splice junction mapper for RNA-Seq reads. It aligns RNA-Seq reads to mammalian-sized genomes using the ultra high-throughput short read aligner Bowtie, and then analyzes the mapping results to identify splice junctions between exons.",

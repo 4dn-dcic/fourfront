@@ -4,7 +4,7 @@
     "id": "/profiles/workflow.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["name"],
+    "required": ["title", "workflow_type"],
     "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases", "accession"],
     "mixinProperties": [
@@ -50,31 +50,31 @@
             "description": "Path to the CWL file for the workflow - URL or directory path",
             "type": "string"
         },
-        "analysis_steps": {
-            "title": "Analysis Steps",
-            "description": "The steps that comprise the workflow with info on who are their parents.",
+        "workflow_steps": {
+            "title": "Workflow Steps",
+            "description": "The analysis steps that comprise the workflow with info on who are their parents.",
             "type": "array",
             "items": {
                 "description": "A step in the workflow and whose its parent are.",
                 "title": "Step Info",
                 "type": "object",
-                "additionalProperties": "false",
+                "additionalProperties": false,
                 "properties": {
                     "step": {
-                        "title": "Analysis Step",
+                        "title": "Workflow Step",
                         "description": "A step in the workflow.",
                         "type": "string",
                         "linkTo": "AnalysisStep"
                     },
                     "parents": {
                         "title": "Step parents",
-                        "description": "The analysis step(s) that directly preceed the step",
+                        "description": "The analysis step(s) that directly preceed the step in the workflow",
                         "type": "array",
                         "items": {
                             "title": "Parent Step",
-                          "description": "An analysis step that immediately preceeds this step.",
-                          "type": "string",
-                          "linkTo": "AnalysisStep"
+                            "description": "An analysis step that immediately preceeds this step.",
+                            "type": "string",
+                            "linkTo": "AnalysisStep"
                         }
                     }
                 }
