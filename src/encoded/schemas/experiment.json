@@ -26,7 +26,6 @@
             "type": "string",
             "description": "A controlled term specifying the type of experiment.",
             "comment":"required ontology term",
-            "default": "",
             "title": "Experiment Type",
             "enum": [
                 "in situ Hi-C",

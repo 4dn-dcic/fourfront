@@ -4,7 +4,7 @@
     "id": "/profiles/experiment_hic.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [],
+    "required": ["experiment_type"],
     "identifyingProperties": ["uuid", "accession", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -30,6 +30,13 @@
     "properties": {
         "schema_version": {
             "default": "1"
+        },  "experiment_type": {
+            "enum": [
+            "in situ Hi-C",
+            "dilution Hi-C",
+            "micro-C",
+            "DNase Hi-C"
+          ]
         },
         "crosslinking_method": {
             "title": "Crosslinking Method",
