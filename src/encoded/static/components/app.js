@@ -11,7 +11,11 @@ var url = require('url');
 var portal = {
     portal_title: '4D Nucleome',
     global_sections: [
-        {id: 'data', sid:'sData', title: 'Data', url: '/search/?type=Experiment&type=Biosample'},
+        {id: 'data', sid:'sData', title: 'Data', children: [
+            {id: 'experiments', title: 'Experiments', url: '/search/?type=ExperimentHiC'},
+            {id: 'biosources', title: 'Biosources', url: '/search/?type=Biosource'},
+            {id: 'assays', title: 'Assays', url: '/search/?type=Assay'},
+        ]},
         {id: 'tools', sid:'sTools', title: 'Tools', url: '/search/?type=Protocol&type=Software'},
         {id: 'help', sid:'sHelp', title: 'Help', children: [
             {id: 'gettingstarted', title: 'Getting started', url: '/help/getting-started/'},
