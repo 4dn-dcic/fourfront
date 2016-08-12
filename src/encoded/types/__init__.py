@@ -127,6 +127,7 @@ class Enzyme(Item):
 
 @collection(
     name='biosources',
+    unique_key='accession',
     properties={
         'title': 'Biosources',
         'description': 'Cell lines and tissues used for biosamples',
@@ -135,6 +136,7 @@ class Biosource(Item):
     """Biosource class."""
 
     item_type = 'biosource'
+    name_key = 'accession'
     schema = load_schema('encoded:schemas/biosource.json')
     embedded = ["individual"]
 
