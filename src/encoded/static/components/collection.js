@@ -10,7 +10,13 @@ var lookup_column = function (result, column) {
     var value = result;
     var names = column.split('.');
     for (var i = 0, len = names.length; i < len && value !== undefined; i++) {
-        value = value[names[i]];
+        if (value[0]) {
+            if (value[0][names[i]]){
+                value = value[0][names[i]];
+            }
+        }else{
+            value = value[names[i]];
+        }
     }
     return value;
 };
@@ -181,11 +187,13 @@ var lookup_column = function (result, column) {
                     // cell factories
                     //if (factory) {
                     //    return factory({context: item, column: column});
-                    //}
+                    //};
                     var value = lookup_column(item, column);
                     if (column == '@id') {
                         factory = globals.listing_titles.lookup(item);
                         value = factory({context: item});
+                    } else if(typeof value === 'string') {
+                        value = value;
                     } else if (value == null) {
                         value = '';
                     } else if (value[0]['@type']) {
