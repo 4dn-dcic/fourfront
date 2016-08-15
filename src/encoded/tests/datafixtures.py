@@ -108,18 +108,49 @@ def encode2_award(testapp):
     }
     return testapp.post_json('/award', item).json['@graph'][0]
 
-
-@pytest.fixture
-def biosource(testapp):
-    # this is now called biosource
+@pytest.fixture(scope="module")
+def human_donor(testapp, award, lab, human):
     item = {
-        'description': 'Sigma-Aldrich',
-        'biosource_type' :'primary cell',
+        "accession": "4DNIN000AAQ1",
+        "age": 53,
+        "age_units": "year",
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'organism' : human['@id'],
+        "ethnicity": "Caucasian",
+        "health_status": "unknown",
+        "life_stage": "adult",
+        "sex": "female",
+        "status": "released",
+        "url": "http://ccr.coriell.org/Sections/BrowseCatalog/FamilyTypeSubDetail.aspx?PgId=402&fam=1463&coll=GM",
+        "uuid": "44d24e3f-bc5b-469a-8500-7ebd728f8ed5"
+    }
+
+    return testapp.post_json('/individual_human', item).json['@graph'][0]
+
+@pytest.fixture(scope="module")
+def worthington_biochemical(testapp, award, lab):
+    item = {
+        "title": "Worthington Biochemical",
+        "name": "worthington-biochemical",
+        "description": "",
+        "url": "http://www.worthington-biochem.com",
+    }
+    return testapp.post_json('/vendor', item).json['@graph'][0]
+
+@pytest.fixture(scope="module")
+def human_biosource(testapp, human_donor, worthington_biochemical):
+    item = {
+        "description": "GM06990 cells",
+        "biosource_type": "immortalized cell line",
+        "individual":human_donor['@id'],
+        "cell_line": "GM06990",
+        "biosource_vendor": worthington_biochemical['@id']
     }
     return testapp.post_json('/biosource', item).json['@graph'][0]
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def human(testapp):
     item = {
         'uuid': '7745b647-ff15-4ff3-9ced-b897d4e2983c',
@@ -144,15 +175,6 @@ def mouse(testapp):
 @pytest.fixture
 def organism(human):
     return human
-
-
-@pytest.fixture
-def biosample(testapp, biosource):
-    item = {
-        'description' : "GM06990 prepared for Hi-C",
-        'biosource': [biosource['@id'],],
-    }
-    return testapp.post_json('/biosample', item).json['@graph'][0]
 
 
 @pytest.fixture
@@ -320,27 +342,30 @@ def mouse_donor(testapp, award, lab):
     return testapp.post_json('/individual_mouse', item).json['@graph'][0]
 
 
-@pytest.fixture
-def base_biosample(testapp, biosource):
+@pytest.fixture(scope="module")
+def human_biosample(testapp, human_biosource):
     item = {
-        'description' : "GM06990 prepared for Hi-C",
-        'biosource': [biosource['@id'],],
+        "description": "GM06990 prepared for Hi-C",
+        "biosource": [human_biosource['@id'],],
+        #"biosample_protocols": ["131106bc-8535-4448-903e-854af460b212"],
+        #"modifications": ["431106bc-8535-4448-903e-854af460b254"],
+        #"treatments": ["686b362f-4eb6-4a9c-8173-3ab267307e3b"]
     }
     return testapp.post_json('/biosample', item).json['@graph'][0]
 
 @pytest.fixture
-def biosample_1(testapp, biosource):
+def biosample_1(testapp, human_biosource):
     item = {
         'description' : "GM06990 prepared for Hi-C",
-        'biosource': [biosource['@id'],],
+        'biosource': [human_biosource['@id'],],
     }
     return testapp.post_json('/biosample', item).json['@graph'][0]
 
 @pytest.fixture
-def biosample_2(testapp, biosource):
+def biosample_2(testapp, human_biosource):
     item = {
         'description' : "GM06990 prepared for Hi-C",
-        'biosource': [biosource['@id'],],
+        'biosource': [human_biosource['@id'],],
     }
     return testapp.post_json('/biosample', item).json['@graph'][0]
 

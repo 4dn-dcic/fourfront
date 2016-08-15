@@ -35,7 +35,6 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'biosource.biosource_vendor',
         'references',
         'biosample_protocols',
-        'modifications',
         'treatments',
     ]
 
