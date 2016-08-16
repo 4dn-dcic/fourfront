@@ -69,7 +69,7 @@
                 "properties": {
                     "workflow_argument_name": {
                         "title": "Workflow argument name",
-                        "description": "the name of the argument of the workflow that corresponds to the input file",
+                        "description": "the name of the argument of the workflow",
                         "type": "string"
                     },
                     "argument_type":{
@@ -100,7 +100,7 @@
                            },
                            "step_argument_name": {
                                "title": "Step argument name",
-                               "description": "the name of the argument of the step that corresponds to the input file",
+                               "description": "the name of the argument of the step that corresponds to the workflow argument",
                                "type": "string"
                            }
                        }
