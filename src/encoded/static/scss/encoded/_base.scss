@@ -47,6 +47,8 @@ html {
 
     @media screen and (min-width: $screen-sm-min) {
         font-size: $font-size-base;
+
+    overflow-y: scroll;
     }
 }
 
