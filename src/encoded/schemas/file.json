@@ -15,7 +15,8 @@
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/notes" },
-        { "$ref": "mixins.json#/accession" }
+        { "$ref": "mixins.json#/accession" },
+        { "$ref": "mixins.json#/dbxrefs"}
     ],
     "properties": {
         "schema_version": {
