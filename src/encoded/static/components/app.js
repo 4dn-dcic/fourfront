@@ -186,6 +186,7 @@ var App = React.createClass({
     render: function() {
         console.log('render app');
         var context = this.props.context;
+        var content;
         var href_url = url.parse(this.props.href);
         // Switching between collections may leave component in place
         var key = context && context['@id'] && context['@id'].split('?')[0];
@@ -220,29 +221,29 @@ var App = React.createClass({
             return value.toLowerCase();
         });
         var currRoute = lowerList[lowerList.length-1];
-        if (_.contains(lowerList, "home") || (currRoute === "" && lowerList[lowerList.length-2] === href_url.host)){
-            this.state.content = <HomePage context={context}/>
+        // first case is fallback
+        if (canonical === "about:blank"){
+            title = portal.portal_title;
+            content = null;
+        }else if (_.contains(lowerList, "home") || (currRoute === "" && lowerList[lowerList.length-2] === href_url.host)){
+            content = <HomePage context={context}/>
             title = portal.portal_title;
         }else if (context) {
             var ContentView = globals.content_views.lookup(context, current_action);
-            this.state.content = <ContentView context={context} />;
+            content = <ContentView context={context} />;
             title = context.title || context.name || context.accession || context['@id'];
             if (title && title != 'Home') {
                 title = title + ' – ' + portal.portal_title;
             } else {
                 title = portal.portal_title;
             }
-
         }
-
         // Google does not update the content of 301 redirected pages
         var base;
         if (({'http://www.encodeproject.org/': 1, 'http://encodeproject.org/': 1})[canonical]) {
             base = canonical = 'https://www.encodeproject.org/';
             this.historyEnabled = false;
         }
-
-
         return (
             <html lang="en">
                 <head>
@@ -270,7 +271,7 @@ var App = React.createClass({
                             <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
                                 <Navigation />
                                 <div id="content" className="container" key={key}>
-                                    {this.state.content}
+                                    {content}
                                 </div>
                                 {errors}
                                 <div id="layout-footer"></div>
