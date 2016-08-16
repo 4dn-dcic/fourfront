@@ -45,14 +45,72 @@
                 "Other"
             ]
         },
+        "workflow_diagram": {
+            "title": "Workflow diagram",
+            "description": "Image of workflow diagram",
+            "comments": "static or interactive",
+            "type": "file"
+        },
         "cwl_pointer": {
             "title": "CWL Path",
             "description": "Path to the CWL file for the workflow - URL or directory path",
             "type": "string"
         },
+        "arguments": {
+            "title": "Workflow arguments",
+            "comment": "The information in this 'argument' field is redundantly described in the cwl itself, but it would make it easy to reconstruct workflow graph and map to the arguments specified by the workflow_run object, if we want to use the meta data for such purpose. We could alternatively parse the cwl to get this information and delete this field. I think this information is sufficient for constructing the graph"
+            "description": "arguments of the workflow.",
+            "type": "array",
+            "items": {
+                "title": "argument",
+                "description": "An argument of the workflow.",
+                "type": "object",
+                "additionalProperties": "false",
+                "properties": {
+                    "workflow_argument_name": {
+                        "title": "Workflow argument name",
+                        "description": "the name of the argument of the workflow that corresponds to the input file",
+                        "type": "string"
+                    },
+                    "argument_type":{
+                        "titie": "Workflow argument type",
+                        "description": "type of the argument",
+                        "type": "string",
+                        "enum" : [
+                            "Input_file",
+                            "Output_file",
+                            "parameter"
+                        ]
+                    },
+                    "description": {
+                        "title": "description",
+                        "description": "description of the argument",
+                        "type": "string"
+                    },
+                    "argument_mapping": {
+                       "title": "argument_mapping",
+                       "comment": "same workflow argument can be passed to multiple steps",
+                       "description": "argument mapping between workflow and steps",
+                       "type": "array",
+                       "items": {
+                           "workflow_step": {
+                               "title": "Corresponding workflow step",
+                               "description": "the step of the workflow that takes the input file",
+                               "type": "string"
+                           },
+                           "step_argument_name": {
+                               "title": "Step argument name",
+                               "description": "the name of the argument of the step that corresponds to the input file",
+                               "type": "string"
+                           }
+                       }
+                }
+            }
+        },
         "workflow_steps": {
             "title": "Workflow Steps",
-            "description": "The analysis steps that comprise the workflow with info on who are their parents.",
+            "we may not need a separate workflow_steps field if we use the 'argument' field, but it may still be nice to have an array of workflow steps that comprise the workflow.
+           "description": "The analysis steps that comprise the workflow with info on who are their parents.",
             "type": "array",
             "items": {
                 "description": "A step in the workflow and whose its parent are.",
@@ -68,7 +126,8 @@
                     },
                     "parents": {
                         "title": "Step parents",
-                        "description": "The analysis step(s) that directly preceed the step in the workflow",
+                        "comment": "we may not need the parents information if we use the 'argument' field instead." 
+                       "description": "The analysis step(s) that directly preceed the step in the workflow",
                         "type": "array",
                         "items": {
                             "title": "Parent Step",
