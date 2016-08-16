@@ -102,6 +102,16 @@
                                "title": "Step argument name",
                                "description": "the name of the argument of the step that corresponds to the workflow argument",
                                "type": "string"
+                           },
+                           "step_argument_type": {
+                               "title": "Step argument type",
+                               "description": "type of the argument of the step",
+                               "type": "string",
+                               "enum": [
+                                  "Input_file",
+                                  "Output_file",
+                                  "parameter"
+                               ]
                            }
                        }
                 }
