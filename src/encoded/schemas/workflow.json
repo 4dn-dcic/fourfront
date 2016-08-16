@@ -109,7 +109,7 @@
         },
         "workflow_steps": {
             "title": "Workflow Steps",
-            "we may not need a separate workflow_steps field if we use the 'argument' field, but it may still be nice to have an array of workflow steps that comprise the workflow.
+            "comment": "we may not need a separate workflow_steps field if we use the 'argument' field, but it may still be nice to have an array of workflow steps that comprise the workflow.",
            "description": "The analysis steps that comprise the workflow with info on who are their parents.",
             "type": "array",
             "items": {
@@ -126,7 +126,7 @@
                     },
                     "parents": {
                         "title": "Step parents",
-                        "comment": "we may not need the parents information if we use the 'argument' field instead." 
+                        "comment": "we may not need the parents information if we use the 'argument' field instead." ,
                        "description": "The analysis step(s) that directly preceed the step in the workflow",
                         "type": "array",
                         "items": {
