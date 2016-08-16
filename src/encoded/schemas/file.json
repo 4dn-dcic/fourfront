@@ -195,6 +195,76 @@
                 "archived",
                 "released"
                 ]
+        },
+        "read_length": {
+            "title": "Sequencing read length (bp)",
+            "description": "Length of sequencing reads in base pairs for fastq files",
+            "type": "integer"
+        },
+        "instrument": {
+            "title": "Sequencer",
+            "description": "Instrument used for sequencing",
+            "type": "string",
+            "comment": "should this be a controlled CV with enum?"
+        },
+        "paired_end": {
+            "title": "Paired End Identifier",
+            "description": "Which pair the file belongs to (if paired end library)",
+            "type": "string",
+            "enum": [
+                "1",
+                "2"
+            ]
+        },
+        "flowcell_details": {
+            "title": "Flowcells",
+            "description": "For high-throughput sequencing, the flowcells used for the sequencing of the replicate.",
+            "type": "array",
+            "default": [],
+            "items": {
+                "title": "Flowcell details",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "machine": {
+                        "title": "Machine Name",
+                        "description": "The lab specific name of the machine used.",
+                        "type": "string"
+                    },
+                    "flowcell": {
+                        "title": "Flowcell ID",
+                        "type": "string"
+                    },
+                    "lane": {
+                        "title": "Lane",
+                        "type": "string"
+                    },
+                    "barcode": {
+                        "title": "Barcode",
+                        "type": "string"
+                    },
+                    "barcode_in_read": {
+                        "title": "Barcode in read",
+                        "description": "The read the barcode is located on.",
+                        "type": "string",
+                        "enum": [
+                            "1",
+                            "2"
+                        ]
+                    },
+                    "barcode_position": {
+                        "title": "Barcode position",
+                        "description": "The 1-based start position of the barcode in 5->3 orientation.",
+                        "type": "integer"
+                    },
+                    "chunk": {
+                        "title": "Chunk",
+                        "description": "The file chunk label as assigned by Illumina software when splitting up a fastq into specified chunk sizes.",
+                        "comment": "This label is used to re-assemble the chunks into the original file in the correct order.",
+                        "type": "string"
+                    }
+                }
+            }
         }
     },
     "file_format_file_extension": {

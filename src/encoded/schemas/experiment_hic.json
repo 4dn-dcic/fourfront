@@ -106,12 +106,6 @@
             "description": "Size of average fragment in base pairs after fragmentation step",
             "type": "integer"
         },
-        "instrument": {
-            "title": "Sequencer",
-            "description": "Instrument used for sequencing",
-            "type": "string",
-            "comment": "should this be a controlled CV with enum?"
-        },
         "pairing": {
             "type": "string",
             "description": "A single or paired end experiment",
@@ -121,11 +115,6 @@
                 "single end",
                 "paired end"
             ]
-        },
-        "read_length": {
-            "title": "Sequencing read length (bp)",
-            "description": "Length of sequencing reads in base pairs",
-            "type": "integer"
         }
     }
 }
