@@ -19,6 +19,7 @@
         { "$ref": "mixins.json#/references" },
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/documents" },
+        { "$ref": "mixins.json#/library"},
         { "$ref": "experiment.json#/properties" }
     ],
     "dependencies": {
@@ -94,27 +95,6 @@
             "title": "Ligation Temperature (°C)",
             "description": "Temperature of ligation step in degrees Celsius",
             "type": "number"
-        },
-        "fragmentation_method": {
-            "title": "Fragmentation Method",
-            "description": "Information on the method used to fragment the DNA post ligation",
-            "type": "string",
-            "comment": "should this be a controlled CV?"
-        },
-        "average_fragment_size": {
-            "title": "Average Fragment Size (bp)",
-            "description": "Size of average fragment in base pairs after fragmentation step",
-            "type": "integer"
-        },
-        "pairing": {
-            "type": "string",
-            "description": "A single or paired end experiment",
-            "default": "",
-            "title": "Pairing",
-            "enum": [
-                "single end",
-                "paired end"
-            ]
         }
     }
 }
