@@ -241,45 +241,52 @@
 	margin-bottom: 20px;
 }
 
-.fourDN-title{
+.fourDN-banner{
 	text-align: center;
+	margin-top: 40px;
+	margin-bottom: 40px;
+	> h4 {
+		font-size: 1.4em;
+		color: #999999;
+		> div {
+			display: inline-block;
+		}
+	}
 }
 
 .fourDN-section{
 	font-family: 'Work Sans', sans-serif;
 	padding-bottom: 10px;
-	margin: 0px;
-	width: 100%;
+	margin-top: 20px;
 }
 
-.fourDN-section td{
-	vertical-align: bottom;
-	padding: 0px !important;
-}
-.fourDN-section tr{
-	border-bottom: 2px solid #009999;
-}
 .fourDN-section-title{
-	color: #999999 !important;
+	width: inherit;
 	font-weight: 200;
-	font-size: 1.7em !important;
+	font-size: 1.4em !important;
+	border-bottom: 2px solid #009999;
+	> a {
+		color: #999999;
+		text-decoration: none !important;
+		&:hover {
+			color: #000000 !important;
+		}
+	}
 }
 
 .fourDN-section-info{
 	color: #b3b3b3 !important;
-	text-align: right;
 	font-weight: 200;
-	font-size: 1.4em;
+	font-size: 1.2em;
 }
 
 
 .fourDN-content{
 	padding-top: 5px;
-	padding-left: 20%;
+	padding-left: 10%;
 	font-family: 'Yrsa', serif;
 	line-height: 130%;
-	font-size: 1.5em;
-	margin-bottom: 40px;
+	font-size: 1.4em;
 }
 
 .item-toggle-link{
