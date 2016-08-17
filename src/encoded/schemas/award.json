@@ -66,6 +66,15 @@
             "type": "string",
             "linkTo": "User"
         },
+        "project": {
+            "title": "Project",
+            "description": "The name of the consortium project",
+            "type": "string",
+            "enum": [
+                "4DN",
+                "External"
+            ]
+        },
         "viewing_group": {
             "title": "View access group",
             "description": "The group that determines which set of data the user has permission to view.",
