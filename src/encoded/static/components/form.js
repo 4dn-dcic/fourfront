@@ -240,10 +240,6 @@ var jsonSchemaToFormSchema = function(attrs) {
         if (p.formInput == 'file') {
             props.input = <inputs.FileInput />;
             return ReactForms.schema.Scalar(props);
-        } else if (p.formInput == 'layout') {
-            var layout = require('./layout');
-            props.input = <layout.Layout editable={true} />;
-            return ReactForms.schema.Scalar(props);
         } else {
             props.component = <ReactForms.Fieldset className={props.required ? "required" : ''} />;
         }

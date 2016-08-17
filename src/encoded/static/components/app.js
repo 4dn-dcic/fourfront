@@ -4,12 +4,14 @@ var jsonScriptEscape = require('../libs/jsonScriptEscape');
 var globals = require('./globals');
 var mixins = require('./mixins');
 var Navigation = require('./navigation');
+var HomePage = require('./home');
 var Footer = require('./footer');
 var url = require('url');
+var _ = require('underscore');
 
 //sid is to allow addition of supplementary ids to navbar link headings
 var portal = {
-    portal_title: '4D Nucleome',
+    portal_title: '4DN Data Portal',
     global_sections: [
         {id: 'data', sid:'sData', title: 'Data', children: [
             {id: 'experiments', title: 'Experiments', url: '/search/?type=ExperimentHiC'},
@@ -64,7 +66,8 @@ var App = React.createClass({
     getInitialState: function() {
         return {
             errors: [],
-            dropdownComponent: undefined
+            dropdownComponent: undefined,
+            content: undefined
         };
     },
 
@@ -182,19 +185,17 @@ var App = React.createClass({
 
     render: function() {
         console.log('render app');
-        var content;
         var context = this.props.context;
+        var content;
         var href_url = url.parse(this.props.href);
         // Switching between collections may leave component in place
         var key = context && context['@id'] && context['@id'].split('?')[0];
         var current_action = this.currentAction();
+
         if (!current_action && context.default_page) {
             context = context.default_page;
         }
-        if (context) {
-            var ContentView = globals.content_views.lookup(context, current_action);
-            content = <ContentView context={context} />;
-        }
+
         var errors = this.state.errors.map(function (error) {
             return <div className="alert alert-error"></div>;
         });
@@ -202,13 +203,6 @@ var App = React.createClass({
         var appClass = 'done';
         if (this.props.slow) {
             appClass = 'communicating';
-        }
-
-        var title = context.title || context.name || context.accession || context['@id'];
-        if (title && title != 'Home') {
-            title = title + ' – ' + portal.portal_title;
-        } else {
-            title = portal.portal_title;
         }
 
         var canonical = this.props.href;
@@ -220,13 +214,36 @@ var App = React.createClass({
             }
         }
 
+        // add static page routing
+        var title;
+        var routeList = canonical.split("/");
+        var lowerList = routeList.map(function(value) {
+            return value.toLowerCase();
+        });
+        var currRoute = lowerList[lowerList.length-1];
+        // first case is fallback
+        if (canonical === "about:blank"){
+            title = portal.portal_title;
+            content = null;
+        }else if (_.contains(lowerList, "home") || (currRoute === "" && lowerList[lowerList.length-2] === href_url.host)){
+            content = <HomePage context={context}/>
+            title = portal.portal_title;
+        }else if (context) {
+            var ContentView = globals.content_views.lookup(context, current_action);
+            content = <ContentView context={context} />;
+            title = context.title || context.name || context.accession || context['@id'];
+            if (title && title != 'Home') {
+                title = title + ' – ' + portal.portal_title;
+            } else {
+                title = portal.portal_title;
+            }
+        }
         // Google does not update the content of 301 redirected pages
         var base;
         if (({'http://www.encodeproject.org/': 1, 'http://encodeproject.org/': 1})[canonical]) {
             base = canonical = 'https://www.encodeproject.org/';
             this.historyEnabled = false;
         }
-
         return (
             <html lang="en">
                 <head>

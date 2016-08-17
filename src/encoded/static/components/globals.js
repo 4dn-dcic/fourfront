@@ -14,8 +14,6 @@ module.exports.listing_views = new Registry();
 // Cell name listing titles
 module.exports.listing_titles = new Registry();
 
-// Blocks
-module.exports.blocks = new Registry();
 
 // Graph detail view
 module.exports.graph_detail = new Registry();
