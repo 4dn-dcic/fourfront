@@ -98,7 +98,7 @@
         }
     },
     "facets": {
-        "award.title": {
+        "award.project": {
             "title": "Award"
         },
         "biosample.biosource.biosource_type": {
@@ -124,7 +124,7 @@
         }
     },
     "columns": {
-        "award.title": {
+        "award.project": {
             "title": "Award"
         },
         "biosample.biosource.biosource_type": {
