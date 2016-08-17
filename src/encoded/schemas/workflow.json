@@ -51,6 +51,7 @@
             "comment": "static or interactive",
             "comment": "Soo do you want to link to a file object here?  Or might either a document or image (or some other object be better)?",
             "comment": "in either case you need to have type = string and linkTo the appropriate object type as I don't see 'file' as a primitive type in json?",
+            "comment": "Andy: great point! I wasn't sure but do you think we should create a file object for a diagram (png, pdf, html, etc?) and link it here or create a webpage and add a url here? Feel free to modify..",
             "type": "string"
         },
         "cwl_pointer": {
