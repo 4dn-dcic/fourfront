@@ -226,7 +226,7 @@ var App = React.createClass({
             title = portal.portal_title;
             content = null;
         }else if (_.contains(lowerList, "home") || (currRoute === "" && lowerList[lowerList.length-2] === href_url.host)){
-            content = <HomePage context={context}/>
+            content = <HomePage context={context}/>;
             title = portal.portal_title;
         }else if (context) {
             var ContentView = globals.content_views.lookup(context, current_action);

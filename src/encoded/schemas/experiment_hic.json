@@ -127,5 +127,57 @@
             "description": "Length of sequencing reads in base pairs",
             "type": "integer"
         }
+    },
+    "facets": {
+        "award.title": {
+            "title": "Award"
+        },
+        "biosample.biosource.biosource_type": {
+            "title": "Biosource type"
+        },
+        "biosample.biosource.cell_line": {
+            "title": "Cell line"
+        },
+        "biosample.biosource.tissue": {
+            "title": "Tissue"
+        },
+        "digestion_enzyme.name": {
+            "title": "Enzyme"
+        },
+        "biosample.modifications.modification_type": {
+            "title": "Modification type"
+        },
+        "biosample.treatments.uuid": {
+            "title": "Treatment"
+        },
+        "lab.title": {
+            "title": "Lab"
+        }
+    },
+    "columns": {
+        "award.title": {
+            "title": "Award"
+        },
+        "biosample.biosource.biosource_type": {
+            "title": "Biosource type"
+        },
+        "biosample.biosource.cell_line": {
+            "title": "Cell line"
+        },
+        "biosample.biosource.tissue": {
+            "title": "Tissue"
+        },
+        "digestion_enzyme.name": {
+            "title": "Enzyme"
+        },
+        "biosample.modifications.modification_type": {
+            "title": "Modification type"
+        },
+        "biosample.treatments.uuid": {
+            "title": "Treatment"
+        },
+        "lab.title": {
+            "title": "Lab"
+        }
     }
 }

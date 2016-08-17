@@ -109,21 +109,44 @@
             }
         }
     },
+    "facets": {
+        "biosource.biosource_type": {
+            "title": "Biosource type"
+        },
+        "biosource.individual.organism.name": {
+            "title": "Organism"
+        },
+        "biosource.cell_line": {
+            "title": "Cell line"
+        },
+        "biosource.tissue": {
+            "title": "Tissue"
+        },
+        "modifications.modification_type": {
+            "title": "Modification type"
+        },
+        "treatments.uuid": {
+            "title": "Treatment"
+        }
+    },
     "columns": {
-        "accession": {
-            "title": "Accession"
+        "biosource.biosource_type": {
+            "title": "Biosource type"
         },
-        "description": {
-            "title": "Description"
+        "biosource.individual.organism.name": {
+            "title": "Organism"
         },
-        "biosource": {
-            "title": "Biosource"
+        "biosource.cell_line": {
+            "title": "Cell line"
         },
-        "modifications": {
-            "title": "Modifications"
+        "biosource.tissue": {
+            "title": "Tissue"
         },
-        "treatments": {
-            "title": "Treatments"
+        "modifications.modification_type": {
+            "title": "Modification type"
+        },
+        "treatments.uuid": {
+            "title": "Treatment"
         }
     }
 }
