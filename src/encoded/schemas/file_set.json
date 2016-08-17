@@ -43,6 +43,7 @@
             "description": "The categorization of the set of files.",
             "type": "string",
             "enum" : [
+              "technical replicates",
               "unspecified",
               "sequence files",
               "alignment files",
