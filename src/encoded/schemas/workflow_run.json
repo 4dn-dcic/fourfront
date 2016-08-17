@@ -34,10 +34,10 @@
             "description": "The files used as initial input for the workflow.",
             "type": "array",
             "items": {
-                "title": "Input file",
-                "description": "A file used as input for the workflow.",
+                "title": "Input file mapping",
+                "description": "Info on file used as input and mapping to CWL argument for the workflow.",
                 "type": "object",
-                "additionalProperties": "false",
+                "additionalProperties": false,
                 "properties": {
                     "workflow_argument_name": {
                         "title": "Workflow argument name",
@@ -45,7 +45,9 @@
                         "type": "string"
                     },
                     "value": {
-                        "title": "Input file ID",
+                        "title": "Input file",
+                        "comment": "for both this and the output file you are linking to a file object but you have titled the field 'Input file ID'?",
+                        "comment": "just want to be sure you aren't trying to add a specific 7bg or some other id here - if so another property will need to be added, if not change title back to Input File I think",
                         "description": "a specified input file",
                         "type": "string",
                         "linkTo": "File"
@@ -58,10 +60,10 @@
             "description": "All files that are saved as output of the workflow",
             "type": "array",
             "items": {
-                "title": "Output file",
-                "description": "A file output by the workflow.",
+                "title": "Output file mapping",
+                "description": "Info on file output by the workflow and how it is mapped to CWL arguments.",
                 "type": "object",
-                "additionalProperties": "false",
+                "additionalProperties": false,
                 "properties": {
                     "workflow_argument_name": {
                         "title": "Workflow argument name",
@@ -69,7 +71,7 @@
                         "type": "string"
                     },
                     "value": {
-                        "title": "Output file ID",
+                        "title": "Output file",
                         "description": "a specified output file",
                         "type": "string",
                         "linkTo": "File"
@@ -84,7 +86,7 @@
             "items": {
                 "title": "Parameter",
                 "type": "object",
-                "additionalProperties": "false",
+                "additionalProperties": false,
                 "properties": {
                     "workflow_argument_name": {
                         "title": "Workflow argument name",
