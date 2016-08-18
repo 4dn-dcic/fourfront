@@ -99,7 +99,10 @@
     },
     "facets": {
         "award.project": {
-            "title": "Award"
+            "title": "Project"
+        },
+        "biosample.biosource.individual.organism.name": {
+            "title": "Organism"
         },
         "biosample.biosource.biosource_type": {
             "title": "Biosource type"
@@ -122,7 +125,10 @@
     },
     "columns": {
         "award.project": {
-            "title": "Award"
+            "title": "Project"
+        },
+        "biosample.biosource.individual.organism.name": {
+            "title": "Organism"
         },
         "biosample.biosource.biosource_type": {
             "title": "Biosource type"

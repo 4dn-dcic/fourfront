@@ -27,8 +27,12 @@ class Treatment(Item):
         "title": "Treatment_type",
         "type": "string",
     })
-    def treatment_type(self, rnai_type=None, chemical=None):
-        return rnai_type or chemical or "None"
+    def treatment_type(self, rnai_type=None, target=None, chemical=None):
+        if rnai_type and target:
+            rnai_value = rnai_type + " for " + target
+        else:
+            rnai_value = rnai_type
+        return rnai_value or chemical or "None"
 
 
 @collection(

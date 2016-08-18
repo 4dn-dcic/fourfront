@@ -145,15 +145,21 @@ class Biosource(Item):
         "description": "Specific name of the biosource.",
         "type": "string",
     })
-    def biosource_name(self, biosource_type, cell_line=None, tissue=None):
+    def biosource_name(self, request, biosource_type, individual=None,  cell_line=None, tissue=None):
         if biosource_type == "tissue":
             if tissue:
                 return tissue
         elif biosource_type == "immortalized cell line":
             if cell_line:
                 return cell_line
-        # TODO: remove fallback case?
-        return "Undefined"
+        elif biosource_type == "whole organisms":
+            if individual:
+                individual_props = request.embed(individual, '@@object')
+                organism = individual_props['organism']
+                organism_props = request.embed(organism, '@@object')
+                organism_name = organism_props['name']
+                return "whole " + organism_name
+        return biosource_type
 
 
 @collection(

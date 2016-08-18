@@ -26,7 +26,7 @@ class Experiment(Item):
     base_types = ['Experiment'] + Item.base_types
     embedded = ["protocol", "protocol_variation", "lab", "award", "biosample",
                 "biosample.biosource", "biosample.modifications",
-                "biosample.treatments"]
+                "biosample.treatments", "biosample.biosource.individual.organism"]
     name_key = 'accession'
 
     def _update(self, properties, sheets=None):
