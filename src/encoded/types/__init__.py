@@ -138,7 +138,22 @@ class Biosource(Item):
     item_type = 'biosource'
     name_key = 'accession'
     schema = load_schema('encoded:schemas/biosource.json')
-    embedded = ["individual"]
+    embedded = ["individual", "individual.organism"]
+
+    @calculated_property(schema={
+        "title": "Biosource name",
+        "description": "Specific name of the biosource.",
+        "type": "string",
+    })
+    def biosource_name(self, biosource_type, cell_line=None, tissue=None):
+        if biosource_type == "tissue":
+            if tissue:
+                return tissue
+        elif biosource_type == "immortalized cell line":
+            if cell_line:
+                return cell_line
+        # TODO: remove fallback case?
+        return "Undefined"
 
 
 @collection(

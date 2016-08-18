@@ -80,28 +80,23 @@
           "biosource_type": {
               "title": "Biosource type"
           },
+          "biosource_name": {
+              "title": "Biosource name"
+          },
           "individual.organism.name": {
               "title": "Organism"
-          },
-          "cell_line": {
-              "title": "Cell line"
-          },
-          "tissue": {
-              "title": "Tissue"
           }
+
       },
       "columns": {
           "biosource_type": {
               "title": "Biosource type"
           },
+          "biosource_name": {
+              "title": "Biosource name"
+          },
           "individual.organism.name": {
               "title": "Organism"
-          },
-          "cell_line": {
-              "title": "Cell line"
-          },
-          "tissue": {
-              "title": "Tissue"
           }
       }
 }

@@ -104,11 +104,8 @@
         "biosample.biosource.biosource_type": {
             "title": "Biosource type"
         },
-        "biosample.biosource.cell_line": {
-            "title": "Cell line"
-        },
-        "biosample.biosource.tissue": {
-            "title": "Tissue"
+        "biosample.biosource.biosource_name": {
+            "title": "Biosource name"
         },
         "digestion_enzyme.name": {
             "title": "Enzyme"
@@ -116,8 +113,8 @@
         "biosample.modifications.modification_type": {
             "title": "Modification type"
         },
-        "biosample.treatments.uuid": {
-            "title": "Treatment"
+        "biosample.treatments.treatment_type": {
+            "title": "Treatment type"
         },
         "lab.title": {
             "title": "Lab"
@@ -130,11 +127,8 @@
         "biosample.biosource.biosource_type": {
             "title": "Biosource type"
         },
-        "biosample.biosource.cell_line": {
-            "title": "Cell line"
-        },
-        "biosample.biosource.tissue": {
-            "title": "Tissue"
+        "biosample.biosource.biosource_name": {
+            "title": "Biosource name"
         },
         "digestion_enzyme.name": {
             "title": "Enzyme"
@@ -142,8 +136,8 @@
         "biosample.modifications.modification_type": {
             "title": "Modification type"
         },
-        "biosample.treatments.uuid": {
-            "title": "Treatment"
+        "biosample.treatments.treatment_type": {
+            "title": "Treatment type"
         },
         "lab.title": {
             "title": "Lab"

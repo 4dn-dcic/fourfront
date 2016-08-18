@@ -1,7 +1,7 @@
 """The type file for the collection Treatment."""
 from snovault import (
     abstract_collection,
-    # calculated_property,
+    calculated_property,
     collection,
     load_schema,
 )
@@ -22,6 +22,13 @@ class Treatment(Item):
     """Treatment class."""
 
     base_types = ['Treatment'] + Item.base_types
+
+    @calculated_property(schema={
+        "title": "Treatment_type",
+        "type": "string",
+    })
+    def treatment_type(self, rnai_type=None, chemical=None):
+        return rnai_type or chemical or "None"
 
 
 @collection(

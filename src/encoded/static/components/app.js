@@ -14,7 +14,7 @@ var portal = {
     portal_title: '4DN Data Portal',
     global_sections: [
         {id: 'data', sid:'sData', title: 'Data', children: [
-            {id: 'experiments', title: 'Experiments', url: '/search/?type=ExperimentHiC'},
+            {id: 'experiments', title: 'Experiments', url: '/search/?type=Experiment'},
             {id: 'biosources', title: 'Biosources', url: '/search/?type=Biosource'},
             {id: 'assays', title: 'Assays', url: '/search/?type=Assay'},
         ]},

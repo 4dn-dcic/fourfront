@@ -113,40 +113,34 @@
         "biosource.biosource_type": {
             "title": "Biosource type"
         },
+        "biosource.biosource_name": {
+            "title": "Biosource name"
+        },
         "biosource.individual.organism.name": {
             "title": "Organism"
-        },
-        "biosource.cell_line": {
-            "title": "Cell line"
-        },
-        "biosource.tissue": {
-            "title": "Tissue"
         },
         "modifications.modification_type": {
             "title": "Modification type"
         },
-        "treatments.uuid": {
-            "title": "Treatment"
+        "treatments.treatment_type": {
+            "title": "Treatment type"
         }
     },
     "columns": {
         "biosource.biosource_type": {
             "title": "Biosource type"
         },
+        "biosource.biosource_name": {
+            "title": "Biosource name"
+        },
         "biosource.individual.organism.name": {
             "title": "Organism"
-        },
-        "biosource.cell_line": {
-            "title": "Cell line"
-        },
-        "biosource.tissue": {
-            "title": "Tissue"
         },
         "modifications.modification_type": {
             "title": "Modification type"
         },
-        "treatments.uuid": {
-            "title": "Treatment"
+        "treatments.treatment_type": {
+            "title": "Treatment type"
         }
     }
 }

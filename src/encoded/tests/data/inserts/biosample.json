@@ -13,7 +13,7 @@
         "biosource": ["111116bc-8535-4448-903e-854af460b254"],
         "biosample_protocols": ["131106bc-8535-4448-903e-854af460b212"],
         "modifications": ["431106bc-8535-4448-903e-854af460b254"],
-        "treatments": ["686b362f-4eb6-4a9c-8173-3ab267307e3b"],
+        "treatments": ["686b362f-4eb6-4a9c-8173-3ab267307a8d"],
         "biosample_relation":[{"relationship_type":"derived from","biosample":"231111bc-8535-4448-903e-854af460b254"}]
     }
 ]

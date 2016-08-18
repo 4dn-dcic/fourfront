@@ -10,5 +10,17 @@
         "title": "4D NUCLEOME NETWORK DATA COORDINATION AND INTEGRATION CENTER",
         "url": "https://projectreporter.nih.gov/project_info_description.cfm?aid=8987140&icde=30570219",
         "uuid": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
+    },
+    {
+        "description": "A test external award.",
+        "end_date": "2020-08-31",
+        "name": "1U01CA200059-02",
+        "pi": "admin@admin.com",
+        "project": "External",
+        "start_date": "2015-09-07",
+        "status": "current",
+        "title": "SOME EXTERNAL AWARD",
+        "url": "https://projectreporter.nih.gov/project_info_description.cfm?aid=8987140&icde=30570219",
+        "uuid": "b0b9c607-f8b4-4f02-93f4-9895b461334c"
     }
 ]
