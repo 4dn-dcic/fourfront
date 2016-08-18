@@ -29,6 +29,7 @@ ORDER = [
     'enzyme',
     'construct',
     'treatment_rnai',
+    'treatment_chemical',
     'modification',
     'biosample',
     'file',
