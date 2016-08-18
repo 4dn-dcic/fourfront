@@ -108,16 +108,16 @@
             "title": "Biosource type"
         },
         "biosample.biosource.biosource_name": {
-            "title": "Biosource name"
+            "title": "Biosource"
         },
         "digestion_enzyme.name": {
             "title": "Enzyme"
         },
-        "biosample.modifications.modification_type": {
-            "title": "Modification type"
+        "biosample.modifications.modification_name": {
+            "title": "Modification"
         },
         "biosample.treatments.treatment_type": {
-            "title": "Treatment type"
+            "title": "Treatment"
         },
         "lab.title": {
             "title": "Lab"
@@ -134,16 +134,16 @@
             "title": "Biosource type"
         },
         "biosample.biosource.biosource_name": {
-            "title": "Biosource name"
+            "title": "Biosource"
         },
         "digestion_enzyme.name": {
             "title": "Enzyme"
         },
-        "biosample.modifications.modification_type": {
-            "title": "Modification type"
+        "biosample.modifications.modification_name": {
+            "title": "Modification"
         },
         "biosample.treatments.treatment_type": {
-            "title": "Treatment type"
+            "title": "Treatment"
         },
         "lab.title": {
             "title": "Lab"
