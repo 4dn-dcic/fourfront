@@ -1,7 +1,7 @@
 [
     {
         "address2": "10 Schattuck Street",
-        "address1": "Biomedical Bioinfotics",
+        "address1": "Biomedical Bioinfomatics",
         "awards": ["1U01CA200059-01"],
         "city": "Boston",
         "country": "USA",
@@ -16,5 +16,17 @@
         "state": "MA",
         "title": "4DN DCIC Lab, HMS",
         "uuid": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc988"
+    },
+    {
+        "awards": ["Test-4DN"],
+        "name": "test-4dn-lab",
+        "title": "4DN test lab",
+        "uuid": "828cd4fe-ebb0-4b22-a94a-d2e3a36cc988"
+    },
+    {
+        "awards": ["Test-NOT-4DN"],
+        "name": "test-not-4dn-lab",
+        "title": "NOT 4DN test lab",
+        "uuid": "828cd4fe-ebb0-4b21-a94a-d2e3a36cc988"
     }
 ]

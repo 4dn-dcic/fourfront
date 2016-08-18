@@ -14,12 +14,12 @@
     {
         "email": "wrangler@wrangler.com",
         "first_name": "Wrangler",
-        "groups": ["wrangler"],
+        "groups": ["submitter"],
         "job_title": "wrangler",
-        "lab": "4dn-dcic-lab",
+        "lab": "test-4dn-lab",
         "last_name": "Wrangler",
         "status": "current",
-        "submits_for": ["4dn-dcic-lab"],
+        "submits_for": ["test-4dn-lab"],
         "timezone": "US/Pacific",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267307e3b"
     },
@@ -28,10 +28,10 @@
         "first_name": "Submitter",
         "groups": ["submitter"],
         "job_title": "Submitter",
-        "lab": "4dn-dcic-lab",
+        "lab": "test-not-4dn-lab",
         "last_name": "Submitter",
         "status": "current",
-        "submits_for": ["4dn-dcic-lab"],
+        "submits_for": ["test-not-4dn-lab"],
         "timezone": "US/Pacific",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267307e3c"
     },
@@ -40,11 +40,38 @@
         "first_name": "Viewer",
         "groups": ["viewer"],
         "job_title": "viewer",
-        "lab": "4dn-dcic-lab",
+        "lab": "test-4dn-lab",
         "last_name": "Viewer",
         "status": "current",
-        "submits_for": ["4dn-dcic-lab"],
         "timezone": "US/Pacific",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267307e3d"
+    },
+    {
+        "email": "4DN_member@4DN.com",
+        "first_name": "4DN",
+        "groups": ["viewer", "submitter"],
+        "job_title": "Data provider",
+        "lab": "test-4dn-lab",
+        "last_name": "Member",
+        "status": "current",
+        "submits_for": ["test-4dn-lab"],
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab267227e3d"
+    },
+    {
+        "email": "NonMember@someplace.com",
+        "first_name": "Non",
+        "groups": ["viewer", "submitter"],
+        "job_title": "Data provider",
+        "last_name": "Member",
+        "status": "current",
+        "submits_for": ["test-not-4dn-lab"],
+        "uuid": "986b362f-4eb6-4a9d-8173-3ab267227e3d"
+    },
+    {
+        "email": "someguy@somewhere.com",
+        "first_name": "Some",
+        "last_name": "Guy",
+        "status": "current",
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab117227e3d"
     }
 ]
