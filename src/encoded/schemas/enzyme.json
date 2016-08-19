@@ -31,14 +31,9 @@
               "NcoI,MspI,BspHI",
               "NcoI",
               "MboI",
-<<<<<<< ab70cd0a60e34ecd549d8ccf8c3634a8b88ccdad
               "DNase I",
-              "MNase"
-=======
-              "Msp1",
-              "DNase_I",
-              "Micrococcal_nuclease"
->>>>>>> Changes1
+              "MNase",
+              "Msp1"
             ],
             "uniqueKey": "enzyme:name"
         },
