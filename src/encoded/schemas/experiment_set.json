@@ -42,7 +42,8 @@
               "unspecified",
               "replicates",
               "biological replicates",
-              "technical repllicates"
+              "technical repllicates",
+              "analysis set"
             ]
         },
         "description": {

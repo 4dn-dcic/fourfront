@@ -45,7 +45,8 @@
             "type": "string",
             "enum": [
                 "none",
-                "formaldehyde"
+                "1% Formaldehyde",
+                "1.3% Formaldehyde"
             ]
         },
         "crosslinking_time": {
@@ -94,6 +95,11 @@
         "ligation_temperature": {
             "title": "Ligation Temperature (°C)",
             "description": "Temperature of ligation step in degrees Celsius",
+            "type": "number"
+        },
+        "ligation_volume": {
+            "title": "Ligation Volume (ml)",
+            "description": "Volume of ligation step in milliliters",
             "type": "number"
         }
     },
