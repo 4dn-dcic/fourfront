@@ -40,11 +40,10 @@
         "cut_position": 0,
         "url": "https://www.neb.com/products/r0543-dpnii"
     },
-
     {
-        "name": "NcoI,MspI,BspHI",
+        "name": "NcoI_MspI_BspHI",
         "enzyme_source": "new-england-biolabs",
-        "description": "Mixed Enzymes",
+        "description": "Mixed Enzymes"
     },
     {
         "name": "NcoI",

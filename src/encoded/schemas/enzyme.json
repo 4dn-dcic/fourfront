@@ -28,20 +28,19 @@
             "enum": [
               "HindIII",
               "DpnII",
-              "NcoI,MspI,BspHI",
+              "NcoI_MspI_BspHI",
               "NcoI",
               "MboI",
               "DNase I",
               "MNase",
-              "Msp1"
+              "MspI"
             ],
             "uniqueKey": "enzyme:name"
         },
         "description": {
             "title": "Description",
             "description": "A plain text description of the enzyme.",
-            "type": "string",
-            "default": ""
+            "type": "string"
         },
         "enzyme_source": {
             "title": "Enzyme Source",
