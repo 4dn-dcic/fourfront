@@ -30,8 +30,8 @@
               "DpnII",
               "NcoI",
               "MboI",
-              "DNase_I",
-              "Micrococcal_nuclease"
+              "DNase I",
+              "MNase"
             ],
             "uniqueKey": "enzyme:name"
         },

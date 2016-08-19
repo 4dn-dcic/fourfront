@@ -10,7 +10,7 @@
         "url": "https://www.neb.com/products/r0104-hindiii"
     },
     {
-        "name": "DNase_I",
+        "name": "DNase I",
         "enzyme_source": "thermofisher-scientific",
         "description": "from Ma et al 2015 Nature Methods",
         "catalog_number":"EN052",
@@ -27,7 +27,7 @@
         "url": "https://www.neb.com/products/r0147-mboi"
     },
     {
-        "name": "Micrococcal_nuclease",
+        "name": "MNase",
         "enzyme_source": "worthington-biochemical",
         "description": "from Liu et al 2005 Plos Biology",
         "catalog_number":"LS004798",

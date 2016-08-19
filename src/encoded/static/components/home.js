@@ -83,8 +83,9 @@ var ContentItem = React.createClass({
 
 var HomePage = module.exports = React.createClass({
     render: function() {
-        var experimentBanner = <BannerLoader text='experiments' location='/search/?searchTerm=%40type%3Aexperiment'/>
-        var biosourceBanner = <BannerLoader text='cell lines' location='/search/?searchTerm=%40type%3Abiosource'/>
+        var experiment4DNBanner = <BannerLoader text='experiments' location='/search/?type=Experiment&award.project=4DN'/>
+        var experimentExtBanner = <BannerLoader text='experiments' location='/search/?type=Experiment&award.project=External'/>
+        var biosourceBanner = <BannerLoader text='cell types' location='/search/?type=Biosource'/>
         var announcements = announcements_data.map(function(announce) {
             return (
                 <ContentItem content={announce}/>
@@ -99,7 +100,7 @@ var HomePage = module.exports = React.createClass({
             <div>
                 <div className="fourDN-title fourDN-banner">
                     <h3>Welcome to the 4DN Data Portal. We are under construction.<br/>The portal will be open to data submitters soon. Stay tuned!</h3>
-                    <h4>The portal currently has {experimentBanner} across {biosourceBanner}.</h4>
+                    <h4>The portal currently hosts {experiment4DNBanner} from the 4DN network and<br/>{experimentExtBanner} from other sources over {biosourceBanner}.</h4>
                 </div>
                 <div className="row">
                     <div className="col-md-6 col-xs-12">

@@ -109,21 +109,38 @@
             }
         }
     },
+    "facets": {
+        "biosource.biosource_type": {
+            "title": "Biosource type"
+        },
+        "biosource.biosource_name": {
+            "title": "Biosource name"
+        },
+        "biosource.individual.organism.name": {
+            "title": "Organism"
+        },
+        "modifications.modification_type": {
+            "title": "Modification type"
+        },
+        "treatments.treatment_type": {
+            "title": "Treatment type"
+        }
+    },
     "columns": {
-        "accession": {
-            "title": "Accession"
+        "biosource.biosource_type": {
+            "title": "Biosource type"
         },
-        "description": {
-            "title": "Description"
+        "biosource.biosource_name": {
+            "title": "Biosource name"
         },
-        "biosource": {
-            "title": "Biosource"
+        "biosource.individual.organism.name": {
+            "title": "Organism"
         },
-        "modifications": {
-            "title": "Modifications"
+        "modifications.modification_type": {
+            "title": "Modification type"
         },
-        "treatments": {
-            "title": "Treatments"
+        "treatments.treatment_type": {
+            "title": "Treatment type"
         }
     }
 }

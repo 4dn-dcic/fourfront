@@ -14,7 +14,7 @@ var portal = {
     portal_title: '4DN Data Portal',
     global_sections: [
         {id: 'data', sid:'sData', title: 'Data', children: [
-            {id: 'experiments', title: 'Experiments', url: '/search/?type=ExperimentHiC'},
+            {id: 'experiments', title: 'Experiments', url: '/search/?type=Experiment'},
             {id: 'biosources', title: 'Biosources', url: '/search/?type=Biosource'},
             {id: 'assays', title: 'Assays', url: '/search/?type=Assay'},
         ]},
@@ -218,6 +218,9 @@ var App = React.createClass({
         var title;
         var routeList = canonical.split("/");
         var lowerList = routeList.map(function(value) {
+            if(value.charAt(0) === "#"){
+                value = "";
+            }
             return value.toLowerCase();
         });
         var currRoute = lowerList[lowerList.length-1];
@@ -226,7 +229,7 @@ var App = React.createClass({
             title = portal.portal_title;
             content = null;
         }else if (_.contains(lowerList, "home") || (currRoute === "" && lowerList[lowerList.length-2] === href_url.host)){
-            content = <HomePage context={context}/>
+            content = <HomePage context={context}/>;
             title = portal.portal_title;
         }else if (context) {
             var ContentView = globals.content_views.lookup(context, current_action);
