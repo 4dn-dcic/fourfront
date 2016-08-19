@@ -16,5 +16,20 @@
         "state": "MA",
         "title": "4DN DCIC Lab, HMS",
         "uuid": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc988"
+    },
+    {
+        "address2": "Room 906B",
+        "address1": "1 Baylor Plaza",
+        "awards": ["OD008540-01"],
+        "city": "Houston",
+        "country": "USA",
+        "institute_label": "BCM",
+        "institute_name": "Baylor College of Medicine, Rice University",
+        "name": "erez-liebermanaiden-lab",
+        "phone1": "713-798-4897",
+        "postal_code": "77030",
+        "state": "TX",
+        "title": "Erez Lieberman Aiden Lab, BCM",
+        "uuid": "828cd4fe-ebb0-4b36-a94a-d2e3a36cc98a"
     }
 ]
