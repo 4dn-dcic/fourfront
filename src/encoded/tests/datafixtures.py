@@ -1,7 +1,7 @@
 import pytest
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def lab(testapp):
     item = {
         'name': 'encode-lab',
@@ -87,7 +87,7 @@ def viewing_group_member(testapp, award):
     return testapp.get(res.location).json
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def award(testapp):
     item = {
         'name': 'encode3-award',
@@ -108,7 +108,7 @@ def encode2_award(testapp):
     }
     return testapp.post_json('/award', item).json['@graph'][0]
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def human_donor(testapp, award, lab, human):
     item = {
         "accession": "4DNIN000AAQ1",
@@ -128,7 +128,7 @@ def human_donor(testapp, award, lab, human):
 
     return testapp.post_json('/individual_human', item).json['@graph'][0]
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def worthington_biochemical(testapp, award, lab):
     item = {
         "title": "Worthington Biochemical",
@@ -138,7 +138,7 @@ def worthington_biochemical(testapp, award, lab):
     }
     return testapp.post_json('/vendor', item).json['@graph'][0]
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def human_biosource(testapp, human_donor, worthington_biochemical):
     item = {
         "description": "GM06990 cells",
@@ -150,7 +150,7 @@ def human_biosource(testapp, human_donor, worthington_biochemical):
     return testapp.post_json('/biosource', item).json['@graph'][0]
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def human(testapp):
     item = {
         'uuid': '7745b647-ff15-4ff3-9ced-b897d4e2983c',
@@ -342,7 +342,7 @@ def mouse_donor(testapp, award, lab):
     return testapp.post_json('/individual_mouse', item).json['@graph'][0]
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def human_biosample(testapp, human_biosource):
     item = {
         "description": "GM06990 prepared for Hi-C",
