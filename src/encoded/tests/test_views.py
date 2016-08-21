@@ -174,12 +174,13 @@ def test_load_workbook(workbook, testapp, item_type, length):
     # testdata must come before testapp in the funcargs list for their
     # savepoints to be correctly ordered.
     res = testapp.get('/%s/?limit=all' % item_type).maybe_follow(status=200)
+    #TODO ASK_BEN about inherited collections i.e. protocol
     assert len(res.json['@graph']) == length
 
 
 @pytest.mark.slow
 def test_collection_limit(workbook, testapp):
-    res = testapp.get('/antibodies/?limit=2', status=200)
+    res = testapp.get('/enzymes/?limit=2', status=200)
     assert len(res.json['@graph']) == 2
 
 

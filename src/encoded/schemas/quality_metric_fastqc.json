@@ -141,6 +141,5 @@
             ],
             "description": "FastQC metric"
         }
-    },
-    "changelog": "/profiles/changelogs/fastqc_quality_metric.md"
+    }
 }
