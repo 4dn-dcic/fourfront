@@ -286,7 +286,7 @@ def test_user_effective_principals(submitter, lab, anontestapp, execute_counter)
         'system.Authenticated',
         'system.Everyone',
         'userid.%s' % submitter['uuid'],
-        'viewing_group.ENCODE',
+        'viewing_group.4DN',
     ]
 
 
@@ -324,19 +324,6 @@ def test_page_collection_default(workbook, anontestapp):
     assert 'default_page' in res.json
     assert res.json['default_page']['@id'] == '/pages/images/'
 
-
-def test_antibody_redirect(testapp, antibody_approval, anontestapp):
-    assert antibody_approval['@id'].startswith('/antibody-approvals/')
-
-    res = testapp.get(antibody_approval['@id'], status=200)
-    assert 'antibody' in res.json
-
-    anontestapp.get(antibody_approval['@id'], status=403)
-
-    res = testapp.get('/antibodies/%s/' % antibody_approval['uuid']).follow(status=200)
-    assert res.json['@type'] == ['AntibodyLot', 'Item']
-
-    assert anontestapp.get('/antibodies/%s/' % antibody_approval['uuid'], status=301)
 
 
 def test_jsonld_context(testapp):
