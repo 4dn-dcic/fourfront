@@ -163,9 +163,7 @@ def test_load_workbook(workbook, testapp, item_type, length):
     # savepoints to be correctly ordered.
     res = testapp.get('/%s/?limit=all' % item_type).maybe_follow(status=200)
     #TODO ASK_BEN about inherited collections i.e. protocol
-    #assert len(res.json['@graph']) == length
-    if len(res.json['@graph']) != length:
-        import pdb; pdb.set_trace()
+    assert len(res.json['@graph']) == length
 
 
 @pytest.mark.slow
@@ -209,10 +207,10 @@ def test_collection_post_bad_(anontestapp):
 
 
 def test_collection_actions_filtered_by_permission(workbook, testapp, anontestapp):
-    res = testapp.get('/experiments/')
+    res = testapp.get('/protocols/')
     assert any(action for action in res.json.get('actions', []) if action['name'] == 'add')
 
-    res = anontestapp.get('/experiments/')
+    res = anontestapp.get('/protocols/')
     assert not any(action for action in res.json.get('actions', []) if action['name'] == 'add')
 
 

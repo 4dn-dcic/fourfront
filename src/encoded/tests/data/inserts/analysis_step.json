@@ -9,10 +9,10 @@
         "software_used": "0afb6080-1c08-11e4-8c21-0800200c9a66",
         "input_file_info":
             [
-                {"input_file_type": "reads", "inputfile_format": "fastq"},
-                {"input_file_type": "genome index", "inputfile_format": "bai"}
+                {"input_file_type": "reads", "input_file_format": "fastq"},
+                {"input_file_type": "genome index", "input_file_format": "bai"}
             ],
-        "output_file_info": [{"output_file_type": "unfiltered alignments", "outputfile_format": "bam"}],
+        "output_file_info": [{"output_file_type": "unfiltered alignments", "output_file_format": "bam"}],
         "step_parameters":
             [
                 {"parameter": "--runThreadN", "description": "number of threads"},
@@ -30,8 +30,8 @@
         "cwl_pointer": "http:fake/path/to/filter.cwl",
         "analysis_step_types": ["filtering"],
         "software_used": "7868f960-50ac-11e4-916c-0800200c9a66",
-        "input_file_info": [{"input_file_type": "unfiltered alignments", "inputfile_format": "bam"}],
-        "output_file_info": [{"output_file_type": "alignments", "outputfile_format": "bam"}],
+        "input_file_info": [{"input_file_type": "unfiltered alignments", "input_file_format": "bam"}],
+        "output_file_info": [{"output_file_type": "alignments", "output_file_format": "bam"}],
         "uuid": "0bdb6080-1c08-11e4-8c21-0800200c9a44"
     }
 ]

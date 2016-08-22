@@ -284,7 +284,7 @@ def publication(testapp, lab, award):
 def software(testapp):
     #TODO: ASK_ANDY do we want software_type to be an array?
     item = {
-        "title": "FastQC",
+        "name": "FastQC",
         "software_type": ["indexer",],
         "version": "1.0",
     }
