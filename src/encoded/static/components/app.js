@@ -27,13 +27,13 @@ var portal = {
             {id: 'news', title: 'News', url: '/news'},
             {id: 'acknowledgements', title: 'Acknowledgements', url: '/acknowledgements/'},
             {id: 'contact', title: 'Contact', url: '/help/contacts/'}
-        ]},
-        {id: 'account', sid:'sAccount', title: 'Account', children: [
+        ]}
+    ],
+    user_section: [
             {id: 'login', title: 'Log in', url: '/'},
             {id: 'profile', title: 'Profile', url: '/'},
             {id: 'contextactions', title: 'Actions', url: '/'},
             {id: 'settings', title: 'Settings', url: '/'}
-        ]},
     ]
 };
 
@@ -114,6 +114,9 @@ var App = React.createClass({
                 }
             }
             return context_actions;
+        }
+        if (category === 'user_section') {
+            return portal.user_section;
         }
         if (category === 'user') {
             return this.state.session_properties.user_actions || [];

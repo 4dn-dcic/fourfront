@@ -23,7 +23,7 @@
         "dbxrefs": ["sample ext id"],
         "crosslinking_method": "1% Formaldehyde",
         "uuid": "75041e2f-3e43-4388-8bbb-e861f209c444",
-        "protocol": "dcf15d5e-40aa-43bc-b81c-32c70c9afb01",
+        "protocol": "131106bc-8535-4448-903e-854af460b244",
         "submitted_by": "admin@admin.com",
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"]
     },
@@ -51,7 +51,7 @@
         "dbxrefs": ["sample ext id"],
         "crosslinking_method": "1% Formaldehyde",
         "uuid": "75041e2f-3e43-4388-8bbb-e861f209c4fb",
-        "protocol": "dcf15d5e-40aa-43bc-b81c-32c70c9afb01",
+        "protocol": "131106bc-8535-4448-903e-854af460b244",
         "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEX067APU1"}],
         "submitted_by": "admin@admin.com",
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
@@ -81,7 +81,7 @@
         "dbxrefs": ["sample ext id"],
         "crosslinking_method": "1% Formaldehyde",
         "uuid": "75041e2f-3e43-4388-8bbb-e861f209c4fc",
-        "protocol": "dcf15d5e-40aa-43bc-b81c-32c70c9afb01",
+        "protocol": "131106bc-8535-4448-903e-854af460b244",
         "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEX067APU1"}],
         "submitted_by": "admin@admin.com",
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
@@ -111,10 +111,8 @@
         "dbxrefs": ["sample ext id"],
         "crosslinking_method": "1% Formaldehyde",
         "uuid": "75041e2f-3e43-4388-8bbb-e861f209c4fd",
-        "protocol": "dcf15d5e-40aa-43bc-b81c-32c70c9afb01",
+        "protocol": "131106bc-8535-4448-903e-854af460b244",
         "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEX067APU1"}],
         "submitted_by": "admin@admin.com",
-        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
-        "experiment_sets":["431106bc-8535-4448-903e-854af460b260"]
-    }
+        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"]    }
 ]

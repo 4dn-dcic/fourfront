@@ -28,5 +28,3 @@ sudo shutdown -r now
 ```
 
 ** Note ** this will temporarily bring the site down, for a couple of minutes
-
-
