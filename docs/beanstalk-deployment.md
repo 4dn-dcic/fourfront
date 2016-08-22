@@ -17,7 +17,7 @@ Once conneted do the following:
 
 ```bash
 source /opt/python/current/env
-sudo services httpd stop
+sudo service httpd stop
 echo $RDS_PASSWORD
 
 dropdb -p $RDS_PORT -h $RDS_HOSTNAME -U $RDS_USERNAME -e $RDS_DB_NAME
