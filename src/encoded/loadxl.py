@@ -41,7 +41,6 @@ ORDER = [
     'task',
     'workflow',
     'workflow_run',
-    'page'
 ]
 
 IS_ATTACHMENT = [
