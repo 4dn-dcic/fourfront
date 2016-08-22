@@ -158,7 +158,7 @@ class Biosource(Item):
                 organism = individual_props['organism']
                 organism_props = request.embed(organism, '@@object')
                 organism_name = organism_props['name']
-                return "whole " + organism_name
+                return "Whole " + organism_name
         return biosource_type
 
 
@@ -187,6 +187,22 @@ class Modification(Item):
     item_type = 'modification'
     schema = load_schema('encoded:schemas/modification.json')
     embedded = ['constructs']
+
+    @calculated_property(schema={
+        "title": "Modification name",
+        "description": "Modification name including type and target.",
+        "type": "string",
+    })
+    def modification_name(self, request, modification_type=None, constructs=None):
+        if modification_type == "Crispr":
+            if constructs:
+                #TODO: add case for multiple constructs
+                construct_props = request.embed(constructs[0], '@@object')
+                target = construct_props['designed_to_target']
+                return modification_type + " for " + target
+        elif modification_type:
+            return modification_type
+        return "None"
 
 
 @collection(
