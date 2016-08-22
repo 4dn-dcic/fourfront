@@ -81,7 +81,7 @@
               "title": "Biosource type"
           },
           "biosource_name": {
-              "title": "Biosource name"
+              "title": "Biosource"
           },
           "individual.organism.name": {
               "title": "Organism"
@@ -93,7 +93,7 @@
               "title": "Biosource type"
           },
           "biosource_name": {
-              "title": "Biosource name"
+              "title": "Biosource"
           },
           "individual.organism.name": {
               "title": "Organism"
