@@ -156,15 +156,18 @@ var NavItem = module.exports.NavItem = React.createClass({
     },
 
     render: function() {
-        var {dropdownId, dropdownTitle, dropdownSId} = this.props;
-        var dropdownOpen = dropdownId && (this.context.openDropdown === dropdownId);
-        return (
-            <li className={dropdownId ? ('dropdown' + (dropdownOpen ? ' open' : '')) : ''}>
-                <a href="#" data-trigger id={dropdownSId} className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded={dropdownOpen} onClick={this.context.dropdownClick.bind(null, dropdownId)}>
-                        {dropdownTitle}
-                </a>
-                {this.props.children}
-            </li>
-        );
+         var {dropdownId, dropdownTitle, dropdownSId, dropdownLink} = this.props;
+         var dropdownOpen = dropdownId && (this.context.openDropdown === dropdownId);
+         return (
+             <li className={dropdownId ? ('dropdown' + (dropdownOpen ? ' open' : '')) : ''}>
+                {dropdownLink ?
+                    <a href={dropdownLink} id={dropdownSId}>{dropdownTitle}</a>
+                :   <a href="#" data-trigger id={dropdownSId} className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded={dropdownOpen} onClick={this.context.dropdownClick.bind(null, dropdownId)}>
+                         {dropdownTitle}
+                    </a>
+                }
+                 {this.props.children}
+             </li>
+         );
     }
 });
