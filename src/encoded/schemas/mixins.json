@@ -277,7 +277,7 @@
             "title": "Average Fragment Size (bp)",
             "description": "Size of average fragment in base pairs after fragmentation step",
             "type": "integer"
-        },         
+        },
         "fragment_size_range": {
             "title": "Fragment size range",
             "description": "The measured size range of the purified nucleic acid, in bp.",
@@ -316,6 +316,45 @@
               "see document",
               "SPRI beads"
           ]
+        }
+    },
+    "genome_region": {
+        "title": "Genomic Region",
+        "description": "A region of the genome described by assembly, chromosome and exact or approximate location",
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+            "genome_assembly": {
+                "title": "Genome assembly",
+                "description": "The genome assembly from which the region was derived",
+                "type": "string",
+                "enum": [
+                    "GRCh38",
+                    "GRCh37",
+                    "GRCm38",
+                    "MGSCv37"
+                ]
+            },
+            "chromosome": {
+                "title": "Chromosome",
+                "description": "The chromosome containing the region",
+                "type": "string",
+                "enum": ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"]
+            },
+            "start_coordinate": {
+                "title": "Start",
+                "description": "The base position of the start coordinate of the region - start < end",
+                "type": "integer"
+            },
+            "end_coordinate": {
+                "title": "End",
+                "description": "The base position of the end coordinate - end > start",
+                "type": "integer"
+            },
+            "location_description": {
+                "title": "Location Description",
+                "description": "If exact coordinates of the region are not available a description of the genome location"
+            }
         }
     }
 }
