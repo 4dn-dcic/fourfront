@@ -1,4 +1,5 @@
 import pytest
+pytestmark = pytest.mark.working
 
 
 def raising_checker(value, system):

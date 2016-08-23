@@ -1,5 +1,6 @@
 import pytest
 
+
 targets = [
     {'name': 'one', 'uuid': '775795d3-4410-4114-836b-8eeecf1d0c2f'},
     {'name': 'two', 'uuid': 'd6784f5e-48a1-4b40-9b11-c8aefb6e1377'},

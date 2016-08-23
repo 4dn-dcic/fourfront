@@ -4,7 +4,6 @@
     "id": "/profiles/individual_human.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [],
     "identifyingProperties": ["uuid", "accession", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [

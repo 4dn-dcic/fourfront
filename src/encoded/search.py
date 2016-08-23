@@ -55,6 +55,8 @@ DEFAULT_DOC_TYPES = [
     'Biosource',
     #'Dataset',
     'Experiment',
+    'Page',
+    'Organism',
     #'Pipeline',
     'Workflow',
     'Publication',
@@ -534,6 +536,7 @@ def search(context, request, search_type=None, return_generator=False):
     """
     Search view connects to ElasticSearch and returns the results
     """
+    #import pdb; pdb.set_trace()
     types = request.registry[TYPES]
     search_base = normalize_query(request)
     result = {
