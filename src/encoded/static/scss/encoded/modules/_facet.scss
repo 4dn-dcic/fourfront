@@ -85,7 +85,11 @@
     position: relative;
     @include font-size(0.9);
     line-height: 1;
-
+    &:hover{
+        .bar{
+            background-color: #21c49e;
+        }
+    }
     i {
         line-height: 14px;
     }
@@ -97,15 +101,13 @@
     color: #000000;
 }
 
-.facet-list li a {
-    display: block;
-    color: #666666;
-}
 
 .facet-list li {
     > a{
-    text-decoration: none;
-    margin-left: 20px;
+        text-decoration: none;
+        margin-left: 20px;
+        display: block;
+        color: #666666;
     }
 }
 
