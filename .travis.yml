@@ -47,6 +47,7 @@ install:
 - bin/buildout -c buildout-travis.cfg || (echo "Retrying buildout" && bin/buildout
   -c buildout-travis.cfg)
 - pip install awsebcli
+- pip install coveralls
 before_script:
 - |
   if test -n "$BROWSER"; then
@@ -67,8 +68,8 @@ before_script:
   fi
 script:
 - if test -n "$NPM"; then npm test; fi
-- if test -n "$NPM"; then bin/test -v -v --timeout=400 -m "not bdd and setone"; fi
-- if test -n "$UNIT"; then bin/test -v -v --timeout=400 -m "working and not setone";
+- if test -n "$NPM"; then bin/test -v -v --timeout=400 -m "not bdd and setone" --cov src/encoded; fi
+- if test -n "$UNIT"; then bin/test -v -v --timeout=400 -m "working and not setone" --cov src/encoded;
   fi
 - |
   if test -n "$BROWSER"; then
@@ -82,6 +83,7 @@ script:
       --browser-arg-int idleTimeout 300 \
       --browser-arg name "$TRAVIS_REPO_SLUG $TRAVIS_BRANCH $TRAVIS_COMMIT" \
       --browser-arg browser "$BROWSER"
+      --cov src/encoded
   fi
 after_script:
 - echo leader=$BUILD_LEADER status=$BUILD_AGGREGATE_STATUS
@@ -96,6 +98,7 @@ after_script:
     wait $(cat "$SC_PIDFILE")
   fi
 after_success:
+- coveralls
 - python travis_after_all.py https://api.travis-ci.org
 - export $(cat .to_export_back) >> /dev/null
 - |
