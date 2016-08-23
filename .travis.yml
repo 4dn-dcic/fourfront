@@ -99,6 +99,10 @@ after_script:
   fi
 after_success:
 - coveralls
+- |
+  if test -n "$NPM"; then 
+     cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
+  fi
 - python travis_after_all.py https://api.travis-ci.org
 - export $(cat .to_export_back) >> /dev/null
 - |
