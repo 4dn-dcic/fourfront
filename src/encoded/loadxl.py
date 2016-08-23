@@ -35,6 +35,7 @@ ORDER = [
     'file',
     'file_set',
     'experiment_hic',
+    'experiment_capture_c',
     'experiment_set',
     'software',
     'analysis_step',
