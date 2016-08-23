@@ -30,8 +30,8 @@ matrix:
   #  env: BROWSER=Chrome
   - python: '3.4'
     env: NPM=Test
-  #- python: '3.4'
-  #  env: UNIT=Test
+  - python: '3.4'
+    env: UNIT=Test
 notifications:
   slack:
     secure: J/KlvQ0eGRwdPFzVhmIVhcMWyrJ7BgfyXdUM0EMZ/R8MgpZT/yp5SkNTDpszPYSEX2wblrMfRnzldJIietJ/z2fs5zagGHbqKRpdBoFri3SCIBDlDA+St8y36TJAsCxdM/Tn+Hw66NDy0boHqz6FVSaFG7kEFHgmd+u3zeKjaChzhvpk7Z8wENyTW+Gl+f5YCxE8kG5gelJ2Ic+aD4lU5J7xcMaQNG0cWKDx4s861jNdEMNGIBCZshmwF3Z+TiwQ1c/ygALtxxBQkw7gLFr6mFJbUhWtA989ekxiQ58/HceUb9broIk/tQqM3dHIYG1SOu9oYs4Fl7llnl0tMMkYqyVhn/tzB31nXPVUV7LzhmG1SHEavEWEBJolPe7OxI5stP4QBKywglz+Bp9RinGxW2AtDuVshwsiKlt9AEvSggnOUk0RimmH3ephWOnyb5ZR4Z6Dh1SU3rTXnCzZeK1kYZSt05joEDXRJG5eiGdgVTdwQkulDXBv9KcpqgNRrr7xvjrRRHtJL26TEv5QuYNxt68lkVpnc38q/BXLojIRIfKVc4aAynZa4Era9noxnTBvxj8ogQ/yMPN6hJXP0xIUyL5j1LyCtHxnoSSq/VX1batEeY7NTHKtT98H5YMRfLMleMRmKV8tMcC81MbsKQXiIoCwMjA4uSstmXQTvmLr65A=
@@ -67,8 +67,8 @@ before_script:
   fi
 script:
 - if test -n "$NPM"; then npm test; fi
-  #- if test -n "$NPM"; then bin/test -v -v --timeout=400 -m "not bdd and setone"; fi
-- if test -n "$UNIT"; then bin/test -v -v --timeout=400 -m "not bdd and not setone";
+- if test -n "$NPM"; then bin/test -v -v --timeout=400 -m "not bdd and setone"; fi
+- if test -n "$UNIT"; then bin/test -v -v --timeout=400 -m "working and not setone";
   fi
 - |
   if test -n "$BROWSER"; then
@@ -99,9 +99,8 @@ after_success:
 - python travis_after_all.py https://api.travis-ci.org
 - export $(cat .to_export_back) >> /dev/null
 - |
-  #temporarily remove these two until test are back
-  #if [ "$BUILD_LEADER" = "YES" ]; then
-    #if [ "$BUILD_AGGREGATE_STATUS" = "others_succeeded" ]; then
+  if [ "$BUILD_LEADER" = "YES" ]; then
+    if [ "$BUILD_AGGREGATE_STATUS" = "others_succeeded" ]; then
       if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
         if [ "$TRAVIS_BRANCH" = "master" ]; then
           echo "Job succeeded! PUBLISHING..."
@@ -112,8 +111,8 @@ after_success:
           python deploy_beanstalk.py
         fi
       fi
-      #fi
-    #fi
+     fi
+    fi
 after_failure:
 - python travis_after_all.py https://api.travis-ci.org
 - export $(cat .to_export_back) >> /dev/null
