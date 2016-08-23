@@ -729,7 +729,7 @@ var Facet = search.Facet = React.createClass({
                         </div>
                     : null}
                     {(terms.length > 5 && !moreTermSelected) ?
-                        <label className="pull-right">
+                        <label className="pull-left">
                                 <small>
                                     <button type="button" className={seeMoreClass} data-toggle="collapse" data-target={'#'+termID} onClick={this.handleClick} />
                                 </small>
