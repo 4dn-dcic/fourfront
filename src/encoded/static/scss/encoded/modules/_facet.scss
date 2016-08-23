@@ -80,9 +80,8 @@
 .facet-list { margin: 0; }
 
 .facet-list li {
-    padding: 3px 10px;
+    padding: 3px 10px 3px 0px;
     margin-bottom: 1px;
-    border-radius: 5px;
     position: relative;
     @include font-size(0.9);
     line-height: 1;
@@ -92,30 +91,22 @@
     }
 }
 
-.facet-list li#selected {
-    background: #999999;
-    border-radius: 0px;
-}
-
 .facet-list a#selected {
-    color: #fff;
     text-decoration: none;
-    font-weight: normal;
+    font-weight: bold;
+    color: #000000;
 }
 
 .facet-list li a {
     display: block;
-    color: #000;
+    color: #666666;
 }
 
-.facet-list li:hover {
+.facet-list li {
     > a{
     text-decoration: none;
+    margin-left: 20px;
     }
-    // individual facet entry animations
-    // > .bar{
-    //     height: 100%;
-    // }
 }
 
 .facet-item {
@@ -297,12 +288,12 @@ div.meta-status {
 }
 
 span.bar {
-    background-color: #57E2C2;
+    background-color: #7ce9cf;
     position: absolute;
     display: inline-block;
     left: 0;
     bottom:0;
-    height: 15%;
+    height: 10%;
     -ms-transition: height 0.3s ease-out;
 	-moz-transition: height 0.3s ease-out;
 	-webkit-transition: height 0.3s ease-out;
@@ -348,4 +339,8 @@ span.bar {
         vertical-align: baseline;
         border: none;
     }
+}
+
+.facet-selector{
+    margin-left: -20px;
 }

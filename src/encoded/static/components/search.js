@@ -642,13 +642,14 @@ var Term = search.Term = React.createClass({
         }
         return (
             <li id={selected ? "selected" : null} key={term}>
-                {selected ? '' : <span className="bar" style={barStyle}></span>}
+                <span className="bar" style={barStyle}></span>
                 {field === 'lot_reviews.status' ? <span className={globals.statusClass(term, 'indicator pull-left facet-term-key icon icon-circle')}></span> : null}
                 <a id={selected ? "selected" : null} href={href} onClick={href ? this.props.onFilter : null}>
-                    <span className="pull-right">{count} {selected && this.props.canDeselect ? <i className="icon icon-times-circle-o"></i> : ''}</span>
+                    <span className="pull-left facet-selector">{selected && this.props.canDeselect ? <i className="icon icon-times-circle-o"></i> : ''}</span>
                     <span className="facet-item">
                         {em ? <em>{title}</em> : <span>{title}</span>}
                     </span>
+                    <span className="pull-right">{count}</span>
                 </a>
             </li>
         );
