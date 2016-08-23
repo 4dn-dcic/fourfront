@@ -55,7 +55,6 @@ DEFAULT_DOC_TYPES = [
     'Biosource',
     #'Dataset',
     'Experiment',
-    'Page',
     'Organism',
     #'Pipeline',
     'Workflow',
