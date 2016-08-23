@@ -1,5 +1,5 @@
 import pytest
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
 @pytest.yield_fixture(scope='session')

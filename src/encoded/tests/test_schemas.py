@@ -2,7 +2,7 @@ import pytest
 from pkg_resources import resource_listdir
 from snovault.schema_utils import load_schema
 
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 SCHEMA_FILES = [
     f for f in resource_listdir('encoded', 'schemas')

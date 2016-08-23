@@ -1,5 +1,5 @@
 import pytest
-pytestmark = [pytest.mark.setone, pytest.mark.working]
+pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 
 def _type_length():

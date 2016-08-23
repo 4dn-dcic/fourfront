@@ -1,6 +1,6 @@
 import pytest
 from snovault.schema_utils import load_schema
-pytestmark = pytest.mark.working
+pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 def biosample_relation(derived_from):
     return {"biosample_relation":
