@@ -153,6 +153,18 @@
         },
         "lab.title": {
             "title": "Lab"
+        },
+        "description":{
+            "title": "Description"
+        },
+        "accession":{
+            "title": "Accession"
+        },
+        "title":{
+            "title": "Title"
+        },
+        "name":{
+            "title": "Name"
         }
     }
 }
