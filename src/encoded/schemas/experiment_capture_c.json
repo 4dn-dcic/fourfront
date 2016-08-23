@@ -1,6 +1,6 @@
 {
     "title": "Capture Hi-C Experiment Variables",
-    "description": "Experimental variables specific for a Capture Hi-C experiment.",
+    "description": "Experimental variables for a Capture Hi-C experiment.",
     "id": "/profiles/experiment_capture_c.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -32,7 +32,8 @@
     "properties": {
         "schema_version": {
             "default": "1"
-        },  "experiment_type": {
+        },
+        "experiment_type": {
             "enum": [
             "capture Hi-C"
           ]
@@ -52,9 +53,6 @@
                 "title": "Target Region",
                 "type": "object",
                 "additionalProperties": false,
-                "mixinProperties": [
-                    { "$ref": "mixins.json#/genome_region" }
-                ],
                 "properties": {
                     "targeted_genes": {
                         "title": "Targeted Genes",
@@ -73,6 +71,38 @@
                         "description": "The multi fasta file that lists all the oligos used for this region",
                         "type": "string",
                         "linkTo": "File"
+                    },
+                    "genome_assembly": {
+                        "title": "Genome assembly",
+                        "description": "The genome assembly from which the region was derived",
+                        "type": "string",
+                        "enum": [
+                            "GRCh38",
+                            "GRCh37",
+                            "GRCm38",
+                            "MGSCv37"
+                        ]
+                    },
+                    "chromosome": {
+                        "title": "Chromosome",
+                        "description": "The chromosome containing the region",
+                        "type": "string",
+                        "enum": ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"]
+                    },
+                    "start_coordinate": {
+                        "title": "Start",
+                        "description": "The base position of the start coordinate of the region - start < end",
+                        "type": "integer"
+                    },
+                    "end_coordinate": {
+                        "title": "End",
+                        "description": "The base position of the end coordinate - end > start",
+                        "type": "integer"
+                    },
+                    "location_description": {
+                        "title": "Location Description",
+                        "description": "If exact coordinates of the region are not available a description of the genome location",
+                        "type": "string"
                     }
                 }
             }
