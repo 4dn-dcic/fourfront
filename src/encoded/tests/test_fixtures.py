@@ -1,4 +1,5 @@
 import pytest
+pytestmark = pytest.mark.working
 
 
 @pytest.yield_fixture(scope='session')

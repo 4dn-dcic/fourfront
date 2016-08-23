@@ -1,3 +1,5 @@
+import pytest
+
 def test_audit_item_schema_validation(testapp, organism):
     testapp.patch_json(organism['@id'] + '?validate=false', {'disallowed': 'errs'})
     res = testapp.get(organism['@id'] + '@@index-data')

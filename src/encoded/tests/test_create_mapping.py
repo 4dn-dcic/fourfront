@@ -1,5 +1,7 @@
 import pytest
 from ..loadxl import ORDER
+pytestmark = pytest.mark.working
+
 
 
 @pytest.mark.parametrize('item_type', ORDER)

@@ -1,5 +1,6 @@
 # Use workbook fixture from BDD tests (including elasticsearch)
 from .features.conftest import app_settings, app, workbook
+import pytest
 
 
 def test_search_view(workbook, testapp):
