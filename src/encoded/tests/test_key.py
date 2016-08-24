@@ -1,4 +1,5 @@
 import pytest
+pytestmark = pytest.mark.working
 
 items = [
     {'name': 'one', 'accession': 'TEST1'},

@@ -156,7 +156,7 @@ class Item(snovault.Item):
         return self.STATUS_ACL.get(status, ALLOW_LAB_SUBMITTER_EDIT)
 
     def __ac_local_roles__(self):
-        """smth."""
+        """this creates roles based on properties of the object being acccessed"""
         roles = {}
         properties = self.upgrade_properties().copy()
         if 'lab' in properties:

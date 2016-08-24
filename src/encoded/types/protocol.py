@@ -10,7 +10,7 @@ from .base import (
     # paths_filtered_by_status
 )
 
-
+#TODO: ASK_BEN about generic classes
 @collection(
     name='protocols',
     properties={
@@ -34,6 +34,7 @@ class Protocol(Item):
 class ProtocolsCellCulture(Protocol):
     """sub class of protocol with special variables for cell culture."""
 
+    base_types = ['ProtocolCellCulture'] + Item.base_types
     item_type = 'protocol_cell_culture'
     schema = load_schema('encoded:schemas/protocol_cell_culture.json')
     embedded = Protocol.embedded

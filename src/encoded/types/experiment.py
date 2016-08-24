@@ -23,8 +23,10 @@ from .base import (
 class Experiment(Item):
     """The main expeperiment class."""
 
-    base_types = ['Experiment'] + Item.base_types
-    embedded = ["protocol", "protocol_variation", "lab", "award"]
+    base_types = ['Experiment','experiment_hic'] + Item.base_types
+    embedded = ["protocol", "protocol_variation", "lab", "award", "biosample",
+                "biosample.biosource", "biosample.modifications",
+                "biosample.treatments", "biosample.biosource.individual.organism"]
     name_key = 'accession'
 
     def _update(self, properties, sheets=None):

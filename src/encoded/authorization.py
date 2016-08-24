@@ -61,4 +61,5 @@ def groupfinder(login, request):
     principals.extend('group.%s' % group for group in groups)
     viewing_groups = user_properties.get('viewing_groups', [])
     principals.extend('viewing_group.%s' % group for group in viewing_groups)
+    #import pdb; pdb.set_trace()
     return principals

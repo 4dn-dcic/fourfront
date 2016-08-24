@@ -75,5 +75,28 @@
               "type": "string",
               "format": "uri"
           }
+      },
+      "facets": {
+          "biosource_type": {
+              "title": "Biosource type"
+          },
+          "biosource_name": {
+              "title": "Biosource"
+          },
+          "individual.organism.name": {
+              "title": "Organism"
+          }
+
+      },
+      "columns": {
+          "biosource_type": {
+              "title": "Biosource type"
+          },
+          "biosource_name": {
+              "title": "Biosource"
+          },
+          "individual.organism.name": {
+              "title": "Organism"
+          }
       }
 }

@@ -80,7 +80,8 @@
             "description": "The group that determines which set of data the user has permission to view.",
             "type": "string",
             "enum": [
-                "4DN"
+                "4DN",
+                "Not 4DN"
             ]
         }
     },
@@ -88,6 +89,5 @@
         "name": 1.0,
         "title": 1.0,
         "pi.title": 1.0
-    },
-    "changelog": "/profiles/changelogs/award.md"
+    }
 }

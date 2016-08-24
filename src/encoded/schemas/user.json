@@ -54,7 +54,8 @@
             "items": {
                 "type": "string",
                 "enum": [
-                    "4DN"
+                    "4DN",
+                    "Not 4DN"
                 ]
             }
         },

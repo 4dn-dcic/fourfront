@@ -3,17 +3,32 @@
         "uuid": "231111bc-8535-4448-903e-854af460b254",
         "description": "GM06990 prepared for Hi-C",
         "biosource": ["331111bc-8535-4448-903e-854af460b254"],
-        "biosample_protocols": ["131106bc-8535-4448-903e-854af460b212"],
+        "biosample_protocols": ["131106bc-8535-4448-903e-854af460b244"],
         "modifications": ["431106bc-8535-4448-903e-854af460b254"],
         "treatments": ["686b362f-4eb6-4a9c-8173-3ab267307e3b"]
+    },
+    {
+        "uuid": "231111bc-8535-4448-903e-854af460ba4d",
+        "description": "GM06990 prepared for Hi-C",
+        "biosource": ["331111bc-8535-4448-903e-854af46abcd4"],
+        "biosample_protocols": ["131106bc-8535-4448-903e-854af460b244"],
+        "modifications": ["431106bc-8535-4448-903e-854af460b265"],
+        "treatments": ["586b362f-4eb6-4a9c-8173-3ab267307e3b"]
+    },
+    {
+        "uuid": "231111bc-8535-4448-903e-854af460c13f",
+        "description": "GM06990 prepared for Hi-C",
+        "biosource": ["331111bc-8535-4448-903e-854af460b666"],
+        "biosample_protocols": ["131106bc-8535-4448-903e-854af460b244"],
+        "modifications": ["431106bc-8535-4448-903e-854af460b276"],
+        "treatments": ["686b362f-4eb6-4a9c-8173-3ab267307a8d"]
     },
     {
         "uuid": "231111bc-8535-4448-903e-854af460b255",
         "description": "GM06990 prepared for Hi-C",
         "biosource": ["331111bc-8535-4448-903e-854af460b254"],
-        "biosample_protocols": ["131106bc-8535-4448-903e-854af460b212"],
+        "biosample_protocols": ["131106bc-8535-4448-903e-854af460b244"],
         "modifications": ["431106bc-8535-4448-903e-854af460b254"],
-        "treatments": ["686b362f-4eb6-4a9c-8173-3ab267307e3b"],
-        "biosample_relation":[{"relationship_type":"derived from","biosample":"231111bc-8535-4448-903e-854af460b254"}]
+        "treatments": ["486b362f-4eb6-4a9c-8173-3ab267307e4b"]
     }
 ]

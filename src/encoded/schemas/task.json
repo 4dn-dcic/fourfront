@@ -78,7 +78,7 @@
             "items": {
                 "title": "Parameter",
                 "type": "object",
-                "additionalProperties": "false",
+                "additionalProperties": false,
                 "properties": {
                     "parameter": {
                         "title": "Parameter name",
