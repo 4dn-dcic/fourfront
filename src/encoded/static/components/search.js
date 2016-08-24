@@ -846,7 +846,9 @@ var FacetList = search.FacetList = React.createClass({
                     <div className="clear-filters-control">
                         <a href={context.clear_filters}>Clear Filters <i className="icon icon-times-circle"></i></a>
                     </div>
-                : null}
+                :   <div className="clear-filters-control placeholder">
+                        <a>Clear Filters</a>
+                    </div>}
                 {this.props.mode === 'picker' && !this.props.hideTextFilter ? <TextFilter {...this.props} filters={filters} /> : ''}
                 {facets.map(facet => {
                     if ((hideTypes && facet.field == 'type') || (!loggedIn && this.context.hidePublicAudits && facet.field.substring(0, 6) === 'audit.')) {
@@ -932,10 +934,11 @@ var ResultTable = search.ResultTable = React.createClass({
         var batch_hub_disabled = total > batchHubLimit;
         var columns = context['columns'];
         var filters = context['filters'];
-        var label = 'results';
+        var label = 'results. ';
         var searchBase = this.props.searchBase;
         var trimmedSearchBase = searchBase.replace(/[\?|\&]limit=all/, "");
-
+        var specificFilter;
+        var show_link;
         var facets = context['facets'].map(function(facet) {
             if (this.props.restrictions[facet.field] !== undefined) {
                 facet = _.clone(facet);
@@ -948,14 +951,30 @@ var ResultTable = search.ResultTable = React.createClass({
         // See if a specific result type was requested ('type=x')
         // Satisfied iff exactly one type is in the search
         if (results.length) {
-            var specificFilter;
             filters.forEach(function(filter) {
                 if (filter.field === 'type') {
                     specificFilter = specificFilter ? '' : filter.term;
                 }
             });
         }
-
+        // Check to see if we are searching among multiple data types
+        // True if only facet is of field "type" when ignoring audits
+        var facet_types = [];
+        for (var i = 0; i < facets.length; i++){
+            if (facets[i]['field']){
+                if (!(facets[i]['field'].includes("audit"))){
+                    facet_types.push(facets[i]['field'])
+                }
+            }
+        }
+        if (facet_types.length === 1 && facet_types[0] === 'type'){
+            if (facets[0]['terms'][0]['doc_count'] === facets[0]['total'] && facets[0]['total'] > 1){
+                // it's a single data type, so grab it
+                specificFilter = facets[0]['terms'][0]['key'];
+            }else{
+                specificFilter = 'Multiple type';
+            }
+        }
         // Get a sorted list of batch hubs keys with case-insensitive sort
         var batchHubKeys = [];
         if (context.batch_hub && Object.keys(context.batch_hub).length) {
@@ -972,8 +991,23 @@ var ResultTable = search.ResultTable = React.createClass({
             'th': 'matrix'
         };
 
+        // Create "show all" or "show 25" links if necessary
+        show_link = ((total > results.length && searchBase.indexOf('limit=all') === -1) ?
+            <a href={searchBase ? searchBase + '&limit=all' : '?limit=all'}
+                    onClick={this.onFilter}>View All</a>
+            :
+            <span>{results.length > 25 ?
+                <a href={trimmedSearchBase ? trimmedSearchBase : "/search/"}
+                    onClick={this.onFilter}>View 25</a>
+                : null}
+            </span>);
+
         return (
             <div>
+                <div className="row search-title">
+                    <h3>{specificFilter ? specificFilter : 'Unresolved type'} search</h3>
+                    <h4>Showing {results.length} of {total} {label} {show_link}</h4>
+                </div>
                 <div className="row">
                     {facets.length ? <div className="col-sm-5 col-md-4 col-lg-3">
                         <FacetList {...this.props} facets={facets} filters={filters}
@@ -982,8 +1016,6 @@ var ResultTable = search.ResultTable = React.createClass({
                     <div className="col-sm-7 col-md-8 col-lg-9">
                         {context['notification'] === 'Success' ?
                             <div>
-                                <h4>Showing {results.length} of {total} {label}</h4>
-
                                 <div className="results-table-control">
                                     {context.views ?
                                         <div className="btn-attached">
@@ -992,20 +1024,6 @@ var ResultTable = search.ResultTable = React.createClass({
                                             )}
                                         </div>
                                     : null}
-
-                                    {total > results.length && searchBase.indexOf('limit=all') === -1 ?
-                                        <a rel="nofollow" className="btn btn-info btn-sm"
-                                                href={searchBase ? searchBase + '&limit=all' : '?limit=all'}
-                                                onClick={this.onFilter}>View All</a>
-                                    :
-                                        <span>
-                                            {results.length > 25 ?
-                                                <a className="btn btn-info btn-sm"
-                                                    href={trimmedSearchBase ? trimmedSearchBase : "/search/"}
-                                                    onClick={this.onFilter}>View 25</a>
-                                            : null}
-                                        </span>
-                                    }
 
                                     {context['batch_download'] ?
                                         <BatchDownload context={context} />

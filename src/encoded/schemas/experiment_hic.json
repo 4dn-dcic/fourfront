@@ -119,11 +119,11 @@
         "digestion_enzyme.name": {
             "title": "Enzyme"
         },
-        "biosample.modifications.modification_name": {
-            "title": "Modification"
+        "biosample.modifications_summary": {
+            "title": "Modifications"
         },
-        "biosample.treatments.treatment_type": {
-            "title": "Treatment"
+        "biosample.treatments_summary": {
+            "title": "Treatments"
         },
         "lab.title": {
             "title": "Lab"
@@ -145,11 +145,11 @@
         "digestion_enzyme.name": {
             "title": "Enzyme"
         },
-        "biosample.modifications.modification_name": {
-            "title": "Modification"
+        "biosample.modifications_summary": {
+            "title": "Modifications"
         },
-        "biosample.treatments.treatment_type": {
-            "title": "Treatment"
+        "biosample.treatments_summary": {
+            "title": "Treatments"
         },
         "lab.title": {
             "title": "Lab"

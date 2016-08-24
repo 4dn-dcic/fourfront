@@ -119,11 +119,11 @@
         "biosource.individual.organism.name": {
             "title": "Organism"
         },
-        "modifications.modification_name": {
-            "title": "Modification"
+        "modifications_summary": {
+            "title": "Modifications"
         },
-        "treatments.treatment_type": {
-            "title": "Treatment"
+        "treatments_summary": {
+            "title": "Treatments"
         }
     },
     "columns": {
@@ -136,11 +136,11 @@
         "biosource.individual.organism.name": {
             "title": "Organism"
         },
-        "modifications.modification_name": {
-            "title": "Modification"
+        "modifications_summary": {
+            "title": "Modifications"
         },
-        "treatments.treatment_type": {
-            "title": "Treatment"
+        "treatments_summary": {
+            "title": "Treatments"
         },
         "description":{
             "title": "Description"
