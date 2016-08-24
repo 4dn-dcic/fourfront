@@ -113,7 +113,7 @@
         "biosample.biosource.biosource_type": {
             "title": "Biosource type"
         },
-        "biosample.biosource.biosource_name": {
+        "biosample.biosource_summary": {
             "title": "Biosource"
         },
         "digestion_enzyme.name": {
@@ -139,7 +139,7 @@
         "biosample.biosource.biosource_type": {
             "title": "Biosource type"
         },
-        "biosample.biosource.biosource_name": {
+        "biosample.biosource_summary": {
             "title": "Biosource"
         },
         "digestion_enzyme.name": {
@@ -165,6 +165,9 @@
         },
         "name":{
             "title": "Name"
+        },
+        "experiment_summary":{
+            "title": "Experiment summary"
         }
     }
 }

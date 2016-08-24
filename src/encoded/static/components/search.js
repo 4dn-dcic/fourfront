@@ -341,100 +341,27 @@ globals.listing_views.register(Biosample, 'Biosample');
 
 
 var Experiment = module.exports.Experiment = React.createClass({
-    mixins: [PickerActionsMixin, AuditMixin],
     render: function() {
         var result = this.props.context;
-
-        // Make array of scientific names from replicates; remove all duplicates
-        var names = _.uniq(result.replicates.map(function(replicate) {
-            return (replicate.library && replicate.library.biosample && replicate.library.biosample.organism &&
-                    replicate.library.biosample.organism) ? replicate.library.biosample.organism.scientific_name : undefined;
-        }));
-        var name = (names.length === 1 && names[0] && names[0] !== 'unknown') ? names[0] : '';
-
-        // Make array of life stages from replicates; remove all duplicates
-        var lifeStages = _.uniq(result.replicates.map(function(replicate) {
-            return (replicate.library && replicate.library.biosample) ? replicate.library.biosample.life_stage : undefined;
-        }));
-        var lifeStage = (lifeStages.length === 1 && lifeStages[0] && lifeStages[0] !== 'unknown') ? ' ' + lifeStages[0] : '';
-
-        // Make array of ages from replicates; remove all duplicates
-        var ages = _.uniq(result.replicates.map(function(replicate) {
-            return (replicate.library && replicate.library.biosample) ? replicate.library.biosample.age : undefined;
-        }));
-        var age = (ages.length === 1 && ages[0] && ages[0] !== 'unknown') ? ' ' + ages[0] : '';
-
-        // Collect synchronizations
-        var synchronizations = _.uniq(result.replicates.filter(function(replicate) {
-            return (replicate.library && replicate.library.biosample && replicate.library.biosample.synchronization);
-        }).map(function(replicate) {
-            var biosample = replicate.library.biosample;
-            return (biosample.synchronization +
-                (biosample.post_synchronization_time ?
-                    ' + ' + biosample.post_synchronization_time + (biosample.post_synchronization_time_units ? ' ' + biosample.post_synchronization_time_units : '')
-                : ''));
-        }));
-
-        // Make array of age units from replicates; remove all duplicates
-        var ageUnit = '';
-        if (age) {
-            var ageUnits = _.uniq(result.replicates.map(function(replicate) {
-                return (replicate.library && replicate.library.biosample) ? replicate.library.biosample.age_units : undefined;
-            }));
-            ageUnit = (ageUnits.length === 1 && ageUnits[0] && ageUnits[0] !== 'unknown') ? ' ' + ageUnits[0] : '';
-        }
-
-        // If we have life stage or age, need to separate from scientific name with comma
-        var separator = (lifeStage || age) ? ', ' : '';
-
-        // Get the first treatment if it's there
-        var treatment = (result.replicates[0] && result.replicates[0].library && result.replicates[0].library.biosample &&
-                result.replicates[0].library.biosample.treatments[0]) ? SingleTreatment(result.replicates[0].library.biosample.treatments[0]) : '';
-
         return (
             <li>
                 <div className="clearfix">
-                    {this.renderActions()}
                     <div className="pull-right search-meta">
                         <p className="type meta-title">Experiment</p>
                         <p className="type">{' ' + result['accession']}</p>
-                        <p className="type meta-status">{' ' + result['status']}</p>
-                        <AuditIndicators audits={result.audit} id={this.props.context['@id']} search />
+                        <p className="type">{' ' + result['award']['project']}</p>
                     </div>
                     <div className="accession">
                         <a href={result['@id']}>
-                            {result.assay_title ?
-                                <span>{result.assay_title}</span>
-                            :
-                                <span>{result.assay_term_name}</span>
-                            }
-                            {result['biosample_term_name'] ? <span>{' of ' + result['biosample_term_name']}</span> : null}
+                            {result['experiment_summary']}
                         </a>
                     </div>
-                    {name || lifeStage || age || ageUnit ?
-                        <div className="highlight-row">
-                            {name ? <em>{name}</em> : null}
-                            {separator + lifeStage + age + ageUnit}
-                        </div>
-                    : null}
                     <div className="data-row">
-                        {result.target && result.target.label ?
-                            <div><strong>Target: </strong>{result.target.label}</div>
-                        : null}
-
-                        {treatment ?
-                            <div><strong>Treatment: </strong>{treatment}</div>
-                        : null}
-
-                        {synchronizations && synchronizations.length ?
-                            <div><strong>Synchronization timepoint: </strong>{synchronizations.join(', ')}</div>
-                        : null}
-
-                        <div><strong>Lab: </strong>{result.lab.title}</div>
-                        <div><strong>Project: </strong>{result.award.project}</div>
+                        <div><strong>Lab: </strong>{result['lab']['title']}</div>
+                        <div><strong>Modifications: </strong>{result['biosample']['modifications_summary']}</div>
+                        <div><strong>Treatments: </strong>{result['biosample']['treatments_summary']}</div>
                     </div>
                 </div>
-                <AuditDetail context={result} id={this.props.context['@id']} forcedEditLink />
             </li>
         );
     }
@@ -1006,7 +933,33 @@ var ResultTable = search.ResultTable = React.createClass({
             <div>
                 <div className="row search-title">
                     <h3>{specificFilter ? specificFilter : 'Unresolved type'} search</h3>
-                    <h4>Showing {results.length} of {total} {label} {show_link}</h4>
+                    <div className="row">
+                        <h4 className='inline-subheader'>Showing {results.length} of {total} {label} {show_link}</h4>
+                        <div className="pull-left results-table-control">
+                            {context.views ?
+                                <div className="btn-attached">
+                                    {context.views.map((view, i) =>
+                                        <a key={i} className="btn btn-info btn-sm btn-svgicon" href={view.href} title={view.title}>{SvgIcon(view2svg[view.icon])}</a>
+                                    )}
+                                </div>
+                            : null}
+                            {context['batch_download'] ?
+                                <BatchDownload context={context} />
+                            : null}
+                        </div>
+                        <div className="pull-right results-table-control placeholder">
+                            {context.views ?
+                                <div className="btn-attached">
+                                    {context.views.map((view, i) =>
+                                        <a key={i} className="btn btn-info btn-sm btn-svgicon" href={view.href} title={view.title}>{SvgIcon(view2svg[view.icon])}</a>
+                                    )}
+                                </div>
+                            : null}
+                            {context['batch_download'] ?
+                                <BatchDownload context={context} />
+                            : null}
+                        </div>
+                    </div>
                 </div>
                 <div className="row">
                     {facets.length ? <div className="col-sm-5 col-md-4 col-lg-3">
@@ -1014,38 +967,6 @@ var ResultTable = search.ResultTable = React.createClass({
                                     searchBase={searchBase ? searchBase + '&' : searchBase + '?'} onFilter={this.onFilter} />
                     </div> : ''}
                     <div className="col-sm-7 col-md-8 col-lg-9">
-                        {context['notification'] === 'Success' ?
-                            <div>
-                                <div className="results-table-control">
-                                    {context.views ?
-                                        <div className="btn-attached">
-                                            {context.views.map((view, i) =>
-                                                <a key={i} className="btn btn-info btn-sm btn-svgicon" href={view.href} title={view.title}>{SvgIcon(view2svg[view.icon])}</a>
-                                            )}
-                                        </div>
-                                    : null}
-
-                                    {context['batch_download'] ?
-                                        <BatchDownload context={context} />
-                                    : null}
-
-                                    {batchHubKeys && context.batch_hub ?
-                                        <DropdownButton disabled={batch_hub_disabled} label="batchhub" title={batch_hub_disabled ? 'Filter to ' + batchHubLimit + ' to visualize' : 'Visualize'} wrapperClasses="results-table-button">
-                                            <DropdownMenu>
-                                                {batchHubKeys.map(assembly =>
-                                                    <a key={assembly} data-bypass="true" target="_blank" href={context['batch_hub'][assembly]}>
-                                                        {assembly}
-                                                    </a>
-                                                )}
-                                            </DropdownMenu>
-                                        </DropdownButton>
-                                    : null}
-                                </div>
-                            </div>
-                        :
-                            <h4>{context['notification']}</h4>
-                        }
-                        <hr />
                         <ul className="nav result-table" id="result-table">
                             {results.length ?
                                 results.map(function (result) {
