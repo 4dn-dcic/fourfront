@@ -9,6 +9,7 @@ ENCODE Metadata Database
 .. _Build status: https://travis-ci.org/hms-dbmi/fourfront
 
 |Coverage|_
+
 .. |Coverage| image:: https://coveralls.io/repos/github/hms-dbmi/fourfront/badge.svg?branch=master
 .. _Coverage: https://coveralls.io/github/hms-dbmi/fourfront?branch=master
 
