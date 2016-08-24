@@ -8,8 +8,9 @@ ENCODE Metadata Database
 .. |Build status| image:: https://travis-ci.org/hms-dbmi/fourfront.png?branch=master
 .. _Build status: https://travis-ci.org/hms-dbmi/fourfront
 
-.. image:: https://coveralls.io/repos/github/hms-dbmi/fourfront/badge.svg?branch=master
-:target: https://coveralls.io/github/hms-dbmi/fourfront?branch=master
+|Coverage|_
+.. |Coverage| image:: https://coveralls.io/repos/github/hms-dbmi/fourfront/badge.svg?branch=master
+.. _Coverage: https://coveralls.io/github/hms-dbmi/fourfront?branch=master
 
 This is a fork from `ENCODE-DCC/encoded <https://github.com/ENCODE-DCC/encoded>`_ .  We are working to modularize the project and adapted to our needs for the 4D Nucleome project.
 
