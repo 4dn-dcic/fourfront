@@ -203,16 +203,6 @@ class File(Item):
     def title(self, accession=None, external_accession=None):
         return accession or external_accession
 
-    # Don't specify schema as this just overwrites the existing value
-    @calculated_property(
-        condition=lambda paired_end=None: paired_end == '1')
-    def paired_with(self, root, request):
-        paired_with = self.get_rev_links('paired_with')
-        if not paired_with:
-            return None
-        item = root.get_by_uuid(paired_with[0])
-        return request.resource_path(item)
-
     @calculated_property(schema={
         "title": "Download URL",
         "type": "string",
