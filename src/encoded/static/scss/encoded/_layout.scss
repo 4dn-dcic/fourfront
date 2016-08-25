@@ -265,13 +265,13 @@
 	font-weight: 200;
 	font-size: 1.4em !important;
 	border-bottom: 2px solid #168369;
-	> a {
-		color: #999999;
-		text-decoration: none !important;
-		&:hover {
-			color: #000000 !important;
-		}
-	}
+}
+
+.fourDN-section-toggle{
+	color: #999999;
+	text-decoration: none !important;
+	&:hover {
+		color: #000000 !important;
 }
 
 .fourDN-section-info{

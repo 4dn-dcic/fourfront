@@ -158,7 +158,7 @@ class Biosource(Item):
                 organism = individual_props['organism']
                 organism_props = request.embed(organism, '@@object')
                 organism_name = organism_props['name']
-                return "Whole " + organism_name
+                return "whole " + organism_name
         return biosource_type
 
 
