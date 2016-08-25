@@ -929,36 +929,40 @@ var ResultTable = search.ResultTable = React.createClass({
                 : null}
             </span>);
 
+            //Table controls, removed for now. To implement, put the following div in the
+            //same row as the h4 element in the render function below
+
+            /*<div className="pull-left results-table-control">
+                {context.views ?
+                    <div className="btn-attached">
+                        {context.views.map((view, i) =>
+                            <a key={i} className="btn btn-info btn-sm btn-svgicon" href={view.href} title={view.title}>{SvgIcon(view2svg[view.icon])}</a>
+                        )}
+                    </div>
+                : null}
+                {context['batch_download'] ?
+                    <BatchDownload context={context} />
+                : null}
+            </div>
+            <div className="pull-right results-table-control placeholder">
+                {context.views ?
+                    <div className="btn-attached">
+                        {context.views.map((view, i) =>
+                            <a key={i} className="btn btn-info btn-sm btn-svgicon" href={view.href} title={view.title}>{SvgIcon(view2svg[view.icon])}</a>
+                        )}
+                    </div>
+                : null}
+                {context['batch_download'] ?
+                    <BatchDownload context={context} />
+                : null}
+            </div>*/
+
         return (
             <div>
                 <div className="row search-title">
                     <h3>{specificFilter ? specificFilter : 'Unresolved type'} search</h3>
                     <div className="row">
                         <h4 className='inline-subheader'>Showing {results.length} of {total} {label} {show_link}</h4>
-                        <div className="pull-left results-table-control">
-                            {context.views ?
-                                <div className="btn-attached">
-                                    {context.views.map((view, i) =>
-                                        <a key={i} className="btn btn-info btn-sm btn-svgicon" href={view.href} title={view.title}>{SvgIcon(view2svg[view.icon])}</a>
-                                    )}
-                                </div>
-                            : null}
-                            {context['batch_download'] ?
-                                <BatchDownload context={context} />
-                            : null}
-                        </div>
-                        <div className="pull-right results-table-control placeholder">
-                            {context.views ?
-                                <div className="btn-attached">
-                                    {context.views.map((view, i) =>
-                                        <a key={i} className="btn btn-info btn-sm btn-svgicon" href={view.href} title={view.title}>{SvgIcon(view2svg[view.icon])}</a>
-                                    )}
-                                </div>
-                            : null}
-                            {context['batch_download'] ?
-                                <BatchDownload context={context} />
-                            : null}
-                        </div>
                     </div>
                 </div>
                 <div className="row">
