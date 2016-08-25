@@ -1,6 +1,7 @@
 # Use workbook fixture from BDD tests (including elasticsearch)
 from .features.conftest import app_settings, app, workbook
 import pytest
+pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 
 def test_search_view(workbook, testapp):
@@ -31,6 +32,7 @@ def test_report_view(workbook, testapp):
     assert '@graph' in res
 
 
+@pytest.mark.skip(reason="we dont have matrix view currently")
 def test_matrix_view(workbook, testapp):
     res = testapp.get('/matrix/?type=Experiment').json
     assert res['@type'] == ['Matrix']
