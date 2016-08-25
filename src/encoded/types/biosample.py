@@ -73,6 +73,23 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
                 return 'None'
         return 'None'
 
+    # @calculated_property(schema={
+    #     "title": "Biosource summary",
+    #     "description": "Summary of any biosources comprising the biosample.",
+    #     "type": "string",
+    # })
+    # def biosource_summary(self, request, biosource=None):
+    #     if biosource:
+    #         ret_str = ''
+    #         for i in range(len(biosource)):
+    #             bios_props = request.embed(biosource[i], '@@object')
+    #             ret_str += (bios_props['biosource_name'] + ' and ') if bios_props['biosource_name'] else ''
+    #         if len(ret_str) > 0:
+    #             return ret_str[:-4]
+    #         else:
+    #             return 'None'
+    #     return 'None'
+
     def _update(self, properties, sheets=None):
         # update self first to ensure 'biosample_relation' are stored in self.properties
         super(Biosample, self)._update(properties, sheets)

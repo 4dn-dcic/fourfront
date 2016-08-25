@@ -570,7 +570,7 @@ var Experiment = module.exports.Experiment = React.createClass({
     }
 });
 
-globals.content_views.register(Experiment, 'Experiment');
+globals.content_views.register(Experiment, 'Disabled');
 
 
 // Display the table of replicates
