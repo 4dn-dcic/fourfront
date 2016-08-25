@@ -60,6 +60,19 @@ def submitter(testapp, lab, award):
     res = testapp.post_json('/user', item)
     return testapp.get(res.location).json
 
+@pytest.fixture
+def remc_submitter(testapp, remc_lab, remc_award):
+    item = {
+        'first_name': 'REMC',
+        'last_name': 'Submitter',
+        'email': 'remc_submitter@example.org',
+        'submits_for': [remc_lab['@id']],
+        'viewing_groups': [remc_award['viewing_group']],
+    }
+    # User @@object view has keys omitted.
+    res = testapp.post_json('/user', item)
+    return testapp.get(res.location).json
+
 
 @pytest.fixture
 def access_key(testapp, submitter):
@@ -93,6 +106,16 @@ def award(testapp):
         'name': 'encode3-award',
         'description': 'ENCODE test award',
         'viewing_group': '4DN',
+    }
+    return testapp.post_json('/award', item).json['@graph'][0]
+
+
+@pytest.fixture
+def remc_award(testapp):
+    item = {
+        'name': 'remc-award',
+        'description': 'REMC test award',
+        'viewing_group': 'Not 4DN',
     }
     return testapp.post_json('/award', item).json['@graph'][0]
 

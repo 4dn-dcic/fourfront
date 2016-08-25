@@ -19,6 +19,7 @@
             "title": "Affiliation",
             "description": "Lab user is primarily associated with.",
             "comment": "See lab.json for available identifiers.",
+            "permission": "import-items",
             "type": "string",
             "linkTo": "Lab"
         },
@@ -27,6 +28,7 @@
             "description": "Labs user is authorized to submit data for.",
             "type": "array",
             "default": [],
+            "permission": "import-items",
             "uniqueItems": true,
             "items": {
                 "description": "A lab user is authorized to submit for.",
@@ -41,6 +43,7 @@
             "type": "array",
             "default": [],
             "uniqueItems": true,
+            "permission": "import-items",
             "items": {
                 "type": "string"
             }
@@ -54,7 +57,8 @@
             "items": {
                 "type": "string",
                 "enum": [
-                    "4DN"
+                    "4DN",
+                    "Not 4DN"
                 ]
             }
         },
