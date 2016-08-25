@@ -31,10 +31,7 @@
             {
                 "targeted_genes": ["POKE", "MON"],
                 "oligo_file": "46e82a90-49e5-4c33-afab-9ec90d65faf4",
-                "genome_assembly": "GRCh38",
-                "chromosome": "1",
-                "start_coordinate": 1,
-                "end_coordinate": 100000
+                "genomic_region": "d1115d5e-40aa-43bc-b81c-32c70c9afb01"
             }
         ]
     },
@@ -71,16 +68,11 @@
             {
                 "targeted_genes": ["POKE", "MON"],
                 "oligo_file": "46e82a90-49e5-4c33-afab-9ec90d65faf4",
-                "genome_assembly": "GRCh38",
-                "chromosome": "1",
-                "start_coordinate": 1,
-                "end_coordinate": 100000
+                "genomic_region": "d1115d5e-40aa-43bc-b81c-32c70c9afb01"
             },
             {
                 "oligo_file": "46e82a90-49e5-4c33-afab-9ec90d65faf4",
-                "genome_assembly": "GRCh38",
-                "chromosome": "2",
-                "location_description": "Region A - 3 Mb from 5Mb to 8 Mb from end"
+                "genomic_region": "d2215d5e-40aa-43bc-b81c-32c70c9afb01"
             }
         ]
     }

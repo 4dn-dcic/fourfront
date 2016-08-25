@@ -34,6 +34,7 @@ ORDER = [
     'biosample',
     'file',
     'file_set',
+    'genomic_region',
     'experiment_hic',
     'experiment_capture_c',
     'experiment_set',
