@@ -11,25 +11,11 @@
     "mixinProperties": [
     ],
     "properties": {
-        "schema_version": {
-            "default": "1"
-        },
-        "status": {
-            "title": "Status",
-            "type": "string",
-            "default": "in review",
-            "enum": [
-                "in review",
-                "current",
-                "in progress",
-                "deleted",
-                "replaced",
-                "released",
-                "revoked"
-            ]
-        },
         "accession": {
             "accessionType": "EX"
+        },
+        "schema_version": {
+            "default": "1"
         },
         "description": {
             "title": "description",

@@ -80,8 +80,7 @@
             "description": "The group that determines which set of data the user has permission to view.",
             "type": "string",
             "enum": [
-                "4DN",
-                "Not 4DN"
+                "4DN"
             ]
         }
     },

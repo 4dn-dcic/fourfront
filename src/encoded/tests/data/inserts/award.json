@@ -12,21 +12,6 @@
         "uuid": "b0b9c607-f8b4-4f02-93f4-9895b461334b"
     },
     {
-        "description": "A test 4DN award - for testing permissions and access to various items",
-        "name": "Test-4DN",
-        "status": "current",
-        "title": "4DN TEST",
-        "uuid": "b0b9c607-f8b4-4f02-93f4-9895b461224b",
-        "viewing_group": "4DN"
-    },
-    {
-        "description": "A test non 4DN award - for testing permissions and access to various items",
-        "name": "Test-NOT-4DN",
-        "status": "current",
-        "title": "Other TEST",
-        "uuid": "b0b9c607-f8b4-4f02-93f4-9895b461444b"
-    },
-    {
         "description": "A test external award.",
         "end_date": "2020-08-31",
         "name": "1U01CA200059-02",

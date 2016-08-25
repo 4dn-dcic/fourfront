@@ -11,17 +11,6 @@
         "url": "https://www.cyclingnews.com"
     },
     {
-        "uuid": "686b362f-4eb6-4a9c-8173-3ab267307e4b",
-        "aliases": ["Excellent:Treatment"],
-        "description": "RNAi treatment to change the your nose!",
-        "rnai_type":"shRNA",
-        "target": "YourNose",
-        "target_sequence": "ATGCATGC",
-        "rnai_constructs": ["131106bc-8535-4448-903e-854af460b211"],
-        "rnai_vendor": "b31106bc-8535-4448-903e-854af460b21d",
-        "url": "https://www.velonews.com"
-    },
-    {
         "uuid": "686b362f-4eb6-4a9c-8173-3ab267307a8d",
         "aliases": ["Awesome:Treatment2"],
         "description": "RNAi treatment to change the world!",

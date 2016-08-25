@@ -120,22 +120,36 @@ class Item(snovault.Item):
         'released': ALLOW_CURRENT,
         'deleted': DELETED,
         'replaced': DELETED,
+
+        # shared_status
         'current': ALLOW_CURRENT,
         'revoked': ONLY_ADMIN_VIEW,
-        # IS there a function in dataset/experiment that causes revoked to
-        # behave separately there than here?
 
         # file
-        # I don't think we currently have this
         'obsolete': ONLY_ADMIN_VIEW,
+
+        # antibody_characterization
+        'compliant': ALLOW_CURRENT,
+        'not compliant': ALLOW_CURRENT,
+        'not reviewed': ALLOW_CURRENT,
+        'not submitted for review by lab': ALLOW_CURRENT,
+
+        # antibody_lot
+        'eligible for new data': ALLOW_CURRENT,
+        'not eligible for new data': ALLOW_CURRENT,
+        'not pursued': ALLOW_CURRENT,
 
         # dataset / experiment
         'release ready': ALLOW_VIEWING_GROUP_VIEW,
         'revoked': ALLOW_CURRENT,
-        'in review': ALLOW_LAB_SUBMITTER_EDIT,
+        'in review': ALLOW_CURRENT_AND_SUBMITTER_EDIT,
 
         # publication
         'published': ALLOW_CURRENT,
+
+        # pipeline
+        'active': ALLOW_CURRENT,
+        'archived': ALLOW_CURRENT,
     }
 
     @property
@@ -156,7 +170,7 @@ class Item(snovault.Item):
         return self.STATUS_ACL.get(status, ALLOW_LAB_SUBMITTER_EDIT)
 
     def __ac_local_roles__(self):
-        """this creates roles based on properties of the object being acccessed"""
+        """smth."""
         roles = {}
         properties = self.upgrade_properties().copy()
         if 'lab' in properties:

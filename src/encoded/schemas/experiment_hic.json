@@ -12,6 +12,7 @@
         { "$ref": "mixins.json#/accession" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/notes" },
@@ -19,7 +20,7 @@
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/library"},
-        { "$ref": "experiment.json#/properties"}
+        { "$ref": "experiment.json#/properties" }
     ],
     "dependencies": {
       "crosslinking_temperature": ["crosslinking_method", "crosslinking_time"],
@@ -30,8 +31,7 @@
     "properties": {
         "schema_version": {
             "default": "1"
-        },
-        "experiment_type": {
+        },  "experiment_type": {
             "enum": [
             "in situ Hi-C",
             "dilution Hi-C",
