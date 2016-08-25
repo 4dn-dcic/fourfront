@@ -105,7 +105,6 @@ class NamespacedAuthenticationPolicy(object):
         return userid
 
     def remember(self, request, principal, **kw):
-        import pdb; pdb.set_trace()
         if not principal.startswith(self._namespace_prefix):
             return []
         principal = principal[len(self._namespace_prefix):]
@@ -157,7 +156,6 @@ class WebUserAuthenticationPolicy(CallbackAuthenticationPolicy):
         return login
 
     def remember(self, request, principal, **kw):
-        import pdb; pdb.set_trace()
         return []
 
     def forget(self, request):
