@@ -19,7 +19,7 @@
         "description": "Test Drive",
         "ligation_temperature": 37,
         "crosslinking_temperature": 37,
-        "award": "1U01CA200059-01",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b461224b",
         "dbxrefs": ["sample ext id"],
         "crosslinking_method": "1% Formaldehyde",
         "uuid": "75041e2f-3e43-4388-8bbb-e861f209c444",
@@ -29,7 +29,7 @@
     },
     {
         "accession":"4DNEX067APT1",
-        "biosample":"231111bc-8535-4448-903e-854af460b255",
+        "biosample":"231111bc-8535-4448-903e-854af460ba4d",
         "fragmentation_method": "chemical",
         "experiment_type": "dilution Hi-C",
         "enzyme_lot_number": "123456",
@@ -47,7 +47,7 @@
         "description": "Test Drive",
         "ligation_temperature": 37,
         "crosslinking_temperature": 37,
-        "award": "1U01CA200059-01",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b4613349",
         "dbxrefs": ["sample ext id"],
         "crosslinking_method": "1% Formaldehyde",
         "uuid": "75041e2f-3e43-4388-8bbb-e861f209c4fb",
@@ -59,6 +59,7 @@
     },
     {
         "accession":"4DNEX067APV1",
+        "biosample":"231111bc-8535-4448-903e-854af460c13f",
         "fragmentation_method": "chemical",
         "experiment_type": "dilution Hi-C",
         "digestion_enzyme": "HindIII",
@@ -102,7 +103,7 @@
         "description": "Test Drive",
         "ligation_temperature": 37,
         "crosslinking_temperature": 37,
-        "award": "1U01CA200059-02",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b4613349",
         "dbxrefs": ["sample ext id"],
         "crosslinking_method": "1% Formaldehyde",
         "uuid": "75041e2f-3e43-4388-8bbb-e861f209c4fc",
@@ -132,13 +133,13 @@
         "description": "Test Drive",
         "ligation_temperature": 37,
         "crosslinking_temperature": 37,
-        "award": "1U01CA200059-02",
+        "award": "b0b9c607-f8b4-4f02-93f4-9895b4613349",
         "dbxrefs": ["sample ext id"],
         "crosslinking_method": "1% Formaldehyde",
         "uuid": "75041e2f-3e43-4388-8bbb-e861f209c4fd",
         "protocol": "131106bc-8535-4448-903e-854af460b244",
         "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEX067APU1"}],
         "submitted_by": "admin@admin.com",
-        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"]    
+        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"]
     }
 ]

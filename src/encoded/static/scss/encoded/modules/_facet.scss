@@ -94,6 +94,12 @@
     }
 }
 
+.facet-list #selected {
+    .bar{
+        height: 100%;
+    }
+}
+
 .facet-list a#selected {
     text-decoration: none;
     font-weight: bold;

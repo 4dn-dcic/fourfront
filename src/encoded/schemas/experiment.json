@@ -9,7 +9,6 @@
     "identifyingProperties": ["uuid", "accession" , "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
-        { "$ref": "mixins.json#/attribution" }
     ],
     "properties": {
         "schema_version": {
