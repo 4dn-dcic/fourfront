@@ -357,9 +357,9 @@ var Experiment = module.exports.Experiment = React.createClass({
                         </a>
                     </div>
                     <div className="data-row">
-                        <div><strong>Lab: </strong>{result['lab']['title']}</div>
                         <div><strong>Modifications: </strong>{result['biosample']['modifications_summary']}</div>
                         <div><strong>Treatments: </strong>{result['biosample']['treatments_summary']}</div>
+                        <div><strong>Lab: </strong>{result['lab']['title']}</div>
                     </div>
                 </div>
             </li>

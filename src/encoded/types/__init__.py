@@ -152,6 +152,9 @@ class Biosource(Item):
         elif biosource_type == "immortalized cell line":
             if cell_line:
                 return cell_line
+        elif biosource_type == "primary cell":
+            if cell_line:
+                return cell_line
         elif biosource_type == "whole organisms":
             if individual:
                 individual_props = request.embed(individual, '@@object')
