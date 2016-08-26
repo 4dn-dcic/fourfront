@@ -343,6 +343,7 @@ globals.listing_views.register(Biosample, 'Biosample');
 var Experiment = module.exports.Experiment = React.createClass({
     render: function() {
         var result = this.props.context;
+        console.log(result);
         return (
             <li>
                 <div className="clearfix">
