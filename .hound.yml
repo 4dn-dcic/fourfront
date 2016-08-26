@@ -1,11 +1,11 @@
-#configuration file for hound code style checker
 scss:
-  enabled: true
+  enabled: false
 jshint:
-  enabled: true
+  enabled: false 
 ruby:
   enabled: false
 python:
   enabled: true
+  config_file: setup.cfg
 
 fail_on_violations: true
