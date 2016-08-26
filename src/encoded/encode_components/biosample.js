@@ -567,7 +567,7 @@ var Biosample = module.exports.Biosample = React.createClass({
     }
 });
 
-globals.content_views.register(Biosample, 'Disabled');
+globals.content_views.register(Biosample, 'Biosample');
 
 
 var MaybeLink = React.createClass({

@@ -2,7 +2,7 @@
 var _ = require('underscore');
 
 // Objects that will be forced to use item.js object view
-var typesToItem = ['AntibodyLot', 'Biosample', 'Donor', 'Annotation',
+var typesToItem = ['AntibodyLot', 'Donor', 'Annotation',
     'PublicationData', 'Reference', 'Project', 'UscsBrowserComposite', 'Series',
     'Image', 'Pipeline', 'Publication', 'region-search',
     'JSONSchema', 'Software', 'TALEN', 'Target', 'FileSet', 'File', 'Individual',
