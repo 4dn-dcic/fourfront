@@ -40,8 +40,13 @@ ALLOW_VIEWING_GROUP_VIEW = [
     (Allow, 'role.viewing_group_member', 'view'),
 ] + ONLY_ADMIN_VIEW
 
-ALLOW_LAB_SUBMITTER_EDIT = [
+ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT = [
     (Allow, 'role.viewing_group_member', 'view'),
+    (Allow, 'role.lab_submitter', 'edit'),
+] + ONLY_ADMIN_VIEW
+
+ALLOW_LAB_SUBMITTER_EDIT = [
+    (Allow, 'role.lab_member', 'view'),
     (Allow, 'role.lab_submitter', 'edit'),
 ] + ONLY_ADMIN_VIEW
 

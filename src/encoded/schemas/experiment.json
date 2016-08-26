@@ -17,7 +17,7 @@
         "status": {
             "title": "Status",
             "type": "string",
-            "default": "in review",
+            "default": "current",
             "enum": [
                 "in review",
                 "current",
