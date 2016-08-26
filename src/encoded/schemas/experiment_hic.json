@@ -113,17 +113,17 @@
         "biosample.biosource.biosource_type": {
             "title": "Biosource type"
         },
-        "biosample.biosource.biosource_name": {
+        "biosample.biosource_summary": {
             "title": "Biosource"
         },
         "digestion_enzyme.name": {
             "title": "Enzyme"
         },
-        "biosample.modifications.modification_name": {
-            "title": "Modification"
+        "biosample.modifications_summary": {
+            "title": "Modifications"
         },
-        "biosample.treatments.treatment_type": {
-            "title": "Treatment"
+        "biosample.treatments_summary": {
+            "title": "Treatments"
         },
         "lab.title": {
             "title": "Lab"
@@ -139,20 +139,35 @@
         "biosample.biosource.biosource_type": {
             "title": "Biosource type"
         },
-        "biosample.biosource.biosource_name": {
+        "biosample.biosource_summary": {
             "title": "Biosource"
         },
         "digestion_enzyme.name": {
             "title": "Enzyme"
         },
-        "biosample.modifications.modification_name": {
-            "title": "Modification"
+        "biosample.modifications_summary": {
+            "title": "Modifications"
         },
-        "biosample.treatments.treatment_type": {
-            "title": "Treatment"
+        "biosample.treatments_summary": {
+            "title": "Treatments"
         },
         "lab.title": {
             "title": "Lab"
+        },
+        "description":{
+            "title": "Description"
+        },
+        "accession":{
+            "title": "Accession"
+        },
+        "title":{
+            "title": "Title"
+        },
+        "name":{
+            "title": "Name"
+        },
+        "experiment_summary":{
+            "title": "Experiment summary"
         }
     }
 }

@@ -12,7 +12,7 @@ Will load static entries from a js file
 Uses fetch to get context necessary to populate banner entry
 **************** */
 
-var BannerLoader = React.createClass({
+var BannerLoader = module.exports.BannerLoader = React.createClass({
     render: function() {
         var text = this.props.text;
         var location = this.props.location;
@@ -25,13 +25,13 @@ var BannerLoader = React.createClass({
     }
 });
 
-var BannerEntry = React.createClass({
+var BannerEntry = module.exports.BannerEntry = React.createClass({
     render: function() {
         var total = this.props.data.total;
         var location = this.props.location;
         var text = total + " " + this.props.text;
         return (
-            <a href={location}>{text}</a>
+            <a className="banner-entry" href={location}>{text}</a>
         );
     }
 });
@@ -73,7 +73,7 @@ var ContentItem = React.createClass({
         }
         return (
             <div className="fourDN-section">
-                <div className="fourDN-section-title"><a href="" onClick={this.handleToggle}>{title}</a></div>
+                <div className="fourDN-section-title"><a className="fourDN-section-toggle" href="" onClick={this.handleToggle}>{title}</a></div>
                 <div className="fourDN-section-info">{subtitle}</div>
                 {content}
             </div>
@@ -81,11 +81,15 @@ var ContentItem = React.createClass({
     }
 });
 
-var HomePage = module.exports = React.createClass({
+var HomePage = module.exports.HomePage = React.createClass({
+    // BannerLoaders are passed in as props
+    PropTypes: {
+        banners: React.PropTypes.array.isRequired
+    },
     render: function() {
-        var experiment4DNBanner = <BannerLoader text='experiments' location='/search/?type=Experiment&award.project=4DN'/>
-        var experimentExtBanner = <BannerLoader text='experiments' location='/search/?type=Experiment&award.project=External'/>
-        var biosourceBanner = <BannerLoader text='cell types' location='/search/?type=Biosource'/>
+        var experiment4DNBanner = this.props.banners[0]
+        var experimentExtBanner = this.props.banners[1]
+        var biosourceBanner = this.props.banners[2]
         var announcements = announcements_data.map(function(announce) {
             return (
                 <ContentItem content={announce}/>
