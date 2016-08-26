@@ -97,6 +97,18 @@
           },
           "individual.organism.name": {
               "title": "Organism"
+          },
+          "description":{
+              "title": "Description"
+          },
+          "accession":{
+              "title": "Accession"
+          },
+          "title":{
+              "title": "Title"
+          },
+          "name":{
+              "title": "Name"
           }
       }
 }
