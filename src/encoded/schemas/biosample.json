@@ -113,7 +113,7 @@
         "biosource.biosource_type": {
             "title": "Biosource type"
         },
-        "biosource.biosource_name": {
+        "biosource_summary": {
             "title": "Biosource"
         },
         "biosource.individual.organism.name": {
@@ -130,7 +130,7 @@
         "biosource.biosource_type": {
             "title": "Biosource type"
         },
-        "biosource.biosource_name": {
+        "biosource_summary": {
             "title": "Biosource"
         },
         "biosource.individual.organism.name": {

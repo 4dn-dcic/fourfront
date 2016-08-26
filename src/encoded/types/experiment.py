@@ -130,16 +130,12 @@ class ExperimentHiC(Experiment):
     })
     def experiment_summary(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
         sum_str = experiment_type
-
+        if biosample:
+            biosamp_props = request.embed(biosample, '@@object')
+            biosource = biosamp_props['biosource_summary']
+            sum_str += (' on ' + biosource)
         if digestion_enzyme:
             de_props = request.embed(digestion_enzyme, '@@object')
             de_name = de_props['name']
             sum_str += (' with ' + de_name)
-        if biosample:
-            biosamp_props = request.embed(biosample, '@@object')
-            biosource = biosamp_props['biosource']
-            # hardcoded to use the first biosource; change if biosource can be an array
-            biosource_props = request.embed(biosource[0], '@@object')
-            bios_name = biosource_props['biosource_name']
-            sum_str += (' using ' + bios_name)
         return sum_str
