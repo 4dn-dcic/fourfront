@@ -121,7 +121,7 @@ class Item(snovault.Item):
         'deleted': DELETED,
         'replaced': DELETED,
         'current': ALLOW_CURRENT,
-        'revoked': ONLY_ADMIN_VIEW,
+        # 'revoked': ONLY_ADMIN_VIEW,
         # IS there a function in dataset/experiment that causes revoked to
         # behave separately there than here?
 
