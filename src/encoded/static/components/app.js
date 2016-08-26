@@ -220,7 +220,7 @@ var App = React.createClass({
         var title;
         var routeList = canonical.split("/");
         var lowerList = routeList.map(function(value) {
-            if(value.charAt(0) === "#"){
+            if(value.charAt(0) === "#" && value.charAt(1) !== "!"){
                 value = "";
             }
             return value.toLowerCase();
