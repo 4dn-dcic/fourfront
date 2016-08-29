@@ -137,7 +137,8 @@ class Item(snovault.Item):
         # dataset / experiment
         'release ready': ALLOW_VIEWING_GROUP_VIEW,
         'revoked': ALLOW_CURRENT,
-        'in review': ALLOW_LAB_SUBMITTER_EDIT,
+        # 'in review': ALLOW_LAB_SUBMITTER_EDIT,
+        'in review': ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT,
 
         # publication
         'published': ALLOW_CURRENT,
