@@ -4,7 +4,7 @@ var jsonScriptEscape = require('../libs/jsonScriptEscape');
 var globals = require('./globals');
 var mixins = require('./mixins');
 var Navigation = require('./navigation');
-var HomePage = require('./home');
+var home = require('./home');
 var Footer = require('./footer');
 var url = require('url');
 var _ = require('underscore');
@@ -15,8 +15,7 @@ var portal = {
     global_sections: [
         {id: 'data', sid:'sData', title: 'Data', children: [
             {id: 'experiments', title: 'Experiments', url: '/search/?type=Experiment'},
-            {id: 'biosources', title: 'Biosources', url: '/search/?type=Biosource'},
-            {id: 'assays', title: 'Assays', url: '/search/?type=Assay'},
+            {id: 'biosources', title: 'Biosources', url: '/search/?type=Biosource'}
         ]},
         {id: 'tools', sid:'sTools', title: 'Tools', url: '/search/?type=Protocol&type=Software'},
         {id: 'help', sid:'sHelp', title: 'Help', children: [
@@ -221,7 +220,7 @@ var App = React.createClass({
         var title;
         var routeList = canonical.split("/");
         var lowerList = routeList.map(function(value) {
-            if(value.charAt(0) === "#"){
+            if(value.charAt(0) === "#" && value.charAt(1) !== "!"){
                 value = "";
             }
             return value.toLowerCase();
@@ -232,7 +231,11 @@ var App = React.createClass({
             title = portal.portal_title;
             content = null;
         }else if (_.contains(lowerList, "home") || (currRoute === "" && lowerList[lowerList.length-2] === href_url.host)){
-            content = <HomePage context={context}/>;
+            var banners = [];
+            banners.push(<home.BannerLoader text='experiments' location='/search/?type=Experiment&award.project=4DN'/>);
+            banners.push(<home.BannerLoader text='experiments' location='/search/?type=Experiment&award.project=External'/>);
+            banners.push(<home.BannerLoader text='cell types' location='/search/?type=Biosource'/>);
+            content = <home.HomePage banners={banners}/>;
             title = portal.portal_title;
         }else if (context) {
             var ContentView = globals.content_views.lookup(context, current_action);
