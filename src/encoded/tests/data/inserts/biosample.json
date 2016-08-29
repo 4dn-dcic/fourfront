@@ -8,8 +8,9 @@
         "treatments": ["686b362f-4eb6-4a9c-8173-3ab267307e3b"],
         "award": "Test-4DN",
         "submitted_by": "wrangler@wrangler.com",
-        "lab": "test-4dn-lab",       
-        "status": "in review"
+        "lab": "test-4dn-lab",
+        "status": "in review",
+        "accession": "4DNBS1234567"
     },
     {
         "uuid": "231111bc-8535-4448-903e-854af460ba4d",
