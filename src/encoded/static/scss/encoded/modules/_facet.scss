@@ -40,9 +40,12 @@
 }
 
 .clear-filters-control {
-    margin-bottom: 5px;
     text-align: right;
     font-size: 0.9rem;
+    > a{
+        color: #999999;
+        text-decoration: none;
+    }
 }
 
 .clear-filters-control-matrix {
@@ -60,6 +63,11 @@
     margin-bottom: 7px;
     border-bottom: 1px solid #eee;
     overflow: hidden;
+    &:hover{
+        .bar{
+            height: 100%;
+        }
+    }
 }
 
 .facet:last-child {
@@ -71,36 +79,41 @@
 .facet-list { margin: 0; }
 
 .facet-list li {
-    padding: 3px 10px;
+    padding: 3px 10px 3px 0px;
     margin-bottom: 1px;
-    border-radius: 5px;
     position: relative;
     @include font-size(0.9);
     line-height: 1;
-
+    &:hover{
+        .bar{
+            background-color: #21c49e;
+        }
+    }
     i {
         line-height: 14px;
     }
 }
 
-.facet-list li#selected {
-    background: #4183c4;
+.facet-list #selected {
+    .bar{
+        height: 100%;
+    }
 }
 
 .facet-list a#selected {
-    color: #fff;
     text-decoration: none;
-    font-weight: normal;
+    font-weight: bold;
+    color: #000000;
 }
 
-.facet-list li a {
-    display: block;
-    color: #000;
-}
 
-.facet-list li a:hover {
-    text-decoration: none;
-    color: #3e82d7;
+.facet-list li {
+    > a{
+        text-decoration: none;
+        margin-left: 20px;
+        display: block;
+        color: #666666;
+    }
 }
 
 .facet-item {
@@ -113,15 +126,25 @@
 }
 
 .facet-list button.btn.collapsed:before {
-    content:'+ See more...' ;
+    content:'+ VIEW ALL' ;
     text-decoration: none;
+    color: #999999;
     @include font-size(0.85);
+    float: left;
+    &:hover{
+        text-decoration: none;
+    }
 }
 
 .facet-list button.btn:before {
-    content:'- See fewer';
+    content:'- VIEW FEWER' ;
     text-decoration: none;
+    color: #999999;
     @include font-size(0.85);
+    float: left;
+    &:hover{
+        text-decoration: none;
+    }
 }
 
 .facet-list label {
@@ -272,13 +295,18 @@ div.meta-status {
 }
 
 span.bar {
-    background-color: #E5E5E5;
+    background-color: #7ce9cf;
     position: absolute;
     display: inline-block;
-    right: 0;
-    top: 0;
+    left: 0;
     bottom:0;
+    height: 10%;
+    -ms-transition: height 0.3s ease-out;
+	-moz-transition: height 0.3s ease-out;
+	-webkit-transition: height 0.3s ease-out;
+	transition: height 0.3s ease-out;
     z-index: -1;
+
 }
 
 
@@ -318,4 +346,8 @@ span.bar {
         vertical-align: baseline;
         border: none;
     }
+}
+
+.facet-selector{
+    margin-left: -17px;
 }

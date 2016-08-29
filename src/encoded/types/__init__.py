@@ -152,13 +152,16 @@ class Biosource(Item):
         elif biosource_type == "immortalized cell line":
             if cell_line:
                 return cell_line
+        elif biosource_type == "primary cell":
+            if cell_line:
+                return cell_line
         elif biosource_type == "whole organisms":
             if individual:
                 individual_props = request.embed(individual, '@@object')
                 organism = individual_props['organism']
                 organism_props = request.embed(organism, '@@object')
                 organism_name = organism_props['name']
-                return "Whole " + organism_name
+                return "whole " + organism_name
         return biosource_type
 
 
@@ -193,13 +196,9 @@ class Modification(Item):
         "description": "Modification name including type and target.",
         "type": "string",
     })
-    def modification_name(self, request, modification_type=None, constructs=None):
-        if modification_type == "Crispr":
-            if constructs:
-                #TODO: add case for multiple constructs
-                construct_props = request.embed(constructs[0], '@@object')
-                target = construct_props['designed_to_target']
-                return modification_type + " for " + target
+    def modification_name(self, request, modification_type=None, target=None):
+        if modification_type and target:
+            return modification_type + " for " + target
         elif modification_type:
             return modification_type
         return "None"

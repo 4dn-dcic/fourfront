@@ -34,26 +34,22 @@
         "file_format": {
             "title": "File format",
             "type": "string",
-            "oneOf": [
-                {
-                    "enum": [
-                        "bam",
-                        "bai",
-                        "bed",
-                        "bigBed",
-                        "bigWig",
-                        "fasta",
-                        "fastq",
-                        "gff",
-                        "gtf",
-                        "hdf5",
-                        "tsv",
-                        "csv",
-                        "tar",
-                        "tagAlign",
-                        "wig"
-                    ]
-                }
+            "enum": [
+                "bam",
+                "bai",
+                "bed",
+                "bigBed",
+                "bigWig",
+                "fasta",
+                "fastq",
+                "gff",
+                "gtf",
+                "hdf5",
+                "tsv",
+                "csv",
+                "tar",
+                "tagAlign",
+                "wig"
             ]
         },
         "file_type": {

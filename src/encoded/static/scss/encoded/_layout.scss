@@ -264,13 +264,14 @@
 	width: inherit;
 	font-weight: 200;
 	font-size: 1.4em !important;
-	border-bottom: 2px solid #009999;
-	> a {
-		color: #999999;
-		text-decoration: none !important;
-		&:hover {
-			color: #000000 !important;
-		}
+	border-bottom: 2px solid #168369;
+}
+
+.fourDN-section-toggle{
+	color: #999999;
+	text-decoration: none !important;
+	&:hover {
+		color: #000000 !important;
 	}
 }
 
@@ -297,9 +298,14 @@
 	}
 }
 
-// simply used to hide elements
+// simply used to make invisible elements
 .invis{
 	display: none !important;
+}
+
+// simply used to make hidden elements
+.placeholder{
+	visibility: hidden !important;
 }
 
 // used in item.js
@@ -316,9 +322,16 @@
 //make headers use work sans
 h1, h2, h3, h4, h5, h6 {
 	font-family: 'Work Sans', sans-serif;
+	margin-top: 10px;
+	margin-bottom: 10px;
 }
 
 //make all else use ysra
 p, input {
 	font-family: 'Yrsa', serif;
+}
+
+.inline-subheader{
+	display: inline;
+	color: #999999 !important;
 }
