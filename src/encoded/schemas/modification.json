@@ -46,22 +46,34 @@
                 "linkTo": "Construct"
             }
         },
-        "genomic_site": {
-            "title": "Genomic Site",
-            "description": "The coordinates of the genomic modification.",
-            "type": "string",
-            "comment": "require genbank format location info"
+        "modified_regions": {
+            "title": "Modified Regions",
+            "description": "The genomic regions being modified.",
+            "type": "array",
+            "items": {
+                "title": "Genomic region",
+                "description": "region being modfied",
+                "type": "string",
+                "linkTo": "GenomicRegion"
+            }
         },
-        "target": {
-            "title": "Target",
+        "targets": {
+            "title": "Targets",
             "description": "The targeted gene or genomic region that is targeted by the modification.",
-            "type": "string"
+            "type": "string",
+            "linkTo": "Target"
         },
         "url": {
             "title": "URL",
             "description": "An external resource with additional information about the construct.",
             "type": "string",
             "format": "uri"
+        },
+        "created_by" : {
+            "title": "Created By",
+            "description": "Lab or Company that produced the modfication",
+            "type": "string",
+            "linkTo": "Vendor"
         }
     }
 }
