@@ -121,9 +121,6 @@
         "categories": {
             "title": "Category"
         },
-        "supplementary_data.supplementary_data_type": {
-            "title": "Available supplemental data"
-        },
         "publication_year": {
             "title": "Publication year"
         },
@@ -150,35 +147,11 @@
         "journal": {
             "title": "Journal"
         },
-        "volume": {
-            "title": "Volume"
-        },
-        "issue": {
-            "title": "Issue"
-        },
-        "page": {
-            "title": "Page"
-        },
-        "data_used": {
-            "title": "Data used"
-        },
         "abstract": {
             "title": "Abstract"
         },
-        "supplementary_data.supplementary_data_type": {
-            "title": "Available data"
-        },
-        "supplementary_data.file_format": {
-            "title": "File format"
-        },
-        "supplementary_data.url": {
-            "title": "URL"
-        },
-        "supplementary_data.data_summary": {
-            "title": "Data summary"
-        },
-        "identifiers": {
-            "title": "identifiers"
+        "PMID": {
+            "title": "PMID"
         }
     },
     "boost_values": {
