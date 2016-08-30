@@ -57,8 +57,8 @@
                 "linkTo": "GenomicRegion"
             }
         },
-        "targets": {
-            "title": "Targets",
+        "target_of_mod": {
+            "title": "Target of Modification",
             "description": "The targeted gene or genomic region that is targeted by the modification.",
             "type": "string",
             "linkTo": "Target"

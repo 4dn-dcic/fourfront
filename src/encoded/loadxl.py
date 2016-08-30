@@ -19,6 +19,7 @@ ORDER = [
     'lab',
     'organism',
     'genomic_region',
+    'target',
     'publication',
     'document',
     'vendor',

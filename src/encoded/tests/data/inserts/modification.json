@@ -6,7 +6,8 @@
         "constructs": ["131106bc-8535-4448-903e-854af460b211"],
         "modified_regions": ["d1115d5e-40aa-43bc-b81c-32c70c9afb01"],
         "url": "https://www.cyclingnews.com",
-        "created_by": "b31106bc-8535-4448-903e-854af460b21f"
+        "created_by": "b31106bc-8535-4448-903e-854af460b21f",
+        "target_of_mod": "d1115d5e-40aa-43bc-b81c-32c70c9afb55"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b265",
@@ -14,7 +15,8 @@
         "modification_type": "Stable Transfection",
         "constructs": ["131106bc-8535-4448-903e-854af460b211"],
         "modified_regions": ["d1115d5e-40aa-43bc-b81c-32c70c9afb01", "d2215d5e-40aa-43bc-b81c-32c70c9afb01"],
-        "url": "https://www.cyclingnews.com"
+        "url": "https://www.cyclingnews.com",
+        "target_of_mod": "d1115d5e-40aa-43bc-b81c-32c70c9afb55"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b276",

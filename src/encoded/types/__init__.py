@@ -189,16 +189,16 @@ class Modification(Item):
 
     item_type = 'modification'
     schema = load_schema('encoded:schemas/modification.json')
-    embedded = ['constructs', 'modified_regions', 'created_by']
+    embedded = ['constructs', 'modified_regions', 'created_by', 'target_of_mod']
 
     @calculated_property(schema={
         "title": "Modification name",
         "description": "Modification name including type and target.",
         "type": "string",
     })
-    def modification_name(self, request, modification_type=None, target=None):
-        if modification_type and target:
-            return modification_type + " for " + target
+    def modification_name(self, request, modification_type=None, target_of_mod=None):
+        if modification_type and target_of_mod:
+            return modification_type + " for " + target_of_mod
         elif modification_type:
             return modification_type
         return "None"
@@ -270,6 +270,19 @@ class WorkflowRun(Item):
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
     embedded = ['workflow', 'tasks']
+
+
+@collection(
+    name='targets',
+    properties={
+        'title': 'Targets',
+        'description': 'Listing of genes and regions targeted for some purpose',
+    })
+class Target(Item):
+    """The Target class that describes a target of something."""
+
+    item_type = 'target'
+    schema = load_schema('encoded:schemas/target.json')
 
 
 @collection(

@@ -153,4 +153,4 @@ class ExperimentCaptureC(Experiment):
 
     item_type = 'experiment_capture_c'
     schema = load_schema('encoded:schemas/experiment_capture_c.json')
-    embedded = Experiment.embedded + ["digestion_enzyme", "submitted_by", "targeted_regions.genomic_region"]
+    embedded = Experiment.embedded + ["digestion_enzyme", "submitted_by", "targeted_regions"]
