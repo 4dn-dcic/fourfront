@@ -107,17 +107,11 @@
         },
         "published_by": {
             "title": "Published by",
-            "type": "array",
-            "uniqueItems": true,
-            "default": ["ENCODE"],
-            "items": {
-                "title": "Published by",
             "type": "string",
             "enum": [
                 "4DN",
                 "External"
                 ]
-            }
         }
     },
     "facets": {

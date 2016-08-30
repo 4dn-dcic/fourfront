@@ -7,7 +7,7 @@
         "date_published": "2012-09-06",
         "PMID": "PMID:22955616",
         "status": "published",
-        "published_by": ["External"],
+        "published_by": "External",
         "categories": ["integrative analysis"],
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
