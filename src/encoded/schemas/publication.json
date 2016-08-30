@@ -4,7 +4,7 @@
     "id": "/profiles/publication.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [ "title", "award", "lab" ],
+    "required": [ "title"],
     "identifyingProperties": ["uuid", "title"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -30,36 +30,23 @@
             "description": "Abstract of the publication or communication.",
             "type": "string"
         },
+        "contact_author": {
+            "title": "Authors",
+            "description": "Please select a user as the contact person",
+            "type": "string",
+            "comment": "for use of internal tracking",
+            "linkTo": "User"
+        },
         "authors": {
             "title": "Authors",
+            "description": "All authors, with format Bernstein BE, Birney E, Dunham I,...",
             "type": "string"
         },
         "date_published": {
             "title": "Date published",
-            "type": "string"
-        },
-        "date_revised": {
-            "title": "Date revised",
             "type": "string",
-            "anyOf": [
-                {"format": "date-time"},
-                {"format": "date"}
-            ]
-        },
-        "issue": {
-            "title": "Issue",
-            "description": "The issue of the publication.",
-            "type": "string"
-        },
-        "page": {
-            "title": "Page",
-            "description": "Pagination of the reference",
-            "type": "string"
-        },
-        "volume": {
-            "title": "Volume",
-            "description": "The volume of the publication.",
-            "type": "string"
+            "description": "please give the date YYYY-MM-DD format",
+            "format": "date"
         },
         "journal": {
             "title": "Journal",
@@ -81,72 +68,18 @@
                 "replaced"
             ]
         },
-        "identifiers": {
-            "title": "Identifiers",
-            "description": "The identifiers that reference data found in the object.",
-            "type": "array",
-            "uniqueItems": true,
-            "items": {
-                "title": "Identifier",
-                "description": "An identifier that references data found in the object.",
-                "type": "string",
-                "uniqueKey":  "publication:identifier",
-                "pattern": "^(PMID:[0-9]+|doi:10\\.[0-9]{4}[\\d\\s\\S\\:\\.\\/]+|PMCID:PMC[0-9]+|[0-9]{4}\\.[0-9]{4})$"
-            }
+        "PMID":{
+            "title": "Pubmed Identifier",
+            "description": "Pubmed ID for the published publications.",
+            "type": "string",
+            "uniqueKey":  "publication:PMID",
+            "pattern": "^PMID:[0-9]*"
         },
-        "supplementary_data": {
-            "title": "Supplementary_data",
-            "description": "Description of data found in the publication.",
-            "type": "array",
-            "default": [],
-            "items": {
-                "title": "Supplementary data details",
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                    "url": {
-                        "title": "URL",
-                        "description": "External resources with additional information or supplemental files associated with the publication.",
-                        "type": "string",
-                        "format": "uri"
-                    },
-                    "file_format": {
-                        "title": "File format",
-                        "description": "Description of the file format of files downloaded from the URL.",
-                        "type": "string",
-                        "enum" : [
-                            "BED",
-                            "TSV",
-                            "GTF",
-                            "VCF",
-                            "text",
-                            "other format"
-                            ]
-                    },
-                    "supplementary_data_type": {
-                        "title": "Supplementary data type",
-                        "description": "The type of supplementary data reader should expect.",
-                        "type": "string",
-                        "enum" : [
-                            "peak calls",
-                            "enhancer annotations",
-                            "RNA annotations",
-                            "promoter regions",
-                            "HMM regions",
-                            "HOT regions",
-                            "website",
-                            "motifs",
-                            "genomic annotations",
-                            "connectivity"
-                            ]
-                    },
-                    "data_summary": {
-                        "title": "Method summary",
-                        "description": "An explanation how the methods or results presented in the publication advance the understanding of how regions on the genome interact with each other.",
-                        "type": "string"
-                    }
-                }
-            }
+        "url": {
+            "title": "URL",
+            "description": "External resources with additional information or supplemental files associated with the publication.",
+            "type": "string",
+            "format": "uri"
         },
         "categories": {
             "title": "Categories",
@@ -181,17 +114,10 @@
                 "title": "Published by",
             "type": "string",
             "enum": [
-                "ENCODE",
-                "mouseENCODE",
-                "modENCODE",
-                "Roadmap",
-                "community"
+                "4DN",
+                "External"
                 ]
             }
-        },
-        "data_used": {
-            "title": "Data used",
-            "type": "string"
         }
     },
     "facets": {
@@ -264,7 +190,7 @@
     "boost_values": {
         "title": 1.0,
         "authors": 1.0,
-        "identifiers": 1.0,
+        "PMID": 1.0,
         "abstract": 1.0
     },
     "sort_by": {

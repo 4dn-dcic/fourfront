@@ -67,7 +67,7 @@ class Organism(Item):
 
 @collection(
     name='publications',
-    unique_key='publication:identifier',
+    unique_key='publication:PMID',
     properties={
         'title': 'Publications',
         'description': 'Publication pages',
@@ -77,14 +77,17 @@ class Publication(Item):
 
     item_type = 'publication'
     schema = load_schema('encoded:schemas/publication.json')
-    # embedded = ['datasets']
 
-    def unique_keys(self, properties):
-        """unique keys."""
-        keys = super(Publication, self).unique_keys(properties)
-        if properties.get('identifiers'):
-            keys.setdefault('alias', []).extend(properties['identifiers'])
-        return keys
+# I commented out the following part since I don't understand the function
+# I changed the identifies to PMID, and it is not a list anymore
+# but a string with a regex format
+
+    # def unique_keys(self, properties):
+    #     """unique keys."""
+    #     keys = super(Publication, self).unique_keys(properties)
+    #     if properties.get('identifiers'):
+    #         keys.setdefault('alias', []).extend(properties['identifiers'])
+    #     return keys
 
     @calculated_property(condition='date_published', schema={
         "title": "Publication year",
