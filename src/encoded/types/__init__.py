@@ -95,7 +95,7 @@ class Publication(Item):
     })
     def publication_year(self, date_published):
         """publication year."""
-        return date_published.partition(' ')[0]
+        return date_published.partition('-')[0]
 
 
 @collection(
