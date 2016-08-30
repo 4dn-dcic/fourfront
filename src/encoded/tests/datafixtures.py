@@ -297,7 +297,7 @@ def publication(testapp, lab, award):
         'title': "Test publication",
         'award': award['@id'],
         'lab': lab['@id'],
-        'identifiers': ["doi:10.1214/11-AOAS466"],
+        'PMID': "PMID:12345678",
     }
     return testapp.post_json('/publication', item).json['@graph'][0]
 
@@ -372,7 +372,7 @@ def biosample_2(testapp, human_biosource):
 
 @pytest.fixture
 def donor_1(testapp, lab, award):
-    item = {        
+    item = {
         'award': award['@id'],
         'lab': lab['@id'],
     }
@@ -380,7 +380,7 @@ def donor_1(testapp, lab, award):
 
 @pytest.fixture
 def donor_2(testapp, lab, award):
-    item = {        
+    item = {
         'award': award['@id'],
         'lab': lab['@id'],
     }
