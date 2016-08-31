@@ -3,7 +3,6 @@ var React = require('react');
 var jsonScriptEscape = require('../libs/jsonScriptEscape');
 var globals = require('./globals');
 var mixins = require('./mixins');
-var Navigation = require('./navigation');
 var home = require('./home');
 var Footer = require('./footer');
 var url = require('url');
@@ -278,7 +277,6 @@ var App = React.createClass({
                         <div className="loading-spinner"></div>
 
                             <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
-                                <Navigation />
                                 <div id="content" className="container" key={key}>
                                     {content}
                                 </div>
@@ -312,5 +310,4 @@ var App = React.createClass({
         }
     }
 });
-
 module.exports = App;

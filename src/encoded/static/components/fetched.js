@@ -1,6 +1,5 @@
 'use strict';
 var React = require('react');
-var cloneWithProps = require('react/lib/cloneWithProps');
 var parseAndLogError = require('./mixins').parseAndLogError;
 var globals = require('./globals');
 var ga = require('google-analytics');
@@ -127,10 +126,13 @@ var FetchedData = module.exports.FetchedData = React.createClass({
             React.Children.forEach(this.props.children, child => {
                 if (child.type === Param.type) {
                     // <Param> child component; add to array of <Param> child components with this.props.key of its name and calling `handleFetch`
-                    params.push(cloneWithProps(child, {
-                        key: child.props.name,
-                        handleFetch: this.handleFetch,
-                    }));
+                    // params.push(cloneWithProps(child, {
+                    //     key: child.props.name,
+                    //     handleFetch: this.handleFetch,
+                    // }));
+
+                    // Temporary change. TODO update with React.cloneElement (CloneWithProps is deprecated)
+                    children.push(child);
 
                     // Still communicating with server if handleFetch not yet called
                     if (this.state[child.props.name] === undefined) {
@@ -186,7 +188,7 @@ var FetchedData = module.exports.FetchedData = React.createClass({
         // Successfully got data. Display in the web page
         return (
             <div className="done">
-                {children.map((child, i) => cloneWithProps(child, _.extend({key: i}, this.props, this.state)))}
+                {children.map((child, i) => React.cloneElement(child, _.extend(this.props, this.state)))}
                 {params}
             </div>
         );
