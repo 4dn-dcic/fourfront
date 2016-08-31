@@ -93,7 +93,7 @@ var lookup_column = function (result, column) {
             // hardcode pmid link activity. TODO make more generic?
             } else if (cell.value.slice(0,5) === "PMID:") {
                 if (cell.value.length > 5){
-                    var pmid_link = 'http://www.ncbi.nlm.nih.gov/pubmed/?term=' + cell.value.slice(5);
+                    var pmid_link = 'http://www.ncbi.nlm.nih.gov/pubmed/' + cell.value.slice(5);
                     return (
                         <td key={index}><a href={pmid_link}>{cell.value}</a></td>
                     );
