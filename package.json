@@ -1,5 +1,5 @@
 {
-  "name": "encoded",
+  "name": "4DN",
   "version": "0.0.0",
   "description": "domready held back.",
   "scripts": {
@@ -11,7 +11,7 @@
   "author": "",
   "license": "MIT",
   "files": [],
-  "repository": "ENCODE-DCC/encoded",
+  "repository": "hms-dbmi/fourfront",
   "jest": {
     "rootDir": "src/encoded/static",
     "setupFiles": [
