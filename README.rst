@@ -13,6 +13,7 @@ ENCODE Metadata Database
 .. |Coverage| image:: https://coveralls.io/repos/github/hms-dbmi/fourfront/badge.svg?branch=master
 .. _Coverage: https://coveralls.io/github/hms-dbmi/fourfront?branch=master
 
+
 This is a fork from `ENCODE-DCC/encoded <https://github.com/ENCODE-DCC/encoded>`_ .  We are working to modularize the project and adapted to our needs for the 4D Nucleome project.
 
 Step 1: Verify that homebrew is working properly::

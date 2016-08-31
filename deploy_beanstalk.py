@@ -45,6 +45,8 @@ def deploy():
             sys.stdout.write(out)
             sys.stdout.flush()
 
+
+#this is a style error
 if __name__ == "__main__":
     ver = get_git_version()
     update_version(ver)

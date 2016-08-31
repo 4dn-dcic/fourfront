@@ -60,6 +60,7 @@ tests_require = [
     'pytest_exact_fixtures',
     'pytest-xdist',
     'pytest-cov',
+    'flake8',
 ]
 
 setup(
