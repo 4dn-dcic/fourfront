@@ -46,6 +46,17 @@
                 "linkTo": "Construct"
             }
         },
+        "guide_rnas": {
+            "title": "Guide RNAs",
+            "description": "The guide RNA sequences used in Crispr targetting.",
+            "type": "array",
+            "items": {
+                "title": "Guide RNA",
+                "description": "Sequence of the guide RNA - submit as DNA (i.e. T not U) can include the PAM motif that is not actually part of the transcribed target and should not include the tracrRNA so that the sequence submitted reflects the genomic sequence",
+                "type": "string",
+                "pattern": "^[ATGCN]+$"
+            }
+        },
         "modified_regions": {
             "title": "Modified Regions",
             "description": "The genomic regions being modified.",
