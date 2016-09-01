@@ -276,68 +276,61 @@ var Antibody = module.exports.Antibody = React.createClass({
 globals.listing_views.register(Antibody, 'AntibodyLot');
 
 var Biosample = module.exports.Biosample = React.createClass({
-    mixins: [PickerActionsMixin, AuditMixin],
     render: function() {
         var result = this.props.context;
-        var lifeStage = (result['life_stage'] && result['life_stage'] != 'unknown') ? ' ' + result['life_stage'] : '';
-        var age = (result['age'] && result['age'] != 'unknown') ? ' ' + result['age'] : '';
-        var ageUnits = (result['age_units'] && result['age_units'] != 'unknown' && age) ? ' ' + result['age_units'] : '';
-        var separator = (lifeStage || age) ? ',' : '';
-        var rnais = (result.rnais[0] && result.rnais[0].target && result.rnais[0].target.label) ? result.rnais[0].target.label : '';
-        var constructs;
-        if (result.model_organism_donor_constructs && result.model_organism_donor_constructs.length) {
-            constructs = result.model_organism_donor_constructs[0].target.label;
-        } else {
-            constructs = result.constructs[0] ? result.constructs[0].target.label : '';
-        }
-        var treatment = (result.treatments[0] && result.treatments[0].treatment_term_name) ? result.treatments[0].treatment_term_name : '';
-        var mutatedGenes = result.donor && result.donor.mutated_gene && result.donor.mutated_gene.label;
-
-        // Build the text of the synchronization string
-        var synchText;
-        if (result.synchronization) {
-            synchText = result.synchronization +
-                (result.post_synchronization_time ?
-                    ' + ' + result.post_synchronization_time + (result.post_synchronization_time_units ? ' ' + result.post_synchronization_time_units : '')
-                : '');
-        }
-
         return (
             <li>
                 <div className="clearfix">
-                    {this.renderActions()}
                     <div className="pull-right search-meta">
                         <p className="type meta-title">Biosample</p>
                         <p className="type">{' ' + result['accession']}</p>
-                        <p className="type meta-status">{' ' + result['status']}</p>
-                        <AuditIndicators audits={result.audit} id={this.props.context['@id']} search />
                     </div>
                     <div className="accession">
                         <a href={result['@id']}>
-                            {result['biosample_term_name'] + ' ('}
-                            <em>{result.organism.scientific_name}</em>
-                            {separator + lifeStage + age + ageUnits + ')'}
+                            {result['biosource_summary']}
                         </a>
                     </div>
                     <div className="data-row">
-                        <div><strong>Type: </strong>{result['biosample_type']}</div>
-                        {result.summary ? <div><strong>Summary: </strong>{globals.truncateString(result.summary, 80)}</div> : null}
-                        {rnais ? <div><strong>RNAi target: </strong>{rnais}</div> : null}
-                        {constructs ? <div><strong>Construct: </strong>{constructs}</div> : null}
-                        {treatment ? <div><strong>Treatment: </strong>{treatment}</div> : null}
-                        {mutatedGenes ? <div><strong>Mutated gene: </strong>{mutatedGenes}</div> : null}
-                        {result.culture_harvest_date ? <div><strong>Culture harvest date: </strong>{result.culture_harvest_date}</div> : null}
-                        {result.date_obtained ? <div><strong>Date obtained: </strong>{result.date_obtained}</div> : null}
-                        {synchText ? <div><strong>Synchronization timepoint: </strong>{synchText}</div> : null}
-                        <div><strong>Source: </strong>{result.source.title}</div>
+                        <div><strong>Modifications: </strong>{result['modifications_summary']}</div>
+                        <div><strong>Treatments: </strong>{result['treatments_summary']}</div>
                     </div>
                 </div>
-                <AuditDetail context={result} id={this.props.context['@id']} forcedEditLink />
             </li>
         );
     }
 });
 globals.listing_views.register(Biosample, 'Biosample');
+
+
+var Biosource = module.exports.Biosource = React.createClass({
+    render: function() {
+        var result = this.props.context;
+        var organism;
+        if (result['individual']){
+            organism = result['individual']['organism']['name'];
+        }
+        return (
+            <li>
+                <div className="clearfix">
+                    <div className="pull-right search-meta">
+                        <p className="type meta-title">Biosource</p>
+                        <p className="type">{' ' + result['accession']}</p>
+                    </div>
+                    <div className="accession">
+                        <a href={result['@id']}>
+                            {result['biosource_name']}
+                        </a>
+                    </div>
+                    <div className="data-row">
+                        <div><strong>{result['biosource_type']}</strong></div>
+                        <div><strong>{organism}</strong></div>
+                    </div>
+                </div>
+            </li>
+        );
+    }
+});
+globals.listing_views.register(Biosource, 'Biosource');
 
 
 var Experiment = module.exports.Experiment = React.createClass({
