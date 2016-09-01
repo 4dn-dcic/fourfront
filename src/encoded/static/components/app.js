@@ -4,6 +4,7 @@ var jsonScriptEscape = require('../libs/jsonScriptEscape');
 var globals = require('./globals');
 var mixins = require('./mixins');
 var home = require('./home');
+var Navigation = require('./navigation');
 var Footer = require('./footer');
 var url = require('url');
 var _ = require('underscore');
@@ -13,19 +14,11 @@ var portal = {
     portal_title: '4DN Data Portal',
     global_sections: [
         {id: 'data', sid:'sData', title: 'Data', children: [
-            {id: 'experiments', title: 'Experiments', url: '/search/?type=Experiment'},
-            {id: 'biosources', title: 'Biosources', url: '/search/?type=Biosource'}
+            {id: 'experiments', title: 'Experiments', url: '/'},
+            {id: 'biosources', title: 'Biosources', url: '/'}
         ]},
-        {id: 'tools', sid:'sTools', title: 'Tools', url: '/search/?type=Protocol&type=Software'},
-        {id: 'help', sid:'sHelp', title: 'Help', children: [
-            {id: 'gettingstarted', title: 'Getting started', url: '/help/getting-started/'},
-            {id: 'restapi', title: 'REST API', url: '/help/rest-api/'},
-            {id: 'projectoverview', title: 'Project overview', url: '/about/contributors/'},
-            {id: 'tutorials', title: 'Tutorials', url: '/tutorials/'},
-            {id: 'news', title: 'News', url: '/news'},
-            {id: 'acknowledgements', title: 'Acknowledgements', url: '/acknowledgements/'},
-            {id: 'contact', title: 'Contact', url: '/help/contacts/'}
-        ]}
+        {id: 'tools', sid:'sTools', title: 'Tools', url: '/broken'},
+        {id: 'help', sid:'sHelp', title: 'Help', url: '/'}
     ],
     user_section: [
             {id: 'login', title: 'Log in', url: '/'},
@@ -34,6 +27,32 @@ var portal = {
             {id: 'settings', title: 'Settings', url: '/'}
     ]
 };
+
+// var portal = {
+//     portal_title: '4DN Data Portal',
+//     global_sections: [
+//         {id: 'data', sid:'sData', title: 'Data', children: [
+//             {id: 'experiments', title: 'Experiments', url: '/search/?type=Experiment'},
+//             {id: 'biosources', title: 'Biosources', url: '/search/?type=Biosource'}
+//         ]},
+//         {id: 'tools', sid:'sTools', title: 'Tools', url: '/search/?type=Protocol&type=Software'},
+//         {id: 'help', sid:'sHelp', title: 'Help', children: [
+//             {id: 'gettingstarted', title: 'Getting started', url: '/help/getting-started/'},
+//             {id: 'restapi', title: 'REST API', url: '/help/rest-api/'},
+//             {id: 'projectoverview', title: 'Project overview', url: '/about/contributors/'},
+//             {id: 'tutorials', title: 'Tutorials', url: '/tutorials/'},
+//             {id: 'news', title: 'News', url: '/news'},
+//             {id: 'acknowledgements', title: 'Acknowledgements', url: '/acknowledgements/'},
+//             {id: 'contact', title: 'Contact', url: '/help/contacts/'}
+//         ]}
+//     ],
+//     user_section: [
+//             {id: 'login', title: 'Log in', url: '/'},
+//             {id: 'profile', title: 'Profile', url: '/'},
+//             {id: 'contextactions', title: 'Actions', url: '/'},
+//             {id: 'settings', title: 'Settings', url: '/'}
+//     ]
+// };
 
 
 // See https://github.com/facebook/react/issues/2323
@@ -231,20 +250,25 @@ var App = React.createClass({
             content = null;
         }else if (_.contains(lowerList, "home") || (currRoute === "" && lowerList[lowerList.length-2] === href_url.host)){
             var banners = [];
-            banners.push(<home.BannerLoader text='experiments' location='/search/?type=Experiment&award.project=4DN'/>);
-            banners.push(<home.BannerLoader text='experiments' location='/search/?type=Experiment&award.project=External'/>);
-            banners.push(<home.BannerLoader text='cell types' location='/search/?type=Biosource'/>);
+            // banners.push(<home.BannerLoader text='experiments' location='/search/?type=Experiment&award.project=4DN'/>);
+            // banners.push(<home.BannerLoader text='experiments' location='/search/?type=Experiment&award.project=External'/>);
+            // banners.push(<home.BannerLoader text='cell types' location='/search/?type=Biosource'/>);
+            banners.push(<div>Testing</div>);
+            banners.push(<div>Testing</div>);
+            banners.push(<div>Testing</div>);
             content = <home.HomePage banners={banners}/>;
             title = portal.portal_title;
         }else if (context) {
-            var ContentView = globals.content_views.lookup(context, current_action);
-            content = <ContentView context={context} />;
-            title = context.title || context.name || context.accession || context['@id'];
-            if (title && title != 'Home') {
-                title = title + ' – ' + portal.portal_title;
-            } else {
-                title = portal.portal_title;
-            }
+            content = <div>Placeholder content</div>
+            title = portal.portal_title;
+            // var ContentView = globals.content_views.lookup(context, current_action);
+            // content = <ContentView context={context} />;
+            // title = context.title || context.name || context.accession || context['@id'];
+            // if (title && title != 'Home') {
+            //     title = title + ' – ' + portal.portal_title;
+            // } else {
+            //     title = portal.portal_title;
+            // }
         }
         // Google does not update the content of 301 redirected pages
         var base;
@@ -277,6 +301,7 @@ var App = React.createClass({
                         <div className="loading-spinner"></div>
 
                             <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
+                                <Navigation />
                                 <div id="content" className="container" key={key}>
                                     {content}
                                 </div>
@@ -310,4 +335,5 @@ var App = React.createClass({
         }
     }
 });
+
 module.exports = App;

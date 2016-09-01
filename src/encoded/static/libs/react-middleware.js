@@ -17,6 +17,7 @@ var render = function (Component, body, res) {
     var markup;
     try {
         markup = ReactDOMServer.renderToString(<Component {...props} />);
+
     } catch (err) {
         props.context = {
             '@type': ['RenderingError', 'error'],
