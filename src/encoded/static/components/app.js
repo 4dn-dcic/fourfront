@@ -242,9 +242,9 @@ var App = React.createClass({
             content = <home.HomePage banners={banners}/>;
             title = portal.portal_title;
         }else if (context) {
-            console.log(context);
-            console.log(globals.content_views);
             var ContentView = globals.content_views.lookup(context, current_action);
+            console.log('_____');
+            console.log(current_action);
             content = <ContentView context={context} />;
             title = context.title || context.name || context.accession || context['@id'];
             if (title && title != 'Home') {
@@ -284,7 +284,7 @@ var App = React.createClass({
                             <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
                                 <Navigation />
                                 <div id="content" className="container" key={key}>
-                                    danks
+                                    {content}
                                 </div>
                                 {errors}
                                 <div id="layout-footer"></div>
