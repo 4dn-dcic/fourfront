@@ -30,23 +30,23 @@ var store = require('../store');
 //     });
 // };
 //
-// var parseAndLogError = module.exports.parseAndLogError = function (cause, response) {
-//     var promise = parseError(response);
-//     promise.then(data => {
-//         ga('send', 'exception', {
-//             'exDescription': '' + cause + ':' + data.code + ':' + data.title,
-//             'location': window.location.href
-//         });
-//     });
-//     return promise;
-// };
-//
-//
-// var contentTypeIsJSON = module.exports.contentTypeIsJSON = function (content_type) {
-//     return (content_type || '').split(';')[0].split('/').pop().split('+').pop() === 'json';
-// };
-//
-//
+var parseAndLogError = module.exports.parseAndLogError = function (cause, response) {
+    var promise = parseError(response);
+    promise.then(data => {
+        ga('send', 'exception', {
+            'exDescription': '' + cause + ':' + data.code + ':' + data.title,
+            'location': window.location.href
+        });
+    });
+    return promise;
+};
+
+
+var contentTypeIsJSON = module.exports.contentTypeIsJSON = function (content_type) {
+    return (content_type || '').split(';')[0].split('/').pop().split('+').pop() === 'json';
+};
+
+
 // module.exports.RenderLess = {
 //     shouldComponentUpdate: function (nextProps, nextState) {
 //         var key;
@@ -70,13 +70,13 @@ var store = require('../store');
 //     }
 // };
 //
-// class Timeout {
-//     constructor(timeout) {
-//         this.promise = new Promise(resolve => setTimeout(resolve.bind(undefined, this), timeout));
-//     }
-// }
-//
-//
+class Timeout {
+    constructor(timeout) {
+        this.promise = new Promise(resolve => setTimeout(resolve.bind(undefined, this), timeout));
+    }
+}
+
+
 module.exports.Persona = {
     childContextTypes: {
         fetch: React.PropTypes.func,
@@ -643,8 +643,8 @@ module.exports.HistoryAndTriggers = {
             this.requestAborted = false;
         }
         var keys = [];
-        for (var key in dictionary) {
-            if (dictionary.hasOwnProperty(key)) {
+        for (var key in newProps) {
+            if (newProps.hasOwnProperty(key)) {
                 keys.push(key);
             }
         }
