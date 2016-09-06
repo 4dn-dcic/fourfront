@@ -8,6 +8,7 @@ var Navigation = require('./navigation');
 var Footer = require('./footer');
 var url = require('url');
 var _ = require('underscore');
+var store = require('../store');
 
 //sid is to allow addition of supplementary ids to navbar link headings
 var portal = {
@@ -83,8 +84,7 @@ var App = React.createClass({
     getInitialState: function() {
         return {
             errors: [],
-            dropdownComponent: undefined,
-            content: undefined
+            dropdownComponent: undefined
         };
     },
 
@@ -297,9 +297,7 @@ var App = React.createClass({
                     }}></script>
                     <div id="slot-application">
                         <div id="application" className={appClass}>
-
                         <div className="loading-spinner"></div>
-
                             <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
                                 <Navigation />
                                 <div id="content" className="container" key={key}>
@@ -318,20 +316,26 @@ var App = React.createClass({
 
     statics: {
         getRenderedProps: function (document) {
-            var props = {};
             // Ensure the initial render is exactly the same
-            props.href = document.querySelector('link[rel="canonical"]').getAttribute('href');
+            store.dispatch({
+                type: 'href',
+                value: document.querySelector('link[rel="canonical"]').getAttribute('href')
+            });
+            // props.href = document.querySelector('link[rel="canonical"]').getAttribute('href');
             var script_props = document.querySelectorAll('script[data-prop-name]');
             for (var i = 0; i < script_props.length; i++) {
                 var elem = script_props[i];
-                var value = elem.text;
+                var elem_value = elem.text;
                 var elem_type = elem.getAttribute('type') || '';
                 if (elem_type == 'application/json' || elem_type.slice(-5) == '+json') {
-                    value = JSON.parse(value);
+                    elem_value = JSON.parse(elem_value);
                 }
-                props[elem.getAttribute('data-prop-name')] = value;
+                store.dispatch({
+                    type: elem.getAttribute('data-prop-name'),
+                    value: elem_value
+                });
             }
-            return props;
+
         }
     }
 });

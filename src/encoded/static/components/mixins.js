@@ -6,6 +6,7 @@ var url = require('url');
 var origin = require('../libs/origin');
 var serialize = require('form-serialize');
 var ga = require('google-analytics');
+var store = require('../store');
 //
 //
 // var parseError = module.exports.parseError = function (response) {
@@ -105,9 +106,13 @@ module.exports.Persona = {
         if (session['auth.userid']) {
             this.fetchSessionProperties();
         }
-        this.setProps({
-            href: window.location.href,
-            session_cookie: session_cookie
+        store.dispatch({
+            type: 'href',
+            value: document.querySelector('link[rel="canonical"]').getAttribute('href')
+        });
+        store.dispatch({
+            type: 'session_cookie',
+            value: session_cookie
         });
     },
 
@@ -135,7 +140,10 @@ module.exports.Persona = {
             request.etag = response.headers.get('ETag');
             var session_cookie = this.extractSessionCookie();
             if (this.props.session_cookie !== session_cookie) {
-                this.setProps({session_cookie: session_cookie});
+                store.dispatch({
+                    type: 'session_cookie',
+                    value: session_cookie
+                });
             }
         });
         return request;
@@ -295,7 +303,10 @@ module.exports.HistoryAndTriggers = {
 
     onHashChange: function (event) {
         // IE8/9
-        this.setProps({href: window.location.href});
+        store.dispatch({
+            type: 'href',
+            value: document.querySelector('link[rel="canonical"]').getAttribute('href')
+        });
     },
    triggerLogout: function (event) {
         console.log('Logging out (persona)');
@@ -318,7 +329,10 @@ module.exports.HistoryAndTriggers = {
         }, err => {
             parseError(err).then(data => {
                 data.title = 'Logout failure: ' + data.title;
-                this.setProps({context: data});
+                store.dispatch({
+                    type: 'context',
+                    value: data
+                });
             });
         });
     },
@@ -454,9 +468,13 @@ module.exports.HistoryAndTriggers = {
                 this.requestAborted = true;
                 this.requestCurrent = false;
             }
-            this.setProps({
-                context: event.state,
-                href: href  // href should be consistent with context
+            store.dispatch({
+                type: 'href',
+                value: href
+            });
+            store.dispatch({
+                type: 'context',
+                value: event.state
             });
         }
         // Always async update in case of server side changes.
@@ -529,7 +547,10 @@ module.exports.HistoryAndTriggers = {
             } else {
                 window.history.pushState(window.state, '', href + fragment);
             }
-            this.setProps({href: href + fragment});
+            store.dispatch({
+                type: 'href',
+                value: href + fragment
+            });
             return;
         }
 
@@ -542,7 +563,11 @@ module.exports.HistoryAndTriggers = {
 
         Promise.race([request, timeout.promise]).then(v => {
             if (v instanceof Timeout) {
-                this.setProps({'slow': true});
+                store.dispatch({
+                    type: 'slow',
+                    value: true
+                });
+
             } else {
                 // Request has returned data
                 this.requestCurrent = false;
@@ -572,8 +597,9 @@ module.exports.HistoryAndTriggers = {
             } else {
                 window.history.pushState(null, '', response_url + fragment);
             }
-            this.setProps({
-                href: response_url + fragment
+            store.dispatch({
+                type: 'href',
+                value: response_url + fragment
             });
             if (!response.ok) {
                 throw response;
@@ -587,8 +613,9 @@ module.exports.HistoryAndTriggers = {
             promise = promise.then(this.scrollTo);
         }
 
-        this.setProps({
-            contextRequest: request
+        store.dispatch({
+            type: 'contextRequest',
+            value: request
         });
         return request;
     },
@@ -606,16 +633,27 @@ module.exports.HistoryAndTriggers = {
         // gotten a response. If the requestAborted flag is set, then a request was aborted and so we have
         // the data for a Network Request Error. Don't render that, but clear the requestAboerted flag.
         // Otherwise we have good page data to render.
-        var newProps = {slow: false};
+        var newProps = {'slow': false};
         if (!this.requestAborted) {
             // Real page to render
-            newProps.context = data;
+            newProps['context'] = data;
         } else {
             // data holds network error. Don't render that, but clear the requestAborted flag so we're ready
             // for the next navigation click.
             this.requestAborted = false;
         }
-        this.setProps(newProps);
+        var keys = [];
+        for (var key in dictionary) {
+            if (dictionary.hasOwnProperty(key)) {
+                keys.push(key);
+            }
+        }
+        for (var key in keys) {
+            store.dispatch({
+                type: key,
+                value: keys[key]
+            });
+        }
     },
 
     componentDidUpdate: function () {
