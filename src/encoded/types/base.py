@@ -123,22 +123,15 @@ class Item(snovault.Item):
     STATUS_ACL = {
         # standard_status
         'released': ALLOW_CURRENT,
+        'current': ALLOW_CURRENT,
+        'revoked': ALLOW_CURRENT,
         'deleted': DELETED,
         'replaced': DELETED,
-        'current': ALLOW_CURRENT,
-        # 'revoked': ONLY_ADMIN_VIEW,
-        # IS there a function in dataset/experiment that causes revoked to
-        # behave separately there than here?
-
-        # file
-        # I don't think we currently have this
+        'in review by lab': ALLOW_LAB_SUBMITTER_EDIT,
+        'in review by project': ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT,
+        'released to project': ALLOW_VIEWING_GROUP_VIEW,
+        # for file
         'obsolete': ONLY_ADMIN_VIEW,
-
-        # dataset / experiment
-        'release ready': ALLOW_VIEWING_GROUP_VIEW,
-        'revoked': ALLOW_CURRENT,
-        # 'in review': ALLOW_LAB_SUBMITTER_EDIT,
-        'in review': ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT,
 
         # publication
         'published': ALLOW_CURRENT,
