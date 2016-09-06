@@ -7,29 +7,29 @@ var origin = require('../libs/origin');
 var serialize = require('form-serialize');
 var ga = require('google-analytics');
 var store = require('../store');
-//
-//
-// var parseError = module.exports.parseError = function (response) {
-//     if (response instanceof Error) {
-//         return Promise.resolve({
-//             status: 'error',
-//             title: response.message,
-//             '@type': ['AjaxError', 'Error']
-//         });
-//     }
-//     var content_type = response.headers.get('Content-Type') || '';
-//     content_type = content_type.split(';')[0];
-//     if (content_type == 'application/json') {
-//         return response.json();
-//     }
-//     return Promise.resolve({
-//         status: 'error',
-//         title: response.statusText,
-//         code: response.status,
-//         '@type': ['AjaxError', 'Error']
-//     });
-// };
-//
+
+
+var parseError = module.exports.parseError = function (response) {
+    if (response instanceof Error) {
+        return Promise.resolve({
+            status: 'error',
+            title: response.message,
+            '@type': ['AjaxError', 'Error']
+        });
+    }
+    var content_type = response.headers.get('Content-Type') || '';
+    content_type = content_type.split(';')[0];
+    if (content_type == 'application/json') {
+        return response.json();
+    }
+    return Promise.resolve({
+        status: 'error',
+        title: response.statusText,
+        code: response.status,
+        '@type': ['AjaxError', 'Error']
+    });
+};
+
 var parseAndLogError = module.exports.parseAndLogError = function (cause, response) {
     var promise = parseError(response);
     promise.then(data => {
@@ -47,29 +47,29 @@ var contentTypeIsJSON = module.exports.contentTypeIsJSON = function (content_typ
 };
 
 
-// module.exports.RenderLess = {
-//     shouldComponentUpdate: function (nextProps, nextState) {
-//         var key;
-//         if (nextProps) {
-//             for (key in nextProps) {
-//                 if (nextProps[key] !== this.props[key]) {
-//                     console.log('changed props: %s', key);
-//                     return true;
-//                 }
-//             }
-//         }
-//         if (nextState) {
-//             for (key in nextState) {
-//                 if (nextState[key] !== this.state[key]) {
-//                     console.log('changed state: %s', key);
-//                     return true;
-//                 }
-//             }
-//         }
-//         return false;
-//     }
-// };
-//
+module.exports.RenderLess = {
+    shouldComponentUpdate: function (nextProps, nextState) {
+        var key;
+        if (nextProps) {
+            for (key in nextProps) {
+                if (nextProps[key] !== this.props[key]) {
+                    console.log('changed props: %s', key);
+                    return true;
+                }
+            }
+        }
+        if (nextState) {
+            for (key in nextState) {
+                if (nextState[key] !== this.state[key]) {
+                    console.log('changed state: %s', key);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+};
+
 class Timeout {
     constructor(timeout) {
         this.promise = new Promise(resolve => setTimeout(resolve.bind(undefined, this), timeout));
@@ -219,18 +219,18 @@ module.exports.Persona = {
         });
     },
 };
-//
-// class UnsavedChangesToken {
-//     constructor(manager) {
-//         this.manager = manager;
-//     }
-//
-//     release() {
-//         this.manager.releaseUnsavedChanges(this);
-//     }
-// }
-//
-//
+
+class UnsavedChangesToken {
+    constructor(manager) {
+        this.manager = manager;
+    }
+
+    release() {
+        this.manager.releaseUnsavedChanges(this);
+    }
+}
+
+
 module.exports.HistoryAndTriggers = {
     SLOW_REQUEST_TIME: 250,
     // Detect HTML5 history support
@@ -460,7 +460,7 @@ module.exports.HistoryAndTriggers = {
         var request = this.props.contextRequest;
         var href = window.location.href;
         if (event.state) {
-            // Abort inflight xhr before setProps
+            // Abort inflight xhr before dispatching
             if (request && this.requestCurrent) {
                 // Abort the current request, then remember we've aborted it so that we don't render
                 // the Network Request Error page.

@@ -22,11 +22,11 @@ var Navigation = module.exports = React.createClass({
         };
     },
 
-    // getInitialState: function() {
-    //     return {
-    //         testWarning: !productionHost[url.parse(this.context.location_href).hostname]
-    //     };
-    // },
+    getInitialState: function() {
+        return {
+            testWarning: !productionHost[url.parse(this.context.location_href).hostname]
+        };
+    },
 
     handleClick: function(e) {
         e.preventDefault();
@@ -53,7 +53,7 @@ var Navigation = module.exports = React.createClass({
                     <Navbar brand={img} brandlink="/" label="main" navClasses="navbar-main" navID="navbar-icon">
                         <GlobalSections />
                         <UserActions />
-                        <Search />
+                        {/* REMOVE SEARCH FOR NOW: <Search />*/}
                     </Navbar>
                 </div>
                 {this.state.testWarning ?
@@ -199,8 +199,8 @@ var AccountActions = React.createClass({
         }
         var actions = this.context.listActionsFor('user').map(function (action) {
             return (
-                <div>
-                    <a href={action.href || ''} key={action.id} data-bypass={action.bypass} data-trigger={action.trigger} className="global-entry">
+                <div key={action.id} >
+                    <a href={action.href || ''} data-bypass={action.bypass} data-trigger={action.trigger} className="global-entry">
                         {action.title}
                     </a>
                 </div>

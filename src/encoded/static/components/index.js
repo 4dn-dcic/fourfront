@@ -9,6 +9,7 @@ require('./mixins');
 require('./statuslabel');
 require('./schema');
 require('./navigation');
+require('./search');
 
 
 module.exports = require('./app');
