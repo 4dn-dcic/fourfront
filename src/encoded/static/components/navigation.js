@@ -1,7 +1,7 @@
 'use strict';
 var React = require('react');
 var url = require('url');
-// var Login = require('./login');
+var Login = require('./login');
 var {Navbars, Navbar, Nav, NavItem} = require('../libs/bootstrap/navbar');
 var {DropdownMenu} = require('../libs/bootstrap/dropdown-menu');
 var productionHost = require('./globals').productionHost;
@@ -154,8 +154,7 @@ var UserActions = React.createClass({
         var session_properties = this.context.session_properties;
         var actions = this.context.listActionsFor('user_section').map(function (action) {
             if (action.id === "login"){
-                // return(<Login key={action.id} />);
-                return(<div key={action.id}>Login placeholder</div>)
+                return(<Login key={action.id} />);
             }else if (action.id === "profile"){
                 return(<AccountActions key={action.id} />);
             }else if (action.id === "contextactions") {
@@ -169,8 +168,7 @@ var UserActions = React.createClass({
             }
         });
         var active_icon;
-        // if (session_properties['auth.userid']) {
-        if (true) {
+        if (session_properties['auth.userid']) {
             active_icon = <img src="/static/img/User_active.svg" height= "30px" width="25px"/>
         }else{
             active_icon = <img src="/static/img/User_inactive.svg" height= "30px" width="25px"/>
@@ -195,8 +193,7 @@ var AccountActions = React.createClass({
 
     render: function() {
         var session_properties = this.context.session_properties;
-        // if (!session_properties['auth.userid']) {
-        if (true) {
+        if (!session_properties['auth.userid']) {
             // Logged out, so no user menu at all
             return(<a href="#" className="invis"/>);
         }
