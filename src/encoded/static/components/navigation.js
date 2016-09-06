@@ -154,12 +154,12 @@ var UserActions = React.createClass({
         var session_properties = this.context.session_properties;
         var actions = this.context.listActionsFor('user_section').map(function (action) {
             if (action.id === "login"){
-                // return(<Login />);
-                return(<div>Login placeholder</div>)
+                // return(<Login key={action.id} />);
+                return(<div key={action.id}>Login placeholder</div>)
             }else if (action.id === "profile"){
-                return(<AccountActions/>);
+                return(<AccountActions key={action.id} />);
             }else if (action.id === "contextactions") {
-                return(<ContextActions/>);
+                return(<ContextActions key={action.id} />);
             }else{
                 return(
                         <a href={action.href || ''} key={action.id} data-bypass={action.bypass} data-trigger={action.trigger} className="global-entry">

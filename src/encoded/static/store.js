@@ -1,9 +1,12 @@
 import { createStore, combineReducers } from 'redux'
 
+// Create a redux store to manage state for the whole application
+
 const href = function(state='', action) {
     switch (action.type) {
     case 'href':
-        return action.value
+        var val = action.value ? action.value : state;
+        return val
      default:
         return state
   }
@@ -12,7 +15,8 @@ const href = function(state='', action) {
 const context = function(state={}, action){
     switch (action.type) {
     case 'context':
-        return action.value
+        var val = action.value ? action.value : state;
+        return val
      default:
         return state
   }
@@ -21,7 +25,8 @@ const context = function(state={}, action){
 const inline = function(state='', action) {
     switch (action.type) {
     case 'inline':
-        return action.value
+        var val = action.value ? action.value : state;
+        return val
      default:
         return state
     }
@@ -30,7 +35,8 @@ const inline = function(state='', action) {
 const session_cookie = function(state='', action) {
     switch (action.type) {
     case 'session_cookie':
-        return action.value
+        var val = action.value ? action.value : state;
+        return val
      default:
         return state
     }
@@ -39,7 +45,8 @@ const session_cookie = function(state='', action) {
 const contextRequest = function(state={}, action) {
     switch (action.type) {
     case 'contextRequest':
-        return action.value
+        var val = action.value ? action.value : state;
+        return val
      default:
         return state
     }
@@ -48,7 +55,8 @@ const contextRequest = function(state={}, action) {
 const slow = function(state=false, action) {
     switch (action.type) {
     case 'slow':
-        return action.value
+        var val = action.value ? action.value : state;
+        return val
      default:
         return state
     }
