@@ -16,7 +16,7 @@ const context = function(state={}, action){
     switch (action.type) {
     case 'context':
         var val = action.value ? action.value : state;
-        return val
+        return val;
      default:
         return state
   }

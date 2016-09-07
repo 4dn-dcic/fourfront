@@ -469,13 +469,14 @@ module.exports.HistoryAndTriggers = {
                 this.requestCurrent = false;
             }
             store.dispatch({
-                type: 'href',
-                value: href
-            });
-            store.dispatch({
                 type: 'context',
                 value: event.state
             });
+            store.dispatch({
+                type: 'href',
+                value: href
+            });
+
         }
         // Always async update in case of server side changes.
         // Triggers standard analytics handling.
@@ -601,6 +602,7 @@ module.exports.HistoryAndTriggers = {
                 type: 'href',
                 value: response_url + fragment
             });
+
             if (!response.ok) {
                 throw response;
             }
@@ -612,7 +614,6 @@ module.exports.HistoryAndTriggers = {
         if (!options.replace) {
             promise = promise.then(this.scrollTo);
         }
-
         store.dispatch({
             type: 'contextRequest',
             value: request
@@ -642,18 +643,16 @@ module.exports.HistoryAndTriggers = {
             // for the next navigation click.
             this.requestAborted = false;
         }
-        var keys = [];
-        for (var key in newProps) {
-            if (newProps.hasOwnProperty(key)) {
-                keys.push(key);
-            }
-        }
-        for (var key in keys) {
+        if (newProps['context']) {
             store.dispatch({
-                type: key,
-                value: keys[key]
+                type: 'context',
+                value: data
             });
         }
+        store.dispatch({
+            type: 'slow',
+            value: false
+        });
     },
 
     componentDidUpdate: function () {

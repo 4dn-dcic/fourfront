@@ -126,13 +126,10 @@ var FetchedData = module.exports.FetchedData = React.createClass({
             React.Children.forEach(this.props.children, child => {
                 if (child.type === Param.type) {
                     // <Param> child component; add to array of <Param> child components with this.props.key of its name and calling `handleFetch`
-                    // params.push(cloneWithProps(child, {
-                    //     key: child.props.name,
-                    //     handleFetch: this.handleFetch,
-                    // }));
-
-                    // Temporary change. TODO update with React.cloneElement (CloneWithProps is deprecated)
-                    children.push(child);
+                    params.push(React.cloneElement(child, {
+                        key: child.props.name,
+                        handleFetch: this.handleFetch,
+                    }));
 
                     // Still communicating with server if handleFetch not yet called
                     if (this.state[child.props.name] === undefined) {

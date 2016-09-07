@@ -67,7 +67,8 @@ var App = React.createClass({
     getInitialState: function() {
         return {
             errors: [],
-            dropdownComponent: undefined
+            dropdownComponent: undefined,
+            content: undefined
         };
     },
 
@@ -243,14 +244,20 @@ var App = React.createClass({
             title = portal.portal_title;
         }else if (context) {
             var ContentView = globals.content_views.lookup(context, current_action);
-            console.log('_____');
-            console.log(current_action);
-            content = <ContentView context={context} />;
-            title = context.title || context.name || context.accession || context['@id'];
-            if (title && title != 'Home') {
-                title = title + ' – ' + portal.portal_title;
-            } else {
-                title = portal.portal_title;
+            if (ContentView){
+                content = <ContentView context={context} />;
+                title = context.title || context.name || context.accession || context['@id'];
+                if (title && title != 'Home') {
+                    title = title + ' – ' + portal.portal_title;
+                } else {
+                    title = portal.portal_title;
+                }
+            }else{
+                // This code is here to deal with non-simultaneous changing
+                // of props.href and props.context. This content below should
+                // never be displayed.
+                content=<div>ERROR</div>;
+                title=portal.portal_title;
             }
         }
         // Google does not update the content of 301 redirected pages
@@ -318,6 +325,7 @@ var App = React.createClass({
                     value: elem_value
                 });
             }
+
 
         }
     }
