@@ -47,6 +47,7 @@ install:
   -c buildout-travis.cfg)
 - pip install awsebcli
 - pip install coveralls
+- pip install codacy-coverage
 before_script:
 - |
   if test -n "$BROWSER"; then
@@ -101,6 +102,7 @@ after_success:
 - coveralls
 - "if test -n \"$NPM\"; then \n   cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js\n
   \  cat ./coverage/lcov.info | ./node_modules/.bin/codacy-coverage\n   rm -rf ./coverage\nfi\n"
+- if test -n "$UNIT"; then python-codacy-coverage -r coverage.xml; fi
 - python travis_after_all.py https://api.travis-ci.org
 - export $(cat .to_export_back) >> /dev/null
 - |
