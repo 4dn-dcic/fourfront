@@ -1,6 +1,5 @@
 'use strict';
 var React = require('react');
-var globals = require('./globals');
 var fetched = require('./fetched');
 var _ = require('underscore');
 var announcements_data = require('../data/announcements_data');

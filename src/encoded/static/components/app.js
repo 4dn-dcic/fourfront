@@ -4,6 +4,7 @@ var jsonScriptEscape = require('../libs/jsonScriptEscape');
 var globals = require('./globals');
 var mixins = require('./mixins');
 var home = require('./home');
+var ErrorPage = require('./error');
 var Navigation = require('./navigation');
 var Footer = require('./footer');
 var url = require('url');
@@ -237,9 +238,9 @@ var App = React.createClass({
             // banners.push(<home.BannerLoader text='experiments' location='/search/?type=Experiment&award.project=4DN'/>);
             // banners.push(<home.BannerLoader text='experiments' location='/search/?type=Experiment&award.project=External'/>);
             // banners.push(<home.BannerLoader text='cell types' location='/search/?type=Biosource'/>);
-            banners.push(<div>Testing</div>);
-            banners.push(<div>Testing</div>);
-            banners.push(<div>Testing</div>);
+            banners.push(<div> -- </div>);
+            banners.push(<div> -- </div>);
+            banners.push(<div> -- </div>);
             content = <home.HomePage banners={banners}/>;
             title = portal.portal_title;
         }else if (context) {
@@ -256,7 +257,7 @@ var App = React.createClass({
                 // This code is here to deal with non-simultaneous changing
                 // of props.href and props.context. This content below should
                 // never be displayed.
-                content=<div>ERROR</div>;
+                content = <ErrorPage />;
                 title=portal.portal_title;
             }
         }

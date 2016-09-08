@@ -1,4 +1,4 @@
-import { createStore, combineReducers } from 'redux'
+import { createStore, combineReducers } from 'redux';
 
 // Create a redux store to manage state for the whole application
 
