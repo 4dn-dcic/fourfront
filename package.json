@@ -62,6 +62,8 @@
     "react-bootstrap": "^0.30.3",
     "redux": "^3.5.2",
     "react-redux": "^4.4.5",
+    "classnames": "^2.2.5",
+    "react-forms": "2.0.0-beta33",
     "scriptjs": "^2.5.7",
     "source-map-support": "^0.2.7",
     "subprocess-middleware": "^0.1.0",

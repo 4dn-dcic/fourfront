@@ -259,7 +259,6 @@ var lookup_column = function (result, column) {
             var sortOn = this.state.sortOn;
             var reversed = this.state.reversed;
             var searchTerm = this.state.searchTerm;
-            this.state.searchTerm = searchTerm;
             var titles = context.columns || {};
             var data = this.state.data;
             var params = url.parse(this.context.location_href, true).query;
@@ -279,7 +278,7 @@ var lookup_column = function (result, column) {
                 );
             });
             var actions = (context.actions || []).map(action =>
-                <span className="table-actions">
+                <span key={action.href} className="table-actions">
                     <a href={action.href}>
                         <button className={'btn ' + action.className || ''}>{action.title}</button>
                     </a>
@@ -370,7 +369,7 @@ var lookup_column = function (result, column) {
             }
             var cellIndex = target.cellIndex;
             var reversed = '';
-            var sorton = this.refs.sorton.getDOMNode();
+            var sorton = this.refs.sorton;
             if (this.props.defaultSortOn !== cellIndex) {
                 sorton.value = cellIndex;
             } else {
@@ -379,7 +378,7 @@ var lookup_column = function (result, column) {
             if (this.state.sortOn == cellIndex) {
                 reversed = !this.state.reversed || '';
             }
-            this.refs.reversed.getDOMNode().value = reversed;
+            this.refs.reversed.value = reversed;
             event.preventDefault();
             event.stopPropagation();
             this.submit();
@@ -400,7 +399,7 @@ var lookup_column = function (result, column) {
 
         submit: function () {
             // form.submit() does not fire onsubmit handlers...
-            var target = this.refs.form.getDOMNode();
+            var target = this.refs.form;
 
             // IE8 does not support the Event constructor
             if (!this.hasEvent) {
@@ -413,7 +412,7 @@ var lookup_column = function (result, column) {
         },
 
         clearFilter: function (event) {
-            this.refs.q.getDOMNode().value = '';
+            this.refs.q.value = '';
             this.submitTimer = setTimeout(this.submit);
         },
 

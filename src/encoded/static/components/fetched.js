@@ -185,7 +185,7 @@ var FetchedData = module.exports.FetchedData = React.createClass({
         // Successfully got data. Display in the web page
         return (
             <div className="done">
-                {children.map((child, i) => React.cloneElement(child, _.extend(this.props, this.state)))}
+                {children.map((child, i) => React.cloneElement(child, _.extend({key: i}, this.props, this.state)))}
                 {params}
             </div>
         );
