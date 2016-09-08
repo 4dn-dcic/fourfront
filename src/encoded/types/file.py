@@ -162,7 +162,7 @@ class File(Item):
                 else:
                     # case two we have relations but not the one we need
                     for target_relation in target_fl.properties['related_files']:
-                        if target_relation['file'] == acc:
+                        if target_relation.get('file') == acc:
                             break
                     else:
                         # make data for new related_files
