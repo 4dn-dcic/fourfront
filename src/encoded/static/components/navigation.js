@@ -109,8 +109,8 @@ var ContextActions = React.createClass({
     render: function() {
         var actions = this.context.listActionsFor('context').map(function(action) {
             return (
-                <div>
-                    <a href={action.href} key={action.name} className="global-entry">
+                <div key={action.name} >
+                    <a href={action.href} className="global-entry">
                         <i className="icon icon-pencil"></i> {action.title}
                     </a>
                 </div>
