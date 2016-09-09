@@ -111,20 +111,29 @@ var FetchedData = module.exports.FetchedData = React.createClass({
         return {};
     },
 
+    componentDidMount: function() {
+        this._isMounted = true;
+    },
+
+    componentWillUnmount: function() {
+        this._isMounted = false;
+    },
+
     handleFetch: function(result) {
         // Set state to returned search result data to cause rerender of child components
-        this.setState(result);
+        if (this._isMounted){
+            this.setState(result);
+        }
     },
 
     render: function () {
         var params = [];
         var communicating = false;
         var children = [];
-
         // Collect <Param> and non-<Param> child components into appropriate arrays
         if (this.props.children) {
             React.Children.forEach(this.props.children, child => {
-                if (child.type === Param.type) {
+                if (child.type === Param) {
                     // <Param> child component; add to array of <Param> child components with this.props.key of its name and calling `handleFetch`
                     params.push(React.cloneElement(child, {
                         key: child.props.name,

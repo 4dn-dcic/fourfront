@@ -8,7 +8,6 @@ var fetched = require('./fetched');
 var ga = require('google-analytics');
 var _ = require('underscore');
 
-
 var filterValue = function(value) {
     if (Array.isArray(value)) {
         value.map(filterValue);
@@ -559,5 +558,6 @@ var JSONSchemaForm = module.exports.JSONSchemaForm = React.createClass({
     render: function() {
         return <Form {...this.props} defaultValue={this.state.value} schema={this.state.schema} />;
     }
+
 
 });

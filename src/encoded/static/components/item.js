@@ -43,13 +43,14 @@ var Fallback = module.exports.Fallback = React.createClass({
 var ItemLoader = React.createClass({
     mixins: [AuditMixin],
     render: function() {
-        var schemas = {};
         return (
-            <Item context={this.props.context} schemas={schemas}/>
+            <fetched.FetchedData>
+                <fetched.Param name="schemas" url="/profiles/" />
+                <Item context={this.props.context} />
+            </fetched.FetchedData>
         );
     }
 });
-
 
 var Item = React.createClass({
     render: function() {
@@ -101,9 +102,9 @@ var IPanel = module.exports.IPanel = React.createClass({
                         <dl className="key-value">
                             {sortKeys.map(function(ikey, idx){
                                 return (
-                                    <div key={idx} data-test="term-name">
-                                      {formKey(tips,ikey)}
-                                      <dd>{formValue(schemas,context[ikey])}</dd>
+                                    <div key={ikey} data-test="term-name">
+                                        {formKey(tips,ikey)}
+                                        <dd>{formValue(schemas,context[ikey])}</dd>
                                     </div>
                                 );
                             })}
@@ -141,7 +142,7 @@ globals.listing_titles.fallback = function () {
     return title;
 };
 
-
+// Removed this functionality for now...
 var ItemEdit = module.exports.ItemEdit = React.createClass({
     contextTypes: {
         navigate: React.PropTypes.func
@@ -247,7 +248,7 @@ var formValue = function (schemas, item) {
         toReturn.push(<SubIPanel schemas={schemas} content={item}/>);
     }else{
         if (typeof item === 'string' && item.charAt(0) === '/') {
-            toReturn.push(<a href={item}>{item}</a>)
+            toReturn.push(<a key={item} href={item}>{item}</a>)
         }else{
             toReturn.push(item);
         }
@@ -307,7 +308,7 @@ var Subview = React.createClass({
                           <dl className="key-value sub-descriptions">
                               {sortKeys.map(function(ikey, idx){
                                   return (
-                                    <div className="sub-entry" key={idx} data-test="term-name">
+                                    <div className="sub-entry" key={ikey} data-test="term-name">
                                       {formKey(tips,ikey)}
                                       <dd>{formValue(schemas, item[ikey])}</dd>
                                     </div>

@@ -122,6 +122,14 @@ var lookup_column = function (result, column) {
             return state;
         },
 
+        componentDidMount: function() {
+            this._isMounted = true;
+        },
+
+        componentWillUnmount: function() {
+            this._isMounted = false;
+        },
+
         componentWillReceiveProps: function (nextProps, nextContext) {
             var updateData = false;
             if (nextProps.context !== this.props.context) {
@@ -154,7 +162,9 @@ var lookup_column = function (result, column) {
                 reversed: params.reversed || false,
                 searchTerm: params.q || ''
             };
-            this.setState(state);
+            if(this._isMounted){
+                this.setState(state);
+            }
             return state;
         },
 
@@ -174,7 +184,9 @@ var lookup_column = function (result, column) {
                     columns.push(column);
                 }
             }
-            this.setState({columns: columns});
+            if(this._isMounted){
+                this.setState({columns: columns});
+            }
             return columns;
         },
 
@@ -328,7 +340,7 @@ var lookup_column = function (result, column) {
                             {this.props.showControls ? <tr className="nosort table-controls">
                                 <th colSpan={columns.length}>
                                     {loading_or_total}
-                                    {actions}
+                                    {/*{actions} REMOVE ACTIONS FOR NOW*/}
                                     <form ref="form" className="table-filter" onKeyUp={this.handleKeyUp}
                                         data-skiprequest="true" data-removeempty="true">
                                         <input ref="q" disabled={this.state.communicating || undefined}

@@ -33,8 +33,8 @@ var portal = {
     ],
     user_section: [
             {id: 'login', title: 'Log in', url: '/'},
-            {id: 'profile', title: 'Profile', url: '/'},
-            {id: 'contextactions', title: 'Actions', url: '/'}
+            {id: 'profile', title: 'Profile', url: '/'}
+            // Remove context actions for now{id: 'contextactions', title: 'Actions', url: '/'}
     ]
 };
 

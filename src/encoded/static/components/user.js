@@ -189,16 +189,16 @@ var ImpersonateUserForm = React.createClass({
 
     render: function() {
         var ReactForms = require('react-forms');
-        // var ImpersonateUserSchema = ReactForms.Mapping({}, {
-        //     userid: ReactForms.Scalar({
-        //         label: 'User',
-        //         hint: 'Enter the email of the user you want to impersonate.',
-        //     }),
-        // });
-        // var form = <Form schema={ImpersonateUserSchema} submitLabel="Submit"
-        //       method="POST" action="/impersonate-user"
-        //       onFinish={this.finished} />;
-        var form = <div>Form will go here...</div>;
+        var ImpersonateUserSchema = ReactForms.Mapping({}, {
+            userid: ReactForms.Scalar({
+                label: 'User',
+                hint: 'Enter the email of the user you want to impersonate.',
+            }),
+        });
+        var form = <Form schema={ImpersonateUserSchema} submitLabel="Submit"
+              method="POST" action="/impersonate-user"
+              onFinish={this.finished} />;
+        // var form = <div>Form will go here...</div>;
         return (
             <div>
                 <h2>Impersonate User</h2>
