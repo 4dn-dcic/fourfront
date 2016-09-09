@@ -257,7 +257,7 @@ var App = React.createClass({
                 // of props.href and props.context. This content below should
                 // never be displayed.
                 content = <ErrorPage />;
-                title=portal.portal_title;
+                title="Not Found";
             }
         }
         // Google does not update the content of 301 redirected pages

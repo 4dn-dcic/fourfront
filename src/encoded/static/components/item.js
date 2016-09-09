@@ -12,31 +12,35 @@ var AuditDetail = audit.AuditDetail;
 var AuditMixin = audit.AuditMixin;
 var JSONSchemaForm = form.JSONSchemaForm;
 var Table = collection.Table;
+var ErrorPage = require('./error');
 
 var Fallback = module.exports.Fallback = React.createClass({
     contextTypes: {
         location_href: React.PropTypes.string
     },
 
-    render: function() {
-        var url = require('url');
-        var context = this.props.context;
-        var title = typeof context.title == "string" ? context.title : url.parse(this.context.location_href).path;
-        return (
-            <div className="view-item">
-                <header className="row">
-                    <div className="col-sm-12">
-                        <h2>{title}</h2>
-                    </div>
-                </header>
-                {typeof context.description == "string" ? <p className="description">{context.description}</p> : null}
-                <section className="view-detail panel">
-                    <div className="container">
-                        <pre>{JSON.stringify(context, null, 4)}</pre>
-                    </div>
-                </section>
-            </div>
-        );
+    // render: function() {
+    //     var url = require('url');
+    //     var context = this.props.context;
+    //     var title = typeof context.title == "string" ? context.title : url.parse(this.context.location_href).path;
+    //     return (
+    //         <div className="view-item">
+    //             <header className="row">
+    //                 <div className="col-sm-12">
+    //                     <h2>{title}</h2>
+    //                 </div>
+    //             </header>
+    //             {typeof context.description == "string" ? <p className="description">{context.description}</p> : null}
+    //             <section className="view-detail panel">
+    //                 <div className="container">
+    //                     <pre>{JSON.stringify(context, null, 4)}</pre>
+    //                 </div>
+    //             </section>
+    //         </div>
+    //     );
+    // }
+    render: function(){
+        return(<ErrorPage />);
     }
 });
 
