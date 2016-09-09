@@ -35,6 +35,9 @@ ALLOW_EVERYONE_VIEW = [
     (Allow, Everyone, 'view'),
 ] + ONLY_ADMIN_VIEW
 
+ALLOW_LAB_MEMBER_VIEW = [
+    (Allow, 'role.lab_member', 'view'),
+] + ONLY_ADMIN_VIEW
 
 ALLOW_VIEWING_GROUP_VIEW = [
     (Allow, 'role.viewing_group_member', 'view'),
@@ -43,7 +46,7 @@ ALLOW_VIEWING_GROUP_VIEW = [
 ALLOW_LAB_SUBMITTER_EDIT = [
     (Allow, 'role.viewing_group_member', 'view'),
     (Allow, 'role.lab_submitter', 'edit'),
-] + ONLY_ADMIN_VIEW
+] + ALLOW_LAB_MEMBER_VIEW
 
 ALLOW_CURRENT_AND_SUBMITTER_EDIT = [
     (Allow, Everyone, 'view'),
@@ -162,6 +165,9 @@ class Item(snovault.Item):
         if 'lab' in properties:
             lab_submitters = 'submits_for.%s' % properties['lab']
             roles[lab_submitters] = 'role.lab_submitter'
+            # add lab_member as well
+            lab_member = 'lab.%s' % properties['lab']
+            roles[lab_member] = 'role.lab_member'
         if 'award' in properties:
             viewing_group = _award_viewing_group(properties['award'], find_root(self))
             if viewing_group is not None:

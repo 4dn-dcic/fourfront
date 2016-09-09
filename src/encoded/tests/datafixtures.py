@@ -42,6 +42,8 @@ def wrangler(testapp):
         'email': 'wrangler@example.org',
         'groups': ['admin'],
     }
+
+    import pdb; pdb.set_trace()
     # User @@object view has keys omitted.
     res = testapp.post_json('/user', item)
     return testapp.get(res.location).json
@@ -59,6 +61,20 @@ def submitter(testapp, lab, award):
     # User @@object view has keys omitted.
     res = testapp.post_json('/user', item)
     return testapp.get(res.location).json
+
+
+@pytest.fixture
+def lab_viewer(testapp, lab, award):
+    item = {
+        'first_name': 'ENCODE',
+        'last_name': 'lab viewer',
+        'email': 'encode_viewer@example.org',
+        'lab': lab['name'],
+    }
+    # User @@object view has keys omitted.
+    res = testapp.post_json('/user', item)
+    return testapp.get(res.location).json
+
 
 @pytest.fixture
 def remc_submitter(testapp, remc_lab, remc_award):

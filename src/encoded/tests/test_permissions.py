@@ -70,6 +70,10 @@ def submitter_testapp(submitter, app, external_tx, zsa_savepoints):
 
 
 @pytest.fixture
+def lab_viewer_testapp(lab_viewer, app, external_tx, zsa_savepoints):
+    return remote_user_testapp(app, lab_viewer['uuid'])
+
+@pytest.fixture
 def viewing_group_member_testapp(viewing_group_member, app, external_tx, zsa_savepoints):
     return remote_user_testapp(app, viewing_group_member['uuid'])
 
@@ -88,7 +92,7 @@ def test_wrangler_post_non_lab_collection(wrangler_testapp):
     return wrangler_testapp.post_json('/organism', item, status=201)
 
 
-def test_submitter_post_non_lab_collection(submitter_testapp):
+def test_submitter_cant_post_non_lab_collection(submitter_testapp):
     item = {
         'name': 'human',
         'scientific_name': 'Homo sapiens',
@@ -124,6 +128,8 @@ def test_submitter_view_experiement(submitter_testapp, submitter, lab, award):
                   'status':'in review'}
     res = submitter_testapp.post_json('/experiments-hic', experiment, status=201)
     submitter_testapp.get(res.json['@graph'][0]['@id'], status=200) 
+
+
 
 def test_user_view_details_admin(submitter, access_key, testapp):
     res = testapp.get(submitter['@id'])
@@ -176,6 +182,9 @@ def test_users_view_basic_indexer(submitter, indexer_testapp):
 def test_viewing_group_member_view(viewing_group_member_testapp, experiment):
     viewing_group_member_testapp.get(experiment['@id'], status=200)
 
+
+def test_lab_viewer_view(lab_viewer_testapp, experiment):
+    lab_viewer_testapp.get(experiment['@id'], status=200)
 
 def test_submitter_patch_lab_disallowed(submitter, other_lab, submitter_testapp):
     res = submitter_testapp.get(submitter['@id'])
