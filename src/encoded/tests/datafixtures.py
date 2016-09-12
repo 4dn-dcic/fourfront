@@ -43,7 +43,6 @@ def wrangler(testapp):
         'groups': ['admin'],
     }
 
-    import pdb; pdb.set_trace()
     # User @@object view has keys omitted.
     res = testapp.post_json('/user', item)
     return testapp.get(res.location).json
