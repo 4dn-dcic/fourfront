@@ -106,9 +106,15 @@ module.exports.Persona = {
         if (session['auth.userid']) {
             this.fetchSessionProperties();
         }
+        var query_href;
+        if(document.querySelector('link[rel="canonical"]')){
+            query_href = document.querySelector('link[rel="canonical"]').getAttribute('href');
+        }else{
+            query_href = this.props.href;
+        }
         store.dispatch({
             type: 'href',
-            value: document.querySelector('link[rel="canonical"]').getAttribute('href')
+            value: query_href
         });
         store.dispatch({
             type: 'session_cookie',
@@ -151,7 +157,12 @@ module.exports.Persona = {
 
     extractSessionCookie: function () {
         var cookie = require('cookie-monster');
-        return cookie(document).get('session');
+        if (cookie(document).get('session')){
+            return cookie(document).get('session');
+        }else{
+            return this.props.session_cookie;
+        }
+
     },
 
     componentWillReceiveProps: function (nextProps) {

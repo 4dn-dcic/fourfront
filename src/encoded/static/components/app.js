@@ -265,6 +265,7 @@ var App = React.createClass({
         if (({'http://www.encodeproject.org/': 1, 'http://encodeproject.org/': 1})[canonical]) {
             base = canonical = 'https://www.encodeproject.org/';
             this.historyEnabled = false;
+
         }
         return (
             <html lang="en">
