@@ -28,6 +28,7 @@ describe("Server rendering", function () {
         ReactDOMServer = require('react-dom/server');
         App = require('..');
         store = require('../../store');
+        // test dispatching some values to store
         store.dispatch({
             type: 'href',
             value: home_url
@@ -35,6 +36,22 @@ describe("Server rendering", function () {
         store.dispatch({
             type: 'context',
             value: home
+        });
+        store.dispatch({
+            type: 'inline',
+            value: ''
+        });
+        store.dispatch({
+            type: 'session_cookie',
+            value: ''
+        });
+        store.dispatch({
+            type: 'contextRequest',
+            value: {}
+        });
+        store.dispatch({
+            type: 'slow',
+            value: false
         });
         var props = store.getState();
         var server_app = <App {...props} />;
