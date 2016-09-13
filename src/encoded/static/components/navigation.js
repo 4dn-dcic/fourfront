@@ -151,38 +151,32 @@ var UserActions = React.createClass({
     },
 
     render: function() {
-        var login = <Login key='login' />;
         var session_properties = this.context.session_properties;
         var actions = this.context.listActionsFor('user_section').map(function (action) {
             if (action.id === "login"){
-                return(login);
-            }else if (action.id === "profile"){
-                return(<AccountActions key={action.id} />);
-            }else if (action.id === "contextactions") {
-                return(<ContextActions key={action.id} />);
-            }else{
-                return(
-                        <a href={action.href || ''} key={action.id} data-bypass={action.bypass} data-trigger={action.trigger} className="global-entry">
+                return(<Login key={action.id} />);
+            }else if (action.id === "accountactions"){
+                // link to registration page if logged out or account actions if logged in
+                if (!session_properties['auth.userid']) {
+                    return(
+                        <a href={action.url || ''} key={action.id} className="global-entry">
                             {action.title}
                         </a>
                     );
+                }else{
+                    return(<AccountActions key={action.id} />);
+                }
+            }else if (action.id === "contextactions") {
+                return(<ContextActions key={action.id} />);
             }
         });
-        var user_content;
-        if (session_properties['auth.userid']) {
-            user_content =  <NavItem dropdownId="context" dropdownTitle='Account'>
-                                <DropdownMenu label="context">
-                                    {actions}
-                                </DropdownMenu>
-                            </NavItem>;
-        }else{
-            user_content =  <div className='nav-solo'>
-                                {login}
-                            </div>;
-        }
         return (
                 <Nav right={true} acct={true}>
-                    {user_content}
+                    <NavItem dropdownId="context" dropdownTitle='Account'>
+                        <DropdownMenu label="context">
+                            {actions}
+                        </DropdownMenu>
+                    </NavItem>
                 </Nav>
         );
     }

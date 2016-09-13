@@ -16,10 +16,11 @@ var store = require('../store');
 var portal = {
     portal_title: '4DN Data Portal',
     global_sections: [
-        {id: 'data', sid:'sData', title: 'Data', children: [
-            {id: 'experiments', title: 'Experiments', url: '/search/?type=Experiment'},
-            {id: 'biosources', title: 'Biosources', url: '/search/?type=Biosource'}
-        ]},
+        {id: 'browse', sid:'sBrowse', title: 'Browse', url: '/search/?type=Experiment'},
+        // {id: 'data', sid:'sData', title: 'Data', children: [
+        //     {id: 'experiments', title: 'Experiments', url: '/search/?type=Experiment'},
+        //     {id: 'biosources', title: 'Biosources', url: '/search/?type=Biosource'}
+        // ]},
         {id: 'help', sid:'sHelp', title: 'Help', children: [
             {id: 'portalusage', title: 'Portal usage', url: '/portal-usage/'},
             {id: 'announcements', title: 'Announcements', url: '/announcements/'},
@@ -28,7 +29,7 @@ var portal = {
     ],
     user_section: [
             {id: 'login', title: 'Log in', url: '/'},
-            {id: 'profile', title: 'Profile', url: '/'}
+            {id: 'accountactions', title: 'Register', url: '/register/'}
             // Remove context actions for now{id: 'contextactions', title: 'Actions', url: '/'}
     ]
 };

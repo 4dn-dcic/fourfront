@@ -268,8 +268,9 @@
 .fourDN-section-toggle{
 	color: #999999;
 	text-decoration: none !important;
-	&:hover {
-		color: #000000 !important;
+	&:hover,
+	&:focus {
+		color: #000000;
 	}
 }
 

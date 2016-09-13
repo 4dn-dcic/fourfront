@@ -16,9 +16,7 @@ var Login = React.createClass({
     },
     render: function() {
         var session = this.context.session;
-        var disabled = !session;
         var userActionRender;
-
         // first case is if user is not logged in
         if (!(session && session['auth.userid'])) {
 			userActionRender = <LoginBoxes isRefreshing={this.handleToggle}/>
