@@ -470,8 +470,8 @@ def format_facets(es_results, facets, used_filters, schemas, total):
         if agg_name not in aggregations:
             continue
         terms = aggregations[agg_name][agg_name]['buckets']
-        # if len(terms) < 2:
-        #     continue
+        if len(terms) < 2:
+            continue
         result.append({
             'field': field,
             'title': facet.get('title', field),

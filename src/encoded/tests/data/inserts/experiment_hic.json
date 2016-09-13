@@ -54,8 +54,7 @@
         "protocol": "131106bc-8535-4448-903e-854af460b244",
         "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEX067APU1"}],
         "submitted_by": "admin@admin.com",
-        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
-        "experiment_sets":["431106bc-8535-4448-903e-854af460b260"]
+        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"]
     },
     {
         "accession":"4DNEX067APV1",
@@ -80,8 +79,7 @@
         "protocol": "131106bc-8535-4448-903e-854af460b244",
         "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEX067APU1"}],
         "submitted_by": "wrangler@wrangler.com",
-        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
-        "experiment_sets":["431106bc-8535-4448-903e-854af460b260"]
+        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"]
     },
     {
         "accession":"4DNEX067APY1",
@@ -110,8 +108,7 @@
         "protocol": "131106bc-8535-4448-903e-854af460b244",
         "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEX067APU1"}],
         "submitted_by": "admin@admin.com",
-        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
-        "experiment_sets":["431106bc-8535-4448-903e-854af460b260"]
+        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"]
     },
     {
         "accession":"4DNEX067APZ1",

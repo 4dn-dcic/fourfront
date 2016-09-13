@@ -53,5 +53,69 @@
             "type": "string",
             "default": ""
         }
+    },
+    "facets": {
+        "experiments_in_set": {
+            "title": "Experiments"
+        },
+        "experiments_in_set.experiment_summary":{
+            "title": "Experiment summary"
+        },
+        "experiments_in_set.award.project": {
+            "title": "Project"
+        },
+        "experiments_in_set.biosample.biosource.individual.organism.name": {
+            "title": "Organism"
+        },
+        "experiments_in_set.biosample.biosource.biosource_type": {
+            "title": "Biosource type"
+        },
+        "experiments_in_set.biosample.biosource_summary": {
+            "title": "Biosource"
+        },
+        "experiments_in_set.digestion_enzyme.name": {
+            "title": "Enzyme"
+        },
+        "experiments_in_set.biosample.modifications_summary": {
+            "title": "Modifications"
+        },
+        "experiments_in_set.biosample.treatments_summary": {
+            "title": "Treatments"
+        },
+        "experiments_in_set.lab.title": {
+            "title": "Lab"
+        }
+    },
+    "columns": {
+        "experiments_in_set": {
+            "title": "Experiments"
+        },
+        "experiments_in_set.experiment_summary":{
+            "title": "Experiment summary"
+        },
+        "experiments_in_set.award.project": {
+            "title": "Project"
+        },
+        "experiments_in_set.biosample.biosource.individual.organism.name": {
+            "title": "Organism"
+        },
+        "experiments_in_set.biosample.biosource.biosource_type": {
+            "title": "Biosource type"
+        },
+        "experiments_in_set.biosample.biosource_summary": {
+            "title": "Biosource"
+        },
+        "experiments_in_set.digestion_enzyme.name": {
+            "title": "Enzyme"
+        },
+        "experiments_in_set.biosample.modifications_summary": {
+            "title": "Modifications"
+        },
+        "experiments_in_set.biosample.treatments_summary": {
+            "title": "Treatments"
+        },
+        "experiments_in_set.lab.title": {
+            "title": "Lab"
+        }
     }
 }

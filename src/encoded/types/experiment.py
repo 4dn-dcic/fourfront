@@ -88,6 +88,10 @@ class ExperimentSet(Item):
     item_type = 'experiment_set'
     schema = load_schema('encoded:schemas/experiment_set.json')
     name_key = "uuid"
+    embedded = ["experiments_in_set", "experiments_in_set.protocol", "experiments_in_set.protocol_variation",
+                "experiments_in_set.lab", "experiments_in_set.award", "experiments_in_set.biosample",
+                "experiments_in_set.biosample.biosource", "experiments_in_set.biosample.modifications",
+                "experiments_in_set.biosample.treatments", "experiments_in_set.biosample.biosource.individual.organism"]
 
     def _update(self, properties, sheets=None):
         # update self first
