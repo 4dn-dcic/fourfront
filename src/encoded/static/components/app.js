@@ -20,15 +20,10 @@ var portal = {
             {id: 'experiments', title: 'Experiments', url: '/search/?type=Experiment'},
             {id: 'biosources', title: 'Biosources', url: '/search/?type=Biosource'}
         ]},
-        {id: 'tools', sid:'sTools', title: 'Tools', url: '/search/?type=Protocol&type=Software'},
         {id: 'help', sid:'sHelp', title: 'Help', children: [
-            {id: 'gettingstarted', title: 'Getting started', url: '/help/getting-started/'},
-            {id: 'restapi', title: 'REST API', url: '/help/rest-api/'},
-            {id: 'projectoverview', title: 'Project overview', url: '/about/contributors/'},
-            {id: 'tutorials', title: 'Tutorials', url: '/tutorials/'},
-            {id: 'news', title: 'News', url: '/news'},
-            {id: 'acknowledgements', title: 'Acknowledgements', url: '/acknowledgements/'},
-            {id: 'contact', title: 'Contact', url: '/help/contacts/'}
+            {id: 'portalusage', title: 'Portal usage', url: '/portal-usage/'},
+            {id: 'announcements', title: 'Announcements', url: '/announcements/'},
+            {id: 'about', title: 'About', url: '/about/'}
         ]}
     ],
     user_section: [

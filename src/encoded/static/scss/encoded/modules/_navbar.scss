@@ -171,21 +171,12 @@
     }
 }
 
-.navbar-acct {
-    @media (min-width: $screen-md-min) {
-        margin-top: 10px !important;
-    }
-    @media (max-width: $grid-float-breakpoint-max) {
-        margin-top: 0px !important;
-    }
-}
 
 // Drop down styles when window is constrained
 .navbar-nav {
   font-family: 'Work Sans', sans-serif;
   // margin: ($navbar-padding-vertical / 2);
   margin: 20px;
-
   > li > a {
     padding-top:    10px;
     padding-bottom: 10px;
@@ -242,6 +233,21 @@
       }
     }
   }
+}
+
+.nav-solo{
+    padding: 10px 15px 10px 25px;
+    line-height: 20px;
+    .global-entry{
+        font-size: 1.4em;
+        color: #999999;
+        font-weight: 200px;
+        &:hover,
+        &:focus {
+          text-decoration: none !important;
+          color: #000000 !important;
+        }
+    }
 }
 
 .nav-img{

@@ -151,10 +151,11 @@ var UserActions = React.createClass({
     },
 
     render: function() {
+        var login = <Login key='login' />;
         var session_properties = this.context.session_properties;
         var actions = this.context.listActionsFor('user_section').map(function (action) {
             if (action.id === "login"){
-                return(<Login key={action.id} />);
+                return(login);
             }else if (action.id === "profile"){
                 return(<AccountActions key={action.id} />);
             }else if (action.id === "contextactions") {
@@ -167,19 +168,21 @@ var UserActions = React.createClass({
                     );
             }
         });
-        var active_icon;
+        var user_content;
         if (session_properties['auth.userid']) {
-            active_icon = <img src="/static/img/User_active.svg" height= "30px" width="25px"/>
+            user_content =  <NavItem dropdownId="context" dropdownTitle='Account'>
+                                <DropdownMenu label="context">
+                                    {actions}
+                                </DropdownMenu>
+                            </NavItem>;
         }else{
-            active_icon = <img src="/static/img/User_inactive.svg" height= "30px" width="25px"/>
+            user_content =  <div className='nav-solo'>
+                                {login}
+                            </div>;
         }
         return (
                 <Nav right={true} acct={true}>
-                    <NavItem dropdownId="context" dropdownTitle={active_icon}>
-                        <DropdownMenu label="context">
-                            {actions}
-                        </DropdownMenu>
-                    </NavItem>
+                    {user_content}
                 </Nav>
         );
     }
