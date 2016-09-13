@@ -21,17 +21,13 @@ function mapStateToProps(store) {
 
 var render = function (Component, body, res) {
     //var start = process.hrtime();
+    var disp_dict = {
+        'context': JSON.parse(body),
+        'href':res.getHeader('X-Request-URL') || context['@id'],
+        'inline':inline
+    };
     store.dispatch({
-        type: 'context',
-        value: JSON.parse(body)
-    });
-    store.dispatch({
-        type: 'href',
-        value: res.getHeader('X-Request-URL') || context['@id']
-    });
-    store.dispatch({
-        type: 'inline',
-        value: inline
+        type: disp_dict
     });
     var markup;
     var UseComponent;

@@ -7,6 +7,7 @@ var origin = require('../libs/origin');
 var serialize = require('form-serialize');
 var ga = require('google-analytics');
 var store = require('../store');
+var dispatch_dict = {}; //used with navigate to store value for simultaneous dispatch
 
 
 var parseError = module.exports.parseError = function (response) {
@@ -113,12 +114,10 @@ module.exports.Persona = {
             query_href = this.props.href;
         }
         store.dispatch({
-            type: 'href',
-            value: query_href
+            type: {'href':query_href}
         });
         store.dispatch({
-            type: 'session_cookie',
-            value: session_cookie
+            type: {'session_cookie': session_cookie}
         });
     },
 
@@ -147,8 +146,7 @@ module.exports.Persona = {
             var session_cookie = this.extractSessionCookie();
             if (this.props.session_cookie !== session_cookie) {
                 store.dispatch({
-                    type: 'session_cookie',
-                    value: session_cookie
+                    type: {'session_cookie': session_cookie}
                 });
             }
         });
@@ -315,8 +313,7 @@ module.exports.HistoryAndTriggers = {
     onHashChange: function (event) {
         // IE8/9
         store.dispatch({
-            type: 'href',
-            value: document.querySelector('link[rel="canonical"]').getAttribute('href')
+            type: {'href':document.querySelector('link[rel="canonical"]').getAttribute('href')}
         });
     },
    triggerLogout: function (event) {
@@ -341,8 +338,7 @@ module.exports.HistoryAndTriggers = {
             parseError(err).then(data => {
                 data.title = 'Logout failure: ' + data.title;
                 store.dispatch({
-                    type: 'context',
-                    value: data
+                    type: {'context':data}
                 });
             });
         });
@@ -480,12 +476,10 @@ module.exports.HistoryAndTriggers = {
                 this.requestCurrent = false;
             }
             store.dispatch({
-                type: 'context',
-                value: event.state
+                type: {'context': event.state}
             });
             store.dispatch({
-                type: 'href',
-                value: href
+                type: {'href': href}
             });
 
         }
@@ -516,7 +510,6 @@ module.exports.HistoryAndTriggers = {
         if (!this.confirmNavigation()) {
             return;
         }
-
         // options.skipRequest only used by collection search form
         // options.replace only used handleSubmit, handlePopState, handlePersonaLogin
         options = options || {};
@@ -560,8 +553,7 @@ module.exports.HistoryAndTriggers = {
                 window.history.pushState(window.state, '', href + fragment);
             }
             store.dispatch({
-                type: 'href',
-                value: href + fragment
+                type: {'href':href + fragment}
             });
             return;
         }
@@ -576,8 +568,7 @@ module.exports.HistoryAndTriggers = {
         Promise.race([request, timeout.promise]).then(v => {
             if (v instanceof Timeout) {
                 store.dispatch({
-                    type: 'slow',
-                    value: true
+                    type: {'slow':true}
                 });
 
             } else {
@@ -609,11 +600,11 @@ module.exports.HistoryAndTriggers = {
             } else {
                 window.history.pushState(null, '', response_url + fragment);
             }
-            store.dispatch({
-                type: 'href',
-                value: response_url + fragment
-            });
-
+            // store.dispatch({
+            //     type: 'href',
+            //     value: response_url + fragment
+            // });
+            dispatch_dict['href'] = response_url + fragment;
             if (!response.ok) {
                 throw response;
             }
@@ -625,10 +616,7 @@ module.exports.HistoryAndTriggers = {
         if (!options.replace) {
             promise = promise.then(this.scrollTo);
         }
-        store.dispatch({
-            type: 'contextRequest',
-            value: request
-        });
+        dispatch_dict['contextRequest'] = request;
         return request;
     },
 
@@ -645,25 +633,19 @@ module.exports.HistoryAndTriggers = {
         // gotten a response. If the requestAborted flag is set, then a request was aborted and so we have
         // the data for a Network Request Error. Don't render that, but clear the requestAboerted flag.
         // Otherwise we have good page data to render.
-        var newProps = {'slow': false};
+        dispatch_dict['slow'] = false;
         if (!this.requestAborted) {
             // Real page to render
-            newProps['context'] = data;
+            dispatch_dict['context'] = data;
         } else {
             // data holds network error. Don't render that, but clear the requestAborted flag so we're ready
             // for the next navigation click.
             this.requestAborted = false;
         }
-        if (newProps['context']) {
-            store.dispatch({
-                type: 'context',
-                value: data
-            });
-        }
         store.dispatch({
-            type: 'slow',
-            value: false
+            type: dispatch_dict
         });
+        dispatch_dict={};
     },
 
     componentDidUpdate: function () {

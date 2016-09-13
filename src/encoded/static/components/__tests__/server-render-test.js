@@ -29,30 +29,17 @@ describe("Server rendering", function () {
         App = require('..');
         store = require('../../store');
         // test dispatching some values to store
+        var dispatch_vals = {
+            'href':home_url,
+            'context':home,
+            'inline':'',
+            'session_cookie':'',
+            'contextRequest':{},
+            'slow':false
+        }
         store.dispatch({
-            type: 'href',
-            value: home_url
+            type: dispatch_vals
         })
-        store.dispatch({
-            type: 'context',
-            value: home
-        });
-        store.dispatch({
-            type: 'inline',
-            value: ''
-        });
-        store.dispatch({
-            type: 'session_cookie',
-            value: ''
-        });
-        store.dispatch({
-            type: 'contextRequest',
-            value: {}
-        });
-        store.dispatch({
-            type: 'slow',
-            value: false
-        });
         var props = store.getState();
         var server_app = <App {...props} />;
         var markup = '<!DOCTYPE html>\n' + ReactDOMServer.renderToString(server_app);

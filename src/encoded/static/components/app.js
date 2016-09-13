@@ -309,11 +309,10 @@ var App = React.createClass({
         getRenderedProps: function (document) {
             // Ensure the initial render is exactly the same
             store.dispatch({
-                type: 'href',
-                value: document.querySelector('link[rel="canonical"]').getAttribute('href')
+                type: {'href':document.querySelector('link[rel="canonical"]').getAttribute('href')}
             });
-            // props.href = document.querySelector('link[rel="canonical"]').getAttribute('href');
             var script_props = document.querySelectorAll('script[data-prop-name]');
+            var props_dict = {};
             for (var i = 0; i < script_props.length; i++) {
                 var elem = script_props[i];
                 var elem_value = elem.text;
@@ -321,13 +320,11 @@ var App = React.createClass({
                 if (elem_type == 'application/json' || elem_type.slice(-5) == '+json') {
                     elem_value = JSON.parse(elem_value);
                 }
-                store.dispatch({
-                    type: elem.getAttribute('data-prop-name'),
-                    value: elem_value
-                });
+                props_dict[ elem.getAttribute('data-prop-name')] = elem_value;
             }
-
-
+            store.dispatch({
+                type: props_dict
+            });
         }
     }
 });
