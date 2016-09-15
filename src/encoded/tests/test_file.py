@@ -12,43 +12,31 @@ def test_replaced_file_not_uniqued(testapp, file):
 
 
 @pytest.fixture
-def fastq_no_replicate(award, experiment, lab):
+def fastq(award, experiment, lab):
     return {
+        'accession': '4DNFI067APU2',
         'award': award['@id'],
-        'dataset': experiment['@id'],
         'lab': lab['@id'],
         'file_format': 'fastq',
         'md5sum': '0123456789abcdef0123456789abcdef',
-        'output_type': 'raw data',
         'status': 'in progress',
     }
 
 
-@pytest.fixture
-def fastq(fastq_no_replicate, replicate):
-    item = fastq_no_replicate.copy()
-    item['replicate'] = replicate['@id']
-    return item
-
-
-def test_file_post_fastq_no_replicate(testapp, fastq_no_replicate):
-    testapp.post_json('/file', fastq_no_replicate, status=422)
-
-
-def test_file_post_fastq_with_replicate(testapp, fastq):
+def test_file_post_fastq(testapp, fastq):
     testapp.post_json('/file', fastq, status=201)
 
 
+
 @pytest.fixture
-def file(testapp, award, experiment, lab, replicate):
+def file(testapp, award, experiment, lab):
+
     item = {
         'award': award['@id'],
-        'dataset': experiment['@id'],
         'lab': lab['@id'],
-        'replicate': replicate['@id'],
         'file_format': 'tsv',
         'md5sum': '00000000000000000000000000000000',
-        'output_type': 'raw data',
+        'filename': 'my.tsv',
         'status': 'in progress',
     }
     res = testapp.post_json('/file', item)
@@ -56,77 +44,23 @@ def file(testapp, award, experiment, lab, replicate):
 
 
 @pytest.fixture
-def fastq_pair_1(fastq):
+def fastq_related_file(fastq):
     item = fastq.copy()
-    item['paired_end'] = '1'
-    return item
-
-
-@pytest.fixture
-def fastq_pair_1_paired_with(fastq_pair_1, file):
-    item = fastq_pair_1.copy()
-    item['paired_with'] = file['@id']
-    return item
-
-
-@pytest.fixture
-def fastq_pair_2(fastq):
-    item = fastq.copy()
-    item['paired_end'] = '2'
+    item['related_files'] = [{'relationship_type': 'derived from',
+                              'file' :fastq['accession']}]
     item['md5sum'] = '2123456789abcdef0123456789abcdef'
+    item['accession'] = ''
     return item
 
 
-@pytest.fixture
-def fastq_pair_2_paired_with(fastq_pair_2, fastq_pair_1):
-    item = fastq_pair_2.copy()
-    item['paired_with'] = 'md5:' + fastq_pair_1['md5sum']
-    return item
 
+def test_file_post_fastq_related(testapp, fastq, fastq_related_file):
+    testapp.post_json('/file', fastq, status=201)
+    fastq_related_res = testapp.post_json('/file', fastq_related_file, status=201)
 
-@pytest.fixture
-def external_accession(fastq_pair_1):
-    item = fastq_pair_1.copy()
-    item['external_accession'] = 'EXTERNAL'
-    return item
+    # when updating the last one we should have updated this one too
+    fastq_res = testapp.get('/md5:{md5sum}'.format(**fastq)).follow(status=200)
+    fastq_related_files = fastq_res.json['related_files']
+    assert fastq_related_files == [{'file': fastq_related_res.json['@graph'][0]['@id'],
+                                   'relationship_type': 'parent of'}]
 
-
-def test_file_post_fastq_pair_1_paired_with(testapp, fastq_pair_1_paired_with):
-    testapp.post_json('/file', fastq_pair_1_paired_with, status=422)
-
-
-def test_file_post_fastq_pair_1(testapp, fastq_pair_1):
-    testapp.post_json('/file', fastq_pair_1, status=201)
-
-
-def test_file_post_fastq_pair_2_paired_with(testapp, fastq_pair_1, fastq_pair_2_paired_with):
-    testapp.post_json('/file', fastq_pair_1, status=201)
-    testapp.post_json('/file', fastq_pair_2_paired_with, status=201)
-
-
-def test_file_post_fastq_pair_2_paired_with_again(testapp, fastq_pair_1, fastq_pair_2_paired_with):
-    testapp.post_json('/file', fastq_pair_1, status=201)
-    testapp.post_json('/file', fastq_pair_2_paired_with, status=201)
-    item = fastq_pair_2_paired_with.copy()
-    item['md5sum'] = '3123456789abcdef0123456789abcdef'
-    testapp.post_json('/file', item, status=409)
-
-
-def test_file_post_fastq_pair_2_no_pair_1(testapp, fastq_pair_2):
-    testapp.post_json('/file', fastq_pair_2, status=422)
-
-
-def test_file_paired_with_back_calculated(testapp, fastq_pair_1, fastq_pair_2_paired_with):
-    res = testapp.post_json('/file', fastq_pair_1, status=201)
-    location1 = res.json['@graph'][0]['@id']
-    res = testapp.post_json('/file', fastq_pair_2_paired_with, status=201)
-    location2 = res.json['@graph'][0]['@id']
-    res = testapp.get(location1)
-    assert res.json['paired_with'] == location2
-
-
-def test_file_external_accession(testapp, external_accession):
-    res = testapp.post_json('/file', external_accession, status=201)
-    item = testapp.get(res.location).json
-    assert 'accession' not in item
-    assert item['@id'] == '/files/EXTERNAL/'
