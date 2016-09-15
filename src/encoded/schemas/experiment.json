@@ -17,15 +17,17 @@
         "status": {
             "title": "Status",
             "type": "string",
-            "default": "current",
+            "default": "in review by lab",
+            "permission": "import_items",
             "enum": [
-                "in review",
+                "released",
                 "current",
-                "in progress",
+                "revoked",
                 "deleted",
                 "replaced",
-                "released",
-                "revoked"
+                "in review by lab",
+                "in review by project",
+                "released to project"
             ]
         },
         "accession": {
