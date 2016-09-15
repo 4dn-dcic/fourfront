@@ -6,13 +6,13 @@ var React = require('react');
 var globals = require('./globals');
 var _ = require('underscore');
 var parseAndLogError = require('./mixins').parseAndLogError;
-var navigation = require('./navigation');
-var Modal = require('react-bootstrap/lib/Modal');
+// var navigation = require('./navigation');
+import { Modal } from 'react-bootstrap';
 var ItemStore = require('./lib/store').ItemStore;
 var Form = require('./form').Form;
 var ObjectPicker = require('./inputs').ObjectPicker;
 
-var Breadcrumbs = navigation.Breadcrumbs;
+// var Breadcrumbs = navigation.Breadcrumbs;
 
 
 class AccessKeyStore extends ItemStore {
@@ -52,7 +52,7 @@ var AccessKeyTable = React.createClass({
                       </thead>
                       <tbody>
                         {this.state.access_keys.map(k =>
-                            <tr>
+                            <tr key={k.access_key_id}>
                               <td>{k.access_key_id}</td>
                               <td>{k.description}</td>
                               <td>
@@ -91,7 +91,7 @@ var AccessKeyTable = React.createClass({
     },
     showNewSecret: function(title, response) {
         this.setState({modal:
-            <Modal title={title} onRequestHide={this.hideModal}>
+            <Modal title={title} onHide={this.hideModal}>
                 <div className="modal-body">
                     Please make a note of the new secret access key.
                     This is the last time you will be able to view it.
@@ -108,14 +108,14 @@ var AccessKeyTable = React.createClass({
 
     onDelete: function(item) {
         this.setState({modal:
-            <Modal title={'Access key ' + item['access_key_id'] + ' has been deleted.'} onRequestHide={this.hideModal} />
+            <Modal title={'Access key ' + item['access_key_id'] + ' has been deleted.'} onHide={this.hideModal} />
         });
     },
 
     onError: function(error) {
         var View = globals.content_views.lookup(error);
-        this.setState({modal: 
-            <Modal title="Error" onRequestHide={this.hideModal}>
+        this.setState({modal:
+            <Modal title="Error" onHide={this.hideModal}>
                 <div className="modal-body">
                     <View context={error} loadingComplete={true} />
                 </div>
@@ -138,7 +138,6 @@ var User = module.exports.User = React.createClass({
         return (
             <div>
                 <header className="row">
-                    <Breadcrumbs root='/search/?type=user' crumbs={crumbs} />
                     <div className="col-sm-12">
                         <h1 className="page-title">{context.title}</h1>
                     </div>
@@ -166,7 +165,7 @@ var User = module.exports.User = React.createClass({
                         </div>
                     </div>
                 : ''}
-                {context.access_keys ? 
+                {context.access_keys ?
                     <div className="access-keys">
                         <h3>Access Keys</h3>
                         <div className="panel data-display">
@@ -190,13 +189,20 @@ var ImpersonateUserForm = React.createClass({
 
     render: function() {
         var ReactForms = require('react-forms');
-        var ImpersonateUserSchema = require('./ImpersonateUserSchema');
+        // var ImpersonateUserSchema = ReactForms.Mapping({}, {
+        //     userid: ReactForms.Scalar({
+        //         label: 'User',
+        //         hint: 'Enter the email of the user you want to impersonate.',
+        //     }),
+        // });
+        // var form = <Form schema={ImpersonateUserSchema} submitLabel="Submit"
+        //       method="POST" action="/impersonate-user"
+        //       onFinish={this.finished} />;
+        var form = <div>Form will go here...</div>;
         return (
             <div>
                 <h2>Impersonate User</h2>
-                <Form schema={ImpersonateUserSchema} submitLabel="Submit"
-                      method="POST" action="/impersonate-user"
-                      onFinish={this.finished} />
+                {form}
             </div>
         );
     },

@@ -6,14 +6,13 @@ var globals = require('./globals');
 var audit = require('./audit');
 var form = require('./form');
 var _ = require('underscore');
-var cx = require('react/lib/cx');
-var panel = require('../libs/bootstrap/panel');
+var Panel = require('react-bootstrap').Panel;
 var AuditIndicators = audit.AuditIndicators;
 var AuditDetail = audit.AuditDetail;
 var AuditMixin = audit.AuditMixin;
 var JSONSchemaForm = form.JSONSchemaForm;
 var Table = collection.Table;
-var {Panel, PanelBody, PanelHeading} = panel;
+var ErrorPage = require('./error');
 
 var Fallback = module.exports.Fallback = React.createClass({
     contextTypes: {
@@ -53,7 +52,6 @@ var ItemLoader = React.createClass({
         );
     }
 });
-
 
 var Item = React.createClass({
     render: function() {
@@ -98,30 +96,27 @@ var IPanel = module.exports.IPanel = React.createClass({
         var sortKeys = Object.keys(context).sort();
         var tips = tipsFromSchema(schemas, context);
         return (
-            <section className="flexcol-sm-12">
-            <div className={itemClass}>
-            <Panel addClasses="data-display">
-                <PanelBody addClasses="panel-body-with-header">
-                    <div className="flexrow">
-                        <div className="flexcol-sm-6">
-                            <div className="flexcol-heading experiment-heading"><h5>{title}</h5></div>
-                            <dl className="key-value">
-                                {sortKeys.map(function(ikey, val){
-                                    return (
-                                        <div key={ikey.id} data-test="term-name">
-                                          {formKey(tips,ikey)}
-                                          <dd>{formValue(schemas,context[ikey])}</dd>
-                                        </div>
-                                    );
-                                })}
-                            </dl>
-                        </div>
+            <Panel className="data-display panel-body-with-header">
+                <div className="flexrow">
+                    <div className="flexcol-sm-6">
+                        <div className="flexcol-heading experiment-heading"><h5>{title}</h5></div>
+                        <dl className="key-value">
+                            {sortKeys.map(function(ikey, idx){
+                                return (
+                                    <div key={ikey} data-test="term-name">
+                                        {formKey(tips,ikey)}
+                                        <dd>{formValue(schemas,context[ikey])}</dd>
+                                    </div>
+                                );
+                            })}
+                        </dl>
                     </div>
-                </PanelBody>
+                </div>
             </Panel>
-            </div>
-        </section>
         );
+        // return (
+        //         <Panel>BasicPanel</Panel>
+        // );
     }
 });
 
@@ -148,7 +143,7 @@ globals.listing_titles.fallback = function () {
     return title;
 };
 
-
+// TODO: Add ItemEdit back in with custom forms. Removed this functionality for now...
 var ItemEdit = module.exports.ItemEdit = React.createClass({
     contextTypes: {
         navigate: React.PropTypes.func
@@ -254,7 +249,7 @@ var formValue = function (schemas, item) {
         toReturn.push(<SubIPanel schemas={schemas} content={item}/>);
     }else{
         if (typeof item === 'string' && item.charAt(0) === '/') {
-            toReturn.push(<a href={item}>{item}</a>)
+            toReturn.push(<a key={item} href={item}>{item}</a>)
         }else{
             toReturn.push(item);
         }
@@ -307,24 +302,22 @@ var Subview = React.createClass({
         var sortKeys = Object.keys(item).sort();
         return(
             <div className="flexcol-sm-6 subview">
-              <Panel addClasses="sub-panel data-display">
-                  <PanelBody addClasses="panel-body-with-header">
-                      <div className="flexrow">
-                          <div className="flexcol-sm-6">
-                              <div className="flexcol-heading experiment-heading"><h5>{title}</h5></div>
-                              <dl className="key-value sub-descriptions">
-                                  {sortKeys.map(function(ikey, val){
-                                      return (
-                                        <div className="sub-entry" key={ikey.id} data-test="term-name">
-                                          {formKey(tips,ikey)}
-                                          <dd>{formValue(schemas, item[ikey])}</dd>
-                                        </div>
-                                      );
-                                  })}
-                              </dl>
-                          </div>
+              <Panel className="sub-panel data-display panel-body-with-header">
+                  <div className="flexrow">
+                      <div className="flexcol-sm-6">
+                          <div className="flexcol-heading experiment-heading"><h5>{title}</h5></div>
+                          <dl className="key-value sub-descriptions">
+                              {sortKeys.map(function(ikey, idx){
+                                  return (
+                                    <div className="sub-entry" key={ikey} data-test="term-name">
+                                      {formKey(tips,ikey)}
+                                      <dd>{formValue(schemas, item[ikey])}</dd>
+                                    </div>
+                                  );
+                              })}
+                          </dl>
                       </div>
-                  </PanelBody>
+                  </div>
               </Panel>
             </div>
         );
