@@ -1,7 +1,7 @@
 'use strict';
 var React = require('react');
 var _ = require('underscore');
-import { Panel } from 'react-bootstrap';
+var Panel = require('react-bootstrap').Panel;
 
 var editTargetMap = {
     'experiments': 'Experiment',

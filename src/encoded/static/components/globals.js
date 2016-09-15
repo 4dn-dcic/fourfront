@@ -113,7 +113,7 @@ module.exports.statusOrder = [
     'not reviewed'
 ];
 
-module.exports.productionHost = {'www.encodeproject.org':1, 'encodeproject.org':1, 'www.encodedcc.org':1};
+module.exports.productionHost = {'www.data.4dnucleome.org':1, 'data.4dnucleome.org':1};
 
 var encodeVersionMap = module.exports.encodeVersionMap = {
     "ENCODE2": "2",

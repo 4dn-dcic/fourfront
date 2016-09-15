@@ -6,7 +6,7 @@ var globals = require('./globals');
 var audit = require('./audit');
 var form = require('./form');
 var _ = require('underscore');
-import { Panel } from 'react-bootstrap';
+var Panel = require('react-bootstrap').Panel;
 var AuditIndicators = audit.AuditIndicators;
 var AuditDetail = audit.AuditDetail;
 var AuditMixin = audit.AuditMixin;
@@ -19,28 +19,25 @@ var Fallback = module.exports.Fallback = React.createClass({
         location_href: React.PropTypes.string
     },
 
-    // render: function() {
-    //     var url = require('url');
-    //     var context = this.props.context;
-    //     var title = typeof context.title == "string" ? context.title : url.parse(this.context.location_href).path;
-    //     return (
-    //         <div className="view-item">
-    //             <header className="row">
-    //                 <div className="col-sm-12">
-    //                     <h2>{title}</h2>
-    //                 </div>
-    //             </header>
-    //             {typeof context.description == "string" ? <p className="description">{context.description}</p> : null}
-    //             <section className="view-detail panel">
-    //                 <div className="container">
-    //                     <pre>{JSON.stringify(context, null, 4)}</pre>
-    //                 </div>
-    //             </section>
-    //         </div>
-    //     );
-    // }
-    render: function(){
-        return(<ErrorPage />);
+    render: function() {
+        var url = require('url');
+        var context = this.props.context;
+        var title = typeof context.title == "string" ? context.title : url.parse(this.context.location_href).path;
+        return (
+            <div className="view-item">
+                <header className="row">
+                    <div className="col-sm-12">
+                        <h2>{title}</h2>
+                    </div>
+                </header>
+                {typeof context.description == "string" ? <p className="description">{context.description}</p> : null}
+                <section className="view-detail panel">
+                    <div className="container">
+                        <pre>{JSON.stringify(context, null, 4)}</pre>
+                    </div>
+                </section>
+            </div>
+        );
     }
 });
 
@@ -146,7 +143,7 @@ globals.listing_titles.fallback = function () {
     return title;
 };
 
-// Removed this functionality for now...
+// TODO: Add ItemEdit back in with custom forms. Removed this functionality for now...
 var ItemEdit = module.exports.ItemEdit = React.createClass({
     contextTypes: {
         navigate: React.PropTypes.func
@@ -305,7 +302,7 @@ var Subview = React.createClass({
         var sortKeys = Object.keys(item).sort();
         return(
             <div className="flexcol-sm-6 subview">
-              <Panel addClasses="sub-panel data-display panel-body-with-header">
+              <Panel className="sub-panel data-display panel-body-with-header">
                   <div className="flexrow">
                       <div className="flexcol-sm-6">
                           <div className="flexcol-heading experiment-heading"><h5>{title}</h5></div>
