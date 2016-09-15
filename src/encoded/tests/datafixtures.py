@@ -36,7 +36,7 @@ def admin(testapp):
 def wrangler(testapp):
     item = {
         # antibody_characterization reviewed_by has linkEnum
-        #'uuid': '4c23ec32-c7c8-4ac0-affb-04befcc881d4',
+        # 'uuid': '4c23ec32-c7c8-4ac0-affb-04befcc881d4',
         'first_name': 'Wrangler',
         'last_name': 'Admin',
         'email': 'wrangler@example.org',
@@ -134,6 +134,7 @@ def remc_award(testapp):
     }
     return testapp.post_json('/award', item).json['@graph'][0]
 
+
 @pytest.fixture
 def encode2_award(testapp):
     item = {
@@ -146,6 +147,7 @@ def encode2_award(testapp):
     }
     return testapp.post_json('/award', item).json['@graph'][0]
 
+
 @pytest.fixture
 def human_donor(testapp, award, lab, human):
     item = {
@@ -154,17 +156,18 @@ def human_donor(testapp, award, lab, human):
         "age_units": "year",
         'award': award['@id'],
         'lab': lab['@id'],
-        'organism' : human['@id'],
+        'organism': human['@id'],
         "ethnicity": "Caucasian",
         "health_status": "unknown",
         "life_stage": "adult",
         "sex": "female",
         "status": "released",
         "url": "http://ccr.coriell.org/Sections/BrowseCatalog/FamilyTypeSubDetail.aspx?PgId=402&fam=1463&coll=GM",
-        #"uuid": "44d24e3f-bc5b-469a-8500-7ebd728f8ed5"
+        # "uuid": "44d24e3f-bc5b-469a-8500-7ebd728f8ed5"
     }
 
     return testapp.post_json('/individual_human', item).json['@graph'][0]
+
 
 @pytest.fixture
 def worthington_biochemical(testapp, award, lab):
@@ -176,14 +179,16 @@ def worthington_biochemical(testapp, award, lab):
     }
     return testapp.post_json('/vendor', item).json['@graph'][0]
 
+
 @pytest.fixture
 def human_biosource(testapp, human_donor, worthington_biochemical):
     item = {
         "description": "GM06990 cells",
         "biosource_type": "immortalized cell line",
-        "individual":human_donor['@id'],
+        "individual": human_donor['@id'],
         "cell_line": "GM06990",
-        "biosource_vendor": worthington_biochemical['@id']
+        "biosource_vendor": worthington_biochemical['@id'],
+        "status": "current"
     }
     return testapp.post_json('/biosource', item).json['@graph'][0]
 
@@ -248,10 +253,11 @@ def base_experiment(testapp, lab, award, human_biosample):
     }
     return testapp.post_json('/experiment_hic', item, status=201).json['@graph'][0]
 
+
 @pytest.fixture
 def file(testapp, lab, award, experiment):
     item = {
-        'experiments': [experiment['@id'],],
+        'experiments': [experiment['@id'], ],
         'file_format': 'fastq',
         'md5sum': 'd41d8cd98f00b204e9800998ecf8427e',
         'lab': lab['@id'],
@@ -264,7 +270,7 @@ def file(testapp, lab, award, experiment):
 @pytest.fixture
 def fastq_file(testapp, lab, award, experiment):
     item = {
-        'experiments': [experiment['@id'],],
+        'experiments': [experiment['@id'], ],
         'file_format': 'fastq',
         'md5sum': 'd41d8cd9f00b204e9800998ecf8427e',
         'lab': lab['@id'],
@@ -277,7 +283,7 @@ def fastq_file(testapp, lab, award, experiment):
 @pytest.fixture
 def bam_file(testapp, lab, award, experiment):
     item = {
-        'experiments': [experiment['@id'],],
+        'experiments': [experiment['@id'], ],
         'file_format': 'bam',
         'md5sum': 'd41d8cd9f00b204e9800998ecf86674427e',
         'lab': lab['@id'],
@@ -311,7 +317,7 @@ def rnai(testapp, lab, award):
 @pytest.fixture
 def construct(testapp):
     item = {
-        'name':'Awesome_Construct',
+        'name': 'Awesome_Construct',
         'construct_type': 'tagging construct',
         'tags': 'eGFP, C-terminal',
     }
@@ -329,13 +335,12 @@ def publication(testapp, lab, award):
     return testapp.post_json('/publication', item).json['@graph'][0]
 
 
-
 @pytest.fixture
 def software(testapp):
-    #TODO: ASK_ANDY do we want software_type to be an array?
+    # TODO: ASK_ANDY do we want software_type to be an array?
     item = {
         "name": "FastQC",
-        "software_type": ["indexer",],
+        "software_type": ["indexer", ],
         "version": "1.0",
     }
     return testapp.post_json('/software', item).json['@graph'][0]
@@ -345,8 +350,8 @@ def software(testapp):
 def analysis_step(testapp, software):
     item = {
         'name': 'fastqc',
-        "software_used" : software['@id'],
-        "version" : 1
+        "software_used": software['@id'],
+        "version": 1
     }
     return testapp.post_json('/analysis_step', item).json['@graph'][0]
 
