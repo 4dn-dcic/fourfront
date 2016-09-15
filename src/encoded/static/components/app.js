@@ -253,7 +253,7 @@ var App = React.createClass({
         }
         // Google does not update the content of 301 redirected pages
         var base;
-        if (({'http://data.4dnucleome.org/': 1, 'http://data.4dnucleome.org/': 1})[canonical]) {
+        if (({'http://data.4dnucleome.org/': 1})[canonical]) {
             base = canonical = 'http://data.4dnucleome.org/';
             this.historyEnabled = false;
 

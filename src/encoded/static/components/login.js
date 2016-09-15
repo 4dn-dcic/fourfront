@@ -90,10 +90,10 @@ var LoginBoxes = React.createClass({
         .then(response => {
             console.log("got response" + response.ok);
             if (!response.ok){
-        			console.log("we got an error during login");
-        			this.setState({errormsg : "Invalid Login"});
-        			throw response;
-        		}
+                console.log("we got an error during login");
+                this.setState({errormsg : "Invalid Login"});
+                throw response;
+            }
             this.handleToggle();
             this.props.isRefreshing();
             return response.json();
@@ -114,11 +114,11 @@ var LoginBoxes = React.createClass({
     handleSubmit: function(e){
         e.preventDefault();
         var username = this.state.username.trim();
-    	var password = this.state.password.trim();
-      	if (username === '' || password === '') {
-        	return;
+        var password = this.state.password.trim();
+        if (username === '' || password === '') {
+            return;
         }
-    	this.loginToServer({username: username, password: password});
+        this.loginToServer({username: username, password: password});
         this.setState({username: '', password: ''});
     },
     render: function () {
