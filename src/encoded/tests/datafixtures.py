@@ -6,6 +6,7 @@ def lab(testapp):
     item = {
         'name': 'encode-lab',
         'title': 'ENCODE lab',
+        'status': 'current'
     }
     return testapp.post_json('/lab', item).json['@graph'][0]
 
@@ -15,6 +16,7 @@ def remc_lab(testapp):
     item = {
         'name': 'remc-lab',
         'title': 'REMC lab',
+        'status': 'current'
     }
     return testapp.post_json('/lab', item).json['@graph'][0]
 
@@ -26,6 +28,7 @@ def admin(testapp):
         'last_name': 'Admin',
         'email': 'admin@example.org',
         'groups': ['admin'],
+        'status': 'current'
     }
     # User @@object view has keys omitted.
     res = testapp.post_json('/user', item)
@@ -35,8 +38,6 @@ def admin(testapp):
 @pytest.fixture
 def wrangler(testapp):
     item = {
-        # antibody_characterization reviewed_by has linkEnum
-        # 'uuid': '4c23ec32-c7c8-4ac0-affb-04befcc881d4',
         'first_name': 'Wrangler',
         'last_name': 'Admin',
         'email': 'wrangler@example.org',
@@ -56,6 +57,7 @@ def submitter(testapp, lab, award):
         'email': 'encode_submitter@example.org',
         'submits_for': [lab['@id']],
         'viewing_groups': [award['viewing_group']],
+        'status': "current"
     }
     # User @@object view has keys omitted.
     res = testapp.post_json('/user', item)
@@ -69,6 +71,7 @@ def lab_viewer(testapp, lab, award):
         'last_name': 'lab viewer',
         'email': 'encode_viewer@example.org',
         'lab': lab['name'],
+        'status': 'current'
     }
     # User @@object view has keys omitted.
     res = testapp.post_json('/user', item)
@@ -83,6 +86,7 @@ def remc_submitter(testapp, remc_lab, remc_award):
         'email': 'remc_submitter@example.org',
         'submits_for': [remc_lab['@id']],
         'viewing_groups': [remc_award['viewing_group']],
+        'status': 'current'
     }
     # User @@object view has keys omitted.
     res = testapp.post_json('/user', item)
@@ -109,6 +113,7 @@ def viewing_group_member(testapp, award):
         'last_name': 'Group',
         'email': 'viewing_group_member@example.org',
         'viewing_groups': [award['viewing_group']],
+        'status': 'current'
     }
     # User @@object view has keys omitted.
     res = testapp.post_json('/user', item)
@@ -121,6 +126,7 @@ def award(testapp):
         'name': 'encode3-award',
         'description': 'ENCODE test award',
         'viewing_group': '4DN',
+        'status': 'current'
     }
     return testapp.post_json('/award', item).json['@graph'][0]
 
@@ -131,6 +137,7 @@ def remc_award(testapp):
         'name': 'remc-award',
         'description': 'REMC test award',
         'viewing_group': 'Not 4DN',
+        'status': 'current'
     }
     return testapp.post_json('/award', item).json['@graph'][0]
 
@@ -176,6 +183,7 @@ def worthington_biochemical(testapp, award, lab):
         "name": "worthington-biochemical",
         "description": "",
         "url": "http://www.worthington-biochem.com",
+        'status': 'current'
     }
     return testapp.post_json('/vendor', item).json['@graph'][0]
 
