@@ -598,4 +598,4 @@ var Search = search.Search = React.createClass({
     }
 });
 
-globals.content_views.register(Search, 'Search');
+globals.content_views.register(Search, 'Disabled');
