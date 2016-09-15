@@ -1,6 +1,6 @@
 'use strict';
 var React = require('react');
-import { Modal } from 'react-bootstrap';
+var Modal = require('react-bootstrap').Modal;
 
 var Login = React.createClass({
     contextTypes: {
@@ -54,21 +54,21 @@ var LoginBoxes = React.createClass({
     	session: React.PropTypes.object,
         navigate: React.PropTypes.func
     },
-  getInitialState: function() {
-  	return {username: '', password: '', isOpen: false, errormsg: ''};
-  },
-  usernameFill: function(v) {
-  	this.setState({username: v});
-  },
-  passwordFill: function(v) {
-  	this.setState({password: v});
-  },
-  handleToggle: function () {
+    getInitialState: function() {
+    	return {username: '', password: '', isOpen: false, errormsg: ''};
+    },
+    usernameFill: function(v) {
+    	this.setState({username: v});
+    },
+    passwordFill: function(v) {
+    	this.setState({password: v});
+    },
+    handleToggle: function () {
       this.setState({
-		  isOpen: !this.state.isOpen
-	  });
-  },
-loginToServer: function(data) {
+    	  isOpen: !this.state.isOpen
+      });
+    },
+    loginToServer: function(data) {
 		console.log(data);
 		// clear any error messages
 		this.setState({errormsg : ""});
@@ -86,69 +86,68 @@ loginToServer: function(data) {
 				"Content-Type": "application/json",
 			},
 			credentials: "same-origin"
-  })
-  .then(response => {
-	console.log("got response" + response.ok);
-    if (!response.ok){
-				console.log("we got an error during login");
-				this.setState({errormsg : "Invalid Login"});
-				throw response;
-			}
-    this.handleToggle();
-    this.props.isRefreshing();
-    return response.json();
-  })
-  .then(session_properties => {
-      this.context.session['auth.userid'] = data.username;
-      window.location.reload();
-      /*var next_url = window.location.href;
-      if (window.location.hash == '#logged-out') {
-          next_url = window.location.pathname + window.location.search;
-      }
-      this.context.navigate(next_url, {replace: true});
-      */
-    },function(error) {
-				console.log("got an error" + error);
-  })
-},
-  handleSubmit: function(e){
-    e.preventDefault();
-    var username = this.state.username.trim();
-	var password = this.state.password.trim();
-  	if (username === '' || password === '') {
-    	return;
-    }
-	this.loginToServer({username: username, password: password});
-    this.setState({username: '', password: ''});
-  },
-  render: function () {
-		/* href="" will cause mouse pointer to change to the finger on hover */
-    var error_span = '';
-    if (this.state.errormsg) {
-   	    error_span = <div className="error">{this.state.errormsg}</div>;
-    }
-	return (
-        <div>
-	       <a id="loginbtn" href=""  className="global-entry" onClick={this.handleToggle}>Sign in</a>
-           <Modal show={this.state.isOpen} onHide={this.handleToggle}>
-               <div className="login-box">
-                  <h1 className="title">Your Account</h1>
-                          {error_span}
-                  <label className="fill-label">Username:</label>
-                  <TextBox default="Username" fill={this.usernameFill} tType="text"/>
-                  <label className="fill-label">Password:</label>
-                  <TextBox default="Password" fill={this.passwordFill} tType="password"/>
-                  <ul className="links">
-                      <li><button id="popuploginbtn" className="sexy-btn"
-                          onClick={this.handleSubmit}><span>Sign in</span></button></li>
-                      <li><button id="closebtn" className="sexy-btn"
-                          onClick={this.handleToggle}><span>Close</span></button></li>
-                  </ul>
-              </div>
-          </Modal>
-        </div>
-       );
-  },
+        })
+        .then(response => {
+            console.log("got response" + response.ok);
+            if (!response.ok){
+        			console.log("we got an error during login");
+        			this.setState({errormsg : "Invalid Login"});
+        			throw response;
+        		}
+            this.handleToggle();
+            this.props.isRefreshing();
+            return response.json();
+        })
+        .then(session_properties => {
+            this.context.session['auth.userid'] = data.username;
+            window.location.reload();
+            /*var next_url = window.location.href;
+            if (window.location.hash == '#logged-out') {
+              next_url = window.location.pathname + window.location.search;
+            }
+            this.context.navigate(next_url, {replace: true});
+            */
+        },function(error) {
+            console.log("got an error" + error);
+        })
+    },
+    handleSubmit: function(e){
+        e.preventDefault();
+        var username = this.state.username.trim();
+    	var password = this.state.password.trim();
+      	if (username === '' || password === '') {
+        	return;
+        }
+    	this.loginToServer({username: username, password: password});
+        this.setState({username: '', password: ''});
+    },
+    render: function () {
+        var error_span = '';
+        if (this.state.errormsg) {
+       	    error_span = <div className="error">{this.state.errormsg}</div>;
+        }
+    	return (
+            <div>
+    	       <a id="loginbtn" href=""  className="global-entry" onClick={this.handleToggle}>Sign in</a>
+               <Modal show={this.state.isOpen} onHide={this.handleToggle}>
+                   <div className="login-box">
+                      <h1 className="title">Your Account</h1>
+                              {error_span}
+                      <label className="fill-label">Username:</label>
+                      <TextBox default="Username" fill={this.usernameFill} tType="text"/>
+                      <label className="fill-label">Password:</label>
+                      <TextBox default="Password" fill={this.passwordFill} tType="password"/>
+                      <ul className="links">
+                          <li><button id="popuploginbtn" className="sexy-btn"
+                              onClick={this.handleSubmit}><span>Sign in</span></button></li>
+                          <li><button id="closebtn" className="sexy-btn"
+                              onClick={this.handleToggle}><span>Close</span></button></li>
+                      </ul>
+                  </div>
+              </Modal>
+            </div>
+           );
+       },
 });
 
 var TextBox = React.createClass({

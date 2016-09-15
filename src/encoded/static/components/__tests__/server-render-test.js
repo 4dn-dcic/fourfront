@@ -36,10 +36,10 @@ describe("Server rendering", function () {
             'session_cookie':'',
             'contextRequest':{},
             'slow':false
-        }
+        };
         store.dispatch({
             type: dispatch_vals
-        })
+        });
         var props = store.getState();
         var server_app = <App {...props} />;
         var markup = '<!DOCTYPE html>\n' + ReactDOMServer.renderToString(server_app);

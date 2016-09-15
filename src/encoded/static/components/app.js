@@ -233,9 +233,6 @@ var App = React.createClass({
             banners.push(<home.BannerLoader text='experiments' location='/search/?type=Experiment&award.project=4DN'/>);
             banners.push(<home.BannerLoader text='experiments' location='/search/?type=Experiment&award.project=External'/>);
             banners.push(<home.BannerLoader text='cell types' location='/search/?type=Biosource'/>);
-            // banners.push(<div> -- </div>);
-            // banners.push(<div> -- </div>);
-            // banners.push(<div> -- </div>);
             content = <home.HomePage banners={banners}/>;
             title = portal.portal_title;
         }else if (context) {
@@ -249,17 +246,15 @@ var App = React.createClass({
                     title = portal.portal_title;
                 }
             }else{
-                // This code is here to deal with non-simultaneous changing
-                // of props.href and props.context. This content below should
-                // never be displayed.
+                // Handle the case where context is not loaded correctly
                 content = <ErrorPage />;
                 title="Not Found";
             }
         }
         // Google does not update the content of 301 redirected pages
         var base;
-        if (({'http://www.encodeproject.org/': 1, 'http://encodeproject.org/': 1})[canonical]) {
-            base = canonical = 'https://www.encodeproject.org/';
+        if (({'http://data.4dnucleome.org/': 1, 'http://data.4dnucleome.org/': 1})[canonical]) {
+            base = canonical = 'http://data.4dnucleome.org/';
             this.historyEnabled = false;
 
         }

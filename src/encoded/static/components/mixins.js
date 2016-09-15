@@ -600,7 +600,8 @@ module.exports.HistoryAndTriggers = {
             } else {
                 window.history.pushState(null, '', response_url + fragment);
             }
-            dispatch_dict['href'] = response_url + fragment;
+
+            dispatch_dict.href = response_url + fragment;
             if (!response.ok) {
                 throw response;
             }
@@ -612,7 +613,7 @@ module.exports.HistoryAndTriggers = {
         if (!options.replace) {
             promise = promise.then(this.scrollTo);
         }
-        dispatch_dict['contextRequest'] = request;
+        dispatch_dict.contextRequest = request;
         return request;
     },
 
@@ -629,10 +630,10 @@ module.exports.HistoryAndTriggers = {
         // gotten a response. If the requestAborted flag is set, then a request was aborted and so we have
         // the data for a Network Request Error. Don't render that, but clear the requestAboerted flag.
         // Otherwise we have good page data to render.
-        dispatch_dict['slow'] = false;
+        dispatch_dict.slow = false;
         if (!this.requestAborted) {
             // Real page to render
-            dispatch_dict['context'] = data;
+            dispatch_dict.context = data;
         } else {
             // data holds network error. Don't render that, but clear the requestAborted flag so we're ready
             // for the next navigation click.

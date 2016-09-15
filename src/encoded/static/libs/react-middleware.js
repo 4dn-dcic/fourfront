@@ -6,7 +6,7 @@ var transformResponse = require('subprocess-middleware').transformResponse;
 var fs = require('fs');
 var inline = fs.readFileSync(__dirname + '/../build/inline.js').toString();
 var store = require('../store');
-import { Provider, connect } from 'react-redux';
+var { Provider, connect } = require('react-redux');
 
 function mapStateToProps(store) {
    return {

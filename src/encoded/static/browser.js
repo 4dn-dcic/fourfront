@@ -9,7 +9,7 @@ ReactMount.allowFullPageRender = true;
 var App = require('./components');
 var domready = require('domready');
 var store = require('./store');
-import { Provider, connect } from 'react-redux';
+var { Provider, connect } = require('react-redux');
 
 function mapStateToProps(store) {
    return {
