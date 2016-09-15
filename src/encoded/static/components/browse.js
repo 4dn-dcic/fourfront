@@ -107,92 +107,47 @@ var Item = module.exports.Item = React.createClass({
 });
 globals.listing_views.register(Item, 'Item');
 
-var Biosample = module.exports.Biosample = React.createClass({
-    render: function() {
-        var result = this.props.context;
-        return (
-            <li>
-                <div className="clearfix">
-                    <div className="pull-right search-meta">
-                        <p className="type meta-title">Biosample</p>
-                        <p className="type">{' ' + result['accession']}</p>
-                    </div>
-                    <div className="accession">
-                        <a href={result['@id']}>
-                            {result['biosource_summary']}
-                        </a>
-                    </div>
-                    <div className="data-row">
-                        <div><strong>Modifications: </strong>{result['modifications_summary']}</div>
-                        <div><strong>Treatments: </strong>{result['treatments_summary']}</div>
-                    </div>
-                </div>
-            </li>
-        );
-    }
-});
-globals.listing_views.register(Biosample, 'Biosample');
-
-
-var Biosource = module.exports.Biosource = React.createClass({
-    render: function() {
-        var result = this.props.context;
-        var organism;
-        if (result['individual']){
-            organism = result['individual']['organism']['name'];
+// Find the component experiments in an experiment set that match the current filters
+function siftExperiments(graph, filters) {
+    var filterList = {};
+    var passExperiments = new Set();
+    for(var i=0; i < graph.length; i++){
+        var experiment_set = graph[i];
+        if(experiment_set.experiments_in_set){
+            var experiments = experiment_set.experiments_in_set;
+            for(var j=0; j < experiments.length; j++){
+                var experiment = experiments[j];
+                if(!passExperiments.has(experiment)){
+                    passExperiments.add(experiment);
+                }
+            }
         }
-        return (
-            <li>
-                <div className="clearfix">
-                    <div className="pull-right search-meta">
-                        <p className="type meta-title">Biosource</p>
-                        <p className="type">{' ' + result['accession']}</p>
-                    </div>
-                    <div className="accession">
-                        <a href={result['@id']}>
-                            {result['biosource_name']}
-                        </a>
-                    </div>
-                    <div className="data-row">
-                        <div><strong>{result['biosource_type']}</strong></div>
-                        <div><strong>{organism}</strong></div>
-                    </div>
-                </div>
-            </li>
-        );
     }
-});
-globals.listing_views.register(Biosource, 'Biosource');
+    filters = filters.replace(/+/g,' ');
+    filters = filters.split(/[?&]+/);
+    console.log(filters);
+    // for(var i=0; i < filters.length; i++){
+    //     var splitField = filters[i].field.split(".");
+    //     if (splitField[0] === 'experiments_in_set' && splitField.length > 1){
+    //         filterList.push(splitField.slice(1));
+    //     }
+    // }
+    // for (let experiment of passExperiments){
+    //     for(var k=0; k < filterList.length; k++){
+    //         var filters = filterList[k];
+    //         for(var l=0; l < filters.length; l++){
+    //             if(!experiment[filters[l]]){
+    //                 passExperiments.delete(experiment);
+    //                 break;
+    //             }else{
+    //                 experiment = experiment[filters[l]];
+    //             }
+    //         }
+    //     }
+    // }
 
-
-var Experiment = module.exports.Experiment = React.createClass({
-    render: function() {
-        var result = this.props.context;
-        return (
-            <li>
-                <div className="clearfix">
-                    <div className="pull-right search-meta">
-                        <p className="type meta-title">Experiment</p>
-                        <p className="type">{' ' + result['accession']}</p>
-                        <p className="type">{' ' + result['award']['project']}</p>
-                    </div>
-                    <div className="accession">
-                        <a href={result['@id']}>
-                            {result['experiment_summary']}
-                        </a>
-                    </div>
-                    <div className="data-row">
-                        <div><strong>Modifications: </strong>{result['biosample']['modifications_summary']}</div>
-                        <div><strong>Treatments: </strong>{result['biosample']['treatments_summary']}</div>
-                        <div><strong>Lab: </strong>{result['lab']['title']}</div>
-                    </div>
-                </div>
-            </li>
-        );
-    }
-});
-globals.listing_views.register(Experiment, 'Experiment');
-
+    return passExperiments;
+}
 
 // If the given term is selected, return the href for the term
 function termSelected(term, field, filters) {
@@ -222,10 +177,12 @@ var Term = search.Term = React.createClass({
         var count = this.props.term['doc_count'];
         var title = this.props.title || term;
         var field = this.props.facet['field'];
+        var graph = this.props.context['@graph'];
         var em = field === 'target.organism.scientific_name' ||
                     field === 'organism.scientific_name' ||
                     field === 'replicates.library.biosample.donor.organism.scientific_name';
         var selected = termSelected(term, field, filters);
+        // selected is the actually selected terms
         var href;
         if (selected && !this.props.canDeselect) {
             href = null;
@@ -234,6 +191,9 @@ var Term = search.Term = React.createClass({
         } else {
             href = this.props.searchBase + field + '=' + encodeURIComponent(term).replace(/%20/g, '+');
         }
+        //href is all the selected terms and the theoretically selected one
+        var passExperiments = siftExperiments(graph, href);
+        var expCount = passExperiments.size;
         return (
             <li id={selected ? "selected" : null} key={term}>
                 {field === 'lot_reviews.status' ? <span className={globals.statusClass(term, 'indicator pull-left facet-term-key icon icon-circle')}></span> : null}
@@ -242,6 +202,7 @@ var Term = search.Term = React.createClass({
                     <span className="facet-item">
                         {em ? <em>{title}</em> : <span>{title}</span>}
                     </span>
+                    <span className="pull-right">{expCount}</span>
                     <span className="pull-right">{count}</span>
                 </a>
             </li>
@@ -448,7 +409,7 @@ var FacetList = search.FacetList = React.createClass({
                         return <span key={facet.field} />;
                     } else {
                         return <Facet {...this.props} key={facet.field} facet={facet} filters={filters}
-                                        width={width} />;
+                                        width={width}/>;
                     }
                 })}
             </div>
@@ -637,4 +598,4 @@ var Search = search.Search = React.createClass({
     }
 });
 
-globals.content_views.register(Search, 'Disabled');
+globals.content_views.register(Search, 'Search');

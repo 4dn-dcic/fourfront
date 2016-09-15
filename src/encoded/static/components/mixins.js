@@ -600,10 +600,6 @@ module.exports.HistoryAndTriggers = {
             } else {
                 window.history.pushState(null, '', response_url + fragment);
             }
-            // store.dispatch({
-            //     type: 'href',
-            //     value: response_url + fragment
-            // });
             dispatch_dict['href'] = response_url + fragment;
             if (!response.ok) {
                 throw response;

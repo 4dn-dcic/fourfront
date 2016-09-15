@@ -55,8 +55,8 @@
         }
     },
     "facets": {
-        "experiments_in_set": {
-            "title": "Experiments"
+        "experimentset_type": {
+            "title": "Experiment set type"
         },
         "experiments_in_set.experiment_summary":{
             "title": "Experiment summary"
@@ -87,6 +87,9 @@
         }
     },
     "columns": {
+        "experimentset_type": {
+            "title": "Experiment set type"
+        },
         "experiments_in_set": {
             "title": "Experiments"
         },

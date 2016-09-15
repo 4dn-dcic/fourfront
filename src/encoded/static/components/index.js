@@ -15,6 +15,7 @@ require('./navigation');
 require('./inputs');
 require('./schema');
 require('./search');
+require('./browse');
 
 
 module.exports = require('./app');
