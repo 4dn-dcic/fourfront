@@ -226,6 +226,18 @@ def experiment(testapp, lab, award, human_biosample):
     return testapp.post_json('/experiment_hic', item).json['@graph'][0]
 
 @pytest.fixture
+def experiment_project_review(testapp, lab, award, human_biosample):
+    item = {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'biosample': human_biosample['@id'],
+        'experiment_type': 'micro-C',
+        'status': 'in review by project'
+    }
+    return testapp.post_json('/experiment_hic', item).json['@graph'][0]
+
+
+@pytest.fixture
 def base_experiment(testapp, lab, award, human_biosample):
     item = {
         'award': award['uuid'],
@@ -387,7 +399,7 @@ def biosample_2(testapp, human_biosource):
 
 @pytest.fixture
 def donor_1(testapp, lab, award):
-    item = {        
+    item = {
         'award': award['@id'],
         'lab': lab['@id'],
     }
@@ -395,7 +407,7 @@ def donor_1(testapp, lab, award):
 
 @pytest.fixture
 def donor_2(testapp, lab, award):
-    item = {        
+    item = {
         'award': award['@id'],
         'lab': lab['@id'],
     }
