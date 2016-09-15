@@ -29,8 +29,7 @@
                 "in review by project",
                 "released to project"
             ]
-        }
-    },
+        },
         "name": {
             "title": "Common name",
             "description": "A short unique name for the organism (e.g. 'mouse' or 'human').",

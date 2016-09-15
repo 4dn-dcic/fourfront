@@ -29,8 +29,7 @@
                 "in review by project",
                 "released to project"
             ]
-        }
-    },
+        },
         "title": {
             "rdfs:subPropertyOf": "dc:title",
             "title": "Name",
