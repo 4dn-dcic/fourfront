@@ -125,7 +125,10 @@ function siftExperiments(graph, filters) {
             filterList[rejoined].push(splitFilter[1]);
         // add a case for filters directly applicable to ExperimentSet
         }else if (splitField[0] !== 'type' && splitField[0] !== '' && splitField.length === 1){
-            directFilters[splitField[0]] = splitFilter[1];
+            if(!directFilters[splitField[0]]){
+                directFilters[splitField[0]] = [];
+            }
+            directFilters[splitField[0]].push(splitFilter[1]);
         }
     }
     // Start by adding all applicable experiments to set
@@ -136,7 +139,7 @@ function siftExperiments(graph, filters) {
             var directKeys = Object.keys(directFilters);
             for(var j=0; j < directKeys.length; j++){
                 if(experiment_set[directKeys[j]]){
-                    if(experiment_set[directKeys[j]] !== directFilters[directKeys[j]]){
+                    if(!_.contains(directFilters[directKeys[j]], experiment_set[directKeys[j]])){
                         invalid = true;
                         break;
                     }
@@ -153,23 +156,27 @@ function siftExperiments(graph, filters) {
             }
         }
     }
-    console.log('+++++++++++++++++++++++++++++');
-    console.log(filters);
     // reformate decoded URI to find filters
     var filterKeys = Object.keys(filterList);
     for(let experiment of passExperiments){
         var eliminated = false;
-        var valueProbe = experiment;
         for(var k=0; k < filterKeys.length; k++){
             if(eliminated){
                 break;
             }
+            var valueProbe = experiment;
             var filters = filterKeys[k].split('.');
             for(var l=0; l < filters.length; l++){
+                // for now, use first item in an array (for things such as biosamples)
+                if(Array.isArray(valueProbe)){
+                    valueProbe = valueProbe[0];
+                }
                 if(valueProbe[filters[l]]){
                     valueProbe = valueProbe[filters[l]];
                     if(l === filters.length-1){ // last level of filter
+                        // if(valueProbe !== filterList[filterKeys[k]]){ // AND operation within a facet
                         if(!_.contains(filterList[filterKeys[k]], valueProbe)){ // AND operation within a facet
+                            eliminated = true;
                             passExperiments.delete(experiment);
                         }
                     }
@@ -181,7 +188,6 @@ function siftExperiments(graph, filters) {
             }
         }
     }
-    console.log('==========================');
     return passExperiments;
 }
 
@@ -229,7 +235,7 @@ var Term = search.Term = React.createClass({
         }
         //href is all the selected terms and the theoretically selected one
         var passExperiments = siftExperiments(graph, decodeURIComponent(href));
-        var expCount = passExperiments.size;
+        var expCount = selected ? '' : passExperiments.size;
         return (
             <li id={selected ? "selected" : null} key={term}>
                 {field === 'lot_reviews.status' ? <span className={globals.statusClass(term, 'indicator pull-left facet-term-key icon icon-circle')}></span> : null}
@@ -480,6 +486,8 @@ var ResultTable = search.ResultTable = React.createClass({
         var label = 'results. ';
         var searchBase = this.props.searchBase;
         var trimmedSearchBase = searchBase.replace(/[\?|\&]limit=all/, "");
+        var passExperiments = siftExperiments(results, decodeURIComponent(trimmedSearchBase));
+        console.log(passExperiments);
         var specificFilter;
         var show_link;
         var facets = context['facets'].map(function(facet) {
