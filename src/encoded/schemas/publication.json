@@ -11,7 +11,6 @@
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/submitted" },
-        { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/attribution" }
     ],
     "properties": {
@@ -75,11 +74,17 @@
             "uniqueKey":  "publication:PMID",
             "pattern": "^PMID:[0-9]*"
         },
-        "url": {
-            "title": "URL",
-            "description": "External resources with additional information or supplemental files associated with the publication.",
-            "type": "string",
-            "format": "uri"
+        "experiment_sets_in_pub": {
+            "title": "Experiment sets that are part of this publication",
+            "description": "List of experiment sets to be associated with the publication.",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "Experiment Set",
+                "comment": "use accessions for identifiers.",
+                "type": "string",
+                "linkTo": "ExperimentSet"
+            }
         },
         "categories": {
             "title": "Categories",

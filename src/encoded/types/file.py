@@ -144,11 +144,15 @@ class File(Item):
 
         if 'related_files' in properties.keys():
             for relation in properties["related_files"]:
-                switch = relation["relationship_type"]
-                rev_switch = DicRefRelation[switch]
-                related_fl = relation["file"]
-                relationship_entry = {"relationship_type": rev_switch, "file": acc}
-                rel_dic = {'related_files': [relationship_entry, ]}
+                try:
+                    switch = relation["relationship_type"]
+                    rev_switch = DicRefRelation[switch]
+                    related_fl = relation["file"]
+                    relationship_entry = {"relationship_type": rev_switch, "file": acc}
+                    rel_dic = {'related_files': [relationship_entry, ]}
+                except:
+                    print("invalid data, can't update correctly")
+                    return
 
                 target_fl = self.collection.get(related_fl)
                 # case one we don't have relations

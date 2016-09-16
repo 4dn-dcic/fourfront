@@ -28,7 +28,7 @@ var FileInput = module.exports.FileInput = React.createClass({
                     <br />Drop a {filename ? 'replacement' : ''} file here.
                     Or <input ref="input" type="file" onChange={this.onChange} />
                     <br /><br />
-                </div>      
+                </div>
             </div>
         );
     },
