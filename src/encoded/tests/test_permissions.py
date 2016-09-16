@@ -251,3 +251,184 @@ def test_labs_view_wrangler(wrangler_testapp, other_lab):
     labs = wrangler_testapp.get('/labs/', status=200)
     assert(len(labs.json['@graph']) == 1)
 
+
+##############################################
+# Permission tests based on different statuses
+# Submitter created item and wants to view
+def test_submitter_cannot_view_ownitem(human, award, lab, submitter_testapp, wrangler_testapp):
+    statuses = ['deleted']
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'organism': human['@id']
+    }
+    res = submitter_testapp.post_json('/individual_human', item, status=201)
+    for status in statuses:
+        wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
+        submitter_testapp.get(res.json['@graph'][0]['@id'], status=403)
+
+
+def test_submitter_can_view_ownitem(human, award, lab, submitter_testapp, wrangler_testapp):
+    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by lab', 'in review by project']
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'organism': human['@id']
+    }
+    res = submitter_testapp.post_json('/individual_human', item, status=201)
+    for status in statuses:
+        wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
+        submitter_testapp.get(res.json['@graph'][0]['@id'], status=200)
+
+
+def test_submitter_cannot_view_ownitem_replaced(human, award, lab, submitter_testapp, wrangler_testapp):
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'organism': human['@id']
+    }
+    res = submitter_testapp.post_json('/individual_human', item, status=201)
+    wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": "replaced"}, status=200)
+    submitter_testapp.get(res.json['@graph'][0]['@id'], status=404)
+
+# Submitter created item and wants to patch
+def test_submitter_cannot_patch_statuses(human, award, lab, submitter_testapp, wrangler_testapp):
+    statuses = ['deleted', 'current', 'released', 'revoked', 'released to project']
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'organism': human['@id']
+    }
+    res = submitter_testapp.post_json('/individual_human', item, status=201)
+    for status in statuses:
+        wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
+        submitter_testapp.patch_json(res.json['@graph'][0]['@id'], {'sex': 'female'}, status=403)
+
+
+def test_submitter_can_patch_statuses(human, award, lab, submitter_testapp, wrangler_testapp):
+    statuses = ['in review by lab', 'in review by project']
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'organism': human['@id']
+    }
+    res = submitter_testapp.post_json('/individual_human', item, status=201)
+    for status in statuses:
+        wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
+        submitter_testapp.patch_json(res.json['@graph'][0]['@id'], {'sex': 'female'}, status=200)
+
+
+# Replaced seems to be a special case with err0r 404 instead of 403
+def test_submitter_cannot_patch_replaced(human, award, lab, submitter_testapp, wrangler_testapp):
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'organism': human['@id']
+    }
+    res = submitter_testapp.post_json('/individual_human', item, status=201)
+    wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": "replaced"}, status=200)
+    submitter_testapp.patch_json(res.json['@graph'][0]['@id'], {'sex': 'female'}, status=404)
+
+
+# Submitter created item and lab member wants to view
+def test_labmember_cannot_view_submitter_item(human, award, lab, submitter_testapp, wrangler_testapp, lab_viewer_testapp):
+    statuses = ['deleted']
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'organism': human['@id']
+    }
+    res = submitter_testapp.post_json('/individual_human', item, status=201)
+    for status in statuses:
+        wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
+        lab_viewer_testapp.get(res.json['@graph'][0]['@id'], status=403)
+
+
+def test_labmember_can_view_submitter_item(human, award, lab, submitter_testapp, wrangler_testapp, lab_viewer_testapp):
+    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by lab', 'in review by project']
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'organism': human['@id']
+    }
+    res = submitter_testapp.post_json('/individual_human', item, status=201)
+    for status in statuses:
+        wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
+        lab_viewer_testapp.get(res.json['@graph'][0]['@id'], status=200)
+
+
+def test_labmember_cannot_view_submitter_item_replaced(human, award, lab, submitter_testapp, wrangler_testapp, lab_viewer_testapp):
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'organism': human['@id']
+    }
+    res = submitter_testapp.post_json('/individual_human', item, status=201)
+    wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": "replaced"}, status=200)
+    lab_viewer_testapp.get(res.json['@graph'][0]['@id'], status=404)
+
+
+# Submitter created item and lab member wants to patch
+def test_labmember_cannot_patch_submitter_item(human, award, lab, submitter_testapp, wrangler_testapp, lab_viewer_testapp):
+    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by lab', 'in review by project']
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'organism': human['@id']
+    }
+    res = submitter_testapp.post_json('/individual_human', item, status=201)
+    for status in statuses:
+        wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
+        lab_viewer_testapp.patch_json(res.json['@graph'][0]['@id'], {'sex': 'female'}, status=422)
+
+# Submitter created item and project member wants to view
+def test_viewing_group_member_cannot_view_submitter_item(human, award, lab, submitter_testapp, wrangler_testapp, viewing_group_member_testapp):
+    statuses = ['deleted', 'in review by lab']
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'organism': human['@id']
+    }
+    res = submitter_testapp.post_json('/individual_human', item, status=201)
+    for status in statuses:
+        wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
+        viewing_group_member_testapp.get(res.json['@graph'][0]['@id'], status=403)
+
+
+def test_viewing_group_member_can_view_submitter_item(human, award, lab, submitter_testapp, wrangler_testapp, viewing_group_member_testapp):
+    statuses = ['current', 'released', 'revoked', 'released to project',  'in review by project']
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'organism': human['@id']
+    }
+    res = submitter_testapp.post_json('/individual_human', item, status=201)
+    for status in statuses:
+        wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
+        viewing_group_member_testapp.get(res.json['@graph'][0]['@id'], status=200)
+
+
+def test_viewing_group_member_cannot_view_submitter_item_replaced(human, award, lab, submitter_testapp, wrangler_testapp, viewing_group_member_testapp):
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'organism': human['@id']
+    }
+    res = submitter_testapp.post_json('/individual_human', item, status=201)
+    wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": "replaced"}, status=200)
+    viewing_group_member_testapp.get(res.json['@graph'][0]['@id'], status=404)
+
+
+# Submitter created item and lab member wants to patch
+def test_viewing_group_member_cannot_patch_submitter_item(human, award, lab, submitter_testapp, wrangler_testapp, viewing_group_member_testapp):
+    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by lab', 'in review by project']
+    item = {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'organism': human['@id']
+    }
+    res = submitter_testapp.post_json('/individual_human', item, status=201)
+    for status in statuses:
+        wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
+        viewing_group_member_testapp.patch_json(res.json['@graph'][0]['@id'], {'sex': 'female'}, status=422)
+

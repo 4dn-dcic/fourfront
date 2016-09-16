@@ -71,7 +71,8 @@ def lab_viewer(testapp, lab, award):
         'last_name': 'lab viewer',
         'email': 'encode_viewer@example.org',
         'lab': lab['name'],
-        'status': 'current'
+        'status': 'current',
+        'viewing_groups': [award['viewing_group']]
     }
     # User @@object view has keys omitted.
     res = testapp.post_json('/user', item)
@@ -126,7 +127,6 @@ def award(testapp):
         'name': 'encode3-award',
         'description': 'ENCODE test award',
         'viewing_group': '4DN',
-        'status': 'current'
     }
     return testapp.post_json('/award', item).json['@graph'][0]
 
@@ -137,7 +137,6 @@ def remc_award(testapp):
         'name': 'remc-award',
         'description': 'REMC test award',
         'viewing_group': 'Not 4DN',
-        'status': 'current'
     }
     return testapp.post_json('/award', item).json['@graph'][0]
 
@@ -156,7 +155,7 @@ def encode2_award(testapp):
 
 
 @pytest.fixture
-def human_donor(testapp, award, lab, human):
+def human_individual(testapp, award, lab, human):
     item = {
         "accession": "4DNIN000AAQ1",
         "age": 53,
@@ -172,7 +171,6 @@ def human_donor(testapp, award, lab, human):
         "url": "http://ccr.coriell.org/Sections/BrowseCatalog/FamilyTypeSubDetail.aspx?PgId=402&fam=1463&coll=GM",
         # "uuid": "44d24e3f-bc5b-469a-8500-7ebd728f8ed5"
     }
-
     return testapp.post_json('/individual_human', item).json['@graph'][0]
 
 
@@ -189,11 +187,11 @@ def worthington_biochemical(testapp, award, lab):
 
 
 @pytest.fixture
-def human_biosource(testapp, human_donor, worthington_biochemical):
+def human_biosource(testapp, human_individual, worthington_biochemical):
     item = {
         "description": "GM06990 cells",
         "biosource_type": "immortalized cell line",
-        "individual": human_donor['@id'],
+        "individual": human_individual['@id'],
         "cell_line": "GM06990",
         "biosource_vendor": worthington_biochemical['@id'],
         "status": "current"
@@ -237,6 +235,7 @@ def experiment(testapp, lab, award, human_biosample):
         'experiment_type': 'micro-C'
     }
     return testapp.post_json('/experiment_hic', item).json['@graph'][0]
+
 
 @pytest.fixture
 def experiment_project_review(testapp, lab, award, human_biosample):
@@ -331,6 +330,7 @@ def construct(testapp):
     }
     return testapp.post_json('/construct', item).json['@graph'][0]
 
+
 @pytest.fixture
 def publication(testapp, lab, award):
     item = {
@@ -387,28 +387,31 @@ def document(testapp, lab, award):
 def human_biosample(testapp, human_biosource):
     item = {
         "description": "GM06990 prepared for Hi-C",
-        "biosource": [human_biosource['@id'],],
-        #"biosample_protocols": ["131106bc-8535-4448-903e-854af460b212"],
-        #"modifications": ["431106bc-8535-4448-903e-854af460b254"],
-        #"treatments": ["686b362f-4eb6-4a9c-8173-3ab267307e3b"]
+        "biosource": [human_biosource['@id'], ],
+        # "biosample_protocols": ["131106bc-8535-4448-903e-854af460b212"],
+        # "modifications": ["431106bc-8535-4448-903e-854af460b254"],
+        # "treatments": ["686b362f-4eb6-4a9c-8173-3ab267307e3b"]
     }
     return testapp.post_json('/biosample', item).json['@graph'][0]
+
 
 @pytest.fixture
 def biosample_1(testapp, human_biosource):
     item = {
-        'description' : "GM06990 prepared for Hi-C",
-        'biosource': [human_biosource['@id'],],
+        'description': "GM06990 prepared for Hi-C",
+        'biosource': [human_biosource['@id'], ],
     }
     return testapp.post_json('/biosample', item).json['@graph'][0]
+
 
 @pytest.fixture
 def biosample_2(testapp, human_biosource):
     item = {
-        'description' : "GM06990 prepared for Hi-C",
-        'biosource': [human_biosource['@id'],],
+        'description': "GM06990 prepared for Hi-C",
+        'biosource': [human_biosource['@id'], ],
     }
     return testapp.post_json('/biosample', item).json['@graph'][0]
+
 
 @pytest.fixture
 def donor_1(testapp, lab, award):
@@ -417,6 +420,7 @@ def donor_1(testapp, lab, award):
         'lab': lab['@id'],
     }
     return testapp.post_json('/individual_human', item, status=201).json['@graph'][0]
+
 
 @pytest.fixture
 def donor_2(testapp, lab, award):
@@ -431,8 +435,8 @@ def donor_2(testapp, lab, award):
 def analysis_step_bam(testapp):
     item = {
         'name': 'bamqc',
-        'software_used' : 'aligner',
-        "version" : "1.0"
+        'software_used': 'aligner',
+        "version": "1.0"
     }
     return testapp.post_json('/analysis_step', item).json['@graph'][0]
 
@@ -448,7 +452,7 @@ def task_bam(testapp, analysis_step_bam):
 
 
 @pytest.fixture
-def workflow_bam(testapp, lab, award, analysis_step_bam ):
+def workflow_bam(testapp, lab, award, analysis_step_bam):
     item = {
         'award': award['@id'],
         'lab': lab['@id'],
