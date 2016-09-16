@@ -47,7 +47,7 @@
           "individual": {
               "title": "Individual",
               "description": "Information on donor or individual mouse or other organism.",
-              "comment": "For human biosamples, see human_donor.json for available identifiers. For mouse biosamples, see mouse_donor.json for available identifiers.",
+              "comment": "For human biosamples, see human_individual.json for available identifiers.",
               "type": "string",
               "linkTo": "Individual"
           },

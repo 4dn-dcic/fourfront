@@ -1,0 +1,136 @@
+{
+    "title": "Capture Hi-C Experiment Variables",
+    "description": "Experimental variables for a Capture Hi-C experiment.",
+    "id": "/profiles/experiment_capture_c.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["experiment_type"],
+    "identifyingProperties": ["uuid", "accession", "aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/accession" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/references" },
+        { "$ref": "mixins.json#/dbxrefs" },
+        { "$ref": "mixins.json#/documents" },
+        { "$ref": "mixins.json#/library"},
+        { "$ref": "experiment.json#/properties" },
+        { "$ref": "experiment_hic.json#/properties" }
+    ],
+    "dependencies": {
+      "crosslinking_temperature": ["crosslinking_method", "crosslinking_time"],
+      "crosslinking_time": ["crosslinking_method", "crosslinking_temperature"],
+      "digestion_temperature": ["digestion_enzyme", "digestion_time"],
+      "digestion_time": ["digestion_enzyme", "digestion_temperature"]
+    },
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "experiment_type": {
+            "enum": [
+            "capture Hi-C"
+          ]
+        },
+        "rna_tag": {
+            "title": "Biotinylated RNA base",
+            "description": "The biotinylated base used to tag the in vitro transcribed capture RNA",
+            "type": "string",
+            "comment": "should this be a controlled CV with enum?"
+        },
+        "targeted_regions": {
+            "title": "Targeted Regions",
+            "description": "Information about the regions targeted for capture",
+            "type": "array",
+            "items": {
+                "description": "A region targeted for capture.",
+                "title": "Target Region",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "targeted_genes": {
+                        "title": "Targeted Genes",
+                        "description": "The genes that are specifically targeted - can also be derived from genomic region info",
+                        "type": "array",
+                        "items": {
+                            "title": "Gene",
+                            "description": "Gene symbol for targeted gene",
+                            "comment": "will want to have validation against authority gene name databases",
+                            "comment": "and link to the external resource",
+                            "type": "string"
+                        }
+                    },
+                    "oligo_file": {
+                        "title": "Oligonucleotide Fasta File",
+                        "description": "The multi fasta file that lists all the oligos used for this region",
+                        "type": "string",
+                        "linkTo": "File"
+                    },
+                    "genomic_region": {
+                        "title": "Genomic Region",
+                        "description": "The genome assembly, chromosome and coordinates of the region",
+                        "type": "string",
+                        "linkTo": "GenomicRegion"
+                    }
+                }
+            }
+        }
+    },
+    "facets": {
+        "award.project": {
+            "title": "Project"
+        },
+        "biosample.biosource.individual.organism.name": {
+            "title": "Organism"
+        },
+        "biosample.biosource.biosource_type": {
+            "title": "Biosource type"
+        },
+        "biosample.biosource.biosource_name": {
+            "title": "Biosource name"
+        },
+        "digestion_enzyme.name": {
+            "title": "Enzyme"
+        },
+        "biosample.modifications.modification_type": {
+            "title": "Modification type"
+        },
+        "biosample.treatments.treatment_type": {
+            "title": "Treatment type"
+        },
+        "lab.title": {
+            "title": "Lab"
+        }
+    },
+    "columns": {
+        "award.project": {
+            "title": "Project"
+        },
+        "biosample.biosource.individual.organism.name": {
+            "title": "Organism"
+        },
+        "biosample.biosource.biosource_type": {
+            "title": "Biosource type"
+        },
+        "biosample.biosource.biosource_name": {
+            "title": "Biosource name"
+        },
+        "digestion_enzyme.name": {
+            "title": "Enzyme"
+        },
+        "biosample.modifications.modification_type": {
+            "title": "Modification type"
+        },
+        "biosample.treatments.treatment_type": {
+            "title": "Treatment type"
+        },
+        "lab.title": {
+            "title": "Lab"
+        }
+    }
+}

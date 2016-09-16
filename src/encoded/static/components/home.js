@@ -1,6 +1,5 @@
 'use strict';
 var React = require('react');
-var globals = require('./globals');
 var fetched = require('./fetched');
 var _ = require('underscore');
 var announcements_data = require('../data/announcements_data');
@@ -92,12 +91,12 @@ var HomePage = module.exports.HomePage = React.createClass({
         var biosourceBanner = this.props.banners[2]
         var announcements = announcements_data.map(function(announce) {
             return (
-                <ContentItem content={announce}/>
+                <ContentItem key={announce.title} content={announce}/>
             );
         });
         var entries = gs_entries.map(function(entry) {
             return (
-                <ContentItem content={entry}/>
+                <ContentItem key={entry.title} content={entry}/>
             );
         });
         return (

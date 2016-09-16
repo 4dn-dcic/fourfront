@@ -109,7 +109,7 @@ var ObjectPicker = module.exports.ObjectPicker = React.createClass({
                         {' '}<button className={"btn btn-primary" + (this.state.browsing ? ' active' : '')} onClick={this.handleBrowse}>Browse&hellip;</button>
                     </div>
                 }
-                {this.state.browsing ? 
+                {this.state.browsing ?
                     <fetched.FetchedData>
                         <fetched.Param name="context" url={'/search/' + searchParams} />
                         <SearchBlockEdit

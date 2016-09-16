@@ -122,6 +122,14 @@ var lookup_column = function (result, column) {
             return state;
         },
 
+        componentDidMount: function() {
+            this._isMounted = true;
+        },
+
+        componentWillUnmount: function() {
+            this._isMounted = false;
+        },
+
         componentWillReceiveProps: function (nextProps, nextContext) {
             var updateData = false;
             if (nextProps.context !== this.props.context) {
@@ -154,7 +162,9 @@ var lookup_column = function (result, column) {
                 reversed: params.reversed || false,
                 searchTerm: params.q || ''
             };
-            this.setState(state);
+            if(this._isMounted){
+                this.setState(state);
+            }
             return state;
         },
 
@@ -174,7 +184,9 @@ var lookup_column = function (result, column) {
                     columns.push(column);
                 }
             }
-            this.setState({columns: columns});
+            if(this._isMounted){
+                this.setState({columns: columns});
+            }
             return columns;
         },
 
@@ -259,7 +271,6 @@ var lookup_column = function (result, column) {
             var sortOn = this.state.sortOn;
             var reversed = this.state.reversed;
             var searchTerm = this.state.searchTerm;
-            this.state.searchTerm = searchTerm;
             var titles = context.columns || {};
             var data = this.state.data;
             var params = url.parse(this.context.location_href, true).query;
@@ -279,7 +290,7 @@ var lookup_column = function (result, column) {
                 );
             });
             var actions = (context.actions || []).map(action =>
-                <span className="table-actions">
+                <span key={action.href} className="table-actions">
                     <a href={action.href}>
                         <button className={'btn ' + action.className || ''}>{action.title}</button>
                     </a>
@@ -329,7 +340,7 @@ var lookup_column = function (result, column) {
                             {this.props.showControls ? <tr className="nosort table-controls">
                                 <th colSpan={columns.length}>
                                     {loading_or_total}
-                                    {actions}
+                                    {/*{actions} REMOVE ACTIONS FOR NOW*/}
                                     <form ref="form" className="table-filter" onKeyUp={this.handleKeyUp}
                                         data-skiprequest="true" data-removeempty="true">
                                         <input ref="q" disabled={this.state.communicating || undefined}
@@ -370,7 +381,7 @@ var lookup_column = function (result, column) {
             }
             var cellIndex = target.cellIndex;
             var reversed = '';
-            var sorton = this.refs.sorton.getDOMNode();
+            var sorton = this.refs.sorton;
             if (this.props.defaultSortOn !== cellIndex) {
                 sorton.value = cellIndex;
             } else {
@@ -379,7 +390,7 @@ var lookup_column = function (result, column) {
             if (this.state.sortOn == cellIndex) {
                 reversed = !this.state.reversed || '';
             }
-            this.refs.reversed.getDOMNode().value = reversed;
+            this.refs.reversed.value = reversed;
             event.preventDefault();
             event.stopPropagation();
             this.submit();
@@ -400,7 +411,7 @@ var lookup_column = function (result, column) {
 
         submit: function () {
             // form.submit() does not fire onsubmit handlers...
-            var target = this.refs.form.getDOMNode();
+            var target = this.refs.form;
 
             // IE8 does not support the Event constructor
             if (!this.hasEvent) {
@@ -413,7 +424,7 @@ var lookup_column = function (result, column) {
         },
 
         clearFilter: function (event) {
-            this.refs.q.getDOMNode().value = '';
+            this.refs.q.value = '';
             this.submitTimer = setTimeout(this.submit);
         },
 

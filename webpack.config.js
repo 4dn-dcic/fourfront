@@ -25,7 +25,6 @@ var preLoaders = [
 	// Strip @jsx pragma in react-forms, which makes babel abort
 	{
 		test: /\.js$/,
-		include: path.resolve(__dirname, 'node_modules/react-forms'),
 		loader: 'string-replace',
 		query: {
 			search: '@jsx',
@@ -40,7 +39,6 @@ var loaders = [
 		test: /\.js$/,
 		include: [
 			path.resolve(__dirname, 'src/encoded/static'),
-			path.resolve(__dirname, 'node_modules/react-forms'),
 		],
 		loader: 'babel',
 	},
