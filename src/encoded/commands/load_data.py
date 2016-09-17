@@ -4,12 +4,18 @@ import logging
 from pyramid.path import DottedNameResolver
 from pyramid.paster import get_app
 from encoded import configure_dbsession
+import sys
 
 logger = logging.getLogger(__name__)
 EPILOG = __doc__
 
 
 def main():
+    # halt and catch fire
+    if sys.environ.get("ENV_NAME") == "PROD":
+        print("# detected production... ")
+        print("# halt and catch fire...")
+
     parser = argparse.ArgumentParser(
         description="Load Test Data", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
