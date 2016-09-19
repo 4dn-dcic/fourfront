@@ -12,10 +12,16 @@ EPILOG = __doc__
 
 
 def main():
+
+    logging.basicConfig()
+    # Loading app will have configured from config file. Reconfigure here:
+    logging.getLogger('encoded').setLevel(logging.DEBUG)
+
     # halt and catch fire
     if os.environ.get("ENV_NAME") == "PROD":
-        print("# detected production... ")
-        print("# halt and catch fire...")
+        logger.warn("# detected production... ")
+        logger.warn("# halt and catch fire...")
+        return
 
     parser = argparse.ArgumentParser(
         description="Load Test Data", epilog=EPILOG,
@@ -25,9 +31,6 @@ def main():
     parser.add_argument('config_uri', help="path to configfile")
     args = parser.parse_args()
 
-    logging.basicConfig()
-    # Loading app will have configured from config file. Reconfigure here:
-    logging.getLogger('encoded').setLevel(logging.DEBUG)
 
 
     #get the pyramids app
