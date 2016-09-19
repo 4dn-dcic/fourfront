@@ -56,7 +56,7 @@ var Listing = module.exports.Listing = function (props) {
     var context;
     if (props['@id']) {
         context = props;
-        props = {context: context,  key: context['@id']};
+        props = {context: context, passExperiments: passExperiments,  key: context['@id']};
     }
     var ListingView = globals.listing_views.lookup(props.context);
     return <ListingView {...props} />;
@@ -81,6 +81,7 @@ var Item = module.exports.Item = React.createClass({
     mixins: [PickerActionsMixin, AuditMixin],
     render: function() {
         var result = this.props.context;
+        console.log(this.props.passExperiments);
         var title = globals.listing_titles.lookup(result)({context: result});
         var item_type = result['@type'][0];
         return (
@@ -106,6 +107,132 @@ var Item = module.exports.Item = React.createClass({
     }
 });
 globals.listing_views.register(Item, 'Item');
+
+var Biosample = module.exports.Biosample = React.createClass({
+    render: function() {
+        var result = this.props.context;
+        return (
+            <li>
+                <div className="clearfix">
+                    <div className="pull-right search-meta">
+                        <p className="type meta-title">Biosample</p>
+                        <p className="type">{' ' + result['accession']}</p>
+                    </div>
+                    <div className="accession">
+                        <a href={result['@id']}>
+                            {result['biosource_summary']}
+                        </a>
+                    </div>
+                    <div className="data-row">
+                        <div><strong>Modifications: </strong>{result['modifications_summary']}</div>
+                        <div><strong>Treatments: </strong>{result['treatments_summary']}</div>
+                    </div>
+                </div>
+            </li>
+        );
+    }
+});
+globals.listing_views.register(Biosample, 'Biosample');
+
+
+var Biosource = module.exports.Biosource = React.createClass({
+    render: function() {
+        var result = this.props.context;
+        var organism;
+        if (result['individual']){
+            organism = result['individual']['organism']['name'];
+        }
+        return (
+            <li>
+                <div className="clearfix">
+                    <div className="pull-right search-meta">
+                        <p className="type meta-title">Biosource</p>
+                        <p className="type">{' ' + result['accession']}</p>
+                    </div>
+                    <div className="accession">
+                        <a href={result['@id']}>
+                            {result['biosource_name']}
+                        </a>
+                    </div>
+                    <div className="data-row">
+                        <div><strong>{result['biosource_type']}</strong></div>
+                        <div><strong>{organism}</strong></div>
+                    </div>
+                </div>
+            </li>
+        );
+    }
+});
+globals.listing_views.register(Biosource, 'Biosource');
+
+
+var Experiment = module.exports.Experiment = React.createClass({
+    render: function() {
+        var result = this.props.context;
+        return (
+            <li>
+                <div className="clearfix">
+                    <div className="pull-right search-meta">
+                        <p className="type meta-title">Experiment</p>
+                        <p className="type">{' ' + result['accession']}</p>
+                        <p className="type">{' ' + result['award']['project']}</p>
+                    </div>
+                    <div className="accession">
+                        <a href={result['@id']}>
+                            {result['experiment_summary']}
+                        </a>
+                    </div>
+                    <div className="data-row">
+                        <div><strong>Modifications: </strong>{result['biosample']['modifications_summary']}</div>
+                        <div><strong>Treatments: </strong>{result['biosample']['treatments_summary']}</div>
+                        <div><strong>Lab: </strong>{result['lab']['title']}</div>
+                    </div>
+                </div>
+            </li>
+        );
+    }
+});
+globals.listing_views.register(Experiment, 'Experiment');
+
+var ExperimentSet = module.exports.ExperimentSet = React.createClass({
+    render: function() {
+        var result = this.props.context;
+        var passExperiments = this.props.passExperiments;
+        console.log(passExperiments);
+        var experimentArray = result.experiments_in_set;
+        var childExperiments = experimentArray.map(function (experiment) {
+            console.log(experiment);
+            if(passExperiments.has(experiment)){
+                return (
+                    <div key={experiment.accession} >
+                        <a href={experiment['@id'] || ''}>
+                            {experiment.accession}
+                        </a>
+                    </div>
+                );
+            }
+        });
+        return (
+            <li>
+                <div className="clearfix">
+                    <div className="pull-right search-meta">
+                        <p className="type meta-title">ExperimentSet</p>
+
+                    </div>
+                    <div className="accession">
+                        <a href={result['@id']}>
+                            {result['experiment_summary']}
+                        </a>
+                    </div>
+                    <div className="data-row">
+                        <div>{childExperiments}</div>
+                    </div>
+                </div>
+            </li>
+        );
+    }
+});
+globals.listing_views.register(ExperimentSet, 'ExperimentSet');
 
 // Find the component experiments in an experiment set that match the current filters
 function siftExperiments(graph, filters) {
@@ -487,7 +614,6 @@ var ResultTable = search.ResultTable = React.createClass({
         var searchBase = this.props.searchBase;
         var trimmedSearchBase = searchBase.replace(/[\?|\&]limit=all/, "");
         var passExperiments = siftExperiments(results, decodeURIComponent(trimmedSearchBase));
-        console.log(passExperiments);
         var specificFilter;
         var show_link;
         var facets = context['facets'].map(function(facet) {
@@ -580,7 +706,6 @@ var ResultTable = search.ResultTable = React.createClass({
                     <BatchDownload context={context} />
                 : null}
             </div>*/
-
         return (
             <div>
                 <div className="row search-title">
@@ -598,7 +723,7 @@ var ResultTable = search.ResultTable = React.createClass({
                         <ul className="nav result-table" id="result-table">
                             {results.length ?
                                 results.map(function (result) {
-                                    return Listing({context:result, columns: columns, key: result['@id']});
+                                    return Listing({context:result, columns: columns, passExperiments: passExperiments, key: result['@id']});
                                 })
                             : null}
                         </ul>

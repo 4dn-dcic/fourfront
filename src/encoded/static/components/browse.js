@@ -107,6 +107,117 @@ var Item = module.exports.Item = React.createClass({
 });
 globals.listing_views.register(Item, 'Item');
 
+var Biosample = module.exports.Biosample = React.createClass({
+    render: function() {
+        var result = this.props.context;
+        return (
+            <li>
+                <div className="clearfix">
+                    <div className="pull-right search-meta">
+                        <p className="type meta-title">Biosample</p>
+                        <p className="type">{' ' + result['accession']}</p>
+                    </div>
+                    <div className="accession">
+                        <a href={result['@id']}>
+                            {result['biosource_summary']}
+                        </a>
+                    </div>
+                    <div className="data-row">
+                        <div><strong>Modifications: </strong>{result['modifications_summary']}</div>
+                        <div><strong>Treatments: </strong>{result['treatments_summary']}</div>
+                    </div>
+                </div>
+            </li>
+        );
+    }
+});
+globals.listing_views.register(Biosample, 'Biosample');
+
+
+var Biosource = module.exports.Biosource = React.createClass({
+    render: function() {
+        var result = this.props.context;
+        var organism;
+        if (result['individual']){
+            organism = result['individual']['organism']['name'];
+        }
+        return (
+            <li>
+                <div className="clearfix">
+                    <div className="pull-right search-meta">
+                        <p className="type meta-title">Biosource</p>
+                        <p className="type">{' ' + result['accession']}</p>
+                    </div>
+                    <div className="accession">
+                        <a href={result['@id']}>
+                            {result['biosource_name']}
+                        </a>
+                    </div>
+                    <div className="data-row">
+                        <div><strong>{result['biosource_type']}</strong></div>
+                        <div><strong>{organism}</strong></div>
+                    </div>
+                </div>
+            </li>
+        );
+    }
+});
+globals.listing_views.register(Biosource, 'Biosource');
+
+
+var Experiment = module.exports.Experiment = React.createClass({
+    render: function() {
+        var result = this.props.context;
+        return (
+            <li>
+                <div className="clearfix">
+                    <div className="pull-right search-meta">
+                        <p className="type meta-title">Experiment</p>
+                        <p className="type">{' ' + result['accession']}</p>
+                        <p className="type">{' ' + result['award']['project']}</p>
+                    </div>
+                    <div className="accession">
+                        <a href={result['@id']}>
+                            {result['experiment_summary']}
+                        </a>
+                    </div>
+                    <div className="data-row">
+                        <div><strong>Modifications: </strong>{result['biosample']['modifications_summary']}</div>
+                        <div><strong>Treatments: </strong>{result['biosample']['treatments_summary']}</div>
+                        <div><strong>Lab: </strong>{result['lab']['title']}</div>
+                    </div>
+                </div>
+            </li>
+        );
+    }
+});
+globals.listing_views.register(Experiment, 'Experiment');
+
+var ExperimentSet = module.exports.ExperimentSet = React.createClass({
+    render: function() {
+        var result = this.props.context;
+        return (
+            <li>
+                <div className="clearfix">
+                    <div className="pull-right search-meta">
+                        <p className="type meta-title">ExperimentSet</p>
+
+                    </div>
+                    <div className="accession">
+                        <a href={result['@id']}>
+                            {result['experiment_summary']}
+                        </a>
+                    </div>
+                    <div className="data-row">
+                        <div>{this.props.passExperiments}</div>
+                    </div>
+                </div>
+            </li>
+        );
+    }
+});
+globals.listing_views.register(ExperimentSet, 'ExperimentSet');
+
 // Find the component experiments in an experiment set that match the current filters
 function siftExperiments(graph, filters) {
     var filterList = {};
