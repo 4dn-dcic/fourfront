@@ -6,6 +6,8 @@ var _ = require('underscore');
 var globals = require('./globals');
 var search = module.exports;
 var audit = require('./audit');
+var Panel = require('react-bootstrap').Panel;
+var Button = require('react-bootstrap').Button;
 
 var AuditIndicators = audit.AuditIndicators;
 var AuditDetail = audit.AuditDetail;
@@ -81,7 +83,6 @@ var Item = module.exports.Item = React.createClass({
     mixins: [PickerActionsMixin, AuditMixin],
     render: function() {
         var result = this.props.context;
-        console.log(this.props.passExperiments);
         var title = globals.listing_titles.lookup(result)({context: result});
         var item_type = result['@type'][0];
         return (
@@ -195,38 +196,40 @@ var Experiment = module.exports.Experiment = React.createClass({
 globals.listing_views.register(Experiment, 'Experiment');
 
 var ExperimentSet = module.exports.ExperimentSet = React.createClass({
+    getInitialState: function() {
+    	return {
+            open: false
+        };
+    },
+    handleToggle: function () {
+        this.setState({
+  		  open: !this.state.open
+  	  });
+    },
+
     render: function() {
         var result = this.props.context;
         var passExperiments = this.props.passExperiments;
-        console.log(passExperiments);
         var experimentArray = result.experiments_in_set;
         var childExperiments = experimentArray.map(function (experiment) {
-            console.log(experiment);
             if(passExperiments.has(experiment)){
                 return (
-                    <div key={experiment.accession} >
-                        <a href={experiment['@id'] || ''}>
-                            {experiment.accession}
-                        </a>
-                    </div>
+                    <ExperimentSublist result={experiment} key={experiment.accession} />
                 );
             }
         });
         return (
             <li>
                 <div className="clearfix">
-                    <div className="pull-right search-meta">
-                        <p className="type meta-title">ExperimentSet</p>
-
-                    </div>
                     <div className="accession">
+                        <Button onClick={this.handleToggle}>+</Button>
                         <a href={result['@id']}>
-                            {result['experiment_summary']}
+                            {result.description || result.accesion || result.uuid || result['@id']}
                         </a>
                     </div>
-                    <div className="data-row">
-                        <div>{childExperiments}</div>
-                    </div>
+                    <Panel collapsible expanded={this.state.open}>
+                        {childExperiments}
+                    </Panel>
                 </div>
             </li>
         );
@@ -234,11 +237,57 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
 });
 globals.listing_views.register(ExperimentSet, 'ExperimentSet');
 
+var ExperimentSublist = React.createClass({
+    getInitialState: function() {
+    	return {
+            open: false
+        };
+    },
+    handleToggle: function () {
+        this.setState({
+  		  open: !this.state.open
+  	  });
+    },
+    render: function() {
+        var result = this.props.result;
+        var files = result.files;
+        var childFiles = files.map(function (file) {
+            return (
+                <div key={file.accession}>
+                    <a href={file['@id'] || ''}>
+                        {file.file_format || file.accession || file.uuid || file['@id']}
+                    </a>
+                </div>
+            );
+        });
+        return(
+            <div key={result.accession}>
+                <Button onClick={this.handleToggle}>+</Button>
+                <a href={result['@id'] || ''} onClick={this.handleToggle}>
+                    {result.experiment_summary || result.accession || result.uuid || result['@id']}
+                </a>
+                <Panel collapsible expanded={this.state.open}>
+                    {childFiles}
+                </Panel>
+            </div>
+        );
+    }
+});
+
 // Find the component experiments in an experiment set that match the current filters
-function siftExperiments(graph, filters) {
+function siftExperiments(graph, filters, field=null, term=null) {
     var filterList = {};
     var directFilters = {}; // for filters of ExperimentSet
     var passExperiments = new Set();
+    var thisField;
+    if(field){
+        thisField = field.split('.');
+        if (thisField[0] === 'experiments_in_set'){
+            thisField = thisField.slice(1).join('.');
+        }else{
+            thisField = thisField.join('.');
+        }
+    }
     filters = filters.replace(/\+/g,' ');
     filters = filters.split(/[?\&]+/);
     for(var i=0; i < filters.length; i++){
@@ -301,8 +350,13 @@ function siftExperiments(graph, filters) {
                 if(valueProbe[filters[l]]){
                     valueProbe = valueProbe[filters[l]];
                     if(l === filters.length-1){ // last level of filter
-                        // if(valueProbe !== filterList[filterKeys[k]]){ // AND operation within a facet
-                        if(!_.contains(filterList[filterKeys[k]], valueProbe)){ // AND operation within a facet
+                        if(thisField && filterKeys[k] === thisField){
+                            if(valueProbe !== term){
+                                eliminated = true;
+                                passExperiments.delete(experiment);
+                            }
+                        }else if(!_.contains(filterList[filterKeys[k]], valueProbe)){ // OR behavior if not active field
+
                             eliminated = true;
                             passExperiments.delete(experiment);
                         }
@@ -352,17 +406,18 @@ var Term = search.Term = React.createClass({
                     field === 'replicates.library.biosample.donor.organism.scientific_name';
         var selected = termSelected(term, field, filters);
         // selected is the actually selected terms
+        var fullHref = this.props.searchBase + field + '=' + encodeURIComponent(term).replace(/%20/g, '+');
         var href;
         if (selected && !this.props.canDeselect) {
             href = null;
         } else if (selected) {
             href = selected;
         } else {
-            href = this.props.searchBase + field + '=' + encodeURIComponent(term).replace(/%20/g, '+');
+            href = fullHref;
         }
-        //href is all the selected terms and the theoretically selected one
-        var passExperiments = siftExperiments(graph, decodeURIComponent(href));
-        var expCount = selected ? '' : passExperiments.size;
+        var termExperiments = siftExperiments(graph, fullHref.replace(/%2C/g, ','), field, term);
+        // var expChange = termExperiments.size - this.props.passExperiments.size;
+        var expCount = termExperiments.size;
         return (
             <li id={selected ? "selected" : null} key={term}>
                 {field === 'lot_reviews.status' ? <span className={globals.statusClass(term, 'indicator pull-left facet-term-key icon icon-circle')}></span> : null}
@@ -716,7 +771,7 @@ var ResultTable = search.ResultTable = React.createClass({
                 </div>
                 <div className="row">
                     {facets.length ? <div className="col-sm-5 col-md-4 col-lg-3">
-                        <FacetList {...this.props} facets={facets} filters={filters}
+                        <FacetList {...this.props} passExperiments={passExperiments} facets={facets} filters={filters}
                                     searchBase={searchBase ? searchBase + '&' : searchBase + '?'} onFilter={this.onFilter} />
                     </div> : ''}
                     <div className="col-sm-7 col-md-8 col-lg-9">
