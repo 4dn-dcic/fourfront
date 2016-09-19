@@ -78,6 +78,21 @@ Permissions
 * view_raw (admin)
 * visible_for_edit - hiding deleted child objects from edit
 
+Permissions of items are tied to the statuses of items. We have 8 statuses for most items (there are exceptions like file and publication)
+
+* Current : Everyone can view, admin can edit
+* Released : Everyone can view, admin can edit
+* Revoked : Everyone can view, admin can edit
+* Deleted : Nobody can view, admin can edit
+* Replaced : Nobody can view, admin can edit
+* In review by lab : Lab members can view, submitter can edit
+* In review by project : Project members can view, submitter can edit
+* Released to project : Project members can view
+
+
+
+
+
 This gnu grep expression will extract a list of permissions (brew tap homebrew/dupes; brew install grep)::
 
     $ ggrep --no-filename -roP "(?<=permission[=(]['\"])[^'\"]+" src/ | sort | uniq
