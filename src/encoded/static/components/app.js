@@ -22,7 +22,6 @@ var portal = {
             {id: 'experiments', title: 'Experiments', url: '/search/?type=Experiment'},
             {id: 'biosources', title: 'Biosources', url: '/search/?type=Biosource'}
         ]},
-        {id: 'tools', sid:'sTools', title: 'Tools', url: '/search/?type=Protocol&type=Software'},
         {id: 'help', sid:'sHelp', title: 'Help', children: [
             {id: 'gettingstarted', title: 'Getting started', url: '/help#getting-started'},
             {id: 'metadatastructure', title: 'Metadata structure', url: '/help#metadata'},
