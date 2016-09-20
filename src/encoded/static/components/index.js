@@ -7,6 +7,8 @@ require('./collection');
 require('./footer');
 require('./globals');
 require('./home');
+require('./help');
+require('./about');
 require('./item');
 require('./user');
 require('./mixins');
