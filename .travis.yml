@@ -121,9 +121,10 @@ after_success:
           echo "Job succeeded! PUBLISHING to PROD environment..."
           git config --global user.email "travis@builder.com"
           git config --global user.name "Travis"
-          git checkout production
+          #git checkout production
           eb use 4dn-prod --debug --verbose
-          python deploy_beanstalk.py --prod
+          eb deploy 4dn-prod --debug --verbose
+          #python deploy_beanstalk.py --prod
         fi
 
       fi
