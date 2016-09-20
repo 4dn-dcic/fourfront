@@ -225,14 +225,11 @@ var App = React.createClass({
         routeList.map(function(value) {
             if (value.includes('#') && value.charAt(0) !== "#"){
                 var navSplit = value.split("#");
-                console.log(navSplit);
                 lowerList.push(navSplit[0].toLowerCase());
             }else if(value.charAt(0) !== "!" && value.length > 0){
                 lowerList.push(value.toLowerCase());
             }
         });
-        console.log(lowerList);
-        console.log(href_url.host);
         var currRoute = lowerList.slice(1); // eliminate http
         // first case is fallback
         if (canonical === "about:blank"){
