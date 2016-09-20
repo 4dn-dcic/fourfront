@@ -118,6 +118,7 @@ after_success:
           python deploy_beanstalk.py
         fi
         if [ "$TRAVIS_BRANCH" = "production" ]; then
+          bin/aws s3 cp --recursive s3://encoded-4dn-conf-prod/.aws ~/.aws
           echo "Job succeeded! PUBLISHING to PROD environment..."
           git config --global user.email "travis@builder.com"
           git config --global user.name "Travis"
