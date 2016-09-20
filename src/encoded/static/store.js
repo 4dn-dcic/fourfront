@@ -30,6 +30,24 @@ const inline = function(state='', action) {
     }
 }
 
+const session = function(state={}, action) {
+    if (action.type && _.contains(Object.keys(action.type), 'session')){
+        var val = action.type.session ? action.type.session : state;
+        return val
+    }else{
+        return state
+    }
+}
+
+const session_properties = function(state={}, action) {
+    if (action.type && _.contains(Object.keys(action.type), 'session_properties')){
+        var val = action.type.session_properties ? action.type.session_properties : state;
+        return val
+    }else{
+        return state
+    }
+}
+
 const session_cookie = function(state='', action) {
     if (action.type && _.contains(Object.keys(action.type), 'session_cookie')){
         var val = action.type.session_cookie ? action.type.session_cookie : state;
@@ -62,6 +80,8 @@ const reducers = combineReducers({
   href,
   context,
   inline,
+  session,
+  session_properties,
   session_cookie,
   contextRequest,
   slow

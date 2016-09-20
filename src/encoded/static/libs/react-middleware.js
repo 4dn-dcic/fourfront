@@ -13,6 +13,8 @@ function mapStateToProps(store) {
        href: store.href,
        context: store.context,
        inline: store.inline,
+       session: store.session,
+       session_properties: store.session_properties,
        session_cookie: store.session_cookie,
        contextRequest: store.contextRequest,
        slow: store.slow

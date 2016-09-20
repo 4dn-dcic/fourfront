@@ -58,6 +58,7 @@ var Param = module.exports.Param = React.createClass({
                 headers: {'Accept': 'application/json'}
             });
             request.then(response => {
+                console.log(response);
                 if (!response.ok) throw response;
                 return response.json();
             })
@@ -90,6 +91,8 @@ var Param = module.exports.Param = React.createClass({
 
     receive: function (data) {
         var result = {};
+        console.log('&&&&&');
+        console.log(data);
         result[this.props.name] = data;
         if (this.props.etagName) {
             result[this.props.etagName] = this.state.fetchedRequest.etag;

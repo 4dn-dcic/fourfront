@@ -237,6 +237,9 @@ var App = React.createClass({
             banners.push(<home.BannerLoader text='experiments' location='/search/?type=Experiment&award.project=4DN'/>);
             banners.push(<home.BannerLoader text='experiments' location='/search/?type=Experiment&award.project=External'/>);
             banners.push(<home.BannerLoader text='cell types' location='/search/?type=Biosource'/>);
+            // banners.push(<div>------</div>);
+            // banners.push(<div>------</div>);
+            // banners.push(<div>------</div>);
             content = <home.HomePage banners={banners}/>;
             title = portal.portal_title;
         }else if (context) {
