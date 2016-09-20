@@ -11,10 +11,7 @@ elasticsearch.server = ${elasticsearch_instance}
 snovault.app_version = ${encoded_version}
 snovault.elasticsearch.index = ${elasticsearch_index}
 
-
-create_tables = true
 snovault.load_test_data = ${load_test_data}
-#encoded.loadxl:load_test_data
 
 [composite:indexer]
 use = config:base.ini#indexer

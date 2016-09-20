@@ -17,11 +17,6 @@ def main():
     # Loading app will have configured from config file. Reconfigure here:
     logging.getLogger('encoded').setLevel(logging.DEBUG)
 
-    # halt and catch fire
-    if os.environ.get("ENV_NAME") == "PROD":
-        logger.warn("# detected production... ")
-        logger.warn("# halt and catch fire...")
-        return
 
     parser = argparse.ArgumentParser(
         description="Load Test Data", epilog=EPILOG,
@@ -39,7 +34,9 @@ def main():
     #create db schema
     configure_dbsession(app)
 
+
     load_test_data = app.registry.settings.get('snovault.load_test_data')
+    print("****** load test data is %s" % (load_test_data))
     load_test_data = DottedNameResolver().resolve(load_test_data)
     load_test_data(app)
 

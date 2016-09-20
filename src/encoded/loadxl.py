@@ -598,12 +598,13 @@ def load_test_data(app):
     import transaction
     transaction.commit()
 
+
 def load_prod_data(app):
     """smth."""
     # load web-users authentication info
     pwd = os.environ.get('ENCODED_SECRET')
     if not pwd:
-        print("password not set for admin user")
+        print("***************password not set for admin user")
     db = app.registry['dbsession']
     create_user(db, 'admin@admin.com', 'admin', pwd)
 
