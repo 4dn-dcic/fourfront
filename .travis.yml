@@ -123,7 +123,7 @@ after_success:
           git config --global user.name "Travis"
           #git checkout production
           eb use 4dn-prod --debug --verbose
-          eb deploy 4dn-prod
+          python deploy_beanstlk.py
         fi
 
       fi

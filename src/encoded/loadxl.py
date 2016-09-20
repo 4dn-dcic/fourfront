@@ -601,6 +601,12 @@ def load_test_data(app):
 
 def load_prod_data(app):
     """smth."""
+    # potentially we don't have the tables we need yet
+    from snovault.storage import Base
+    
+    if asbool(settings.get('create_tables', False)):
+        Base.metadata.create_all(engine)
+
     # load web-users authentication info
     pwd = os.environ.get('ENCODED_SECRET')
     if not pwd:

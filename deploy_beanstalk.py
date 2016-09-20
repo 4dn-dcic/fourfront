@@ -6,7 +6,10 @@ import argparse
 
 
 def get_git_version():
-    version = os.environ.get("TRAVIS_COMMIT", None)
+    if (os.environ.get("TRAVIS_BRANCH") == "production"):
+        version = os.environ.get("ENCODED_VERSION", None)
+    else:
+        version = os.environ.get("TRAVIS_COMMIT")
     if not version:
         version = subprocess.check_output(
             ['git', '-C', os.path.dirname(__file__), 'describe']).decode('utf-8').strip()
