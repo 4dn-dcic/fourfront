@@ -6,6 +6,8 @@ var mixins = require('./mixins');
 var home = require('./home');
 var ErrorPage = require('./error');
 var Navigation = require('./navigation');
+var HelpPage = require('./help');
+var AboutPage = require('./about');
 var Footer = require('./footer');
 var url = require('url');
 var _ = require('underscore');
@@ -22,13 +24,11 @@ var portal = {
         ]},
         {id: 'tools', sid:'sTools', title: 'Tools', url: '/search/?type=Protocol&type=Software'},
         {id: 'help', sid:'sHelp', title: 'Help', children: [
-            {id: 'gettingstarted', title: 'Getting started', url: '/help/getting-started/'},
-            {id: 'restapi', title: 'REST API', url: '/help/rest-api/'},
-            {id: 'projectoverview', title: 'Project overview', url: '/about/contributors/'},
-            {id: 'tutorials', title: 'Tutorials', url: '/tutorials/'},
-            {id: 'news', title: 'News', url: '/news'},
-            {id: 'acknowledgements', title: 'Acknowledgements', url: '/acknowledgements/'},
-            {id: 'contact', title: 'Contact', url: '/help/contacts/'}
+            {id: 'gettingstarted', title: 'Getting started', url: '/help#getting-started'},
+            {id: 'metadatastructure', title: 'Metadata structure', url: '/help#metadata'},
+            {id: 'datasubmission', title: 'Data submission', url: '/help#datasubmission'},
+            {id: 'restapi', title: 'REST API', url: '/help#restapi'},
+            {id: 'about', title: 'About', url: '/about/'}
         ]}
     ],
     user_section: [
@@ -221,24 +221,36 @@ var App = React.createClass({
         // add static page routing
         var title;
         var routeList = canonical.split("/");
-        var lowerList = routeList.map(function(value) {
-            if(value.charAt(0) === "#" && value.charAt(1) !== "!"){
-                value = "";
+        var lowerList = [];
+        routeList.map(function(value) {
+            if (value.includes('#') && value.charAt(0) !== "#"){
+                var navSplit = value.split("#");
+                console.log(navSplit);
+                lowerList.push(navSplit[0].toLowerCase());
+            }else if(value.charAt(0) !== "!" && value.length > 0){
+                lowerList.push(value.toLowerCase());
             }
-            return value.toLowerCase();
         });
-        var currRoute = lowerList[lowerList.length-1];
+        console.log(lowerList);
+        console.log(href_url.host);
+        var currRoute = lowerList.slice(1); // eliminate http
         // first case is fallback
         if (canonical === "about:blank"){
             title = portal.portal_title;
             content = null;
-        }else if (_.contains(lowerList, "home") || (currRoute === "" && lowerList[lowerList.length-2] === href_url.host)){
+        }else if (currRoute[currRoute.length-1] === 'home' || (currRoute[currRoute.length-1] === href_url.host)){
             var banners = [];
             banners.push(<home.BannerLoader text='experiments' location='/search/?type=Experiment&award.project=4DN'/>);
             banners.push(<home.BannerLoader text='experiments' location='/search/?type=Experiment&award.project=External'/>);
             banners.push(<home.BannerLoader text='cell types' location='/search/?type=Biosource'/>);
             content = <home.HomePage banners={banners}/>;
             title = portal.portal_title;
+        }else if (currRoute[currRoute.length-1] === 'help'){
+            content = <HelpPage />;
+            title = 'Help - ' + portal.portal_title;
+        }else if (currRoute[currRoute.length-1] === 'about'){
+            content = <AboutPage />;
+            title = 'About - ' + portal.portal_title;
         }else if (context) {
             var ContentView = globals.content_views.lookup(context, current_action);
             if (ContentView){
