@@ -68,10 +68,10 @@ before_script:
     while test -f "$SC_PIDFILE" && test ! -f "$SC_READYFILE"; do sleep .5; done
   fi
 script:
-- if test -n "$NPM"; then npm test; fi
-- if test -n "$NPM"; then bin/test -v -v --timeout=400 -m "not bdd and setone" --cov
+- if test -n "$NPM1"; then npm test; fi
+- if test -n "$NPM1"; then bin/test -v -v --timeout=400 -m "not bdd and setone" --cov
   src/encoded; fi
-- if test -n "$UNIT"; then bin/test -v -v --timeout=400 -m "working and not setone"
+- if test -n "$UNIT1"; then bin/test -v -v --timeout=400 -m "working and not setone"
   --cov src/encoded; fi
 - |
   if test -n "$BROWSER"; then
