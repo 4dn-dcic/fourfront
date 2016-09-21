@@ -5,7 +5,6 @@ var globals = require('./globals');
 var ga = require('google-analytics');
 var _ = require('underscore');
 
-
 var Param = module.exports.Param = React.createClass({
     contextTypes: {
         fetch: React.PropTypes.func,
@@ -90,11 +89,19 @@ var Param = module.exports.Param = React.createClass({
 
     receive: function (data) {
         var result = {};
+        var status = "";
         result[this.props.name] = data;
         if (this.props.etagName) {
             result[this.props.etagName] = this.state.fetchedRequest.etag;
         }
-        this.props.handleFetch(result);
+        if(result.status){
+            status = result.status;
+        }else if(data.status){
+            status = data.status;
+        }
+        if(status !== "error"){
+            this.props.handleFetch(result);
+        }
     },
 
     render: function() { return null; }

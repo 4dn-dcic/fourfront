@@ -233,7 +233,6 @@ var App = React.createClass({
         });
         var currRoute = lowerList.slice(1); // eliminate http
         // first case is fallback
-        console.log(currRoute[currRoute.length-1]);
         if (canonical === "about:blank"){
             title = portal.portal_title;
             content = null;
