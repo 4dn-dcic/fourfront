@@ -5,7 +5,7 @@ from functools import reduce
 import io
 import logging
 import os.path
-
+from pyramid.settings import asbool
 from snovault.storage import User
 
 text = type(u'')
