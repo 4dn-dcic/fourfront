@@ -91,13 +91,22 @@ var Param = module.exports.Param = React.createClass({
 
     receive: function (data) {
         var result = {};
+        var status = "";
         console.log('&&&&&');
         console.log(data);
         result[this.props.name] = data;
         if (this.props.etagName) {
             result[this.props.etagName] = this.state.fetchedRequest.etag;
         }
-        this.props.handleFetch(result);
+        console.log(result);
+        if(result.status){
+            status = result.status;
+        }else if(data.status){
+            status = data.status;
+        }
+        if(status !== "error"){
+            this.props.handleFetch(result);
+        }
     },
 
     render: function() { return null; }
@@ -124,7 +133,8 @@ var FetchedData = module.exports.FetchedData = React.createClass({
 
     handleFetch: function(result) {
         // Set state to returned search result data to cause rerender of child components
-        if (this._isMounted){
+        // If data has error status, do not update state
+        if (this._isMounted && status !== "error"){
             this.setState(result);
         }
     },
