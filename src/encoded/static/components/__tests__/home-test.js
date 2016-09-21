@@ -49,25 +49,9 @@ describe('Testing item.js', function() {
         expect(bannerEntries[2].getAttribute('href')).toEqual('/search/?type=Biosource');
     });
 
-    it('has announcement and getting started headers', function() {
+    it('has welcome, announcements, and links headers', function() {
         var newsHeaders = TestUtils.scryRenderedDOMComponentsWithClass(page, "fourDN-header");
-        expect(newsHeaders.length).toEqual(2);
-    });
-
-    it('closes and opens entries properly', function() {
-        var originalEntries = TestUtils.scryRenderedDOMComponentsWithClass(page, "fourDN-content");
-        var numOriginalEntries = originalEntries.length;
-        var titleToggles = TestUtils.scryRenderedDOMComponentsWithClass(page, "fourDN-section-toggle");
-        var entryTitle = titleToggles[0];
-        // this is the first found entry title (doesn't matter which)
-        TestUtils.Simulate.click(entryTitle);
-        var expandedEntries = TestUtils.scryRenderedDOMComponentsWithClass(page, "fourDN-content");
-        // it closes correctly
-        expect(expandedEntries.length < numOriginalEntries).toBeTruthy();
-        TestUtils.Simulate.click(entryTitle);
-        expandedEntries = TestUtils.scryRenderedDOMComponentsWithClass(page, "fourDN-content");
-        // and re-opens correctly
-        expect(expandedEntries.length).toEqual(numOriginalEntries);
+        expect(newsHeaders.length).toEqual(3);
     });
 
 });
