@@ -603,15 +603,14 @@ def load_prod_data(app):
     """smth."""
     # potentially we don't have the tables we need yet
     from snovault.storage import Base
-    
-    if asbool(settings.get('create_tables', False)):
-        Base.metadata.create_all(engine)
+
+    db = app.registry['dbsession']
+    Base.metadata.create_all(db.connection())
 
     # load web-users authentication info
     pwd = os.environ.get('ENCODED_SECRET')
     if not pwd:
         print("***************password not set for admin user")
-    db = app.registry['dbsession']
     create_user(db, 'admin@admin.com', 'admin', pwd)
 
     # one transaction to rule them all
