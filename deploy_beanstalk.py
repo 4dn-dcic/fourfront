@@ -7,7 +7,7 @@ import argparse
 
 def get_git_version():
     if (os.environ.get("TRAVIS_BRANCH") == "production"):
-        version = os.environ.get("ENCODED_VERSION", None)
+        version = "0.7a"  #  Change this with new version
     else:
         version = os.environ.get("TRAVIS_COMMIT")
     if not version:
