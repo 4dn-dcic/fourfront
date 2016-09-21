@@ -3,7 +3,7 @@ var React = require('react');
 var fetched = require('./fetched');
 var _ = require('underscore');
 var announcements_data = require('../data/announcements_data');
-var gs_entries = require('../data/getting_started_data');
+var statics = require('../data/statics');
 
 /* ****************
 New homepage
@@ -94,28 +94,23 @@ var HomePage = module.exports.HomePage = React.createClass({
                 <ContentItem key={announce.title} content={announce}/>
             );
         });
-        var entries = gs_entries.map(function(entry) {
-            return (
-                <ContentItem key={entry.title} content={entry}/>
-            );
-        });
         return (
             <div>
-                <div className="fourDN-title fourDN-banner">
-                    <h3>Welcome to the 4DN Data Portal. We are under construction.<br/>The portal will be open to data submitters soon. Stay tuned!</h3>
+                <div className="fourDN-banner">
+                    <h2>4DN Data Portal</h2>
                     <h4>The portal currently hosts {experiment4DNBanner} from the 4DN network and<br/>{experimentExtBanner} from other sources over {biosourceBanner}.</h4>
                 </div>
                 <div className="row">
                     <div className="col-md-6 col-xs-12">
                         <div className="col-md-11">
-                            <h3 className="fourDN-header">Announcements</h3>
-                            {announcements}
+                            <h3 className="fourDN-header">Welcome!</h3>
+                            <p className="fourDN-content" dangerouslySetInnerHTML={{__html: statics.homeDescription}}></p>
                         </div>
                     </div>
                     <div className="col-md-6 col-xs-12">
-                        <div className="col-md-11 col-md-push-1">
-                            <h3 className="fourDN-header">Getting started</h3>
-                            {entries}
+                        <div className="col-md-11">
+                            <h3 className="fourDN-header">Announcements</h3>
+                            {announcements}
                         </div>
                     </div>
                 </div>
