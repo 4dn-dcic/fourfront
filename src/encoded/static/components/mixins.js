@@ -230,41 +230,17 @@ module.exports.Persona = {
     },
 };
 
-class UnsavedChangesToken {
-    constructor(manager) {
-        this.manager = manager;
-    }
-
-    release() {
-        this.manager.releaseUnsavedChanges(this);
-    }
-}
-
-
 module.exports.HistoryAndTriggers = {
     SLOW_REQUEST_TIME: 250,
     // Detect HTML5 history support
     historyEnabled: !!(typeof window != 'undefined' && window.history && window.history.pushState),
 
     childContextTypes: {
-        adviseUnsavedChanges: React.PropTypes.func,
         navigate: React.PropTypes.func
-    },
-
-    adviseUnsavedChanges: function () {
-        var token = new UnsavedChangesToken(this);
-        this.setState({unsavedChanges: this.state.unsavedChanges.concat([token])});
-        return token;
-    },
-
-    releaseUnsavedChanges: function (token) {
-        console.assert(this.state.unsavedChanges.indexOf(token) != -1);
-        this.setState({unsavedChanges: this.state.unsavedChanges.filter(x => x !== token)});
     },
 
     getChildContext: function() {
         return {
-            adviseUnsavedChanges: this.adviseUnsavedChanges,
             navigate: this.navigate
         };
     },
@@ -277,7 +253,6 @@ module.exports.HistoryAndTriggers = {
 
     getInitialState: function () {
         return {
-            unsavedChanges: [],
             promisePending: false
         };
     },
@@ -488,33 +463,22 @@ module.exports.HistoryAndTriggers = {
         // Triggers standard analytics handling.
         this.navigate(href, {replace: true});
     },
-
-    confirmNavigation: function() {
-        // check for beforeunload confirmation
-        if (this.state.unsavedChanges.length) {
-            var res = window.confirm('You have unsaved changes. Are you sure you want to lose them?');
-            if (res) {
-                this.setState({unsavedChanges: []});
-            }
-            return res;
+    // only navigate if href is changing
+    confirmNavigation: function(href) {
+        if(href===this.props.href){
+            return false;
         }
         return true;
     },
 
-    handleBeforeUnload: function() {
-        if (this.state.unsavedChanges.length) {
-            return 'You have unsaved changes.';
-        }
-    },
-
     navigate: function (href, options) {
-        if (!this.confirmNavigation()) {
-            return;
-        }
         // options.skipRequest only used by collection search form
         // options.replace only used handleSubmit, handlePopState, handlePersonaLogin
         options = options || {};
         href = url.resolve(this.props.href, href);
+        if (!this.confirmNavigation(href)) {
+            return;
+        }
 
         // Strip url fragment.
         var fragment = '';
