@@ -4,6 +4,7 @@ var fetched = require('./fetched');
 var _ = require('underscore');
 var announcements_data = require('../data/announcements_data');
 var statics = require('../data/statics');
+var Panel = require('react-bootstrap').Panel;
 
 /* ****************
 New homepage
@@ -62,19 +63,14 @@ var ContentItem = React.createClass({
         }else{
             subtitle = "";
         }
-        var content;
-        if (!this.state.active){
-            content = <span></span>;
-        }else{
-            content = (
-                <div className="fourDN-content"><p dangerouslySetInnerHTML={{__html: content}}></p></div>
-            );
-        }
+
         return (
             <div className="fourDN-section">
                 <div className="fourDN-section-title"><a className="fourDN-section-toggle" href="" onClick={this.handleToggle}>{title}</a></div>
                 <div className="fourDN-section-info">{subtitle}</div>
-                {content}
+                <Panel collapsible expanded={this.state.active} className="fourDN-content">
+                    <p dangerouslySetInnerHTML={{__html: content}}></p>
+                </Panel>
             </div>
         );
     }
@@ -86,9 +82,9 @@ var HomePage = module.exports.HomePage = React.createClass({
         banners: React.PropTypes.array.isRequired
     },
     render: function() {
-        var experiment4DNBanner = this.props.banners[0]
-        var experimentExtBanner = this.props.banners[1]
-        var biosourceBanner = this.props.banners[2]
+        var experiment4DNBanner = this.props.banners[0];
+        var experimentExtBanner = this.props.banners[1];
+        var biosourceBanner = this.props.banners[2];
         var announcements = announcements_data.map(function(announce) {
             return (
                 <ContentItem key={announce.title} content={announce}/>
@@ -101,17 +97,19 @@ var HomePage = module.exports.HomePage = React.createClass({
                     <h4>The portal currently hosts {experiment4DNBanner} from the 4DN network and<br/>{experimentExtBanner} from other sources over {biosourceBanner}.</h4>
                 </div>
                 <div className="row">
-                    <div className="col-md-6 col-xs-12">
-                        <div className="col-md-11">
-                            <h3 className="fourDN-header">Welcome!</h3>
-                            <p className="fourDN-content" dangerouslySetInnerHTML={{__html: statics.homeDescription}}></p>
-                        </div>
+                    <div className="col-md-9 col-xs-12">
+                        <h3 className="fourDN-header">Welcome!</h3>
+                        <p className="fourDN-content" dangerouslySetInnerHTML={{__html: statics.homeDescription}}></p>
                     </div>
-                    <div className="col-md-6 col-xs-12">
-                        <div className="col-md-11">
-                            <h3 className="fourDN-header">Announcements</h3>
-                            {announcements}
-                        </div>
+                    <div className="col-md-3 col-xs-12">
+                        <h3 className="fourDN-header">Links</h3>
+                        <p className="fourDN-content"dangerouslySetInnerHTML={{__html: statics.homeLinks}}></p>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-md-8 col-xs-12">
+                        <h3 className="fourDN-header">Announcements</h3>
+                        {announcements}
                     </div>
                 </div>
             </div>
