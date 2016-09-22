@@ -12,19 +12,13 @@ jest.dontMock('react');
 jest.dontMock('underscore');
 
 describe('Testing item.js', function() {
-    var React, HomePage, BannerEntry, testItem, TestUtils, page, data, _, banners, Wrapper;
+    var React, HomePage, testItem, TestUtils, page, data, _, banners, Wrapper;
 
     beforeEach(function() {
         React = require('react');
         TestUtils = require('react/lib/ReactTestUtils');
         _ = require('underscore');
-        HomePage = require('../home').HomePage;
-        BannerEntry = require('../home').BannerEntry;
-        banners = [];
-        data = require('../testdata/static/search-data');
-        banners.push(<BannerEntry data={data} text='experiments' location='/search/?type=Experiment&award.project=4DN'/>);
-        banners.push(<BannerEntry data={data} text='experiments' location='/search/?type=Experiment&award.project=External'/>);
-        banners.push(<BannerEntry data={data} text='cell types' location='/search/?type=Biosource'/>);
+        HomePage = require('../home');
         Wrapper = React.createClass({
             render: function() {
                 return (
@@ -34,7 +28,7 @@ describe('Testing item.js', function() {
         });
         page = TestUtils.renderIntoDocument(
             <Wrapper>
-                <HomePage banners={banners} />
+                <HomePage />
             </Wrapper>
         );
     });
@@ -49,25 +43,9 @@ describe('Testing item.js', function() {
         expect(bannerEntries[2].getAttribute('href')).toEqual('/search/?type=Biosource');
     });
 
-    it('has announcement and getting started headers', function() {
+    it('has welcome, announcements, and links headers', function() {
         var newsHeaders = TestUtils.scryRenderedDOMComponentsWithClass(page, "fourDN-header");
-        expect(newsHeaders.length).toEqual(2);
-    });
-
-    it('closes and opens entries properly', function() {
-        var originalEntries = TestUtils.scryRenderedDOMComponentsWithClass(page, "fourDN-content");
-        var numOriginalEntries = originalEntries.length;
-        var titleToggles = TestUtils.scryRenderedDOMComponentsWithClass(page, "fourDN-section-toggle");
-        var entryTitle = titleToggles[0];
-        // this is the first found entry title (doesn't matter which)
-        TestUtils.Simulate.click(entryTitle);
-        var expandedEntries = TestUtils.scryRenderedDOMComponentsWithClass(page, "fourDN-content");
-        // it closes correctly
-        expect(expandedEntries.length < numOriginalEntries).toBeTruthy();
-        TestUtils.Simulate.click(entryTitle);
-        expandedEntries = TestUtils.scryRenderedDOMComponentsWithClass(page, "fourDN-content");
-        // and re-opens correctly
-        expect(expandedEntries.length).toEqual(numOriginalEntries);
+        expect(newsHeaders.length).toEqual(3);
     });
 
 });

@@ -13,6 +13,7 @@ describe("Server rendering", function () {
     var ReactDOMServer;
     var document;
     var store;
+    var fetch;
     var home_url = "http://localhost/";
     var home = {
         "@id": "/",
@@ -26,6 +27,7 @@ describe("Server rendering", function () {
         React = require('react');
         ReactDOM = require('react-dom');
         ReactDOMServer = require('react-dom/server');
+        fetch = require('whatwg-fetch');
         App = require('..');
         store = require('../../store');
         // test dispatching some values to store

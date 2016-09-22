@@ -281,10 +281,13 @@
 
 
 .fourDN-content{
-	padding-top: 10px;
 	font-family: 'Yrsa', serif;
 	line-height: 130%;
 	font-size: 1.4em;
+}
+
+.fourDN-content-panel{
+	margin-top: 0px !important;
 }
 
 .item-toggle-link{
@@ -340,4 +343,20 @@ p, input {
 .error-page{
 	margin-top: 50px;
 	text-align: center;
+}
+
+.static-page{
+	width:80%;
+	margin: auto;
+}
+
+.slide-display{
+	padding: 20px 0px 20px 0px;
+	>img{
+		display: block;
+		margin: auto;
+	}
+	>.slide-controls{
+		text-align: center;
+	}
 }
