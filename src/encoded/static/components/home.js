@@ -90,7 +90,7 @@ var HomePage = module.exports = React.createClass({
     render: function() {
         var experiment4DNBanner = <BannerLoader text='experiments' location='/search/?type=Experiment&award.project=4DN'/>;
         var experimentExtBanner = <BannerLoader text='experiments' location='/search/?type=Experiment&award.project=External'/>;
-        var biosourceBanner = <BannerLoader text='experiments' location='/search/?type=Biosource'/>;
+        var biosourceBanner = <BannerLoader text='cell types' location='/search/?type=Biosource'/>;
         var announcements = announcements_data.map(function(announce) {
             return (
                 <ContentItem key={announce.title} content={announce}/>
