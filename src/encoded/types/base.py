@@ -135,6 +135,9 @@ class Item(snovault.Item):
         'released to project': ALLOW_VIEWING_GROUP_VIEW,
         # for file
         'obsolete': ONLY_ADMIN_VIEW,
+        'uploading': ALLOW_LAB_SUBMITTER_EDIT,
+        'uploaded': ALLOW_LAB_SUBMITTER_EDIT,
+        'upload failed': ALLOW_LAB_SUBMITTER_EDIT,
 
         # publication
         'published': ALLOW_CURRENT,

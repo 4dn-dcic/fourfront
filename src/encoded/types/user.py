@@ -36,6 +36,11 @@ ONLY_ADMIN_VIEW_DETAILS = [
     (Deny, Everyone, ['view', 'view_details', 'edit']),
 ]
 
+ONLY_OWNER_EDIT = [
+    (Allow, 'role.owner', 'view'),
+    (Allow, 'role.owner', 'edit'),
+] + ONLY_ADMIN_VIEW_DETAILS
+
 USER_ALLOW_CURRENT = [
     (Allow, Everyone, 'view'),
 ] + ONLY_ADMIN_VIEW_DETAILS
@@ -63,7 +68,7 @@ class User(Item):
     #     'lab',
     # ]
     STATUS_ACL = {
-        'current': [(Allow, 'role.owner', ['edit', 'view_details'])] + USER_ALLOW_CURRENT,
+        'current': ONLY_OWNER_EDIT,
         'deleted': USER_DELETED,
         'replaced': USER_DELETED,
         'revoked': ONLY_ADMIN_VIEW_DETAILS,
@@ -130,12 +135,12 @@ def user_basic_view(context, request):
 
 @view_config(context=User.Collection, permission='add', request_method='POST',
              physical_path="/users")
-def user_add(context,request):
+def user_add(context, request):
     '''
     if we have a password in our request, create and auth entry
     for the user as well
     '''
-    #do we have valid data
+    # do we have valid data
     pwd = request.json.get('password', None)
     pwd_less_data = request.json.copy()
 
@@ -145,8 +150,8 @@ def user_add(context,request):
     validate_request(context.type_info.schema, request, pwd_less_data)
 
     if request.errors:
-        return HTTPUnprocessableEntity(json={'errors':request.errors},
-                                     content_type='application/json')
+        return HTTPUnprocessableEntity(json={'errors': request.errors},
+                                       content_type='application/json')
 
     result = collection_add(context, request)
     if result:
@@ -162,6 +167,7 @@ def user_add(context,request):
             transaction.commit()
 
     return result
+
 
 @calculated_property(context=User, category='user_action')
 def impersonate(request):

@@ -134,12 +134,12 @@ class File(Item):
         # update self first to ensure 'related_files' are stored in self.properties
         super(File, self)._update(properties, sheets)
         DicRefRelation = {
-             "derived from": "parent of",
-             "parent of": "derived from",
-             "supercedes": "is superceded by",
-             "is superceded by": "supercedes",
-             "paired with": "paired with"
-             }
+            "derived from": "parent of",
+            "parent of": "derived from",
+            "supercedes": "is superceded by",
+            "is superceded by": "supercedes",
+            "paired with": "paired with"
+        }
         acc = str(self.uuid)
 
         if 'related_files' in properties.keys():
@@ -293,7 +293,6 @@ def post_upload(context, request):
     else:
         raise ValueError(external.get('service'))
 
-
     # remove the path from the file name and only take first 32 chars
     name = properties.get('filename').split('/')[-1][:32]
     profile_name = request.registry.settings.get('file_upload_profile_name')
@@ -339,7 +338,7 @@ def download(context, request):
     if external.get('service') == 's3':
         conn = boto.connect_s3()
         location = conn.generate_url(
-            36*60*60, request.method, external['bucket'], external['key'],
+            36 * 60 * 60, request.method, external['bucket'], external['key'],
             force_http=proxy or use_download_proxy, response_headers={
                 'response-content-disposition': "attachment; filename=" + filename,
             })
