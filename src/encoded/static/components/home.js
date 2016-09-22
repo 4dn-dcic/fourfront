@@ -1,5 +1,6 @@
 'use strict';
 var React = require('react');
+var ReactDOM = require('react-dom');
 var fetched = require('./fetched');
 var _ = require('underscore');
 var announcements_data = require('../data/announcements_data');
@@ -12,20 +13,18 @@ Will load static entries from a js file
 Uses fetch to get context necessary to populate banner entry
 **************** */
 
-var BannerLoader = module.exports.BannerLoader = React.createClass({
+var BannerLoader = React.createClass({
     render: function() {
-        var text = this.props.text;
-        var location = this.props.location;
         return (
-            <fetched.FetchedData>
-                <fetched.Param name='data' url={location} />
-                <BannerEntry text={text} location={location}/>
+            <fetched.FetchedData backup={<BannerEntry data={{'total':"-"}} text={this.props.text} location={this.props.location}/>}>
+                <fetched.Param name='data' url={this.props.location} />
+                <BannerEntry text={this.props.text} location={this.props.location}/>
             </fetched.FetchedData>
         );
     }
 });
 
-var BannerEntry = module.exports.BannerEntry = React.createClass({
+var BannerEntry = React.createClass({
     render: function() {
         var total = this.props.data.total;
         var location = this.props.location;
@@ -68,7 +67,7 @@ var ContentItem = React.createClass({
             <div className="fourDN-section">
                 <div className="fourDN-section-title"><a className="fourDN-section-toggle" href="" onClick={this.handleToggle}>{title}</a></div>
                 <div className="fourDN-section-info">{subtitle}</div>
-                <Panel collapsible expanded={this.state.active} className="fourDN-content">
+                <Panel collapsible expanded={this.state.active} className="fourDN-content fourDN-content-panel">
                     <p dangerouslySetInnerHTML={{__html: content}}></p>
                 </Panel>
             </div>
@@ -76,15 +75,22 @@ var ContentItem = React.createClass({
     }
 });
 
-var HomePage = module.exports.HomePage = React.createClass({
-    // BannerLoaders are passed in as props
-    PropTypes: {
-        banners: React.PropTypes.array.isRequired
-    },
+var HomePageLoader = React.createClass({
     render: function() {
-        var experiment4DNBanner = this.props.banners[0];
-        var experimentExtBanner = this.props.banners[1];
-        var biosourceBanner = this.props.banners[2];
+        return (
+            <fetched.FetchedData>
+                <fetched.Param name='data' url='/search/?type=Experiment' />
+            </fetched.FetchedData>
+        );
+    }
+});
+
+
+var HomePage = module.exports = React.createClass({
+    render: function() {
+        var experiment4DNBanner = <BannerLoader text='experiments' location='/search/?type=Experiment&award.project=4DN'/>;
+        var experimentExtBanner = <BannerLoader text='experiments' location='/search/?type=Experiment&award.project=External'/>;
+        var biosourceBanner = <BannerLoader text='experiments' location='/search/?type=Biosource'/>;
         var announcements = announcements_data.map(function(announce) {
             return (
                 <ContentItem key={announce.title} content={announce}/>

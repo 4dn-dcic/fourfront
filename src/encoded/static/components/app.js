@@ -3,7 +3,7 @@ var React = require('react');
 var jsonScriptEscape = require('../libs/jsonScriptEscape');
 var globals = require('./globals');
 var mixins = require('./mixins');
-var home = require('./home');
+var HomePage = require('./home');
 var ErrorPage = require('./error');
 var Navigation = require('./navigation');
 var HelpPage = require('./help');
@@ -237,11 +237,7 @@ var App = React.createClass({
             title = portal.portal_title;
             content = null;
         }else if (currRoute[currRoute.length-1] === 'home' || (currRoute[currRoute.length-1] === href_url.host)){
-            var banners = [];
-            banners.push(<home.BannerLoader text='experiments' location='/search/?type=Experiment&award.project=4DN'/>);
-            banners.push(<home.BannerLoader text='experiments' location='/search/?type=Experiment&award.project=External'/>);
-            banners.push(<home.BannerLoader text='cell types' location='/search/?type=Biosource'/>);
-            content = <home.HomePage banners={banners}/>;
+            content = <HomePage />;
             title = portal.portal_title;
         }else if (currRoute[currRoute.length-1] === 'help'){
             content = <HelpPage />;

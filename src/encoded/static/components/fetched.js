@@ -81,7 +81,6 @@ var Param = module.exports.Param = React.createClass({
         } else {
             throw "Unsupported type: " + this.props.type;
         }
-
         this.setState({
             fetchedRequest: request
         });
@@ -137,6 +136,7 @@ var FetchedData = module.exports.FetchedData = React.createClass({
         var params = [];
         var communicating = false;
         var children = [];
+        var backup = this.props.backup ? this.props.backup : null;
         // Collect <Param> and non-<Param> child components into appropriate arrays
         if (this.props.children) {
             React.Children.forEach(this.props.children, child => {
@@ -163,11 +163,19 @@ var FetchedData = module.exports.FetchedData = React.createClass({
             return null;
         }
 
-        // If no login info yet, keep displaying the loading spinner
+        // // If no login info yet, keep displaying the loading spinner
         if (!this.context.session) {
+            if(backup){
+                return (
+                    <div className="communicating">
+                        {backup}
+                    </div>
+                );
+            }
             return (
                 <div className="communicating">
                     <div className="loading-spinner"></div>
+                    {params}
                 </div>
             );
         }

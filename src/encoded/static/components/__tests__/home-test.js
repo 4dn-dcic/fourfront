@@ -12,19 +12,13 @@ jest.dontMock('react');
 jest.dontMock('underscore');
 
 describe('Testing item.js', function() {
-    var React, HomePage, BannerEntry, testItem, TestUtils, page, data, _, banners, Wrapper;
+    var React, HomePage, testItem, TestUtils, page, data, _, banners, Wrapper;
 
     beforeEach(function() {
         React = require('react');
         TestUtils = require('react/lib/ReactTestUtils');
         _ = require('underscore');
-        HomePage = require('../home').HomePage;
-        BannerEntry = require('../home').BannerEntry;
-        banners = [];
-        data = require('../testdata/static/search-data');
-        banners.push(<BannerEntry data={data} text='experiments' location='/search/?type=Experiment&award.project=4DN'/>);
-        banners.push(<BannerEntry data={data} text='experiments' location='/search/?type=Experiment&award.project=External'/>);
-        banners.push(<BannerEntry data={data} text='cell types' location='/search/?type=Biosource'/>);
+        HomePage = require('../home');
         Wrapper = React.createClass({
             render: function() {
                 return (
@@ -34,7 +28,7 @@ describe('Testing item.js', function() {
         });
         page = TestUtils.renderIntoDocument(
             <Wrapper>
-                <HomePage banners={banners} />
+                <HomePage />
             </Wrapper>
         );
     });
