@@ -113,6 +113,7 @@ module.exports.Persona = {
         }else{
             query_href = this.props.href;
         }
+        this.setState({session: session});
         store.dispatch({
             type: {'href':query_href, 'session_cookie': session_cookie}
         });
@@ -226,16 +227,6 @@ module.exports.Persona = {
     },
 };
 
-class UnsavedChangesToken {
-    constructor(manager) {
-        this.manager = manager;
-    }
-
-    release() {
-        this.manager.releaseUnsavedChanges(this);
-    }
-}
-
 
 module.exports.HistoryAndTriggers = {
     SLOW_REQUEST_TIME: 250,
@@ -243,20 +234,12 @@ module.exports.HistoryAndTriggers = {
     historyEnabled: !!(typeof window != 'undefined' && window.history && window.history.pushState),
 
     childContextTypes: {
-        adviseUnsavedChanges: React.PropTypes.func,
         navigate: React.PropTypes.func
     },
 
     getChildContext: function() {
         return {
-            adviseUnsavedChanges: this.adviseUnsavedChanges,
             navigate: this.navigate
-        };
-    },
-
-    getDefaultProps: function() {
-        return {
-            slow: false
         };
     },
 
