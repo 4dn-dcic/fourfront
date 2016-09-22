@@ -8,6 +8,7 @@
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted"},
         { "$ref": "mixins.json#/status" }
     ],
     "type": "object",
