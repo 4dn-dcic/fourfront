@@ -17,6 +17,9 @@
         "schema_version": {
             "default": "1"
         },
+        "status": {
+            "default": "current"
+        },
         "lab": {
             "title": "Affiliation",
             "description": "Lab user is primarily associated with.",

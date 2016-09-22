@@ -19,8 +19,8 @@
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/library"},
-        { "$ref": "experiment.json#/properties"},
-        { "$ref": "experiment_hic.json#/properties"}
+        { "$ref": "experiment.json#/properties" },
+        { "$ref": "experiment_hic.json#/properties" }
     ],
     "dependencies": {
       "crosslinking_temperature": ["crosslinking_method", "crosslinking_time"],
