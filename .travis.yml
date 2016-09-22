@@ -13,6 +13,8 @@ addons:
     packages:
     - bsdtar
     - elasticsearch
+    - gcc-c++ 
+    - make  
     - graphviz
 env:
   global:
