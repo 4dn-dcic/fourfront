@@ -1,5 +1,6 @@
 'use strict';
 var React = require('react');
+var cloneWithProps = require('react/lib/cloneWithProps');
 var parseAndLogError = require('./mixins').parseAndLogError;
 var globals = require('./globals');
 var ga = require('google-analytics');
@@ -111,31 +112,22 @@ var FetchedData = module.exports.FetchedData = React.createClass({
         return {};
     },
 
-    componentDidMount: function() {
-        this._isMounted = true;
-    },
-
-    componentWillUnmount: function() {
-        this._isMounted = false;
-    },
-
     handleFetch: function(result) {
         // Set state to returned search result data to cause rerender of child components
-        if (this._isMounted){
-            this.setState(result);
-        }
+        this.setState(result);
     },
 
     render: function () {
         var params = [];
         var communicating = false;
         var children = [];
+
         // Collect <Param> and non-<Param> child components into appropriate arrays
         if (this.props.children) {
             React.Children.forEach(this.props.children, child => {
-                if (child.type === Param) {
+                if (child.type === Param.type) {
                     // <Param> child component; add to array of <Param> child components with this.props.key of its name and calling `handleFetch`
-                    params.push(React.cloneElement(child, {
+                    params.push(cloneWithProps(child, {
                         key: child.props.name,
                         handleFetch: this.handleFetch,
                     }));
@@ -194,7 +186,7 @@ var FetchedData = module.exports.FetchedData = React.createClass({
         // Successfully got data. Display in the web page
         return (
             <div className="done">
-                {children.map((child, i) => React.cloneElement(child, _.extend({key: i}, this.props, this.state)))}
+                {children.map((child, i) => cloneWithProps(child, _.extend({key: i}, this.props, this.state)))}
                 {params}
             </div>
         );

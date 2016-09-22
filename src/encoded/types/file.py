@@ -183,6 +183,8 @@ class File(Item):
     @property
     def __name__(self):
         properties = self.upgrade_properties()
+        if 'external_accession' in properties:
+            return properties['external_accession']
         if properties.get('status') == 'replaced':
             return self.uuid
         return properties.get(self.name_key, None) or self.uuid
@@ -193,6 +195,9 @@ class File(Item):
             if 'md5sum' in properties:
                 value = 'md5:{md5sum}'.format(**properties)
                 keys.setdefault('alias', []).append(value)
+            # Ensure no files have multiple reverse paired_with
+            # if 'paired_with' in properties:
+            #     keys.setdefault('file:paired_with', []).append(properties['paired_with'])
         return keys
 
     @calculated_property(schema={
@@ -238,11 +243,14 @@ class File(Item):
             bucket = registry.settings['file_upload_bucket']
             mapping = cls.schema['file_format_file_extension']
             file_extension = mapping[properties['file_format']]
-            key = '{uuid}/{accession}{file_extension}'.format(
-                file_extension=file_extension, uuid=uuid, **properties)
-
-            # remove the path from the file name and only take first 32 chars
-            name = properties.get('filename').split('/')[-1][:32]
+            date = properties['date_created'].split('T')[0].replace('-', '/')
+            accession_or_external = properties.get('accession') or properties['external_accession']
+            key = '{date}/{uuid}/{accession_or_external}{file_extension}'.format(
+                accession_or_external=accession_or_external,
+                date=date, file_extension=file_extension, uuid=uuid, **properties)
+            name = 'up{time:.6f}-{accession_or_external}'.format(
+                accession_or_external=accession_or_external,
+                time=time.time(), **properties)[:32]  # max 32 chars
 
             profile_name = registry.settings.get('file_upload_profile_name')
             sheets['external'] = external_creds(bucket, key, name, profile_name)
@@ -274,7 +282,7 @@ def post_upload(context, request):
     if properties['status'] not in ('uploading', 'upload failed'):
         raise HTTPForbidden('status must be "uploading" to issue new credentials')
 
-    accession_or_external = properties.get('accession')
+    accession_or_external = properties.get('accession') or properties['external_accession']
     external = context.propsheets.get('external', None)
 
     if external is None:
@@ -283,19 +291,19 @@ def post_upload(context, request):
         uuid = context.uuid
         mapping = context.schema['file_format_file_extension']
         file_extension = mapping[properties['file_format']]
-
-        key = '{uuid}/{accession}{file_extension}'.format(
-            file_extension=file_extension, uuid=uuid, **properties)
-
+        date = properties['date_created'].split('T')[0].replace('-', '/')
+        key = '{date}/{uuid}/{accession_or_external}{file_extension}'.format(
+            accession_or_external=accession_or_external,
+            date=date, file_extension=file_extension, uuid=uuid, **properties)
     elif external.get('service') == 's3':
         bucket = external['bucket']
         key = external['key']
     else:
         raise ValueError(external.get('service'))
 
-
-    # remove the path from the file name and only take first 32 chars
-    name = properties.get('filename').split('/')[-1][:32]
+    name = 'up{time:.6f}-{accession_or_external}'.format(
+        accession_or_external=accession_or_external,
+        time=time.time(), **properties)[:32]  # max 32 chars
     profile_name = request.registry.settings.get('file_upload_profile_name')
     creds = external_creds(bucket, key, name, profile_name)
 

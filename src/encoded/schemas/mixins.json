@@ -15,7 +15,6 @@
             "type": "string",
             "format": "uuid",
             "serverDefault": "uuid4",
-            "permission": "import_items",
             "requestMethod": "POST"
         }
     },
@@ -26,7 +25,6 @@
             "comment": "Only admins are allowed to set or update this value.",
             "type": "string",
             "format": "accession",
-            "permission": "import_items",
             "serverDefault": "accession"
         },
         "alternate_accessions": {
@@ -39,7 +37,6 @@
                 "description": "An accession previously assigned to an object that has been merged with this object.",
                 "comment":"Only admins are allowed to set or update this value.",
                 "type": "string",
-                "permission": "import_items",
                 "format": "accession"
             }
         }
@@ -65,17 +62,14 @@
         "status": {
             "title": "Status",
             "type": "string",
-            "default": "in review by lab",
-            "permission": "import_items",
+            "default": "current",
             "enum": [
-                "released",
                 "current",
-                "revoked",
+                "in progress",
                 "deleted",
                 "replaced",
-                "in review by lab",
-                "in review by project",
-                "released to project"
+                "released",
+                "revoked"
             ]
         }
     },
@@ -89,8 +83,7 @@
                 {"format": "date-time"},
                 {"format": "date"}
             ],
-            "serverDefault": "now",
-            "permission": "import_items"
+            "serverDefault": "now"
         },
         "submitted_by": {
             "rdfs:subPropertyOf": "dc:creator",
@@ -98,8 +91,7 @@
             "comment": "Do not submit, value is assigned by the server. The user that created the object.",
             "type": "string",
             "linkTo": "User",
-            "serverDefault": "userid",
-            "permission": "import_items"
+            "serverDefault": "userid"
         }
     },
     "modified": {
@@ -117,8 +109,7 @@
                       {"format": "date-time"},
                       {"format": "date"}
                   ],
-                  "serverDefault": "now",
-                  "permission": "import_items"
+                  "serverDefault": "now"
               },
               "modified_by": {
                   "rdfs:subPropertyOf": "dc:modifier",
@@ -126,8 +117,7 @@
                   "description": "Do not submit, value is assigned by the server. The user that modfied the object.",
                   "type": "string",
                   "linkTo": "User",
-                  "serverDefault": "userid",
-                  "permission": "import_items"
+                  "serverDefault": "userid"
               }
           }
       }

@@ -6,13 +6,13 @@ var React = require('react');
 var globals = require('./globals');
 var _ = require('underscore');
 var parseAndLogError = require('./mixins').parseAndLogError;
-// var navigation = require('./navigation');
-var Modal = require('react-bootstrap').Modal;
+var navigation = require('./navigation');
+var Modal = require('react-bootstrap/lib/Modal');
 var ItemStore = require('./lib/store').ItemStore;
 var Form = require('./form').Form;
 var ObjectPicker = require('./inputs').ObjectPicker;
 
-// var Breadcrumbs = navigation.Breadcrumbs;
+var Breadcrumbs = navigation.Breadcrumbs;
 
 
 class AccessKeyStore extends ItemStore {
@@ -52,7 +52,7 @@ var AccessKeyTable = React.createClass({
                       </thead>
                       <tbody>
                         {this.state.access_keys.map(k =>
-                            <tr key={k.access_key_id}>
+                            <tr>
                               <td>{k.access_key_id}</td>
                               <td>{k.description}</td>
                               <td>
@@ -91,48 +91,34 @@ var AccessKeyTable = React.createClass({
     },
     showNewSecret: function(title, response) {
         this.setState({modal:
-            <Modal show={true} onHide={this.hideModal}>
-            <Modal.Header>
-                <Modal.Title>{title}</Modal.Title>
-            </Modal.Header>
-                <Modal.Body>
+            <Modal title={title} onRequestHide={this.hideModal}>
+                <div className="modal-body">
                     Please make a note of the new secret access key.
                     This is the last time you will be able to view it.
                     <dl className="key-value">
-                        <div>
-                            <dt>Access Key ID</dt>
-                            <dd>{response.access_key_id}</dd>
-                        </div>
-                        <div>
-                            <dt>Secret Access Key</dt>
-                            <dd>{response.secret_access_key}</dd>
-                        </div>
+                        <dt>Access Key ID</dt>
+                        <dd>{response.access_key_id}</dd>
+                        <dt>Secret Access Key</dt>
+                        <dd>{response.secret_access_key}</dd>
                     </dl>
-                </Modal.Body>
+                </div>
             </Modal>
         });
     },
 
     onDelete: function(item) {
         this.setState({modal:
-            <Modal show={true} onHide={this.hideModal}>
-                <Modal.Header>
-                    <Modal.Title>{'Access key ' + item['access_key_id'] + ' has been deleted.'}</Modal.Title>
-                </Modal.Header>
-            </Modal>
+            <Modal title={'Access key ' + item['access_key_id'] + ' has been deleted.'} onRequestHide={this.hideModal} />
         });
     },
 
     onError: function(error) {
         var View = globals.content_views.lookup(error);
-        this.setState({modal:
-            <Modal show={true} onHide={this.hideModal}>
-                <Modal.Header>
-                    <Modal.Title>Error</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
+        this.setState({modal: 
+            <Modal title="Error" onRequestHide={this.hideModal}>
+                <div className="modal-body">
                     <View context={error} loadingComplete={true} />
-                </Modal.Body>
+                </div>
             </Modal>
         });
     },
@@ -152,6 +138,7 @@ var User = module.exports.User = React.createClass({
         return (
             <div>
                 <header className="row">
+                    <Breadcrumbs root='/search/?type=user' crumbs={crumbs} />
                     <div className="col-sm-12">
                         <h1 className="page-title">{context.title}</h1>
                     </div>
@@ -179,7 +166,7 @@ var User = module.exports.User = React.createClass({
                         </div>
                     </div>
                 : ''}
-                {context.access_keys ?
+                {context.access_keys ? 
                     <div className="access-keys">
                         <h3>Access Keys</h3>
                         <div className="panel data-display">
@@ -203,20 +190,13 @@ var ImpersonateUserForm = React.createClass({
 
     render: function() {
         var ReactForms = require('react-forms');
-        // var ImpersonateUserSchema = ReactForms.Mapping({}, {
-        //     userid: ReactForms.Scalar({
-        //         label: 'User',
-        //         hint: 'Enter the email of the user you want to impersonate.',
-        //     }),
-        // });
-        // var form = <Form schema={ImpersonateUserSchema} submitLabel="Submit"
-        //       method="POST" action="/impersonate-user"
-        //       onFinish={this.finished} />;
-        var form = <div>Form will go here...</div>;
+        var ImpersonateUserSchema = require('./ImpersonateUserSchema');
         return (
             <div>
                 <h2>Impersonate User</h2>
-                {form}
+                <Form schema={ImpersonateUserSchema} submitLabel="Submit"
+                      method="POST" action="/impersonate-user"
+                      onFinish={this.finished} />
             </div>
         );
     },

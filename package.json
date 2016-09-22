@@ -1,5 +1,5 @@
 {
-  "name": "4DN",
+  "name": "encoded",
   "version": "0.0.0",
   "description": "domready held back.",
   "scripts": {
@@ -11,7 +11,7 @@
   "author": "",
   "license": "MIT",
   "files": [],
-  "repository": "hms-dbmi/fourfront",
+  "repository": "ENCODE-DCC/encoded",
   "jest": {
     "rootDir": "src/encoded/static",
     "setupFiles": [
@@ -57,13 +57,9 @@
     "marked": "^0.3.3",
     "moment": "^2.8.2",
     "query-string": "^4.1.0",
-    "react": "^15.3.1",
-    "react-dom": "^15.3.1",
-    "react-bootstrap": "^0.30.3",
-    "redux": "^3.5.2",
-    "react-redux": "^4.4.5",
-    "classnames": "^2.2.5",
-    "react-forms": "2.0.0-beta33",
+    "react": "^0.12.2",
+    "react-bootstrap": "^0.15.1",
+    "react-forms": "git+https://github.com/lrowe/react-forms.git#3953a633b1f77640dffb5e3f1d5bbe78a98c3dfe",
     "scriptjs": "^2.5.7",
     "source-map-support": "^0.2.7",
     "subprocess-middleware": "^0.1.0",

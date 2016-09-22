@@ -19,8 +19,8 @@
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/library"},
-        { "$ref": "experiment.json#/properties" },
-        { "$ref": "experiment_hic.json#/properties" }
+        { "$ref": "experiment.json#/properties"},
+        { "$ref": "experiment_hic.json#/properties"}
     ],
     "dependencies": {
       "crosslinking_temperature": ["crosslinking_method", "crosslinking_time"],
@@ -53,40 +53,17 @@
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
-<<<<<<< HEAD
                     "target": {
                         "title": "Target",
                         "description": "The genes or region that is specifically targeted",
                         "type": "string",
                         "linkTo": "Target"
-=======
-                    "targeted_genes": {
-                        "title": "Targeted Genes",
-                        "description": "The genes that are specifically targeted - can also be derived from genomic region info",
-                        "type": "array",
-                        "items": {
-                            "title": "Gene",
-                            "description": "Gene symbol for targeted gene",
-                            "comment": "will want to have validation against authority gene name databases",
-                            "comment": "and link to the external resource",
-                            "type": "string"
-                        }
->>>>>>> master
                     },
                     "oligo_file": {
                         "title": "Oligonucleotide Fasta File",
                         "description": "The multi fasta file that lists all the oligos used for this region",
                         "type": "string",
                         "linkTo": "File"
-<<<<<<< HEAD
-=======
-                    },
-                    "genomic_region": {
-                        "title": "Genomic Region",
-                        "description": "The genome assembly, chromosome and coordinates of the region",
-                        "type": "string",
-                        "linkTo": "GenomicRegion"
->>>>>>> master
                     }
                 }
             }

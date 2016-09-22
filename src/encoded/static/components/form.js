@@ -8,6 +8,7 @@ var fetched = require('./fetched');
 var ga = require('google-analytics');
 var _ = require('underscore');
 
+
 var filterValue = function(value) {
     if (Array.isArray(value)) {
         value.map(filterValue);
@@ -66,7 +67,8 @@ var RepeatingItem = React.createClass({
 var RepeatingFieldset = React.createClass({
 
   render() {
-    var cx = require('classnames');
+    var cx = require('react/lib/cx');
+    var cloneWithProps = require('react/lib/cloneWithProps');
     var ReactForms = require('react-forms');
     var {
       item: Item, value, className, noAddButton, noRemoveButton,
@@ -102,7 +104,7 @@ var RepeatingFieldset = React.createClass({
               )
             };
             return React.isValidElement(Item) ?
-              React.cloneElement(Item, props) :
+              cloneWithProps(Item, props) :
               <Item {...props} />;
           })}
         </div>
@@ -558,6 +560,5 @@ var JSONSchemaForm = module.exports.JSONSchemaForm = React.createClass({
     render: function() {
         return <Form {...this.props} defaultValue={this.state.value} schema={this.state.schema} />;
     }
-
 
 });

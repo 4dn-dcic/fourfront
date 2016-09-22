@@ -60,7 +60,6 @@ tests_require = [
     'pytest_exact_fixtures',
     'pytest-xdist',
     'pytest-cov',
-    'attrs',
 ]
 
 setup(

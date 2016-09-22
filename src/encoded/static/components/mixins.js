@@ -6,8 +6,6 @@ var url = require('url');
 var origin = require('../libs/origin');
 var serialize = require('form-serialize');
 var ga = require('google-analytics');
-var store = require('../store');
-var dispatch_dict = {}; //used with navigate to store value for simultaneous dispatch
 
 
 var parseError = module.exports.parseError = function (response) {
@@ -107,17 +105,9 @@ module.exports.Persona = {
         if (session['auth.userid']) {
             this.fetchSessionProperties();
         }
-        var query_href;
-        if(document.querySelector('link[rel="canonical"]')){
-            query_href = document.querySelector('link[rel="canonical"]').getAttribute('href');
-        }else{
-            query_href = this.props.href;
-        }
-        store.dispatch({
-            type: {'href':query_href}
-        });
-        store.dispatch({
-            type: {'session_cookie': session_cookie}
+        this.setProps({
+            href: window.location.href,
+            session_cookie: session_cookie
         });
     },
 
@@ -145,9 +135,7 @@ module.exports.Persona = {
             request.etag = response.headers.get('ETag');
             var session_cookie = this.extractSessionCookie();
             if (this.props.session_cookie !== session_cookie) {
-                store.dispatch({
-                    type: {'session_cookie': session_cookie}
-                });
+                this.setProps({session_cookie: session_cookie});
             }
         });
         return request;
@@ -155,12 +143,7 @@ module.exports.Persona = {
 
     extractSessionCookie: function () {
         var cookie = require('cookie-monster');
-        if (cookie(document).get('session')){
-            return cookie(document).get('session');
-        }else{
-            return this.props.session_cookie;
-        }
-
+        return cookie(document).get('session');
     },
 
     componentWillReceiveProps: function (nextProps) {
@@ -312,9 +295,7 @@ module.exports.HistoryAndTriggers = {
 
     onHashChange: function (event) {
         // IE8/9
-        store.dispatch({
-            type: {'href':document.querySelector('link[rel="canonical"]').getAttribute('href')}
-        });
+        this.setProps({href: window.location.href});
     },
    triggerLogout: function (event) {
         console.log('Logging out (persona)');
@@ -337,9 +318,7 @@ module.exports.HistoryAndTriggers = {
         }, err => {
             parseError(err).then(data => {
                 data.title = 'Logout failure: ' + data.title;
-                store.dispatch({
-                    type: {'context':data}
-                });
+                this.setProps({context: data});
             });
         });
     },
@@ -467,7 +446,7 @@ module.exports.HistoryAndTriggers = {
         var request = this.props.contextRequest;
         var href = window.location.href;
         if (event.state) {
-            // Abort inflight xhr before dispatching
+            // Abort inflight xhr before setProps
             if (request && this.requestCurrent) {
                 // Abort the current request, then remember we've aborted it so that we don't render
                 // the Network Request Error page.
@@ -475,13 +454,10 @@ module.exports.HistoryAndTriggers = {
                 this.requestAborted = true;
                 this.requestCurrent = false;
             }
-            store.dispatch({
-                type: {'context': event.state}
+            this.setProps({
+                context: event.state,
+                href: href  // href should be consistent with context
             });
-            store.dispatch({
-                type: {'href': href}
-            });
-
         }
         // Always async update in case of server side changes.
         // Triggers standard analytics handling.
@@ -510,6 +486,7 @@ module.exports.HistoryAndTriggers = {
         if (!this.confirmNavigation()) {
             return;
         }
+
         // options.skipRequest only used by collection search form
         // options.replace only used handleSubmit, handlePopState, handlePersonaLogin
         options = options || {};
@@ -552,9 +529,7 @@ module.exports.HistoryAndTriggers = {
             } else {
                 window.history.pushState(window.state, '', href + fragment);
             }
-            store.dispatch({
-                type: {'href':href + fragment}
-            });
+            this.setProps({href: href + fragment});
             return;
         }
 
@@ -567,10 +542,7 @@ module.exports.HistoryAndTriggers = {
 
         Promise.race([request, timeout.promise]).then(v => {
             if (v instanceof Timeout) {
-                store.dispatch({
-                    type: {'slow':true}
-                });
-
+                this.setProps({'slow': true});
             } else {
                 // Request has returned data
                 this.requestCurrent = false;
@@ -600,7 +572,9 @@ module.exports.HistoryAndTriggers = {
             } else {
                 window.history.pushState(null, '', response_url + fragment);
             }
-            dispatch_dict.href = response_url + fragment;
+            this.setProps({
+                href: response_url + fragment
+            });
             if (!response.ok) {
                 throw response;
             }
@@ -612,7 +586,10 @@ module.exports.HistoryAndTriggers = {
         if (!options.replace) {
             promise = promise.then(this.scrollTo);
         }
-        dispatch_dict.contextRequest = request;
+
+        this.setProps({
+            contextRequest: request
+        });
         return request;
     },
 
@@ -629,19 +606,16 @@ module.exports.HistoryAndTriggers = {
         // gotten a response. If the requestAborted flag is set, then a request was aborted and so we have
         // the data for a Network Request Error. Don't render that, but clear the requestAboerted flag.
         // Otherwise we have good page data to render.
-        dispatch_dict.slow = false;
+        var newProps = {slow: false};
         if (!this.requestAborted) {
             // Real page to render
-            dispatch_dict.context = data;
+            newProps.context = data;
         } else {
             // data holds network error. Don't render that, but clear the requestAborted flag so we're ready
             // for the next navigation click.
             this.requestAborted = false;
         }
-        store.dispatch({
-            type: dispatch_dict
-        });
-        dispatch_dict={};
+        this.setProps(newProps);
     },
 
     componentDidUpdate: function () {

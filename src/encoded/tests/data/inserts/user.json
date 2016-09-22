@@ -32,7 +32,7 @@
         "lab": "test-not-4dn-lab",
         "last_name": "Submitter",
         "status": "current",
-        "submits_for": ["test-4dn-lab"],
+        "submits_for": ["test-not-4dn-lab"],
         "timezone": "US/Pacific",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267307e3c"
     },

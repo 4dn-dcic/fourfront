@@ -1,15 +1,30 @@
 'use strict';
 var React = require('react');
+var cloneWithProps = require('react/lib/cloneWithProps');
 var queryString = require('query-string');
+var Modal = require('react-bootstrap/lib/Modal');
+var OverlayMixin = require('react-bootstrap/lib/OverlayMixin');
+var button = require('../libs/bootstrap/button');
+var dropdownMenu = require('../libs/bootstrap/dropdown-menu');
+var SvgIcon = require('../libs/svg-icons');
+var cx = require('react/lib/cx');
 var url = require('url');
 var _ = require('underscore');
 var globals = require('./globals');
+var image = require('./image');
 var search = module.exports;
+var dbxref = require('./dbxref');
 var audit = require('./audit');
+var objectutils = require('./objectutils');
 
+var DbxrefList = dbxref.DbxrefList;
+var statusOrder = globals.statusOrder;
+var SingleTreatment = objectutils.SingleTreatment;
 var AuditIndicators = audit.AuditIndicators;
 var AuditDetail = audit.AuditDetail;
 var AuditMixin = audit.AuditMixin;
+var DropdownButton = button.DropdownButton;
+var DropdownMenu = dropdownMenu.DropdownMenu;
 
 // Should really be singular...
 var types = {
@@ -68,7 +83,7 @@ var PickerActionsMixin = module.exports.PickerActionsMixin = {
         if (this.context.actions && this.context.actions.length) {
             return (
                 <div className="pull-right">
-                    {this.context.actions.map(action => React.cloneElement(action, {id: this.props.context['@id']}))}
+                    {this.context.actions.map(action => cloneWithProps(action, {id: this.props.context['@id']}))}
                 </div>
             );
         } else {
@@ -106,6 +121,159 @@ var Item = module.exports.Item = React.createClass({
     }
 });
 globals.listing_views.register(Item, 'Item');
+
+// Display one antibody status indicator
+var StatusIndicator = React.createClass({
+    getInitialState: function() {
+        return {
+            tipOpen: false,
+            tipStyles: {}
+        };
+    },
+
+    // Display tooltip on hover
+    onMouseEnter: function () {
+        function getNextElementSibling(el) {
+            // IE8 doesn't support nextElementSibling
+            return el.nextElementSibling ? el.nextElementSibling : el.nextSibling;
+        }
+
+        // Get viewport bounds of result table and of this tooltip
+        var whiteSpace = 'nowrap';
+        var resultBounds = document.getElementById('result-table').getBoundingClientRect();
+        var resultWidth = resultBounds.right - resultBounds.left;
+        var tipBounds = _.clone(getNextElementSibling(this.refs.indicator.getDOMNode()).getBoundingClientRect());
+        var tipWidth = tipBounds.right - tipBounds.left;
+        var width = tipWidth;
+        if (tipWidth > resultWidth) {
+            // Tooltip wider than result table; set tooltip to result table width and allow text to wrap
+            tipBounds.right = tipBounds.left + resultWidth - 2;
+            whiteSpace = 'normal';
+            width = tipBounds.right - tipBounds.left - 2;
+        }
+
+        // Set an inline style to move the tooltip if it runs off right edge of result table
+        var leftOffset = resultBounds.right - tipBounds.right;
+        if (leftOffset < 0) {
+            // Tooltip goes outside right edge of result table; move it to the left
+            this.setState({tipStyles: {left: (leftOffset + 10) + 'px', maxWidth: resultWidth + 'px', whiteSpace: whiteSpace, width: width + 'px'}});
+        } else {
+            // Tooltip fits inside result table; move it to native position
+            this.setState({tipStyles: {left: '10px', maxWidth: resultWidth + 'px', whiteSpace: whiteSpace, width: width + 'px'}});
+        }
+
+        this.setState({tipOpen: true});
+    },
+
+    // Close tooltip when not hovering
+    onMouseLeave: function() {
+        this.setState({tipStyles: {maxWidth: 'none', whiteSpace: 'nowrap', width: 'auto', left: '15px'}}); // Reset position and width
+        this.setState({tipOpen: false});
+    },
+
+    render: function() {
+        var classes = {tooltipopen: this.state.tipOpen};
+
+        return (
+            <span className="tooltip-status-trigger">
+                <i className={globals.statusClass(this.props.status, 'indicator icon icon-circle')} ref="indicator" onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}></i>
+                <div className={"tooltip-status sentence-case " + cx(classes)} style={this.state.tipStyles}>
+                    {this.props.status}<br /><span>{this.props.terms.join(', ')}</span>
+                </div>
+            </span>
+        );
+    }
+});
+
+// Display the status indicators for one target
+var StatusIndicators = React.createClass({
+    render: function() {
+        var targetTree = this.props.targetTree;
+        var target = this.props.target;
+
+        return (
+            <span className="status-indicators">
+                {Object.keys(targetTree[target]).map(function(status, i) {
+                    if (status !== 'target') {
+                        return <StatusIndicator key={i} status={status} terms={targetTree[target][status]} />;
+                    } else {
+                        return null;
+                    }
+                })}
+            </span>
+        );
+    }
+});
+
+var Antibody = module.exports.Antibody = React.createClass({
+    mixins: [PickerActionsMixin, AuditMixin],
+    render: function() {
+        var result = this.props.context;
+
+        // Sort the lot reviews by their status according to our predefined order
+        // given in the statusOrder array.
+        var lot_reviews = _.sortBy(result.lot_reviews, function(lot_review) {
+            return _.indexOf(statusOrder, lot_review.status); // Use underscore indexOf so that this works in IE8
+        });
+
+        // Build antibody display object as a hierarchy: target=>status=>biosample_term_names
+        var targetTree = {};
+        lot_reviews.forEach(function(lot_review) {
+            lot_review.targets.forEach(function(target) {
+                // If we haven't seen this target, save it in targetTree along with the
+                // corresponding target and organism structures.
+                if (!targetTree[target.name]) {
+                    targetTree[target.name] = {target: target};
+                }
+                var targetNode = targetTree[target.name];
+
+                // If we haven't seen the status, save it in the targetTree target
+                if (!targetNode[lot_review.status]) {
+                    targetNode[lot_review.status] = [];
+                }
+                var statusNode = targetNode[lot_review.status];
+
+                // If we haven't seen the biosample term name, save it in the targetTree target status
+                if (statusNode.indexOf(lot_review.biosample_term_name) === -1) {
+                    statusNode.push(lot_review.biosample_term_name);
+                }
+            });
+        });
+        lot_reviews = null; // Tell GC we're done, just to be sure
+
+        return (
+            <li>
+                <div className="clearfix">
+                    {this.renderActions()}
+                    <div className="pull-right search-meta">
+                        <p className="type meta-title">Antibody</p>
+                        <p className="type">{' ' + result.accession}</p>
+                        <AuditIndicators audits={result.audit} id={this.props.context['@id']} search />
+                    </div>
+                    <div className="accession">
+                        {Object.keys(targetTree).map(function(target) {
+                            return (
+                                <div key={target}>
+                                    <a href={result['@id']}>
+                                        {targetTree[target].target.label}
+                                        {targetTree[target].target.organism ? <span>{' ('}<i>{targetTree[target].target.organism.scientific_name}</i>{')'}</span> : ''}
+                                    </a>
+                                    <StatusIndicators targetTree={targetTree} target={target} />
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <div className="data-row">
+                        <div><strong>Source: </strong>{result.source.title}</div>
+                        <div><strong>Product ID / Lot ID: </strong>{result.product_id} / {result.lot_id}</div>
+                    </div>
+                </div>
+                <AuditDetail context={result} id={this.props.context['@id']} forcedEditLink />
+            </li>
+        );
+    }
+});
+globals.listing_views.register(Antibody, 'AntibodyLot');
 
 var Biosample = module.exports.Biosample = React.createClass({
     render: function() {
@@ -192,6 +360,161 @@ var Experiment = module.exports.Experiment = React.createClass({
     }
 });
 globals.listing_views.register(Experiment, 'Experiment');
+
+var Dataset = module.exports.Dataset = React.createClass({
+    mixins: [PickerActionsMixin, AuditMixin],
+    render: function() {
+        var result = this.props.context;
+        var biosampleTerm, organism, lifeSpec, targets, lifeStages = [], ages = [];
+
+        // Determine whether the dataset is a series or not
+        var seriesDataset = result['@type'].indexOf('Series') >= 0;
+
+        // Get the biosample info for Series types if any. Can be string or array. If array, only use iff 1 term name exists
+        if (seriesDataset) {
+            biosampleTerm = (result.biosample_term_name && typeof result.biosample_term_name === 'object' && result.biosample_term_name.length === 1) ? result.biosample_term_name[0] :
+                ((result.biosample_term_name && typeof result.biosample_term_name === 'string') ? result.biosample_term_name : '');
+            var organisms = _.uniq(result.organism && result.organism.length && result.organism.map(function(organism) {
+                return organism.scientific_name;
+            }));
+            if (organisms.length === 1) {
+                organism = organisms[0];
+            }
+
+            // Dig through the biosample life stages and ages
+            if (result.related_datasets && result.related_datasets.length) {
+                result.related_datasets.forEach(function(dataset) {
+                    if (dataset.replicates && dataset.replicates.length) {
+                        dataset.replicates.forEach(function(replicate) {
+                            if (replicate.library && replicate.library.biosample) {
+                                var biosample = replicate.library.biosample;
+                                var lifeStage = (biosample.life_stage && biosample.life_stage !== 'unknown') ? biosample.life_stage : '';
+
+                                if (lifeStage) { lifeStages.push(lifeStage); }
+                                if (biosample.age_display) { ages.push(biosample.age_display); }
+                            }
+                        });
+                    }
+                });
+                lifeStages = _.uniq(lifeStages);
+                ages = _.uniq(ages);
+            }
+            lifeSpec = _.compact([lifeStages.length === 1 ? lifeStages[0] : null, ages.length === 1 ? ages[0] : null]);
+
+            // Get list of target labels
+            if (result.target) {
+                targets = _.uniq(result.target.map(function(target) {
+                    return target.label;
+                }));
+            }
+        }
+
+        var haveSeries = result['@type'].indexOf('Series') >= 0;
+        var haveFileSet = result['@type'].indexOf('FileSet') >= 0;
+
+        return (
+            <li>
+                <div className="clearfix">
+                    {this.renderActions()}
+                    <div className="pull-right search-meta">
+                        <p className="type meta-title">{haveSeries ? 'Series' : (haveFileSet ? 'FileSet' : 'Dataset')}</p>
+                        <p className="type">{' ' + result['accession']}</p>
+                        <p className="type meta-status">{' ' + result['status']}</p>
+                        <AuditIndicators audits={result.audit} id={this.props.context['@id']} search />
+                    </div>
+                    <div className="accession">
+                        <a href={result['@id']}>
+                            {datasetTypes[result['@type'][0]]}
+                            {seriesDataset ?
+                                <span>
+                                    {biosampleTerm ? <span>{' in ' + biosampleTerm}</span> : null}
+                                    {organism || lifeSpec.length > 0 ?
+                                        <span>
+                                            {' ('}
+                                            {organism ? <i>{organism}</i> : null}
+                                            {lifeSpec.length > 0 ? <span>{organism ? ', ' : ''}{lifeSpec.join(', ')}</span> : null}
+                                            {')'}
+                                        </span>
+                                    : null}
+                                </span>
+                            :
+                                <span>{result.description ? <span>{': ' + result.description}</span> : null}</span>
+                            }
+                        </a>
+                    </div>
+                    <div className="data-row">
+                        {result['dataset_type'] ? <div><strong>Dataset type: </strong>{result['dataset_type']}</div> : null}
+                        {targets && targets.length ? <div><strong>Targets: </strong>{targets.join(', ')}</div> : null}
+                        <div><strong>Lab: </strong>{result.lab.title}</div>
+                        <div><strong>Project: </strong>{result.award.project}</div>
+                    </div>
+                </div>
+                <AuditDetail context={result} id={this.props.context['@id']} forcedEditLink />
+            </li>
+        );
+    }
+});
+globals.listing_views.register(Dataset, 'Dataset');
+
+var Target = module.exports.Target = React.createClass({
+    mixins: [PickerActionsMixin, AuditMixin],
+    render: function() {
+        var result = this.props.context;
+        return (
+            <li>
+                <div className="clearfix">
+                    {this.renderActions()}
+                    <div className="pull-right search-meta">
+                        <p className="type meta-title">Target</p>
+                        <AuditIndicators audits={result.audit} id={this.props.context['@id']} search />
+                    </div>
+                    <div className="accession">
+                        <a href={result['@id']}>
+                            {result['label']}
+                            {result.organism && result.organism.scientific_name ? <em>{' (' + result.organism.scientific_name + ')'}</em> : null}
+                        </a>
+                    </div>
+                    <div className="data-row">
+                        <strong>External resources: </strong>
+                        {result.dbxref && result.dbxref.length ?
+                            <DbxrefList values={result.dbxref} target_gene={result.gene_name} />
+                        : <em>None submitted</em> }
+                    </div>
+                </div>
+                <AuditDetail context={result} id={this.props.context['@id']} forcedEditLink />
+            </li>
+        );
+    }
+});
+globals.listing_views.register(Target, 'Target');
+
+
+var Image = module.exports.Image = React.createClass({
+    mixins: [PickerActionsMixin],
+    render: function() {
+        var result = this.props.context;
+        var Attachment = image.Attachment;
+        return (
+            <li>
+                <div className="clearfix">
+                    {this.renderActions()}
+                    <div className="pull-right search-meta">
+                        <p className="type meta-title">Image</p>
+                        <AuditIndicators audits={result.audit} id={this.props.context['@id']} search />
+                    </div>
+                    <div className="accession">
+                        <a href={result['@id']}>{result.caption}</a>
+                    </div>
+                    <div className="data-row">
+                        <Attachment context={result} attachment={result.attachment} />
+                    </div>
+                </div>
+                <AuditDetail context={result} id={this.props.context['@id']} forcedEditLink />
+            </li>
+        );
+    }
+});
+globals.listing_views.register(Image, 'Image');
 
 
 // If the given term is selected, return the href for the term
@@ -456,6 +779,53 @@ var FacetList = search.FacetList = React.createClass({
                     }
                 })}
             </div>
+        );
+    }
+});
+
+var BatchDownload = search.BatchDownload = React.createClass({
+    mixins: [OverlayMixin],
+
+    getInitialState: function () {
+        return {
+            isModalOpen: false
+        };
+    },
+
+    handleToggle: function () {
+        this.setState({
+            isModalOpen: !this.state.isModalOpen
+        });
+    },
+
+    render: function () {
+        return (
+            <a className="btn btn-info btn-sm" onClick={this.handleToggle}>Download</a>
+        );
+    },
+
+    renderOverlay: function () {
+        var link = this.props.context['batch_download'];
+        if (!this.state.isModalOpen) {
+            return <span/>;
+        }
+        return (
+            <Modal title="Using batch download" onRequestHide={this.handleToggle}>
+                <div className="modal-body">
+                <p>Click the "Download" button below to download a "files.txt" file that contains a list of URLs to a file containing all the experimental metadata and links to download the file.
+                The first line of the file will always be the URL to download the metadata file. <br />
+                Further description of the contents of the metadata file are described in the <a href="/help/batch-download/">Batch Download help doc</a>.</p><br />
+
+                <p>The "files.txt" file can be copied to any server.<br />
+                The following command using cURL can be used to download all the files in the list:</p><br />
+                <code>xargs -n 1 curl -O -L &lt; files.txt</code><br />
+                </div>
+                <div className="modal-footer">
+                    <a className="btn btn-info btn-sm" onClick={this.handleToggle}>Close</a>
+                    <a data-bypass="true" target="_self" className="btn btn-info btn-sm"
+                        href={link}>{'Download'}</a>
+                </div>
+            </Modal>
         );
     }
 });

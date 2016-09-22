@@ -11,7 +11,7 @@ jest.dontMock('underscore');
 
 
 describe('Testing item.js', function() {
-    var React, item, Item, testItem, TestUtils, FetchContext, context, schemas, _, Wrapper;
+    var React, item, Item, testItem, TestUtils, FetchContext, context, schemas, _, definitions, defTerms, defDescs;
 
     beforeEach(function() {
         React = require('react');
@@ -21,51 +21,49 @@ describe('Testing item.js', function() {
         Item = item.IPanel;
         context = require('../testdata/library/sid38806');
         schemas = require('../testdata/schemas');
-        Wrapper = React.createClass({
-            render: function() {
-                return (
-                    <div>{this.props.children}</div>
-                );
+        FetchContext = {
+            fetch: function(url, options) {
+                return Promise.resolve({json: () => ({'@graph': []})});
             }
-        });
-        testItem = TestUtils.renderIntoDocument(
-            <Wrapper>
+        };
+        testItem = React.withContext(FetchContext, function() {
+            return TestUtils.renderIntoDocument(
                 <Item schemas={schemas} context={context} />
-            </Wrapper>
-        );
-
+            );
+        });
+        definitions = TestUtils.findRenderedDOMComponentWithClass(testItem, 'key-value');
+        defTerms = TestUtils.scryRenderedDOMComponentsWithTag(definitions, 'dt');
+        defDescs = TestUtils.scryRenderedDOMComponentsWithTag(definitions, 'dd');
     });
 
     it('has the correct number of def terms and def descriptions', function() {
-        var defTerms = TestUtils.scryRenderedDOMComponentsWithTag(testItem, 'dt');
-        var defDescs = TestUtils.scryRenderedDOMComponentsWithTag(testItem, 'dd');
         expect(defTerms.length).toEqual(19);
         expect(defDescs.length).toEqual(19);
     });
 
     it('has a good title', function() {
         var titleLine = TestUtils.findRenderedDOMComponentWithClass(testItem, 'experiment-heading');
-        var exptHeading = titleLine;
+        var exptHeading = titleLine.getDOMNode();
         expect(exptHeading.textContent).toEqual('ENCLB055ZZZ');
     });
 
     it('expands object views properly', function() {
         var objToggles = TestUtils.scryRenderedDOMComponentsWithClass(testItem, 'item-toggle-link');
-        var objDefDesc = objToggles[0];
+        var objDefDesc = objToggles[0].getDOMNode();
         // this is the biosamples link
         TestUtils.Simulate.click(objDefDesc);
         var objDefinitions = TestUtils.findRenderedDOMComponentWithClass(testItem, 'sub-descriptions');
-        var objEntries = TestUtils.scryRenderedDOMComponentsWithClass(testItem, 'sub-entry');
+        var objEntries = TestUtils.scryRenderedDOMComponentsWithClass(objDefinitions, 'sub-entry');
         // there should be 25 entries within the biosample object subview
         expect(objEntries.length).toEqual(25);
     });
 
     it('opens and closes tooltips correctly', function(){
         var objTriggers = TestUtils.scryRenderedDOMComponentsWithClass(testItem, 'tooltip-trigger');
-        TestUtils.SimulateNative.mouseOver(objTriggers[0]);
+        TestUtils.SimulateNative.mouseOver(objTriggers[0].getDOMNode());
         var openTooltips = TestUtils.scryRenderedDOMComponentsWithClass(testItem, 'tooltip-open');
         expect(openTooltips.length > 0).toBeTruthy();
-        TestUtils.SimulateNative.mouseOut(objTriggers[0]);
+        TestUtils.SimulateNative.mouseOut(objTriggers[0].getDOMNode());
         var openTooltips = TestUtils.scryRenderedDOMComponentsWithClass(testItem, 'tooltip-open');
         expect(openTooltips.length).toEqual(0);
     });

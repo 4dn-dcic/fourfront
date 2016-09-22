@@ -12,7 +12,7 @@ jest.dontMock('react');
 jest.dontMock('underscore');
 
 describe('Testing item.js', function() {
-    var React, HomePage, BannerEntry, testItem, TestUtils, page, data, _, banners, Wrapper;
+    var React, HomePage, BannerEntry, testItem, TestUtils, page, data, _, banners;
 
     beforeEach(function() {
         React = require('react');
@@ -25,17 +25,8 @@ describe('Testing item.js', function() {
         banners.push(<BannerEntry data={data} text='experiments' location='/search/?type=Experiment&award.project=4DN'/>);
         banners.push(<BannerEntry data={data} text='experiments' location='/search/?type=Experiment&award.project=External'/>);
         banners.push(<BannerEntry data={data} text='cell types' location='/search/?type=Biosource'/>);
-        Wrapper = React.createClass({
-            render: function() {
-                return (
-                    <div>{this.props.children}</div>
-                );
-            }
-        });
         page = TestUtils.renderIntoDocument(
-            <Wrapper>
-                <HomePage banners={banners} />
-            </Wrapper>
+            <HomePage banners={banners} />
         );
     });
 
@@ -44,9 +35,9 @@ describe('Testing item.js', function() {
         var bannerEntries = TestUtils.scryRenderedDOMComponentsWithClass(page, 'banner-entry');
         expect(banners.length).toEqual(1);
         expect(bannerEntries.length).toEqual(3);
-        expect(bannerEntries[0].getAttribute('href')).toEqual('/search/?type=Experiment&award.project=4DN');
-        expect(bannerEntries[1].getAttribute('href')).toEqual('/search/?type=Experiment&award.project=External');
-        expect(bannerEntries[2].getAttribute('href')).toEqual('/search/?type=Biosource');
+        expect(bannerEntries[0].getDOMNode().getAttribute('href')).toEqual('/search/?type=Experiment&award.project=4DN');
+        expect(bannerEntries[1].getDOMNode().getAttribute('href')).toEqual('/search/?type=Experiment&award.project=External');
+        expect(bannerEntries[2].getDOMNode().getAttribute('href')).toEqual('/search/?type=Biosource');
     });
 
     it('has announcement and getting started headers', function() {
@@ -58,7 +49,7 @@ describe('Testing item.js', function() {
         var originalEntries = TestUtils.scryRenderedDOMComponentsWithClass(page, "fourDN-content");
         var numOriginalEntries = originalEntries.length;
         var titleToggles = TestUtils.scryRenderedDOMComponentsWithClass(page, "fourDN-section-toggle");
-        var entryTitle = titleToggles[0];
+        var entryTitle = titleToggles[0].getDOMNode();
         // this is the first found entry title (doesn't matter which)
         TestUtils.Simulate.click(entryTitle);
         var expandedEntries = TestUtils.scryRenderedDOMComponentsWithClass(page, "fourDN-content");
