@@ -39,6 +39,7 @@ ONLY_ADMIN_VIEW_DETAILS = [
 ONLY_OWNER_EDIT = [
     (Allow, 'role.owner', 'view'),
     (Allow, 'role.owner', 'edit'),
+    (Allow, 'role.owner', 'view_details')
 ] + ONLY_ADMIN_VIEW_DETAILS
 
 USER_ALLOW_CURRENT = [
