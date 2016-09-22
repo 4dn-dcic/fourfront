@@ -1,5 +1,5 @@
 ========================
-ENCODE Metadata Database
+Fourfront Metadata Database
 ========================
  
 
