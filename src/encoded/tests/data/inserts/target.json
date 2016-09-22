@@ -1,0 +1,21 @@
+[
+    {
+        "description": "A target of consequence",
+        "targeted_genes": ["PARK2", "FMR1"],
+        "uuid": "d1115d5e-40aa-43bc-b81c-32c70c9afb55",
+        "aliases": ["dcic:test_targ1"]
+    },
+    {
+        "description": "A target of circumstance",
+        "targeted_genes": ["PARK2", "FMR1"],
+        "targeted_region": "d1115d5e-40aa-43bc-b81c-32c70c9afb01",
+        "uuid": "d1115d5e-40aa-43bc-b81c-32c70c9afb44",
+        "aliases": ["dcic:test_targ2"]
+    },
+    {
+        "description": "A target of no regard",
+        "targeted_region": "d1115d5e-40aa-43bc-b81c-32c70c9afb01",
+        "uuid": "d1115d5e-40aa-43bc-b81c-32c70c9afb33",
+        "aliases": ["dcic:test_targ3"]
+    }
+]
