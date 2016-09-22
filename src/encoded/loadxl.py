@@ -18,6 +18,8 @@ ORDER = [
     'award',
     'lab',
     'organism',
+    'genomic_region',
+    'target',
     'publication',
     'document',
     'vendor',
@@ -35,6 +37,7 @@ ORDER = [
     'file',
     'file_set',
     'experiment_hic',
+    'experiment_capture_c',
     'experiment_set',
     'software',
     'analysis_step',
@@ -512,6 +515,9 @@ PHASE1_PIPELINES = {
     'experiment_hic': [
         remove_keys('experiment_relation', 'experiment_sets'),
     ],
+    'experiment_capture_c': [
+        remove_keys('experiment_relation', 'experiment_sets'),
+    ],
     'experiment_set': [
         remove_keys('experiments_in_set'),
     ],
@@ -539,6 +545,9 @@ PHASE2_PIPELINES = {
         skip_rows_missing_all_keys('files_in_set'),
     ],
     'experiment_hic': [
+        skip_rows_missing_all_keys('experiment_relation', 'experiment_sets'),
+    ],
+    'experiment_capture_c': [
         skip_rows_missing_all_keys('experiment_relation', 'experiment_sets'),
     ],
     'experiment_set': [

@@ -13,7 +13,9 @@
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/submitted"},
         { "$ref": "mixins.json#/references" },
+        { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/notes" }
     ],
     "properties": {
@@ -46,22 +48,45 @@
                 "linkTo": "Construct"
             }
         },
-        "genomic_site": {
-            "title": "Genomic Site",
-            "description": "The coordinates of the genomic modification.",
-            "type": "string",
-            "comment": "require genbank format location info"
+        "guide_rnas": {
+            "title": "Guide RNAs",
+            "description": "The guide RNA sequences used in Crispr targetting.",
+            "type": "array",
+            "items": {
+                "title": "Guide RNA",
+                "description": "Sequence of the guide RNA - submit as DNA (i.e. T not U) can include the PAM motif that is not actually part of the transcribed target and should not include the tracrRNA so that the sequence submitted reflects the genomic sequence",
+                "type": "string",
+                "pattern": "^[ATGCN]+$"
+            }
         },
-        "target": {
-            "title": "Target",
+        "modified_regions": {
+            "title": "Modified Regions",
+            "description": "The genomic regions being modified.",
+            "type": "array",
+            "items": {
+                "title": "Genomic region",
+                "description": "region being modfied",
+                "type": "string",
+                "linkTo": "GenomicRegion"
+            }
+        },
+        "target_of_mod": {
+            "title": "Target of Modification",
             "description": "The targeted gene or genomic region that is targeted by the modification.",
-            "type": "string"
+            "type": "string",
+            "linkTo": "Target"
         },
         "url": {
             "title": "URL",
             "description": "An external resource with additional information about the construct.",
             "type": "string",
             "format": "uri"
+        },
+        "created_by" : {
+            "title": "Created By",
+            "description": "Lab or Company that produced the modfication",
+            "type": "string",
+            "linkTo": "Vendor"
         }
     }
 }

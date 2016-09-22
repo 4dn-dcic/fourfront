@@ -282,11 +282,13 @@
 
 
 .fourDN-content{
-	padding-top: 5px;
-	padding-left: 10%;
 	font-family: 'Yrsa', serif;
 	line-height: 130%;
 	font-size: 1.4em;
+}
+
+.fourDN-content-panel{
+	margin-top: 0px !important;
 }
 
 .item-toggle-link{
@@ -318,6 +320,10 @@
  margin-top: 30px;
 }
 
+.help-entry{
+	margin: 50px 0px 50px 0px;
+}
+
 //make headers use work sans
 h1, h2, h3, h4, h5, h6 {
 	font-family: 'Work Sans', sans-serif;
@@ -338,4 +344,20 @@ p, input {
 .error-page{
 	margin-top: 50px;
 	text-align: center;
+}
+
+.static-page{
+	width:80%;
+	margin: auto;
+}
+
+.slide-display{
+	padding: 20px 0px 20px 0px;
+	>img{
+		display: block;
+		margin: auto;
+	}
+	>.slide-controls{
+		text-align: center;
+	}
 }

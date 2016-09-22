@@ -29,6 +29,7 @@ from pyramid.settings import (
 from snovault import ROOT
 from snovault.storage import User
 from snovault import COLLECTIONS
+from snovault.validation import ValidationFailure
 from snovault.calculated import calculate_properties
 from snovault.validators import no_validate_item_content_post
 
