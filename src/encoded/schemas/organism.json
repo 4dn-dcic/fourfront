@@ -16,6 +16,22 @@
         "schema_version": {
             "default": "1"
         },
+        "status": {
+            "title": "Status",
+            "type": "string",
+            "default": "released",
+            "permission": "import_items",
+            "enum": [
+                "released",
+                "current",
+                "revoked",
+                "deleted",
+                "replaced",
+                "in review by lab",
+                "in review by project",
+                "released to project"
+            ]
+        },
         "name": {
             "title": "Common name",
             "description": "A short unique name for the organism (e.g. 'mouse' or 'human').",

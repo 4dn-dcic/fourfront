@@ -42,6 +42,9 @@ _app_settings = {
     'postgresql.statement_timeout': 20,
     'tm.attempts': 3,
     'ontology_path': pkg_resources.resource_filename('encoded', '../../ontology.json'),
+    # some file specific stuff for testing
+    'file_upload_bucket': 'test-bucket',
+    'file_upload_profile_name' : 'test-profile',
 }
 
 
@@ -50,6 +53,7 @@ def app_settings(request, wsgi_server_host_port, conn, DBSession):
     from snovault import DBSESSION
     settings = _app_settings.copy()
     settings['persona.audiences'] = 'http://%s:%s' % wsgi_server_host_port
+    # add some here for file testing
     settings[DBSESSION] = DBSession
     return settings
 

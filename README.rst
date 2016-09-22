@@ -1,6 +1,7 @@
 ========================
-ENCODE Metadata Database
+Fourfront Metadata Database
 ========================
+ 
 
 |Build status|_
 

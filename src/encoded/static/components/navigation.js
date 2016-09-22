@@ -18,6 +18,12 @@ var Navigation = module.exports = React.createClass({
 
     getInitialState: function() {
         return {
+            testWarning: false
+        };
+    },
+
+    getInitialState: function() {
+        return {
             testWarning: !productionHost[url.parse(this.context.location_href).hostname]
         };
     },
@@ -47,7 +53,7 @@ var Navigation = module.exports = React.createClass({
                     <Navbar brand={img} brandlink="/" label="main" navClasses="navbar-main" navID="navbar-icon">
                         <GlobalSections />
                         <UserActions />
-                        <Search />
+                        {/* REMOVE SEARCH FOR NOW: <Search />*/}
                     </Navbar>
                 </div>
                 {this.state.testWarning ?
@@ -103,8 +109,8 @@ var ContextActions = React.createClass({
     render: function() {
         var actions = this.context.listActionsFor('context').map(function(action) {
             return (
-                <div>
-                    <a href={action.href} key={action.name} className="global-entry">
+                <div key={action.name} >
+                    <a href={action.href} className="global-entry">
                         <i className="icon icon-pencil"></i> {action.title}
                     </a>
                 </div>
@@ -148,11 +154,11 @@ var UserActions = React.createClass({
         var session_properties = this.context.session_properties;
         var actions = this.context.listActionsFor('user_section').map(function (action) {
             if (action.id === "login"){
-                return(<Login />);
+                return(<Login key={action.id} />);
             }else if (action.id === "profile"){
-                return(<AccountActions/>);
+                return(<AccountActions key={action.id} />);
             }else if (action.id === "contextactions") {
-                return(<ContextActions/>);
+                return(<ContextActions key={action.id} />);
             }else{
                 return(
                         <a href={action.href || ''} key={action.id} data-bypass={action.bypass} data-trigger={action.trigger} className="global-entry">
@@ -193,8 +199,8 @@ var AccountActions = React.createClass({
         }
         var actions = this.context.listActionsFor('user').map(function (action) {
             return (
-                <div>
-                    <a href={action.href || ''} key={action.id} data-bypass={action.bypass} data-trigger={action.trigger} className="global-entry">
+                <div key={action.id} >
+                    <a href={action.href || ''} data-bypass={action.bypass} data-trigger={action.trigger} className="global-entry">
                         {action.title}
                     </a>
                 </div>

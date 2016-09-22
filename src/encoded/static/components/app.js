@@ -3,13 +3,18 @@ var React = require('react');
 var jsonScriptEscape = require('../libs/jsonScriptEscape');
 var globals = require('./globals');
 var mixins = require('./mixins');
-var Navigation = require('./navigation');
 var home = require('./home');
+var ErrorPage = require('./error');
+var Navigation = require('./navigation');
+var HelpPage = require('./help');
+var AboutPage = require('./about');
 var Footer = require('./footer');
 var url = require('url');
 var _ = require('underscore');
+var store = require('../store');
 
 //sid is to allow addition of supplementary ids to navbar link headings
+
 var portal = {
     portal_title: '4DN Data Portal',
     global_sections: [
@@ -17,22 +22,18 @@ var portal = {
             {id: 'experiments', title: 'Experiments', url: '/search/?type=Experiment'},
             {id: 'biosources', title: 'Biosources', url: '/search/?type=Biosource'}
         ]},
-        {id: 'tools', sid:'sTools', title: 'Tools', url: '/search/?type=Protocol&type=Software'},
         {id: 'help', sid:'sHelp', title: 'Help', children: [
-            {id: 'gettingstarted', title: 'Getting started', url: '/help/getting-started/'},
-            {id: 'restapi', title: 'REST API', url: '/help/rest-api/'},
-            {id: 'projectoverview', title: 'Project overview', url: '/about/contributors/'},
-            {id: 'tutorials', title: 'Tutorials', url: '/tutorials/'},
-            {id: 'news', title: 'News', url: '/news'},
-            {id: 'acknowledgements', title: 'Acknowledgements', url: '/acknowledgements/'},
-            {id: 'contact', title: 'Contact', url: '/help/contacts/'}
+            {id: 'gettingstarted', title: 'Getting started', url: '/help#getting-started'},
+            {id: 'metadatastructure', title: 'Metadata structure', url: '/help#metadata'},
+            {id: 'datasubmission', title: 'Data submission', url: '/help#datasubmission'},
+            {id: 'restapi', title: 'REST API', url: '/help#restapi'},
+            {id: 'about', title: 'About', url: '/about/'}
         ]}
     ],
     user_section: [
             {id: 'login', title: 'Log in', url: '/'},
-            {id: 'profile', title: 'Profile', url: '/'},
-            {id: 'contextactions', title: 'Actions', url: '/'},
-            {id: 'settings', title: 'Settings', url: '/'}
+            {id: 'profile', title: 'Profile', url: '/'}
+            // Remove context actions for now{id: 'contextactions', title: 'Actions', url: '/'}
     ]
 };
 
@@ -219,39 +220,55 @@ var App = React.createClass({
         // add static page routing
         var title;
         var routeList = canonical.split("/");
-        var lowerList = routeList.map(function(value) {
-            if(value.charAt(0) === "#" && value.charAt(1) !== "!"){
-                value = "";
+        var lowerList = [];
+        routeList.map(function(value) {
+            if (value.includes('#') && value.charAt(0) !== "#"){
+                var navSplit = value.split("#");
+                lowerList.push(navSplit[0].toLowerCase());
+            }else if(value.charAt(0) !== "!" && value.length > 0){
+                lowerList.push(value.toLowerCase());
             }
-            return value.toLowerCase();
         });
-        var currRoute = lowerList[lowerList.length-1];
+        var currRoute = lowerList.slice(1); // eliminate http
         // first case is fallback
         if (canonical === "about:blank"){
             title = portal.portal_title;
             content = null;
-        }else if (_.contains(lowerList, "home") || (currRoute === "" && lowerList[lowerList.length-2] === href_url.host)){
+        }else if (currRoute[currRoute.length-1] === 'home' || (currRoute[currRoute.length-1] === href_url.host)){
             var banners = [];
             banners.push(<home.BannerLoader text='experiments' location='/search/?type=Experiment&award.project=4DN'/>);
             banners.push(<home.BannerLoader text='experiments' location='/search/?type=Experiment&award.project=External'/>);
             banners.push(<home.BannerLoader text='cell types' location='/search/?type=Biosource'/>);
             content = <home.HomePage banners={banners}/>;
             title = portal.portal_title;
+        }else if (currRoute[currRoute.length-1] === 'help'){
+            content = <HelpPage />;
+            title = 'Help - ' + portal.portal_title;
+        }else if (currRoute[currRoute.length-1] === 'about'){
+            content = <AboutPage />;
+            title = 'About - ' + portal.portal_title;
         }else if (context) {
             var ContentView = globals.content_views.lookup(context, current_action);
-            content = <ContentView context={context} />;
-            title = context.title || context.name || context.accession || context['@id'];
-            if (title && title != 'Home') {
-                title = title + ' – ' + portal.portal_title;
-            } else {
-                title = portal.portal_title;
+            if (ContentView){
+                content = <ContentView context={context} />;
+                title = context.title || context.name || context.accession || context['@id'];
+                if (title && title != 'Home') {
+                    title = title + ' – ' + portal.portal_title;
+                } else {
+                    title = portal.portal_title;
+                }
+            }else{
+                // Handle the case where context is not loaded correctly
+                content = <ErrorPage />;
+                title="Not Found";
             }
         }
         // Google does not update the content of 301 redirected pages
         var base;
-        if (({'http://www.encodeproject.org/': 1, 'http://encodeproject.org/': 1})[canonical]) {
-            base = canonical = 'https://www.encodeproject.org/';
+        if (({'http://data.4dnucleome.org/': 1})[canonical]) {
+            base = canonical = 'http://data.4dnucleome.org/';
             this.historyEnabled = false;
+
         }
         return (
             <html lang="en">
@@ -274,9 +291,7 @@ var App = React.createClass({
                     }}></script>
                     <div id="slot-application">
                         <div id="application" className={appClass}>
-
                         <div className="loading-spinner"></div>
-
                             <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
                                 <Navigation />
                                 <div id="content" className="container" key={key}>
@@ -295,20 +310,24 @@ var App = React.createClass({
 
     statics: {
         getRenderedProps: function (document) {
-            var props = {};
             // Ensure the initial render is exactly the same
-            props.href = document.querySelector('link[rel="canonical"]').getAttribute('href');
+            store.dispatch({
+                type: {'href':document.querySelector('link[rel="canonical"]').getAttribute('href')}
+            });
             var script_props = document.querySelectorAll('script[data-prop-name]');
+            var props_dict = {};
             for (var i = 0; i < script_props.length; i++) {
                 var elem = script_props[i];
-                var value = elem.text;
+                var elem_value = elem.text;
                 var elem_type = elem.getAttribute('type') || '';
                 if (elem_type == 'application/json' || elem_type.slice(-5) == '+json') {
-                    value = JSON.parse(value);
+                    elem_value = JSON.parse(elem_value);
                 }
-                props[elem.getAttribute('data-prop-name')] = value;
+                props_dict[ elem.getAttribute('data-prop-name')] = elem_value;
             }
-            return props;
+            store.dispatch({
+                type: props_dict
+            });
         }
     }
 });
