@@ -42,7 +42,8 @@ var ContentItem = React.createClass({
         };
     },
 
-    handleToggle: function(b) {
+    handleToggle: function(e) {
+        e.preventDefault();
         this.setState({active: !this.state.active});
     },
 
