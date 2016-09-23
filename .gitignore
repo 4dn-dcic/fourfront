@@ -12,6 +12,7 @@ coverage.xml
 /develop-eggs/
 /downloads/
 /eggs/
+/.eggs/
 /extends/
 /node_modules/
 /ontology.json
