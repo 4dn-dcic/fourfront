@@ -256,7 +256,7 @@ def base_experiment(testapp, lab, award, human_biosample):
         'lab': lab['uuid'],
         'biosample': human_biosample['@id'],
         'experiment_type': 'micro-C',
-        'status': 'in progress'
+        'status': 'in review by lab'
     }
     return testapp.post_json('/experiment_hic', item, status=201).json['@graph'][0]
 
@@ -269,7 +269,7 @@ def file(testapp, lab, award, experiment):
         'md5sum': 'd41d8cd98f00b204e9800998ecf8427e',
         'lab': lab['@id'],
         'award': award['@id'],
-        'status': 'in progress',  # avoid s3 upload codepath
+        'status': 'uploaded',  # avoid s3 upload codepath
     }
     return testapp.post_json('/file', item).json['@graph'][0]
 
@@ -282,7 +282,7 @@ def fastq_file(testapp, lab, award, experiment):
         'md5sum': 'd41d8cd9f00b204e9800998ecf8427e',
         'lab': lab['@id'],
         'award': award['@id'],
-        'status': 'in progress',  # avoid s3 upload codepath
+        'status': 'uploaded',  # avoid s3 upload codepath
     }
     return testapp.post_json('/file', item).json['@graph'][0]
 
@@ -295,7 +295,7 @@ def bam_file(testapp, lab, award, experiment):
         'md5sum': 'd41d8cd9f00b204e9800998ecf86674427e',
         'lab': lab['@id'],
         'award': award['@id'],
-        'status': 'in progress',  # avoid s3 upload codepath
+        'status': 'uploaded',  # avoid s3 upload codepath
     }
     return testapp.post_json('/file', item).json['@graph'][0]
 

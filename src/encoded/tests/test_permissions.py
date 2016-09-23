@@ -159,18 +159,25 @@ def test_users_post_disallowed(submitter, access_key, submitter_testapp):
     submitter_testapp.post_json('/user', item, status=403)
 
 
-def test_users_view_basic_authenticated(submitter, authenticated_testapp):
-    res = authenticated_testapp.get(submitter['@id'])
-    assert 'title' in res.json
-    assert 'email' not in res.json
-    assert 'access_keys' not in res.json
+def test_users_cannot_view_other_users_info_with_basic_authenticated(submitter, authenticated_testapp):
+    authenticated_testapp.get(submitter['@id'], status=403)
+    # res = authenticated_testapp.get(submitter['@id'])
+    # assert 'title' in res.json
+    # assert 'email' not in res.json
+    # assert 'access_keys' not in res.json
 
+
+def test_users_can_see_their_own_user_info(submitter, submitter_testapp):
+    res = submitter_testapp.get(submitter['@id'])
+    assert 'title' in res.json
+    assert 'email' in res.json
+    assert 'access_keys' in res.json
 
 def test_users_view_basic_anon(submitter, anontestapp):
-    res = anontestapp.get(submitter['@id'])
-    assert 'title' in res.json
-    assert 'email' not in res.json
-    assert 'access_keys' not in res.json
+    anontestapp.get(submitter['@id'], status=403)
+    # assert 'title' in res.json
+    # assert 'email' not in res.json
+    # assert 'access_keys' not in res.json
 
 
 def test_users_view_basic_indexer(submitter, indexer_testapp):
@@ -431,4 +438,3 @@ def test_viewing_group_member_cannot_patch_submitter_item(human, award, lab, sub
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
         viewing_group_member_testapp.patch_json(res.json['@graph'][0]['@id'], {'sex': 'female'}, status=422)
-
