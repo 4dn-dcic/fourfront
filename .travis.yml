@@ -104,7 +104,7 @@ after_success:
 - "if test -n \"$NPM\"; then \n   cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js\n
   \  cat ./coverage/lcov.info | ./node_modules/.bin/codacy-coverage\n   rm -rf ./coverage\nfi\n"
 - if test -n "$UNIT"; then python-codacy-coverage -r coverage.xml; fi
-- python travis_after_all.py https://api.travis-ci.org
+- python deploy/travis_after_all.py https://api.travis-ci.org
 - export $(cat .to_export_back) >> /dev/null
 - |
   if [ "$BUILD_LEADER" = "YES" ]; then
@@ -131,5 +131,5 @@ after_success:
      fi
     fi
 after_failure:
-- python travis_after_all.py https://api.travis-ci.org
+- python deploy/travis_after_all.py https://api.travis-ci.org
 - export $(cat .to_export_back) >> /dev/null
