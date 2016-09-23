@@ -184,12 +184,9 @@
                 "uploading",
                 "uploaded",
                 "upload failed",
-                "format check failed",
-                "in progress",
                 "deleted",
                 "replaced",
                 "revoked",
-                "archived",
                 "released"
                 ]
         },

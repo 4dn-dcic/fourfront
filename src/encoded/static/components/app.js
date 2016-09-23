@@ -3,7 +3,7 @@ var React = require('react');
 var jsonScriptEscape = require('../libs/jsonScriptEscape');
 var globals = require('./globals');
 var mixins = require('./mixins');
-var home = require('./home');
+var HomePage = require('./home');
 var ErrorPage = require('./error');
 var Navigation = require('./navigation');
 var HelpPage = require('./help');
@@ -23,10 +23,10 @@ var portal = {
             {id: 'biosources', title: 'Biosources', url: '/search/?type=Biosource'}
         ]},
         {id: 'help', sid:'sHelp', title: 'Help', children: [
-            {id: 'gettingstarted', title: 'Getting started', url: '/help#getting-started'},
-            {id: 'metadatastructure', title: 'Metadata structure', url: '/help#metadata'},
-            {id: 'datasubmission', title: 'Data submission', url: '/help#datasubmission'},
-            {id: 'restapi', title: 'REST API', url: '/help#restapi'},
+            {id: 'gettingstarted', title: 'Getting started', url: '/help'},
+            {id: 'metadatastructure', title: 'Metadata structure', url: '/help#metadata-structure'},
+            {id: 'datasubmission', title: 'Data submission', url: '/help#data-submission'},
+            {id: 'restapi', title: 'REST API', url: '/help#rest-api'},
             {id: 'about', title: 'About', url: '/about/'}
         ]}
     ],
@@ -221,10 +221,12 @@ var App = React.createClass({
         var title;
         var routeList = canonical.split("/");
         var lowerList = [];
+        var scrollList = [];
         routeList.map(function(value) {
             if (value.includes('#') && value.charAt(0) !== "#"){
                 var navSplit = value.split("#");
                 lowerList.push(navSplit[0].toLowerCase());
+                scrollList.push(navSplit[1].toLowerCase());
             }else if(value.charAt(0) !== "!" && value.length > 0){
                 lowerList.push(value.toLowerCase());
             }
@@ -235,11 +237,7 @@ var App = React.createClass({
             title = portal.portal_title;
             content = null;
         }else if (currRoute[currRoute.length-1] === 'home' || (currRoute[currRoute.length-1] === href_url.host)){
-            var banners = [];
-            banners.push(<home.BannerLoader text='experiments' location='/search/?type=Experiment&award.project=4DN'/>);
-            banners.push(<home.BannerLoader text='experiments' location='/search/?type=Experiment&award.project=External'/>);
-            banners.push(<home.BannerLoader text='cell types' location='/search/?type=Biosource'/>);
-            content = <home.HomePage banners={banners}/>;
+            content = <HomePage />;
             title = portal.portal_title;
         }else if (currRoute[currRoute.length-1] === 'help'){
             content = <HelpPage />;
