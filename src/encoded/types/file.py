@@ -242,7 +242,10 @@ class File(Item):
                 file_extension=file_extension, uuid=uuid, **properties)
 
             # remove the path from the file name and only take first 32 chars
-            name = properties.get('filename').split('/')[-1][:32]
+            fname = properties.get('filename')
+            name = ""
+            if fname:
+                name = fname.split('/')[-1][:32]
 
             profile_name = registry.settings.get('file_upload_profile_name')
             sheets['external'] = external_creds(bucket, key, name, profile_name)
@@ -293,9 +296,11 @@ def post_upload(context, request):
     else:
         raise ValueError(external.get('service'))
 
-
     # remove the path from the file name and only take first 32 chars
-    name = properties.get('filename').split('/')[-1][:32]
+    fname = properties.get('filename')
+    name = ''
+    if fname:
+        name = fname.split('/')[-1][:32]
     profile_name = request.registry.settings.get('file_upload_profile_name')
     creds = external_creds(bucket, key, name, profile_name)
 
