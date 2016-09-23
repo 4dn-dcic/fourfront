@@ -162,9 +162,7 @@ class ExperimentCaptureC(Experiment):
     def experiment_summary(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
         sum_str = experiment_type
         if biosample:
-            print('_____________________________________________________')
             biosamp_props = request.embed(biosample, '@@object')
-            print(biosamp_props)
             biosource = biosamp_props['biosource_summary']
             sum_str += (' on ' + biosource)
         if digestion_enzyme:
