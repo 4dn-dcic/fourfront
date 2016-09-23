@@ -52,7 +52,8 @@ var LoginBoxes = React.createClass({
     passwordFill: function(v) {
     	this.setState({password: v});
     },
-    handleToggle: function () {
+    handleToggle: function (e) {
+      e.preventDefault();
       this.setState({
     	  isOpen: !this.state.isOpen
       });
