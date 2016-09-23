@@ -4,7 +4,7 @@ var queryString = require('query-string');
 var url = require('url');
 var _ = require('underscore');
 var globals = require('./globals');
-var search = module.exports;
+var browse = module.exports;
 var audit = require('./audit');
 var Panel = require('react-bootstrap').Panel;
 var Button = require('react-bootstrap').Button;
@@ -108,92 +108,6 @@ var Item = module.exports.Item = React.createClass({
     }
 });
 globals.listing_views.register(Item, 'Item');
-
-var Biosample = module.exports.Biosample = React.createClass({
-    render: function() {
-        var result = this.props.context;
-        return (
-            <li>
-                <div className="clearfix">
-                    <div className="pull-right search-meta">
-                        <p className="type meta-title">Biosample</p>
-                        <p className="type">{' ' + result['accession']}</p>
-                    </div>
-                    <div className="accession">
-                        <a href={result['@id']}>
-                            {result['biosource_summary']}
-                        </a>
-                    </div>
-                    <div className="data-row">
-                        <div><strong>Modifications: </strong>{result['modifications_summary']}</div>
-                        <div><strong>Treatments: </strong>{result['treatments_summary']}</div>
-                    </div>
-                </div>
-            </li>
-        );
-    }
-});
-globals.listing_views.register(Biosample, 'Biosample');
-
-
-var Biosource = module.exports.Biosource = React.createClass({
-    render: function() {
-        var result = this.props.context;
-        var organism;
-        if (result['individual']){
-            organism = result['individual']['organism']['name'];
-        }
-        return (
-            <li>
-                <div className="clearfix">
-                    <div className="pull-right search-meta">
-                        <p className="type meta-title">Biosource</p>
-                        <p className="type">{' ' + result['accession']}</p>
-                    </div>
-                    <div className="accession">
-                        <a href={result['@id']}>
-                            {result['biosource_name']}
-                        </a>
-                    </div>
-                    <div className="data-row">
-                        <div><strong>{result['biosource_type']}</strong></div>
-                        <div><strong>{organism}</strong></div>
-                    </div>
-                </div>
-            </li>
-        );
-    }
-});
-globals.listing_views.register(Biosource, 'Biosource');
-
-
-var Experiment = module.exports.Experiment = React.createClass({
-    render: function() {
-        var result = this.props.context;
-        return (
-            <li>
-                <div className="clearfix">
-                    <div className="pull-right search-meta">
-                        <p className="type meta-title">Experiment</p>
-                        <p className="type">{' ' + result['accession']}</p>
-                        <p className="type">{' ' + result['award']['project']}</p>
-                    </div>
-                    <div className="accession">
-                        <a href={result['@id']}>
-                            {result['experiment_summary']}
-                        </a>
-                    </div>
-                    <div className="data-row">
-                        <div><strong>Modifications: </strong>{result['biosample']['modifications_summary']}</div>
-                        <div><strong>Treatments: </strong>{result['biosample']['treatments_summary']}</div>
-                        <div><strong>Lab: </strong>{result['lab']['title']}</div>
-                    </div>
-                </div>
-            </li>
-        );
-    }
-});
-globals.listing_views.register(Experiment, 'Experiment');
 
 var ExperimentSet = module.exports.ExperimentSet = React.createClass({
     getInitialState: function() {
@@ -393,7 +307,7 @@ function countSelectedTerms(terms, field, filters) {
     return count;
 }
 
-var Term = search.Term = React.createClass({
+var Term = browse.Term = React.createClass({
     render: function () {
         var filters = this.props.filters;
         var term = this.props.term['key'];
@@ -434,7 +348,7 @@ var Term = search.Term = React.createClass({
     }
 });
 
-var TypeTerm = search.TypeTerm = React.createClass({
+var TypeTerm = browse.TypeTerm = React.createClass({
     render: function () {
         var term = this.props.term['key'];
         var filters = this.props.filters;
@@ -450,7 +364,7 @@ var TypeTerm = search.TypeTerm = React.createClass({
 });
 
 
-var Facet = search.Facet = React.createClass({
+var Facet = browse.Facet = React.createClass({
     getDefaultProps: function() {
         return {width: 'inherit'};
     },
@@ -520,7 +434,7 @@ var Facet = search.Facet = React.createClass({
     }
 });
 
-var TextFilter = search.TextFilter = React.createClass({
+var TextFilter = browse.TextFilter = React.createClass({
 
     getValue: function(props) {
         var filter = this.props.filters.filter(function(f) {
@@ -568,7 +482,7 @@ var TextFilter = search.TextFilter = React.createClass({
     }
 });
 
-var FacetList = search.FacetList = React.createClass({
+var FacetList = browse.FacetList = React.createClass({
     contextTypes: {
         session: React.PropTypes.object,
         hidePublicAudits: React.PropTypes.bool
@@ -641,7 +555,7 @@ var FacetList = search.FacetList = React.createClass({
     }
 });
 
-var ResultTable = search.ResultTable = React.createClass({
+var ResultTable = browse.ResultTable = React.createClass({
 
     getDefaultProps: function() {
         return {
@@ -796,7 +710,7 @@ var ResultTable = search.ResultTable = React.createClass({
     }
 });
 
-var Search = search.Search = React.createClass({
+var Search = browse.Search = React.createClass({
     contextTypes: {
         location_href: React.PropTypes.string,
         navigate: React.PropTypes.func
@@ -822,4 +736,4 @@ var Search = search.Search = React.createClass({
     }
 });
 
-globals.content_views.register(Search, 'Search');
+globals.content_views.register(Search, 'Browse');

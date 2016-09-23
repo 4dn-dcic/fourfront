@@ -184,7 +184,6 @@ var App = React.createClass({
     },
 
     render: function() {
-        console.log(this.props.inline);
         console.log('render app');
         var context = this.props.context;
         var content;
