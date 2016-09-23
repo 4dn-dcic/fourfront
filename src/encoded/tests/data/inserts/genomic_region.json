@@ -1,0 +1,17 @@
+[
+    {
+        "genome_assembly": "GRCh38",
+        "chromosome": "1",
+        "start_coordinate":1,
+        "end_coordinate":1000000,
+        "uuid": "d1115d5e-40aa-43bc-b81c-32c70c9afb01",
+        "aliases": ["dcic:test_reg1"]
+    },
+    {
+        "genome_assembly": "GRCh38",
+        "chromosome": "2",
+        "location_description": "Region A - 3 Mb from 5Mb to 8 Mb from end",
+        "uuid": "d2215d5e-40aa-43bc-b81c-32c70c9afb01",
+        "aliases": ["dcic:test_reg2"]
+    }
+]

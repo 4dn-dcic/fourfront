@@ -33,11 +33,11 @@ class Experiment(Item):
         # update self first to ensure 'experiment_relation' are stored in self.properties
         super(Experiment, self)._update(properties, sheets)
         DicRefRelation = {
-             "controlled by": "control for",
-             "derived from": "source for",
-             "control for": "controlled by",
-             "source for": "derived from"
-             }
+            "controlled by": "control for",
+            "derived from": "source for",
+            "control for": "controlled by",
+            "source for": "derived from"
+        }
         acc = str(self.uuid)
         if 'experiment_relation' in properties.keys():
             for relation in properties["experiment_relation"]:
@@ -139,3 +139,17 @@ class ExperimentHiC(Experiment):
             de_name = de_props['name']
             sum_str += (' with ' + de_name)
         return sum_str
+
+
+@collection(
+    name='experiments-capture-hic',
+    unique_key='accession',
+    properties={
+        'title': 'Experiments Capture Hi-C',
+        'description': 'Listing Capture Hi-C Experiments',
+    })
+class ExperimentCaptureC(Experiment):
+    """The experiment class for Capture Hi-C experiments."""
+    item_type = 'experiment_capture_c'
+    schema = load_schema('encoded:schemas/experiment_capture_c.json')
+    embedded = Experiment.embedded + ["digestion_enzyme", "submitted_by" ]

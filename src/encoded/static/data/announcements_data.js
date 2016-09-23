@@ -12,7 +12,7 @@ var announcements = module.exports = [
     {
         "title":"Data submission open (beta)",
         "author":"DCIC Staff",
-        "date":"September 19, 2016",
+        "date":"9/19/2016",
         "content":"The 4DN Data Portal is open for beta-testers for data submission for Hi-C and related experiments."
     }
 ]

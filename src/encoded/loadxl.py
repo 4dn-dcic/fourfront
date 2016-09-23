@@ -5,7 +5,7 @@ from functools import reduce
 import io
 import logging
 import os.path
-
+from pyramid.settings import asbool
 from snovault.storage import User
 
 text = type(u'')
@@ -18,6 +18,8 @@ ORDER = [
     'award',
     'lab',
     'organism',
+    'genomic_region',
+    'target',
     'publication',
     'document',
     'vendor',
@@ -35,6 +37,7 @@ ORDER = [
     'file',
     'file_set',
     'experiment_hic',
+    'experiment_capture_c',
     'experiment_set',
     'software',
     'analysis_step',
@@ -512,6 +515,9 @@ PHASE1_PIPELINES = {
     'experiment_hic': [
         remove_keys('experiment_relation', 'experiment_sets'),
     ],
+    'experiment_capture_c': [
+        remove_keys('experiment_relation', 'experiment_sets'),
+    ],
     'experiment_set': [
         remove_keys('experiments_in_set'),
     ],
@@ -539,6 +545,9 @@ PHASE2_PIPELINES = {
         skip_rows_missing_all_keys('files_in_set'),
     ],
     'experiment_hic': [
+        skip_rows_missing_all_keys('experiment_relation', 'experiment_sets'),
+    ],
+    'experiment_capture_c': [
         skip_rows_missing_all_keys('experiment_relation', 'experiment_sets'),
     ],
     'experiment_set': [
@@ -599,11 +608,37 @@ def load_test_data(app):
     transaction.commit()
 
 
+def load_prod_data(app):
+    """smth."""
+    from webtest import TestApp
+    environ = {
+        'HTTP_ACCEPT': 'application/json',
+        'REMOTE_USER': 'TEST',
+    }
+    testapp = TestApp(app, environ)
+
+    from pkg_resources import resource_filename
+    inserts = resource_filename('encoded', 'tests/data/prod-inserts/')
+    docsdir = []
+    load_all(testapp, inserts, docsdir)
+
+    # load web-users authentication info
+    db = app.registry['dbsession']
+    pwd = os.environ.get('ENCODED_SECRET')
+    if not pwd:
+        print("***************password not set for admin user")
+    create_user(db, 'admin@admin.com', 'admin', pwd)
+
+    # one transaction to rule them all
+    import transaction
+    transaction.commit()
+
+
 def create_user(db, email, name, pwd):
     """create user if user not in database."""
     if User.get_by_username(email) is None:
         print('creating user ', email)
-        new_user = User(email, name, pwd)
+        new_user = User(email=email, password=pwd,name=name)
         db.add(new_user)
     else:
         print('user %s already exists, skipping' % (email))

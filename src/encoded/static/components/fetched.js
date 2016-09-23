@@ -5,7 +5,6 @@ var globals = require('./globals');
 var ga = require('google-analytics');
 var _ = require('underscore');
 
-
 var Param = module.exports.Param = React.createClass({
     contextTypes: {
         fetch: React.PropTypes.func,
@@ -82,7 +81,6 @@ var Param = module.exports.Param = React.createClass({
         } else {
             throw "Unsupported type: " + this.props.type;
         }
-
         this.setState({
             fetchedRequest: request
         });
@@ -90,11 +88,19 @@ var Param = module.exports.Param = React.createClass({
 
     receive: function (data) {
         var result = {};
+        var status = "";
         result[this.props.name] = data;
         if (this.props.etagName) {
             result[this.props.etagName] = this.state.fetchedRequest.etag;
         }
-        this.props.handleFetch(result);
+        if(result.status){
+            status = result.status;
+        }else if(data.status){
+            status = data.status;
+        }
+        if(status !== "error"){
+            this.props.handleFetch(result);
+        }
     },
 
     render: function() { return null; }
@@ -130,6 +136,7 @@ var FetchedData = module.exports.FetchedData = React.createClass({
         var params = [];
         var communicating = false;
         var children = [];
+        var backup = this.props.backup ? this.props.backup : null;
         // Collect <Param> and non-<Param> child components into appropriate arrays
         if (this.props.children) {
             React.Children.forEach(this.props.children, child => {
@@ -156,11 +163,19 @@ var FetchedData = module.exports.FetchedData = React.createClass({
             return null;
         }
 
-        // If no login info yet, keep displaying the loading spinner
+        // // If no login info yet, keep displaying the loading spinner
         if (!this.context.session) {
+            if(backup){
+                return (
+                    <div className="communicating">
+                        {backup}
+                    </div>
+                );
+            }
             return (
                 <div className="communicating">
                     <div className="loading-spinner"></div>
+                    {params}
                 </div>
             );
         }
