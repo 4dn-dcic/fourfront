@@ -601,13 +601,20 @@ def load_test_data(app):
 
 def load_prod_data(app):
     """smth."""
-    # potentially we don't have the tables we need yet
-    from snovault.storage import Base
+    from webtest import TestApp
+    environ = {
+        'HTTP_ACCEPT': 'application/json',
+        'REMOTE_USER': 'TEST',
+    }
+    testapp = TestApp(app, environ)
 
-    db = app.registry['dbsession']
-    Base.metadata.create_all(db.connection())
+    from pkg_resources import resource_filename
+    inserts = resource_filename('encoded', 'tests/data/prod-inserts/')
+    docsdir = []
+    load_all(testapp, inserts, docsdir)
 
     # load web-users authentication info
+    db = app.registry['dbsession']
     pwd = os.environ.get('ENCODED_SECRET')
     if not pwd:
         print("***************password not set for admin user")
