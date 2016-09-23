@@ -110,6 +110,7 @@ after_success:
   if [ "$BUILD_LEADER" = "YES" ]; then
     if [ "$BUILD_AGGREGATE_STATUS" = "others_succeeded" ]; then
       if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+        bin/aws s3 cp --recursive s3://encoded-4dn-conf-prod/.aws /home/travis/.aws
         if [ "$TRAVIS_BRANCH" = "master" ]; then
           echo "Job succeeded! PUBLISHING to dev environment..."
           git config --global user.email "travis@builder.com"
@@ -119,7 +120,6 @@ after_success:
           python deploy_beanstalk.py
         fi
         if [ "$TRAVIS_BRANCH" = "production" ]; then
-          bin/aws s3 cp --recursive s3://encoded-4dn-conf-prod/.aws /home/travis/.aws
           echo "Job succeeded! PUBLISHING to PROD environment..."
           git config --global user.email "travis@builder.com"
           git config --global user.name "Travis"
@@ -127,7 +127,6 @@ after_success:
           eb use 4dn-prod --debug --verbose
           python deploy_beanstalk.py
         fi
-
       fi
      fi
     fi
