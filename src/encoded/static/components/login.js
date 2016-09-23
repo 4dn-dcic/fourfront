@@ -61,9 +61,8 @@ var LoginBoxes = React.createClass({
         });
     },
     loginToServer: function(e, data) {
-		console.log(data);
 		// clear any error messages
-		this.setState({errormsg : ""});
+        this.setState({errormsg : ""});
 		fetch('/login', {
 			method: "POST",
 			body: JSON.stringify(data),
