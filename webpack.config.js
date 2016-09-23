@@ -15,11 +15,6 @@ var sourceMapType = null;
 
 if (env === 'production') {
 	// tell react to use production build
-	 plugins.push(new webpack.DefinePlugin({
-      'process.env': {
-        'NODE_ENV': '"production"'
-      }
-    }));
 	// uglify code for production
 	plugins.push(new webpack.optimize.UglifyJsPlugin({minimize: true}));
 	// add chunkhash to chunk names for production only (it's slower)
