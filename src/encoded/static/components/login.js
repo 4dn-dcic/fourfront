@@ -52,22 +52,18 @@ var LoginBoxes = React.createClass({
     passwordFill: function(v) {
     	this.setState({password: v});
     },
-    handleToggle: function () {
-      this.setState({
-    	  isOpen: !this.state.isOpen
-      });
+    handleToggle: function (e) {
+        if(e){
+            e.preventDefault();
+        }
+        this.setState({
+            isOpen: !this.state.isOpen
+        });
     },
-    loginToServer: function(data) {
+    loginToServer: function(e, data) {
 		console.log(data);
 		// clear any error messages
 		this.setState({errormsg : ""});
-        //set state for button name
-
-		// update error msg from fetch
-		var updateError = function(msg) {
-			this.setState({errormsg : msg});
-		}
-
 		fetch('/login', {
 			method: "POST",
 			body: JSON.stringify(data),
@@ -84,6 +80,7 @@ var LoginBoxes = React.createClass({
                 throw response;
             }
             this.handleToggle();
+            this.setState({username: '', password: ''});
             this.props.isRefreshing();
             return response.json();
         })
@@ -107,8 +104,8 @@ var LoginBoxes = React.createClass({
         if (username === '' || password === '') {
             return;
         }
-        this.loginToServer({username: username, password: password});
-        this.setState({username: '', password: ''});
+        this.loginToServer(e.persist(), {username: username, password: password});
+
     },
     render: function () {
         var error_span = '';
@@ -117,7 +114,7 @@ var LoginBoxes = React.createClass({
         }
     	return (
             <div>
-    	       <a id="loginbtn" href=""  className="global-entry" onClick={this.handleToggle}>Sign in</a>
+    	       <a id="loginbtn" href="" className="global-entry" onClick={this.handleToggle}>Sign in</a>
                <Modal show={this.state.isOpen} onHide={this.handleToggle}>
                    <div className="login-box">
                       <h1 className="title">Your Account</h1>
