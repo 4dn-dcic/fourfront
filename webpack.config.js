@@ -5,7 +5,7 @@ var env = process.env.NODE_ENV;
 var PATHS = {
 	static: path.resolve(__dirname, 'src/encoded/static'),
 	build: path.resolve(__dirname, 'src/encoded/static/build'),
-}
+};
 
 var plugins = [];
 // don't include momentjs locales (large)
@@ -14,6 +14,12 @@ var chunkFilename = '[name].js';
 var sourceMapType = null;
 
 if (env === 'production') {
+	// tell react to use production build
+	 plugins.push(new webpack.DefinePlugin({
+      'process.env': {
+        'NODE_ENV': '"production"'
+      }
+    }));
 	// uglify code for production
 	plugins.push(new webpack.optimize.UglifyJsPlugin({minimize: true}));
 	// add chunkhash to chunk names for production only (it's slower)
