@@ -60,7 +60,7 @@ var LoginBoxes = React.createClass({
             isOpen: !this.state.isOpen
         });
     },
-    loginToServer: function(e, data) {
+    loginToServer: function(data) {
 		console.log(data);
 		// clear any error messages
 		this.setState({errormsg : ""});
@@ -104,7 +104,7 @@ var LoginBoxes = React.createClass({
         if (username === '' || password === '') {
             return;
         }
-        this.loginToServer(e.persist(), {username: username, password: password});
+        this.loginToServer({username: username, password: password});
 
     },
     render: function () {
