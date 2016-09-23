@@ -27,13 +27,34 @@ def update_version(version):
     print("updated buildout.cfg with version", version)
     subprocess.check_output(
         ['sed', '-i', regex, filename])
+    commit_with_previous_msg(filename)
 
+
+def commit_with_previous_msg(filename):
     print("adding file to git")
     subprocess.check_output(
         ['git', 'add', filename])
-    print("git commit")
+
+    msg = parse(previous_git_commit())
+
+    print("git commit -m " + msg)
     subprocess.check_output(
-        ['git', 'commit', '-m', 'version bump'])
+        ['git', 'commit', '-m', 'version bump + ' + msg])
+
+def previous_git_commit():
+    return subprocess.check_output(
+        ['git', 'log', '-1']
+    ).decode('utf-8').strip()
+
+def parse(commit):
+    author , msg = "", ""
+    # parse up some commit lines
+    commit_lines = commit.split('\n')
+    author = commit_lines[1].split(":")[1].strip()
+    msg = " ".join(l.strip() for l in commit_lines[3:] if l)
+
+    return  "%s - %s" % (author, msg)
+
 
 
 def deploy():

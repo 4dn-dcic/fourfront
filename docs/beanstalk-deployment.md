@@ -1,6 +1,24 @@
 TODO: document beanstalk deployment
 
+## Beanstalk deployment through travis
 
+Currently Travis is set to deploy to beansalk on succesful build.
+
+* Branch 'master' will deploy to the 4dn-web-dev environment (if all test pass)
+* Branch 'prodution' will deploy to the 4dn-prod environment (if all tests pass)
+
+So to push something to production it should go through the following steps.
+
+1.  Pull request is created for feature branch.
+2.  Pull request accepted and merged to master.
+3.  Travis will pick this up run tests and deploy to 4dn-web-dev
+4.  If that is all succcesful to deploy to production do.
+5.  git checkout production
+6.  git merge master
+7.  edit deploy_beanstalk.py and change version number on line 10 to be next version.
+8.  Check in your changes.
+9.  git push origin production
+10.  Travis will then run tests and if pass will deploy to production
 
 ## Dropping database
 

@@ -23,7 +23,7 @@ def fastq(award, experiment, lab):
         'file_format': 'fastq',
         'filename' : 'test.fastq',
         'md5sum': '0123456789abcdef0123456789abcdef',
-        'status': 'in progress',
+        'status': 'uploaded',
     }
 
 
@@ -41,7 +41,7 @@ def file(testapp, award, experiment, lab):
         'file_format': 'tsv',
         'md5sum': '00000000000000000000000000000000',
         'filename': 'my.tsv',
-        'status': 'in progress',
+        'status': 'uploaded',
     }
     res = testapp.post_json('/file', item)
     return res.json['@graph'][0]
@@ -121,7 +121,7 @@ def test_name_for_file_is_accession(registry, fastq):
 
     uuid ="0afb6080-1c08-11e4-8c21-0800200c9a44"
     my_file = File.create(registry,uuid, fastq)
-    assert my_file.__name__ == fastq['accession'] 
+    assert my_file.__name__ == fastq['accession']
 
 def test_file_type(registry, fastq):
 
@@ -131,7 +131,7 @@ def test_file_type(registry, fastq):
     assert "fastq gz" == my_file.file_type('fastq', 'gz')
 
 def test_post_upload_only_for_uploading_or_upload_failed_status(registry, fastq, request):
-    fastq['status'] = 'in progress'
+    fastq['status'] = 'uploaded'
 
     uuid ="0afb6080-1c08-11e4-8c21-0800200c9a44"
     my_file = File.create(registry,uuid, fastq)
@@ -139,6 +139,6 @@ def test_post_upload_only_for_uploading_or_upload_failed_status(registry, fastq,
     try:
         post_upload(my_file,request)
     except HTTPForbidden as e:
-        assert True 
+        assert True
     else:
         assert False
