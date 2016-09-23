@@ -117,7 +117,7 @@ after_success:
           git config --global user.name "Travis"
           #git checkout master
           eb use 4dn-web-dev
-          python deploy_beanstalk.py
+          python deploy/deploy_beanstalk.py
         fi
         if [ "$TRAVIS_BRANCH" = "production" ]; then
           echo "Job succeeded! PUBLISHING to PROD environment..."
@@ -125,7 +125,7 @@ after_success:
           git config --global user.name "Travis"
           #git checkout production
           eb use 4dn-prod --debug --verbose
-          python deploy_beanstalk.py
+          python deploy/deploy_beanstalk.py
         fi
       fi
      fi

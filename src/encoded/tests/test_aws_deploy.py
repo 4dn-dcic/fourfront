@@ -1,6 +1,7 @@
-import pytest
 import os
 from encoded.commands import aws_deploy
+# TODO: move /deploy to src/encoded.commands and write tests for deployment
+# from encoded.commands import beanstalk_deploy
 
 
 def test_is_prod():
@@ -30,6 +31,3 @@ def test_run_w_venv():
     expected_for_dev += ' -c buildout.cfg >> /var/log/deploy.log'
 
     assert expected_for_dev == aws_deploy.run_w_venv(aws_deploy.get_buildout_cmd())
-
-
-
