@@ -131,15 +131,17 @@ class File(Item):
     name_key = 'accession'
 
     def _update(self, properties, sheets=None):
+        if not properties: 
+            return
         # update self first to ensure 'related_files' are stored in self.properties
         super(File, self)._update(properties, sheets)
         DicRefRelation = {
-            "derived from": "parent of",
-            "parent of": "derived from",
-            "supercedes": "is superceded by",
-            "is superceded by": "supercedes",
-            "paired with": "paired with"
-        }
+             "derived from": "parent of",
+             "parent of": "derived from",
+             "supercedes": "is superceded by",
+             "is superceded by": "supercedes",
+             "paired with": "paired with"
+             }
         acc = str(self.uuid)
 
         if 'related_files' in properties.keys():
@@ -243,12 +245,10 @@ class File(Item):
 
             # remove the path from the file name and only take first 32 chars
             fname = properties.get('filename')
-            name = ""
             if fname:
                 name = fname.split('/')[-1][:32]
-
-            profile_name = registry.settings.get('file_upload_profile_name')
-            sheets['external'] = external_creds(bucket, key, name, profile_name)
+                profile_name = registry.settings.get('file_upload_profile_name')
+                sheets['external'] = external_creds(bucket, key, name, profile_name)
         return super(File, cls).create(registry, uuid, properties, sheets)
 
 
@@ -273,6 +273,7 @@ def get_upload(context, request):
 @view_config(name='upload', context=File, request_method='POST',
              permission='edit', validators=[schema_validator({"type": "object"})])
 def post_upload(context, request):
+    import pdb; pdb.set_trace()
     properties = context.upgrade_properties()
     if properties['status'] not in ('uploading', 'upload failed'):
         raise HTTPForbidden('status must be "uploading" to issue new credentials')
@@ -296,11 +297,9 @@ def post_upload(context, request):
     else:
         raise ValueError(external.get('service'))
 
+
     # remove the path from the file name and only take first 32 chars
-    fname = properties.get('filename')
-    name = ''
-    if fname:
-        name = fname.split('/')[-1][:32]
+    name = properties.get('filename').split('/')[-1][:32]
     profile_name = request.registry.settings.get('file_upload_profile_name')
     creds = external_creds(bucket, key, name, profile_name)
 
@@ -309,10 +308,10 @@ def post_upload(context, request):
         new_properties = properties.copy()
         new_properties['status'] = 'uploading'
 
-    registry = request.registry
-    registry.notify(BeforeModified(context, request))
-    context.update(new_properties, {'external': creds})
-    registry.notify(AfterModified(context, request))
+        registry = request.registry
+        registry.notify(BeforeModified(context, request))
+        context.update(new_properties, {'external': creds})
+        registry.notify(AfterModified(context, request))
 
     rendered = request.embed('/%s/@@object' % context.uuid, as_user=True)
     result = {
@@ -344,7 +343,7 @@ def download(context, request):
     if external.get('service') == 's3':
         conn = boto.connect_s3()
         location = conn.generate_url(
-            36 * 60 * 60, request.method, external['bucket'], external['key'],
+            36*60*60, request.method, external['bucket'], external['key'],
             force_http=proxy or use_download_proxy, response_headers={
                 'response-content-disposition': "attachment; filename=" + filename,
             })
