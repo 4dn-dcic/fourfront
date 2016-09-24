@@ -34,3 +34,5 @@ coverage.xml
 .~*#
 production.ini
 .python-version
+
+set_aws_env.sh
