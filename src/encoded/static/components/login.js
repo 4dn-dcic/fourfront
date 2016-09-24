@@ -60,10 +60,9 @@ var LoginBoxes = React.createClass({
             isOpen: !this.state.isOpen
         });
     },
-    loginToServer: function(e, data) {
-		console.log(data);
+    loginToServer: function(data) {
 		// clear any error messages
-		this.setState({errormsg : ""});
+        this.setState({errormsg : ""});
 		fetch('/login', {
 			method: "POST",
 			body: JSON.stringify(data),
@@ -104,7 +103,7 @@ var LoginBoxes = React.createClass({
         if (username === '' || password === '') {
             return;
         }
-        this.loginToServer(e.persist(), {username: username, password: password});
+        this.loginToServer({username: username, password: password});
 
     },
     render: function () {
@@ -114,23 +113,23 @@ var LoginBoxes = React.createClass({
         }
     	return (
             <div>
-    	       <a id="loginbtn" href="" className="global-entry" onClick={this.handleToggle}>Sign in</a>
-               <Modal show={this.state.isOpen} onHide={this.handleToggle}>
-                   <div className="login-box">
-                      <h1 className="title">Your Account</h1>
-                              {error_span}
-                      <label className="fill-label">Username:</label>
-                      <TextBox default="Username" fill={this.usernameFill} tType="text"/>
-                      <label className="fill-label">Password:</label>
-                      <TextBox default="Password" fill={this.passwordFill} tType="password"/>
-                      <ul className="links">
-                          <li><button id="popuploginbtn" className="sexy-btn"
-                              onClick={this.handleSubmit}><span>Sign in</span></button></li>
-                          <li><button id="closebtn" className="sexy-btn"
-                              onClick={this.handleToggle}><span>Close</span></button></li>
-                      </ul>
-                  </div>
-              </Modal>
+                <a id="loginbtn" href="" className="global-entry" onClick={this.handleToggle}>Sign in</a>
+                <Modal show={this.state.isOpen} onHide={this.handleToggle}>
+                    <div className="login-box">
+                        <h1 className="title">Your Account</h1>
+                        {error_span}
+                        <label className="fill-label">Username:</label>
+                        <TextBox default="Username" fill={this.usernameFill} tType="text"/>
+                        <label className="fill-label">Password:</label>
+                        <TextBox default="Password" fill={this.passwordFill} tType="password"/>
+                        <ul className="links">
+                            <li><button id="popuploginbtn" className="sexy-btn"
+                            onClick={this.handleSubmit}><span>Sign in</span></button></li>
+                            <li><button id="closebtn" className="sexy-btn"
+                            onClick={this.handleToggle}><span>Close</span></button></li>
+                        </ul>
+                    </div>
+                </Modal>
             </div>
            );
        },
