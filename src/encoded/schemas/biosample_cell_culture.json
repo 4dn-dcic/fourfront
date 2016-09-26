@@ -54,15 +54,15 @@
                 "years"
             ]
         },
-        "culture_SOP_deviations": {
+        "protocol_SOP_deviations": {
             "title": "Additional Protocol with Deviations from SOP",
             "description": "Protocol with deviations from SOP",
             "type": "string",
             "linkTo": "Protocol"
         },
-        "culture_additional_protocols": {
+        "protocol_additional": {
             "title": "Additional Protocol for Cell Culture",
-            "description": "Please add protocol for additonal treatments like synchronization",
+            "description": "Protocol for additonal treatments like synchronization",
             "type": "string",
             "linkTo": "Protocol"
         },
