@@ -113,7 +113,9 @@ module.exports.statusOrder = [
     'not reviewed'
 ];
 
-module.exports.productionHost = {'www.data.4dnucleome.org':1, 'data.4dnucleome.org':1};
+module.exports.productionHost = {'www.data.4dnucleome.org':1, 
+                                 'data.4dnucleome.org':1,
+                                '4dn-prod.us-east-1.elasticbeanstalk.com':1,};
 
 var encodeVersionMap = module.exports.encodeVersionMap = {
     "ENCODE2": "2",
