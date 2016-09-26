@@ -280,7 +280,6 @@ def post_upload(context, request):
     accession_or_external = properties.get('accession')
     external = context.propsheets.get('external', None)
 
-    import pdb; pdb.set_trace()
     if external is None:
         # Handle objects initially posted as another state.
         bucket = request.registry.settings['file_upload_bucket']
