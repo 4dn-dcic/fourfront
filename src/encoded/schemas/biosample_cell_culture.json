@@ -1,7 +1,7 @@
 {
     "title": "Protocol Cell Culture",
     "description": "Description of cell culture specific protocols.",
-    "id": "/profiles/protocol_cell_culture.json",
+    "id": "/profiles/biosample_cell_culture.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "identifyingProperties": ["uuid", "aliases"],
@@ -45,7 +45,7 @@
             "title": "Starting amount",
             "description": "The initial quantity of cells or tissue obtained.",
             "comment": "The pattern is only enforced when the value supplied is a string.",
-            "type": "string"            
+            "type": "string"
         },
         "starting_amount_units": {
             "title": "Starting amount units",

@@ -26,15 +26,15 @@ class Protocol(Item):
 
 
 @collection(
-    name='protocols-cell-culture',
+    name='biosample-cell-culture',
     properties={
         'title': 'Protocols Cell Culture',
         'description': 'Listing Cell Culture Protocols',
     })
-class ProtocolsCellCulture(Protocol):
+class BiosampleCellCulture(Protocol):
     """sub class of protocol with special variables for cell culture."""
 
     base_types = ['ProtocolCellCulture'] + Item.base_types
-    item_type = 'protocol_cell_culture'
-    schema = load_schema('encoded:schemas/protocol_cell_culture.json')
+    item_type = 'biosample_cell_culture'
+    schema = load_schema('encoded:schemas/biosample_cell_culture.json')
     embedded = Protocol.embedded
