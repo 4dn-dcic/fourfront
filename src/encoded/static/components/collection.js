@@ -201,6 +201,7 @@ var lookup_column = function (result, column) {
                     //    return factory({context: item, column: column});
                     //};
                     var value = lookup_column(item, column);
+                    console.log(value);
                     if (column == '@id') {
                         factory = globals.listing_titles.lookup(item);
                         value = factory({context: item});
@@ -208,7 +209,7 @@ var lookup_column = function (result, column) {
                         value = value;
                     } else if (value == null) {
                         value = '';
-                    } else if (value[0]['@type']) {
+                    } else if (value[0] && value[0]['@type']) { // it's an embedded object
                         if(value[0]['description']){
                             var str = value[0]['description'];
                             // If str length is > 100 characters, split at closest word and concat '...'
