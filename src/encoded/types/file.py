@@ -5,6 +5,7 @@ from snovault import (
     calculated_property,
     collection,
     load_schema,
+    abstract_collection,
 )
 from snovault.schema_utils import schema_validator
 from .base import (
@@ -116,7 +117,7 @@ class FileSet(Item):
                         target_file.update(target_file.properties)
 
 
-@collection(
+@abstract_collection(
     name='files',
     unique_key='accession',
     properties={
@@ -131,7 +132,7 @@ class File(Item):
     name_key = 'accession'
 
     def _update(self, properties, sheets=None):
-        if not properties: 
+        if not properties:
             return
         # update self first to ensure 'related_files' are stored in self.properties
         super(File, self)._update(properties, sheets)
@@ -250,6 +251,20 @@ class File(Item):
                 profile_name = registry.settings.get('file_upload_profile_name')
                 sheets['external'] = external_creds(bucket, key, name, profile_name)
         return super(File, cls).create(registry, uuid, properties, sheets)
+
+
+@collection(
+    name='fastq-file',
+    unique_key='accession',
+    properties={
+        'title': 'FASTQ Files',
+        'description': 'Listing of FASTQ Files',
+    })
+class FastqFile(File):
+    """Collection for individual fastq files."""
+    item_type = 'fastq_file'
+    schema = load_schema('encoded:schemas/file_fastq.json')
+    name_key = 'accession'
 
 
 @view_config(name='upload', context=File, request_method='GET',
