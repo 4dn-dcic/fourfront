@@ -301,16 +301,18 @@ def post_upload(context, request):
     name = properties.get('filename').split('/')[-1][:32]
     profile_name = request.registry.settings.get('file_upload_profile_name')
     creds = external_creds(bucket, key, name, profile_name)
+    # in case we haven't uploaded a file before
+    context.propsheets['external'] = external_creds(bucket, key, name, profile_name)
 
     new_properties = None
     if properties['status'] == 'upload failed':
         new_properties = properties.copy()
         new_properties['status'] = 'uploading'
 
-        registry = request.registry
-        registry.notify(BeforeModified(context, request))
-        context.update(new_properties, {'external': creds})
-        registry.notify(AfterModified(context, request))
+    registry = request.registry
+    registry.notify(BeforeModified(context, request))
+    context.update(new_properties, {'external': creds})
+    registry.notify(AfterModified(context, request))
 
     rendered = request.embed('/%s/@@object' % context.uuid, as_user=True)
     result = {
