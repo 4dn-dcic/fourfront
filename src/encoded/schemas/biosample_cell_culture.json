@@ -4,6 +4,7 @@
     "id": "/profiles/biosample_cell_culture.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
+    "required": ["culture_start_date"],
     "identifyingProperties": ["uuid", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -17,13 +18,16 @@
         { "$ref": "mixins.json#/notes" },
         { "$ref": "mixins.json#/dbxrefs" }
     ],
+    "dependencies": {
+      "starting_amount": ["starting_amount_units"]
+    },
     "properties": {
         "schema_version": {
             "default": "1"
         },
         "culture_start_date": {
             "title": "Culture start date",
-            "description": "For cultured samples, the date the culture was started. For cell lines, the date this particular growth was started, not the date the line was established.",
+            "description": "The date the culture was started.",
             "comment": "Date can be submitted in as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD ((TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
             "type": "string",
             "anyOf": [
@@ -31,49 +35,55 @@
                 {"format": "date"}
             ]
         },
-        "culture_harvest_date": {
-            "title": "Culture harvest date",
-            "description": "For cultured samples, the date the biosample was taken.",
-            "comment": "Date can be submitted in as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD (TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM.",
-            "type": "string",
-            "anyOf": [
-                {"format": "date-time"},
-                {"format": "date"}
+        "culture_duration":{
+            "title":"Culture duration",
+            "description":"Time cells in culture since first thaw",
+            "type":"number"
+        },
+        "culture_duration_units":{
+            "title":"",
+            "description":"",
+            "comment":"",
+            "type":"string",
+            "enum": [
+                "minutes",
+                "hours",
+                "days",
+                "weeks",
+                "months",
+                "years"
             ]
+        },
+        "culture_SOP_deviations": {
+            "title": "Additional Protocol with Deviations from SOP",
+            "description": "Protocol with deviations from SOP",
+            "type": "string",
+            "linkTo": "Protocol"
+        },
+        "culture_additional_protocols": {
+            "title": "Additional Protocol for Cell Culture",
+            "description": "Please add protocol for additonal treatments like synchronization",
+            "type": "string",
+            "linkTo": "Protocol"
         },
         "starting_amount": {
             "title": "Starting amount",
-            "description": "The initial quantity of cells or tissue obtained.",
-            "comment": "The pattern is only enforced when the value supplied is a string.",
+            "description": "The initial quantity of cells used for the culture.",
             "type": "string"
         },
         "starting_amount_units": {
             "title": "Starting amount units",
             "type": "string",
             "enum": [
+                "cells",
                 "g",
                 "mg",
-                "cells/ml",
-                "cells",
-                "whole embryos",
-                "items",
-                "μg",
-                "whole animals"
+                "μg"
             ]
         },
         "passage_number": {
             "title": "Passage Number",
             "description": "Number of passages of the cell culture",
-            "type": "integer"
-        },
-        "doubling_time": {
-            "title": "Doubling Time",
-            "description": "The calculated doubling time of the culture in hours",
-            "type": "number"
-        },
-        "doubling_number": {
-            "title": "Number of Doublings",
-            "description": "The number of times the culture has doubled at the time of harvest",
             "type": "integer"
         },
         "differentiation_state": {
@@ -90,12 +100,13 @@
         "karyotype_image": {
             "title": "Karyotype",
             "description": "Image of the karyotype of potentially genomically unstable lines",
+            "comment":"Please supply a karyotype image if the passage number is 10 or more, or sequencing data for karyotype information data is not available.",
             "type": "string",
             "linkTo": "Image"
         },
         "karyotype": {
             "title": "Karyotype",
-            "description": "Description of the karyotype of potentially genomically unstable lines",
+            "description": "Chromosome count and any noted rearrangements or copy number variation",
             "type": "string"
         },
         "synchronization_stage": {
