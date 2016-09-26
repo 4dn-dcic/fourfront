@@ -33,6 +33,7 @@ class Lab(Item):
     name_key = 'name'
     embedded = ['awards']
 
+
 @collection(
     name='protocols',
     properties={
@@ -53,8 +54,9 @@ class Protocol(Item):
         'title': 'Biosample Cell Culture Information',
         'description': 'Listing Biosample Cell Culture Information',
     })
-class BiosampleCellCulture():
+class BiosampleCellCulture(Item):
     """Cell culture details for Biosample."""
+
     base_types = ['BiosampleCellCulture'] + Item.base_types
     item_type = 'biosample_cell_culture'
     schema = load_schema('encoded:schemas/biosample_cell_culture.json')
