@@ -131,6 +131,8 @@ class File(Item):
     name_key = 'accession'
 
     def _update(self, properties, sheets=None):
+        if not properties: 
+            return
         # update self first to ensure 'related_files' are stored in self.properties
         super(File, self)._update(properties, sheets)
         DicRefRelation = {
@@ -242,10 +244,11 @@ class File(Item):
                 file_extension=file_extension, uuid=uuid, **properties)
 
             # remove the path from the file name and only take first 32 chars
-            name = properties.get('filename').split('/')[-1][:32]
-
-            profile_name = registry.settings.get('file_upload_profile_name')
-            sheets['external'] = external_creds(bucket, key, name, profile_name)
+            fname = properties.get('filename')
+            if fname:
+                name = fname.split('/')[-1][:32]
+                profile_name = registry.settings.get('file_upload_profile_name')
+                sheets['external'] = external_creds(bucket, key, name, profile_name)
         return super(File, cls).create(registry, uuid, properties, sheets)
 
 
@@ -304,10 +307,10 @@ def post_upload(context, request):
         new_properties = properties.copy()
         new_properties['status'] = 'uploading'
 
-    registry = request.registry
-    registry.notify(BeforeModified(context, request))
-    context.update(new_properties, {'external': creds})
-    registry.notify(AfterModified(context, request))
+        registry = request.registry
+        registry.notify(BeforeModified(context, request))
+        context.update(new_properties, {'external': creds})
+        registry.notify(AfterModified(context, request))
 
     rendered = request.embed('/%s/@@object' % context.uuid, as_user=True)
     result = {
