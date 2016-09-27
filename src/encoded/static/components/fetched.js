@@ -1,11 +1,9 @@
 'use strict';
 var React = require('react');
-var cloneWithProps = require('react/lib/cloneWithProps');
 var parseAndLogError = require('./mixins').parseAndLogError;
 var globals = require('./globals');
 var ga = require('google-analytics');
 var _ = require('underscore');
-
 
 var Param = module.exports.Param = React.createClass({
     contextTypes: {
@@ -83,7 +81,6 @@ var Param = module.exports.Param = React.createClass({
         } else {
             throw "Unsupported type: " + this.props.type;
         }
-
         this.setState({
             fetchedRequest: request
         });
@@ -91,11 +88,19 @@ var Param = module.exports.Param = React.createClass({
 
     receive: function (data) {
         var result = {};
+        var status = "";
         result[this.props.name] = data;
         if (this.props.etagName) {
             result[this.props.etagName] = this.state.fetchedRequest.etag;
         }
-        this.props.handleFetch(result);
+        if(result.status){
+            status = result.status;
+        }else if(data.status){
+            status = data.status;
+        }
+        if(status !== "error"){
+            this.props.handleFetch(result);
+        }
     },
 
     render: function() { return null; }
@@ -112,22 +117,32 @@ var FetchedData = module.exports.FetchedData = React.createClass({
         return {};
     },
 
+    componentDidMount: function() {
+        this._isMounted = true;
+    },
+
+    componentWillUnmount: function() {
+        this._isMounted = false;
+    },
+
     handleFetch: function(result) {
         // Set state to returned search result data to cause rerender of child components
-        this.setState(result);
+        if (this._isMounted){
+            this.setState(result);
+        }
     },
 
     render: function () {
         var params = [];
         var communicating = false;
         var children = [];
-
+        var backup = this.props.backup ? this.props.backup : null;
         // Collect <Param> and non-<Param> child components into appropriate arrays
         if (this.props.children) {
             React.Children.forEach(this.props.children, child => {
-                if (child.type === Param.type) {
+                if (child.type === Param) {
                     // <Param> child component; add to array of <Param> child components with this.props.key of its name and calling `handleFetch`
-                    params.push(cloneWithProps(child, {
+                    params.push(React.cloneElement(child, {
                         key: child.props.name,
                         handleFetch: this.handleFetch,
                     }));
@@ -148,11 +163,19 @@ var FetchedData = module.exports.FetchedData = React.createClass({
             return null;
         }
 
-        // If no login info yet, keep displaying the loading spinner
+        // // If no login info yet, keep displaying the loading spinner
         if (!this.context.session) {
+            if(backup){
+                return (
+                    <div className="communicating">
+                        {backup}
+                    </div>
+                );
+            }
             return (
                 <div className="communicating">
                     <div className="loading-spinner"></div>
+                    {params}
                 </div>
             );
         }
@@ -186,7 +209,7 @@ var FetchedData = module.exports.FetchedData = React.createClass({
         // Successfully got data. Display in the web page
         return (
             <div className="done">
-                {children.map((child, i) => cloneWithProps(child, _.extend({key: i}, this.props, this.state)))}
+                {children.map((child, i) => React.cloneElement(child, _.extend({key: i}, this.props, this.state)))}
                 {params}
             </div>
         );

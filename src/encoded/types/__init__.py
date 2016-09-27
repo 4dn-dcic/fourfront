@@ -138,7 +138,31 @@ class Biosource(Item):
     item_type = 'biosource'
     name_key = 'accession'
     schema = load_schema('encoded:schemas/biosource.json')
-    embedded = ["individual"]
+    embedded = ["individual", "individual.organism"]
+
+    @calculated_property(schema={
+        "title": "Biosource name",
+        "description": "Specific name of the biosource.",
+        "type": "string",
+    })
+    def biosource_name(self, request, biosource_type, individual=None, cell_line=None, tissue=None):
+        if biosource_type == "tissue":
+            if tissue:
+                return tissue
+        elif biosource_type == "immortalized cell line":
+            if cell_line:
+                return cell_line
+        elif biosource_type == "primary cell":
+            if cell_line:
+                return cell_line
+        elif biosource_type == "whole organisms":
+            if individual:
+                individual_props = request.embed(individual, '@@object')
+                organism = individual_props['organism']
+                organism_props = request.embed(organism, '@@object')
+                organism_name = organism_props['name']
+                return "whole " + organism_name
+        return biosource_type
 
 
 @collection(
@@ -165,7 +189,20 @@ class Modification(Item):
 
     item_type = 'modification'
     schema = load_schema('encoded:schemas/modification.json')
-    embedded = ['constructs']
+    embedded = ['constructs', 'modified_regions', 'created_by', 'target_of_mod']
+
+    @calculated_property(schema={
+        "title": "Modification name",
+        "description": "Modification name including type and target.",
+        "type": "string",
+    })
+    def modification_name(self, request, modification_type=None, target_of_mod=None):
+        if modification_type and target_of_mod:
+            target = request.embed(target_of_mod, '@@object')
+            return modification_type + " for " + target['target_summary']
+        elif modification_type:
+            return modification_type
+        return "None"
 
 
 @collection(
@@ -233,4 +270,78 @@ class WorkflowRun(Item):
 
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
+<<<<<<< HEAD
 #    embedded = ['workflow']
+=======
+    embedded = ['workflow', 'tasks']
+
+
+@collection(
+    name='targets',
+    properties={
+        'title': 'Targets',
+        'description': 'Listing of genes and regions targeted for some purpose',
+    })
+class Target(Item):
+    """The Target class that describes a target of something."""
+
+    item_type = 'target'
+    schema = load_schema('encoded:schemas/target.json')
+    embedded = ['targeted_region']
+
+    @calculated_property(schema={
+        "title": "Target summary",
+        "description": "Summary of target information, either specific genes or genomic coordinates.",
+        "type": "string",
+    })
+    def target_summary(self, request, targeted_genes=None, targeted_region=None):
+        if targeted_genes:
+            value = ""
+            value += ' and '.join(targeted_genes)
+            return value
+        elif targeted_region:
+            value = ""
+            genomic_region = request.embed(targeted_region, '@@object')
+            value += genomic_region['genome_assembly']
+            if genomic_region['chromosome']:
+                value += ':'
+                value += genomic_region['chromosome']
+            if genomic_region['start_coordinate'] and genomic_region['end_coordinate']:
+                value += ':' + str(genomic_region['start_coordinate']) + '-' + str(genomic_region['end_coordinate'])
+            return value
+        return "no target"
+
+
+@collection(
+    name='genomic_regions',
+    properties={
+        'title': 'Genomic Regions',
+        'description': 'Listing of genomic regions',
+    })
+class GenomicRegion(Item):
+    """The GenomicRegion class that describes a region of a genome."""
+
+    item_type = 'genomic_region'
+    schema = load_schema('encoded:schemas/genomic_region.json')
+
+    @calculated_property(schema={
+        "title": "Region",
+        "description": "Assembly:chromosome:start-end.",
+        "type": "string",
+    })
+    def region(self, request, genome_assembly, chromosome=None):
+            # if biosource_type == "tissue":
+            #     if tissue:
+            #         return tissue
+            # elif biosource_type == "immortalized cell line":
+            #     if cell_line:
+            #         return cell_line
+            # elif biosource_type == "whole organisms":
+            #     if individual:
+            #         individual_props = request.embed(individual, '@@object')
+            #         organism = individual_props['organism']
+            #         organism_props = request.embed(organism, '@@object')
+            #         organism_name = organism_props['name']
+            #         return "Whole " + organism_name
+            return None
+>>>>>>> master

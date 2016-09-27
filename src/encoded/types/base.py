@@ -35,13 +35,21 @@ ALLOW_EVERYONE_VIEW = [
     (Allow, Everyone, 'view'),
 ] + ONLY_ADMIN_VIEW
 
+ALLOW_LAB_MEMBER_VIEW = [
+    (Allow, 'role.lab_member', 'view'),
+] + ONLY_ADMIN_VIEW
 
 ALLOW_VIEWING_GROUP_VIEW = [
     (Allow, 'role.viewing_group_member', 'view'),
 ] + ONLY_ADMIN_VIEW
 
-ALLOW_LAB_SUBMITTER_EDIT = [
+ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT = [
     (Allow, 'role.viewing_group_member', 'view'),
+    (Allow, 'role.lab_submitter', 'edit'),
+] + ALLOW_LAB_MEMBER_VIEW
+
+ALLOW_LAB_SUBMITTER_EDIT = [
+    (Allow, 'role.lab_member', 'view'),
     (Allow, 'role.lab_submitter', 'edit'),
 ] + ONLY_ADMIN_VIEW
 
@@ -118,38 +126,21 @@ class Item(snovault.Item):
     STATUS_ACL = {
         # standard_status
         'released': ALLOW_CURRENT,
+        'current': ALLOW_CURRENT,
+        'revoked': ALLOW_CURRENT,
         'deleted': DELETED,
         'replaced': DELETED,
-
-        # shared_status
-        'current': ALLOW_CURRENT,
-        'revoked': ONLY_ADMIN_VIEW,
-
-        # file
+        'in review by lab': ALLOW_LAB_SUBMITTER_EDIT,
+        'in review by project': ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT,
+        'released to project': ALLOW_VIEWING_GROUP_VIEW,
+        # for file
         'obsolete': ONLY_ADMIN_VIEW,
-
-        # antibody_characterization
-        'compliant': ALLOW_CURRENT,
-        'not compliant': ALLOW_CURRENT,
-        'not reviewed': ALLOW_CURRENT,
-        'not submitted for review by lab': ALLOW_CURRENT,
-
-        # antibody_lot
-        'eligible for new data': ALLOW_CURRENT,
-        'not eligible for new data': ALLOW_CURRENT,
-        'not pursued': ALLOW_CURRENT,
-
-        # dataset / experiment
-        'release ready': ALLOW_VIEWING_GROUP_VIEW,
-        'revoked': ALLOW_CURRENT,
-        'in review': ALLOW_CURRENT_AND_SUBMITTER_EDIT,
+        'uploading': ALLOW_LAB_SUBMITTER_EDIT,
+        'uploaded': ALLOW_LAB_SUBMITTER_EDIT,
+        'upload failed': ALLOW_LAB_SUBMITTER_EDIT,
 
         # publication
         'published': ALLOW_CURRENT,
-
-        # pipeline
-        'active': ALLOW_CURRENT,
-        'archived': ALLOW_CURRENT,
     }
 
     @property
@@ -170,12 +161,15 @@ class Item(snovault.Item):
         return self.STATUS_ACL.get(status, ALLOW_LAB_SUBMITTER_EDIT)
 
     def __ac_local_roles__(self):
-        """smth."""
+        """this creates roles based on properties of the object being acccessed"""
         roles = {}
         properties = self.upgrade_properties().copy()
         if 'lab' in properties:
             lab_submitters = 'submits_for.%s' % properties['lab']
             roles[lab_submitters] = 'role.lab_submitter'
+            # add lab_member as well
+            lab_member = 'lab.%s' % properties['lab']
+            roles[lab_member] = 'role.lab_member'
         if 'award' in properties:
             viewing_group = _award_viewing_group(properties['award'], find_root(self))
             if viewing_group is not None:

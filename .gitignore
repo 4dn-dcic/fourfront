@@ -1,4 +1,6 @@
 .coverage
+coverage.xml
+/coverage
 /.installed.cfg
 /.mr.developer.cfg
 /.cache/
@@ -10,6 +12,7 @@
 /develop-eggs/
 /downloads/
 /eggs/
+/.eggs/
 /extends/
 /node_modules/
 /ontology.json
@@ -31,3 +34,5 @@
 .~*#
 production.ini
 .python-version
+
+set_aws_env.sh

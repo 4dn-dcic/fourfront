@@ -11,11 +11,27 @@
     "mixinProperties": [
     ],
     "properties": {
-        "accession": {
-            "accessionType": "EX"
-        },
         "schema_version": {
             "default": "1"
+        },
+        "status": {
+            "title": "Status",
+            "type": "string",
+            "default": "in review by lab",
+            "permission": "import_items",
+            "enum": [
+                "released",
+                "current",
+                "revoked",
+                "deleted",
+                "replaced",
+                "in review by lab",
+                "in review by project",
+                "released to project"
+            ]
+        },
+        "accession": {
+            "accessionType": "EX"
         },
         "description": {
             "title": "description",
@@ -31,7 +47,7 @@
             "title": "Reference Protocol",
             "description": "Reference Protocol Document.",
             "type": "string",
-            "linkTo": "Document"
+            "linkTo": "Protocol"
         },
         "protocol_variation": {
             "title": "Protocol Documents",
@@ -41,7 +57,7 @@
                 "title": "Document",
                 "description": "A document associated with the specific experimental protocol.",
                 "type": "string",
-                "linkTo": "Document"
+                "linkTo": "Protocol"
               }
         },
         "experiment_relation": {

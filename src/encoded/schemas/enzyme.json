@@ -15,7 +15,8 @@
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/notes" },
-        { "$ref": "mixins.json#/documents" }
+        { "$ref": "mixins.json#/documents" },
+        { "$ref": "mixins.json#/status" }
     ],
     "properties": {
         "schema_version": {
@@ -28,18 +29,19 @@
             "enum": [
               "HindIII",
               "DpnII",
+              "NcoI_MspI_BspHI",
               "NcoI",
               "MboI",
-              "DNase_I",
-              "Micrococcal_nuclease"
+              "DNaseI",
+              "MNase",
+              "MspI"
             ],
             "uniqueKey": "enzyme:name"
         },
         "description": {
             "title": "Description",
             "description": "A plain text description of the enzyme.",
-            "type": "string",
-            "default": ""
+            "type": "string"
         },
         "enzyme_source": {
             "title": "Enzyme Source",

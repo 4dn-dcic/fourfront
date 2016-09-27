@@ -1,6 +1,6 @@
 """Collection for the Biosample object."""
 from snovault import (
-    # calculated_property,
+    calculated_property,
     collection,
     load_schema,
 )
@@ -35,9 +35,60 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'biosource.biosource_vendor',
         'references',
         'biosample_protocols',
-        'modifications',
         'treatments',
+        'modifications'
     ]
+
+    @calculated_property(schema={
+        "title": "Modifications summary",
+        "description": "Summary of any modifications on the biosample.",
+        "type": "string",
+    })
+    def modifications_summary(self, request, modifications=None):
+        if modifications:
+            ret_str = ''
+            for i in range(len(modifications)):
+                mod_props = request.embed(modifications[i], '@@object')
+                ret_str += (mod_props['modification_name'] + ' and ') if mod_props['modification_name'] else ''
+            if len(ret_str) > 0:
+                return ret_str[:-5]
+            else:
+                return 'None'
+        return 'None'
+
+    @calculated_property(schema={
+        "title": "Treatments summary",
+        "description": "Summary of any treatments on the biosample.",
+        "type": "string",
+    })
+    def treatments_summary(self, request, treatments=None):
+        if treatments:
+            ret_str = ''
+            for i in range(len(treatments)):
+                treat_props = request.embed(treatments[i], '@@object')
+                ret_str += (treat_props['treatment_type'] + ' and ') if treat_props['treatment_type'] else ''
+            if len(ret_str) > 0:
+                return ret_str[:-5]
+            else:
+                return 'None'
+        return 'None'
+
+    @calculated_property(schema={
+        "title": "Biosource summary",
+        "description": "Summary of any biosources comprising the biosample.",
+        "type": "string",
+    })
+    def biosource_summary(self, request, biosource=None):
+        if biosource:
+            ret_str = ''
+            for i in range(len(biosource)):
+                bios_props = request.embed(biosource[i], '@@object')
+                ret_str += (bios_props['biosource_name'] + ' and ') if bios_props['biosource_name'] else ''
+            if len(ret_str) > 0:
+                return ret_str[:-5]
+            else:
+                return 'None'
+        return 'None'
 
     def _update(self, properties, sheets=None):
         # update self first to ensure 'biosample_relation' are stored in self.properties

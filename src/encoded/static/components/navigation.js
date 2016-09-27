@@ -18,6 +18,12 @@ var Navigation = module.exports = React.createClass({
 
     getInitialState: function() {
         return {
+            testWarning: false
+        };
+    },
+
+    getInitialState: function() {
+        return {
             testWarning: !productionHost[url.parse(this.context.location_href).hostname]
         };
     },
@@ -46,7 +52,8 @@ var Navigation = module.exports = React.createClass({
                 <div className="container">
                     <Navbar brand={img} brandlink="/" label="main" navClasses="navbar-main" navID="navbar-icon">
                         <GlobalSections />
-                        <Search />
+                        <UserActions />
+                        {/* REMOVE SEARCH FOR NOW: <Search />*/}
                     </Navbar>
                 </div>
                 {this.state.testWarning ?
@@ -69,40 +76,19 @@ var Navigation = module.exports = React.createClass({
 var GlobalSections = React.createClass({
     contextTypes: {
         listActionsFor: React.PropTypes.func,
-        session_properties: React.PropTypes.object
-    },
-    createTitle: function(title, session_props){
-        if(title !== "Account"){
-            return title;
-        }else{
-            if (session_props['auth.userid']) {
-                return session_props.user.title;
-            }else{
-                return "Account";
-            }
-        }
     },
     render: function() {
-        var session_properties = this.context.session_properties;
         var actions = this.context.listActionsFor('global_sections').map(action => {
             return (
-                <NavItem key={action.id} dropdownId={action.id} dropdownTitle={this.createTitle(action.title, session_properties)} dropdownSId={action.sid} dropdownLink={action.url ? action.url : null}>
+                <NavItem key={action.id} dropdownId={action.id} dropdownTitle={action.title} dropdownSId={action.sid} dropdownLink={action.url ? action.url : null}>
                     {action.children ?
                         <DropdownMenu label={action.id}>
                             {action.children.map(function(action){
-                                if (action.id === "login"){
-                                    return(<Login />);
-                                }else if (action.id === "profile") {
-                                    return(<UserActions/>);
-                                }else if (action.id === "contextactions") {
-                                    return(<ContextActions/>);
-                                }else{
-                                    return(
-                                        <a href={action.url || ''} key={action.id} className="global-entry">
-                                            {action.title}
-                                        </a>
-                                    );
-                                }
+                                return(
+                                    <a href={action.url || ''} key={action.id} className="global-entry">
+                                        {action.title}
+                                    </a>
+                                );
                             })}
                         </DropdownMenu>
                     : null}
@@ -123,8 +109,8 @@ var ContextActions = React.createClass({
     render: function() {
         var actions = this.context.listActionsFor('context').map(function(action) {
             return (
-                <div>
-                    <a href={action.href} key={action.name} className="global-entry">
+                <div key={action.name} >
+                    <a href={action.href} className="global-entry">
                         <i className="icon icon-pencil"></i> {action.title}
                     </a>
                 </div>
@@ -166,6 +152,47 @@ var UserActions = React.createClass({
 
     render: function() {
         var session_properties = this.context.session_properties;
+        var actions = this.context.listActionsFor('user_section').map(function (action) {
+            if (action.id === "login"){
+                return(<Login key={action.id} />);
+            }else if (action.id === "profile"){
+                return(<AccountActions key={action.id} />);
+            }else if (action.id === "contextactions") {
+                return(<ContextActions key={action.id} />);
+            }else{
+                return(
+                        <a href={action.href || ''} key={action.id} data-bypass={action.bypass} data-trigger={action.trigger} className="global-entry">
+                            {action.title}
+                        </a>
+                    );
+            }
+        });
+        var active_icon;
+        if (session_properties['auth.userid']) {
+            active_icon = <img src="/static/img/User_active.svg" height= "30px" width="25px"/>
+        }else{
+            active_icon = <img src="/static/img/User_inactive.svg" height= "30px" width="25px"/>
+        }
+        return (
+                <Nav right={true} acct={true}>
+                    <NavItem dropdownId="context" dropdownTitle={active_icon}>
+                        <DropdownMenu label="context">
+                            {actions}
+                        </DropdownMenu>
+                    </NavItem>
+                </Nav>
+        );
+    }
+});
+
+var AccountActions = React.createClass({
+    contextTypes: {
+        listActionsFor: React.PropTypes.func,
+        session_properties: React.PropTypes.object
+    },
+
+    render: function() {
+        var session_properties = this.context.session_properties;
         if (!session_properties['auth.userid']) {
             // Logged out, so no user menu at all
             return(<a href="#" className="invis"/>);
@@ -173,14 +200,12 @@ var UserActions = React.createClass({
         var actions = this.context.listActionsFor('user').map(function (action) {
             return (
                 <div key={action.id} >
-                    <a href={action.href || ''} key={action.id} data-bypass={action.bypass} data-trigger={action.trigger} className="global-entry">
+                    <a href={action.href || ''} data-bypass={action.bypass} data-trigger={action.trigger} className="global-entry">
                         {action.title}
                     </a>
                 </div>
             );
         });
-        var user = session_properties.user;
-        var fullname = (user && user.title) || 'unknown';
         return (
             <div className="custom-entry">{actions}</div>
         );

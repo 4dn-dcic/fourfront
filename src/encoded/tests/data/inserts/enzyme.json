@@ -2,7 +2,6 @@
     {
         "name": "HindIII",
         "enzyme_source": "new-england-biolabs",
-        "description": "from Liberman et al 2009 Science",
         "catalog_number":"R0104",
         "recognition_sequence": "AAGCTT",
         "site_length": 6,
@@ -10,16 +9,15 @@
         "url": "https://www.neb.com/products/r0104-hindiii"
     },
     {
-        "name": "DNase_I",
+        "name": "DNaseI",
         "enzyme_source": "thermofisher-scientific",
-        "description": "from Ma et al 2015 Nature Methods",
+        "description": "used for DNase HiC",
         "catalog_number":"EN052",
         "url": "https://www.thermofisher.com/order/catalog/product/EN0525"
     },
     {
         "name": "MboI",
         "enzyme_source": "new-england-biolabs",
-        "description": "from Rao et al 2014 Cell",
         "catalog_number":"R0147",
         "recognition_sequence": "GATC",
         "site_length": 4,
@@ -27,11 +25,42 @@
         "url": "https://www.neb.com/products/r0147-mboi"
     },
     {
-        "name": "Micrococcal_nuclease",
+        "name": "MNase",
         "enzyme_source": "worthington-biochemical",
-        "description": "from Liu et al 2005 Plos Biology",
+        "description": "used for Micro-C",
         "catalog_number":"LS004798",
         "url": "http://www.worthington-biochem.com/nfcp/default.html"
-
+    },
+    {
+        "name": "DpnII",
+        "enzyme_source": "new-england-biolabs",
+        "catalog_number":"R0543",
+        "recognition_sequence": "GATC",
+        "site_length": 4,
+        "cut_position": 0,
+        "url": "https://www.neb.com/products/r0543-dpnii"
+    },
+    {
+        "name": "NcoI_MspI_BspHI",
+        "enzyme_source": "new-england-biolabs",
+        "description": "Mixed Enzymes"
+    },
+    {
+        "name": "NcoI",
+        "enzyme_source": "new-england-biolabs",
+        "catalog_number":"R0193",
+        "recognition_sequence": "CCATGG",
+        "site_length": 6,
+        "cut_position": 1,
+        "url": "https://www.neb.com/products/r0193-ncoi"
+    },
+    {
+        "name": "MspI",
+        "enzyme_source": "new-england-biolabs",
+        "catalog_number":"R0106",
+        "recognition_sequence": "CCGG",
+        "site_length": 4,
+        "cut_position": 1,
+        "url": "https://www.neb.com/products/r0106-mspi"
     }
 ]

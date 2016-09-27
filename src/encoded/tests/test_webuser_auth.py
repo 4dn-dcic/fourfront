@@ -1,4 +1,5 @@
 import pytest
+pytestmark = pytest.mark.working
 
 @pytest.fixture(scope='session')
 def test_user():

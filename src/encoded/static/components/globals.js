@@ -14,8 +14,6 @@ module.exports.listing_views = new Registry();
 // Cell name listing titles
 module.exports.listing_titles = new Registry();
 
-// Blocks
-module.exports.blocks = new Registry();
 
 // Graph detail view
 module.exports.graph_detail = new Registry();
@@ -115,7 +113,7 @@ module.exports.statusOrder = [
     'not reviewed'
 ];
 
-module.exports.productionHost = {'www.encodeproject.org':1, 'encodeproject.org':1, 'www.encodedcc.org':1};
+module.exports.productionHost = {'www.data.4dnucleome.org':1, 'data.4dnucleome.org':1};
 
 var encodeVersionMap = module.exports.encodeVersionMap = {
     "ENCODE2": "2",

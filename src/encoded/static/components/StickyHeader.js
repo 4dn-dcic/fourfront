@@ -1,7 +1,7 @@
 'use strict';
 const React = require('react');
+const ReactDOM = require('react-dom');
 const offset = require('../libs/offset');
-const cloneWithProps = require('react/lib/cloneWithProps');
 
 module.exports = React.createClass({
     render() {
@@ -25,7 +25,7 @@ module.exports = React.createClass({
     stickyHeader() {
         // http://stackoverflow.com/a/6625189/199100
         // http://css-tricks.com/persistent-headers/
-        const header = this.getDOMNode();
+        const header = ReactDOM.findDOMNode(this);
         const table = header.parentElement;
         const offsetTop = offset(table).top;
         const nb = document.querySelector('.navbar-fixed-top');

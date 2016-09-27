@@ -13,6 +13,7 @@
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/notes"}
     ],
     "properties": {

@@ -1,7 +1,7 @@
 'use strict';
 var React = require('react');
 var _ = require('underscore');
-var {Panel} = require('../libs/bootstrap/panel');
+var Panel = require('react-bootstrap').Panel;
 
 var editTargetMap = {
     'experiments': 'Experiment',
@@ -17,7 +17,6 @@ var editTargetMap = {
     'datasets': 'Dataset',
     'publications': 'Publication',
     'software': 'Software',
-    'pages': 'Page',
     'awards': 'Award',
     'replicates': 'Replicate'
 };
@@ -246,7 +245,7 @@ var DetailEmbeddedLink = React.createClass({
 
             // Pick up any trailing text after the last path, if any
             var postText = detail.slice(lastStart);
-            
+
             // Render all text and paths, plus the trailing text
             return <span>{result}{postText}</span>;
         } else {

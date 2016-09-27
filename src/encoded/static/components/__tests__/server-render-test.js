@@ -9,24 +9,45 @@ jest.dontMock('underscore');
 describe("Server rendering", function () {
     var React;
     var App;
+    var ReactDOM;
+    var ReactDOMServer;
     var document;
+    var store;
+    var fetch;
     var home_url = "http://localhost/";
     var home = {
         "@id": "/",
         "@type": ["Portal"],
-        "portal_title": "4D Nucleome",
+        "portal_title": "4DN Data Portal",
         "title": "Home"
     };
 
     beforeEach(function () {
         require('../../libs/react-patches');
         React = require('react');
+        ReactDOM = require('react-dom');
+        ReactDOMServer = require('react-dom/server');
+        fetch = require('whatwg-fetch');
         App = require('..');
-        var server_app = <App context={home} href={home_url} />;
-        var markup = '<!DOCTYPE html>\n' + React.renderToString(server_app);
+        store = require('../../store');
+        // test dispatching some values to store
+        var dispatch_vals = {
+            'href':home_url,
+            'context':home,
+            'inline':'',
+            'session_cookie':'',
+            'contextRequest':{},
+            'slow':false
+        };
+        store.dispatch({
+            type: dispatch_vals
+        });
+        var props = store.getState();
+        var server_app = <App {...props} />;
+        var markup = '<!DOCTYPE html>\n' + ReactDOMServer.renderToString(server_app);
         var parser = new DOMParser();
         document = parser.parseFromString(markup, 'text/html');
-        window.location.href = home_url;
+        window.location.href = props['href'];
     });
 
     it("renders the application to html", function () {
@@ -39,8 +60,8 @@ describe("Server rendering", function () {
     });
 
     it("mounts the application over the rendered html", function () {
-        var props = App.getRenderedProps(document);
-        var app = React.render(<App {...props} />, document);
-        expect(app.getDOMNode()).toBe(document.documentElement);
+        var props = store.getState();
+        var app = ReactDOM.render(<App {...props} />, document);
+        expect(ReactDOM.findDOMNode(app)).toBe(document.documentElement);
     });
 });

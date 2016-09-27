@@ -1,6 +1,5 @@
 'use strict';
 var React = require('react');
-var cloneWithProps = require('react/lib/cloneWithProps');
 var {DropdownMenu} = require('./dropdown-menu');
 
 
@@ -126,12 +125,13 @@ var Navbar = module.exports.Navbar = React.createClass({
 // Controls one navigation area within a <Navbar>
 var Nav = module.exports.Nav = React.createClass({
     propTypes: {
-        right: React.PropTypes.bool // True if right-justified navigation area
+        right: React.PropTypes.bool, // True if right-justified navigation area
+        acct: React.PropTypes.bool // True if acct area
     },
 
     render: function() {
         return (
-            <ul className={'nav navbar-nav' + (this.props.right ? ' navbar-right' : '')}>
+            <ul className={'nav navbar-nav' + (this.props.right ? ' navbar-right' : '') + (this.props.acct ? ' navbar-acct' : '') }>
                 {this.props.children}
             </ul>
         );
@@ -155,18 +155,18 @@ var NavItem = module.exports.NavItem = React.createClass({
     },
 
     render: function() {
-        var {dropdownId, dropdownTitle, dropdownSId, dropdownLink} = this.props;
-        var dropdownOpen = dropdownId && (this.context.openDropdown === dropdownId);
-        return (
-            <li className={dropdownId ? ('dropdown' + (dropdownOpen ? ' open' : '')) : ''}>
+         var {dropdownId, dropdownTitle, dropdownSId, dropdownLink} = this.props;
+         var dropdownOpen = dropdownId && (this.context.openDropdown === dropdownId);
+         return (
+             <li className={dropdownId ? ('dropdown' + (dropdownOpen ? ' open' : '')) : ''}>
                 {dropdownLink ?
                     <a href={dropdownLink} id={dropdownSId}>{dropdownTitle}</a>
                 :   <a href="#" data-trigger id={dropdownSId} className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded={dropdownOpen} onClick={this.context.dropdownClick.bind(null, dropdownId)}>
-                        {dropdownTitle}
+                         {dropdownTitle}
                     </a>
                 }
-                {this.props.children}
-            </li>
-        );
+                 {this.props.children}
+             </li>
+         );
     }
 });

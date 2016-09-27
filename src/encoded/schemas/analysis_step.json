@@ -94,7 +94,7 @@
             "type": "array",
             "items": {
                 "type": "object",
-                "additionalProperties": "false",
+                "additionalProperties": false,
                 "properties": {
                     "input_file_type": {
                         "title": "Input file type",
@@ -145,7 +145,7 @@
             "type": "array",
             "items": {
                 "type": "object",
-                "additionalProperties": "false",
+                "additionalProperties": false,
                 "properties": {
                     "output_file_type": {
                         "title": "Output file type",
@@ -197,7 +197,7 @@
             "items": {
                 "title": "Parameter",
                 "type": "object",
-                "additionalProperties": "false",
+                "additionalProperties": false,
                 "properties": {
                     "parameter": {
                         "title": "Parameter name",

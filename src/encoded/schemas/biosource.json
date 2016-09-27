@@ -14,7 +14,9 @@
         { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/accession" },
         { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/submitted"},
         { "$ref": "mixins.json#/references" },
+        { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/notes" }
     ],
     "properties": {
@@ -47,7 +49,7 @@
           "individual": {
               "title": "Individual",
               "description": "Information on donor or individual mouse or other organism.",
-              "comment": "For human biosamples, see human_donor.json for available identifiers. For mouse biosamples, see mouse_donor.json for available identifiers.",
+              "comment": "For human biosamples, see human_individual.json for available identifiers.",
               "type": "string",
               "linkTo": "Individual"
           },
@@ -74,6 +76,41 @@
               "description": "An external resource with additional information about the biosource.",
               "type": "string",
               "format": "uri"
+          }
+      },
+      "facets": {
+          "biosource_type": {
+              "title": "Biosource type"
+          },
+          "biosource_name": {
+              "title": "Biosource"
+          },
+          "individual.organism.name": {
+              "title": "Organism"
+          }
+
+      },
+      "columns": {
+          "biosource_type": {
+              "title": "Biosource type"
+          },
+          "biosource_name": {
+              "title": "Biosource"
+          },
+          "individual.organism.name": {
+              "title": "Organism"
+          },
+          "description":{
+              "title": "Description"
+          },
+          "accession":{
+              "title": "Accession"
+          },
+          "title":{
+              "title": "Title"
+          },
+          "name":{
+              "title": "Name"
           }
       }
 }

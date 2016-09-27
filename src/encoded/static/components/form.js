@@ -8,7 +8,6 @@ var fetched = require('./fetched');
 var ga = require('google-analytics');
 var _ = require('underscore');
 
-
 var filterValue = function(value) {
     if (Array.isArray(value)) {
         value.map(filterValue);
@@ -67,8 +66,7 @@ var RepeatingItem = React.createClass({
 var RepeatingFieldset = React.createClass({
 
   render() {
-    var cx = require('react/lib/cx');
-    var cloneWithProps = require('react/lib/cloneWithProps');
+    var cx = require('classnames');
     var ReactForms = require('react-forms');
     var {
       item: Item, value, className, noAddButton, noRemoveButton,
@@ -104,7 +102,7 @@ var RepeatingFieldset = React.createClass({
               )
             };
             return React.isValidElement(Item) ?
-              cloneWithProps(Item, props) :
+              React.cloneElement(Item, props) :
               <Item {...props} />;
           })}
         </div>
@@ -239,10 +237,6 @@ var jsonSchemaToFormSchema = function(attrs) {
     if (p.type == 'object') {
         if (p.formInput == 'file') {
             props.input = <inputs.FileInput />;
-            return ReactForms.schema.Scalar(props);
-        } else if (p.formInput == 'layout') {
-            var layout = require('./layout');
-            props.input = <layout.Layout editable={true} />;
             return ReactForms.schema.Scalar(props);
         } else {
             props.component = <ReactForms.Fieldset className={props.required ? "required" : ''} />;
@@ -564,5 +558,6 @@ var JSONSchemaForm = module.exports.JSONSchemaForm = React.createClass({
     render: function() {
         return <Form {...this.props} defaultValue={this.state.value} schema={this.state.schema} />;
     }
+
 
 });

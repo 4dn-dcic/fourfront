@@ -1,13 +1,11 @@
 /* NavBar */
 .navbar-inverse {
     border: none;
-    // border-bottom: 0px solid #4e7294;
     background: #ffffff;
-    // @include box-shadow(0px 0px 30px 2px rgba(170, 170, 170, .9));
 
     .navbar-brand {
         padding: 0px !important;
-        margin-left: -15px;
+        // margin-left: -50px !important;
         color: $navbar-default-brand-color;
         font-size: 1.7em;
         font-weight: 200;
@@ -173,11 +171,20 @@
     }
 }
 
+.navbar-acct {
+    @media (min-width: $screen-md-min) {
+        margin-top: 10px !important;
+    }
+    @media (max-width: $grid-float-breakpoint-max) {
+        margin-top: 0px !important;
+    }
+}
+
 // Drop down styles when window is constrained
 .navbar-nav {
   font-family: 'Work Sans', sans-serif;
   // margin: ($navbar-padding-vertical / 2);
-  margin: 20px !important;
+  margin: 20px;
 
   > li > a {
     padding-top:    10px;
@@ -187,6 +194,7 @@
 
   @media (max-width: $grid-float-breakpoint-max) {
     // Dropdowns get custom display when collapsed
+    margin-bottom: 0px !important;
     .open .dropdown-menu {
       position: static;
       float: none;
@@ -243,4 +251,14 @@
 
 .navbar-form{
     margin: 0px;
+}
+
+// for account image
+#user-inactive:hover{
+    stroke: #000000 !important;
+}
+
+#user-active:hover{
+    fill: #000000;
+    stroke: #000000;
 }
