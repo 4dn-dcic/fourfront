@@ -94,6 +94,7 @@ class FileSet(Item):
     """Collection of files stored under fileset."""
 
     item_type = 'file_set'
+    base_types = ['FileSet'] + Item.base_types
     schema = load_schema('encoded:schemas/file_set.json')
     name_key = 'accession'
 
@@ -128,6 +129,7 @@ class File(Item):
     """Collection for individual files."""
 
     item_type = 'file'
+    base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
     name_key = 'accession'
 
@@ -263,6 +265,7 @@ class File(Item):
 class FileFastq(File):
     """Collection for individual fastq files."""
     item_type = 'file_fastq'
+    base_types = ['FileFastq'] + item.base_types
     schema = load_schema('encoded:schemas/file_fastq.json')
     name_key = 'accession'
 
