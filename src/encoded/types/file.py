@@ -265,7 +265,6 @@ class File(Item):
 class FileFastq(File):
     """Collection for individual fastq files."""
     item_type = 'file_fastq'
-    base_types = ['FileFastq'] + item.base_types
     schema = load_schema('encoded:schemas/file_fastq.json')
     name_key = 'accession'
 
