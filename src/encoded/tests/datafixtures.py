@@ -275,7 +275,7 @@ def file(testapp, lab, award, experiment):
 
 
 @pytest.fixture
-def fastq_file(testapp, lab, award, experiment):
+def file_fastq(testapp, lab, award, experiment):
     item = {
         'experiments': [experiment['@id'], ],
         'file_format': 'fastq',

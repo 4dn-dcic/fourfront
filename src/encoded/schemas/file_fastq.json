@@ -1,7 +1,7 @@
 {
-    "title": "Data file",
-    "description": "Schema for submitting metadata for a data file.",
-    "id": "/profiles/file.json",
+    "title": "FASTQ file",
+    "description": "Schema for submitting metadata for a FASTQ file.",
+    "id": "/profiles/file_fastq.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["file_format", "award", "lab"],
@@ -10,13 +10,13 @@
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
-        { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/notes" },
         { "$ref": "mixins.json#/accession" },
-        { "$ref": "mixins.json#/dbxrefs"}
+        { "$ref": "mixins.json#/dbxrefs"},
+        { "$ref": "file.json#/properties"}
     ],
     "properties": {
         "schema_version": {
@@ -117,5 +117,8 @@
                 }
             }
         }
+    },
+    "file_format_file_extension": {
+        "fastq": ".fastq.gz"
     }
 }

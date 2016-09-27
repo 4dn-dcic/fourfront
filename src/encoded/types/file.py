@@ -254,15 +254,15 @@ class File(Item):
 
 
 @collection(
-    name='fastq-file',
+    name='file-fastq',
     unique_key='accession',
     properties={
         'title': 'FASTQ Files',
         'description': 'Listing of FASTQ Files',
     })
-class FastqFile(File):
+class FileFastq(File):
     """Collection for individual fastq files."""
-    item_type = 'fastq_file'
+    item_type = 'file_fastq'
     schema = load_schema('encoded:schemas/file_fastq.json')
     name_key = 'accession'
 
