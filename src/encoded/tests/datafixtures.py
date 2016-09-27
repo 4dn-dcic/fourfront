@@ -271,7 +271,7 @@ def file(testapp, lab, award, experiment):
         'award': award['@id'],
         'status': 'uploaded',  # avoid s3 upload codepath
     }
-    return testapp.post_json('/file', item).json['@graph'][0]
+    return testapp.post_json('/file_fastq', item).json['@graph'][0]
 
 
 @pytest.fixture
@@ -284,20 +284,7 @@ def file_fastq(testapp, lab, award, experiment):
         'award': award['@id'],
         'status': 'uploaded',  # avoid s3 upload codepath
     }
-    return testapp.post_json('/file', item).json['@graph'][0]
-
-
-@pytest.fixture
-def bam_file(testapp, lab, award, experiment):
-    item = {
-        'experiments': [experiment['@id'], ],
-        'file_format': 'bam',
-        'md5sum': 'd41d8cd9f00b204e9800998ecf86674427e',
-        'lab': lab['@id'],
-        'award': award['@id'],
-        'status': 'uploaded',  # avoid s3 upload codepath
-    }
-    return testapp.post_json('/file', item).json['@graph'][0]
+    return testapp.post_json('/file_fastq', item).json['@graph'][0]
 
 
 RED_DOT = """data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA
