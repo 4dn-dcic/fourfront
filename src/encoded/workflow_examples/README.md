@@ -1,10 +1,10 @@
-## json files
+## Summary of the directory
 * The two files gitar_cwl and sbg.task.detail.json are directly obtained from SBG using scripts get_cwl_from_SBG.py and get_job_detail_SBG.py, respectively.
 * The two json files (file, workflow_run) are created by script read_sbg_job_detail_create_files.py, by using sbg.task.detail.json as input. 
 * The workflow json file is created by script read_cwl_create_workflow_insert.py, by using gitar_cwl as input. (in progress)
 
 
-## Script usages
+## scripts
 ```
 usage: read_sbg_job_detail_create_files.py [-h]
                                            [--sbg_job_report SBG_JOB_REPORT]
