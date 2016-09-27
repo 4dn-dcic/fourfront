@@ -1,13 +1,175 @@
-[
-    {
-        "title": "Dummy Workflow",
-        "description": "A dummy workflow with 2 steps",
-        "workflow_type": "Other",
-        "cwl_pointer": "http:fake/path/to/workflow.cwl",
-        "uuid": "96b9b39a-9254-44f5-a051-872aec7136c0",
-        "workflow_steps": [
-            {"parents": ["0afb6080-1c08-11e4-8c21-0800200c9a44", "0afb6080-1c08-11e4-8c21-0800200c9a44"], "step": "0afb6080-1c08-11e4-8c21-0800200c9a44"},
-            {"step": "0afb6080-1c08-11e4-8c21-0800200c9a44"}
-        ]
-    }
-]
+{
+    "arguments": [
+        {
+            "workflow_argument_name": "#input_fastq2", 
+            "argument_type": "Input file"
+        }, 
+        {
+            "workflow_argument_name": "#input_fastq1", 
+            "argument_type": "Input file"
+        }, 
+        {
+            "workflow_argument_name": "#bowtie_index", 
+            "argument_type": "Input file"
+        }, 
+        {
+            "workflow_argument_name": "#RE_bed", 
+            "argument_type": "Input file"
+        }, 
+        {
+            "workflow_argument_name": "#chrlen_file", 
+            "argument_type": "Input file"
+        }, 
+        {
+            "workflow_argument_name": "#contact_matrix_binsize", 
+            "argument_type": "parameter"
+        }, 
+        {
+            "workflow_argument_name": "#chromosome", 
+            "argument_type": "parameter"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "hictool_fastq2bam", 
+                    "step_argument_name": "sorted_bam_pe", 
+                    "step_argument_type": "Output_file"
+                }
+            ], 
+            "workflow_argument_name": "#sorted_bam_pe", 
+            "argument_type": "Output file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "hictool_bam2hdf5", 
+                    "step_argument_name": "HiC_project_object_hdf5", 
+                    "step_argument_type": "Output_file"
+                }
+            ], 
+            "workflow_argument_name": "#HiC_project_object_hdf5", 
+            "argument_type": "Output file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "hictool_bam2hdf5", 
+                    "step_argument_name": "HiC_distance_function_hdf5", 
+                    "step_argument_type": "Output_file"
+                }
+            ], 
+            "workflow_argument_name": "#HiC_distance_function_hdf5", 
+            "argument_type": "Output file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "hictool_hdf52matrix", 
+                    "step_argument_name": "normalized_fend_contact_matrix", 
+                    "step_argument_type": "Output_file"
+                }
+            ], 
+            "workflow_argument_name": "#normalized_fend_contact_matrix", 
+            "argument_type": "Output file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "hictool_hdf52matrix", 
+                    "step_argument_name": "normalized_enrich_contact_matrix", 
+                    "step_argument_type": "Output_file"
+                }
+            ], 
+            "workflow_argument_name": "#normalized_enrich_contact_matrix", 
+            "argument_type": "Output file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "hictool_hdf52matrix", 
+                    "step_argument_name": "expected_enrich_contact_matrix", 
+                    "step_argument_type": "Output_file"
+                }
+            ], 
+            "workflow_argument_name": "#expected_enrich_contact_matrix", 
+            "argument_type": "Output file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "hictool_fastq2bam", 
+                    "step_argument_name": "split_bam2", 
+                    "step_argument_type": "Output_file"
+                }
+            ], 
+            "workflow_argument_name": "#split_bam2", 
+            "argument_type": "Output file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "hictool_fastq2bam", 
+                    "step_argument_name": "split_bam1", 
+                    "step_argument_type": "Output_file"
+                }
+            ], 
+            "workflow_argument_name": "#split_bam1", 
+            "argument_type": "Output file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "hictool_bam2hdf5", 
+                    "step_argument_name": "fend_object_hdf5", 
+                    "step_argument_type": "Output_file"
+                }
+            ], 
+            "workflow_argument_name": "#fend_object_hdf5", 
+            "argument_type": "Output file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "hictool_bam2hdf5", 
+                    "step_argument_name": "HiC_norm_binning_hdf5", 
+                    "step_argument_type": "Output_file"
+                }
+            ], 
+            "workflow_argument_name": "#HiC_norm_binning_hdf5", 
+            "argument_type": "Output file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "hictool_bam2hdf5", 
+                    "step_argument_name": "HiC_data_object_hdf5", 
+                    "step_argument_type": "Output_file"
+                }
+            ], 
+            "workflow_argument_name": "#HiC_data_object_hdf5", 
+            "argument_type": "Output file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "hictool_hdf52matrix", 
+                    "step_argument_name": "observed_contact_matrix", 
+                    "step_argument_type": "Output_file"
+                }
+            ], 
+            "workflow_argument_name": "#observed_contact_matrix", 
+            "argument_type": "Output file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "hictool_hdf52matrix", 
+                    "step_argument_name": "expected_fend_contact_matrix", 
+                    "step_argument_type": "Output_file"
+                }
+            ], 
+            "workflow_argument_name": "#expected_fend_contact_matrix", 
+            "argument_type": "Output file"
+        }
+    ]
+}
