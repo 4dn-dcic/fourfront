@@ -362,6 +362,47 @@ p, input {
 	}
 }
 
-.facet-count{
-	margin-left: 10px;
+.exptype-box{
+	padding: 10px;
+	> div > .btn-group > button {
+		width: 240px;
+		text-align: left;
+	}
+	> div > .btn-group > ul {
+		width: 240px;
+		text-align: left;
+		padding: 10px;
+	}
+}
+
+.expset-entry{
+	padding: 0px 5px 0px 5px;
+}
+
+.expset-entry-passed{
+	background-color: #a7f1de;
+}
+
+.expset-panel{
+	margin: 0px 5px 0px 5px !important;
+}
+.expset-button{
+	margin: 0px 10px 0px 5px !important;
+}
+
+.expset-hits{
+	padding: 0px 10px 0px 10px;
+}
+
+.expset-sublist-entry{
+	margin-bottom: 2px;
+}
+
+.expset-facet-header-group{
+	margin-right: 12px;
+}
+.expset-facet-header{
+	display:inline-block;
+	transform: rotate(-90deg);
+	margin: 4px -3px 0px -10px !important;
 }

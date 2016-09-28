@@ -479,7 +479,6 @@ module.exports.HistoryAndTriggers = {
             fragment = href.slice(href_hash_pos);
             href = href.slice(0, href_hash_pos);
         }
-
         if (!this.historyEnabled) {
             if (options.replace) {
                 window.location.replace(href + fragment);
@@ -552,6 +551,7 @@ module.exports.HistoryAndTriggers = {
             }
             // The URL may have redirected
             var response_url = response.url || href;
+
             if (options.replace) {
                 window.history.replaceState(null, '', response_url + fragment);
             } else {
