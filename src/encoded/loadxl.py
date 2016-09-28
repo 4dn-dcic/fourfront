@@ -24,7 +24,7 @@ ORDER = [
     'document',
     'vendor',
     'protocol',
-    'protocol_cell_culture',
+    'biosample_cell_culture',
     'individual_human',
     'individual_mouse',
     'biosource',
