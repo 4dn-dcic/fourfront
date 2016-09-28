@@ -5,6 +5,7 @@ from snovault import (
     calculated_property,
     collection,
     load_schema,
+    abstract_collection,
 )
 from snovault.schema_utils import schema_validator
 from .base import (
@@ -93,6 +94,7 @@ class FileSet(Item):
     """Collection of files stored under fileset."""
 
     item_type = 'file_set'
+    base_types = ['FileSet'] + Item.base_types
     schema = load_schema('encoded:schemas/file_set.json')
     name_key = 'accession'
 
@@ -116,7 +118,7 @@ class FileSet(Item):
                         target_file.update(target_file.properties)
 
 
-@collection(
+@abstract_collection(
     name='files',
     unique_key='accession',
     properties={
@@ -125,13 +127,14 @@ class FileSet(Item):
     })
 class File(Item):
     """Collection for individual files."""
-
     item_type = 'file'
+    base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
+    embedded = ['lab']
     name_key = 'accession'
 
     def _update(self, properties, sheets=None):
-        if not properties: 
+        if not properties:
             return
         # update self first to ensure 'related_files' are stored in self.properties
         super(File, self)._update(properties, sheets)
@@ -250,6 +253,20 @@ class File(Item):
                 profile_name = registry.settings.get('file_upload_profile_name')
                 sheets['external'] = external_creds(bucket, key, name, profile_name)
         return super(File, cls).create(registry, uuid, properties, sheets)
+
+
+@collection(
+    name='file-fastq',
+    unique_key='accession',
+    properties={
+        'title': 'FASTQ Files',
+        'description': 'Listing of FASTQ Files',
+    })
+class FileFastq(File):
+    """Collection for individual fastq files."""
+    item_type = 'file_fastq'
+    schema = load_schema('encoded:schemas/file_fastq.json')
+    embedded = File.embedded
 
 
 @view_config(name='upload', context=File, request_method='GET',
