@@ -76,6 +76,12 @@
               "description": "An external resource with additional information about the biosource.",
               "type": "string",
               "format": "uri"
+          },
+          "SOP_cell_line":{
+              "title": "SOP document for the cell line",
+              "description": "Standard operation protocol for the cell line as determined by 4DN Cells Working Group",
+              "type": "string",
+              "linkTo": "Protocol"
           }
       },
       "facets": {

@@ -57,6 +57,12 @@
                 "linkTo": "Protocol"
             }
         },
+        "cell_culture_details": {
+            "title": "Cell culture related information",
+            "description": "Link to biosample_cell_culture object that carries all cell culture related parameters",
+            "type": "string",
+            "linkTo": "BiosampleCellCulture"
+        },
         "modifications": {
             "title": "Stable genomic modifications",
             "description": "Expression or targeting vectors stably transfected to generate Crispr'ed or other genomic modification",
