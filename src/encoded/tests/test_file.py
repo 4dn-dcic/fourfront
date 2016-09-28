@@ -1,5 +1,5 @@
 import pytest
-from encoded.types.file import File, post_upload
+from encoded.types.file import File, FileFastq, post_upload
 from pyramid.httpexceptions import HTTPForbidden
 pytestmark = pytest.mark.working
 
@@ -86,7 +86,7 @@ def test_create_file_request_proper_s3_resource(registry, fastq, mocker):
     external_creds = mocker.patch('encoded.types.file.external_creds')
     # don't actually create this bad boy
     mocker.patch('encoded.types.base.Item.create')
-    my_file = File.create(registry, '1234567', fastq)
+    my_file = FileFastq.create(registry, '1234567', fastq)
     # check that we would have called aws
     expected_s3_key = "1234567/%s.fastq.gz" % (fastq['accession'])
     external_creds.assert_called_once_with('test-bucket', expected_s3_key,
@@ -96,27 +96,27 @@ def test_create_file_request_proper_s3_resource(registry, fastq, mocker):
 def test_name_for_replaced_file_is_uuid(registry, fastq):
     fastq['status'] = 'replaced'
     uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
-    my_file = File.create(registry, uuid, fastq)
+    my_file = FileFastq.create(registry, uuid, fastq)
     assert my_file.__name__ == uuid
 
 
 def test_upload_credentails_not_set_for_replaced_file(registry, fastq):
     fastq['status'] = 'replaced'
     uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
-    my_file = File.create(registry, uuid, fastq)
+    my_file = FileFastq.create(registry, uuid, fastq)
     # upload credentials only get set when status is 'uploading'
     assert my_file.upload_credentials() is None
 
 
 def test_name_for_file_is_accession(registry, fastq):
     uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
-    my_file = File.create(registry, uuid, fastq)
+    my_file = FileFastq.create(registry, uuid, fastq)
     assert my_file.__name__ == fastq['accession']
 
 
 def test_file_type(registry, fastq):
     uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
-    my_file = File.create(registry, uuid, fastq)
+    my_file = FileFastq.create(registry, uuid, fastq)
     assert 'gz' == my_file.file_type('gz')
     assert "fastq gz" == my_file.file_type('fastq', 'gz')
 
@@ -124,7 +124,7 @@ def test_file_type(registry, fastq):
 def test_post_upload_only_for_uploading_or_upload_failed_status(registry, fastq, request):
     fastq['status'] = 'uploaded'
     uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
-    my_file = File.create(registry, uuid, fastq)
+    my_file = FileFastq.create(registry, uuid, fastq)
     try:
         post_upload(my_file, request)
     except HTTPForbidden as e:

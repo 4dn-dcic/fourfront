@@ -127,8 +127,9 @@ class FileSet(Item):
     })
 class File(Item):
     """Collection for individual files."""
-
+    item_type = 'file'
     base_types = ['File'] + Item.base_types
+    schema = load_schema('encoded:schemas/file.json')
     embedded = ['lab']
     name_key = 'accession'
 
