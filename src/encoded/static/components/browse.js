@@ -68,28 +68,8 @@ var Listing = module.exports.Listing = function (props) {
 
 var Item = module.exports.Item = React.createClass({
     render: function() {
-        var result = this.props.context;
-        var title = globals.listing_titles.lookup(result)({context: result});
-        var item_type = result['@type'][0];
         return (
-            <li>
-                <div className="clearfix">
-                    {this.renderActions()}
-                    {result.accession ?
-                        <div className="pull-right type sentence-case search-meta">
-                            <p>{item_type}: {' ' + result['accession']}</p>
-                            <AuditIndicators audits={result.audit} id={this.props.context['@id']} search />
-                        </div>
-                    : null}
-                    <div className="accession">
-                        <a href={result['@id']}>{title}</a>
-                    </div>
-                    <div className="data-row">
-                        {result.description}
-                    </div>
-                </div>
-                <AuditDetail context={result} id={this.props.context['@id']} forcedEditLink />
-            </li>
+            <div>Browse should not be used for this data type</div>
         );
     }
 });
@@ -342,7 +322,6 @@ var ExpTerm = browse.ExpTerm = React.createClass({
                         {title}
                     </span>
                     <span className="pull-right facet-count">{expCount}</span>
-                    <span className="pull-right facet-count">{count}</span>
                 </a>
             </li>
         );
@@ -607,8 +586,7 @@ var FacetList = browse.FacetList = React.createClass({
                                 <a>Clear Filters</a>
                             </div>}
                         <div className="expset-facet-header-group">
-                            <div className="expset-facet-header pull-right"># exps</div>
-                            <div className="expset-facet-header pull-right"># sets</div>
+                            <div className="expset-facet-header pull-right"># expts</div>
                         </div>
                     </div>
                     {regularFacets}
