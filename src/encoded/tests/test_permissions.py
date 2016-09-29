@@ -41,7 +41,7 @@ def step_run(testapp, lab, award):
         'description': 'It does the thing',
         'title': 'THING_DOER',
         'version': '1.0',
-        'software_type':"normalizer",
+        'software_type': "normalizer",
         'award': award['@id'],
         'lab': lab['@id']
     }
@@ -103,8 +103,9 @@ def test_submitter_cant_post_non_lab_collection(submitter_testapp):
     return submitter_testapp.post_json('/organism', item, status=403)
 
 
-def test_submitter_post_update_experiment(submitter_testapp, lab, award):
-    experiment = {'lab': lab['@id'], 'award': award['@id'], 'experiment_type': 'micro-C'}
+def test_submitter_post_update_experiment(submitter_testapp, lab, award, human_biosample):
+    experiment = {'lab': lab['@id'], 'award': award['@id'],
+                  'experiment_type': 'micro-C', 'biosample': human_biosample['@id']}
     res = submitter_testapp.post_json('/experiments-hic', experiment, status=201)
     location = res.location
     res = submitter_testapp.get(location + '@@testing-allowed?permission=edit', status=200)
@@ -119,14 +120,15 @@ def test_submitter_cant_post_other_lab(submitter_testapp, other_lab, award):
     assert "not in user submits_for" in res.json['errors'][0]['description']
 
 
-def test_wrangler_post_other_lab(wrangler_testapp, other_lab, award):
-    experiment = {'lab': other_lab['@id'], 'award': award['@id'], 'experiment_type': 'micro-C'}
+def test_wrangler_post_other_lab(wrangler_testapp, other_lab, award, human_biosample):
+    experiment = {'lab': other_lab['@id'], 'award': award['@id'],
+                  'experiment_type': 'micro-C', 'biosample': human_biosample['@id']}
     wrangler_testapp.post_json('/experiments-hic', experiment, status=201)
 
 
-def test_submitter_view_experiement(submitter_testapp, submitter, lab, award):
+def test_submitter_view_experiement(submitter_testapp, submitter, lab, award, human_biosample):
     experiment = {'lab': lab['@id'], 'award': award['@id'],
-                  'experiment_type': 'micro-C'}
+                  'experiment_type': 'micro-C', 'biosample': human_biosample['@id']}
     res = submitter_testapp.post_json('/experiments-hic', experiment, status=201)
 
     submitter_testapp.get(res.json['@graph'][0]['@id'], status=200)
@@ -173,6 +175,7 @@ def test_users_can_see_their_own_user_info(submitter, submitter_testapp):
     assert 'email' in res.json
     assert 'access_keys' in res.json
 
+
 def test_users_view_basic_anon(submitter, anontestapp):
     anontestapp.get(submitter['@id'], status=403)
     # assert 'title' in res.json
@@ -193,6 +196,7 @@ def test_viewing_group_member_view(viewing_group_member_testapp, experiment_proj
 
 def test_lab_viewer_view(lab_viewer_testapp, experiment):
     lab_viewer_testapp.get(experiment['@id'], status=200)
+
 
 def test_submitter_patch_lab_disallowed(submitter, other_lab, submitter_testapp):
     res = submitter_testapp.get(submitter['@id'])
@@ -298,6 +302,7 @@ def test_submitter_cannot_view_ownitem_replaced(human, award, lab, submitter_tes
     wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": "replaced"}, status=200)
     submitter_testapp.get(res.json['@graph'][0]['@id'], status=404)
 
+
 # Submitter created item and wants to patch
 def test_submitter_cannot_patch_statuses(human, award, lab, submitter_testapp, wrangler_testapp):
     statuses = ['deleted', 'current', 'released', 'revoked', 'released to project']
@@ -388,6 +393,7 @@ def test_labmember_cannot_patch_submitter_item(human, award, lab, submitter_test
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
         lab_viewer_testapp.patch_json(res.json['@graph'][0]['@id'], {'sex': 'female'}, status=422)
 
+
 # Submitter created item and project member wants to view
 def test_viewing_group_member_cannot_view_submitter_item(human, award, lab, submitter_testapp, wrangler_testapp, viewing_group_member_testapp):
     statuses = ['deleted', 'in review by lab']
@@ -403,7 +409,7 @@ def test_viewing_group_member_cannot_view_submitter_item(human, award, lab, subm
 
 
 def test_viewing_group_member_can_view_submitter_item(human, award, lab, submitter_testapp, wrangler_testapp, viewing_group_member_testapp):
-    statuses = ['current', 'released', 'revoked', 'released to project',  'in review by project']
+    statuses = ['current', 'released', 'revoked', 'released to project', 'in review by project']
     item = {
         'award': award['@id'],
         'lab': lab['@id'],
