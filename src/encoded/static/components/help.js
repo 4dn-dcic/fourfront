@@ -36,7 +36,7 @@ var SlideCarousel = React.createClass({
     getInitialState() {
         return {
             index: 0,
-            slideTitles: ["Slide01.png", "Slide02.png", "Slide03.png", "Slide04.png", "Slide05.png", "Slide06.png", "Slide07.png", "Slide08.png", "Slide09.png", "Slide10.png", "Slide11.png", "Slide12.png"]
+            slideTitles: ["Slide01.png", "Slide02.png", "Slide03.png", "Slide04.png", "Slide05.png", "Slide06.png", "Slide07.png", "Slide08.png", "Slide10.png", "Slide11.png", "Slide12.png"]
         };
     },
     handleForward() {
