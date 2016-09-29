@@ -57,6 +57,15 @@ const slow = function(state=false, action) {
     }
 }
 
+const expSetFilters = function(state={}, action) {
+    if (action.type && _.contains(Object.keys(action.type), 'expSetFilters')){
+        var val = action.type.expSetFilters ? action.type.expSetFilters : state;
+        return val
+    }else{
+        return state
+    }
+}
+
 // Combine Reducers
 const reducers = combineReducers({
   href,
@@ -64,7 +73,8 @@ const reducers = combineReducers({
   inline,
   session_cookie,
   contextRequest,
-  slow
+  slow,
+  expSetFilters
 });
 
 const store = module.exports = createStore(reducers);

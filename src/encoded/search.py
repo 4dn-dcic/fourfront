@@ -29,6 +29,7 @@ CHAR_COUNT = 32
 
 def includeme(config):
     config.add_route('search', '/search{slash:/?}')
+    config.add_route('browse', '/browse{slash:/?}')
     config.add_route('report', '/report{slash:/?}')
     config.add_route('matrix', '/matrix{slash:/?}')
     config.scan(__name__)
@@ -470,8 +471,8 @@ def format_facets(es_results, facets, used_filters, schemas, total):
         if agg_name not in aggregations:
             continue
         terms = aggregations[agg_name][agg_name]['buckets']
-        # if len(terms) < 2:
-        #     continue
+        if len(terms) < 2:
+            continue
         result.append({
             'field': field,
             'title': facet.get('title', field),
@@ -531,18 +532,18 @@ def iter_long_json(name, iterable, **other):
 
 
 @view_config(route_name='search', request_method='GET', permission='search')
-def search(context, request, search_type=None, return_generator=False):
+def search(context, request, search_type=None, return_generator=False, forced_type='Search'):
     """
     Search view connects to ElasticSearch and returns the results
     """
-    #import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     types = request.registry[TYPES]
     search_base = normalize_query(request)
     result = {
         '@context': request.route_path('jsonld_context'),
-        '@id': '/search/' + search_base,
-        '@type': ['Search'],
-        'title': 'Search',
+        '@id': '/' + forced_type.lower() + '/' + search_base,
+        '@type': [forced_type],
+        'title': forced_type,
         'filters': [],
     }
     principals = effective_principals(request)
@@ -581,7 +582,7 @@ def search(context, request, search_type=None, return_generator=False):
     else:
         # Possibly type(s) in query string
         clear_qs = urlencode([("type", typ) for typ in doc_types])
-    result['clear_filters'] = request.route_path('search', slash='/') + (('?' + clear_qs) if clear_qs else '')
+    result['clear_filters'] = request.route_path(forced_type.lower(), slash='/') + (('?' + clear_qs) if clear_qs else '')
 
     # Building query for filters
     if not doc_types:
@@ -724,6 +725,7 @@ def search(context, request, search_type=None, return_generator=False):
         request.response.app_iter = app_iter  # Python 2
     else:
         request.response.app_iter = (s.encode('utf-8') for s in app_iter)
+
     return request.response
 
 
@@ -941,3 +943,8 @@ def matrix(context, request):
         result['notification'] = 'No results found'
 
     return result
+
+@view_config(route_name='browse', request_method='GET', permission='search')
+def browse(context, request, search_type=None, return_generator=False):
+    # import pdb; pdb.set_trace()
+    return search(context, request, search_type, return_generator, forced_type='Browse')

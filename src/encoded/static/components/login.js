@@ -7,28 +7,39 @@ var Login = React.createClass({
         session: React.PropTypes.object
     },
     getInitialState: function() {
-    	return {isOpen: false};
+    	return {
+            isOpen: false,
+            message: ''
+        };
     },
     handleToggle: function () {
         this.setState({
-  		  isOpen: !this.state.isOpen
+  		  isOpen: !this.state.isOpen,
+          message: 'Signing in...'
+  	  });
+    },
+    handleToggleOut: function () {
+        this.setState({
+  		  isOpen: !this.state.isOpen,
+          message: 'Signing out...'
   	  });
     },
     render: function() {
         var session = this.context.session;
         var userActionRender;
+        var message = this.state.message;
         // first case is if user is not logged in
         if (!(session && session['auth.userid'])) {
 			userActionRender = <LoginBoxes isRefreshing={this.handleToggle}/>
         } else { //if logged in give them a logout link
-            userActionRender = <a href="#" onClick={this.handleToggle}  data-trigger="logout" className="global-entry">Sign out</a>;
+            userActionRender = <a href="#" onClick={this.handleToggleOut}  data-trigger="logout" className="global-entry">Sign out</a>;
         }
         return (
             <div>
                 {userActionRender}
                 <Modal show={this.state.isOpen} backdrop='static'>
                    <div className="login-box">
-                      <h1 className="title">Please wait...</h1>
+                      <h1 className="title">{message}</h1>
                    </div>
                 </Modal>
             </div>

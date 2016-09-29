@@ -12,16 +12,14 @@ var Footer = require('./footer');
 var url = require('url');
 var _ = require('underscore');
 var store = require('../store');
+var browse = require('./browse');
 
 //sid is to allow addition of supplementary ids to navbar link headings
 
 var portal = {
     portal_title: '4DN Data Portal',
     global_sections: [
-        {id: 'data', sid:'sData', title: 'Data', children: [
-            {id: 'experiments', title: 'Experiments', url: '/search/?type=Experiment'},
-            {id: 'biosources', title: 'Biosources', url: '/search/?type=Biosource'}
-        ]},
+        {id: 'browse', sid:'sBrowse', title: 'Browse', url: '/browse/?type=ExperimentSet&experimentset_type=biological+replicates'},
         {id: 'help', sid:'sHelp', title: 'Help', children: [
             {id: 'gettingstarted', title: 'Getting started', url: '/help'},
             {id: 'metadatastructure', title: 'Metadata structure', url: '/help#metadata-structure'},
@@ -32,7 +30,7 @@ var portal = {
     ],
     user_section: [
             {id: 'login', title: 'Log in', url: '/'},
-            {id: 'profile', title: 'Profile', url: '/'}
+            {id: 'accountactions', title: 'Register', url: '/help/'}
             // Remove context actions for now{id: 'contextactions', title: 'Actions', url: '/'}
     ]
 };
@@ -248,7 +246,7 @@ var App = React.createClass({
         }else if (context) {
             var ContentView = globals.content_views.lookup(context, current_action);
             if (ContentView){
-                content = <ContentView context={context} />;
+                content = <ContentView context={context} expSetFilters={this.props.expSetFilters}/>;
                 title = context.title || context.name || context.accession || context['@id'];
                 if (title && title != 'Home') {
                     title = title + ' – ' + portal.portal_title;
