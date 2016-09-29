@@ -58,9 +58,6 @@
         "experimentset_type": {
             "title": "Experiment set type"
         },
-        "experiments_in_set.experiment_summary":{
-            "title": "Experiment summary"
-        },
         "experiments_in_set.award.project": {
             "title": "Project"
         },
@@ -95,9 +92,6 @@
         },
         "experiments_in_set": {
             "title": "Experiments"
-        },
-        "experiments_in_set.experiment_summary":{
-            "title": "Experiment summary"
         },
         "experiments_in_set.award.project": {
             "title": "Project"

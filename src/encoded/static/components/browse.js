@@ -66,21 +66,6 @@ var Listing = module.exports.Listing = function (props) {
     return <ListingView {...props} />;
 };
 
-var PickerActionsMixin = module.exports.PickerActionsMixin = {
-    contextTypes: {actions: React.PropTypes.array},
-    renderActions: function() {
-        if (this.context.actions && this.context.actions.length) {
-            return (
-                <div className="pull-right">
-                    {this.context.actions.map(action => React.cloneElement(action, {id: this.props.context['@id']}))}
-                </div>
-            );
-        } else {
-            return <span/>;
-        }
-    }
-};
-
 var Item = module.exports.Item = React.createClass({
     render: function() {
         var result = this.props.context;
@@ -218,7 +203,7 @@ var ExperimentSublist = React.createClass({
 });
 
 // Find the component experiments in an experiment set that match the current filters
-function siftExperiments(graph, filters, field=null, term=null) {
+function siftExperiments(graph, filters, ignored=null, field=null, term=null) {
     var passExperiments = new Set();
     // Start by adding all applicable experiments to set
     for(var i=0; i < graph.length; i++){
@@ -238,6 +223,14 @@ function siftExperiments(graph, filters, field=null, term=null) {
     for(let experiment of passExperiments){
         var eliminated = false;
         for(var k=0; k < filterKeys.length; k++){
+            var refinedFilterSet;
+            if(ignored && ignored[filterKeys[k]] && ignored[filterKeys[k]].size > 0){
+                // remove the ignored filters by using the difference between sets
+                var difference = new Set([...filters[filterKeys[k]]].filter(x => !ignored[filterKeys[k]].has(x)));
+                refinedFilterSet = difference;
+            }else{
+                refinedFilterSet = filters[filterKeys[k]];
+            }
             if(eliminated){
                 break;
             }
@@ -259,13 +252,13 @@ function siftExperiments(graph, filters, field=null, term=null) {
                                 eliminated = true;
                                 passExperiments.delete(experiment);
                             }
-                        }else if(filters[filterKeys[k]].size > 0 && !filters[filterKeys[k]].has(valueProbe)){ // OR behavior if not active field
+                        }else if(refinedFilterSet.size > 0 && !refinedFilterSet.has(valueProbe)){ // OR behavior if not active field
                             eliminated = true;
                             passExperiments.delete(experiment);
                         }
                     }
                 }else{
-                    if(filterKeys[k] !== field && filters[filterKeys[k]].size > 0){
+                    if(filterKeys[k] !== field && refinedFilterSet.size > 0){
                         eliminated = true;
                         passExperiments.delete(experiment);
                         break;
@@ -335,7 +328,7 @@ var ExpTerm = browse.ExpTerm = React.createClass({
         var count = this.props.term['doc_count'];
         var title = this.props.title || term;
         var graph = this.props.context['@graph'];
-        var termExperiments = siftExperiments(graph, this.props.expSetFilters, field, term);
+        var termExperiments = siftExperiments(graph, this.props.expSetFilters, this.props.ignoredFilters, field, term);
         var expCount = termExperiments.size;
         var selected = false;
         if(this.props.expSetFilters[field] && this.props.expSetFilters[field].has(term)){
@@ -360,11 +353,6 @@ var Term = browse.Term = React.createClass({
     contextTypes: {
         navigate: React.PropTypes.func
     },
-    // getInitialState: function() {
-    //     return{
-    //         fullHref: null
-    //     }
-    // },
 
     componentWillMount: function(){
         var fullHref = generateTypeHref('?type=ExperimentSet&', this.props.facet['field'], this.props.term['key']);
@@ -417,7 +405,6 @@ var TypeTerm = browse.TypeTerm = React.createClass({
     }
 });
 
-
 var Facet = browse.Facet = React.createClass({
     getDefaultProps: function() {
         return {width: 'inherit'};
@@ -466,13 +453,13 @@ var Facet = browse.Facet = React.createClass({
                 <ul className="facet-list nav">
                     <div>
                         {terms.slice(0, 5).map(function (term) {
-                            return <TermComponent {...this.props} key={term.key} term={term} filters={filters} total={total} canDeselect={canDeselect} />;
+                            return <TermComponent {...this.props} key={term.key} term={term} filters={filters} total={total} canDeselect={canDeselect}/>;
                         }.bind(this))}
                     </div>
                     {terms.length > 5 ?
                         <div id={termID} className={moreSecClass}>
                             {moreTerms.map(function (term) {
-                                return <TermComponent {...this.props} key={term.key} term={term} filters={filters} total={total} canDeselect={canDeselect} />;
+                                return <TermComponent {...this.props} key={term.key} term={term} filters={filters} total={total} canDeselect={canDeselect}/>;
                             }.bind(this))}
                         </div>
                     : null}
@@ -544,7 +531,6 @@ var DropdownFacet = browse.DropdownFacet = React.createClass({
         );
     }
 });
-
 
 var FacetList = browse.FacetList = React.createClass({
     contextTypes: {
@@ -641,25 +627,16 @@ var ResultTable = browse.ResultTable = React.createClass({
         };
     },
 
-    childContextTypes: {actions: React.PropTypes.array},
-    getChildContext: function() {
-        return {
-            actions: this.props.actions
-        };
-    },
-
     render: function() {
-        const batchHubLimit = 100;
         var context = this.props.context;
         var results = context['@graph'];
         var total = context['total'];
-        var batch_hub_disabled = total > batchHubLimit;
         var columns = context['columns'];
         var filters = context['filters'];
         var label = 'results. ';
         var searchBase = this.props.searchBase;
         var trimmedSearchBase = searchBase.replace(/[\?|\&]limit=all/, "");
-        var passExperiments = siftExperiments(results, this.props.expSetFilters);
+
         var show_link;
         var facets = context['facets'].map(function(facet) {
             if (this.props.restrictions[facet.field] !== undefined) {
@@ -669,16 +646,31 @@ var ResultTable = browse.ResultTable = React.createClass({
             }
             return facet;
         }.bind(this));
-        // Get a sorted list of batch hubs keys with case-insensitive sort
-        var batchHubKeys = [];
-        if (context.batch_hub && Object.keys(context.batch_hub).length) {
-            batchHubKeys = Object.keys(context.batch_hub).sort((a, b) => {
-                var aLower = a.toLowerCase();
-                var bLower = b.toLowerCase();
-                return (aLower > bLower) ? 1 : ((aLower < bLower) ? -1 : 0);
-            });
+        //find ignored filters
+        var ignoredFilters = {};
+        for(var i=0; i < facets.length; i++){
+            var ignoredSet = new Set();
+            var field = facets[i].field;
+            var terms = facets[i].terms;
+            if(this.props.expSetFilters[field]){
+                for(let expFilter of this.props.expSetFilters[field]){
+                    var found = false;
+                    for(var j=0; j < terms.length; j++){
+                        if(expFilter === terms[j].key){
+                            found = true;
+                            break;
+                        }
+                    }
+                    if(!found){
+                        ignoredSet.add(expFilter);
+                    }
+                }
+                if(ignoredSet.size > 0){
+                    ignoredFilters[field] = ignoredSet;
+                }
+            }
         }
-
+        var passExperiments = siftExperiments(results, this.props.expSetFilters, ignoredFilters);
         // Map view icons to svg icons
         var view2svg = {
             'table': 'table',
@@ -706,7 +698,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                 <div className="row">
                     {facets.length ? <div className="col-sm-5 col-md-4 col-lg-3">
                         <FacetList {...this.props} facets={facets} filters={filters}
-                                    searchBase={searchBase ? searchBase + '&' : searchBase + '?'} onFilter={this.onFilter} />
+                                    searchBase={searchBase ? searchBase + '&' : searchBase + '?'} onFilter={this.onFilter} ignoredFilters={ignoredFilters}/>
                     </div> : ''}
                     <div className="col-sm-7 col-md-8 col-lg-9">
                         <ul className="nav result-table" id="result-table">
