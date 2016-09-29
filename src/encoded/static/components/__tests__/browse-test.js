@@ -9,7 +9,7 @@ jest.autoMockOff();
 jest.dontMock('react');
 jest.dontMock('underscore');
 
-describe('Testing item.js', function() {
+describe('Testing browse.js for experiment set browser', function() {
     var React, Browse, testItem, TestUtils, page, context, filters, _, Wrapper;
 
     beforeEach(function() {
@@ -18,8 +18,19 @@ describe('Testing item.js', function() {
         _ = require('underscore');
         Browse = require('../browse').Browse;
         context = require('../testdata/browse/context');
+
         filters = {};
         Wrapper = React.createClass({
+            childContextTypes: {
+                location_href: React.PropTypes.string,
+                navigate: React.PropTypes.func
+            },
+            getChildContext: function() {
+                return {
+                    location_href: "http://localhost:8000/browse/?type=ExperimentSet&experimentset_type=biological+replicates",
+                    navigate: function(){return;}
+                };
+            },
             render: function() {
                 return (
                     <div>{this.props.children}</div>
@@ -33,9 +44,9 @@ describe('Testing item.js', function() {
         );
     });
 
-    it('has one banner with three entries. Entry links are correct', function() {
+    it('has 3 passing entries (experiment sets or experiments)', function() {
         var passEntries = TestUtils.scryRenderedDOMComponentsWithClass(page, 'expset-entry-passed');
-        expect(passEntries.length).toEqual(4);
+        expect(passEntries.length).toEqual(3);
     });
 
 });
