@@ -341,7 +341,8 @@ var lookup_column = function (result, column) {
                             {this.props.showControls ? <tr className="nosort table-controls">
                                 <th colSpan={columns.length}>
                                     {loading_or_total}
-                                    {/*{actions} REMOVE ACTIONS FOR NOW*/}
+                                    {/******REMOVE ACTIONS and SEARCH FORM FOR NOW*******
+                                    {actions}
                                     <form ref="form" className="table-filter" onKeyUp={this.handleKeyUp}
                                         data-skiprequest="true" data-removeempty="true">
                                         <input ref="q" disabled={this.state.communicating || undefined}
@@ -352,6 +353,7 @@ var lookup_column = function (result, column) {
                                         <input ref="sorton" type="hidden" name="sorton" defaultValue={sortOn !== defaultSortOn ? sortOn : ''} />
                                         <input ref="reversed" type="hidden" name="reversed" defaultValue={!!reversed || ''} />
                                     </form>
+                                    */}
                                 </th>
                             </tr> : ''}
                             <tr className="col-headers">
