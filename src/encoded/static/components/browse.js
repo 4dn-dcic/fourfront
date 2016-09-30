@@ -316,7 +316,7 @@ var ExpTerm = browse.ExpTerm = React.createClass({
         }
         return (
             <li id={selected ? "selected" : null} key={term}>
-                <a id={selected ? "selected" : null} href="" onClick={this.handleClick}>
+                <a className={selected ? "expterm-selected" : "expterm"} id={selected ? "selected" : null} href="" onClick={this.handleClick}>
                     <span className="pull-left facet-selector">{selected && this.props.canDeselect ? <i className="icon icon-times-circle-o"></i> : ''}</span>
                     <span className="facet-item">
                         {title}
