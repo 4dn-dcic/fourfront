@@ -387,7 +387,7 @@ p, input {
 	margin: 0px 5px 0px 5px !important;
 }
 .expset-button{
-	margin: 0px 10px 0px 5px !important;
+	margin: 0px 5px 0px 5px !important;
 }
 
 .expset-hits{
@@ -406,4 +406,13 @@ p, input {
 	font-size: 0.9rem;
 	color:#999999;
 	margin: 2px 0px 2px 0px;
+}
+
+.expset-checkbox{
+	display: inline-block;
+	margin: 0px 5px -5px 5px !important;
+}
+
+.expset-checkbox-sub{
+	padding-top: 2px;
 }
