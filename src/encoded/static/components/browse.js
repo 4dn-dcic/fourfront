@@ -100,7 +100,9 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
     render: function() {
         var result = this.props.context;
         var passExperiments = this.props.passExperiments;
+        passExperiments.add(5);
         var experimentArray = result.experiments_in_set;
+        var intersection = new Set(experimentArray.filter(x => passExperiments.has(x)));
         var childExperiments = experimentArray.map(function (experiment) {
             if(passExperiments.has(experiment)){
                 return (
@@ -113,10 +115,10 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
             }
         });
         var passed = "expset-entry";
-        if(passExperiments.size === experimentArray.length){
+        if(intersection.size > 0 && intersection.size === experimentArray.length){
             passed += " expset-entry-passed";
         }
-        var exptHits = "(" + passExperiments.size + " of " + experimentArray.length +" experiments)";
+        var exptHits = "(" + intersection.size + " of " + experimentArray.length +" experiments)";
         this.sortByKey(childExperiments);
         return (
             <li>
