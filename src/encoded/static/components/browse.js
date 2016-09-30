@@ -100,7 +100,6 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
     render: function() {
         var result = this.props.context;
         var passExperiments = this.props.passExperiments;
-        passExperiments.add(5);
         var experimentArray = result.experiments_in_set;
         var intersection = new Set(experimentArray.filter(x => passExperiments.has(x)));
         var childExperiments = experimentArray.map(function (experiment) {
