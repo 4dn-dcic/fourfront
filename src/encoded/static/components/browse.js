@@ -101,6 +101,7 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
         var result = this.props.context;
         var passExperiments = this.props.passExperiments;
         var experimentArray = result.experiments_in_set;
+        var intersection = new Set(experimentArray.filter(x => passExperiments.has(x)));
         var childExperiments = experimentArray.map(function (experiment) {
             if(passExperiments.has(experiment)){
                 return (
@@ -113,10 +114,10 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
             }
         });
         var passed = "expset-entry";
-        if(passExperiments.size === experimentArray.length){
+        if(intersection.size > 0 && intersection.size === experimentArray.length){
             passed += " expset-entry-passed";
         }
-        var exptHits = "(" + passExperiments.size + " of " + experimentArray.length +" experiments)";
+        var exptHits = "(" + intersection.size + " of " + experimentArray.length +" experiments)";
         this.sortByKey(childExperiments);
         return (
             <li>
@@ -316,7 +317,7 @@ var ExpTerm = browse.ExpTerm = React.createClass({
         }
         return (
             <li id={selected ? "selected" : null} key={term}>
-                <a id={selected ? "selected" : null} href="" onClick={this.handleClick}>
+                <a className={selected ? "expterm-selected" : "expterm"} id={selected ? "selected" : null} href="" onClick={this.handleClick}>
                     <span className="pull-left facet-selector">{selected && this.props.canDeselect ? <i className="icon icon-times-circle-o"></i> : ''}</span>
                     <span className="facet-item">
                         {title}
