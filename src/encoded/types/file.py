@@ -139,12 +139,12 @@ class File(Item):
         # update self first to ensure 'related_files' are stored in self.properties
         super(File, self)._update(properties, sheets)
         DicRefRelation = {
-             "derived from": "parent of",
-             "parent of": "derived from",
-             "supercedes": "is superceded by",
-             "is superceded by": "supercedes",
-             "paired with": "paired with"
-             }
+            "derived from": "parent of",
+            "parent of": "derived from",
+            "supercedes": "is superceded by",
+            "is superceded by": "supercedes",
+            "paired with": "paired with"
+        }
         acc = str(self.uuid)
 
         if 'related_files' in properties.keys():
@@ -269,6 +269,20 @@ class FileFastq(File):
     embedded = File.embedded
 
 
+@collection(
+    name='file-fasta',
+    unique_key='accession',
+    properties={
+        'title': 'FASTA Files',
+        'description': 'Listing of FASTA Files',
+    })
+class FileFasta(File):
+    """Collection for individual fasta files."""
+    item_type = 'file_fasta'
+    schema = load_schema('encoded:schemas/file_fasta.json')
+    embedded = File.embedded
+
+
 @view_config(name='upload', context=File, request_method='GET',
              permission='edit')
 def get_upload(context, request):
@@ -312,7 +326,6 @@ def post_upload(context, request):
         key = external['key']
     else:
         raise ValueError(external.get('service'))
-
 
     # remove the path from the file name and only take first 32 chars
     name = properties.get('filename').split('/')[-1][:32]
