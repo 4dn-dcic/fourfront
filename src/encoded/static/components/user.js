@@ -9,7 +9,6 @@ var parseAndLogError = require('./mixins').parseAndLogError;
 // var navigation = require('./navigation');
 var Modal = require('react-bootstrap').Modal;
 var ItemStore = require('./lib/store').ItemStore;
-var Form = require('./form').Form;
 var ObjectPicker = require('./inputs').ObjectPicker;
 
 // var Breadcrumbs = navigation.Breadcrumbs;

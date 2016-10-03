@@ -92,7 +92,7 @@ class ExperimentSet(Item):
                 "experiments_in_set.lab", "experiments_in_set.award", "experiments_in_set.biosample",
                 "experiments_in_set.biosample.biosource", "experiments_in_set.biosample.modifications",
                 "experiments_in_set.biosample.treatments", "experiments_in_set.biosample.biosource.individual.organism",
-                "experiments_in_set.files", "experiments_in_set.digestion_enzyme"]
+                "experiments_in_set.files", "experiments_in_set.filesets",  "experiments_in_set.filesets.files_in_set", "experiments_in_set.digestion_enzyme"]
 
     def _update(self, properties, sheets=None):
         # update self first

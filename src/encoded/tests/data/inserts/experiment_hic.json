@@ -131,7 +131,7 @@
         "notes": "sample dcic notes",
         "lab": "4dn-dcic-lab",
         "aliases": ["labsample:alias5"],
-        "files": ["4DNFI067APU1", "4DNFI067APU2"],
+        "filesets": ["4d6ecff9-7c67-4096-bca8-515246767feb"],
         "description": "Test Drive",
         "ligation_temperature": 37,
         "crosslinking_temperature": 37,
