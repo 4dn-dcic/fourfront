@@ -79,20 +79,22 @@ globals.listing_views.register(Item, 'Item');
 var ExperimentSet = module.exports.ExperimentSet = React.createClass({
     getInitialState: function() {
     	return {
-            open: false
+            open: false,
+            checked: false
         };
     },
 
     handleToggle: function (e) {
         e.preventDefault();
         this.setState({
-  		  open: !this.state.open
-  	  });
+  		    open: !this.state.open,
+  	    });
     },
 
-    handleCheck: function(e) {
-        e.preventDefault();
-        console.log('I AM CHECKED');
+    handleCheck: function() {
+        this.setState({
+            checked: !this.state.checked
+        });
     },
 
     sortByKey: function(array) {
@@ -111,14 +113,14 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
         var childExperiments = experimentArray.map(function (experiment) {
             if(passExperiments.has(experiment)){
                 return (
-                    <ExperimentSublist passed={true} result={experiment} key={'a' + experiment.uuid} />
+                    <ExperimentSublist parentChecked={this.state.checked} passed={true} result={experiment} key={'a' + experiment.uuid} />
                 );
             }else{
                 return (
-                    <ExperimentSublist passed={false} result={experiment} key={'b' + experiment.uuid} />
+                    <ExperimentSublist parentChecked={this.state.checked} passed={false} result={experiment} key={'b' + experiment.uuid} />
                 );
             }
-        });
+        }.bind(this));
         var passed = "expset-entry";
         if(intersection.size > 0 && intersection.size === experimentArray.length){
             passed += " expset-entry-passed";
@@ -130,7 +132,7 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
                 <div className="clearfix">
                     <div className="accession">
                         <Button bsSize="xsmall" className="expset-button" onClick={this.handleToggle}>{this.state.open ? "-" : "+"}</Button>
-                        <Checkbox className='expset-checkbox' inputRef={ref => { this.handleCheck = ref; }}/>
+                        <Checkbox checked={this.state.checked} className='expset-checkbox' onChange={this.handleCheck}/>
                         <a className={passed} href={result['@id']}>
                             {result.description || result.accesion || result.uuid || result['@id']}
                         </a>
@@ -147,17 +149,36 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
 globals.listing_views.register(ExperimentSet, 'ExperimentSet');
 
 var ExperimentSublist = React.createClass({
+
     getInitialState: function() {
     	return {
-            open: false
+            open: false,
+            checked: false
         };
     },
+
     handleToggle: function (e) {
         e.preventDefault();
         this.setState({
   		  open: !this.state.open
   	  });
     },
+
+    // update checkboxes if parent has changed
+    componentWillReceiveProps: function(nextProps) {
+        if(nextProps.parentChecked !== this.props.parentChecked){
+            this.setState({
+                checked: nextProps.parentChecked
+            });
+        }
+    },
+
+    handleCheck: function() {
+        this.setState({
+            checked: !this.state.checked
+        });
+    },
+
     render: function() {
         var result = this.props.result;
         var files = result.files;
@@ -167,18 +188,14 @@ var ExperimentSublist = React.createClass({
         }
         var childFiles = files.map(function (file) {
             return (
-                <div key={file.accession}>
-                    <a href={file['@id'] || ''}>
-                        {file.file_format || file.accession || file.uuid || file['@id']}
-                    </a>
-                </div>
+                <FileSublist key={file.accession} parentChecked={this.state.checked} file={file} />
             );
-        });
+        }.bind(this));
         var fileHits = "(" + childFiles.length + " of " + files.length +" files)";
         return(
             <div className='expset-sublist-entry' key={result.accession}>
                 <Button bsSize="xsmall" className="expset-button" onClick={this.handleToggle}>{this.state.open ? "-" : "+"}</Button>
-                <Checkbox className='expset-checkbox expset-checkbox-sub'/>
+                <Checkbox checked={this.state.checked} className='expset-checkbox expset-checkbox-sub' onChange={this.handleCheck}/>
                 <a className={passed} href={result['@id'] || ''}>
                     {result.experiment_summary || result.accession || result.uuid || result['@id']}
                 </a>
@@ -186,6 +203,41 @@ var ExperimentSublist = React.createClass({
                 <Panel className="expset-panel" collapsible expanded={this.state.open}>
                     {childFiles}
                 </Panel>
+            </div>
+        );
+    }
+});
+
+var FileSublist = React.createClass({
+
+    getInitialState: function() {
+    	return {
+            checked: false
+        };
+    },
+
+    // update checkboxes if parent has changed
+    componentWillReceiveProps: function(nextProps) {
+        if(nextProps.parentChecked !== this.props.parentChecked){
+            this.setState({
+                checked: nextProps.parentChecked
+            });
+        }
+    },
+
+    handleCheck: function() {
+        this.setState({
+            checked: !this.state.checked
+        });
+    },
+
+    render: function() {
+        return(
+            <div className="expset-file">
+                <Checkbox checked={this.state.checked} className='expset-checkbox expset-checkbox-sub' onChange={this.handleCheck}/>
+                <a href={this.props.file['@id'] || ''}>
+                    {this.props.file.file_format || this.props.file.accession || this.props.file.uuid || this.props.file['@id']}
+                </a>
             </div>
         );
     }
@@ -287,25 +339,6 @@ function generateTypeHref(base, field, term) {
     return generated;
 }
 
-// used to set default filter (such as with project=4DN or external from the banner)
-// as of now, only allow one initially added filter
-function setDefaultFilters(searchBase){
-    // reset all filters
-    var split = searchBase.split('~').slice(1); // discard first term
-    if(split[0]){
-        var secondSplit = split[0].split('=');
-        if(secondSplit.length === 2){
-            var defaultSet = new Set();
-            defaultSet.add(secondSplit[1]);
-            var filterObj = {};
-            filterObj[secondSplit[0]] = defaultSet;
-            store.dispatch({
-                type : {'expSetFilters' : filterObj}
-            });
-        }
-    }
-}
-
 var ExpTerm = browse.ExpTerm = React.createClass({
 
     getInitialState: function() {
@@ -361,7 +394,6 @@ var Term = browse.Term = React.createClass({
     },
 
     render: function () {
-        var filters = this.props.filters;
         var term = this.props.term['key'];
         var count = this.props.term['doc_count'];
         var title = this.props.title || term;
@@ -385,7 +417,6 @@ var Term = browse.Term = React.createClass({
 var TypeTerm = browse.TypeTerm = React.createClass({
     render: function () {
         var term = this.props.term['key'];
-        var filters = this.props.filters;
         var title;
         try {
             title = types[term];
@@ -393,7 +424,7 @@ var TypeTerm = browse.TypeTerm = React.createClass({
             title = term;
         }
         var total = this.props.total;
-        return <Term {...this.props} title={title} filters={filters} total={total} />;
+        return <Term {...this.props} title={title} total={total} />;
     }
 });
 
@@ -415,49 +446,21 @@ var Facet = browse.Facet = React.createClass({
 
     render: function() {
         var facet = this.props.facet;
-        var filters = this.props.filters;
         var title = facet['title'];
         var field = facet['field'];
         var total = facet['total'];
-        var termID = title.replace(/\s+/g, '');
-        var terms = facet['terms'].filter(function (term) {
-            if (term.key) {
-                for(var filter in filters) {
-                    if(filters[filter].term === term.key) {
-                        return true;
-                    }
-                }
-                return term.doc_count > 0;
-            } else {
-                return false;
-            }
-        });
-        var moreTerms = terms.slice(5);
+        var terms = facet['terms'];
         var TermComponent = field === 'type' ? TypeTerm : ExpTerm;
         return (
             <div className="facet" hidden={terms.length === 0} style={{width: this.props.width}}>
                 <h5>{title}</h5>
-                <ul className="facet-list nav">
+                <div className="facet-list nav">
                     <div>
-                        {terms.slice(0, 5).map(function (term) {
-                            return <TermComponent {...this.props} key={term.key} term={term} filters={filters} total={total}/>;
+                        {terms.map(function (term) {
+                            return <TermComponent {...this.props} key={term.key} term={term} total={total}/>;
                         }.bind(this))}
                     </div>
-                    {terms.length > 5 ?
-                        <div id={termID} className={moreSecClass}>
-                            {moreTerms.map(function (term) {
-                                return <TermComponent {...this.props} key={term.key} term={term} filters={filters} total={total}/>;
-                            }.bind(this))}
-                        </div>
-                    : null}
-                    {(terms.length > 5) ?
-                        <label className="pull-left">
-                                <small>
-                                    <button type="button" data-toggle="collapse" data-target={'#'+termID} onClick={this.handleClick} />
-                                </small>
-                        </label>
-                    : null}
-                </ul>
+                </div>
             </div>
         );
     }
@@ -481,32 +484,19 @@ var DropdownFacet = browse.DropdownFacet = React.createClass({
 
     render: function() {
         var facet = this.props.facet;
-        var filters = this.props.filters;
         var title = facet['title'];
         var field = facet['field'];
         var total = facet['total'];
-        var termID = title.replace(/\s+/g, '');
-        var terms = facet['terms'].filter(function (term) {
-            if (term.key) {
-                for(var filter in filters) {
-                    if(filters[filter].term === term.key) {
-                        return true;
-                    }
-                }
-                return term.doc_count > 0;
-            } else {
-                return false;
-            }
-        });
+        var terms = facet['terms'];
         var typeTitle = typeSelected(this.props.searchBase);
         var dropdownTitle = <span><span>{typeTitle}</span>{this.state.toggled ? <span className="pull-right"># sets</span> : <span></span>}</span>;
         return (
-            <div hidden={terms.length === 0} style={{width: this.props.width}}>
+            <div style={{width: this.props.width}}>
                 <h5>{title}</h5>
                 <DropdownButton open={this.state.toggled} title={dropdownTitle} id={`dropdown-experimentset_type`} onToggle={this.handleToggle}>
                     {terms.map(function (term, i) {
                         return(
-                            <Term {...this.props} key={i} term={term} filters={filters} total={total} typeTitle={typeTitle}/>
+                            <Term {...this.props} key={i} term={term} total={total} typeTitle={typeTitle}/>
                         );
                     }.bind(this))}
                 </DropdownButton>
@@ -540,20 +530,8 @@ var FacetList = browse.FacetList = React.createClass({
         // Get all facets, and "normal" facets, meaning non-audit facets
         var facets = this.props.facets;
         var normalFacets = facets.filter(facet => facet.field.substring(0, 6) !== 'audit.');
-        var filters = this.props.filters;
         var width = 'inherit';
         if (!facets.length && this.props.mode != 'picker') return <div />;
-        var hideTypes;
-        if (this.props.mode == 'picker') {
-            hideTypes = false;
-        } else {
-            hideTypes = filters.filter(filter => filter.field === 'type').length === 1 && normalFacets.length > 1;
-        }
-        if (this.props.orientation == 'horizontal') {
-            width = (100 / facets.length) + '%';
-        }
-
-        // See if we need the Clear Filters link or not. context.clear_filters
         var clearButton = Object.keys(this.props.expSetFilters).length === 0 ? false : true;
         var searchQuery = context && context['@id'] && url.parse(context['@id']).search;
         if (searchQuery) {
@@ -561,15 +539,13 @@ var FacetList = browse.FacetList = React.createClass({
             var terms = queryString.parse(searchQuery);
         }
         facets.map(facet => {
-            if ((hideTypes && facet.field == 'type') || (!loggedIn && this.context.hidePublicAudits && facet.field.substring(0, 6) === 'audit.')) {
+            if ((facet.field == 'type') || (!loggedIn && this.context.hidePublicAudits && facet.field.substring(0, 6) === 'audit.')) {
                 return;
             } else if (facet.field == 'experimentset_type') {
-                exptypeDropdown = <DropdownFacet {...this.props} key={facet.field} facet={facet} filters={filters}
-                                width={width}/>;
+                exptypeDropdown = <DropdownFacet {...this.props} key={facet.field} facet={facet} width={width}/>;
                 return;
             } else {
-                regularFacets.push(<Facet {...this.props} key={facet.field} facet={facet} filters={filters}
-                                width={width}/>);
+                regularFacets.push(<Facet {...this.props} key={facet.field} facet={facet} width={width}/>);
                 return;
             }
         });
@@ -613,7 +589,6 @@ var ResultTable = browse.ResultTable = React.createClass({
         var results = context['@graph'];
         var total = context['total'];
         var columns = context['columns'];
-        var filters = context['filters'];
         var label = 'results. ';
         var searchBase = this.props.searchBase;
         var trimmedSearchBase = searchBase.replace(/[\?|\&]limit=all/, "");
@@ -678,7 +653,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                 </div>
                 <div className="row">
                     {facets.length ? <div className="col-sm-5 col-md-4 col-lg-3">
-                        <FacetList {...this.props} facets={facets} filters={filters}
+                        <FacetList {...this.props} facets={facets}
                                     searchBase={searchBase ? searchBase + '&' : searchBase + '?'} onFilter={this.onFilter} ignoredFilters={ignoredFilters}/>
                     </div> : ''}
                     <div className="col-sm-7 col-md-8 col-lg-9">
@@ -711,7 +686,6 @@ var Browse = browse.Browse = React.createClass({
 
     changeFilters: function(field, term) {
         // store currently selected filters as a dict of sets
-        // var currFilters = adjustFilterSets(_.clone(this.props.expSetFilters), field, term);
         var tempObj = {};
         var newObj = {};
         var expSet = this.props.expSetFilters[field] ? this.props.expSetFilters[field] : new Set();
@@ -735,7 +709,6 @@ var Browse = browse.Browse = React.createClass({
 
     componentWillMount: function() {
         var searchBase = url.parse(this.context.location_href).search || '';
-        setDefaultFilters(searchBase);
     },
 
     render: function() {
