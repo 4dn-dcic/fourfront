@@ -181,7 +181,21 @@ var ExperimentSublist = React.createClass({
 
     render: function() {
         var result = this.props.result;
-        var files = result.files;
+        // get files from "files" or "filesets[idx].files_in_set"
+        var files;
+        if(result.files){
+            files = result.files;
+        }else if(result.filesets){
+            var tempFiles = [];
+            for(var i=0; i<result.filesets.length; i++){
+                if(result.filesets[i].files_in_set){
+                    tempFiles = tempFiles.concat(result.filesets[i].files_in_set);
+                }
+            }
+            files = tempFiles;
+        }else{
+            files = [];
+        }
         var passed = "expset-entry";
         if(this.props.passed){
             passed += " expset-entry-passed";
@@ -529,6 +543,7 @@ var FacetList = browse.FacetList = React.createClass({
         var regularFacets = [];
         // Get all facets, and "normal" facets, meaning non-audit facets
         var facets = this.props.facets;
+        // ignore all audit facets for the time being
         var normalFacets = facets.filter(facet => facet.field.substring(0, 6) !== 'audit.');
         var width = 'inherit';
         if (!facets.length && this.props.mode != 'picker') return <div />;
@@ -538,7 +553,7 @@ var FacetList = browse.FacetList = React.createClass({
             // Convert search query string to a query object for easy parsing
             var terms = queryString.parse(searchQuery);
         }
-        facets.map(facet => {
+        normalFacets.map(facet => {
             if ((facet.field == 'type') || (!loggedIn && this.context.hidePublicAudits && facet.field.substring(0, 6) === 'audit.')) {
                 return;
             } else if (facet.field == 'experimentset_type') {
