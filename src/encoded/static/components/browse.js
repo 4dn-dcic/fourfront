@@ -728,6 +728,10 @@ var Browse = browse.Browse = React.createClass({
 
     render: function() {
         var context = this.props.context;
+        // no results found!
+        if(context.total === 0 && context.notification){
+            return <div className="error-page"><h4>{context.notification}</h4></div>
+        }
         var results = context['@graph'];
         var notification = context['notification'];
         var searchBase = url.parse(this.context.location_href).search || '';
