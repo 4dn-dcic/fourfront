@@ -56,17 +56,6 @@ var datasetTypes = {
     'UcscBrowserComposite': types['ucsc_browser_composite'].title
 };
 
-var Listing = module.exports.Listing = function (props) {
-    // XXX not all panels have the same markup
-    var context;
-    if (props['@id']) {
-        context = props;
-        props = {context: context, passExperiments: passExperiments,  key: context['@id']};
-    }
-    var ListingView = globals.listing_views.lookup(props.context);
-    return <ListingView {...props} />;
-};
-
 var Item = module.exports.Item = React.createClass({
     render: function() {
         return (
@@ -97,21 +86,10 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
         });
     },
 
-    sortByKey: function(array) {
-        return array.sort(function(a, b) {
-            var keyA = a.key.toLowerCase();
-            var keyB = b.key.toLowerCase();
-            return ((keyA < keyB) ? -1 : ((keyA > keyB) ? 1 : 0));
-        });
-    },
-
     render: function() {
-        var result = this.props.context;
-        var passExperiments = this.props.passExperiments;
-        var experimentArray = result.experiments_in_set;
-        var intersection = new Set(experimentArray.filter(x => passExperiments.has(x)));
+        var experimentArray = this.props.experimentArray;
         var childExperiments = experimentArray.map(function (experiment) {
-            if(passExperiments.has(experiment)){
+            if(this.props.passExperiments.has(experiment)){
                 return (
                     <ExperimentSublist parentChecked={this.state.checked} passed={true} result={experiment} key={'a' + experiment.uuid} />
                 );
@@ -121,22 +99,17 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
                 );
             }
         }.bind(this));
-        var passed = "expset-entry";
-        if(intersection.size > 0 && intersection.size === experimentArray.length){
-            passed += " expset-entry-passed";
-        }
-        var exptHits = "(" + intersection.size + " of " + experimentArray.length +" experiments)";
-        this.sortByKey(childExperiments);
+        childExperiments = sortByKey(childExperiments);
         return (
             <li>
                 <div className="clearfix">
                     <div className="accession">
                         <Button bsSize="xsmall" className="expset-button" onClick={this.handleToggle}>{this.state.open ? "-" : "+"}</Button>
                         <Checkbox checked={this.state.checked} className='expset-checkbox' onChange={this.handleCheck}/>
-                        <a className={passed} href={result['@id']}>
-                            {result.description || result.accesion || result.uuid || result['@id']}
+                        <a className={this.props.passed} href={this.props.href}>
+                            {this.props.title}
                         </a>
-                        <span className='expset-hits'>{exptHits}</span>
+                        <span className='expset-hits'>{this.props.exptHits}</span>
                     </div>
                     <Panel className="expset-panel" collapsible expanded={this.state.open}>
                         {childExperiments}
@@ -146,7 +119,6 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
         );
     }
 });
-globals.listing_views.register(ExperimentSet, 'ExperimentSet');
 
 var ExperimentSublist = React.createClass({
 
@@ -256,6 +228,14 @@ var FileSublist = React.createClass({
         );
     }
 });
+
+function sortByKey(array) {
+    return array.sort(function(a, b) {
+        var keyA = a.key.toLowerCase();
+        var keyB = b.key.toLowerCase();
+        return ((keyA < keyB) ? -1 : ((keyA > keyB) ? 1 : 0));
+    });
+}
 
 // Find the component experiments in an experiment set that match the current filters
 function siftExperiments(graph, filters, ignored=null, field=null, term=null) {
@@ -647,6 +627,30 @@ var ResultTable = browse.ResultTable = React.createClass({
             'table': 'table',
             'th': 'matrix'
         };
+        var resultListing = results.length ?
+            results.map(function (result) {
+                var experimentArray = result.experiments_in_set;
+                var intersection = new Set(experimentArray.filter(x => passExperiments.has(x)));
+                var passed = "expset-entry";
+                var href = result['@id'];
+                var title = result.description || result.accesion || result.uuid || result['@id']
+                var exptHits = "(" + intersection.size + " of " + experimentArray.length +" experiments)";
+                if(intersection.size > 0 && intersection.size === experimentArray.length){
+                    passed += " expset-entry-passed";
+                    return (
+                        <ExperimentSet passed={passed} href={href} title={title} exptHits={exptHits} experimentArray={experimentArray} passExperiments={passExperiments} key={'a' + result['@id']} />
+                    );
+                }else{
+                    return (
+                        <ExperimentSet passed={passed} href={href} title={title} exptHits={exptHits} experimentArray={experimentArray} passExperiments={passExperiments} key={'b' + result['@id']} />
+                    );
+                }
+            })
+            : null;
+
+        if(resultListing){
+            resultListing = sortByKey(resultListing);
+        }
 
         // Create "show all" or "show 25" links if necessary
         show_link = ((total > results.length && searchBase.indexOf('limit=all') === -1) ?
@@ -673,11 +677,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                     </div> : ''}
                     <div className="col-sm-7 col-md-8 col-lg-9">
                         <ul className="nav result-table" id="result-table">
-                            {results.length ?
-                                results.map(function (result) {
-                                    return Listing({context:result, columns: columns, passExperiments: passExperiments, key: result['@id']});
-                                })
-                            : null}
+                            {resultListing}
                         </ul>
                     </div>
                 </div>
@@ -733,19 +733,17 @@ var Browse = browse.Browse = React.createClass({
             return <div className="error-page"><h4>{context.notification}</h4></div>
         }
         var results = context['@graph'];
-        var notification = context['notification'];
         var searchBase = url.parse(this.context.location_href).search || '';
-        searchBase = searchBase.split('~')[0];
-        var facetdisplay = context.facets && context.facets.some(function(facet) {
-            return facet.total > 0;
-        });
-        return (
-            <div>
-                {facetdisplay ?
-                    <div className="panel data-display main-panel">
-                        <ResultTable {...this.props} key={undefined} searchBase={searchBase} onChange={this.context.navigate} changeFilters={this.changeFilters}/>
+        // browse is only for experiment sets
+        if(searchBase.indexOf('?type=ExperimentSet') === -1){
+            return(<div className="error-page">
+                        <h4><a href='/browse/?type=ExperimentSet&experimentset_type=biological+replicates'>Only experiment sets may be browsed.</a></h4>
                     </div>
-                : <h4>{notification}</h4>}
+            );
+        }
+        return (
+            <div className="panel data-display main-panel">
+                <ResultTable {...this.props} key={undefined} searchBase={searchBase} onChange={this.context.navigate} changeFilters={this.changeFilters}/>
             </div>
         );
     }
