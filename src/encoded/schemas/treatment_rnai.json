@@ -35,7 +35,8 @@
         "target": {
             "title": "Target",
             "description": "The targeted gene or genomic region that is targeted by the modification.",
-            "type": "string"
+            "type": "string",
+            "linkTo": "Target"
         },
         "target_sequence": {
             "title": "Target Sequence",
