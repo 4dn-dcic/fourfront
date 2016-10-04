@@ -308,9 +308,9 @@
               "n/a"
             ]
         },
-        "fragmentation_date":{
-            "title": "Fragmentation date",
-            "description": "The date that the nucleic acid was fragmented - submitted as YYYY-MM-DD.",
+        "library_preparation_date":{
+            "title": "Library Preparation Date",
+            "description": "The date that the library was prepared - submitted as YYYY-MM-DD.",
             "type": "string",
             "format": "date"
         },
