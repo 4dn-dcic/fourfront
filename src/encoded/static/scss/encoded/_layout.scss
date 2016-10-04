@@ -380,7 +380,7 @@ p, input {
 }
 
 .expset-entry-passed{
-	background-color: #a7f1de;
+	background-color: #b3ff66;
 }
 
 .expset-panel{
@@ -419,4 +419,33 @@ p, input {
 
 .expset-file{
 	margin-left: 25px;
+}
+
+.expset-whole-selector{
+	padding: 10px;
+}
+
+.expset-file-selector{
+	@media (min-width: $screen-sm-min){
+		border-right: 1px #ccc solid;
+		padding-right: 10px;
+		margin-right: 10px;
+	}
+}
+
+.expset-selector-header{
+	> h5{
+		margin: 0px !important;
+	}
+
+}
+
+.expset-selector-button{
+	margin-top: 5px;
+}
+
+.browse-title{
+    text-align: center;
+    margin: 20px 0px 45px 0px;
+	color: #999999 !important;
 }

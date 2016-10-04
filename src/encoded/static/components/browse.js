@@ -9,52 +9,13 @@ var audit = require('./audit');
 var Panel = require('react-bootstrap').Panel;
 var Button = require('react-bootstrap').Button;
 var Checkbox = require('react-bootstrap').Checkbox;
+var ButtonToolbar = require('react-bootstrap').ButtonToolbar;
 var DropdownButton = require('react-bootstrap').DropdownButton;
 var MenuItem = require('react-bootstrap').MenuItem;
 var store = require('../store');
 var AuditIndicators = audit.AuditIndicators;
 var AuditDetail = audit.AuditDetail;
 var AuditMixin = audit.AuditMixin;
-
-// Should really be singular...
-var types = {
-    annotation: {title: 'Annotation file set'},
-    antibody_lot: {title: 'Antibodies'},
-    biosample: {title: 'Biosamples'},
-    experiment: {title: 'Experiments'},
-    target: {title: 'Targets'},
-    dataset: {title: 'Datasets'},
-    image: {title: 'Images'},
-    matched_set: {title: 'Matched set series'},
-    organism_development_series: {title: 'Organism development series'},
-    publication: {title: 'Publications'},
-    page: {title: 'Web page'},
-    pipeline: {title: 'Pipeline'},
-    project: {title: 'Project file set'},
-    publication_data: {title: 'Publication file set'},
-    reference: {title: 'Reference file set'},
-    reference_epigenome: {title: 'Reference epigenome series'},
-    replication_timing_series: {title: 'Replication timing series'},
-    software: {title: 'Software'},
-    treatment_concentration_series: {title: 'Treatment concentration series'},
-    treatment_time_series: {title: 'Treatment time series'},
-    ucsc_browser_composite: {title: 'UCSC browser composite file set'}
-};
-
-var datasetTypes = {
-    'Annotation': types['annotation'].title,
-    'Dataset': types['dataset'].title,
-    'MatchedSet': types['matched_set'].title,
-    'OrganismDevelopmentSeries': types['organism_development_series'].title,
-    'Project': types['project'].title,
-    'PublicationData': types['publication_data'].title,
-    'Reference': types['reference'].title,
-    'ReferenceEpigenome': types['reference_epigenome'].title,
-    'ReplicationTimingSeries': types['replication_timing_series'].title,
-    'TreatmentConcentrationSeries': types['treatment_concentration_series'].title,
-    'TreatmentTimeSeries': types['treatment_time_series'].title,
-    'UcscBrowserComposite': types['ucsc_browser_composite'].title
-};
 
 var Item = module.exports.Item = React.createClass({
     render: function() {
@@ -91,11 +52,11 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
         var childExperiments = experimentArray.map(function (experiment) {
             if(this.props.passExperiments.has(experiment)){
                 return (
-                    <ExperimentSublist parentChecked={this.state.checked} passed={true} result={experiment} key={'a' + experiment.uuid} />
+                    <ExperimentSublist fileTargets={this.props.fileTargets} parentChecked={this.state.checked} passed={true} result={experiment} key={'a' + experiment.uuid} />
                 );
             }else{
                 return (
-                    <ExperimentSublist parentChecked={this.state.checked} passed={false} result={experiment} key={'b' + experiment.uuid} />
+                    <ExperimentSublist fileTargets={this.props.fileTargets} parentChecked={this.state.checked} passed={false} result={experiment} key={'b' + experiment.uuid} />
                 );
             }
         }.bind(this));
@@ -109,7 +70,7 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
                         <a className={this.props.passed} href={this.props.href}>
                             {this.props.title}
                         </a>
-                        <span className='expset-hits'>{this.props.exptHits}</span>
+                        <span className='expset-hits pull-right'>{this.props.exptHits}</span>
                     </div>
                     <Panel className="expset-panel" collapsible expanded={this.state.open}>
                         {childExperiments}
@@ -174,7 +135,7 @@ var ExperimentSublist = React.createClass({
         }
         var childFiles = files.map(function (file) {
             return (
-                <FileSublist key={file.accession} parentChecked={this.state.checked} file={file} />
+                <FileSublist fileTargets={this.props.fileTargets} key={file.accession} parentChecked={this.state.checked} file={file} passed={this.props.passed}/>
             );
         }.bind(this));
         var fileHits = "(" + childFiles.length + " of " + files.length +" files)";
@@ -197,7 +158,7 @@ var ExperimentSublist = React.createClass({
 var FileSublist = React.createClass({
 
     getInitialState: function() {
-    	return {
+        return {
             checked: false
         };
     },
@@ -218,9 +179,11 @@ var FileSublist = React.createClass({
     },
 
     render: function() {
+        var isChecked = this.state.checked;
+        var fileID = isChecked + "~" + this.props.passed + "~" + this.props.file.file_format + "~" + this.props.file.uuid;
         return(
             <div className="expset-file">
-                <Checkbox checked={this.state.checked} className='expset-checkbox expset-checkbox-sub' onChange={this.handleCheck}/>
+                <Checkbox checked={this.state.checked} name="file-checkbox" id={fileID} className='expset-checkbox expset-checkbox-sub' onChange={this.handleCheck}/>
                 <a href={this.props.file['@id'] || ''}>
                     {this.props.file.file_format || this.props.file.accession || this.props.file.uuid || this.props.file['@id']}
                 </a>
@@ -333,6 +296,34 @@ function generateTypeHref(base, field, term) {
     return generated;
 }
 
+function findFiles() {
+    var checkboxes = document.getElementsByName('file-checkbox');
+    var fileStats = {};
+    fileStats['checked'] = new Set();
+    fileStats['formats'] = {};
+    fileStats['uuids'] = new Set();
+    for(var i=0; i<checkboxes.length; i++){
+        // ID in form checked (boolean), passed (boolean), format, uuid
+        var splitID = checkboxes[i].id.split('~');
+        // check to see if file has already been found
+        if(fileStats['uuids'].has(splitID[3])){
+            continue;
+        }else{
+            fileStats['uuids'].add(splitID[3]);
+            if(splitID[1] === "true" && fileStats['formats'][splitID[2]]){
+                fileStats['formats'][splitID[2]].add(splitID[3]);
+            }else if(splitID[1] === "true"){
+                fileStats['formats'][splitID[2]] = new Set();
+                fileStats['formats'][splitID[2]].add(splitID[3]);
+            }
+            if(splitID[0] === "true"){
+                fileStats['checked'].add(splitID[3]);
+            }
+        }
+    }
+    return fileStats;
+}
+
 var ExpTerm = browse.ExpTerm = React.createClass({
 
     getInitialState: function() {
@@ -408,20 +399,6 @@ var Term = browse.Term = React.createClass({
     }
 });
 
-var TypeTerm = browse.TypeTerm = React.createClass({
-    render: function () {
-        var term = this.props.term['key'];
-        var title;
-        try {
-            title = types[term];
-        } catch (e) {
-            title = term;
-        }
-        var total = this.props.total;
-        return <Term {...this.props} title={title} total={total} />;
-    }
-});
-
 var Facet = browse.Facet = React.createClass({
     getDefaultProps: function() {
         return {width: 'inherit'};
@@ -444,14 +421,13 @@ var Facet = browse.Facet = React.createClass({
         var field = facet['field'];
         var total = facet['total'];
         var terms = facet['terms'];
-        var TermComponent = field === 'type' ? TypeTerm : ExpTerm;
         return (
             <div className="facet" hidden={terms.length === 0} style={{width: this.props.width}}>
                 <h5>{title}</h5>
                 <div className="facet-list nav">
                     <div>
                         {terms.map(function (term) {
-                            return <TermComponent {...this.props} key={term.key} term={term} total={total}/>;
+                            return <ExpTerm {...this.props} key={term.key} term={term} total={total}/>;
                         }.bind(this))}
                     </div>
                 </div>
@@ -582,12 +558,11 @@ var ResultTable = browse.ResultTable = React.createClass({
     render: function() {
         var context = this.props.context;
         var results = context['@graph'];
+        var fileTargets = this.props.fileTargets;
         var total = context['total'];
         var columns = context['columns'];
-        var label = 'results. ';
         var searchBase = this.props.searchBase;
         var trimmedSearchBase = searchBase.replace(/[\?|\&]limit=all/, "");
-
         var show_link;
         var facets = context['facets'].map(function(facet) {
             if (this.props.restrictions[facet.field] !== undefined) {
@@ -633,16 +608,16 @@ var ResultTable = browse.ResultTable = React.createClass({
                 var intersection = new Set(experimentArray.filter(x => passExperiments.has(x)));
                 var passed = "expset-entry";
                 var href = result['@id'];
-                var title = result.description || result.accesion || result.uuid || result['@id']
+                var title = result.description || result.accesion || result.uuid || result['@id'];
                 var exptHits = "(" + intersection.size + " of " + experimentArray.length +" experiments)";
                 if(intersection.size > 0 && intersection.size === experimentArray.length){
                     passed += " expset-entry-passed";
                     return (
-                        <ExperimentSet passed={passed} href={href} title={title} exptHits={exptHits} experimentArray={experimentArray} passExperiments={passExperiments} key={'a' + result['@id']} />
+                        <ExperimentSet fileTargets={fileTargets} passed={passed} href={href} title={title} exptHits={exptHits} experimentArray={experimentArray} passExperiments={passExperiments} key={'a' + result['@id']} />
                     );
                 }else{
                     return (
-                        <ExperimentSet passed={passed} href={href} title={title} exptHits={exptHits} experimentArray={experimentArray} passExperiments={passExperiments} key={'b' + result['@id']} />
+                        <ExperimentSet fileTargets={fileTargets} passed={passed} href={href} title={title} exptHits={exptHits} experimentArray={experimentArray} passExperiments={passExperiments} key={'b' + result['@id']} />
                     );
                 }
             })
@@ -664,18 +639,15 @@ var ResultTable = browse.ResultTable = React.createClass({
             </span>);
         return (
             <div>
-                <div className="row search-title">
-                    <h3>Experiment set browse</h3>
-                    <div className="row">
-                        <h4 className='inline-subheader'>Showing {results.length} of {total} {label} {show_link}</h4>
-                    </div>
-                </div>
                 <div className="row">
                     {facets.length ? <div className="col-sm-5 col-md-4 col-lg-3">
                         <FacetList {...this.props} facets={facets}
                                     searchBase={searchBase ? searchBase + '&' : searchBase + '?'} onFilter={this.onFilter} ignoredFilters={ignoredFilters}/>
                     </div> : ''}
                     <div className="col-sm-7 col-md-8 col-lg-9">
+                        <div className="row">
+                            <h4 className='row browse-title'>Showing {results.length} of {total} experiment sets. {show_link}</h4>
+                        </div>
                         <ul className="nav result-table" id="result-table">
                             {resultListing}
                         </ul>
@@ -690,6 +662,118 @@ var ResultTable = browse.ResultTable = React.createClass({
         this.props.onChange(search);
         e.stopPropagation();
         e.preventDefault();
+    }
+});
+
+var FileButton = browse.FileButton = React.createClass({
+    runFxn: function(e){
+        e.preventDefault();
+        this.props.fxn(this.props.format);
+    },
+    render: function(){
+        return(
+            <Button className="expset-selector-button" bsSize="xsmall" onClick={this.runFxn}>{this.props.format} ({this.props.count})</Button>
+        );
+    }
+});
+
+var ControlsAndResults = browse.ControlsAndResults = React.createClass({
+
+    getInitialState: function(){
+        var initStats = {};
+        initStats['checked'] = new Set();
+        initStats['formats'] = {};
+        initStats['uuids'] = new Set();
+        return{
+            fileStats: initStats,
+            filesToFind: {}
+        }
+    },
+
+    componentDidMount: function(){
+        var currStats = findFiles();
+        this.setState({
+            fileStats: currStats
+        });
+        // update after initiating
+        this.forceUpdate();
+    },
+
+    componentDidUpdate: function(){
+        var currStats = findFiles();
+        console.log(currStats);
+        if(!_.isEqual(this.state.fileStats, currStats)){
+            this.setState({
+                fileStats: currStats
+            });
+        }
+    },
+
+    selectFiles: function(format){
+        var currTargets = this.state.filesToFind;
+        var newTargets = {};
+        var targetKeys = Object.keys(currTargets);
+        if(!_.contains(targetKeys, format)){
+            targetKeys = targetKeys.concat(format);
+        }
+        for(var i=0; i<targetKeys.length; i++){
+            if(targetKeys[i] !== format){
+                newTargets[format] = currTargets[format];
+            }else{
+                if(currTargets[format] && currTargets[format].size > 0){
+                    newTargets[format] = new Set(); // remove old target
+                }else{
+                    newTargets[format] = this.state.fileStats.formats[format];
+                }
+            }
+        }
+        this.setState({
+            filesToFind: newTargets
+        });
+    },
+
+    render: function(){
+        var fileSelectors = ["bam","bai","bed","bigBed","bigWig","fasta","fastq","gff","gtf","hdf5","tsv","csv","tar","tagAlign","wig"];
+        var fileStats = this.state.fileStats;
+        var fileTargets = this.state.filesToFind;
+        var selectorButtons = fileSelectors.map(function (format, idx) {
+            var count = fileStats.formats[format] ? fileStats.formats[format].size : 0;
+            return(
+                <FileButton key={format} fxn={this.selectFiles} format={format} count={count}/>
+            );
+        }.bind(this));
+        return(
+            <div>
+                <div className="row">
+                    <div className="box expset-whole-selector col-sm-12 col-md-10 col-lg-9 col-md-push-2 col-lg-push-3">
+                        <div className="col-sm-8 col-md-8 col-lg-8 expset-file-selector">
+                            <div className="row">
+                                <div className="expset-selector-header">
+                                    <h5>For all <span className="expset-entry-passed">passing</span> entries, select files of type:</h5>
+                                </div>
+                            </div>
+                            <div className="row">
+                                <ButtonToolbar>{selectorButtons}</ButtonToolbar>
+                            </div>
+                        </div>
+                        <div className="col-sm-3 col-md-3 col-lg-3">
+                            <div className="row">
+                                <div className="expset-selector-header">
+                                    <h5>For all selected files:</h5>
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="test-filler">Hi</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="row">
+                    <ResultTable {...this.props} fileTargets={filesToFind}/>
+                </div>
+            </div>
+
+        );
     }
 });
 
@@ -743,7 +827,7 @@ var Browse = browse.Browse = React.createClass({
         }
         return (
             <div className="panel data-display main-panel">
-                <ResultTable {...this.props} key={undefined} searchBase={searchBase} onChange={this.context.navigate} changeFilters={this.changeFilters}/>
+                <ControlsAndResults {...this.props} key={undefined} searchBase={searchBase} onChange={this.context.navigate} changeFilters={this.changeFilters}/>
             </div>
         );
     }
