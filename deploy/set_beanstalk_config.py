@@ -7,8 +7,8 @@ import subprocess
 
 def dbconn_from_env():
     if 'RDS_DB_NAME' in os.environ:
-        override_prefix_name = "RDS"
-        if (os.environ.get("$ENV_NAME","") == "PROD"):
+        prfx = "RDS"
+        if (os.environ.get("ENV_NAME","") == "PROD"):
             prfx = "bnSTaLk"
 
         db = os.environ[prfx + '_DB_NAME']
