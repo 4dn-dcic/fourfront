@@ -35,6 +35,7 @@ ORDER = [
     'modification',
     'biosample',
     'file_fastq',
+    'file_fasta',
     'file_set',
     'experiment_hic',
     'experiment_capture_c',
@@ -509,6 +510,9 @@ PHASE1_PIPELINES = {
     'file_fastq': [
         remove_keys('experiments', 'filesets'),
     ],
+    'file_fasta': [
+        remove_keys('experiments', 'filesets'),
+    ],
     'file_set': [
         remove_keys('files_in_set'),
     ],
@@ -539,6 +543,9 @@ PHASE2_PIPELINES = {
         skip_rows_missing_all_keys('lab', 'submits_for'),
     ],
     'file_fastq': [
+        skip_rows_missing_all_keys('experiments', 'filesets'),
+    ],
+    'file_fasta': [
         skip_rows_missing_all_keys('experiments', 'filesets'),
     ],
     'file_set': [
