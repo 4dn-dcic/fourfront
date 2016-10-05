@@ -8,7 +8,8 @@ branch-defaults:
     environment: 4dn-prod
 global:
   application_name: 4dn-web
+  default_ec2_keyname: 4dn-encode
   default_platform: Python 3.4
   default_region: us-east-1
-  profile: eb-cli
+  profile: null
   sc: git
