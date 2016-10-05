@@ -67,7 +67,9 @@
                 "peaks",
                 "genome reference",
                 "genome index",
-                "blacklisted regions"
+                "blacklisted regions",
+                "repeats",
+                "oligonucleotides"
             ]
         },
         "file_classification": {
