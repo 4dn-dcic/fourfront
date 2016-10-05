@@ -1,5 +1,6 @@
 'use strict';
 var React = require('react');
+var ReactDOM = require('react-dom');
 var queryString = require('query-string');
 var url = require('url');
 var _ = require('underscore');
@@ -18,13 +19,67 @@ var AuditDetail = audit.AuditDetail;
 var AuditMixin = audit.AuditMixin;
 var fileFormats = ["bam","bai","bed","bigBed","bigWig","fasta","fastq","gff","gtf","hdf5","tsv","csv","tar","tagAlign","wig"];
 
+var IndeterminateCheckbox = React.createClass({
+    render: function(){
+        var props = this.props;
+        return(
+            <input {...props} type="checkbox" ref={function(input) {if (input) {input.indeterminate = props.indeterminate;}}} />
+        );
+    }
+});
 
 var ExperimentSet = module.exports.ExperimentSet = React.createClass({
     getInitialState: function() {
     	return {
             open: false,
-            checked: false
+            checked: false,
+            selectedExpts: new Set(),
+            completeExpts: new Set()
         };
+    },
+
+    handleExptUpdate: function(uuid, complete, add=true){
+        var newCompleteSet = this.state.completeExpts;
+        var newPartialSet = this.state.selectedExpts;
+        if(add){
+            if(!newCompleteSet.has(uuid) && complete){
+                newCompleteSet.add(uuid);
+                this.setState({
+                    completeExpts: newCompleteSet
+                });
+            }else if(!newPartialSet.has(uuid) && !complete){
+                newPartialSet.add(uuid);
+                this.setState({
+                    selectedExpts: newPartialSet
+                });
+            }
+        }else{
+            if(newCompleteSet.has(uuid)){
+                newCompleteSet.delete(uuid);
+            }
+            if(newPartialSet.has(uuid)){
+                newPartialSet.delete(uuid);
+            }
+            this.setState({
+                completeExpts: newCompleteSet,
+                selectedExpts: newPartialSet
+            });
+        }
+    },
+
+    // to prevent the case of all sub-expts or files being manually checked, but state.checked not updated
+    componentDidUpdate: function() {
+        if(this.props.experimentArray.length > 0){
+            if(this.state.selectedExpts.size === 0 && this.state.checked){
+                this.setState({
+                    checked: false
+                });
+            }else if(this.state.completeExpts.size === this.props.experimentArray.length && !this.state.checked){
+                this.setState({
+                    checked: true
+                });
+            }
+        }
     },
 
     handleToggle: function (e) {
@@ -45,21 +100,23 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
         var childExperiments = experimentArray.map(function (experiment) {
             if(this.props.passExperiments.has(experiment)){
                 return (
-                    <ExperimentSublist targetFiles={this.props.targetFiles} parentChecked={this.state.checked} passed={true} result={experiment} key={'a' + experiment.uuid} />
+                    <ExperimentSublist handleExptUpdate={this.handleExptUpdate} foundFile={this.props.foundFile} targetFiles={this.props.targetFiles} parentChecked={this.state.checked} passed={true} result={experiment} key={'a' + experiment.uuid} />
                 );
             }else{
                 return (
-                    <ExperimentSublist targetFiles={this.props.targetFiles} parentChecked={this.state.checked} passed={false} result={experiment} key={'b' + experiment.uuid} />
+                    <ExperimentSublist handleExptUpdate={this.handleExptUpdate} foundFile={this.props.foundFile} targetFiles={this.props.targetFiles} parentChecked={this.state.checked} passed={false} result={experiment} key={'b' + experiment.uuid} />
                 );
             }
         }.bind(this));
         childExperiments = sortByKey(childExperiments);
+        var checked = this.state.completeExpts.size === childExperiments.length;
+        var indeterminate = ((this.state.completeExpts.size > 0 || this.state.selectedExpts.size > 0) && this.state.completeExpts.size !== childExperiments.length);
         return (
             <li>
                 <div className="clearfix">
                     <div className="accession">
                         <Button bsSize="xsmall" className="expset-button" onClick={this.handleToggle}>{this.state.open ? "-" : "+"}</Button>
-                        <Checkbox checked={this.state.checked} className='expset-checkbox' onChange={this.handleCheck}/>
+                        <IndeterminateCheckbox checked={checked} indeterminate={indeterminate} className='expset-checkbox' onChange={this.handleCheck}/>
                         <a className={this.props.passed} href={this.props.href}>
                             {this.props.title}
                         </a>
@@ -79,33 +136,13 @@ var ExperimentSublist = React.createClass({
     getInitialState: function() {
     	return {
             open: false,
-            checked: false
+            checked: false,
+            selectedFiles: new Set(),
+            files: []
         };
     },
 
-    handleToggle: function (e) {
-        e.preventDefault();
-        this.setState({
-  		  open: !this.state.open
-  	  });
-    },
-
-    // update checkboxes if parent has changed
-    componentWillReceiveProps: function(nextProps) {
-        if(nextProps !== this.props){
-            this.setState({
-                checked: nextProps.parentChecked
-            });
-        }
-    },
-
-    handleCheck: function() {
-        this.setState({
-            checked: !this.state.checked
-        });
-    },
-
-    render: function() {
+    componentWillMount: function(){
         var result = this.props.result;
         // get files from "files" or "filesets[idx].files_in_set"
         var files;
@@ -122,20 +159,94 @@ var ExperimentSublist = React.createClass({
         }else{
             files = [];
         }
+        this.setState({
+            files: files
+        });
+    },
+
+    // update checkboxes if parent has changed
+    componentWillReceiveProps: function(nextProps) {
+        if(nextProps.parentChecked !== this.props.parentChecked){
+            this.setState({
+                checked: nextProps.parentChecked
+            });
+        }
+    },
+
+    // to prevent the case of all sub-expts or files being manually checked, but state.checked not updated
+    componentDidUpdate: function() {
+        if(this.state.files.length > 0){
+            if(this.state.selectedFiles.size === 0 && this.state.checked){
+                this.setState({
+                    checked: false
+                });
+            }else if(this.state.selectedFiles.size === this.state.files.length && !this.state.checked){
+                this.setState({
+                    checked: true
+                });
+            }
+        }
+    },
+
+    handleToggle: function (e) {
+        e.preventDefault();
+        this.setState({
+  		  open: !this.state.open
+        });
+
+    },
+
+    handleFileUpdate: function (uuid, add=true){
+        var newSet = this.state.selectedFiles;
+        if(add){
+            if(!newSet.has(uuid)){
+                newSet.add(uuid);
+                this.setState({
+                    selectedFiles: newSet
+                });
+            }
+        }else if(newSet.has(uuid)){
+            newSet.delete(uuid);
+            this.setState({
+                selectedFiles: newSet
+            });
+        }
+        if(this.state.selectedFiles.size === this.state.files.length){
+            this.props.handleExptUpdate(this.props.result.uuid, true);
+        }else if(this.state.selectedFiles.size > 0){
+            this.props.handleExptUpdate(this.props.result.uuid, false);
+        }else{
+            this.props.handleExptUpdate(this.props.result.uuid, false, false);
+        }
+    },
+
+    handleCheck: function() {
+        this.setState({
+            checked: !this.state.checked
+        });
+    },
+
+    render: function() {
+        var result = this.props.result;
+        // get files from "files" or "filesets[idx].files_in_set"
+        var files = this.state.files;
         var passed = "expset-entry";
         if(this.props.passed){
             passed += " expset-entry-passed";
         }
         var childFiles = files.map(function (file) {
             return (
-                <FileSublist targetFiles={this.props.targetFiles} key={file.accession} parentChecked={this.state.checked} file={file} passed={this.props.passed}/>
+                <FileSublist handleFileUpdate={this.handleFileUpdate} foundFile={this.props.foundFile} targetFiles={this.props.targetFiles} key={file.accession} parentChecked={this.state.checked} file={file} passed={this.props.passed}/>
             );
         }.bind(this));
-        var fileHits = "(" + childFiles.length + " of " + files.length +" files)";
+        var fileHits = "(" + this.state.selectedFiles.size + " of " + files.length +" files selected)";
+        // base checked status solely on files
+        var checked = this.state.selectedFiles.size === files.length;
+        var indeterminate = (this.state.selectedFiles.size !== files.length && this.state.selectedFiles.size > 0);
         return(
             <div className='expset-sublist-entry' key={result.accession}>
                 <Button bsSize="xsmall" className="expset-button" onClick={this.handleToggle}>{this.state.open ? "-" : "+"}</Button>
-                <Checkbox checked={this.state.checked} className='expset-checkbox expset-checkbox-sub' onChange={this.handleCheck}/>
+                <IndeterminateCheckbox checked={checked} indeterminate={indeterminate} className='expset-checkbox expset-checkbox-sub' onChange={this.handleCheck}/>
                 <a className={passed} href={result['@id'] || ''}>
                     {result.experiment_summary || result.accession || result.uuid || result['@id']}
                 </a>
@@ -157,16 +268,24 @@ var FileSublist = React.createClass({
 
     // update checkboxes if parent has changed
     componentWillReceiveProps: function(nextProps) {
-        if(nextProps !== this.props){
-            if(nextProps.targetFiles[this.props.file.file_format] && nextProps.targetFiles[this.props.file.file_format].has(this.props.file.uuid)){
+        if(this.props.targetFiles !== nextProps.targetFiles){
+            if(nextProps.targetFiles.size > 0 && nextProps.targetFiles.has(this.props.file.uuid)){
+                this.props.foundFile(this.props.file.uuid);
                 this.setState({
                     checked: true
                 });
-            }else{
-                this.setState({
-                    checked: nextProps.parentChecked
-                });
             }
+        }else if(this.props.parentChecked !== nextProps.parentChecked){
+            this.setState({
+                checked: nextProps.parentChecked
+            });
+        }
+    },
+
+    // update selected file info for parent expt
+    componentDidUpdate(nextProps, nextState){
+        if(nextState.checked !== this.state.checked){
+            this.props.handleFileUpdate(this.props.file.uuid, this.state.checked);
         }
     },
 
@@ -562,6 +681,7 @@ var ResultTable = browse.ResultTable = React.createClass({
         var context = this.props.context;
         var results = context['@graph'];
         var targetFiles = this.props.targetFiles;
+        var foundFile = this.props.foundFile;
         var total = context['total'];
         var columns = context['columns'];
         var searchBase = this.props.searchBase;
@@ -616,11 +736,11 @@ var ResultTable = browse.ResultTable = React.createClass({
                 if(intersection.size > 0 && intersection.size === experimentArray.length){
                     passed += " expset-entry-passed";
                     return (
-                        <ExperimentSet targetFiles={targetFiles} passed={passed} href={href} title={title} exptHits={exptHits} experimentArray={experimentArray} passExperiments={passExperiments} key={'a' + result['@id']} />
+                        <ExperimentSet foundFile={foundFile} targetFiles={targetFiles} passed={passed} href={href} title={title} exptHits={exptHits} experimentArray={experimentArray} passExperiments={passExperiments} key={'a' + result['@id']} />
                     );
                 }else{
                     return (
-                        <ExperimentSet targetFiles={targetFiles} passed={passed} href={href} title={title} exptHits={exptHits} experimentArray={experimentArray} passExperiments={passExperiments} key={'b' + result['@id']} />
+                        <ExperimentSet foundFile={foundFile} targetFiles={targetFiles} passed={passed} href={href} title={title} exptHits={exptHits} experimentArray={experimentArray} passExperiments={passExperiments} key={'b' + result['@id']} />
                     );
                 }
             })
@@ -689,7 +809,7 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
         initStats['uuids'] = new Set();
         return{
             fileStats: initStats,
-            filesToFind: {}
+            filesToFind: new Set()
         }
     },
 
@@ -713,26 +833,32 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
         }
     },
 
+    deselectFiles: function(e){
+        e.preventDefault();
+    },
+
+    downloadFiles: function(e){
+        e.preventDefault();
+        var currStats = findFiles();
+        var checkedFiles = currStats['checked'] ? currStats['checked'] : new Set();
+        console.log('____DOWNLOAD THESE ' + checkedFiles.size + ' FILES____');
+        console.log(checkedFiles);
+    },
+
     selectFiles: function(format){
-        var currTargets = this.state.filesToFind;
-        var newTargets = {};
-        var targetKeys = Object.keys(currTargets);
-        if(!_.contains(targetKeys, format)){
-            targetKeys = targetKeys.concat(format);
-        }
-        for(var i=0; i<targetKeys.length; i++){
-            if(targetKeys[i] !== format){
-                newTargets[format] = currTargets[format];
-            }else{
-                if(currTargets[format] && currTargets[format].size > 0){
-                    newTargets[format] = new Set(); // remove old target
-                }else{
-                    newTargets[format] = this.state.fileStats.formats[format];
-                }
-            }
-        }
+        var tempObj = Object.assign({},this.state.fileStats.formats);
         this.setState({
-            filesToFind: newTargets
+            filesToFind: tempObj[format]
+        });
+    },
+
+    foundFile: function(uuid){
+        var revisedTargets = this.state.filesToFind;
+        // if(revisedTargets.has(uuid)){
+        //     revisedTargets.delete(uuid);
+        // }
+        this.setState({
+            filesToFind: revisedTargets
         });
     },
 
@@ -740,12 +866,15 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
         // make sure fileFormats global var is up-to-date
         var fileStats = this.state.fileStats;
         var targetFiles = this.state.filesToFind;
+        console.log(targetFiles);
         var selectorButtons = fileFormats.map(function (format, idx) {
             var count = fileStats.formats[format] ? fileStats.formats[format].size : 0;
             return(
                 <FileButton key={format} fxn={this.selectFiles} format={format} count={count}/>
             );
         }.bind(this));
+        var deselectButton = <Button className="expset-selector-button" bsSize="xsmall">Deselect</Button>;
+        var downloadButton = <Button className="expset-selector-button" bsSize="xsmall" onClick={this.downloadFiles}>Download</Button>;
         return(
             <div>
                 <div className="row">
@@ -767,13 +896,16 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
                                 </div>
                             </div>
                             <div className="row">
-                                <div className="test-filler">Hi</div>
+                                <ButtonToolbar>
+                                    {deselectButton}
+                                    {downloadButton}
+                                </ButtonToolbar>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div className="row">
-                    <ResultTable {...this.props} targetFiles={targetFiles}/>
+                    <ResultTable {...this.props} targetFiles={targetFiles} foundFile={this.foundFile}/>
                 </div>
             </div>
 
