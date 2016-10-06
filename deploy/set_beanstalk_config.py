@@ -6,17 +6,22 @@ import os
 import subprocess
 
 def dbconn_from_env():
-    if 'RDS_DB_NAME' in os.environ:
-        db = os.environ['RDS_DB_NAME']
-        user = os.environ['RDS_USERNAME']
-        pwd =  os.environ['RDS_PASSWORD']
-        host = os.environ['RDS_HOSTNAME']
-        port = os.environ['RDS_PORT']
+    prfx = ''
+    if (os.environ.get("ENV_NAME","") == "PROD"):
+        prfx = "bnSTaLk"
+    elif 'RDS_DB_NAME' in os.environ:
+        prfx = "RDS"
+
+    if prfx:
+        db = os.environ[prfx + '_DB_NAME']
+        user = os.environ[prfx + '_USERNAME']
+        pwd =  os.environ[prfx + '_PASSWORD']
+        host = os.environ[prfx + '_HOSTNAME']
+        port = os.environ[prfx + '_PORT']
         return "postgresql://%s:%s@%s:%s/%s" % (user, pwd, host, port, db)
     return "postgresql://abh:def@local-host:123/ebd"
 
 def update_connection_string(conn):
-
     if not conn: return
     file_dir, _ = os.path.split(os.path.abspath(__file__))
     filename = os.path.join(file_dir, '..','base.ini')
