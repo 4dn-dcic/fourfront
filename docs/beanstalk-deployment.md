@@ -46,3 +46,16 @@ sudo shutdown -r now
 ```
 
 ** Note ** this will temporarily bring the site down, for a couple of minutes
+
+## Database backup / restore
+
+Database snapshots are automatically taken every day.  To restore a backup on production (4dnweb-prod) 
+1. Go to the RDS tab and then look at the snapshots page.
+2. Select the backup you want to restore.
+3. Click Restore Snapshot
+4. You will be prompted for a DB Instance Name, name it what you like.
+5. Go to 4dnweb-prod environment and select configuration -> software configuration
+6. Change the enviornment variable bnSTaLk_HOSTNAME to the name you just used for the new database.
+7. Redeploy the applicaition production.
+
+

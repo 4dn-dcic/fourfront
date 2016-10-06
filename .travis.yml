@@ -124,7 +124,7 @@ after_success:
           git config --global user.email "travis@builder.com"
           git config --global user.name "Travis"
           #git checkout production
-          eb use 4dn-prod --debug --verbose
+          eb use 4dnweb-prod --debug --verbose
           python deploy/deploy_beanstalk.py
         fi
       fi
