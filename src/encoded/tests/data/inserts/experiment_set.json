@@ -3,16 +3,49 @@
         "uuid": "431106bc-8535-4448-903e-854af460b260",
         "description": "Sample experiment set",
         "experimentset_type": "biological replicates",
-        "experiments_in_set": ["4DNEX067APU1", "4DNEX067APT1"],
+        "experiments_in_set": ["4DNEX067APU1"],
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b285",
         "description": "Sample experiment set 2",
+        "experimentset_type": "biological replicates",
+        "experiments_in_set": ["4DNEX067APV1", "4DNEX067APY1"],
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "uuid": "431106bc-8535-4448-903e-854af460b297",
+        "description": "Sample experiment set 3",
+        "experimentset_type": "biological replicates",
+        "experiments_in_set": ["4DNEX067APT1", "4DNEX067APZ1"],
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "uuid": "431106bc-8535-4448-903e-854af460c260",
+        "description": "Sample experiment set",
         "experimentset_type": "analysis set",
-        "experiments_in_set": ["4DNEX067APV1", "4DNEX067APY1", "4DNEX067APZ1"],
+        "experiments_in_set": ["4DNEX067APU1"],
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "uuid": "431106bc-8535-4448-903e-854af460c285",
+        "description": "Sample experiment set 2",
+        "experimentset_type": "analysis set",
+        "experiments_in_set": ["4DNEX067APV1", "4DNEX067APY1"],
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01"
+    },
+    {
+        "uuid": "431106bc-8535-4448-903e-854af460c297",
+        "description": "Sample experiment set 3",
+        "experimentset_type": "analysis set",
+        "experiments_in_set": ["4DNEX067APT1", "4DNEX067APZ1"],
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01"
     }
+
 ]

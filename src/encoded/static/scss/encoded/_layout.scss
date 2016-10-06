@@ -379,10 +379,6 @@ p, input {
 	padding: 0px 5px 0px 5px;
 }
 
-.expset-entry-passed{
-	background-color: #b3ff66;
-}
-
 .expset-panel{
 	margin: 0px 5px 0px 5px !important;
 }
@@ -396,6 +392,12 @@ p, input {
 
 .expset-sublist-entry{
 	margin-bottom: 2px;
+}
+
+.expset-sublist-empty{
+	margin-left: 50px;
+	margin-bottom: 2px;
+	color: #999999;
 }
 
 .expset-facet-header-group{
