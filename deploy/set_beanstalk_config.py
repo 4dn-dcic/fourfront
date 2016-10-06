@@ -6,11 +6,13 @@ import os
 import subprocess
 
 def dbconn_from_env():
-    if 'RDS_DB_NAME' in os.environ:
+    prfx = ''
+    if (os.environ.get("ENV_NAME","") == "PROD"):
+        prfx = "bnSTaLk"
+    elif 'RDS_DB_NAME' in os.environ:
         prfx = "RDS"
-        if (os.environ.get("ENV_NAME","") == "PROD"):
-            prfx = "bnSTaLk"
 
+    if prfx:
         db = os.environ[prfx + '_DB_NAME']
         user = os.environ[prfx + '_USERNAME']
         pwd =  os.environ[prfx + '_PASSWORD']
