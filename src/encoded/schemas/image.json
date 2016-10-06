@@ -5,7 +5,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": [ "attachment" ],
-    "identifyingProperties": ["uuid"],
+    "identifyingProperties": ["uuid","aliases"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -14,6 +14,7 @@
         { "$ref": "mixins.json#/attachment" },
         { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/notes" }
     ],
     "properties": {

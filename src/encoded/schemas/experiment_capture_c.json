@@ -4,7 +4,7 @@
     "id": "/profiles/experiment_capture_c.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["experiment_type"],
+    "required": ["experiment_type", "award", "lab", "biosample"],
     "identifyingProperties": ["uuid", "accession", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -79,17 +79,17 @@
         "biosample.biosource.biosource_type": {
             "title": "Biosource type"
         },
-        "biosample.biosource.biosource_name": {
-            "title": "Biosource name"
+        "biosample.biosource_summary": {
+            "title": "Biosource"
         },
         "digestion_enzyme.name": {
             "title": "Enzyme"
         },
-        "biosample.modifications.modification_type": {
-            "title": "Modification type"
+        "biosample.modifications_summary": {
+            "title": "Modifications"
         },
-        "biosample.treatments.treatment_type": {
-            "title": "Treatment type"
+        "biosample.treatments_summary": {
+            "title": "Treatments"
         },
         "lab.title": {
             "title": "Lab"
@@ -105,20 +105,35 @@
         "biosample.biosource.biosource_type": {
             "title": "Biosource type"
         },
-        "biosample.biosource.biosource_name": {
-            "title": "Biosource name"
+        "biosample.biosource_summary": {
+            "title": "Biosource"
         },
         "digestion_enzyme.name": {
             "title": "Enzyme"
         },
-        "biosample.modifications.modification_type": {
-            "title": "Modification type"
+        "biosample.modifications_summary": {
+            "title": "Modifications"
         },
-        "biosample.treatments.treatment_type": {
-            "title": "Treatment type"
+        "biosample.treatments_summary": {
+            "title": "Treatments"
         },
         "lab.title": {
             "title": "Lab"
+        },
+        "description":{
+            "title": "Description"
+        },
+        "accession":{
+            "title": "Accession"
+        },
+        "title":{
+            "title": "Title"
+        },
+        "name":{
+            "title": "Name"
+        },
+        "experiment_summary":{
+            "title": "Experiment summary"
         }
     }
 }

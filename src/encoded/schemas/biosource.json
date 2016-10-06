@@ -59,6 +59,16 @@
               "type":  "string",
               "comment": "enforce EFO ontology term for a cell line?"
           },
+          "cell_line_tier": {
+              "title": "Cell line tier",
+              "description": "Tier into which the cell line has been classified",
+              "type": "string",
+              "enum": [
+                  "Tier 1",
+                  "Tier 2",
+                  "Unclassified"
+              ]
+          },
           "tissue": {
               "title": "Tissue name",
               "description": "Anatomy (UBERON) Ontology term for the tissue used.",
@@ -76,6 +86,12 @@
               "description": "An external resource with additional information about the biosource.",
               "type": "string",
               "format": "uri"
+          },
+          "SOP_cell_line":{
+              "title": "SOP document for the cell line",
+              "description": "Standard operation protocol for the cell line as determined by 4DN Cells Working Group",
+              "type": "string",
+              "linkTo": "Protocol"
           }
       },
       "facets": {

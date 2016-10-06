@@ -155,27 +155,24 @@ var UserActions = React.createClass({
         var actions = this.context.listActionsFor('user_section').map(function (action) {
             if (action.id === "login"){
                 return(<Login key={action.id} />);
-            }else if (action.id === "profile"){
-                return(<AccountActions key={action.id} />);
-            }else if (action.id === "contextactions") {
-                return(<ContextActions key={action.id} />);
-            }else{
-                return(
-                        <a href={action.href || ''} key={action.id} data-bypass={action.bypass} data-trigger={action.trigger} className="global-entry">
+            }else if (action.id === "accountactions"){
+                // link to registration page if logged out or account actions if logged in
+                if (!session_properties['auth.userid']) {
+                    return(
+                        <a href={action.url || ''} key={action.id} className="global-entry">
                             {action.title}
                         </a>
                     );
+                }else{
+                    return(<AccountActions key={action.id} />);
+                }
+            }else if (action.id === "contextactions") {
+                return(<ContextActions key={action.id} />);
             }
         });
-        var active_icon;
-        if (session_properties['auth.userid']) {
-            active_icon = <img src="/static/img/User_active.svg" height= "30px" width="25px"/>
-        }else{
-            active_icon = <img src="/static/img/User_inactive.svg" height= "30px" width="25px"/>
-        }
         return (
                 <Nav right={true} acct={true}>
-                    <NavItem dropdownId="context" dropdownTitle={active_icon}>
+                    <NavItem dropdownId="context" dropdownTitle='Account'>
                         <DropdownMenu label="context">
                             {actions}
                         </DropdownMenu>
