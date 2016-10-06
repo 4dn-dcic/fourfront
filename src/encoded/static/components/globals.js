@@ -115,6 +115,7 @@ module.exports.statusOrder = [
 
 module.exports.productionHost = {'www.data.4dnucleome.org':1, 
                                  'data.4dnucleome.org':1,
+                                '4dnweb-prod.us-east-1.elasticbeanstalk.com':1,};
                                 '4dn-prod.us-east-1.elasticbeanstalk.com':1,};
 
 var encodeVersionMap = module.exports.encodeVersionMap = {
