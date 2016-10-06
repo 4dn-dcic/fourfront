@@ -1,0 +1,59 @@
+{
+    "arguments": [
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "FastQC", 
+                    "step_argument_name": "limits_file", 
+                    "step_argument_type": "Input file"
+                }
+            ], 
+            "workflow_argument_name": "limits_file", 
+            "argument_type": "Input file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "FastQC", 
+                    "step_argument_name": "input_fastq", 
+                    "step_argument_type": "Input file"
+                }
+            ], 
+            "workflow_argument_name": "input_fastq", 
+            "argument_type": "Input file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "FastQC", 
+                    "step_argument_name": "contaminants_file", 
+                    "step_argument_type": "Input file"
+                }
+            ], 
+            "workflow_argument_name": "contaminants_file", 
+            "argument_type": "Input file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "FastQC", 
+                    "step_argument_name": "adapters_file", 
+                    "step_argument_type": "Input file"
+                }
+            ], 
+            "workflow_argument_name": "adapters_file", 
+            "argument_type": "Input file"
+        }, 
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "FastQC", 
+                    "step_argument_name": "report_zip", 
+                    "step_argument_type": "Output file"
+                }
+            ], 
+            "workflow_argument_name": "report_zip", 
+            "argument_type": "Output file"
+        }
+    ]
+}

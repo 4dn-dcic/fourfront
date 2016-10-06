@@ -1,8 +1,15 @@
 ## Summary of the directory
+### GITAR
 * The two files gitar_cwl and sbg.task.detail.json are directly obtained from SBG using scripts `get_cwl_from_SBG.py` and `get_job_detail_SBG.py`, respectively.
 * The two json files (file, workflow_run) are created by script `read_sbg_job_detail_create_files.py`, by using sbg.task.detail.json as input. 
 * The workflow json file is created by script `read_cwl_create_workflow_insert.py`, by using gitar_cwl as input. (in progress)
 * The three schema example json files are copied to tests/data/inserts.
+
+
+### FASTQC
+* sbg_fastqc_workflow.json is created from sbg_fastqc_workflow.cwl using `read_cwl_create_workflow_insert.py` and is also placed in this directory.
+
+
 
 ## scripts
 ```

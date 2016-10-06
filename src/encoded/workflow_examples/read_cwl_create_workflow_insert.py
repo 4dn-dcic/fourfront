@@ -133,7 +133,8 @@ def parse_cwl(cwlfile, workflow_metadata_json):
     cwl_dict=json.load(f)
 
   # handle SBG cwl.
-  cwl_dict=cwl_dict['raw']  # SBG's cwl is one level down under the 'raw' field.
+  if cwl_dict.has_key('raw'):
+    cwl_dict=cwl_dict['raw']  # 'some' SBG's cwl is one level down under the 'raw' field.
   
   # initialize dictionary to write to output json file
   workflow={ 'arguments':[] }  # this is what we will create.
