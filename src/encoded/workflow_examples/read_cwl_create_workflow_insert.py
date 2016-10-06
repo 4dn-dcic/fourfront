@@ -2,6 +2,16 @@
 
 import json
 import sys
+import random
+
+
+def generate_uuid ():
+  rand_uuid_start=''
+  for i in xrange(8):
+    r=random.choice('abcdefghijklmnopqrstuvwxyz1234567890')
+    rand_uuid_start += r
+    uuid=rand_uuid_start + "-49e5-4c33-afab-9ec90d65faf3"
+  return uuid
 
 
 # function that parses 'source' field of CWL, which contain information of step and argument names.
@@ -126,7 +136,7 @@ def map_step_argument_to_another_step_argument ( workflow, source, step_id, step
 
 
 # function that takes a cwl file and write a workflow insert json file
-def parse_cwl(cwlfile, workflow_metadata_json):
+def parse_cwl(cwlfile, workflow_metadata_json, workflow_name, workflow_description, workflow_type, cwl_url, uuid):
 
   # get cwl as a dict
   with open(cwlfile,'r') as f:
@@ -137,7 +147,15 @@ def parse_cwl(cwlfile, workflow_metadata_json):
     cwl_dict=cwl_dict['raw']  # 'some' SBG's cwl is one level down under the 'raw' field.
   
   # initialize dictionary to write to output json file
-  workflow={ 'arguments':[] }  # this is what we will create.
+  workflow={ 'arguments':[],  # this is what we will create.
+             "workflow_steps": [], # this, too.
+             "title": workflow_name,
+             "description": workflow_description,
+             "workflow_type": workflow_type,
+             "cwl_pointer": cwl_url,
+             "workflow_diagram": '',
+             "uuid": uuid }
+
 
   # parsing global input files and parameters and storing to the workflow dictionary (can't map to step arguments yet)
   # argument type is either 'Input file' or 'parameter'.
@@ -152,6 +170,7 @@ def parse_cwl(cwlfile, workflow_metadata_json):
     map_workflow_output_argument_to_step_argument ( workflow, source, x['id'].strip('#'), source['step'], source['arg'] )
 
   ## parsing steps (map 1. global output files to step arguments and 2. between arguments between steps that are not globally defined)
+  ## fill in 'arguments'
   for x in cwl_dict['steps']:
     for y in x['inputs']:
       if y.has_key('source'):
@@ -167,7 +186,12 @@ def parse_cwl(cwlfile, workflow_metadata_json):
        
         ## case 3 (no global argument, no passing between steps) - we assume this doesn't exist.
 
-     
+  ## parsing steps again
+  ## fill in workflow_steps.
+  for x in cwl_dict['steps']:
+    workflow['workflow_steps'].append( { 'step_name': x['id'].strip('#'), 'LinkTo': generate_uuid() } )   ## assuming that uuid for step is generated at this point? Or should we retrieve a corresponding step that already exists?
+
+
   with open(workflow_metadata_json,'w') as fo:
     fo.write ( json.dumps(workflow,indent=4) + "\n")
     #fo.write ( cwl_dict.keys() + "\n")
@@ -181,7 +205,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="temporary cwl parser that creates a workflow insert")
     parser.add_argument('-c','--cwlfile', help='input cwlfile')
     parser.add_argument('-w','--workflow_metadata_json', help='output workflow metadata json file')
+    parser.add_argument('-n','--workflow_name', help='output workflow metadata json file')
+    parser.add_argument('-d','--workflow_description', help='output workflow metadata json file')
+    parser.add_argument('-t','--workflow_type', help='output workflow metadata json file')
+    parser.add_argument('-u','--cwl_url', help='output workflow metadata json file')
     args = parser.parse_args()
-    parse_cwl(args.cwlfile, args.workflow_metadata_json)
+    uuid= generate_uuid()
+    parse_cwl(args.cwlfile, args.workflow_metadata_json, args.workflow_name, args.workflow_description, args.workflow_type, args.cwl_url, uuid )
 
 

@@ -1,4 +1,6 @@
 {
+    "cwl_pointer": "https://igor.sbgenomics.com/raw/4dn-dcic/dev/fastqc-0-11-4/0", 
+    "uuid": "pt2i2zim-49e5-4c33-afab-9ec90d65faf3", 
     "arguments": [
         {
             "argument_mapping": [
@@ -55,5 +57,15 @@
             "workflow_argument_name": "report_zip", 
             "argument_type": "Output file"
         }
-    ]
+    ], 
+    "title": "FastQC", 
+    "workflow_steps": [
+        {
+            "step_name": "FastQC", 
+            "LinkTo": "kce0k4mf-49e5-4c33-afab-9ec90d65faf3"
+        }
+    ], 
+    "workflow_type": "QC", 
+    "workflow_diagram": "", 
+    "description": "FastQC quality control step for fastq files"
 }
