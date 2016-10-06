@@ -80,7 +80,7 @@ def process_file(v, bucket_name, file_metadata_json, token, no_upload, no_downlo
 
         # upload to s3
         if not no_upload:
-           os.system('aws s3 cp {} s3://{}').format(sbg_filename,bucket_name)
+           os.system("aws s3 cp {} s3://{}".format(sbg_filename,bucket_name))
 
         # create random accession and uuid
         rand_accession=''
