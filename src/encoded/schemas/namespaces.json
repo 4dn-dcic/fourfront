@@ -1,4 +1,5 @@
 {
     "UniProtKB": "http://www.uniprot.org/uniprot/",
-    "SRA": "https://www.ncbi.nlm.nih.gov/sra/?term="
+    "SRA": "https://www.ncbi.nlm.nih.gov/sra/?term=",
+    "GEO": "http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc="
 }
