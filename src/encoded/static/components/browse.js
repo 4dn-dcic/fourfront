@@ -39,27 +39,20 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
     },
 
     handleExptUpdate: function(uuid, complete, add=true){
+        // complete experiments have all files selected
+        // selected experiments have at least one file selected
         var newCompleteSet = this.state.completeExpts;
         var newPartialSet = this.state.selectedExpts;
-        var newEmptySet = this.state.emptyExpts;
         if(add){
             if(!newCompleteSet.has(uuid) && complete){
                 newCompleteSet.add(uuid);
-                if(newEmptySet.has(uuid)){
-                    newEmptySet.delete(uuid);
-                }
                 this.setState({
                     completeExpts: newCompleteSet,
-                    emptyExpts: newEmptySet
                 });
             }else if(!newPartialSet.has(uuid) && !complete){
                 newPartialSet.add(uuid);
-                if(newEmptySet.has(uuid)){
-                    newEmptySet.delete(uuid);
-                }
                 this.setState({
                     selectedExpts: newPartialSet,
-                    emptyExpts: newEmptySet
                 });
             }
         }else{
@@ -91,7 +84,7 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
     // to prevent the case of all sub-expts or files being manually checked, but state.checked not updated
     componentDidUpdate: function() {
         if(this.props.experimentArray.length > 0){
-            if(this.state.selectedExpts.size === 0 && this.state.checked){
+            if(this.state.selectedExpts.size === 0 && this.state.completeExpts.size === 0 && this.state.checked){
                 this.setState({
                     checked: false
                 });
@@ -118,19 +111,37 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
 
     render: function() {
         var experimentArray = this.props.experimentArray;
-        var childExperiments = experimentArray.map(function (experiment) {
-            if(this.props.passExperiments.has(experiment)){
-                return (
-                    <ExperimentSublist handleEmptyExpt={this.handleEmptyExpt} handleExptUpdate={this.handleExptUpdate} foundFile={this.props.foundFile} targetFiles={this.props.targetFiles} parentChecked={this.state.checked} passed={true} result={experiment} key={experiment.uuid} />
-                );
+        var passExperiments = [];
+        var failExperiments = [];
+        for (var i=0; i<experimentArray.length; i++){
+            if(this.props.passExperiments.has(experimentArray[i])){
+                passExperiments.push(experimentArray[i]);
             }else{
-                return (
-                    <ExperimentSublist handleEmptyExpt={this.handleEmptyExpt} handleExptUpdate={this.handleExptUpdate} foundFile={this.props.foundFile} targetFiles={this.props.targetFiles} parentChecked={this.state.checked} passed={false} result={experiment} key={experiment.uuid} />
-                );
+                failExperiments.push(experimentArray[i].uuid);
             }
+        }
+        var childExperiments = passExperiments.map(function (experiment) {
+            return (
+                <ExperimentSublist handleEmptyExpt={this.handleEmptyExpt} handleExptUpdate={this.handleExptUpdate} targetFiles={this.props.targetFiles} parentChecked={this.state.checked} passed={true} result={experiment} key={experiment.uuid} />
+            );
         }.bind(this));
-        var checked = this.state.completeExpts.size === childExperiments.length || this.state.emptyExpts.size === childExperiments.length;
-        var indeterminate = ((this.state.completeExpts.size > 0 || this.state.selectedExpts.size > 0) && this.state.completeExpts.size !== childExperiments.length);
+        // remove hidden experiments from complete/selected records
+        var completeExpts = this.state.completeExpts;
+        var selectedExpts = this.state.selectedExpts;
+        var emptyExpts = this.state.emptyExpts;
+        for (var i=0; i<failExperiments.length; i++){
+            if(completeExpts.has(failExperiments[i])){
+                completeExpts.delete(failExperiments[i]);
+            }
+            if(selectedExpts.has(failExperiments[i])){
+                selectedExpts.delete(failExperiments[i]);
+            }
+            if(emptyExpts.has(failExperiments[i])){
+                emptyExpts.delete(failExperiments[i]);
+            }
+        }
+        var checked = completeExpts.size === childExperiments.length || childExperiments.length === this.state.emptyExpts.size;
+        var indeterminate = (selectedExpts.size > 0 || completeExpts.size > 0) && completeExpts.size !== childExperiments.length;
         return (
             <li>
                 <div className="clearfix">
@@ -283,7 +294,7 @@ var ExperimentSublist = React.createClass({
             files.map(function (file) {
                 if(this.props.targetFiles.has(file.file_format)){
                     passedFileCount += 1;
-                    childFiles.push(<FileSublist handleFileUpdate={this.handleFileUpdate} foundFile={this.props.foundFile} filteredFiles={filteredFiles} key={file.uuid} parentChecked={this.state.checked} file={file} exptPassed={this.props.passed}/>);
+                    childFiles.push(<FileSublist handleFileUpdate={this.handleFileUpdate} filteredFiles={filteredFiles} key={file.uuid} parentChecked={this.state.checked} file={file} exptPassed={this.props.passed}/>);
                 }else{
                     var fileID = false + "~" + this.props.passed + "~" + file.file_format + "~" + file.uuid;
                     if(selectedFiles.has(file.uuid)){
@@ -366,8 +377,7 @@ var FileSublist = React.createClass({
     },
 
     render: function() {
-        var isChecked = this.state.checked;
-        var fileID = isChecked + "~" + this.props.exptPassed + "~" + this.props.file.file_format + "~" + this.props.file.uuid;
+        var fileID = this.state.checked + "~" + this.props.exptPassed + "~" + this.props.file.file_format + "~" + this.props.file.uuid;
         return(
             <div className="expset-file">
                 <Checkbox validationState='warning' checked={this.state.checked} name="file-checkbox" id={fileID} className='expset-checkbox expset-checkbox-sub' onChange={this.handleCheck}/>
@@ -757,7 +767,6 @@ var ResultTable = browse.ResultTable = React.createClass({
         var context = this.props.context;
         var results = context['@graph'];
         var targetFiles = this.props.targetFiles;
-        var foundFile = this.props.foundFile;
         var total = context['total'];
         var columns = context['columns'];
         var searchBase = this.props.searchBase;
@@ -809,7 +818,7 @@ var ResultTable = browse.ResultTable = React.createClass({
             var exptHits = "(" + intersection.size + " of " + experimentArray.length +" experiments)";
             if(intersection.size > 0){
                 passed += " expset-entry-passed";
-                resultListing.push(<ExperimentSet foundFile={foundFile} targetFiles={targetFiles} passed={passed} href={href} title={title} exptHits={exptHits} experimentArray={experimentArray} passExperiments={passExperiments} key={'a' + result['@id']} />);
+                resultListing.push(<ExperimentSet targetFiles={targetFiles} passed={passed} href={href} title={title} exptHits={exptHits} experimentArray={experimentArray} passExperiments={passExperiments} key={'a' + result['@id']} />);
             }
         })
         var plural = resultListing.length === 1 ? "set" : "sets";
@@ -853,7 +862,7 @@ var FileButton = browse.FileButton = React.createClass({
         this.setState({
             selected: !this.state.selected
         });
-        this.props.fxn(this.props.format);
+        this.props.fxn(this.props.format, this.state.selected);
     },
 
     render: function(){
@@ -892,8 +901,9 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
 
     componentDidUpdate: function(nextProps, nextState){
         if(nextProps.expSetFilters !== this.props.expSetFilters || nextProps.context !== this.props.context){
+            // reset file filters when changing set type
             var currStats = findFiles(this.props.fileFormats);
-            if(_.isEqual(nextState.fileStats, currStats)){
+            if(this.state.fileStats.formats !== currStats.formats){
                 this.setState({
                     fileStats: currStats
                 });
@@ -913,25 +923,15 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
         console.log(checkedFiles);
     },
 
-    selectFiles: function(format){
+    selectFiles: function(format, selected){
         var newSet = this.state.filesToFind;
-        if(newSet.has(format)){
+        if(newSet.has(format) && selected){
             newSet.delete(format);
-        }else{
+        }else if(!selected){
             newSet.add(format);
         }
         this.setState({
             filesToFind: newSet
-        });
-    },
-
-    foundFile: function(uuid){
-        var revisedTargets = this.state.filesToFind;
-        // if(revisedTargets.has(uuid)){
-        //     revisedTargets.delete(uuid);
-        // }
-        this.setState({
-            filesToFind: revisedTargets
         });
     },
 
@@ -941,7 +941,7 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
         var selectorButtons = this.props.fileFormats.map(function (format, idx) {
             var count = fileStats.formats[format] ? fileStats.formats[format].size : 0;
             return(
-                <FileButton key={format} fxn={this.selectFiles} format={format} count={count}/>
+                <FileButton key={format} defaults={targetFiles} fxn={this.selectFiles} format={format} count={count}/>
             );
         }.bind(this));
         // var deselectButton = <Button className="expset-selector-button" bsSize="xsmall">Deselect</Button>;
@@ -975,7 +975,7 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
                     </div>
                 </div>
                 <div className="row">
-                    <ResultTable {...this.props} targetFiles={targetFiles} foundFile={this.foundFile}/>
+                    <ResultTable {...this.props} targetFiles={targetFiles}/>
                 </div>
             </div>
 
