@@ -57,9 +57,9 @@ describe('Testing browse.js for experiment set browser', function() {
         );
     });
 
-    it('has 3 passing entries (experiment sets or experiments)', function() {
+    it('has 1 passing entry (an experiment set)', function() {
         var passEntries = TestUtils.scryRenderedDOMComponentsWithClass(page, 'expset-entry-passed');
-        expect(passEntries.length).toEqual(3);
+        expect(passEntries.length).toEqual(1);
     });
 
     it('filters correctly when filters are clicked', function() {
