@@ -1,3 +1,4 @@
 {
-    "UniProtKB": "http://www.uniprot.org/uniprot/"
+    "UniProtKB": "http://www.uniprot.org/uniprot/",
+    "SRA": "https://www.ncbi.nlm.nih.gov/sra/?term="
 }
