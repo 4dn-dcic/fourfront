@@ -1,6 +1,7 @@
 [
     {
         "accession":"4DNEX067AWU1",
+        "status": "released",
         "biosample":"231111bc-8535-4448-903e-854af460b254",
         "fragmentation_method": "chemical",
         "experiment_type": "capture Hi-C",
@@ -36,6 +37,7 @@
     },
     {
         "accession":"4DNEX067AWT1",
+        "status": "in review by project",
         "biosample":"231111bc-8535-4448-903e-854af460b255",
         "fragmentation_method": "chemical",
         "experiment_type": "capture Hi-C",
