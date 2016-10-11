@@ -129,15 +129,15 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
         var completeExpts = this.state.completeExpts;
         var selectedExpts = this.state.selectedExpts;
         var emptyExpts = this.state.emptyExpts;
-        for (var i=0; i<failExperiments.length; i++){
-            if(completeExpts.has(failExperiments[i])){
-                completeExpts.delete(failExperiments[i]);
+        for (var j=0; j<failExperiments.length; j++){
+            if(completeExpts.has(failExperiments[j])){
+                completeExpts.delete(failExperiments[j]);
             }
-            if(selectedExpts.has(failExperiments[i])){
-                selectedExpts.delete(failExperiments[i]);
+            if(selectedExpts.has(failExperiments[j])){
+                selectedExpts.delete(failExperiments[j]);
             }
-            if(emptyExpts.has(failExperiments[i])){
-                emptyExpts.delete(failExperiments[i]);
+            if(emptyExpts.has(failExperiments[j])){
+                emptyExpts.delete(failExperiments[j]);
             }
         }
         var checked = completeExpts.size === childExperiments.length || childExperiments.length === this.state.emptyExpts.size;
