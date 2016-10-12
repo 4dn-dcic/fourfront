@@ -1,9 +1,4 @@
 TODO: document beanstalk deployment
-
-<<<<<<< HEAD
-=======
-
-
 ## Dropping database
 
 For test environment the database is not dropped for each deploy.  This means that new upserts,

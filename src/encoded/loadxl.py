@@ -42,7 +42,6 @@ ORDER = [
     'experiment_set',
     'software',
     'analysis_step',
-    'task',
     'workflow',
     'workflow_run',
 ]

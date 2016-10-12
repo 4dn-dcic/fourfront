@@ -80,6 +80,7 @@
                         "description": "type of the argument",
                         "type": "string",
                         "enum" : [
+                            "",
                             "Input file",
                             "Output file",
                             "parameter"
@@ -116,9 +117,11 @@
                                     "description": "type of the argument of the step",
                                     "type": "string",
                                     "enum": [
-                                        "Input_file",
-                                        "Output_file",
-                                        "parameter"
+                                        "Input file",
+                                        "Output file",
+                                        "parameter",
+                                        "Input file or parameter",
+                                        "Output file or parameter"
                                     ]
                                 }
                             }

@@ -298,10 +298,7 @@ class WorkflowRun(Item):
 
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
-<<<<<<< HEAD
-#    embedded = ['workflow']
-=======
-    embedded = ['workflow', 'tasks']
+    embedded = ['workflow']
 
 
 @collection(
@@ -372,4 +369,3 @@ class GenomicRegion(Item):
             #         organism_name = organism_props['name']
             #         return "Whole " + organism_name
             return None
->>>>>>> master
