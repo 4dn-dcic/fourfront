@@ -118,7 +118,7 @@ describe('Testing about.js', function() {
         var contentParagraphs = TestUtils.scryRenderedDOMComponentsWithClass(page, "fourDN-content");
         expect(contentParagraphs.length).toBeGreaterThan(1); // At least 1 paragraph.
         
-        var fullContentParagraphsText = contentParagraphs.map(function(v){ return v.innerHTML }).join('\n');
+        var fullContentParagraphsText = contentParagraphs.map(function(v){ return v.innerHTML; }).join('\n');
         expect(fullContentParagraphsText.search('Burak Alver')).toBeGreaterThan(-1); // .search returns index, or -1.
         expect(fullContentParagraphsText.search('Nils Gehlenborg')).toBeGreaterThan(-1);
         
