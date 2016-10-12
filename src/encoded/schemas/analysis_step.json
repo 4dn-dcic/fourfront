@@ -112,7 +112,9 @@
                             "peaks",
                             "genome reference",
                             "genome index",
-                            "blacklisted regions"
+                            "blacklisted regions",
+                            "restriction enzyme site regions",
+                            "ntermediate"
                         ]
                     },
                     "input_file_format": {
@@ -133,7 +135,9 @@
                             "csv",
                             "tar",
                             "tagAlign",
-                            "wig"
+                            "wig",
+                            "tgz",
+                            "txt"
                         ]
                     }
                 }
@@ -163,7 +167,9 @@
                             "peaks",
                             "genome reference",
                             "genome index",
-                            "blacklisted regions"
+                            "blacklisted regions",
+                            "restriction enzyme site regions",
+                            "ntermediate"
                         ]
                     },
                     "output_file_format": {
@@ -184,7 +190,9 @@
                             "csv",
                             "tar",
                             "tagAlign",
-                            "wig"
+                            "wig",
+                            "tgz",
+                            "txt"
                         ]
                     }
                 }

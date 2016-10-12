@@ -12,8 +12,8 @@
 
 ### commands that created workflow json files
 ```
-python read_cwl_create_workflow_insert.py -c sbg_fastqc_workflow.cwl -w sbg_fastqc_workflow.json -n FastQC -d "FastQC quality control step for fastq files" -t "QC" -u "https://igor.sbgenomics.com/raw/4dn-dcic/dev/fastqc-0-11-4/0"
-python read_cwl_create_workflow_insert.py -c gitar_cwl -w gitar_workflow.json -n GITAR -d "GITAR Hi-C data processing pipeline" -t "Hi-C" -u "https://igor.sbgenomics.com/raw/4dn-dcic/dev/gitar-v0-2/0"
+python read_cwl_create_workflow_insert.py -c sbg_fastqc_workflow.cwl -w sbg_fastqc_workflow.json -n FastQC -d "FastQC quality control step for fastq files" -t "Other" -u "https://igor.sbgenomics.com/raw/4dn-dcic/dev/fastqc-0-11-4/0"
+python read_cwl_create_workflow_insert.py -c gitar_cwl -w gitar_workflow.json -n GITAR -d "GITAR Hi-C data processing pipeline" -t "Hi-C data analysis" -u "https://igor.sbgenomics.com/raw/4dn-dcic/dev/gitar-v0-2/0"
 cat gitar_workflow.json sbg_fastqc_workflow.json > workflow.json
 # modified manually to make the final json in json format.
 ```
