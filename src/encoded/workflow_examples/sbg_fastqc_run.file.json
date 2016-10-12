@@ -1,29 +1,11 @@
 {
     "status": "uploaded", 
     "submitted_by": "admin@admin.com", 
-    "uuid": "fyyb705v-49e5-4c33-afab-9ec90d65faf3", 
-    "award": "1U01CA200059-01", 
-    "notes": "sample dcic notes", 
-    "accession": "4DNFTHX06R4H", 
-    "lab": "4dn-dcic-lab", 
-    "filename": "s3://4dn-tool-evaluation-files/GM12878_SRR1658581_1pc_1_R1_fastqc.zip"
-}{
-    "status": "uploaded", 
-    "submitted_by": "admin@admin.com", 
-    "uuid": "e1e339be-49e5-4c33-afab-9ec90d65faf3", 
-    "award": "1U01CA200059-01", 
-    "notes": "sample dcic notes", 
-    "accession": "4DNFGJP95J19", 
-    "lab": "4dn-dcic-lab", 
-    "filename": "s3://4dn-tool-evaluation-files/GM12878_SRR1658581_1pc_1_R1_fastqc.zip"
-}{
-    "status": "uploaded", 
-    "submitted_by": "admin@admin.com", 
-    "uuid": "c6d8ea74-49e5-4c33-afab-9ec90d65faf3", 
+    "uuid": "fbdbe727-49e5-4c33-afab-9ec90d65faf3", 
     "award": "1U01CA200059-01", 
     "file_format": "other", 
     "notes": "sample dcic notes", 
-    "accession": "4DNFQRSMRNW9", 
+    "accession": "4DNFFL631LOS", 
     "lab": "4dn-dcic-lab", 
     "filename": "s3://4dn-tool-evaluation-files/GM12878_SRR1658581_1pc_1_R1_fastqc.zip"
 }

@@ -104,7 +104,7 @@ def process_file(v, bucket_name, file_metadata_json, token, no_upload, no_downlo
           "submitted_by": "admin@admin.com",
           "lab": "4dn-dcic-lab",
           "award": "1U01CA200059-01",
-          "file_format":"other",
+          "file_format": "other",
           #"experiments":["4DNEX067APT1"],
           "uuid": uuid,
           "status": "uploaded"
