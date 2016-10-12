@@ -36,6 +36,7 @@ ORDER = [
     'biosample',
     'file_fastq',
     'file_fasta',
+    'file_processed',
     'file_set',
     'experiment_hic',
     'experiment_capture_c',
