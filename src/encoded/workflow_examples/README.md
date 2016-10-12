@@ -22,7 +22,10 @@ cat gitar_workflow.json sbg_fastqc_workflow.json > workflow.json
 ### commands that created workflor_run and file json files
 ```
 read_sbg_job_detail_create_files.py
+python read_sbg_job_detail_create_files.py --sbg_job_report sbg.task.detail.json --bucket_name 4dn-tool-evaluation-files --workflow_run_metadata_json sbg_gitar_run.workflow_run.json --file_metadata_json sbg_gitar_run.file.json --token 05c6ab5c935d469abcd7bff2e503706f --output_only
 python read_sbg_job_detail_create_files.py --sbg_job_report sbg_fastq_run_20161006.json --bucket_name 4dn-tool-evaluation-files --workflow_run_metadata_json sbg_fastqc_run.workflow_run.json --file_metadata_json sbg_fastqc_run.file.json --token 05c6ab5c935d469abcd7bff2e503706f --output_only
+cat sbg_gitar_run.workflow_run.json sbg_fastqc_run.workflow_run.json > workflow_run.json
+cat sbg_gitar_run.file.json sbg_fastqc_run.file.json > file_processed.json
 ```
 
 

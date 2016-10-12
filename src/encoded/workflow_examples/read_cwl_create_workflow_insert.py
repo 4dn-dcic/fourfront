@@ -8,7 +8,7 @@ import random
 def generate_uuid ():
   rand_uuid_start=''
   for i in xrange(8):
-    r=random.choice('abcdefghijklmnopqrstuvwxyz1234567890')
+    r=random.choice('abcdef1234567890')
     rand_uuid_start += r
     uuid=rand_uuid_start + "-49e5-4c33-afab-9ec90d65faf3"
   return uuid
@@ -189,7 +189,7 @@ def parse_cwl(cwlfile, workflow_metadata_json, workflow_name, workflow_descripti
   ## parsing steps again
   ## fill in workflow_steps.
   for x in cwl_dict['steps']:
-    workflow['workflow_steps'].append( { 'step_name': x['id'].strip('#'), 'LinkTo': generate_uuid() } )   ## assuming that uuid for step is generated at this point? Or should we retrieve a corresponding step that already exists?
+    workflow['workflow_steps'].append( { 'step_name': x['id'].strip('#'), 'step': generate_uuid() } )   ## assuming that uuid for step is generated at this point? Or should we retrieve a corresponding step that already exists?
 
 
   with open(workflow_metadata_json,'w') as fo:

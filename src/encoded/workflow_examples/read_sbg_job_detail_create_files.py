@@ -91,7 +91,7 @@ def process_file(v, bucket_name, file_metadata_json, token, no_upload, no_downlo
 
         rand_uuid_start=''
         for i in xrange(8):
-          r=random.choice('abcdefghijklmnopqrstuvwxyz1234567890')
+          r=random.choice('abcdef1234567890')
           rand_uuid_start += r
           uuid=rand_uuid_start + "-49e5-4c33-afab-9ec90d65faf3"
 

@@ -148,17 +148,10 @@
                         "type": "string",
                         "linkTo": "AnalysisStep"
                     },
-                    "parents": {
-                        "title": "Step parents",
-                        "comment": "we may not need the parents information if we use the 'argument' field instead." ,
-                        "description": "The analysis step(s) that directly preceed the step in the workflow",
-                        "type": "array",
-                        "items": {
-                            "title": "Parent Step",
-                            "description": "An analysis step that immediately preceeds this step.",
-                            "type": "string",
-                            "linkTo": "AnalysisStep"
-                        }
+                    "step_name": {
+                        "title": "Workflow Step",
+                        "description": "A step in the workflow.",
+                        "type": "string"
                     }
                 }
             }

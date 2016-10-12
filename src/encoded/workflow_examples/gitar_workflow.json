@@ -1,6 +1,6 @@
 {
     "cwl_pointer": "https://igor.sbgenomics.com/raw/4dn-dcic/dev/gitar-v0-2/0", 
-    "uuid": "v6zptp3y-49e5-4c33-afab-9ec90d65faf3", 
+    "uuid": "c7a60edf-49e5-4c33-afab-9ec90d65faf3", 
     "arguments": [
         {
             "argument_mapping": [
@@ -10146,16 +10146,16 @@
     "title": "GITAR", 
     "workflow_steps": [
         {
-            "step_name": "hictool_fastq2bam", 
-            "LinkTo": "7muvlp4e-49e5-4c33-afab-9ec90d65faf3"
+            "step": "d3b03a23-49e5-4c33-afab-9ec90d65faf3", 
+            "step_name": "hictool_fastq2bam"
         }, 
         {
-            "step_name": "hictool_bam2hdf5", 
-            "LinkTo": "jtbmuzk9-49e5-4c33-afab-9ec90d65faf3"
+            "step": "80c7771e-49e5-4c33-afab-9ec90d65faf3", 
+            "step_name": "hictool_bam2hdf5"
         }, 
         {
-            "step_name": "hictool_hdf52matrix", 
-            "LinkTo": "eo0uinmu-49e5-4c33-afab-9ec90d65faf3"
+            "step": "a937f407-49e5-4c33-afab-9ec90d65faf3", 
+            "step_name": "hictool_hdf52matrix"
         }
     ], 
     "workflow_type": "Hi-C", 

@@ -1,77 +1,77 @@
 [
-  {
+{
     "output_files": [
         {
             "workflow_argument_name": "split_bam1", 
-            "value": "nyp5dy6k-49e5-4c33-afab-9ec90d65faf3"
+            "value": "f38edaa3-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "HiC_norm_binning_hdf5", 
-            "value": "zmgps21l-49e5-4c33-afab-9ec90d65faf3"
+            "value": "f6ff5461-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "split_bam2", 
-            "value": "squkblgw-49e5-4c33-afab-9ec90d65faf3"
+            "value": "a085a4eb-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "expected_enrich_contact_matrix", 
-            "value": "apb2aiso-49e5-4c33-afab-9ec90d65faf3"
+            "value": "5c8fb8e2-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "expected_enrich_contact_matrix", 
-            "value": "rwkp0qei-49e5-4c33-afab-9ec90d65faf3"
+            "value": "525f0e7a-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "HiC_distance_function_hdf5", 
-            "value": "wekv2yih-49e5-4c33-afab-9ec90d65faf3"
+            "value": "f19347f3-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "fend_object_hdf5", 
-            "value": "21hj8h8q-49e5-4c33-afab-9ec90d65faf3"
+            "value": "ec00f2e9-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "expected_fend_contact_matrix", 
-            "value": "f4ilawpe-49e5-4c33-afab-9ec90d65faf3"
+            "value": "4b70a83b-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "expected_fend_contact_matrix", 
-            "value": "n7zy8n4j-49e5-4c33-afab-9ec90d65faf3"
+            "value": "0a7ac8ee-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "HiC_data_object_hdf5", 
-            "value": "gcptqjeh-49e5-4c33-afab-9ec90d65faf3"
+            "value": "9315b7d6-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "sorted_bam_pe", 
-            "value": "8s1oto25-49e5-4c33-afab-9ec90d65faf3"
+            "value": "44047be4-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "HiC_project_object_hdf5", 
-            "value": "326wh2b8-49e5-4c33-afab-9ec90d65faf3"
+            "value": "259f886c-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "observed_contact_matrix", 
-            "value": "al9gb27i-49e5-4c33-afab-9ec90d65faf3"
+            "value": "14dc2fed-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "observed_contact_matrix", 
-            "value": "e5mugho0-49e5-4c33-afab-9ec90d65faf3"
+            "value": "52430813-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "normalized_enrich_contact_matrix", 
-            "value": "xy574lgs-49e5-4c33-afab-9ec90d65faf3"
+            "value": "d375ade0-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "normalized_enrich_contact_matrix", 
-            "value": "7ma2r09w-49e5-4c33-afab-9ec90d65faf3"
+            "value": "43604a2a-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "normalized_fend_contact_matrix", 
-            "value": "k8tifr8o-49e5-4c33-afab-9ec90d65faf3"
+            "value": "78c495a9-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "normalized_fend_contact_matrix", 
-            "value": "8yfczb4l-49e5-4c33-afab-9ec90d65faf3"
+            "value": "7ebe970b-49e5-4c33-afab-9ec90d65faf3"
         }
     ], 
     "parameters": [
@@ -88,34 +88,13 @@
             "value": "22"
         }
     ], 
-    "input_files": [
-        {
-            "workflow_argument_name": "input_fastq2", 
-            "value": "brmiwn4l-49e5-4c33-afab-9ec90d65faf3"
-        }, 
-        {
-            "workflow_argument_name": "input_fastq1", 
-            "value": "fsf6o2zs-49e5-4c33-afab-9ec90d65faf3"
-        }, 
-        {
-            "workflow_argument_name": "chrlen_file", 
-            "value": "vledvy5s-49e5-4c33-afab-9ec90d65faf3"
-        }, 
-        {
-            "workflow_argument_name": "bowtie_index", 
-            "value": "6wuvrrw0-49e5-4c33-afab-9ec90d65faf3"
-        }, 
-        {
-            "workflow_argument_name": "RE_bed", 
-            "value": "9ag1cvsl-49e5-4c33-afab-9ec90d65faf3"
-        }
-    ]
-  },
-  {
+    "input_files": []
+},
+{
     "output_files": [
         {
             "workflow_argument_name": "report_zip", 
-            "value": "fyyb705v-49e5-4c33-afab-9ec90d65faf3"
+            "value": "e1e339be-49e5-4c33-afab-9ec90d65faf3"
         }
     ], 
     "parameters": [
@@ -133,6 +112,5 @@
         }
     ], 
     "input_files": []
-  }
+}
 ]
-
