@@ -146,7 +146,9 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
             <li>
                 <div className="clearfix">
                     <div className="accession">
-                        <Button bsSize="xsmall" className="expset-button" onClick={this.handleToggle}>{this.state.open ? "-" : "+"}</Button>
+                        <Button bsSize="xsmall" className="expset-button icon-container" onClick={this.handleToggle}>
+                            <i className={"icon " + (this.state.open ? "ss-navigateup" : "ss-navigatedown")}></i>
+                        </Button>
                         <IndeterminateCheckbox checked={checked} indeterminate={indeterminate} className='expset-checkbox' onChange={this.handleCheck}/>
                         <a className={this.props.passed} href={this.props.href}>
                             {this.props.title}
@@ -317,7 +319,9 @@ var ExperimentSublist = React.createClass({
         var indeterminate = (this.state.selectedFiles.size !== filteredFiles.length && this.state.selectedFiles.size > 0);
         return(
             <div className='expset-sublist-entry' key={result.accession}>
-                <Button bsSize="xsmall" className="expset-button" onClick={this.handleToggle}>{this.state.open ? "-" : "+"}</Button>
+                <Button bsSize="xsmall" className="expset-button icon-container" onClick={this.handleToggle}>
+                    <i className={"icon " + (this.state.open ? "ss-navigateup" : "ss-navigatedown")}></i>
+                </Button>
                 <IndeterminateCheckbox checked={checked} indeterminate={indeterminate} className='expset-checkbox expset-checkbox-sub' onChange={this.handleCheck}/>
                 <a className="expset-entry" href={result['@id'] || ''}>
                     {result.experiment_summary || result.accession || result.uuid || result['@id']}
