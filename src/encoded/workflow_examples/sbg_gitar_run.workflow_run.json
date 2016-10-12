@@ -1,0 +1,91 @@
+{
+    "output_files": [
+        {
+            "workflow_argument_name": "split_bam1", 
+            "value": "e5e884ce-49e5-4c33-afab-9ec90d65faf3"
+        }, 
+        {
+            "workflow_argument_name": "HiC_norm_binning_hdf5", 
+            "value": "47318043-49e5-4c33-afab-9ec90d65faf3"
+        }, 
+        {
+            "workflow_argument_name": "split_bam2", 
+            "value": "4b4bc8d9-49e5-4c33-afab-9ec90d65faf3"
+        }, 
+        {
+            "workflow_argument_name": "expected_enrich_contact_matrix", 
+            "value": "ac0b9be4-49e5-4c33-afab-9ec90d65faf3"
+        }, 
+        {
+            "workflow_argument_name": "expected_enrich_contact_matrix", 
+            "value": "affe115a-49e5-4c33-afab-9ec90d65faf3"
+        }, 
+        {
+            "workflow_argument_name": "HiC_distance_function_hdf5", 
+            "value": "ab0b1f2e-49e5-4c33-afab-9ec90d65faf3"
+        }, 
+        {
+            "workflow_argument_name": "fend_object_hdf5", 
+            "value": "96550ff8-49e5-4c33-afab-9ec90d65faf3"
+        }, 
+        {
+            "workflow_argument_name": "expected_fend_contact_matrix", 
+            "value": "c01ef390-49e5-4c33-afab-9ec90d65faf3"
+        }, 
+        {
+            "workflow_argument_name": "expected_fend_contact_matrix", 
+            "value": "6e487670-49e5-4c33-afab-9ec90d65faf3"
+        }, 
+        {
+            "workflow_argument_name": "HiC_data_object_hdf5", 
+            "value": "f9d1b203-49e5-4c33-afab-9ec90d65faf3"
+        }, 
+        {
+            "workflow_argument_name": "sorted_bam_pe", 
+            "value": "a159aaf3-49e5-4c33-afab-9ec90d65faf3"
+        }, 
+        {
+            "workflow_argument_name": "HiC_project_object_hdf5", 
+            "value": "43ad2ab4-49e5-4c33-afab-9ec90d65faf3"
+        }, 
+        {
+            "workflow_argument_name": "observed_contact_matrix", 
+            "value": "c68bcdc4-49e5-4c33-afab-9ec90d65faf3"
+        }, 
+        {
+            "workflow_argument_name": "observed_contact_matrix", 
+            "value": "38856283-49e5-4c33-afab-9ec90d65faf3"
+        }, 
+        {
+            "workflow_argument_name": "normalized_enrich_contact_matrix", 
+            "value": "36d76c71-49e5-4c33-afab-9ec90d65faf3"
+        }, 
+        {
+            "workflow_argument_name": "normalized_enrich_contact_matrix", 
+            "value": "7493a9af-49e5-4c33-afab-9ec90d65faf3"
+        }, 
+        {
+            "workflow_argument_name": "normalized_fend_contact_matrix", 
+            "value": "ce5de5d1-49e5-4c33-afab-9ec90d65faf3"
+        }, 
+        {
+            "workflow_argument_name": "normalized_fend_contact_matrix", 
+            "value": "c4f0d9f2-49e5-4c33-afab-9ec90d65faf3"
+        }
+    ], 
+    "parameters": [
+        {
+            "workflow_argument_name": "contact_matrix_binsize", 
+            "value": 50000
+        }, 
+        {
+            "workflow_argument_name": "chromosome", 
+            "value": "21"
+        }, 
+        {
+            "workflow_argument_name": "chromosome", 
+            "value": "22"
+        }
+    ], 
+    "input_files": []
+}
