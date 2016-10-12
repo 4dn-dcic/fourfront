@@ -114,7 +114,8 @@
                             "genome index",
                             "blacklisted regions",
                             "restriction enzyme site regions",
-                            "ntermediate"
+                            "intermediate",
+                            "QC report"
                         ]
                     },
                     "input_file_format": {
@@ -137,7 +138,8 @@
                             "tagAlign",
                             "wig",
                             "tgz",
-                            "txt"
+                            "txt",
+                            "zip"
                         ]
                     }
                 }
@@ -169,7 +171,8 @@
                             "genome index",
                             "blacklisted regions",
                             "restriction enzyme site regions",
-                            "ntermediate"
+                            "intermediate",
+                            "QC report"
                         ]
                     },
                     "output_file_format": {
@@ -192,7 +195,8 @@
                             "tagAlign",
                             "wig",
                             "tgz",
-                            "txt"
+                            "txt",
+                            "zip"
                         ]
                     }
                 }
