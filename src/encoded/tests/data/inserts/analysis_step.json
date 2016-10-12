@@ -7,7 +7,7 @@
         "cwl_pointer": "",
         "analysis_step_types": ["alignment"],
         "software_used": "7868f960-50ac-11e4-916c-0800200c9a66",
-        "input_file_info": [{"input_file_type": "read pairs", "input_file_format": "fastq"},{"input_file_type": "read pairs", "input_file_format": "fastq"},{"input_file_type": "genome index", "input_file_format": "tgz"} ],
+        "input_file_info": [{"input_file_type": "reads", "input_file_format": "fastq"},{"input_file_type": "reads", "input_file_format": "fastq"},{"input_file_type": "genome index", "input_file_format": "tgz"} ],
         "output_file_info": [{"output_file_type": "alignments", "output_file_format": "bam"},{"output_file_type": "alignments", "output_file_format": "bam"},{"output_file_type": "alignments", "output_file_format": "bam"}],
         "uuid": "d3b03a23-49e5-4c33-afab-9ec90d65faf3"
     },
@@ -19,7 +19,7 @@
         "cwl_pointer": "",
         "analysis_step_types": ["file format conversion"],
         "software_used": "7868f960-50ac-11e4-916c-0800200c9a66",
-        "input_file_info": [{"input_file_type": "alignments", "input_file_format": "bam"},{"input_file_type": "read pairs", "input_file_format": "bam"},{"input_file_type": "restriction enzyme site regions", "input_file_format": "bed"} ],
+        "input_file_info": [{"input_file_type": "alignments", "input_file_format": "bam"},{"input_file_type": "alignments", "input_file_format": "bam"},{"input_file_type": "restriction enzyme site regions", "input_file_format": "bed"} ],
         "output_file_info": [{"output_file_type": "intermediate", "output_file_format": "hdf5"}],
         "uuid": "80c7771e-49e5-4c33-afab-9ec90d65faf3"
     },
