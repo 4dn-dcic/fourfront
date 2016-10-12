@@ -10159,7 +10159,7 @@
             "step_name": "hictool_hdf52matrix"
         }
     ], 
-    "workflow_type": "Hi-C", 
+    "workflow_type": "Hi-C data analysis", 
     "workflow_diagram": "", 
     "description": "GITAR Hi-C data processing pipeline"
 },
@@ -10230,7 +10230,7 @@
             "step_name": "FastQC"
         }
     ], 
-    "workflow_type": "QC", 
+    "workflow_type": "Other", 
     "workflow_diagram": "", 
     "description": "FastQC quality control step for fastq files"
 }

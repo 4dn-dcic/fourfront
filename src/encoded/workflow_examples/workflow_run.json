@@ -3,75 +3,75 @@
     "output_files": [
         {
             "workflow_argument_name": "split_bam1", 
-            "value": "f38edaa3-49e5-4c33-afab-9ec90d65faf3"
+            "value": "b4002377-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "HiC_norm_binning_hdf5", 
-            "value": "f6ff5461-49e5-4c33-afab-9ec90d65faf3"
+            "value": "ccf48ccd-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "split_bam2", 
-            "value": "a085a4eb-49e5-4c33-afab-9ec90d65faf3"
+            "value": "165e9eeb-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "expected_enrich_contact_matrix", 
-            "value": "5c8fb8e2-49e5-4c33-afab-9ec90d65faf3"
+            "value": "9e316323-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "expected_enrich_contact_matrix", 
-            "value": "525f0e7a-49e5-4c33-afab-9ec90d65faf3"
+            "value": "fbd7e4ad-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "HiC_distance_function_hdf5", 
-            "value": "f19347f3-49e5-4c33-afab-9ec90d65faf3"
+            "value": "7b24f953-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "fend_object_hdf5", 
-            "value": "ec00f2e9-49e5-4c33-afab-9ec90d65faf3"
+            "value": "ccd45b82-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "expected_fend_contact_matrix", 
-            "value": "4b70a83b-49e5-4c33-afab-9ec90d65faf3"
+            "value": "bc8e4805-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "expected_fend_contact_matrix", 
-            "value": "0a7ac8ee-49e5-4c33-afab-9ec90d65faf3"
+            "value": "ae0b7a78-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "HiC_data_object_hdf5", 
-            "value": "9315b7d6-49e5-4c33-afab-9ec90d65faf3"
+            "value": "61cdc81e-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "sorted_bam_pe", 
-            "value": "44047be4-49e5-4c33-afab-9ec90d65faf3"
+            "value": "12c9ecbf-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "HiC_project_object_hdf5", 
-            "value": "259f886c-49e5-4c33-afab-9ec90d65faf3"
+            "value": "f2d4e59e-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "observed_contact_matrix", 
-            "value": "14dc2fed-49e5-4c33-afab-9ec90d65faf3"
+            "value": "20d4828f-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "observed_contact_matrix", 
-            "value": "52430813-49e5-4c33-afab-9ec90d65faf3"
+            "value": "7c3e582f-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "normalized_enrich_contact_matrix", 
-            "value": "d375ade0-49e5-4c33-afab-9ec90d65faf3"
+            "value": "f95b8cf9-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "normalized_enrich_contact_matrix", 
-            "value": "43604a2a-49e5-4c33-afab-9ec90d65faf3"
+            "value": "d04b6a0f-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "normalized_fend_contact_matrix", 
-            "value": "78c495a9-49e5-4c33-afab-9ec90d65faf3"
+            "value": "58395de6-49e5-4c33-afab-9ec90d65faf3"
         }, 
         {
             "workflow_argument_name": "normalized_fend_contact_matrix", 
-            "value": "7ebe970b-49e5-4c33-afab-9ec90d65faf3"
+            "value": "b9930e7a-49e5-4c33-afab-9ec90d65faf3"
         }
     ], 
     "parameters": [
@@ -89,12 +89,11 @@
         }
     ], 
     "input_files": []
-},
-{
+},{
     "output_files": [
         {
             "workflow_argument_name": "report_zip", 
-            "value": "e1e339be-49e5-4c33-afab-9ec90d65faf3"
+            "value": "fbdbe727-49e5-4c33-afab-9ec90d65faf3"
         }
     ], 
     "parameters": [
