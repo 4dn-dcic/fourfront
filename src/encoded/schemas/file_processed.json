@@ -40,7 +40,8 @@
                 "csv",
                 "tar",
                 "tagAlign",
-                "wig"
+                "wig",
+                "other"
             ]
         }
     },
@@ -66,6 +67,7 @@
         "csv": ".csv",
         "vcf": ".vcf.gz",
         "wig": ".wig.gz",
-        "sam": ".sam.gz"
+        "sam": ".sam.gz",
+        "other": "no_file_extension"
     }
 }
