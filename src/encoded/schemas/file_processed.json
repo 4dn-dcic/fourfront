@@ -21,6 +21,27 @@
     "properties": {
         "schema_version": {
             "default": "1"
+        },
+        "file_format": {
+            "title": "File format",
+            "type": "string",
+            "enum": [
+                "bam",
+                "bai",
+                "bed",
+                "bigBed",
+                "bigWig",
+                "fasta",
+                "fastq",
+                "gff",
+                "gtf",
+                "hdf5",
+                "tsv",
+                "csv",
+                "tar",
+                "tagAlign",
+                "wig"
+            ]
         }
     }
 }
