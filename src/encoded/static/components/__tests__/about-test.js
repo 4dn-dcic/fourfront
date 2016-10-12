@@ -6,7 +6,7 @@
  * 
  * Unlike for other components, because the 'About' page is relatively simple,
  * the ENTIRE App is loaded and initialized to the /about/ page so that 
- * presence of nav bar and other global elements may be tested as well.
+ * presence of nav bar and other global elements may be tested+covered as well.
  */
 
 jest.autoMockOff();
@@ -21,7 +21,7 @@ describe('Testing about.js', function() {
     
     var React, About, testItem, TestUtils, page, data, _, banners, Wrapper, App;
 
-    beforeEach(function() {
+    beforeAll(function() {
         React = require('react');
         TestUtils = require('react/lib/ReactTestUtils');
         _ = require('underscore');
@@ -30,6 +30,7 @@ describe('Testing about.js', function() {
             <App href="http://data.4dnucleome.org/about/" context={{}} />
         );
     });
+
 
     // Check that has navBar with links
     it('Has global navigation bar & links', function() {
@@ -40,13 +41,15 @@ describe('Testing about.js', function() {
         expect(navBannerLinkWrapper.length).toBeGreaterThan(0); // Doesn't matter if 1 or more links.
     });
 
+
     it("Has 'about' page elements -- '.static-page' wrapper, title, and content regions", function() {
         var staticContainer = TestUtils.findRenderedDOMComponentWithClass(page, "static-page");
         expect(staticContainer).toBeTruthy();
         
-        // .children[0] == div.static-page > div.help-entry
-        var staticContainerContentSections = staticContainer.children[0].children;
-        // Should at least have 1 child element (e.g. title) 
+        var staticContainerContentSections = staticContainer.children[0].children; 
+        // ^ == div.static-page > div.help-entry > *
+
+        // Should at least have 1 child element (title, paragraphs) 
         expect(staticContainerContentSections.length).toBeGreaterThan(1); 
 
         // Finding by className incase title location in DOM changes in future.
@@ -56,7 +59,7 @@ describe('Testing about.js', function() {
     });
 
     // Example of something which would be present on About page.
-    it("Has Burak's and Nils' names", function() {
+    it("Has Burak and Nils' names", function() {
         var contentParagraphs = TestUtils.scryRenderedDOMComponentsWithClass(page, "fourDN-content");
         expect(contentParagraphs.length).toBeGreaterThan(1); // At least 1 paragraph.
         
