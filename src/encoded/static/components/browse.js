@@ -10,6 +10,7 @@ var audit = require('./audit');
 var Panel = require('react-bootstrap').Panel;
 var Button = require('react-bootstrap').Button;
 var Checkbox = require('react-bootstrap').Checkbox;
+var Table = require('react-bootstrap').Table;
 var ButtonToolbar = require('react-bootstrap').ButtonToolbar;
 var DropdownButton = require('react-bootstrap').DropdownButton;
 var MenuItem = require('react-bootstrap').MenuItem;
@@ -32,76 +33,75 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
     	return {
             open: false,
             checked: false,
-            selectedExpts: new Set(),
-            completeExpts: new Set(),
-            emptyExpts: new Set()
+            selectedFiles: new Set()
         };
     },
 
-    handleExptUpdate: function(uuid, complete, add=true){
-        // complete experiments have all files selected
-        // selected experiments have at least one file selected
-        var newCompleteSet = this.state.completeExpts;
-        var newPartialSet = this.state.selectedExpts;
-        if(add){
-            if(!newCompleteSet.has(uuid) && complete){
-                newCompleteSet.add(uuid);
-                this.setState({
-                    completeExpts: newCompleteSet,
-                });
-            }else if(!newPartialSet.has(uuid) && !complete){
-                newPartialSet.add(uuid);
-                this.setState({
-                    selectedExpts: newPartialSet,
-                });
-            }
-        }else{
-            if(newCompleteSet.has(uuid)){
-                newCompleteSet.delete(uuid);
-            }
-            if(newPartialSet.has(uuid)){
-                newPartialSet.delete(uuid);
-            }
+    componentWillReceiveProps: function(nextProps) {
+        if(nextProps.parentChecked !== this.props.parentChecked){
             this.setState({
-                completeExpts: newCompleteSet,
-                selectedExpts: newPartialSet
+                checked: nextProps.parentChecked
             });
         }
+        // var newTargets = [];
+        // for(var i=0; i<this.state.files.length; i++){
+        //     if(nextProps.targetFiles.has(this.state.files[i].file_format)){
+        //         newTargets.push(this.state.files[i].uuid);
+        //     }
+        // }
+        // if(newTargets.length !== this.state.filteredFiles.length){
+        //     this.setState({
+        //         filteredFiles: newTargets
+        //     });
+        // }
     },
 
-    handleEmptyExpt: function(uuid){
-        var newEmptySet = this.state.emptyExpts;
-        if(!newEmptySet.has(uuid)){
-            newEmptySet.add(uuid);
-        }
-        if(this.state.emptyExpts !== newEmptySet){
-            this.setState({
-                emptyExpts: newEmptySet,
-            });
-        }
-    },
-
-    // to prevent the case of all sub-expts or files being manually checked, but state.checked not updated
-    componentDidUpdate: function() {
-        if(this.props.experimentArray.length > 0){
-            if(this.state.selectedExpts.size === 0 && this.state.completeExpts.size === 0 && this.state.checked){
-                this.setState({
-                    checked: false
-                });
-            }else if(this.state.completeExpts.size === this.props.experimentArray.length && !this.state.checked){
-                this.setState({
-                    checked: true
-                });
-            }
-        }
-    },
+    // // to prevent the case of all sub-expts or files being manually checked, but state.checked not updated
+    // componentDidUpdate: function() {
+    //     if(this.state.files.length > 0){
+    //         if(this.state.selectedFiles.size === 0 && this.state.checked){
+    //             this.setState({
+    //                 checked: false
+    //             });
+    //         }else if(this.state.selectedFiles.size === this.state.files.length && !this.state.checked){
+    //             this.setState({
+    //                 checked: true
+    //             });
+    //         }
+    //     }
+    // },
 
     handleToggle: function (e) {
         e.preventDefault();
         this.setState({
-  		    open: !this.state.open,
-  	    });
+  		  open: !this.state.open
+        });
+
     },
+
+    // handleFileUpdate: function (uuid, add=true){
+    //     var newSet = this.state.selectedFiles;
+    //     if(add){
+    //         if(!newSet.has(uuid)){
+    //             newSet.add(uuid);
+    //             this.setState({
+    //                 selectedFiles: newSet
+    //             });
+    //         }
+    //     }else if(newSet.has(uuid)){
+    //         newSet.delete(uuid);
+    //         this.setState({
+    //             selectedFiles: newSet
+    //         });
+    //     }
+    //     if(this.state.selectedFiles.size === this.state.filteredFiles.length){
+    //         this.props.handleExptUpdate(this.props.result.uuid, true);
+    //     }else if(this.state.selectedFiles.size > 0){
+    //         this.props.handleExptUpdate(this.props.result.uuid, false);
+    //     }else{
+    //         this.props.handleExptUpdate(this.props.result.uuid, false, false);
+    //     }
+    // },
 
     handleCheck: function() {
         this.setState({
@@ -113,35 +113,88 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
         var experimentArray = this.props.experimentArray;
         var passExperiments = [];
         var failExperiments = [];
+        var files = [];
+        var filesToExp = {};
         for (var i=0; i<experimentArray.length; i++){
             if(this.props.passExperiments.has(experimentArray[i])){
                 passExperiments.push(experimentArray[i]);
+                var tempFiles = [];
+                if(experimentArray[i].files){
+                    tempFiles = experimentArray[i].files;
+                }else if(experimentArray[i].filesets){
+                    for(var j=0; j<experimentArray[i].filesets.length; j++){
+                        if(experimentArray[i].filesets[j].files_in_set){
+                            tempFiles = tempFiles.concat(experimentArray[i].filesets[j].files_in_set);
+                        }
+                    }
+                }
+                // save appropriate experiment info
+                if(tempFiles.length > 0){
+                    var relatedFiles = []; // array of uuids
+                    for(var k=0;k<tempFiles.length;k++){
+                        if(_.contains(relatedFiles, tempFiles[k])){ // skip already-added related files
+                            continue;
+                        }
+                        console.log('___');
+                        console.log(experimentArray[i]);
+                        console.log(tempFiles[k]);
+                        if(tempFiles[k].relatedFiles && tempFiles[k].relatedFiles.file){
+
+                            relatedFiles.push(tempFiles[k].relatedFiles.file.uuid);
+                            var biosource_summary = experimentArray[i].biosample ? experimentArray[i].biosample.biosource_summary : null;
+                            filesToExp[tempFiles[k].uuid] = {
+                                'accession':experimentArray[i].accession,
+                                'biosample':biosource_summary,
+                                'uuid':experimentArray[i].uuid,
+                                'related':tempFiles[k].relatedFiles.file
+                            };
+                        }else{
+                            var biosource_summary = experimentArray[i].biosample ? experimentArray[i].biosample.biosource_summary : null;
+                            filesToExp[tempFiles[k].uuid] = {
+                                'accession':experimentArray[i].accession,
+                                'biosample':biosource_summary,
+                                'uuid':experimentArray[i].uuid
+                            };
+                        }
+                    }
+                }
             }else{
                 failExperiments.push(experimentArray[i].uuid);
             }
         }
-        var childExperiments = passExperiments.map(function (experiment) {
-            return (
-                <ExperimentSublist handleEmptyExpt={this.handleEmptyExpt} handleExptUpdate={this.handleExptUpdate} targetFiles={this.props.targetFiles} parentChecked={this.state.checked} passed={true} result={experiment} key={experiment.uuid} />
-            );
-        }.bind(this));
+        console.log(files);
+        console.log(filesToExp);
+        // var filteredFiles = []; // unused for now... when format selection is added back in, adapt code below:
+        // for(var i=0; i<files.length; i++){
+        //     if(this.props.targetFiles.has(files[i].file_format)){
+        //         filteredFiles.push(files[i].uuid);
+        //     }
+        // }
+        // var childExperiments = files.map(function (file) {
+        //     return (
+        //         <FileEntry extraInfo={filesToExp[file.uuid]} result={file} key={file.uuid} parentChecked={this.state.checked}/>
+        //     );
+        // }.bind(this));
+        var childExperiments = [];
         // remove hidden experiments from complete/selected records
-        var completeExpts = this.state.completeExpts;
-        var selectedExpts = this.state.selectedExpts;
-        var emptyExpts = this.state.emptyExpts;
-        for (var j=0; j<failExperiments.length; j++){
-            if(completeExpts.has(failExperiments[j])){
-                completeExpts.delete(failExperiments[j]);
-            }
-            if(selectedExpts.has(failExperiments[j])){
-                selectedExpts.delete(failExperiments[j]);
-            }
-            if(emptyExpts.has(failExperiments[j])){
-                emptyExpts.delete(failExperiments[j]);
-            }
-        }
-        var checked = completeExpts.size === childExperiments.length || childExperiments.length === this.state.emptyExpts.size;
-        var indeterminate = (selectedExpts.size > 0 || completeExpts.size > 0) && completeExpts.size !== childExperiments.length;
+        // var completeExpts = this.state.completeExpts;
+        // var selectedExpts = this.state.selectedExpts;
+        // var emptyExpts = this.state.emptyExpts;
+        // for (var j=0; j<failExperiments.length; j++){
+        //     if(completeExpts.has(failExperiments[j])){
+        //         completeExpts.delete(failExperiments[j]);
+        //     }
+        //     if(selectedExpts.has(failExperiments[j])){
+        //         selectedExpts.delete(failExperiments[j]);
+        //     }
+        //     if(emptyExpts.has(failExperiments[j])){
+        //         emptyExpts.delete(failExperiments[j]);
+        //     }
+        // }
+        var checked=true;
+        var indeterminate=false;
+        // var checked = completeExpts.size === childExperiments.length || childExperiments.length === this.state.emptyExpts.size;
+        // var indeterminate = (selectedExpts.size > 0 || completeExpts.size > 0) && completeExpts.size !== childExperiments.length;
         return (
             <li>
                 <div className="clearfix">
@@ -154,7 +207,11 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
                         <span className='expset-hits pull-right'>{this.props.exptHits}</span>
                     </div>
                     <Panel className="expset-panel" collapsible expanded={this.state.open}>
-                        {childExperiments}
+                        <Table striped bordered condensed hover>
+                            <tbody>
+                                {childExperiments}
+                            </tbody>
+                        </Table>
                     </Panel>
                 </div>
             </li>
@@ -294,7 +351,9 @@ var ExperimentSublist = React.createClass({
             files.map(function (file) {
                 if(this.props.targetFiles.has(file.file_format)){
                     passedFileCount += 1;
-                    childFiles.push(<FileSublist handleFileUpdate={this.handleFileUpdate} filteredFiles={filteredFiles} key={file.uuid} parentChecked={this.state.checked} file={file} exptPassed={this.props.passed}/>);
+                    childFiles.push(
+                        <FileSublist handleFileUpdate={this.handleFileUpdate} filteredFiles={filteredFiles} key={file.uuid} parentChecked={this.state.checked} file={file} exptPassed={this.props.passed}/>
+                    );
                 }else{
                     var fileID = false + "~" + this.props.passed + "~" + file.file_format + "~" + file.uuid;
                     if(selectedFiles.has(file.uuid)){
@@ -316,17 +375,25 @@ var ExperimentSublist = React.createClass({
         var checked = this.state.selectedFiles.size === filteredFiles.length || passedFileCount === 0;
         var indeterminate = (this.state.selectedFiles.size !== filteredFiles.length && this.state.selectedFiles.size > 0);
         return(
-            <div className='expset-sublist-entry' key={result.accession}>
-                <Button bsSize="xsmall" className="expset-button" onClick={this.handleToggle}>{this.state.open ? "-" : "+"}</Button>
-                <IndeterminateCheckbox checked={checked} indeterminate={indeterminate} className='expset-checkbox expset-checkbox-sub' onChange={this.handleCheck}/>
-                <a className="expset-entry" href={result['@id'] || ''}>
-                    {result.experiment_summary || result.accession || result.uuid || result['@id']}
-                </a>
-                <span className='expset-hits pull-right'>{fileHits}</span>
-                <Panel className="expset-panel" collapsible expanded={this.state.open}>
-                    {childFiles}
-                </Panel>
-            </div>
+            <tr className='expset-sublist-entry' key={result.accession}>
+                <td rowspan="2">{result.accession || result.uuid}</td>
+                <td>
+                    <Button bsSize="xsmall" className="expset-button" onClick={this.handleToggle}>{this.state.open ? "-" : "+"}</Button>
+                    <IndeterminateCheckbox checked={checked} indeterminate={indeterminate} className='expset-checkbox expset-checkbox-sub' onChange={this.handleCheck}/>
+                    <a className="expset-entry" href={result['@id'] || ''}>
+                        {result.experiment_summary || result.accession || result.uuid || result['@id']}
+                    </a>
+                    <span className='expset-hits pull-right'>{fileHits}</span>
+                    <Table striped bordered condensed hover>
+                        <tbody>
+                            {childFiles}
+                        </tbody>
+                    </Table>
+                    <Panel className="expset-panel" collapsible expanded={this.state.open}>
+                        {childFiles}
+                    </Panel>
+                </td>
+            </tr>
         );
     }
 });
