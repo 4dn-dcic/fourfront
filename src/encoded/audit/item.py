@@ -35,7 +35,7 @@ def audit_item_schema(value, system):
         properties['schema_version'] = target_version
 
     properties['uuid'] = str(context.uuid)
-    validated, errors = validate(context.schema, properties, properties)
+    validated, errors = validate(context.schema, properties) # , properties)
     for error in errors:
         category = 'validation error'
         path = list(error.path)
