@@ -523,9 +523,11 @@ module.exports.HistoryAndTriggers = {
 
         Promise.race([request, timeout.promise]).then(v => {
             if (v instanceof Timeout) {
-                store.dispatch({
-                    type: {'slow':true}
-                });
+                console.log('TIMEOUT!!!');
+                // TODO: implement some other type of slow?
+                // store.dispatch({
+                //     type: {'slow':true}
+                // });
 
             } else {
                 // Request has returned data
@@ -587,7 +589,8 @@ module.exports.HistoryAndTriggers = {
         // gotten a response. If the requestAborted flag is set, then a request was aborted and so we have
         // the data for a Network Request Error. Don't render that, but clear the requestAboerted flag.
         // Otherwise we have good page data to render.
-        dispatch_dict.slow = false;
+        // dispatch_dict.slow = false;
+
         if (!this.requestAborted) {
             // Real page to render
             dispatch_dict.context = data;

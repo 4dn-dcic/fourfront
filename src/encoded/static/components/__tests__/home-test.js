@@ -11,7 +11,7 @@ jest.autoMockOff();
 jest.dontMock('react');
 jest.dontMock('underscore');
 
-describe('Testing item.js', function() {
+describe('Testing home.js', function() {
     var React, HomePage, testItem, TestUtils, page, data, _, banners, Wrapper;
 
     beforeEach(function() {

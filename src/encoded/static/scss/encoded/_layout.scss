@@ -379,10 +379,6 @@ p, input {
 	padding: 0px 5px 0px 5px;
 }
 
-.expset-entry-passed{
-	background-color: #a7f1de;
-}
-
 .expset-panel{
 	margin: 0px 5px 0px 5px !important;
 }
@@ -396,6 +392,12 @@ p, input {
 
 .expset-sublist-entry{
 	margin-bottom: 2px;
+}
+
+.expset-sublist-empty{
+	margin-left: 50px;
+	margin-bottom: 2px;
+	color: #999999;
 }
 
 .expset-facet-header-group{
@@ -419,4 +421,33 @@ p, input {
 
 .expset-file{
 	margin-left: 25px;
+}
+
+.expset-whole-selector{
+	padding: 10px;
+}
+
+.expset-file-selector{
+	@media (min-width: $screen-sm-min){
+		border-right: 1px #ccc solid;
+		padding-right: 10px;
+		margin-right: 10px;
+	}
+}
+
+.expset-selector-header{
+	> h5{
+		margin: 0px !important;
+	}
+
+}
+
+.expset-selector-button{
+	margin-top: 5px;
+}
+
+.browse-title{
+    text-align: center;
+    margin: 20px 0px 45px 0px;
+	color: #999999 !important;
 }

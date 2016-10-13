@@ -29,7 +29,7 @@ When that happens we need to drop the database and recreate it, so the inserts c
 
 Easiest way to do that is to ssh into the beanstalk instance and do the follow:
 
-** Note ** to ssh in first `pip install awsebcli` then follow the setup instructions.  With that installed you can simply type eb ssh (ensuring that the master branch is checked out).
+** Note ** to ssh in first `pip install awsebcli` then follow the setup instructions.  With that installed you can simply type eb ssh (ensuring that the master branch is checked out). (If this doesn't work, try `eb init` before `eb ssh`)
 
 Once conneted do the following:
 
@@ -49,7 +49,7 @@ sudo shutdown -r now
 
 ## Database backup / restore
 
-Database snapshots are automatically taken every day.  To restore a backup on production (4dnweb-prod) 
+Database snapshots are automatically taken every day.  To restore a backup on production (4dnweb-prod)
 1. Go to the RDS tab and then look at the snapshots page.
 2. Select the backup you want to restore.
 3. Click Restore Snapshot
@@ -57,5 +57,3 @@ Database snapshots are automatically taken every day.  To restore a backup on pr
 5. Go to 4dnweb-prod environment and select configuration -> software configuration
 6. Change the enviornment variable bnSTaLk_HOSTNAME to the name you just used for the new database.
 7. Redeploy the applicaition production.
-
-
