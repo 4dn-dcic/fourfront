@@ -47,5 +47,5 @@
         "input_file_info": [{"input_file_type": "reads", "input_file_format": "fastq"} ],
         "output_file_info": [{"output_file_type": "QC report", "output_file_format": "zip"}],
         "uuid": "f7b8cd87-49e5-4c33-afab-9ec90d65faf3"
-    },
+    }
 ]
