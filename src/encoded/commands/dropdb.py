@@ -16,24 +16,29 @@ def nameify(s):
 def run(app, host, dbname, port, user, pwd):
 
     # stop_httpd
-    subprocess.check_call(['sudo', 'service', 'httpd', 'stop'])
+    subprocess.check_call(['service', 'httpd', 'stop'])
 
     print("password is ", pwd)
+    env = os.environ.copy()
+    env['PGPASSWORD'] = pwd
 
     # dropdb
-    subprocess.check_call(['dropdb', '-p', port, '-h', host, '-U', user, '-e', dbname])
+    subprocess.Popen('/usr/bin/dropdb -p' + port + ' -h' + host + ' -U' + user + ' -e' + dbname,
+                     shell=True, env=env)
 
     # drop elastic search
-    es = app.registry[ELASTIC_SEARCH]
-    es.indices.delete(index='annotations')
-    es.indices.delete(index='snowvault')
-    # curl -XDELETE 'http://localhost:9200/twitter/'
+    subprocess.check_call(['curl', '-XDELETE', 'http://172.31.49.128:9872/annotations'])
+    if os.environ.get("ENV_NAME") == "PROD":
+        subprocess.check_call(['curl', '-XDELETE', 'http://172.31.49.128:9872/ffprod'])
+    else:
+        subprocess.check_call(['curl', '-XDELETE', 'http://172.31.49.128:9872/snovault'])
 
     # createdb
-    subprocess.check_call(['createdb', '-p', port, '-h', host, '-U', user, '-e', dbname])
+    subprocess.Popen('/usr/bin/createdb -p' + port + ' -h' + host + ' -U' + user + ' -e' + dbname,
+                     shell=True, env=env)
 
     # parachute
-    os.system("shutdown now -h")
+    # os.system("shutdown -r now")
 
 
 def main():
@@ -55,33 +60,18 @@ def main():
     os_dbpwd = environ.get('RDS_PASSWORD')
     os_dbname = environ.get('RDS_DB_NAME')
 
-    def hostname(value):
-        if value != nameify(value):
-            raise argparse.ArgumentTypeError(
-                "%r is an invalid hostname, only [a-z0-9] and hyphen allowed." % value)
-        return value
-
     parser = argparse.ArgumentParser(
         description="",
     )
     parser.add_argument('--port', default=os_port)
-    parser.add_argument('--host', type=hostname, default=os_hostname)
-    parser.add_argument('--dbuser', default=os_dbuser) 
+    parser.add_argument('--host', default=os_hostname)
+    parser.add_argument('--dbuser', default=os_dbuser)
     parser.add_argument('--pwd', default=os_dbpwd)
     parser.add_argument('--name', default=os_dbname)
 
-    # get application info
-    parser.add_argument('--app-name', help="Pyramid app name in configfile")
-    parser.add_argument('config_uri', help="path to configfile")
     args = parser.parse_args()
 
-    logging.basicConfig()
-    app = get_app(args.config_uri, args.app_name)
-
-    # Loading app will have configured from config file. Reconfigure here:
-    logging.getLogger('encoded').setLevel(logging.DEBUG)
-
-    return run(app, args.host, args.name, args.port, args.dbuser, args.pwd)
+    return run(args.host, args.name, args.port, args.dbuser, args.pwd)
 
 
 if __name__ == '__main__':
