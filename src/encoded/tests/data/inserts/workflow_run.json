@@ -1,5 +1,6 @@
 [
 {
+    "uuid": "f1a60edf-49e5-4c33-afab-9ec90d65fab2",
     "output_files": [
         {
             "workflow_argument_name": "split_bam1",
@@ -91,6 +92,7 @@
     "input_files": [],
     "workflow": "c7a60edf-49e5-4c33-afab-9ec90d65faf3"
 },{
+    "uuid": "d8a60edf-49e5-4c33-afab-9ec90d65fae4",
     "output_files": [
         {
             "workflow_argument_name": "report_zip",
@@ -100,15 +102,15 @@
     "parameters": [
         {
             "workflow_argument_name": "adapters_file",
-            "value": null
+            "value": ""
         },
         {
             "workflow_argument_name": "limits_file",
-            "value": null
+            "value": ""
         },
         {
             "workflow_argument_name": "contaminants_file",
-            "value": null
+            "value": ""
         }
     ],
     "input_files": [],
