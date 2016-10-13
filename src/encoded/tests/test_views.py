@@ -142,6 +142,7 @@ def test_load_sample_data(
         lab,
         organism,
         publication,
+        publication_tracking,
         software,
         human_biosource,
         submitter,

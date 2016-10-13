@@ -343,6 +343,17 @@ def publication(testapp, lab, award):
 
 
 @pytest.fixture
+def publication_tracking(testapp, lab, award):
+    item = {
+        'uuid': '8312fc0c-b241-4cb2-9b01-1438910550ad',
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'PMID': "PMID:12345678",
+    }
+    return testapp.post_json('/publication_tracking', item).json['@graph'][0]
+
+
+@pytest.fixture
 def software(testapp):
     # TODO: ASK_ANDY do we want software_type to be an array?
     item = {
