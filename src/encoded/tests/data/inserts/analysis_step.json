@@ -33,7 +33,7 @@
         "software_used": "7868f960-50ac-11e4-916c-0800200c9a66",
         "input_file_info": [{"input_file_type": "intermediate", "input_file_format": "hdf5"},{"input_file_type": "intermediate", "input_file_format": "hdf5"},{"input_file_type": "intermediate", "input_file_format": "hdf5"},{"input_file_type": "chromosome size", "input_file_format": "txt"} ],
         "output_file_info": [{"output_file_type": "contact matrix", "output_file_format": "txt"},{"output_file_type": "contact matrix", "output_file_format": "txt"},{"output_file_type": "contact matrix", "output_file_format": "txt"},{"output_file_type": "contact matrix", "output_file_format": "txt"},{"output_file_type": "contact matrix", "output_file_format": "txt"}],
-        "step_parameters": [{"parameter": "chromosome","description": "chromosome"},{"parameters": "contact_matrix_binsize","description": "Contact matrix binsize", "default_value": 50000}],
+        "step_parameters": [{"parameter": "chromosome","description": "chromosome"},{"parameter": "contact_matrix_binsize","description": "Contact matrix binsize", "default_value": "50000"}],
         "uuid": "a937f407-49e5-4c33-afab-9ec90d65faf3"
     },
     {
