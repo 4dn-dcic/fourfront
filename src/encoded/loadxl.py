@@ -21,6 +21,7 @@ ORDER = [
     'genomic_region',
     'target',
     'publication',
+    'publication_tracking',
     'document',
     'vendor',
     'protocol',
