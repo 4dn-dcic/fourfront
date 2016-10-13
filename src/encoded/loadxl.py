@@ -528,6 +528,9 @@ PHASE1_PIPELINES = {
     ],
     'publication': [
         remove_keys('experiment_sets_in_pub'),
+    ],
+    'publication_tracking': [
+        remove_keys('experiment_sets_in_pub'),
     ]
 }
 
@@ -562,6 +565,9 @@ PHASE2_PIPELINES = {
         skip_rows_missing_all_keys('experiments_in_set'),
     ],
     'publication': [
+        skip_rows_missing_all_keys('experiment_sets_in_pub'),
+    ],
+    'publication_tracking': [
         skip_rows_missing_all_keys('experiment_sets_in_pub'),
     ]
 }

@@ -24,14 +24,12 @@
             "type": "string",
             "uniqueKey":  "publication:PMID",
             "pattern": "^PMID:[0-9]*",
-            "comment": "If a PMID is supplied then it is assumed the paper has been published",
-            "comment": "and that relevant data can be retrieved from pubmed and other fields",
-            "comment": "will be automatically populated via calculated properties"
+            "comment": "Please provide the id in the form of PMID:12345678"
         },
         "status": {
             "title": "Status",
             "type": "string",
-            "default": "in preparation",
+            "default": "published",
             "enum" : [
                 "planned",
                 "in preparation",
@@ -42,30 +40,6 @@
                 "deleted",
                 "replaced"
             ]
-        },
-        "title": {
-            "title": "Title",
-            "description": "Title of the publication or communication.",
-            "uniqueKey": true,
-            "type": "string"
-        },
-        "abstract": {
-            "rdfs:subPropertyOf": "dc:abstract",
-            "title": "Abstract",
-            "description": "Abstract of the publication or communication.",
-            "type": "string"
-        },
-        "contact_author": {
-            "title": "Contact Author",
-            "description": "Please select a user as the contact person",
-            "type": "string",
-            "comment": "for use of internal tracking",
-            "linkTo": "User"
-        },
-        "authors": {
-            "title": "Authors",
-            "description": "All authors, with format Bernstein BE, Birney E, Dunham I,...",
-            "type": "string"
         },
         "published_by": {
             "title": "Published by",
