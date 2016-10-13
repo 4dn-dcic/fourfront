@@ -115,7 +115,8 @@
                             "blacklisted regions",
                             "restriction enzyme site regions",
                             "intermediate",
-                            "QC report"
+                            "QC report",
+                            "chromosome size"
                         ]
                     },
                     "input_file_format": {
@@ -172,7 +173,8 @@
                             "blacklisted regions",
                             "restriction enzyme site regions",
                             "intermediate",
-                            "QC report"
+                            "QC report",
+                            "chromosome size"
                         ]
                     },
                     "output_file_format": {
