@@ -7,9 +7,8 @@ var globals = require('./globals');
 var _ = require('underscore');
 var parseAndLogError = require('./mixins').parseAndLogError;
 // var navigation = require('./navigation');
-import { Modal } from 'react-bootstrap';
+var Modal = require('react-bootstrap').Modal;
 var ItemStore = require('./lib/store').ItemStore;
-var Form = require('./form').Form;
 var ObjectPicker = require('./inputs').ObjectPicker;
 
 // var Breadcrumbs = navigation.Breadcrumbs;
@@ -91,34 +90,48 @@ var AccessKeyTable = React.createClass({
     },
     showNewSecret: function(title, response) {
         this.setState({modal:
-            <Modal title={title} onHide={this.hideModal}>
-                <div className="modal-body">
+            <Modal show={true} onHide={this.hideModal}>
+            <Modal.Header>
+                <Modal.Title>{title}</Modal.Title>
+            </Modal.Header>
+                <Modal.Body>
                     Please make a note of the new secret access key.
                     This is the last time you will be able to view it.
                     <dl className="key-value">
-                        <dt>Access Key ID</dt>
-                        <dd>{response.access_key_id}</dd>
-                        <dt>Secret Access Key</dt>
-                        <dd>{response.secret_access_key}</dd>
+                        <div>
+                            <dt>Access Key ID</dt>
+                            <dd>{response.access_key_id}</dd>
+                        </div>
+                        <div>
+                            <dt>Secret Access Key</dt>
+                            <dd>{response.secret_access_key}</dd>
+                        </div>
                     </dl>
-                </div>
+                </Modal.Body>
             </Modal>
         });
     },
 
     onDelete: function(item) {
         this.setState({modal:
-            <Modal title={'Access key ' + item['access_key_id'] + ' has been deleted.'} onHide={this.hideModal} />
+            <Modal show={true} onHide={this.hideModal}>
+                <Modal.Header>
+                    <Modal.Title>{'Access key ' + item['access_key_id'] + ' has been deleted.'}</Modal.Title>
+                </Modal.Header>
+            </Modal>
         });
     },
 
     onError: function(error) {
         var View = globals.content_views.lookup(error);
         this.setState({modal:
-            <Modal title="Error" onHide={this.hideModal}>
-                <div className="modal-body">
+            <Modal show={true} onHide={this.hideModal}>
+                <Modal.Header>
+                    <Modal.Title>Error</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
                     <View context={error} loadingComplete={true} />
-                </div>
+                </Modal.Body>
             </Modal>
         });
     },

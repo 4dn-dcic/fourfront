@@ -9,6 +9,7 @@
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/accession" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/status" },
@@ -20,6 +21,9 @@
     "properties": {
         "schema_version": {
             "hidden comment": "Bump the default in the subclasses."
+        },
+        "accession": {
+            "accessionType": "ES"
         },
         "experiments_in_set": {
             "title": "Set of experiments",
@@ -42,7 +46,7 @@
               "unspecified",
               "replicates",
               "biological replicates",
-              "technical repllicates",
+              "technical replicates",
               "analysis set",
               "publication"
             ]
@@ -52,6 +56,46 @@
             "description": "A description of why experiments are part of the set.",
             "type": "string",
             "default": ""
+        }
+    },
+    "facets": {
+        "experimentset_type": {
+            "title": "Experiment set type"
+        },
+        "experiments_in_set.award.project": {
+            "title": "Project"
+        },
+        "experiments_in_set.biosample.biosource.individual.organism.name": {
+            "title": "Organism"
+        },
+        "experiments_in_set.biosample.biosource.biosource_type": {
+            "title": "Biosource type"
+        },
+        "experiments_in_set.biosample.biosource_summary": {
+            "title": "Biosource"
+        },
+        "experiments_in_set.digestion_enzyme.name": {
+            "title": "Enzyme"
+        },
+        "experiments_in_set.biosample.modifications_summary": {
+            "title": "Modifications"
+        },
+        "experiments_in_set.biosample.treatments_summary": {
+            "title": "Treatments"
+        },
+        "experiments_in_set.lab.title": {
+            "title": "Lab"
+        }
+    },
+    "columns": {
+        "experimentset_type": {
+            "title": "Experiment set type"
+        },
+        "description": {
+            "title": "Description"
+        },
+        "experiments_in_set": {
+            "title": "Experiments"
         }
     }
 }

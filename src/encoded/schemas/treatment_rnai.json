@@ -16,6 +16,7 @@
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/references" },
         { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/documents" }
     ],
     "properties": {
@@ -33,7 +34,8 @@
         "target": {
             "title": "Target",
             "description": "The targeted gene or genomic region that is targeted by the modification.",
-            "type": "string"
+            "type": "string",
+            "linkTo": "Target"
         },
         "target_sequence": {
             "title": "Target Sequence",

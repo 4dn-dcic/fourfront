@@ -13,6 +13,8 @@ addons:
     packages:
     - bsdtar
     - elasticsearch
+    - gcc-c++ 
+    - make  
     - graphviz
 env:
   global:
@@ -43,8 +45,7 @@ before_install:
 - npm config set python /usr/bin/python2.7
 install:
 - python bootstrap.py --buildout-version 2.4.1 --setuptools-version 18.1
-- bin/buildout -c buildout-travis.cfg || (echo "Retrying buildout" && bin/buildout
-  -c buildout-travis.cfg)
+- bin/buildout || (echo "Retrying buildout" && bin/buildout )
 - pip install awsebcli
 - pip install coveralls
 - pip install codacy-coverage
@@ -103,23 +104,32 @@ after_success:
 - "if test -n \"$NPM\"; then \n   cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js\n
   \  cat ./coverage/lcov.info | ./node_modules/.bin/codacy-coverage\n   rm -rf ./coverage\nfi\n"
 - if test -n "$UNIT"; then python-codacy-coverage -r coverage.xml; fi
-- python travis_after_all.py https://api.travis-ci.org
+- python deploy/travis_after_all.py https://api.travis-ci.org
 - export $(cat .to_export_back) >> /dev/null
 - |
   if [ "$BUILD_LEADER" = "YES" ]; then
     if [ "$BUILD_AGGREGATE_STATUS" = "others_succeeded" ]; then
       if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
+        bin/aws s3 cp --recursive s3://encoded-4dn-conf-prod/.aws /home/travis/.aws
         if [ "$TRAVIS_BRANCH" = "master" ]; then
-          echo "Job succeeded! PUBLISHING..."
+          echo "Job succeeded! PUBLISHING to dev environment..."
           git config --global user.email "travis@builder.com"
           git config --global user.name "Travis"
           #git checkout master
           eb use 4dn-web-dev
-          python deploy_beanstalk.py
+          python deploy/deploy_beanstalk.py
+        fi
+        if [ "$TRAVIS_BRANCH" = "production" ]; then
+          echo "Job succeeded! PUBLISHING to PROD environment..."
+          git config --global user.email "travis@builder.com"
+          git config --global user.name "Travis"
+          #git checkout production
+          eb use 4dnweb-prod --debug --verbose
+          python deploy/deploy_beanstalk.py
         fi
       fi
      fi
     fi
 after_failure:
-- python travis_after_all.py https://api.travis-ci.org
+- python deploy/travis_after_all.py https://api.travis-ci.org
 - export $(cat .to_export_back) >> /dev/null

@@ -113,11 +113,9 @@ module.exports.Persona = {
         }else{
             query_href = this.props.href;
         }
+        this.setState({session: session});
         store.dispatch({
-            type: {'href':query_href}
-        });
-        store.dispatch({
-            type: {'session_cookie': session_cookie}
+            type: {'href':query_href, 'session_cookie': session_cookie}
         });
     },
 
@@ -229,16 +227,6 @@ module.exports.Persona = {
     },
 };
 
-class UnsavedChangesToken {
-    constructor(manager) {
-        this.manager = manager;
-    }
-
-    release() {
-        this.manager.releaseUnsavedChanges(this);
-    }
-}
-
 
 module.exports.HistoryAndTriggers = {
     SLOW_REQUEST_TIME: 250,
@@ -246,37 +234,17 @@ module.exports.HistoryAndTriggers = {
     historyEnabled: !!(typeof window != 'undefined' && window.history && window.history.pushState),
 
     childContextTypes: {
-        adviseUnsavedChanges: React.PropTypes.func,
         navigate: React.PropTypes.func
-    },
-
-    adviseUnsavedChanges: function () {
-        var token = new UnsavedChangesToken(this);
-        this.setState({unsavedChanges: this.state.unsavedChanges.concat([token])});
-        return token;
-    },
-
-    releaseUnsavedChanges: function (token) {
-        console.assert(this.state.unsavedChanges.indexOf(token) != -1);
-        this.setState({unsavedChanges: this.state.unsavedChanges.filter(x => x !== token)});
     },
 
     getChildContext: function() {
         return {
-            adviseUnsavedChanges: this.adviseUnsavedChanges,
             navigate: this.navigate
-        };
-    },
-
-    getDefaultProps: function() {
-        return {
-            slow: false
         };
     },
 
     getInitialState: function () {
         return {
-            unsavedChanges: [],
             promisePending: false
         };
     },
@@ -488,33 +456,22 @@ module.exports.HistoryAndTriggers = {
         this.navigate(href, {replace: true});
     },
 
-    confirmNavigation: function() {
-        // check for beforeunload confirmation
-        if (this.state.unsavedChanges.length) {
-            var res = window.confirm('You have unsaved changes. Are you sure you want to lose them?');
-            if (res) {
-                this.setState({unsavedChanges: []});
-            }
-            return res;
+    // only navigate if href changes
+    confirmNavigation: function(href) {
+        if(href===this.props.href){
+            return false;
         }
         return true;
     },
 
-    handleBeforeUnload: function() {
-        if (this.state.unsavedChanges.length) {
-            return 'You have unsaved changes.';
-        }
-    },
-
     navigate: function (href, options) {
-        if (!this.confirmNavigation()) {
-            return;
-        }
         // options.skipRequest only used by collection search form
         // options.replace only used handleSubmit, handlePopState, handlePersonaLogin
         options = options || {};
         href = url.resolve(this.props.href, href);
-
+        if (!this.confirmNavigation(href)) {
+            return;
+        }
         // Strip url fragment.
         var fragment = '';
         var href_hash_pos = href.indexOf('#');
@@ -522,7 +479,6 @@ module.exports.HistoryAndTriggers = {
             fragment = href.slice(href_hash_pos);
             href = href.slice(0, href_hash_pos);
         }
-
         if (!this.historyEnabled) {
             if (options.replace) {
                 window.location.replace(href + fragment);
@@ -567,9 +523,11 @@ module.exports.HistoryAndTriggers = {
 
         Promise.race([request, timeout.promise]).then(v => {
             if (v instanceof Timeout) {
-                store.dispatch({
-                    type: {'slow':true}
-                });
+                console.log('TIMEOUT!!!');
+                // TODO: implement some other type of slow?
+                // store.dispatch({
+                //     type: {'slow':true}
+                // });
 
             } else {
                 // Request has returned data
@@ -595,11 +553,13 @@ module.exports.HistoryAndTriggers = {
             }
             // The URL may have redirected
             var response_url = response.url || href;
+
             if (options.replace) {
                 window.history.replaceState(null, '', response_url + fragment);
             } else {
                 window.history.pushState(null, '', response_url + fragment);
             }
+
             dispatch_dict.href = response_url + fragment;
             if (!response.ok) {
                 throw response;
@@ -629,7 +589,8 @@ module.exports.HistoryAndTriggers = {
         // gotten a response. If the requestAborted flag is set, then a request was aborted and so we have
         // the data for a Network Request Error. Don't render that, but clear the requestAboerted flag.
         // Otherwise we have good page data to render.
-        dispatch_dict.slow = false;
+        // dispatch_dict.slow = false;
+
         if (!this.requestAborted) {
             // Real page to render
             dispatch_dict.context = data;

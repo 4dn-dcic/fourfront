@@ -209,6 +209,7 @@ var lookup_column = function (result, column) {
                     //    return factory({context: item, column: column});
                     //};
                     var value = lookup_column(item, column);
+                    console.log(value);
                     if (column == '@id') {
                         factory = globals.listing_titles.lookup(item);
                         value = factory({context: item});
@@ -216,7 +217,7 @@ var lookup_column = function (result, column) {
                         value = value;
                     } else if (value == null) {
                         value = '';
-                    } else if (value[0]['@type']) {
+                    } else if (value[0] && value[0]['@type']) { // it's an embedded object
                         if(value[0]['description']){
                             var str = value[0]['description'];
                             // If str length is > 100 characters, split at closest word and concat '...'
@@ -348,7 +349,8 @@ var lookup_column = function (result, column) {
                             {this.props.showControls ? <tr className="nosort table-controls">
                                 <th colSpan={columns.length}>
                                     {loading_or_total}
-                                    {/*{actions} REMOVE ACTIONS FOR NOW*/}
+                                    {/******REMOVE ACTIONS and SEARCH FORM FOR NOW*******
+                                    {actions}
                                     <form ref="form" className="table-filter" onKeyUp={this.handleKeyUp}
                                         data-skiprequest="true" data-removeempty="true">
                                         <input ref="q" disabled={this.state.communicating || undefined}
@@ -359,6 +361,7 @@ var lookup_column = function (result, column) {
                                         <input ref="sorton" type="hidden" name="sorton" defaultValue={sortOn !== defaultSortOn ? sortOn : ''} />
                                         <input ref="reversed" type="hidden" name="reversed" defaultValue={!!reversed || ''} />
                                     </form>
+                                    */}
                                 </th>
                             </tr> : ''}
                             <tr className="col-headers">

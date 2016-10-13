@@ -9,6 +9,8 @@
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/status" }
     ],
     "properties": {
@@ -17,7 +19,7 @@
         },
         "status": {
             "default": "current"
-        },    
+        },
         "lab": {
             "title": "Affiliation",
             "description": "Lab user is primarily associated with.",

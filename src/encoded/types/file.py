@@ -5,6 +5,7 @@ from snovault import (
     calculated_property,
     collection,
     load_schema,
+    abstract_collection,
 )
 from snovault.schema_utils import schema_validator
 from .base import (
@@ -93,6 +94,7 @@ class FileSet(Item):
     """Collection of files stored under fileset."""
 
     item_type = 'file_set'
+    base_types = ['FileSet'] + Item.base_types
     schema = load_schema('encoded:schemas/file_set.json')
     name_key = 'accession'
 
@@ -116,7 +118,7 @@ class FileSet(Item):
                         target_file.update(target_file.properties)
 
 
-@collection(
+@abstract_collection(
     name='files',
     unique_key='accession',
     properties={
@@ -125,21 +127,24 @@ class FileSet(Item):
     })
 class File(Item):
     """Collection for individual files."""
-
     item_type = 'file'
+    base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
+    embedded = ['lab']
     name_key = 'accession'
 
     def _update(self, properties, sheets=None):
+        if not properties:
+            return
         # update self first to ensure 'related_files' are stored in self.properties
         super(File, self)._update(properties, sheets)
         DicRefRelation = {
-             "derived from": "parent of",
-             "parent of": "derived from",
-             "supercedes": "is superceded by",
-             "is superceded by": "supercedes",
-             "paired with": "paired with"
-             }
+            "derived from": "parent of",
+            "parent of": "derived from",
+            "supercedes": "is superceded by",
+            "is superceded by": "supercedes",
+            "paired with": "paired with"
+        }
         acc = str(self.uuid)
 
         if 'related_files' in properties.keys():
@@ -162,7 +167,7 @@ class File(Item):
                 else:
                     # case two we have relations but not the one we need
                     for target_relation in target_fl.properties['related_files']:
-                        if target_relation['file'] == acc:
+                        if target_relation.get('file') == acc:
                             break
                     else:
                         # make data for new related_files
@@ -183,8 +188,6 @@ class File(Item):
     @property
     def __name__(self):
         properties = self.upgrade_properties()
-        if 'external_accession' in properties:
-            return properties['external_accession']
         if properties.get('status') == 'replaced':
             return self.uuid
         return properties.get(self.name_key, None) or self.uuid
@@ -195,9 +198,6 @@ class File(Item):
             if 'md5sum' in properties:
                 value = 'md5:{md5sum}'.format(**properties)
                 keys.setdefault('alias', []).append(value)
-            # Ensure no files have multiple reverse paired_with
-            # if 'paired_with' in properties:
-            #     keys.setdefault('file:paired_with', []).append(properties['paired_with'])
         return keys
 
     @calculated_property(schema={
@@ -243,18 +243,44 @@ class File(Item):
             bucket = registry.settings['file_upload_bucket']
             mapping = cls.schema['file_format_file_extension']
             file_extension = mapping[properties['file_format']]
-            date = properties['date_created'].split('T')[0].replace('-', '/')
-            accession_or_external = properties.get('accession') or properties['external_accession']
-            key = '{date}/{uuid}/{accession_or_external}{file_extension}'.format(
-                accession_or_external=accession_or_external,
-                date=date, file_extension=file_extension, uuid=uuid, **properties)
-            name = 'up{time:.6f}-{accession_or_external}'.format(
-                accession_or_external=accession_or_external,
-                time=time.time(), **properties)[:32]  # max 32 chars
+            key = '{uuid}/{accession}{file_extension}'.format(
+                file_extension=file_extension, uuid=uuid, **properties)
 
-            profile_name = registry.settings.get('file_upload_profile_name')
-            sheets['external'] = external_creds(bucket, key, name, profile_name)
+            # remove the path from the file name and only take first 32 chars
+            fname = properties.get('filename')
+            if fname:
+                name = fname.split('/')[-1][:32]
+                profile_name = registry.settings.get('file_upload_profile_name')
+                sheets['external'] = external_creds(bucket, key, name, profile_name)
         return super(File, cls).create(registry, uuid, properties, sheets)
+
+
+@collection(
+    name='file-fastq',
+    unique_key='accession',
+    properties={
+        'title': 'FASTQ Files',
+        'description': 'Listing of FASTQ Files',
+    })
+class FileFastq(File):
+    """Collection for individual fastq files."""
+    item_type = 'file_fastq'
+    schema = load_schema('encoded:schemas/file_fastq.json')
+    embedded = File.embedded
+
+
+@collection(
+    name='file-fasta',
+    unique_key='accession',
+    properties={
+        'title': 'FASTA Files',
+        'description': 'Listing of FASTA Files',
+    })
+class FileFasta(File):
+    """Collection for individual fasta files."""
+    item_type = 'file_fasta'
+    schema = load_schema('encoded:schemas/file_fasta.json')
+    embedded = File.embedded
 
 
 @view_config(name='upload', context=File, request_method='GET',
@@ -282,7 +308,7 @@ def post_upload(context, request):
     if properties['status'] not in ('uploading', 'upload failed'):
         raise HTTPForbidden('status must be "uploading" to issue new credentials')
 
-    accession_or_external = properties.get('accession') or properties['external_accession']
+    accession_or_external = properties.get('accession')
     external = context.propsheets.get('external', None)
 
     if external is None:
@@ -291,21 +317,22 @@ def post_upload(context, request):
         uuid = context.uuid
         mapping = context.schema['file_format_file_extension']
         file_extension = mapping[properties['file_format']]
-        date = properties['date_created'].split('T')[0].replace('-', '/')
-        key = '{date}/{uuid}/{accession_or_external}{file_extension}'.format(
-            accession_or_external=accession_or_external,
-            date=date, file_extension=file_extension, uuid=uuid, **properties)
+
+        key = '{uuid}/{accession}{file_extension}'.format(
+            file_extension=file_extension, uuid=uuid, **properties)
+
     elif external.get('service') == 's3':
         bucket = external['bucket']
         key = external['key']
     else:
         raise ValueError(external.get('service'))
 
-    name = 'up{time:.6f}-{accession_or_external}'.format(
-        accession_or_external=accession_or_external,
-        time=time.time(), **properties)[:32]  # max 32 chars
+    # remove the path from the file name and only take first 32 chars
+    name = properties.get('filename').split('/')[-1][:32]
     profile_name = request.registry.settings.get('file_upload_profile_name')
     creds = external_creds(bucket, key, name, profile_name)
+    # in case we haven't uploaded a file before
+    context.propsheets['external'] = external_creds(bucket, key, name, profile_name)
 
     new_properties = None
     if properties['status'] == 'upload failed':

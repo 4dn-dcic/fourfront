@@ -27,9 +27,10 @@ class Treatment(Item):
         "title": "Treatment_type",
         "type": "string",
     })
-    def treatment_type(self, rnai_type=None, target=None, chemical=None):
+    def treatment_type(self, request, rnai_type=None, target=None, chemical=None):
         if rnai_type and target:
-            rnai_value = rnai_type + " for " + target
+            targetObj = request.embed(target, '@@object')
+            rnai_value = rnai_type + " for " + targetObj['target_summary']
         else:
             rnai_value = rnai_type
         return rnai_value or chemical or "None"
@@ -60,4 +61,4 @@ class TreatmentRnai(Treatment):
 
     item_type = 'treatment_rnai'
     schema = load_schema('encoded:schemas/treatment_rnai.json')
-    embedded = ['rnai_vendor', 'rnai_constructs']
+    embedded = ['rnai_vendor', 'rnai_constructs', 'target']

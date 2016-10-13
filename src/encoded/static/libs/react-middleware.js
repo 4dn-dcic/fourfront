@@ -15,7 +15,8 @@ function mapStateToProps(store) {
        inline: store.inline,
        session_cookie: store.session_cookie,
        contextRequest: store.contextRequest,
-       slow: store.slow
+       slow: store.slow,
+       expSetFilters: store.expSetFilters
    };
 }
 

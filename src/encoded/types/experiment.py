@@ -33,11 +33,11 @@ class Experiment(Item):
         # update self first to ensure 'experiment_relation' are stored in self.properties
         super(Experiment, self)._update(properties, sheets)
         DicRefRelation = {
-             "controlled by": "control for",
-             "derived from": "source for",
-             "control for": "controlled by",
-             "source for": "derived from"
-             }
+            "controlled by": "control for",
+            "derived from": "source for",
+            "control for": "controlled by",
+            "source for": "derived from"
+        }
         acc = str(self.uuid)
         if 'experiment_relation' in properties.keys():
             for relation in properties["experiment_relation"]:
@@ -88,6 +88,11 @@ class ExperimentSet(Item):
     item_type = 'experiment_set'
     schema = load_schema('encoded:schemas/experiment_set.json')
     name_key = "uuid"
+    embedded = ["experiments_in_set", "experiments_in_set.protocol", "experiments_in_set.protocol_variation",
+                "experiments_in_set.lab", "experiments_in_set.award", "experiments_in_set.biosample",
+                "experiments_in_set.biosample.biosource", "experiments_in_set.biosample.modifications",
+                "experiments_in_set.biosample.treatments", "experiments_in_set.biosample.biosource.individual.organism",
+                "experiments_in_set.files", "experiments_in_set.filesets",  "experiments_in_set.filesets.files_in_set", "experiments_in_set.digestion_enzyme"]
 
     def _update(self, properties, sheets=None):
         # update self first
@@ -121,6 +126,37 @@ class ExperimentHiC(Experiment):
 
     item_type = 'experiment_hic'
     schema = load_schema('encoded:schemas/experiment_hic.json')
+    embedded = Experiment.embedded + ["digestion_enzyme", "submitted_by"]
+
+    @calculated_property(schema={
+        "title": "Experiment summary",
+        "description": "Summary of the experiment, including type, enzyme and biosource.",
+        "type": "string",
+    })
+    def experiment_summary(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
+        sum_str = experiment_type
+        if biosample:
+            biosamp_props = request.embed(biosample, '@@object')
+            biosource = biosamp_props['biosource_summary']
+            sum_str += (' on ' + biosource)
+        if digestion_enzyme:
+            de_props = request.embed(digestion_enzyme, '@@object')
+            de_name = de_props['name']
+            sum_str += (' with ' + de_name)
+        return sum_str
+
+
+@collection(
+    name='experiments-capture-hic',
+    unique_key='accession',
+    properties={
+        'title': 'Experiments Capture Hi-C',
+        'description': 'Listing Capture Hi-C Experiments',
+    })
+class ExperimentCaptureC(Experiment):
+    """The experiment class for Capture Hi-C experiments."""
+    item_type = 'experiment_capture_c'
+    schema = load_schema('encoded:schemas/experiment_capture_c.json')
     embedded = Experiment.embedded + ["digestion_enzyme", "submitted_by"]
 
     @calculated_property(schema={

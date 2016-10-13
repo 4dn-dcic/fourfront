@@ -1,9 +1,12 @@
 'use strict';
 var React = require('react');
+var ReactDOM = require('react-dom');
 var fetched = require('./fetched');
 var _ = require('underscore');
 var announcements_data = require('../data/announcements_data');
-var gs_entries = require('../data/getting_started_data');
+var statics = require('../data/statics');
+var Panel = require('react-bootstrap').Panel;
+var store = require('../store');
 
 /* ****************
 New homepage
@@ -11,26 +14,41 @@ Will load static entries from a js file
 Uses fetch to get context necessary to populate banner entry
 **************** */
 
-var BannerLoader = module.exports.BannerLoader = React.createClass({
+var BannerLoader = React.createClass({
+
     render: function() {
-        var text = this.props.text;
-        var location = this.props.location;
         return (
-            <fetched.FetchedData>
-                <fetched.Param name='data' url={location} />
-                <BannerEntry text={text} location={location}/>
+            <fetched.FetchedData backup={<BannerEntry data={{'total':"-"}} text={this.props.text} destination={this.props.destination} location={this.props.location}/>}>
+                <fetched.Param name='data' url={this.props.location} />
+                <BannerEntry defaultFilter={this.props.defaultFilter ? this.props.defaultFilter : null} text={this.props.text} destination={this.props.destination} location={this.props.location}/>
             </fetched.FetchedData>
         );
     }
 });
 
-var BannerEntry = module.exports.BannerEntry = React.createClass({
+var BannerEntry = React.createClass({
+
+    setFacets: function(){
+        // for 4DN or external filters: if provided, set expSetFilters correctly
+        if(this.props.defaultFilter){
+            var newObj = {};
+            var objSet = new Set();
+            objSet.add(this.props.defaultFilter);
+            newObj['experiments_in_set.award.project'] = objSet;
+            store.dispatch({
+                type: {'expSetFilters': newObj}
+            });
+        }
+
+    },
+
     render: function() {
         var total = this.props.data.total;
         var location = this.props.location;
+        var destination = this.props.destination;
         var text = total + " " + this.props.text;
         return (
-            <a className="banner-entry" href={location}>{text}</a>
+            <a className="banner-entry" href={destination} onClick={this.setFacets}>{text}</a>
         );
     }
 });
@@ -42,7 +60,8 @@ var ContentItem = React.createClass({
         };
     },
 
-    handleToggle: function(b) {
+    handleToggle: function(e) {
+        e.preventDefault();
         this.setState({active: !this.state.active});
     },
 
@@ -62,61 +81,60 @@ var ContentItem = React.createClass({
         }else{
             subtitle = "";
         }
-        var content;
-        if (!this.state.active){
-            content = <span></span>;
-        }else{
-            content = (
-                <div className="fourDN-content"><p dangerouslySetInnerHTML={{__html: content}}></p></div>
-            );
-        }
+
         return (
             <div className="fourDN-section">
                 <div className="fourDN-section-title"><a className="fourDN-section-toggle" href="" onClick={this.handleToggle}>{title}</a></div>
                 <div className="fourDN-section-info">{subtitle}</div>
-                {content}
+                <Panel collapsible expanded={this.state.active} className="fourDN-content fourDN-content-panel">
+                    <p dangerouslySetInnerHTML={{__html: content}}></p>
+                </Panel>
             </div>
         );
     }
 });
 
-var HomePage = module.exports.HomePage = React.createClass({
-    // BannerLoaders are passed in as props
-    PropTypes: {
-        banners: React.PropTypes.array.isRequired
-    },
+var HomePageLoader = React.createClass({
     render: function() {
-        var experiment4DNBanner = this.props.banners[0]
-        var experimentExtBanner = this.props.banners[1]
-        var biosourceBanner = this.props.banners[2]
+        return (
+            <fetched.FetchedData>
+                <fetched.Param name='data' url='/search/?type=Experiment' />
+            </fetched.FetchedData>
+        );
+    }
+});
+
+
+var HomePage = module.exports = React.createClass({
+    render: function() {
+        var experiment4DNBanner = <BannerLoader text='experiments' defaultFilter="4DN" destination="/browse/?type=ExperimentSet&experimentset_type=biological+replicates" location='/search/?type=Experiment&award.project=4DN'/>;
+        var experimentExtBanner = <BannerLoader text='experiments' defaultFilter="External" destination="/browse/?type=ExperimentSet&experimentset_type=biological+replicates" location='/search/?type=Experiment&award.project=External'/>;
+        var biosourceBanner = <BannerLoader text='cell types' destination='/search/?type=Biosource' location='/search/?type=Biosource'/>;
         var announcements = announcements_data.map(function(announce) {
             return (
                 <ContentItem key={announce.title} content={announce}/>
             );
         });
-        var entries = gs_entries.map(function(entry) {
-            return (
-                <ContentItem key={entry.title} content={entry}/>
-            );
-        });
         return (
             <div>
-                <div className="fourDN-title fourDN-banner">
-                    <h3>Welcome to the 4DN Data Portal. We are under construction.<br/>The portal will be open to data submitters soon. Stay tuned!</h3>
+                <div className="fourDN-banner">
+                    <h2>4DN Data Portal</h2>
                     <h4>The portal currently hosts {experiment4DNBanner} from the 4DN network and<br/>{experimentExtBanner} from other sources over {biosourceBanner}.</h4>
                 </div>
                 <div className="row">
-                    <div className="col-md-6 col-xs-12">
-                        <div className="col-md-11">
-                            <h3 className="fourDN-header">Announcements</h3>
-                            {announcements}
-                        </div>
+                    <div className="col-md-9 col-xs-12">
+                        <h3 className="fourDN-header">Welcome!</h3>
+                        <p className="fourDN-content" dangerouslySetInnerHTML={{__html: statics.homeDescription}}></p>
                     </div>
-                    <div className="col-md-6 col-xs-12">
-                        <div className="col-md-11 col-md-push-1">
-                            <h3 className="fourDN-header">Getting started</h3>
-                            {entries}
-                        </div>
+                    <div className="col-md-3 col-xs-12">
+                        <h3 className="fourDN-header">Links</h3>
+                        <p className="fourDN-content"dangerouslySetInnerHTML={{__html: statics.homeLinks}}></p>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-md-8 col-xs-12">
+                        <h3 className="fourDN-header">Announcements</h3>
+                        {announcements}
                     </div>
                 </div>
             </div>

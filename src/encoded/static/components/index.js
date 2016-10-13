@@ -7,6 +7,8 @@ require('./collection');
 require('./footer');
 require('./globals');
 require('./home');
+require('./help');
+require('./about');
 require('./item');
 require('./user');
 require('./mixins');
@@ -15,6 +17,6 @@ require('./navigation');
 require('./inputs');
 require('./schema');
 require('./search');
-
+require('./browse');
 
 module.exports = require('./app');
