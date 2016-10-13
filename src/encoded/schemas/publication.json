@@ -98,6 +98,18 @@
                     "production"
                 ]
             }
+        },
+        "experiment_sets_in_pub": {
+            "title": "Experiment sets that are part of this publication",
+            "description": "List of experiment sets to be associated with the publication.",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "Experiment Set",
+                "comment": "use accessions for identifiers.",
+                "type": "string",
+                "linkTo": "ExperimentSet"
+            }
         }
     }
 }
