@@ -13,7 +13,7 @@ def nameify(s):
     return re.subn(r'\-+', '-', name)[0]
 
 
-def run(app, host, dbname, port, user, pwd):
+def run(host, dbname, port, user, pwd):
 
     # stop_httpd
     subprocess.check_call(['service', 'httpd', 'stop'])
@@ -23,6 +23,7 @@ def run(app, host, dbname, port, user, pwd):
     env['PGPASSWORD'] = pwd
 
     # dropdb
+    # this is still broke :(
     subprocess.Popen('/usr/bin/dropdb -p' + port + ' -h' + host + ' -U' + user + ' -e' + dbname,
                      shell=True, env=env)
 
