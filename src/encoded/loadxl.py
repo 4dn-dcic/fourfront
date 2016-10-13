@@ -44,7 +44,7 @@ ORDER = [
     'software',
     'analysis_step',
     'workflow',
-    'workflow_run',
+    'workflow_run'
 ]
 
 IS_ATTACHMENT = [
