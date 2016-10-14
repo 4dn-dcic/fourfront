@@ -9,15 +9,7 @@ var TestWarning = module.exports = React.createClass({
         portal: React.PropTypes.object
     },
 
-    getInitialState: function() {
-        return {
-            testWarning: this.props.visible || !productionHost[url.parse(this.context.location_href).hostname] || false
-        };
-    },
-
-    handleClick: function(e) {
-        e.preventDefault();
-        e.stopPropagation();
+    hideTestWarning: function(e) {
 
         // Remove the warning banner because the user clicked the close icon
         this.setState({testWarning: false});
@@ -32,13 +24,21 @@ var TestWarning = module.exports = React.createClass({
     },
 
     render : function(){
-        if (!this.state.testWarning) return null;
+        if (!this.props.visible) return null;
         return (
             <div className="test-warning">
                 <div className="container">
                     <p>
                         The data displayed on this page is not official and only for testing purposes.
-                        <a href="#" className="test-warning-close icon icon-times-circle-o" onClick={this.handleClick}></a>
+                        <a className="test-warning-close icon icon-times-circle-o" onClick={function(e){
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (this.props.setHidden){
+                                this.props.setHidden(e);
+                                return;
+                            }
+                            this.hideTestWarning();
+                        }.bind(this)}></a>
                     </p>
                 </div>
             </div>

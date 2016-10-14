@@ -5,6 +5,8 @@ var Login = require('./login');
 var {Navbars, Navbar, Nav, NavItem} = require('../libs/bootstrap/navbar');
 var {DropdownMenu} = require('../libs/bootstrap/dropdown-menu');
 var _ = require('underscore');
+var TestWarning = require('./testwarning');
+var productionHost = require('./globals').productionHost;
 
 
 var Navigation = module.exports = React.createClass({
@@ -15,17 +17,40 @@ var Navigation = module.exports = React.createClass({
         portal: React.PropTypes.object
     },
 
+    getInitialState: function() {
+        return {
+            testWarning: this.props.visible || !productionHost[url.parse(this.context.location_href).hostname] || false
+        };
+    },
+
+    hideTestWarning: function(e) {
+
+        // Remove the warning banner because the user clicked the close icon
+        this.setState({testWarning: false});
+
+        // If collection with .sticky-header on page, jiggle scroll position
+        // to force the sticky header to jump to the top of the page.
+        var hdrs = document.getElementsByClassName('sticky-header');
+        if (hdrs.length) {
+            window.scrollBy(0,-1);
+            window.scrollBy(0,1);
+        }
+    },
+
     render: function() {
         var portal = this.context.portal;
         var img = <img src="/static/img/4dn_logo.svg" className="navbar-logo-image"/>
         return (
-            <div id="navbar" className="navbar navbar-fixed-top navbar-inverse">
-                <div className="container">
-                    <Navbar brand={img} brandlink="/" label="main" navClasses="navbar-main" navID="navbar-icon">
-                        <GlobalSections />
-                        <UserActions />
-                        {/* REMOVE SEARCH FOR NOW: <Search />*/}
-                    </Navbar>
+            <div style={{ marginBottom: ( this.state.testWarning ? 37 : 0 ) }}>
+                <div id="navbar" className="navbar navbar-fixed-top navbar-inverse">
+                    <TestWarning visible={this.state.testWarning} setHidden={this.hideTestWarning} />
+                    <div className="container">
+                        <Navbar brand={img} brandlink="/" label="main" navClasses="navbar-main" navID="navbar-icon">
+                            <GlobalSections />
+                            <UserActions />
+                            {/* REMOVE SEARCH FOR NOW: <Search />*/}
+                        </Navbar>
+                    </div>
                 </div>
             </div>
         );
