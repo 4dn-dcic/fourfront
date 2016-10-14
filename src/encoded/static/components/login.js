@@ -30,7 +30,7 @@ var Login = React.createClass({
         var message = this.state.message;
         // first case is if user is not logged in
         if (!(session && session['auth.userid'])) {
-			userActionRender = <LoginBoxes isRefreshing={this.handleToggle}/>
+			userActionRender = <LoginBoxes handleAuth0Login={this.props.handleAuth0Login} isRefreshing={this.handleToggle} />
         } else { //if logged in give them a logout link
             userActionRender = <a href="#" onClick={this.handleToggleOut}  data-trigger="logout" className="global-entry">Sign out</a>;
         }
@@ -55,8 +55,30 @@ var LoginBoxes = React.createClass({
         navigate: React.PropTypes.func
     },
     getInitialState: function() {
-    	return {username: '', password: '', isOpen: false, errormsg: ''};
+    	return {username: '', password: '', isOpen: false, errormsg: '',
+						  lock: ''};
     },
+	  componentDidMount: function() {
+			  console.log("login componenet did mount")
+					var Auth0Lock = require('auth0-lock').default
+					//console.log(Auth0Lock)
+					// TODO: these should be read in from base and production.ini
+					this.lock = new Auth0Lock('DPxEwsZRnKDpk0VfVAxrStRKukN14ILB', 
+																				'hms-dbmi.auth0.com', {
+							auth: {
+								redirect: false
+							},
+							// TODO add theme : logo
+							socialButtonStyle: 'big',
+							languageDictionary: {
+								title: "Log in to data.4dnucleome.org"
+							},
+							allowedConnections: ['github', 'google-oauth2']
+					});
+					this.lock.on("authenticated", this.props.handleAuth0Login);
+					console.log('lock is', this.lock);
+				  this.setState({lock: this.lock});
+		},
     usernameFill: function(v) {
     	this.setState({username: v});
     },
@@ -118,13 +140,15 @@ var LoginBoxes = React.createClass({
 
     },
     render: function () {
+			  console.log("in login boxes");
+			  console.log(this.state.lock);
         var error_span = '';
         if (this.state.errormsg) {
        	    error_span = <div className="error">{this.state.errormsg}</div>;
         }
     	return (
             <div>
-                <a id="loginbtn" href="" className="global-entry" onClick={this.lock.show()}>Sign in</a>
+                <a id="loginbtn" href="" className="global-entry" onClick={this.state.lock.show}>Sign in</a>
                 <Modal show={this.state.isOpen} onHide={this.handleToggle}>
                     <div className="login-box">
                         <h1 className="title">Your Account</h1>

@@ -154,15 +154,12 @@ module.exports.Auth0 = {
 						return response.json();
 				})
         .then(session_properties => {
-            this.context.session['auth.userid'] = data.username;
-            window.location.reload();
+            //this.context.session['auth.userid'] = data.username;
+            //window.location.reload();
         },function(error) {
             console.log("got an error" + error);
-        })
+        });
     },
-
-
-
     fetch: function (url, options) {
         options = _.extend({credentials: 'same-origin'}, options);
         var http_method = options.method || 'GET';

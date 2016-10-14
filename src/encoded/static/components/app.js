@@ -278,6 +278,8 @@ var App = React.createClass({
                     <script async src='//www.google-analytics.com/analytics.js'></script>
                     <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet" />
                     <link href="https://fonts.googleapis.com/css?family=Yrsa" rel="stylesheet" />
+										<script src="http://cdn.auth0.com/js/lock/10.2/lock.min.js"></script>
+
                     <script data-prop-name="inline" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
                     <link rel="stylesheet" href="/static/css/style.css" />
                 </head>
@@ -289,7 +291,7 @@ var App = React.createClass({
                         <div id="application" className={appClass}>
                         <div className="loading-spinner"></div>
                             <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
-                                <Navigation />
+                                <Navigation handleAuth0Login={this.handleAuth0Login}/>
                                 <div id="content" className="container" key={key}>
                                     {content}
                                 </div>
