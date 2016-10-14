@@ -106,7 +106,7 @@ describe('Testing about.js', function() {
         var staticContainer = TestUtils.findRenderedDOMComponentWithClass(page, "static-page");
         expect(staticContainer).toBeTruthy();
         
-        var staticContainerContentSections = staticContainer.children[0].children; 
+        var staticContainerContentSections = staticContainer.children[1].children; 
         // ^ == div.static-page > div.help-entry > *
 
         // Should at least have 1 child element (title, paragraphs) 

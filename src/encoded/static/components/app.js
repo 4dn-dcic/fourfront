@@ -13,7 +13,6 @@ var url = require('url');
 var _ = require('underscore');
 var store = require('../store');
 var browse = require('./browse');
-var TestWarning = require('./testwarning');
 
 //sid is to allow addition of supplementary ids to navbar link headings
 
@@ -292,7 +291,6 @@ var App = React.createClass({
                         <div id="application" className={appClass}>
                         <div className="loading-spinner"></div>
                             <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
-                                <TestWarning />
                                 <Navigation />
                                 <div id="content" className="container" key={key}>
                                     {content}
