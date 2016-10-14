@@ -40,21 +40,26 @@ describe('Testing about.js', function() {
         expect(navBanner.length).toEqual(1);
         expect(navBannerLinkWrapper.length).toBeGreaterThan(0); // Doesn't matter if 1 or more links.
 
-        // Test mobile dropdown (full menu)
+        /** 
+         * Test mobile dropdown (full menu)
+         */
+
         var menuToggleButton = navBanner[0].children[0].children[0]; // nav.navbar.navbar-main > div.navbar-header > a.navbar-toggle
-        var menu = navBanner[0].children[1]; // nav.navbar.navbar-main > div.navbar-collapse.collapse
+        var menuCollapsibleSection = navBanner[0].children[1]; // nav.navbar.navbar-main > div.navbar-collapse.collapse
         expect(menuToggleButton.className.search('navbar-toggle')).toBeGreaterThan(-1);
         expect(menuToggleButton.getAttribute('aria-expanded')).toEqual('false');
-        expect(menu.className.search('in')).toBe(-1);
+        // Make sure 'in' is not in className, as it controls section visibility @ mobile sizes.
+        expect(menuCollapsibleSection.className.search('in')).toBe(-1); 
         TestUtils.Simulate.click(menuToggleButton); // Open mobile menu
         expect(menuToggleButton.getAttribute('aria-expanded')).toEqual('true');
-        expect(menu.className.search('in')).toBeGreaterThan(-1);
+        expect(menuCollapsibleSection.className.search('in')).toBeGreaterThan(-1);
         TestUtils.Simulate.click(menuToggleButton); // Close mobile menu
         expect(menuToggleButton.getAttribute('aria-expanded')).toEqual('false');
-        expect(menu.className.search('in')).toBe(-1);
+        expect(menuCollapsibleSection.className.search('in')).toBe(-1);
 
-
-        // Test navbar dropdown menu items & sub-menus
+        /**
+         * Test navbar dropdown menu items & sub-menus
+         */
         /*
         // Custom MouseEvent in lieu of TestUtils.Simulate.click as 
         // stopImmediatePropagation doesn't work w/ TestUtils events.
