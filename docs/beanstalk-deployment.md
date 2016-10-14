@@ -23,10 +23,11 @@ So to push something to production it should go through the following steps.
 ## Dropping database
 
 For test environment the database is not dropped for each deploy.  This means that new upserts,
-which change existing data will in most cases not execute succesfully on the test environment.
+which change existing data will in most cases not execute succesfully on the test environment (Unit upgrades are put back in place).
 
 When that happens we need to drop the database and recreate it, so the inserts can be run.
 
+### The Old hard way to do it.. boooo :(
 Easiest way to do that is to ssh into the beanstalk instance and do the follow:
 
 ** Note ** to ssh in first `pip install awsebcli` then follow the setup instructions.  With that installed you can simply type eb ssh (ensuring that the master branch is checked out). (If this doesn't work, try `eb init` before `eb ssh`)
@@ -59,6 +60,20 @@ sudo shutdown -r now
 git checkout master
 eb deploy
 ```
+
+### The New awesome way to do it:
+
+```
+sudo /opt/python/current/app/bin/dropdb
+
+# to bring things up again from back home
+git checkout production 
+eb deploy
+
+```
+
+Bye bye data. Use at your own risk, all warranties void.
+![genghi](https://67.media.tumblr.com/6d863550ff51d672f8c3125344119f20/tumblr_oc5gn5Jvtt1qkjik5o1_540.gif)
 
 ** Note ** this will temporarily bring the site down, for a couple of minutes
 

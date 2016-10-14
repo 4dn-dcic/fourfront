@@ -29,7 +29,9 @@ def run(host, dbname, port, user, pwd):
         status = subprocess.call(cmd)
         print("drop %s index returned %s" % (name, status))
 
-    drop_index("annotations")
+
+    # probably shouldn't drop shared indexes
+    # drop_index("annotations")
     if os.environ.get("ENV_NAME") == "PROD":
         drop_index("ffprod")
     else:
