@@ -227,7 +227,7 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
             );
         }.bind(this));
         var checked = this.state.selectedFiles.size === childEntries.length || childEntries.length === emptyExps.length;
-        var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < childEntries.length
+        var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < childEntries.length;
         return (
             <tbody className={this.props.fillIdx%2 === 1 ? "expset-filled" : ""}>
                 <tr>
@@ -356,7 +356,7 @@ var FileEntry = React.createClass({
                     fileOne.push(<td></td>);
                 }
             }
-            var fileID = this.state.checked + "~" + true + "~" + file.file_format + "~" + file.uuid;
+            fileID = this.state.checked + "~" + true + "~" + file.file_format + "~" + file.uuid;
         }
         if(relatedFile){
             if(relatedFile.paired_end && relatedFile.paired_end === '1'){
