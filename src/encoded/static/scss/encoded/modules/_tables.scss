@@ -9,18 +9,25 @@ thead, tfoot {
 }
 
 table>thead>tr>th {
+    background-color: #ccc !important;
     border-top: none !important;
-    border-bottom: 2px solid #fff !important;
-    border-left: 2px solid #fff !important;
-    padding: 8px 30px 9px 11px !important;
-
+    border-bottom: 1px solid #ddd !important;
+    border-left: 1px solid #ddd !important;
+    padding: 2px 3px !important;
+    font-weight: bold;
+    white-space: nowrap;
+    text-align: center;
+    vertical-align: middle !important;
     &:first-child {
         border-left: none !important;
     }
 }
 
 table>tbody>tr>td {
-    padding: 10px 11px !important;
+    border-top: 0px !important;
+    padding: 2px 3px !important;
+    text-align: center;
+    vertical-align: middle !important;
 }
 
 // round table corners

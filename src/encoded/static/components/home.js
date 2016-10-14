@@ -107,8 +107,8 @@ var HomePageLoader = React.createClass({
 
 var HomePage = module.exports = React.createClass({
     render: function() {
-        var experiment4DNBanner = <BannerLoader text='experiments' defaultFilter="4DN" destination="/browse/?type=ExperimentSet&experimentset_type=biological+replicates" location='/search/?type=Experiment&award.project=4DN'/>;
-        var experimentExtBanner = <BannerLoader text='experiments' defaultFilter="External" destination="/browse/?type=ExperimentSet&experimentset_type=biological+replicates" location='/search/?type=Experiment&award.project=External'/>;
+        var experiment4DNBanner = <BannerLoader text='experiments' defaultFilter="4DN" destination="/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all" location='/search/?type=Experiment&award.project=4DN'/>;
+        var experimentExtBanner = <BannerLoader text='experiments' defaultFilter="External" destination="/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all" location='/search/?type=Experiment&award.project=External'/>;
         var biosourceBanner = <BannerLoader text='cell types' destination='/search/?type=Biosource' location='/search/?type=Biosource'/>;
         var announcements = announcements_data.map(function(announce) {
             return (
