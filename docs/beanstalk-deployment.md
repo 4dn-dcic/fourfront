@@ -42,7 +42,22 @@ dropdb -p $RDS_PORT -h $RDS_HOSTNAME -U $RDS_USERNAME -e $RDS_DB_NAME
 
 createdb -p $RDS_PORT -h $RDS_HOSTNAME -U $RDS_USERNAME -e $RDS_DB_NAME
 
+
+# drop indexes in elastic search
+curl -XDELETE 'http://172.31.49.128:9872/annotations'
+
+# for 4dn-web-dev (Development Environment)
+curl -XDELETE 'http://172.31.49.128:9872/snovault'
+
+# for production (PLEASE DONT SCREW THIS UP :) )
+curl -XDELETE 'http://172.31.49.128:9872/ffprod'
+
 sudo shutdown -r now
+
+# this will drop you back to your local machine, if you want to trigger latest build from master (and you know it's a clean build)
+
+git checkout master
+eb deploy
 ```
 
 ** Note ** this will temporarily bring the site down, for a couple of minutes
