@@ -30,8 +30,8 @@
 ************************************************************/
 
 .static-page {
-	width:80%;
-	margin: auto;
+	width: 75%;
+	margin: 0;
 }
 
 .item-page-container,
@@ -187,6 +187,10 @@ h1.page-title + .page-subtitle {
 
 .text-uppercase {
 	text-transform: uppercase;
+}
+
+.text-justify {
+	text-align: justify;
 }
 
 .text-200 { font-weight: 200; }
@@ -425,7 +429,6 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 }
 
 .fourDN-banner{
-	text-align: center;
 	margin-top: 40px;
 	margin-bottom: 40px;
 	> h4 {
@@ -448,6 +451,9 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	font-weight: 300;
 	font-size: 1.4em !important;
 	border-bottom: 2px solid #168369;
+	padding-bottom: 5px;
+	margin-bottom: 15px;
+	
 }
 
 .fourDN-section-toggle{
@@ -548,7 +554,10 @@ p, input {
 }
 
 .exptype-box{
-	padding: 10px;
+	
+	//display: none; /* TEMPORARY - FOR ALIGNMENT */
+	padding: 10px 0;
+
 	> div > .btn-group > button {
 		width: 240px;
 		text-align: left;
@@ -632,10 +641,12 @@ p, input {
 }
 
 .browse-title{
-    text-align: center;
-    margin-bottom: 20px;
+    text-align: right;
+    margin-bottom: 10px;
+	font-weight: 400;
 	color: #999999 !important;
 }
+
 //extend table class to get ride of bottom margin
 .table{
 	margin-bottom: 0px;

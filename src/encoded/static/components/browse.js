@@ -760,7 +760,7 @@ var FacetList = browse.FacetList = React.createClass({
         return (
             <div>
                 <div className="exptype-box">
-                    {exptypeDropdown}
+                    { exptypeDropdown }
                 </div>
                 <div className={"box facets " + this.props.orientation}>
                     <div className="row">
@@ -884,9 +884,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                             />
                         </div> : ''}
                     <div className="col-sm-7 col-md-8 col-lg-9">
-                        <div className="row">
-                            <h4 className='row browse-title'>Showing {resultListing.length} of {results.length} experiment sets.</h4>
-                        </div>
+                        <h5 className='browse-title'>Showing {resultListing.length} of {results.length} experiment sets.</h5>
                         <div>
                             { resultListing.length > 0 ?
                             <Table bordered condensed id="result-table">
