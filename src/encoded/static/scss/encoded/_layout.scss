@@ -380,10 +380,6 @@ p, input {
 	margin: 0px 5px 0px 5px !important;
 }
 
-.expset-button {
-	margin: 0px 5px 7px 0;
-}
-
 .expset-button.icon-container {
 	width: 24px;
 	height: 24px;
@@ -410,10 +406,6 @@ p, input {
 	color: #999999;
 }
 
-.expset-checkbox{
-	display: inline-block;
-	margin: 0px 5px -5px 5px !important;
-}
 
 .expset-checkbox-sub{
 	margin: 0px -6px -3px 0px !important;
@@ -476,4 +468,25 @@ p, input {
 }
 .control-cell{
 	white-space: nowrap;
+}
+
+.expset-addinfo-key{
+	font-weight: bold;
+	padding-right: 10px;
+	width: 100px;
+	display: inline-block;
+}
+
+.expset-addinfo-val{
+	padding-right: 30px;
+}
+
+.expset-addinfo{
+	padding-bottom: 10px;
+	text-align: left;
+}
+
+.invis-cell{
+	background-color: #fff !important;
+	border: 0px !important;
 }

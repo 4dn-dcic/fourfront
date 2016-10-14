@@ -31,7 +31,15 @@ var expSetColumnLookup={
 
     },
     'other':[]
-}
+};
+
+var expSetAdditionalInfo={
+    'biological replicates':{
+        'Lab': 'lab.title',
+        'Treatments':'biosample.treatments_summary'
+    },
+    'other':[]
+};
 
 var IndeterminateCheckbox = React.createClass({
     render: function(){
@@ -210,6 +218,14 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
                 );
             }
         }.bind(this));
+        var addInfoVals = Object.keys(this.props.addInfo).map(function (key){
+            return(
+                <div>
+                    <span className="expset-addinfo-key">{key}:</span>
+                    <span className="expset-addinfo-val">{this.props.addInfo[key]}</span>
+                </div>
+            );
+        }.bind(this));
         var checked = this.state.selectedFiles.size === childEntries.length || childEntries.length === emptyExps.length;
         var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < childEntries.length
         return (
@@ -217,15 +233,24 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
                 <tr>
                     <td className="expset-table-cell">
                     <div className="control-cell expset-entry-passed">
-                        <Button bsSize="xsmall" className="expset-button" onClick={this.handleToggle}>{this.state.open ? "-" : "+"}</Button>
-                        <IndeterminateCheckbox checked={checked} indeterminate={indeterminate} className='expset-checkbox' onChange={this.handleCheck}/>
+                        <Button bsSize="xsmall" className="icon-container" onClick={this.handleToggle}>
+                            <i className={"icon " + (this.state.open ? "ss-navigateup" : "ss-navigatedown")}></i>
+                        </Button>
+                    </div>
+                    </td>
+                    <td className="expset-table-cell">
+                    <div className="control-cell expset-entry-passed">
+                        <IndeterminateCheckbox checked={checked} indeterminate={indeterminate} onChange={this.handleCheck}/>
                     </div>
                     </td>
                     {columnValues}
                 </tr>
                 <tr>
-                    <td className={this.state.open ? "hidden-col-open" : "hidden-col-closed"} colSpan={Object.keys(this.props.columns).length + 1}>
+                    <td className={this.state.open ? "hidden-col-open" : "hidden-col-closed"} colSpan={Object.keys(this.props.columns).length + 2}>
                         <Panel className="expset-panel" collapsible expanded={this.state.open}>
+                            <div className="expset-addinfo">
+                                {addInfoVals}
+                            </div>
                             <Table striped bordered condensed hover>
                                 <thead>
                                     <tr>
@@ -769,7 +794,6 @@ var ResultTable = browse.ResultTable = React.createClass({
         var setType = results[0].experimentset_type;
         var targetFiles = this.props.targetFiles;
         var total = context['total'];
-        var columns = context['columns'];
         var searchBase = this.props.searchBase;
         var expSetFilters = this.props.expSetFilters;
         var facets = context['facets'].map(function(facet) {
@@ -812,6 +836,7 @@ var ResultTable = browse.ResultTable = React.createClass({
         };
         var resultListing = [];
         var columnTemplate = expSetColumnLookup[setType] ? expSetColumnLookup[setType] : expSetColumnLookup['other'];
+        var addInfoTemplate = expSetAdditionalInfo[setType] ? expSetAdditionalInfo[setType] : expSetAdditionalInfo['other'];
         var resultHeaders = Object.keys(columnTemplate).map(function(key){
             return(<th>{key}</th>);
         });
@@ -821,6 +846,7 @@ var ResultTable = browse.ResultTable = React.createClass({
             var intersection = new Set(experimentArray.filter(x => passExperiments.has(x)));
             var href = result['@id'];
             var columns = {};
+            var addInfo = {};
             var firstExp = experimentArray[0]; // use only for biological replicates
             for (var i=0; i<Object.keys(columnTemplate).length;i++){
                 var splitFilters = columnTemplate[Object.keys(columnTemplate)[i]].split('.');
@@ -830,8 +856,16 @@ var ResultTable = browse.ResultTable = React.createClass({
                 }
                 columns[Object.keys(columnTemplate)[i]] = valueProbe;
             }
+            for (var i=0; i<Object.keys(addInfoTemplate).length;i++){
+                var splitFilters = addInfoTemplate[Object.keys(addInfoTemplate)[i]].split('.');
+                var valueProbe = firstExp;
+                for (var j=0; j<splitFilters.length;j++){
+                    valueProbe = Array.isArray(valueProbe) ? valueProbe[0][splitFilters[j]] : valueProbe[splitFilters[j]];
+                }
+                addInfo[Object.keys(addInfoTemplate)[i]] = valueProbe;
+            }
             if(intersection.size > 0){
-                resultListing.push(<ExperimentSet fillIdx={fillIdx} columns={columns} expSetFilters={expSetFilters} targetFiles={targetFiles} href={href} experimentArray={experimentArray} passExperiments={intersection} key={'a' + result['@id']} />);
+                resultListing.push(<ExperimentSet fillIdx={fillIdx} addInfo={addInfo} columns={columns} expSetFilters={expSetFilters} targetFiles={targetFiles} href={href} experimentArray={experimentArray} passExperiments={intersection} key={'a' + result['@id']} />);
             }
             fillIdx += 1; // for striped tables
         });
@@ -850,6 +884,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                             <Table bordered condensed id="result-table">
                                 <thead>
                                     <tr>
+                                        <th></th>
                                         <th></th>
                                         {resultHeaders}
                                     </tr>
