@@ -152,18 +152,21 @@ var UserActions = React.createClass({
 
     render: function() {
         var session_properties = this.context.session_properties;
+        var acctTitle;
         var actions = this.context.listActionsFor('user_section').map(function (action) {
             if (action.id === "login"){
                 return(<Login key={action.id} />);
             }else if (action.id === "accountactions"){
                 // link to registration page if logged out or account actions if logged in
                 if (!session_properties['auth.userid']) {
+                    acctTitle = <span>Account</span>;
                     return(
                         <a href={action.url || ''} key={action.id} className="global-entry">
                             {action.title}
                         </a>
                     );
                 }else{
+                    acctTitle = <span>Account <i className="icon ss-user"></i></span>;
                     return(<AccountActions key={action.id} />);
                 }
             }else if (action.id === "contextactions") {
@@ -172,7 +175,7 @@ var UserActions = React.createClass({
         });
         return (
                 <Nav right={true} acct={true}>
-                    <NavItem dropdownId="context" dropdownTitle='Account'>
+                    <NavItem dropdownId="context" dropdownTitle={<span>{acctTitle}</span>}>
                         <DropdownMenu label="context">
                             {actions}
                         </DropdownMenu>

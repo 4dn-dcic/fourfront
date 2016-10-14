@@ -27,7 +27,7 @@ var expSetColumnLookup={
         'Organism': 'biosample.biosource.individual.organism.name',
         'Biosource': 'biosample.biosource_summary',
         'Enzyme': 'digestion_enzyme.name',
-        'Modifications':'biosample.modifications_summary'
+        'Modifications':'biosample.modifications_summary_short'
 
     },
     'other':[]
@@ -36,7 +36,8 @@ var expSetColumnLookup={
 var expSetAdditionalInfo={
     'biological replicates':{
         'Lab': 'lab.title',
-        'Treatments':'biosample.treatments_summary'
+        'Treatments':'biosample.treatments_summary',
+        'Modifications':'biosample.modifications_summary'
     },
     'other':[]
 };
@@ -202,25 +203,21 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
         var columnValues = Object.keys(this.props.columns).map(function (key){
             if(key==="Accession"){
                 return(
-                    <td className="expset-table-cell">
+                    <td key={key+this.props.href} className="expset-table-cell">
                         <a className="expset-entry" href={this.props.href}>
                             {this.props.columns[key]}
                         </a>
                     </td>
                 );
-            }else if(key==="Exps"){
-                return(
-                    <td className="expset-table-cell">{experimentArray.length}</td>
-                );
             }else{
                 return(
-                    <td className="expset-table-cell">{this.props.columns[key]}</td>
+                    <td key={key+this.props.href} className="expset-table-cell">{this.props.columns[key]}</td>
                 );
             }
         }.bind(this));
         var addInfoVals = Object.keys(this.props.addInfo).map(function (key){
             return(
-                <div>
+                <div key={key}>
                     <span className="expset-addinfo-key">{key}:</span>
                     <span className="expset-addinfo-val">{this.props.addInfo[key]}</span>
                 </div>
@@ -229,11 +226,11 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
         var checked = this.state.selectedFiles.size === childEntries.length || childEntries.length === emptyExps.length;
         var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < childEntries.length;
         return (
-            <tbody className={this.props.fillIdx%2 === 1 ? "expset-filled" : ""}>
+            <tbody>
                 <tr>
                     <td className="expset-table-cell">
                     <div className="control-cell expset-entry-passed">
-                        <Button bsSize="xsmall" className="icon-container" onClick={this.handleToggle}>
+                        <Button bsSize="xsmall" className="expset-button icon-container" onClick={this.handleToggle}>
                             <i className={"icon " + (this.state.open ? "ss-navigateup" : "ss-navigatedown")}></i>
                         </Button>
                     </div>
@@ -778,7 +775,40 @@ var FacetList = browse.FacetList = React.createClass({
     }
 });
 
+var ColumnSorter = React.createClass({
+
+    runFxn: function(e){
+        e.preventDefault();
+        var reverse = this.props.sortColumn === this.props.val;
+        this.props.fxn(this.props.val, reverse);
+    },
+
+    render: function(){
+        var iconUsed = this.props.sortColumn === this.props.val ?
+            <a className="expset-column-sort-used" href="" onClick={this.runFxn}>
+                <i className="icon ss-descend"></i>
+            </a>
+            :
+            <a className="expset-column-sort" href="" onClick={this.runFxn}>
+                <i className="icon ss-descend"></i>
+            </a>;
+        return(
+            <span>
+                <span>{this.props.val} </span>
+                {iconUsed}
+            </span>
+        );
+    }
+});
+
 var ResultTable = browse.ResultTable = React.createClass({
+
+    getInitialState: function(){
+        return{
+            sortColumn: null,
+            sortReverse: false
+        }
+    },
 
     getDefaultProps: function() {
         return {
@@ -787,15 +817,32 @@ var ResultTable = browse.ResultTable = React.createClass({
         };
     },
 
+    sortBy: function(key, reverse) {
+        if(reverse){
+            this.setState({
+                sortColumn: key,
+                sortReverse: !this.state.sortReverse
+            });
+        }else{
+            this.setState({
+                sortColumn: key,
+                sortReverse: false
+            });
+        }
+
+    },
+
     render: function() {
         var context = this.props.context;
         var results = context['@graph'];
+        var resultCount = results.length; // account for empty expt sets
         // use first experiment set to grap type (all types are the same in any given graph)
         var setType = results[0].experimentset_type;
         var targetFiles = this.props.targetFiles;
         var total = context['total'];
         var searchBase = this.props.searchBase;
         var expSetFilters = this.props.expSetFilters;
+        var sortColumn = this.state.sortColumn;
         var facets = context['facets'].map(function(facet) {
             if (this.props.restrictions[facet.field] !== undefined) {
                 facet = _.clone(facet);
@@ -838,17 +885,29 @@ var ResultTable = browse.ResultTable = React.createClass({
         var columnTemplate = expSetColumnLookup[setType] ? expSetColumnLookup[setType] : expSetColumnLookup['other'];
         var addInfoTemplate = expSetAdditionalInfo[setType] ? expSetAdditionalInfo[setType] : expSetAdditionalInfo['other'];
         var resultHeaders = Object.keys(columnTemplate).map(function(key){
-            return(<th>{key}</th>);
-        });
-        var fillIdx = 0;
+            var sorter = <ColumnSorter sortColumn={this.state.sortColumn} fxn={this.sortBy} val={key}/>;
+            return(<th key={key}>{sorter}</th>);
+        }.bind(this));
         results.map(function (result) {
             var experimentArray = result.experiments_in_set;
+            if(experimentArray.length == 0){
+                resultCount = resultCount - 1;
+                return; // ignore if no expts in the expt set
+            }
+            var accession = result.accession ? result.accession : "Experiment set";
             var intersection = new Set(experimentArray.filter(x => passExperiments.has(x)));
             var href = result['@id'];
             var columns = {};
             var addInfo = {};
             var firstExp = experimentArray[0]; // use only for biological replicates
             for (var i=0; i<Object.keys(columnTemplate).length;i++){
+                if(Object.keys(columnTemplate)[i] === 'Exps'){
+                    columns[Object.keys(columnTemplate)[i]] = experimentArray.length;
+                    continue;
+                }else if(Object.keys(columnTemplate)[i] === 'Accession'){
+                    columns[Object.keys(columnTemplate)[i]] = accession;
+                    continue;
+                }
                 var splitFilters = columnTemplate[Object.keys(columnTemplate)[i]].split('.');
                 var valueProbe = firstExp;
                 for (var j=0; j<splitFilters.length;j++){
@@ -865,10 +924,25 @@ var ResultTable = browse.ResultTable = React.createClass({
                 addInfo[Object.keys(addInfoTemplate)[i]] = valueProbe;
             }
             if(intersection.size > 0){
-                resultListing.push(<ExperimentSet fillIdx={fillIdx} addInfo={addInfo} columns={columns} expSetFilters={expSetFilters} targetFiles={targetFiles} href={href} experimentArray={experimentArray} passExperiments={intersection} key={'a' + result['@id']} />);
+                var keyVal = "";
+                if(sortColumn){
+                    keyVal = columns[sortColumn];
+                }
+                resultListing.push(<ExperimentSet addInfo={addInfo} columns={columns} expSetFilters={expSetFilters} targetFiles={targetFiles} href={href} experimentArray={experimentArray} passExperiments={intersection} key={keyVal+href} />);
             }
-            fillIdx += 1; // for striped tables
         });
+        if(sortColumn){
+            resultListing.sort(function(a,b){
+                if(Number.isInteger(parseInt(a.key.split('/')[0]))){
+                    return(a.key.split('/')[0] - b.key.split('/')[0]);
+                }else{
+                    return(a.key.split('/')[0].localeCompare(b.key.split('/')[0]));
+                }
+            });
+        }
+        if(this.state.sortReverse){
+            resultListing.reverse();
+        }
         return (
             <div>
                 <div className="row">
@@ -878,11 +952,11 @@ var ResultTable = browse.ResultTable = React.createClass({
                     </div> : ''}
                     <div className="col-sm-7 col-md-8 col-lg-9">
                         <div className="row">
-                            <h4 className='row browse-title'>Showing {resultListing.length} of {results.length} experiment sets.</h4>
+                            <h4 className='row browse-title'>Showing {resultListing.length} of {resultCount} experiment sets.</h4>
                         </div>
                         <div>
                             {resultListing.length > 0 ?
-                                <Table bordered condensed id="result-table">
+                                <Table className="table-tbody-striped" bordered condensed id="result-table">
                                 <thead>
                                     <tr>
                                         <th></th>

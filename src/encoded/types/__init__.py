@@ -232,6 +232,19 @@ class Modification(Item):
             return modification_type
         return "None"
 
+    @calculated_property(schema={
+        "title": "Modification name short",
+        "description": "Shorter version of modification name for display on tables.",
+        "type": "string",
+    })
+    def modification_name_short(self, request, modification_type=None, target_of_mod=None):
+        if modification_type and target_of_mod:
+            target = request.embed(target_of_mod, '@@object')
+            return modification_type + " for " + target['target_summary_short']
+        elif modification_type:
+            return modification_type
+        return "None"
+
 
 @collection(
     name='quality_metric_flags',
@@ -334,6 +347,20 @@ class Target(Item):
             if genomic_region['start_coordinate'] and genomic_region['end_coordinate']:
                 value += ':' + str(genomic_region['start_coordinate']) + '-' + str(genomic_region['end_coordinate'])
             return value
+        return "no target"
+
+    @calculated_property(schema={
+        "title": "Target summary short",
+        "description": "Shortened version of target summary.",
+        "type": "string",
+    })
+    def target_summary_short(self, request, targeted_genes=None, description=None):
+        if targeted_genes:
+            value = ""
+            value += ' and '.join(targeted_genes)
+            return value
+        elif description:
+            return description
         return "no target"
 
 
