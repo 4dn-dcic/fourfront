@@ -17,8 +17,8 @@ var Footer = React.createClass({
                     <div className="container">
                         <div className="row">
                             <div className="col-sm-6 col-sm-pull-6 col-md-pull-0">
-                                <div className="copy-notice">
-                                    <a href="http://dcic.4dnucleome.org" target="_blank">
+                                <div className="copy-notice footer-links">
+                                    <a href="http://dcic.4dnucleome.org" target="_blank" style={{ fontWeight : '400' }}>
                                         4D Nucleome Data Coordination and Integration Center
                                     </a>
                                 </div>

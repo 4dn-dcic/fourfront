@@ -4,7 +4,6 @@ var url = require('url');
 var Login = require('./login');
 var {Navbars, Navbar, Nav, NavItem} = require('../libs/bootstrap/navbar');
 var {DropdownMenu} = require('../libs/bootstrap/dropdown-menu');
-var productionHost = require('./globals').productionHost;
 var _ = require('underscore');
 
 
@@ -14,34 +13,6 @@ var Navigation = module.exports = React.createClass({
     contextTypes: {
         location_href: React.PropTypes.string,
         portal: React.PropTypes.object
-    },
-
-    getInitialState: function() {
-        return {
-            testWarning: false
-        };
-    },
-
-    getInitialState: function() {
-        return {
-            testWarning: !productionHost[url.parse(this.context.location_href).hostname]
-        };
-    },
-
-    handleClick: function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        // Remove the warning banner because the user clicked the close icon
-        this.setState({testWarning: false});
-
-        // If collection with .sticky-header on page, jiggle scroll position
-        // to force the sticky header to jump to the top of the page.
-        var hdrs = document.getElementsByClassName('sticky-header');
-        if (hdrs.length) {
-            window.scrollBy(0,-1);
-            window.scrollBy(0,1);
-        }
     },
 
     render: function() {
@@ -56,20 +27,11 @@ var Navigation = module.exports = React.createClass({
                         {/* REMOVE SEARCH FOR NOW: <Search />*/}
                     </Navbar>
                 </div>
-                {this.state.testWarning ?
-                    <div className="test-warning">
-                        <div className="container">
-                            <p>
-                                The data displayed on this page is not official and only for testing purposes.
-                                <a href="#" className="test-warning-close icon icon-times-circle-o" onClick={this.handleClick}></a>
-                            </p>
-                        </div>
-                    </div>
-                : null}
             </div>
         );
     }
 });
+
 
 
 // Main navigation menus
