@@ -248,15 +248,15 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
                             <div className="expset-addinfo">
                                 {addInfoVals}
                             </div>
-                            <Table striped bordered condensed hover>
+                            <Table className="expset-table" striped bordered condensed hover>
                                 <thead>
                                     <tr>
                                         <th></th>
-                                        <th>Experiment Accession</th>
-                                        <th>Biosample Accession</th>
-                                        <th>File Accession</th>
-                                        <th>File Type</th>
-                                        <th>File Info</th>
+                                        <th className="text-500">Experiment Accession</th>
+                                        <th className="text-500">Biosample Accession</th>
+                                        <th className="text-500">File Accession</th>
+                                        <th className="text-500">File Type</th>
+                                        <th className="text-500">File Info</th>
                                     </tr>
                                 </thead>
                                 {childEntries}
@@ -957,11 +957,11 @@ var ResultTable = browse.ResultTable = React.createClass({
                                 ignoredFilters={ignoredFilters}
                             />
                         </div> : ''}
-                    <div className="col-sm-7 col-md-8 col-lg-9">
+                    <div className="expset-result-table-fix col-sm-7 col-md-8 col-lg-9">
                         <h5 className='browse-title'>Showing {resultListing.length} of {resultCount} experiment sets.</h5>
                         <div>
                             { resultListing.length > 0 ?
-                            <Table className="table-tbody-striped" bordered condensed id="result-table">
+                            <Table className="expset-table table-tbody-striped" bordered condensed id="result-table">
                                 <thead>
                                     <tr>
                                         <th></th>

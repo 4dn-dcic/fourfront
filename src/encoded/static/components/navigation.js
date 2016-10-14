@@ -166,7 +166,7 @@ var UserActions = React.createClass({
                         </a>
                     );
                 }else{
-                    acctTitle = <span>Account <i className="icon ss-user"></i></span>;
+                    acctTitle = <span>Account <i className="icon ss-user" style={{ transform: 'translateY(2px)' }}></i></span>;
                     return(<AccountActions key={action.id} />);
                 }
             }else if (action.id === "contextactions") {

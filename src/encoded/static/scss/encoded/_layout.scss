@@ -48,7 +48,7 @@
 ************************************************************/
 
 h1.page-title {
-	/* Only set font-weight: 200 for h1, 
+	/* Only set font-weight: 200 for h1,
 	   200 doesn't look as nice on smaller sizes. */
 	font-weight: 200;
 }
@@ -58,7 +58,7 @@ h1.page-title + .page-subtitle {
 }
 
 .page-subtitle {
-	font-weight: 600;
+	font-weight: 400;
 }
 
 
@@ -166,7 +166,7 @@ h1.page-title + .page-subtitle {
         h1, h2, h3, h4, h5, h6 {
             line-height: 20px;  // 50px - 20px of vertical padding
         }
-		
+
     }
 }
 
@@ -305,7 +305,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	box-sizing: border-box;
 	border: 1px solid #e0e0e0;
 	min-height: 42px;
-	
+
 	h4 {
 
 		font-weight: 500;
@@ -452,7 +452,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	border-bottom: 2px solid #168369;
 	padding-bottom: 5px;
 	margin-bottom: 15px;
-	
+
 }
 
 .fourDN-section-toggle{
@@ -553,7 +553,7 @@ p, input {
 }
 
 .exptype-box{
-	
+
 	//display: none; /* TEMPORARY - FOR ALIGNMENT */
 	padding: 10px 0;
 
@@ -569,7 +569,17 @@ p, input {
 }
 
 .expset-panel {
-	margin: 0px 5px 0px 5px !important;
+	margin: 0px !important;
+	>div>.panel-body{
+		padding-right: 0px;
+		padding-left: 40px;
+	}
+}
+
+.expset-button{
+	padding: 0px !important;
+	text-align: center;
+	box-shadow: none !important;
 }
 
 .expset-button.icon-container {
@@ -578,9 +588,11 @@ p, input {
 }
 
 .expset-button.icon-container > i.icon {
+	padding-top: 3px;
+	padding-left: 1px;
     display: inline-block;
     vertical-align: middle;
-	font-size: 10px;
+	font-size: 14px;
 	line-height: 20px;
 }
 
@@ -661,7 +673,7 @@ p, input {
 }
 
 .expset-addinfo-key{
-	font-weight: bold;
+	font-weight: 500;
 	padding-right: 10px;
 	width: 100px;
 	display: inline-block;
@@ -697,6 +709,26 @@ p, input {
     }
 }
 
+.expset-table{
+	border: none !important;
+	>thead>tr>th{
+		border: 1px solid #eee;
+	}
+	>thead>tr>:first-child,>tbody>tr>:first-child{
+		border-left: none;
+	}
+	>thead>tr>:last-child,>tbody>tr>:last-child{
+		border-right: none;
+	}
+	>tbody>tr>td{
+		border: 1px solid #eee;
+	}
+}
+
 .expset-table-cell{
 	max-width: 160px !important;
+}
+
+.expset-result-table-fix{
+	margin-top: -15px;
 }
