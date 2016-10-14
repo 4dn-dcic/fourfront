@@ -219,7 +219,7 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
             <tbody className={this.props.fillIdx%2 === 1 ? "expset-filled" : ""}>
                 <tr>
                     <td>
-                    <div className="control-cell">
+                    <div className="control-cell expset-entry-passed">
                         <Button bsSize="xsmall" className="expset-button" onClick={this.handleToggle}>{this.state.open ? "-" : "+"}</Button>
                         <IndeterminateCheckbox checked={checked} indeterminate={indeterminate} className='expset-checkbox' onChange={this.handleCheck}/>
                     </div>
@@ -229,7 +229,7 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
                 <tr>
                     <td className={this.state.open ? "hidden-col-open" : "hidden-col-closed"} colSpan={Object.keys(this.props.columns).length + 1}>
                         <Panel className="expset-panel" collapsible expanded={this.state.open}>
-                            <Table striped bordered condensed hover>
+                            <Table className="expset-sub-table" striped bordered condensed hover>
                                 <thead>
                                     <tr>
                                         <th></th>
