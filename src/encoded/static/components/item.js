@@ -57,7 +57,7 @@ var Item = React.createClass({
 
         var context = this.props.context;
         var itemClass = globals.itemClass(context, 'view-item');
-        var IPanel = globals.panel_views.lookup(context);        
+        var IPanel = globals.panel_views.lookup(context);
 
         // Make string of alternate accessions
         return (
