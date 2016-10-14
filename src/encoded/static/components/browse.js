@@ -233,7 +233,7 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
                 <tr>
                     <td className="expset-table-cell">
                     <div className="control-cell expset-entry-passed">
-                        <Button bsSize="xsmall" className="icon-container" onClick={this.handleToggle}>
+                        <Button bsSize="xsmall" className="icon-container expset-button" onClick={this.handleToggle}>
                             <i className={"icon " + (this.state.open ? "ss-navigateup" : "ss-navigatedown")}></i>
                         </Button>
                     </div>
@@ -714,6 +714,7 @@ var DropdownFacet = browse.DropdownFacet = React.createClass({
 });
 
 var FacetList = browse.FacetList = React.createClass({
+
     contextTypes: {
         session: React.PropTypes.object,
         hidePublicAudits: React.PropTypes.bool
@@ -872,27 +873,33 @@ var ResultTable = browse.ResultTable = React.createClass({
         return (
             <div>
                 <div className="row">
-                    {facets.length ? <div className="col-sm-5 col-md-4 col-lg-3">
-                        <FacetList {...this.props} facets={facets}
-                                    searchBase={searchBase ? searchBase + '&' : searchBase + '?'} onFilter={this.onFilter} ignoredFilters={ignoredFilters}/>
-                    </div> : ''}
+                    {facets.length ? 
+                        <div className="col-sm-5 col-md-4 col-lg-3">
+                            <FacetList 
+                                {...this.props} 
+                                facets={facets}
+                                searchBase={searchBase ? searchBase + '&' : searchBase + '?'} 
+                                onFilter={this.onFilter} 
+                                ignoredFilters={ignoredFilters}
+                            />
+                        </div> : ''}
                     <div className="col-sm-7 col-md-8 col-lg-9">
                         <div className="row">
                             <h4 className='row browse-title'>Showing {resultListing.length} of {results.length} experiment sets.</h4>
                         </div>
                         <div>
-                            {resultListing.length > 0 ?
-                                <Table bordered condensed id="result-table">
+                            { resultListing.length > 0 ?
+                            <Table bordered condensed id="result-table">
                                 <thead>
                                     <tr>
                                         <th></th>
                                         <th></th>
-                                        {resultHeaders}
+                                        { resultHeaders }
                                     </tr>
                                 </thead>
-                                {resultListing}
+                                { resultListing }
                             </Table>
-                            : <div></div>}
+                            : <div></div> }
                         </div>
                     </div>
                 </div>
@@ -1006,6 +1013,7 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
         var downloadButton = <Button className="expset-selector-button" bsSize="xsmall" onClick={this.downloadFiles}>Download</Button>;
         return(
             <div>
+            
                 {/*<div className="row">
                     <div className="box expset-whole-selector col-sm-12 col-md-10 col-lg-9 col-md-push-2 col-lg-push-3">
                         <div className="col-sm-8 col-md-8 col-lg-8 expset-file-selector">
@@ -1032,9 +1040,11 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
                         </div>
                     </div>
                 </div>*/}
+
                 <div className="row">
                     <ResultTable {...this.props} targetFiles={targetFiles}/>
                 </div>
+
             </div>
 
         );
@@ -1090,11 +1100,26 @@ var Browse = browse.Browse = React.createClass({
                     </div>
             );
         }
-        return (
-            <div className="panel data-display main-panel">
-                <ControlsAndResults {...this.props} key={undefined} fileFormats={fileFormats} searchBase={searchBase} onChange={this.context.navigate} changeFilters={this.changeFilters}/>
-            </div>
-        );
+
+        return <ControlsAndResults 
+                {...this.props} 
+                key={undefined} 
+                fileFormats={fileFormats} 
+                searchBase={searchBase} 
+                onChange={this.context.navigate} 
+                changeFilters={this.changeFilters}
+            />
+
+        /**
+         * Removing & keeping for record: 
+         * .panel not really needed; adds extra outer padding which causes 
+         * non-alignment w/ navbar logo.
+         */
+        //return (
+        //    <div className="panel data-display main-panel">
+        //        <ControlsAndResults {...this.props} key={undefined} fileFormats={fileFormats} searchBase={searchBase} onChange={this.context.navigate} changeFilters={this.changeFilters}/>
+        //    </div>
+        //);
     }
 });
 
