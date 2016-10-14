@@ -22,14 +22,13 @@ var expSetColumnLookup={
     // all arrays will be handled by taking the first item
     'biological replicates':{
         'Accession': 'accession',
-        'Experiment Type':'experiment_type',
+        'Exp Type':'experiment_type',
+        'Exps': '',
         'Organism': 'biosample.biosource.individual.organism.name',
         'Biosource': 'biosample.biosource_summary',
         'Enzyme': 'digestion_enzyme.name',
-        'Modifications':'biosample.modifications_summary',
-        'Treatments':'biosample.treatments_summary',
-        'Lab':'lab.title',
-        'Experiments': ''
+        'Modifications':'biosample.modifications_summary'
+
     },
     'other':[]
 }
@@ -195,19 +194,19 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
         var columnValues = Object.keys(this.props.columns).map(function (key){
             if(key==="Accession"){
                 return(
-                    <td>
+                    <td className="expset-table-cell">
                         <a className="expset-entry" href={this.props.href}>
                             {this.props.columns[key]}
                         </a>
                     </td>
                 );
-            }else if(key==="Experiments"){
+            }else if(key==="Exps"){
                 return(
-                    <td>{experimentArray.length}</td>
+                    <td className="expset-table-cell">{experimentArray.length}</td>
                 );
             }else{
                 return(
-                    <td>{this.props.columns[key]}</td>
+                    <td className="expset-table-cell">{this.props.columns[key]}</td>
                 );
             }
         }.bind(this));
@@ -216,7 +215,7 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
         return (
             <tbody className={this.props.fillIdx%2 === 1 ? "expset-filled" : ""}>
                 <tr>
-                    <td>
+                    <td className="expset-table-cell">
                     <div className="control-cell expset-entry-passed">
                         <Button bsSize="xsmall" className="expset-button" onClick={this.handleToggle}>{this.state.open ? "-" : "+"}</Button>
                         <IndeterminateCheckbox checked={checked} indeterminate={indeterminate} className='expset-checkbox' onChange={this.handleCheck}/>
@@ -227,7 +226,7 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
                 <tr>
                     <td className={this.state.open ? "hidden-col-open" : "hidden-col-closed"} colSpan={Object.keys(this.props.columns).length + 1}>
                         <Panel className="expset-panel" collapsible expanded={this.state.open}>
-                            <Table className="expset-sub-table" striped bordered condensed hover>
+                            <Table striped bordered condensed hover>
                                 <thead>
                                     <tr>
                                         <th></th>
@@ -847,7 +846,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                         <div className="row">
                             <h4 className='row browse-title'>Showing {resultListing.length} of {results.length} experiment sets.</h4>
                         </div>
-                        <div className="scrollable-container">
+                        <div>
                             <Table bordered condensed id="result-table">
                                 <thead>
                                     <tr>
