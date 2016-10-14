@@ -3,14 +3,7 @@ import subprocess
 import argparse
 from os import environ
 import os
-import logging
-from snovault.elasticsearch.interfaces import ELASTIC_SEARCH
-from pyramid.paster import get_app
-
-
-def nameify(s):
-    name = ''.join(c if c.isalnum() else '-' for c in s.lower()).strip('-')
-    return re.subn(r'\-+', '-', name)[0]
+import time
 
 
 def run(host, dbname, port, user, pwd):
@@ -18,28 +11,42 @@ def run(host, dbname, port, user, pwd):
     # stop_httpd
     subprocess.check_call(['service', 'httpd', 'stop'])
 
-    print("password is ", pwd)
     env = os.environ.copy()
     env['PGPASSWORD'] = pwd
 
     # dropdb
-    # this is still broke :(
-    subprocess.Popen('/usr/bin/dropdb -p' + port + ' -h' + host + ' -U' + user + ' -e' + dbname,
-                     shell=True, env=env)
+    def dbcmd(cmd):
+        return "%s -p %s -h %s -U %s -e %s" % (cmd, port, host, user, dbname)
+
+    subprocess.Popen(dbcmd('/usr/bin/dropdb'), shell=True, env=env)
 
     # drop elastic search
-    subprocess.check_call(['curl', '-XDELETE', 'http://172.31.49.128:9872/annotations'])
-    if os.environ.get("ENV_NAME") == "PROD":
-        subprocess.check_call(['curl', '-XDELETE', 'http://172.31.49.128:9872/ffprod'])
-    else:
-        subprocess.check_call(['curl', '-XDELETE', 'http://172.31.49.128:9872/snovault'])
+    es_server = "http://127.31.49.128:9872"
 
-    # createdb
-    subprocess.Popen('/usr/bin/createdb -p' + port + ' -h' + host + ' -U' + user + ' -e' + dbname,
-                     shell=True, env=env)
+    def drop_index(name):
+        cmd = ['/usr/bin/curl', '-XDELTE', '%s/%s' % (es_server, name)]
+        print("about to drop index %s with cmd %s " % (name, cmd))
+        status = subprocess.call(cmd)
+        print("drop %s index returned %s" % (name, status))
+
+
+    # probably shouldn't drop shared indexes
+    # drop_index("annotations")
+    if os.environ.get("ENV_NAME") == "PROD":
+        drop_index("ffprod")
+    else:
+        drop_index("snovault")
+
+    # createdb, also wait to ensure everybody is caught up
+    subprocess.Popen(dbcmd('createdb'), shell=True, env=env).wait()
 
     # parachute
-    # os.system("shutdown -r now")
+    print("prepare to jump")
+    for i in range(10):
+        time.sleep(1)
+        print(".")
+
+    os.system("shutdown -r now")
 
 
 def main():
@@ -50,7 +57,7 @@ def main():
 
     for line in proc.stdout:
         (key, _, value) = line.decode("utf8").partition("=")
-        os.environ[key] = value
+        os.environ[key] = value.strip("\n")
 
     proc.communicate()
 
