@@ -21,7 +21,7 @@ def run(host, dbname, port, user, pwd):
     subprocess.Popen(dbcmd('/usr/bin/dropdb'), shell=True, env=env)
 
     # drop elastic search
-    es_server = "http://127.31.49.128:9872"
+    es_server = "http://172.31.49.128:9872"
 
     def drop_index(name):
         cmd = ['/usr/bin/curl', '-XDELTE', '%s/%s' % (es_server, name)]
