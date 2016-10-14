@@ -881,7 +881,8 @@ var ResultTable = browse.ResultTable = React.createClass({
                             <h4 className='row browse-title'>Showing {resultListing.length} of {results.length} experiment sets.</h4>
                         </div>
                         <div>
-                            <Table bordered condensed id="result-table">
+                            {resultListing.length > 0 ?
+                                <Table bordered condensed id="result-table">
                                 <thead>
                                     <tr>
                                         <th></th>
@@ -891,6 +892,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                                 </thead>
                                 {resultListing}
                             </Table>
+                            : <div></div>}
                         </div>
                     </div>
                 </div>
