@@ -239,7 +239,7 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
                     </div>
                     </td>
                     <td className="expset-table-cell">
-                    <div className="control-cell expset-entry-passed">
+                    <div className="control-cell">
                         <IndeterminateCheckbox checked={checked} indeterminate={indeterminate} onChange={this.handleCheck}/>
                     </div>
                     </td>
