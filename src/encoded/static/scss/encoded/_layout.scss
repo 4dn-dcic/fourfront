@@ -376,18 +376,31 @@ p, input {
 	}
 }
 
-.expset-panel{
-	margin: 0px 5px 0px 5px !important;
-}
-.expset-button{
+.expset-panel {
 	margin: 0px 5px 0px 5px !important;
 }
 
-.expset-hits{
+.expset-button {
+	margin: 0px 5px 7px 0;
+}
+
+.expset-button.icon-container {
+	width: 24px;
+	height: 24px;
+}
+
+.expset-button.icon-container > i.icon {
+    display: inline-block;
+    vertical-align: middle;
+	font-size: 10px;
+	line-height: 20px;
+}
+
+.expset-hits {
 	padding: 0px 10px 0px 10px;
 }
 
-.expset-sublist-entry{
+.expset-sublist-entry {
 	margin-bottom: 2px;
 }
 

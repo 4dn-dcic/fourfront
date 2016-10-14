@@ -52,7 +52,6 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
         };
     },
 
-    // reset the record of selected files if filters change
     componentWillReceiveProps: function(nextProps) {
         if(!_.isEqual(this.props.expSetFilters, nextProps.expSetFilters)){
             this.setState({
@@ -176,7 +175,6 @@ var ExperimentSet = module.exports.ExperimentSet = React.createClass({
                 }
             }
         }
-
         var files = Object.keys(fileDetail);
         // unused for now... when format selection is added back in, adapt code below:
         // var filteredFiles = [];
