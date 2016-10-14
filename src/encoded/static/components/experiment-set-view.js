@@ -4,7 +4,6 @@ var Panel = require('react-bootstrap').Panel;
 
 var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
-
     parsedCreationDate(){
         if (!('date_created' in this.props.context)) return null;
         return 'Created ' + (new Date(this.props.context.date_created)).toLocaleString(undefined, {
@@ -18,7 +17,16 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
     parsedStatus(){
         if (!('status' in this.props.context)) return null;
-        return <span className="ss-barchart">{ this.props.context.status }</span>;
+        var iconClass = null;
+        switch (this.props.context.status){
+
+            case 'in review by lab':
+            case 'in review by project':
+                iconClass = 'ss-stopwatch';
+                break;
+        }
+        console.log(iconClass);
+        return <span className={iconClass}> { this.props.context.status }</span>;
     },
 
     parsedExperimentSetType(){
