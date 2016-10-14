@@ -14,8 +14,10 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         //var tips = tipsFromSchema(this.props.schemas, context);
 
         return (
-            <div className="container item-page-container">
+            <div className="item-page-container">
+                <h1 className="page-title">Experiment Set</h1>
                 <ExperimentSetHeader {...this.props} />
+                <br/><br/>
                 <Panel className="data-display panel-body-with-header">
                     <dl className="key-value">
                         {Object.keys(this.props.context).sort().map((ikey, idx) =>
@@ -78,8 +80,10 @@ var ExperimentSetHeader = React.createClass({
         return (
             <div className="exp-set-header-area">
 
-                <div className="row clearfix">
-                    <h3 className="col-sm-6 item-label-title">Experiment Set</h3>
+                <div className="row clearfix top-row">
+                    <h3 className="col-sm-6 item-label-title">
+                        { /* PLACEHOLDER / TEMP-EMPTY */ }
+                    </h3>
                     <h5 className="col-sm-6 text-right text-left-xs item-label-extra text-capitalize" title="Status">
                         { this.parsedStatus() }
                     </h5>
@@ -89,7 +93,7 @@ var ExperimentSetHeader = React.createClass({
                     <h4><small>Accession</small>&nbsp; { title }</h4>
                 </div>
 
-                <div className="row clearfix">
+                <div className="row clearfix bottom-row">
                     <div className="col-sm-6 item-label-extra set-type-indicators">{ this.parsedExperimentSetType() }</div>
                     <h5 className="col-sm-6 text-right text-left-xs item-label-extra">{ this.parsedCreationDate() }</h5>
                 </div>

@@ -24,6 +24,44 @@
     margin-top: 10px;
 }
 
+
+/***********************************************************
+		HIGH-LEVEL PAGE ALIGNMENT & RELATED
+************************************************************/
+
+.static-page {
+	width:80%;
+	margin: auto;
+}
+
+.item-page-container,
+.browse-page-container,
+.static-page {
+	/* Consistent margin between top navbar & content among pages */
+	margin-top: 18px;
+
+}
+
+
+/***********************************************************
+		HEADER & TOP AREAS (Navbar, Page Titles, etc.)
+************************************************************/
+
+h1.page-title {
+	/* Only set font-weight: 200 for h1, 
+	   200 doesn't look as nice on smaller sizes. */
+	font-weight: 200;
+}
+
+h1.page-title + .page-subtitle {
+	margin-top: -5px; /* Assumes h1.page-title to have margin-bottom: 10px */
+}
+
+.page-subtitle {
+	font-weight: 600;
+}
+
+
 /* *********************************************************
 		FOOTER
 ********************************************************** */
@@ -134,7 +172,7 @@
 
 
 /***********************************************************
-Additional Utility/Responsive Classes
+		Utility/Responsive Classes
 ***********************************************************/
 
 .column-margin-offset {
@@ -171,8 +209,12 @@ Additional Utility/Responsive Classes
 Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 ************************************************************/
 
-div.item-page-container {
-	margin-top: 15px; /* Same as Bootstrap .panel */
+
+@media screen and (min-width: 768px){
+	/* Nudge accession #, etc. closer to title on wide desktop views */
+	.exp-set-header-area {
+		margin-top: -25px;
+	}
 }
 
 .item-label-title {
@@ -467,6 +509,10 @@ div.item-page-container {
 	margin: 50px 0px 50px 0px;
 }
 
+.static-page > .help-entry:first-of-type {
+	margin-top: 27px;
+}
+
 h1, h2, h3, h4, h5, h6, td, th, span {
 	font-family: 'Work Sans', sans-serif;
 }
@@ -488,11 +534,6 @@ p, input {
 .error-page{
 	margin-top: 50px;
 	text-align: center;
-}
-
-.static-page{
-	width:80%;
-	margin: auto;
 }
 
 .slide-display{

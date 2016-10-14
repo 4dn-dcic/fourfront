@@ -113,7 +113,7 @@ describe('Testing about.js', function() {
         expect(staticContainerContentSections.length).toBeGreaterThan(1); 
 
         // Finding by className incase title location in DOM changes in future.
-        var staticContainerTitle = TestUtils.findRenderedDOMComponentWithClass(page, "fourDN-section-title");
+        var staticContainerTitle = TestUtils.findRenderedDOMComponentWithClass(page, "page-title");
         expect(staticContainerTitle.innerHTML).toEqual('About');
         
     });

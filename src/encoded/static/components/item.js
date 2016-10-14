@@ -70,9 +70,7 @@ var Item = React.createClass({
                     </div>
                 </header>
                 <AuditDetail context={context} key="biosample-audit" />
-                <div className="row item-row">
-                     <IPanel {...this.props}/>
-                </div>
+                <IPanel {...this.props}/>
             </div>
         );
     }

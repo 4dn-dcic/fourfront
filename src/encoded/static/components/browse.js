@@ -1041,9 +1041,7 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
                     </div>
                 </div>*/}
 
-                <div className="row">
-                    <ResultTable {...this.props} targetFiles={targetFiles}/>
-                </div>
+                <ResultTable {...this.props} targetFiles={targetFiles}/>
 
             </div>
 
@@ -1101,25 +1099,29 @@ var Browse = browse.Browse = React.createClass({
             );
         }
 
-        return <ControlsAndResults 
-                {...this.props} 
-                key={undefined} 
-                fileFormats={fileFormats} 
-                searchBase={searchBase} 
-                onChange={this.context.navigate} 
-                changeFilters={this.changeFilters}
-            />
+        return ( 
+            <div className="browse-page-container">
+
+                <h1 className="page-title">Data Browser</h1>
+                <h4 className="page-subtitle">Filter & browse experiments</h4>
+
+                <ControlsAndResults 
+                    {...this.props} 
+                    key={undefined} 
+                    fileFormats={fileFormats} 
+                    searchBase={searchBase} 
+                    onChange={this.context.navigate} 
+                    changeFilters={this.changeFilters}
+                />
+
+            </div>
+        );
 
         /**
-         * Removing & keeping for record: 
-         * .panel not really needed; adds extra outer padding which causes 
+         * Re: removing .panel above: .panel not really needed; adds extra outer padding which causes 
          * non-alignment w/ navbar logo.
          */
-        //return (
-        //    <div className="panel data-display main-panel">
-        //        <ControlsAndResults {...this.props} key={undefined} fileFormats={fileFormats} searchBase={searchBase} onChange={this.context.navigate} changeFilters={this.changeFilters}/>
-        //    </div>
-        //);
+
     }
 });
 

@@ -9,6 +9,9 @@ var HelpPage = module.exports = React.createClass({
     render: function() {
         return(
             <div className="static-page">
+
+                <h1 className="page-title">Help</h1>
+
                 <div className="help-entry">
                     <h3 id="metadata-structure" className="fourDN-section-title">Getting started</h3>
                     <p className="fourDN-content" dangerouslySetInnerHTML={{__html: statics.gettingStarted}}></p>

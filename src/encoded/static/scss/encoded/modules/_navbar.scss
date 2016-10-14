@@ -1,7 +1,10 @@
 /* NavBar */
+
 .navbar-inverse {
     border: none;
     background: #ffffff;
+    border-bottom: 1px solid #f4f4f4;
+    margin-bottom: 0;
 
     .navbar-brand {
         padding: 0px !important;
@@ -255,9 +258,9 @@
     }
 }
 
-.nav-img{
+.navbar-logo-image {
     display: block;
-    margin: auto;
+    margin: 11px auto auto;
 }
 
 .navbar-form{
