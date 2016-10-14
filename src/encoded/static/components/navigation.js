@@ -39,7 +39,7 @@ var Navigation = module.exports = React.createClass({
 
     render: function() {
         var portal = this.context.portal;
-        var img = <img src="/static/img/4dn_logo.svg" className="navbar-logo-image"/>
+        var img = <img src="/static/img/4dn_logo.svg" className="navbar-logo-image"/>;
         return (
             <div style={{ marginBottom: ( this.state.testWarning ? 37 : 0 ) }}>
                 <div id="navbar" className="navbar navbar-fixed-top navbar-inverse">

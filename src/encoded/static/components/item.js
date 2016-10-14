@@ -336,7 +336,7 @@ var formValue = function (schemas, item) {
         toReturn.push(<SubIPanel schemas={schemas} content={item}/>);
     }else{
         if (typeof item === 'string' && item.charAt(0) === '/') {
-            toReturn.push(<a key={item} href={item}>{item}</a>)
+            toReturn.push(<a key={item} href={item}>{item}</a>);
         }else{
             toReturn.push(item);
         }

@@ -61,7 +61,7 @@ var ExperimentSetHeader = React.createClass({
             case 'in review by project':
                 iconClass = 'icon ss-stopwatch';
                 break;
-            
+
         }
         return <span><i className={iconClass}></i> { this.props.context.status }</span>;
     },
@@ -117,7 +117,7 @@ var formValue = function (schemas, item) {
         //console.log(item);
     }else{
         if (typeof item === 'string' && item.charAt(0) === '/') {
-            toReturn.push(<a key={item} href={item}>{item}</a>)
+            toReturn.push(<a key={item} href={item}>{item}</a>);
         }else{
             toReturn.push(item);
         }
