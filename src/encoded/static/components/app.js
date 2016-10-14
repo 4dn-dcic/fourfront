@@ -276,7 +276,7 @@ var App = React.createClass({
                     {base ? <base href={base}/> : null}
                     <link rel="canonical" href={canonical} />
                     <script async src='//www.google-analytics.com/analytics.js'></script>
-                    <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet" />
+                    <link href="https://fonts.googleapis.com/css?family=Work+Sans:200,300,400,500,600,700" rel="stylesheet" />
                     <link href="https://fonts.googleapis.com/css?family=Yrsa" rel="stylesheet" />
                     <script data-prop-name="inline" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
                     <link rel="stylesheet" href="/static/css/style.css" />

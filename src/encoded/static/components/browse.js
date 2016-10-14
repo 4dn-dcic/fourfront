@@ -588,7 +588,7 @@ var ExpTerm = browse.ExpTerm = React.createClass({
         return (
             <li id={selected ? "selected" : null} key={term}>
                 <a className={selected ? "expterm-selected" : "expterm"} id={selected ? "selected" : null} href="" onClick={this.handleClick}>
-                    <span className="pull-left facet-selector">{selected ? <i className="icon icon-times-circle-o"></i> : ''}</span>
+                    <span className="pull-left facet-selector">{selected ? <i className="icon icon-times-circle"></i> : ''}</span>
                     <span className="facet-item">
                         {title}
                     </span>
@@ -711,6 +711,7 @@ var DropdownFacet = browse.DropdownFacet = React.createClass({
 });
 
 var FacetList = browse.FacetList = React.createClass({
+
     contextTypes: {
         session: React.PropTypes.object,
         hidePublicAudits: React.PropTypes.bool
@@ -756,7 +757,7 @@ var FacetList = browse.FacetList = React.createClass({
         return (
             <div>
                 <div className="exptype-box">
-                    {exptypeDropdown}
+                    { exptypeDropdown }
                 </div>
                 <div className={"box facets " + this.props.orientation}>
                     <div className="row">
@@ -946,27 +947,31 @@ var ResultTable = browse.ResultTable = React.createClass({
         return (
             <div>
                 <div className="row">
-                    {facets.length ? <div className="col-sm-5 col-md-4 col-lg-3">
-                        <FacetList {...this.props} facets={facets}
-                                    searchBase={searchBase ? searchBase + '&' : searchBase + '?'} onFilter={this.onFilter} ignoredFilters={ignoredFilters}/>
-                    </div> : ''}
+                    {facets.length ?
+                        <div className="col-sm-5 col-md-4 col-lg-3">
+                            <FacetList
+                                {...this.props}
+                                facets={facets}
+                                searchBase={searchBase ? searchBase + '&' : searchBase + '?'}
+                                onFilter={this.onFilter}
+                                ignoredFilters={ignoredFilters}
+                            />
+                        </div> : ''}
                     <div className="col-sm-7 col-md-8 col-lg-9">
-                        <div className="row">
-                            <h4 className='row browse-title'>Showing {resultListing.length} of {resultCount} experiment sets.</h4>
-                        </div>
+                        <h5 className='browse-title'>Showing {resultListing.length} of {resultCount} experiment sets.</h5>
                         <div>
-                            {resultListing.length > 0 ?
-                                <Table className="table-tbody-striped" bordered condensed id="result-table">
+                            { resultListing.length > 0 ?
+                            <Table className="table-tbody-striped" bordered condensed id="result-table">
                                 <thead>
                                     <tr>
                                         <th></th>
                                         <th></th>
-                                        {resultHeaders}
+                                        { resultHeaders }
                                     </tr>
                                 </thead>
-                                {resultListing}
+                                { resultListing }
                             </Table>
-                            : <div></div>}
+                            : <div></div> }
                         </div>
                     </div>
                 </div>
@@ -1080,6 +1085,7 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
         var downloadButton = <Button className="expset-selector-button" bsSize="xsmall" onClick={this.downloadFiles}>Download</Button>;
         return(
             <div>
+
                 {/*<div className="row">
                     <div className="box expset-whole-selector col-sm-12 col-md-10 col-lg-9 col-md-push-2 col-lg-push-3">
                         <div className="col-sm-8 col-md-8 col-lg-8 expset-file-selector">
@@ -1106,9 +1112,9 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
                         </div>
                     </div>
                 </div>*/}
-                <div className="row">
-                    <ResultTable {...this.props} targetFiles={targetFiles}/>
-                </div>
+
+                <ResultTable {...this.props} targetFiles={targetFiles}/>
+
             </div>
 
         );
@@ -1164,11 +1170,30 @@ var Browse = browse.Browse = React.createClass({
                     </div>
             );
         }
+
         return (
-            <div className="panel data-display main-panel">
-                <ControlsAndResults {...this.props} key={undefined} fileFormats={fileFormats} searchBase={searchBase} onChange={this.context.navigate} changeFilters={this.changeFilters}/>
+            <div className="browse-page-container">
+
+                <h1 className="page-title">Data Browser</h1>
+                <h4 className="page-subtitle">Filter & browse experiments</h4>
+
+                <ControlsAndResults
+                    {...this.props}
+                    key={undefined}
+                    fileFormats={fileFormats}
+                    searchBase={searchBase}
+                    onChange={this.context.navigate}
+                    changeFilters={this.changeFilters}
+                />
+
             </div>
         );
+
+        /**
+         * Re: removing .panel above: .panel not really needed; adds extra outer padding which causes
+         * non-alignment w/ navbar logo.
+         */
+
     }
 });
 

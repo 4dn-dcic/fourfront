@@ -1,20 +1,23 @@
 /* NavBar */
+
 .navbar-inverse {
     border: none;
     background: #ffffff;
+    border-bottom: 1px solid #f4f4f4;
+    margin-bottom: 0;
 
     .navbar-brand {
         padding: 0px !important;
         // margin-left: -50px !important;
         color: $navbar-default-brand-color;
         font-size: 1.7em;
-        font-weight: 200;
+        font-weight: 300;
         height: 70px !important;
     }
 
     .nav > li > a {
         font-size: 1.4em;
-        font-weight: 200;
+        font-weight: 300;
         &:focus,
         &:hover {
             color: #000000;
@@ -174,65 +177,70 @@
 
 // Drop down styles when window is constrained
 .navbar-nav {
-  font-family: 'Work Sans', sans-serif;
-  // margin: ($navbar-padding-vertical / 2);
-  margin: 20px;
-  > li > a {
-    padding-top:    10px;
-    padding-bottom: 10px;
-    line-height: $line-height-computed;
-  }
-
-  @media (max-width: $grid-float-breakpoint-max) {
-    // Dropdowns get custom display when collapsed
-    margin-bottom: 0px !important;
-    .open .dropdown-menu {
-      position: static;
-      float: none;
-      width: auto;
-      margin-top: 0;
-      background-color: transparent;
-      border: 0;
-      box-shadow: none;
-      > li > a,
-      .dropdown-header {
-        padding: 5px 15px 5px 25px;
-      }
-      > li > div > a,
-      .dropdown-header {
-          color: #999999;
-        padding: 5px 15px 5px 25px;
-      }
-      > li > div > div > a,
-      .dropdown-header {
-          color: #999999;
-        padding: 5px 15px 5px 25px;
-      }
-      > li > a {
+    font-family: 'Work Sans', sans-serif;
+    // margin: ($navbar-padding-vertical / 2);
+    margin: 20px;
+    > li > a {
+        padding-top:    10px;
+        padding-bottom: 10px;
         line-height: $line-height-computed;
-        &:hover,
-        &:focus {
-          color: #000000 !important;
-        }
-      }
-      > li > div > a{
-          line-height: $line-height-computed;
-          &:hover,
-          &:focus {
-            text-decoration: none !important;
-            color: #000000 !important;
-          }
-      }
-      > li > div > div > a{
-          line-height: $line-height-computed;
-          &:hover,
-          &:focus {
-            text-decoration: none !important;
-            color: #000000 !important;
-          }
-      }
     }
-  }
+
+    @media (max-width: $grid-float-breakpoint-max) {
+        // Dropdowns get custom display when collapsed
+
+        margin-bottom: 0px !important;
+        .open .dropdown-menu {
+            position: static;
+            float: none;
+            width: auto;
+            margin-top: 0;
+            background-color: transparent;
+            border: 0;
+            box-shadow: none;
+
+            > li > a, .dropdown-header {
+                padding: 5px 15px 5px 25px;
+            }
+
+            > li > div > a, .dropdown-header {
+                color: #777;
+                padding: 5px 15px 5px 25px;
+            }
+
+            > li > div > div > a, .dropdown-header {
+                color: #777;
+                padding: 5px 15px 5px 25px;
+            }
+
+            > li > a {
+                line-height: $line-height-computed;
+                &:hover,
+                &:focus {
+                    color: #000000 !important;
+                }
+            }
+                        
+            > li > div > a {
+                line-height: $line-height-computed;
+                &:hover,
+                &:focus {
+                    text-decoration: none !important;
+                    color: #000000 !important;
+                }
+            }
+
+            > li > div > div > a {
+                line-height: $line-height-computed;
+                &:hover,
+                &:focus {
+                    text-decoration: none !important;
+                    color: #000000 !important;
+                }
+            }
+
+        }
+    }
 }
 
 .nav-solo{
@@ -241,7 +249,7 @@
     .global-entry{
         font-size: 1.4em;
         color: #999999;
-        font-weight: 200px;
+        font-weight: 300;
         &:hover,
         &:focus {
           text-decoration: none !important;
@@ -250,9 +258,9 @@
     }
 }
 
-.nav-img{
+.navbar-logo-image {
     display: block;
-    margin: auto;
+    margin: 11px auto auto;
 }
 
 .navbar-form{

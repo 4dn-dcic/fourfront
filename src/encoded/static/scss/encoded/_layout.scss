@@ -24,6 +24,44 @@
     margin-top: 10px;
 }
 
+
+/***********************************************************
+		HIGH-LEVEL PAGE ALIGNMENT & RELATED
+************************************************************/
+
+.static-page {
+	width: 75%;
+	margin: 0;
+}
+
+.item-page-container,
+.browse-page-container,
+.static-page {
+	/* Consistent margin between top navbar & content among pages */
+	margin-top: 18px;
+
+}
+
+
+/***********************************************************
+		HEADER & TOP AREAS (Navbar, Page Titles, etc.)
+************************************************************/
+
+h1.page-title {
+	/* Only set font-weight: 200 for h1, 
+	   200 doesn't look as nice on smaller sizes. */
+	font-weight: 200;
+}
+
+h1.page-title + .page-subtitle {
+	margin-top: -5px; /* Assumes h1.page-title to have margin-bottom: 10px */
+}
+
+.page-subtitle {
+	font-weight: 600;
+}
+
+
 /* *********************************************************
 		FOOTER
 ********************************************************** */
@@ -110,12 +148,12 @@
     }
 }
 
-.flexcol-heading {
+.flexcol-heading, .item-page-heading {
     position: relative;
     margin-right: -10px;
     margin-left: -10px;
     padding: 10px;
-    background-color: #d8d8d8;
+    background-color: #e8e8e8;
 
     h1, h2, h3, h4, h5, h6 {
         margin: 0;
@@ -124,13 +162,164 @@
     // For the Experiment Summary header
     &.experiment-heading {
 		font-family: 'Work Sans', sans-serif;
-        height: 40px;
 
         h1, h2, h3, h4, h5, h6 {
             line-height: 20px;  // 50px - 20px of vertical padding
         }
+		
     }
 }
+
+
+/***********************************************************
+		Utility/Responsive Classes
+***********************************************************/
+
+.column-margin-offset {
+	margin-left: -10px;
+	margin-right: -10px;
+}
+
+.text-capitalize {
+	// Same class as Bootstrap (in newer version of it?)
+	text-transform: capitalize;
+}
+
+.text-uppercase {
+	text-transform: uppercase;
+}
+
+.text-justify {
+	text-align: justify;
+}
+
+.text-200 { font-weight: 200; }
+.text-300 { font-weight: 300; }
+.text-400 { font-weight: 400; }
+.text-500 { font-weight: 500; }
+.text-600 { font-weight: 600; }
+
+@media screen and (max-width: 767px){
+
+	.text-left-xs {
+		// Make text left-aligned for collapsed mobile view(s),
+		// e.g. if is aligned right on larger screens.
+		text-align: left !important;
+	}
+
+}
+
+/***********************************************************
+Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
+************************************************************/
+
+
+@media screen and (min-width: 768px){
+	/* Nudge accession #, etc. closer to title on wide desktop views */
+	.exp-set-header-area {
+		margin-top: -25px;
+	}
+}
+
+.item-label-title {
+	margin-bottom: 9px;
+	font-family: 'Work Sans', sans-serif;
+	font-weight: 300;
+	margin-top: 0;
+}
+
+.item-label-extra {
+	font-weight: 300;
+
+	.icon[class*=" ss-"] {
+		margin-bottom: -4px;
+		vertical-align: middle;
+	}
+
+	.icon[class*=" sbt-"] {
+		margin-top: -2px;
+		vertical-align: middle;
+	}
+}
+
+@media screen and (max-width: 767px){
+
+	.item-label-extra.text-right {
+		// Hackishly making text left-aligned for collapsed mobile view(s)
+		text-align: left !important;
+	}
+
+}
+
+.set-type-indicators {
+
+	margin-top: 8px;
+
+	.experiment-set-type-indicator {
+		display: inline-block;
+		box-sizing: border-box;
+		border: 1px solid rgba(0,0,0,0.125);
+		height: 28px;
+		line-height: 26px;
+		color : #000;
+		font-weight: 400;
+		padding-left: 10px;
+		padding-right: 10px;
+		border-radius: 5px;
+		text-transform: capitalize;
+		color: #fff;
+
+		&[data-set-type="replicates"]{
+			background-color: #56889b;
+		}
+
+		&[data-set-type="biological replicates"]{
+			background-color: #397855;
+		}
+
+		&[data-set-type="technical replicates"]{
+			background-color: #34677b;
+		}
+
+		&[data-set-type="analysis set"]{
+			background-color: #812423;
+		}
+
+		&[data-set-type="publication"]{
+			background-color: #47419a;
+		}
+
+		&[data-set-type="unspecified"]{
+			background-color: #7b7b7b;
+			display: none;
+		}
+	}
+
+}
+
+.item-page-heading {
+	/* Extending Bootstrap's .flexcol-heading */
+	border-radius: 3px;
+	margin-left: 0;
+	margin-right: 0;
+	box-sizing: border-box;
+	border: 1px solid #e0e0e0;
+	min-height: 42px;
+	
+	h4 {
+
+		font-weight: 500;
+
+		small {
+			vertical-align: top;
+			line-height: inherit;
+			letter-spacing: normal;
+		}
+
+	}
+
+}
+
 
 /* *********************************************************
 		CARL'S LOGIN BOX
@@ -239,7 +428,6 @@
 }
 
 .fourDN-banner{
-	text-align: center;
 	margin-top: 40px;
 	margin-bottom: 40px;
 	> h4 {
@@ -259,9 +447,12 @@
 
 .fourDN-section-title{
 	width: inherit;
-	font-weight: 200;
+	font-weight: 300;
 	font-size: 1.4em !important;
 	border-bottom: 2px solid #168369;
+	padding-bottom: 5px;
+	margin-bottom: 15px;
+	
 }
 
 .fourDN-section-toggle{
@@ -275,7 +466,7 @@
 
 .fourDN-section-info{
 	color: #b3b3b3 !important;
-	font-weight: 200;
+	font-weight: 300;
 	font-size: 1.2em;
 }
 
@@ -323,6 +514,10 @@
 	margin: 50px 0px 50px 0px;
 }
 
+.static-page > .help-entry:first-of-type {
+	margin-top: 27px;
+}
+
 h1, h2, h3, h4, h5, h6, td, th, span {
 	font-family: 'Work Sans', sans-serif;
 }
@@ -346,11 +541,6 @@ p, input {
 	text-align: center;
 }
 
-.static-page{
-	width:80%;
-	margin: auto;
-}
-
 .slide-display{
 	padding: 20px 0px 20px 0px;
 	>img{
@@ -363,7 +553,10 @@ p, input {
 }
 
 .exptype-box{
-	padding: 10px;
+	
+	//display: none; /* TEMPORARY - FOR ALIGNMENT */
+	padding: 10px 0;
+
 	> div > .btn-group > button {
 		width: 240px;
 		text-align: left;
@@ -443,10 +636,12 @@ p, input {
 }
 
 .browse-title{
-    text-align: center;
-    margin-bottom: 20px;
+    text-align: right;
+    margin-bottom: 10px;
+	font-weight: 400;
 	color: #999999 !important;
 }
+
 //extend table class to get ride of bottom margin
 .table{
 	margin-bottom: 0px;
