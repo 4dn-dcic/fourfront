@@ -124,7 +124,7 @@ var LoginBoxes = React.createClass({
         }
     	return (
             <div>
-                <a id="loginbtn" href="" className="global-entry" onClick={this.handleToggle}>Sign in</a>
+                <a id="loginbtn" href="" className="global-entry" onClick={this.lock.show()}>Sign in</a>
                 <Modal show={this.state.isOpen} onHide={this.handleToggle}>
                     <div className="login-box">
                         <h1 className="title">Your Account</h1>
