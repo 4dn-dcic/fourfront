@@ -78,7 +78,7 @@ class Timeout {
 }
 
 
-module.exports.Persona = {
+module.exports.Auth0 = {
     childContextTypes: {
         fetch: React.PropTypes.func,
         session: React.PropTypes.object,
@@ -101,7 +101,7 @@ module.exports.Persona = {
     },
 
     componentDidMount: function () {
-        // Login / logout actions must be deferred until persona is ready.
+        // Login / logout actions must be deferred until Auth0 is ready.
         var session_cookie = this.extractSessionCookie();
         var session = this.parseSessionCookie(session_cookie);
         if (session['auth.userid']) {
@@ -113,6 +113,22 @@ module.exports.Persona = {
         }else{
             query_href = this.props.href;
         }
+				// this is to create the Auth0 login modal window
+				var lock_ = require('auth0-lock');
+			  // TODO: these should be read in from base and production.ini
+			  this.lock = new lock_.default('DPxEwsZRnKDpk0VfVAxrStRKukN14ILB', 
+																			'hms-dbmi.auth0.com', {
+				auth: {
+					redirect: false
+				},
+				// TODO add theme : logo
+				socialButtonStyle: 'big',
+				languageDictionary: {
+					title: "Log in to data.4dnucleome.org"
+				},
+				allowedConnections: ['github', 'google-oauth2']
+				});
+			  this.lock.on("authenticated", this.handleAuth0Login.bind(this));
         this.setState({session: session});
         store.dispatch({
             type: {'href':query_href, 'session_cookie': session_cookie}
