@@ -785,13 +785,17 @@ var ColumnSorter = React.createClass({
     },
 
     render: function(){
+        // Make arrow black if selected; flip if sorting in ascending order
         var iconUsed = this.props.sortColumn === this.props.val ?
             <a className="expset-column-sort-used" href="" onClick={this.runFxn}>
-                <i className="icon ss-descend"></i>
+                {this.props.descend ?
+                    <i className="icon sbt-descend" style={{ transform: 'translateY(2px)' }}></i>
+                    :
+                    <i className="icon sbt-ascend" style={{ transform: 'translateY(2px)' }}></i>}
             </a>
             :
             <a className="expset-column-sort" href="" onClick={this.runFxn}>
-                <i className="icon ss-descend"></i>
+                <i className="icon sbt-descend" style={{ transform: 'translateY(2px)' }}></i>
             </a>;
         return(
             <span>
@@ -886,7 +890,7 @@ var ResultTable = browse.ResultTable = React.createClass({
         var columnTemplate = expSetColumnLookup[setType] ? expSetColumnLookup[setType] : expSetColumnLookup['other'];
         var addInfoTemplate = expSetAdditionalInfo[setType] ? expSetAdditionalInfo[setType] : expSetAdditionalInfo['other'];
         var resultHeaders = Object.keys(columnTemplate).map(function(key){
-            var sorter = <ColumnSorter sortColumn={this.state.sortColumn} fxn={this.sortBy} val={key}/>;
+            var sorter = <ColumnSorter descend={this.state.sortReverse} sortColumn={this.state.sortColumn} fxn={this.sortBy} val={key}/>;
             return(<th key={key}>{sorter}</th>);
         }.bind(this));
         results.map(function (result) {
