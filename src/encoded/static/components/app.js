@@ -280,6 +280,8 @@ var App = React.createClass({
                     <link href="https://fonts.googleapis.com/css?family=Yrsa" rel="stylesheet" />
                     <script data-prop-name="inline" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
                     <link rel="stylesheet" href="/static/css/style.css" />
+                    <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
+                    <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
                 </head>
                 <body onClick={this.handleClick} onSubmit={this.handleSubmit}>
                     <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{

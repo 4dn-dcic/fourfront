@@ -1,7 +1,7 @@
 {
     "title": "Experiment",
     "description": "Schema for submitting metadata for an assay.",
-    "comment": "Experiment is the main organizing object for metadata on a single assay, it's associated protocols, files and subsequent analyses.",
+    "comment": "Experiment is the main organizing object for metadata on a single assay, its associated protocols, files and subsequent analyses.",
     "id": "/profiles/experiment.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",

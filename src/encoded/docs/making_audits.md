@@ -33,7 +33,7 @@ objects referred to by an identifier:
             '''
             pass
 
-    * *Requires metadata in other objects* - metadata need for audit are properties of the object as well as properoties within embedded objects:
+    * *Requires metadata in other objects* - metadata need for audit are properties of the object as well as properties within embedded objects:
    
         @audit_checker('{metadata_object}', frame=['{linked_object_1}'])
         def audit_new_audit_name(value, system):
