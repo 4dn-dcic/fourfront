@@ -106,14 +106,14 @@ describe('Testing about.js', function() {
         var staticContainer = TestUtils.findRenderedDOMComponentWithClass(page, "static-page");
         expect(staticContainer).toBeTruthy();
         
-        var staticContainerContentSections = staticContainer.children[0].children; 
+        var staticContainerContentSections = staticContainer.children[1].children; 
         // ^ == div.static-page > div.help-entry > *
 
         // Should at least have 1 child element (title, paragraphs) 
         expect(staticContainerContentSections.length).toBeGreaterThan(1); 
 
         // Finding by className incase title location in DOM changes in future.
-        var staticContainerTitle = TestUtils.findRenderedDOMComponentWithClass(page, "fourDN-section-title");
+        var staticContainerTitle = TestUtils.findRenderedDOMComponentWithClass(page, "page-title");
         expect(staticContainerTitle.innerHTML).toEqual('About');
         
     });

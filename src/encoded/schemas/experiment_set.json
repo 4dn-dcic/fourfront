@@ -88,6 +88,9 @@
         }
     },
     "columns": {
+        "accession": {
+            "title": "Accession"
+        },
         "experimentset_type": {
             "title": "Experiment set type"
         },
