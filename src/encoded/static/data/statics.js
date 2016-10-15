@@ -137,9 +137,5 @@ module.exports = {
 
     "aboutFunding" : 
         `The 4D Nucleome Data Coordination and Integration Center is supported by the U01 Grant CA200059 from the NIH Common Fund.`
-<<<<<<< HEAD
->>>>>>> Statics.js Edits -
-=======
->>>>>>> 5bc55cb4dbe1ea318b24a1967152a203912e420c
 
 };
