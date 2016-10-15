@@ -25,7 +25,7 @@ describe('Testing statics.js (to increase coverage)', function() {
     });
 
 
-    it('Has the following keys & values: homeDescription, homeLinks, gettingStarted, metadataStructure1, metadataStructure2, submissionXLS, restAPI, aboutDCIC, aboutAcknowledgement, aboutFunding', function() {
+    it('Has the required keys & values', function() {
         
         expect('homeDescription' in Statics).toBe(true);
         expect(Statics.homeDescription.length).toBeGreaterThan(0);
