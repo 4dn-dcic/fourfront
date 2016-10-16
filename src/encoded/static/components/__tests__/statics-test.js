@@ -1,11 +1,9 @@
 'use strict';
 
 /** 
- * Written by Alex, based on Carl's homepage test, to test the 'Help' page 
- * rendered by help.js.
- * 
- * Includes check for 1+ help section, for current 4 section titles,
- * and for functionality of .slide-display slider.
+ * Written by Alex, based on Carl's homepage test, to test the content
+ * in statics.js to ensure variables required exist and have text/html 
+ * content.
  */
 
 jest.autoMockOff();
