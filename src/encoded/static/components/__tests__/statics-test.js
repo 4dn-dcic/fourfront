@@ -19,11 +19,8 @@ describe('Testing statics.js (to increase coverage)', function() {
 
     beforeAll(function() {
         React = require('react');
-        TestUtils = require('react/lib/ReactTestUtils');
-        _ = require('underscore');
         Statics = require('../../data/statics');
     });
-
 
     it('Has the required keys & values', function() {
         
