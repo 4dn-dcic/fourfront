@@ -1,7 +1,8 @@
 var React = require('react');
 var globals = require('./globals');
 var Panel = require('react-bootstrap').Panel;
-
+//var SubIPanel = require('./item').SubIPanel; //For some reason this doesn't work but the below does...
+import { SubIPanel } from './item';
 
 /**
  * Entire ExperimentSet page view.
@@ -112,9 +113,8 @@ var formValue = function (schemas, item) {
             toReturn.push(formValue(schemas, item[i]));
         }
     }else if (typeof item === 'object') {
-        //toReturn.push(<SubIPanel schemas={schemas} content={item}/>);
-        //toReturn.push(item);
         //console.log(item);
+        toReturn.push(<SubIPanel schemas={schemas} content={item}/>);
     }else{
         if (typeof item === 'string' && item.charAt(0) === '/') {
             toReturn.push(<a key={item} href={item}>{item}</a>);

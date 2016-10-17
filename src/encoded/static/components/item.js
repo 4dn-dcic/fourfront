@@ -232,7 +232,7 @@ var RelatedItems = module.exports.RelatedItems = React.createClass({
 
 // ******* Refined item.js code below... *******
 
-var SubIPanel = React.createClass({
+var SubIPanel = module.exports.SubIPanel = React.createClass({
     getInitialState: function() {
     	return {isOpen: false};
     },
