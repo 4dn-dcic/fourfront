@@ -11,7 +11,6 @@ var AuditDetail = audit.AuditDetail;
 var AuditMixin = audit.AuditMixin;
 var Table = collection.Table;
 var ErrorPage = require('./error');
-var ExperimentSetView = require('./experiment-set-view');
 
 var Fallback = module.exports.Fallback = React.createClass({
     contextTypes: {
