@@ -34,7 +34,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
     },
 
     getInitialState: function() {
-    	return {
+        return {
             checked: true,
             selectedFiles: new Set()
         };
@@ -82,10 +82,11 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
         // Let parentController control 'checked' state if provided.
         // Fallback to own state otherwise.
+        var checked;
         if (this.props.parentController) {
-            var checked = this.props.parentController.state.checked;
+            checked = this.props.parentController.state.checked;
         } else {
-            var checked = this.state.checked;
+            checked = this.state.checked;
         }
 
         var childFileEntryRows = Object.keys(fileDetail).map(function (file) {
@@ -141,7 +142,7 @@ var getFileDetailContainer = module.exports.getFileDetailContainer = function(ex
                 'uuid':         experimentArray[i].uuid,
                 '@id' :         experimentArray[i]['@id']
                 // Still missing : 'data', 'related'
-            }
+            };
 
             if(experimentArray[i].files){
                 tempFiles = experimentArray[i].files;
@@ -163,7 +164,8 @@ var getFileDetailContainer = module.exports.getFileDetailContainer = function(ex
             if(tempFiles.length > 0){
                 var relatedFiles = {};
                 var relatedData = [];
-                for(var k=0;k<tempFiles.length;k++){
+                var k;
+                for(k=0;k<tempFiles.length;k++){
 
                     // only use first file relation for now. Only support one relationship total
                     if(tempFiles[k].related_files && tempFiles[k].related_files[0].file){
@@ -184,7 +186,7 @@ var getFileDetailContainer = module.exports.getFileDetailContainer = function(ex
                     }
                 }
                 var usedRelations = [];
-                for(var k=0;k<tempFiles.length;k++){
+                for(k=0;k<tempFiles.length;k++){
                     if(_.contains(Object.keys(relatedFiles), tempFiles[k]['@id'])){
                         if(_.contains(usedRelations, tempFiles[k]['@id'])){
                             // skip already-added related files
