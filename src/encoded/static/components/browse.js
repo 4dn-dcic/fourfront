@@ -15,6 +15,8 @@ var ButtonToolbar = require('react-bootstrap').ButtonToolbar;
 var DropdownButton = require('react-bootstrap').DropdownButton;
 var MenuItem = require('react-bootstrap').MenuItem;
 var store = require('../store');
+var ExperimentsTable = require('./experiments-table').ExperimentsTable;
+var getFileDetailContainer = require('./experiments-table').getFileDetailContainer;
 var AuditIndicators = audit.AuditIndicators;
 var AuditDetail = audit.AuditDetail;
 var AuditMixin = audit.AuditMixin;
@@ -52,6 +54,17 @@ var IndeterminateCheckbox = React.createClass({
 });
 
 var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
+
+    propTypes : {
+        addInfo : React.PropTypes.object,
+        columns : React.PropTypes.object.isRequired,
+        expSetFilters : React.PropTypes.object,
+        experimentArray : React.PropTypes.array.isRequired,
+        href : React.PropTypes.string,
+        passExperiments : React.PropTypes.instanceOf(Set),
+        targetFiles : React.PropTypes.instanceOf(Set),
+    },
+
     getInitialState: function() {
     	return {
             open: false,
@@ -86,23 +99,6 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         });
     },
 
-    handleFileUpdate: function (uuid, add=true){
-        var newSet = this.state.selectedFiles;
-        if(add){
-            if(!newSet.has(uuid)){
-                newSet.add(uuid);
-                this.setState({
-                    selectedFiles: newSet
-                });
-            }
-        }else if(newSet.has(uuid)){
-            newSet.delete(uuid);
-            this.setState({
-                selectedFiles: newSet
-            });
-        }
-    },
-
     handleCheck: function() {
         this.setState({
             checked: !this.state.checked
@@ -110,79 +106,11 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
     },
 
     render: function() {
-        var experimentArray = this.props.experimentArray;
-        var fileDetail = {}; //use @id field as key
-        var emptyExps = [];
-        for (var i=0; i<experimentArray.length; i++){
-            if(this.props.passExperiments.has(experimentArray[i])){
-                var tempFiles = [];
-                var biosample_accession = experimentArray[i].biosample ? experimentArray[i].biosample.accession : null;
-                var biosample_id = biosample_accession ? experimentArray[i].biosample['@id'] : null;
-                if(experimentArray[i].files){
-                    tempFiles = experimentArray[i].files;
-                }else if(experimentArray[i].filesets){
-                    for(var j=0; j<experimentArray[i].filesets.length; j++){
-                        if(experimentArray[i].filesets[j].files_in_set){
-                            tempFiles = tempFiles.concat(experimentArray[i].filesets[j].files_in_set);
-                        }
-                    }
-                // No files in experiment
-                }else{
-                    emptyExps.push(experimentArray[i]['@id']);
-                    fileDetail[experimentArray[i]['@id']] = {
-                        'accession':experimentArray[i].accession,
-                        'biosample':biosample_accession,
-                        'biosample_id':biosample_id,
-                        'uuid':experimentArray[i].uuid,
-                        'data':{}
-                    };
-                }
-                // save appropriate experiment info
-                if(tempFiles.length > 0){
-                    var relatedFiles = {};
-                    var relatedData = [];
-                    for(var k=0;k<tempFiles.length;k++){
 
-                        // only use first file relation for now. Only support one relationship total
-                        if(tempFiles[k].related_files && tempFiles[k].related_files[0].file){
-                            // in form [related file @id, this file @id]
-                            relatedFiles[tempFiles[k].related_files[0].file] =  tempFiles[k]['@id'];
-                            fileDetail[tempFiles[k]['@id']] = {
-                                'accession':experimentArray[i].accession,
-                                'biosample':biosample_accession,
-                                'biosample_id':biosample_id,
-                                'uuid':experimentArray[i].uuid,
-                                'data':tempFiles[k],
-                                'related':{'relationship_type':tempFiles[k].related_files[0].relationship_type,
-                                            'file':tempFiles[k].related_files[0].file,
-                                            'data':null
-                                            }
-                            };
-                        }else{
-                            fileDetail[tempFiles[k]['@id']] = {
-                                'accession':experimentArray[i].accession,
-                                'biosample':biosample_accession,
-                                'biosample_id':biosample_id,
-                                'uuid':experimentArray[i].uuid,
-                                'data':tempFiles[k]
-                            };
-                        }
-                    }
-                    var usedRelations = [];
-                    for(var k=0;k<tempFiles.length;k++){
-                        if(_.contains(Object.keys(relatedFiles), tempFiles[k]['@id'])){
-                            if(_.contains(usedRelations, tempFiles[k]['@id'])){
-                                // skip already-added related files
-                                delete fileDetail[relatedFiles[tempFiles[k]['@id']]];
-                            }else{
-                                fileDetail[relatedFiles[tempFiles[k]['@id']]]['related']['data'] = tempFiles[k];
-                                usedRelations.push(relatedFiles[tempFiles[k]['@id']]);
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        var fileDetailContainer = getFileDetailContainer(this.props.experimentArray, this.props.passExperiments);
+        var fileDetail = fileDetailContainer.fileDetail;
+        var emptyExps = fileDetailContainer.emptyExps;
+
         var files = Object.keys(fileDetail);
         // unused for now... when format selection is added back in, adapt code below:
         // var filteredFiles = [];
@@ -191,16 +119,8 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         //         filteredFiles.push(files[i].uuid);
         //     }
         // }
-        var childEntries = files.map(function (file) {
-            return (
-                <FileEntry expSetFilters={this.props.expSetFilters} info={fileDetail[file]} key={fileDetail[file]['uuid'] + file} parentChecked={this.state.checked} handleFileUpdate={this.handleFileUpdate}/>
-            );
-        }.bind(this));
-        // sort to group experiments
-        childEntries.sort(function(a,b){
-            return(a.key - b.key);
-        });
-        var columnValues = Object.keys(this.props.columns).map(function (key){
+
+        var formattedColumns = Object.keys(this.props.columns).map(function (key){
             if(key==="Accession"){
                 return(
                     <td key={key+this.props.href} className="expset-table-cell">
@@ -215,7 +135,8 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                 );
             }
         }.bind(this));
-        var addInfoVals = Object.keys(this.props.addInfo).map(function (key){
+
+        var formattedAdditionalInfo = Object.keys(this.props.addInfo).map(function (key){
             return(
                 <div key={key}>
                     <span className="expset-addinfo-key">{key}:</span>
@@ -223,8 +144,10 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                 </div>
             );
         }.bind(this));
-        var checked = this.state.selectedFiles.size === childEntries.length || childEntries.length === emptyExps.length;
-        var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < childEntries.length;
+
+        var checked = this.state.selectedFiles.size === files.length || files.length === emptyExps.length;
+        var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < files.length;
+
         return (
             <tbody>
                 <tr>
@@ -240,173 +163,29 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                         <IndeterminateCheckbox checked={checked} indeterminate={indeterminate} onChange={this.handleCheck}/>
                     </div>
                     </td>
-                    {columnValues}
+                    { formattedColumns }
                 </tr>
                 <tr>
                     <td className={this.state.open ? "hidden-col-open" : "hidden-col-closed"} colSpan={Object.keys(this.props.columns).length + 2}>
                         <Panel className="expset-panel" collapsible expanded={this.state.open}>
                             <div className="expset-addinfo">
-                                {addInfoVals}
+                                { formattedAdditionalInfo }
                             </div>
-                            <Table className="expset-table" striped bordered condensed hover>
-                                <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th className="text-500">Experiment Accession</th>
-                                        <th className="text-500">Biosample Accession</th>
-                                        <th className="text-500">File Accession</th>
-                                        <th className="text-500">File Type</th>
-                                        <th className="text-500">File Info</th>
-                                    </tr>
-                                </thead>
-                                {childEntries}
-                            </Table>
+                            <ExperimentsTable 
+                                columnHeaders={[ 
+                                    null, 
+                                    'Experiment Accession', 
+                                    'Biosample Accession',
+                                    'File Accession', 
+                                    'File Type',
+                                    'File Info'
+                                ]}
+                                fileDetailContainer={fileDetailContainer}
+                                parentController={this}
+                            />
                         </Panel>
                     </td>
                 </tr>
-            </tbody>
-        );
-    }
-});
-
-var FileEntry = React.createClass({
-
-    getInitialState: function() {
-        return {
-            checked: true
-        };
-    },
-
-    // initial checkbox setting
-    componentWillMount: function(){
-        // if(this.props.exptPassed && _.contains(this.props.filteredFiles, this.props.file.uuid)){
-        //     this.setState({
-        //         checked: true
-        //     });
-        // }
-        if(this.props.info.data){
-            this.props.handleFileUpdate(this.props.info.data.uuid, true);
-        }
-    },
-
-    // update checkboxes if parent has changed
-    componentWillReceiveProps: function(nextProps) {
-        // if(this.props.filteredFiles !== nextProps.filteredFiles || this.props.exptPassed !== nextProps.exptPassed){
-        //     if(nextProps.exptPassed && _.contains(nextProps.filteredFiles, this.props.file.uuid)){
-        //         this.setState({
-        //             checked: true
-        //         });
-        //     }
-        // }
-        if(this.props.parentChecked !== nextProps.parentChecked){
-            this.setState({
-                checked: nextProps.parentChecked
-            });
-        }
-    },
-
-    // update parent checked state
-    componentDidUpdate(nextProps, nextState){
-        if((nextState.checked !== this.state.checked || !_.isEqual(this.props.expSetFilters, nextProps.expSetFilters)) && this.props.info.data){
-            this.props.handleFileUpdate(this.props.info.data.uuid, this.state.checked);
-        }
-    },
-
-    handleCheck: function() {
-        this.setState({
-            checked: !this.state.checked
-        });
-    },
-
-    render: function(){
-        var file = this.props.info.data ? this.props.info.data : null;
-        var info = this.props.info;
-        var relationship = this.props.info.related ? this.props.info.related : null;
-        var relatedFile;
-        if(relationship){
-            relatedFile = this.props.info.related.data ? this.props.info.related.data : null;
-        }
-        var fileOne;
-        var fileTwo;
-        var fileID;
-        // code embarrasingly specific to fastq file pairs
-        if(file){
-            if(file.paired_end && file.paired_end === '1'){
-                fileOne = [];
-                fileOne.push(<td><a href={file['@id'] || ''}>{file.accession || file.uuid || file['@id']}</a></td>);
-                fileOne.push(<td>{file.file_format}</td>);
-                fileOne.push(<td>Paired end {file.paired_end}</td>);
-            }else if(file.paired_end && file.paired_end === '2'){
-                fileTwo = [];
-                fileTwo.push(<td><a href={file['@id'] || ''}>{file.accession || file.uuid || file['@id']}</a></td>);
-                fileTwo.push(<td>{file.file_format}</td>);
-                fileTwo.push(<td>Paired end {file.paired_end}</td>);
-            }else{
-                fileOne = [];
-                if(file['@id']){
-                    fileOne.push(<td><a href={file['@id'] || ''}>{file.accession || file.uuid || file['@id']}</a></td>);
-                    fileOne.push(<td>{file.file_format}</td>);
-                    fileOne.push(<td>{(file.file_format === 'fastq' || file.file_format === 'fasta') ? 'Unpaired' : ''}</td>);
-                }else{
-                    fileOne.push(<td>No files</td>);
-                    fileOne.push(<td></td>);
-                    fileOne.push(<td></td>);
-                }
-            }
-            fileID = this.state.checked + "~" + true + "~" + file.file_format + "~" + file.uuid;
-        }
-        if(relatedFile){
-            if(relatedFile.paired_end && relatedFile.paired_end === '1'){
-                fileOne = [];
-                fileOne.push(<td><a href={relatedFile['@id'] || ''}>{relatedFile.accession || relatedFile.uuid || relatedFile['@id']}</a></td>);
-                fileOne.push(<td>{relatedFile.file_format}</td>);
-                fileOne.push(<td>Paired end {relatedFile.paired_end}</td>);
-            }else if(relatedFile.paired_end && relatedFile.paired_end === '2'){
-                fileTwo = [];
-                fileTwo.push(<td><a href={relatedFile['@id'] || ''}>{relatedFile.accession || relatedFile.uuid || relatedFile['@id']}</a></td>);
-                fileTwo.push(<td>{relatedFile.file_format}</td>);
-                fileTwo.push(<td>Paired end {relatedFile.paired_end}</td>);
-            }else{
-                fileTwo = [];
-                fileTwo.push(<td><a href={relatedFile['@id'] || ''}>{relatedFile.accession || relatedFile.uuid || relatedFile['@id']}</a></td>);
-                fileTwo.push(<td>{relatedFile.file_format}</td>);
-                fileTwo.push(<td></td>);
-            }
-        }
-        return(
-            <tbody>
-                <tr className='expset-sublist-entry'>
-                    {file['@id'] ?
-                        <td rowSpan="2" className="expset-exp-cell expset-checkbox-cell">
-                            <Checkbox validationState='warning' checked={this.state.checked} name="file-checkbox" id={fileID} className='expset-checkbox-sub' onChange={this.handleCheck}/>
-                        </td>
-                    : <td rowSpan="2"></td>
-                    }
-                    <td rowSpan="2" className="expset-exp-cell expset-exp-accession-title-cell">
-                        <a href={
-                            info['@id']  ? info['@id'] :
-                            info['accession'] ? '/experiments/' + info['accession'] :
-                            ''
-                        }>
-                            {info.accession || info.uuid}
-                        </a>
-                    </td>
-                    <td rowSpan="2" className="expset-exp-cell">
-                        <a href={info.biosample_id || ''}>
-                            {info.biosample}
-                        </a>
-                    </td>
-                    {(fileOne && fileOne[0]) ? fileOne[0] : null}
-                    {(fileOne && fileOne[1]) ? fileOne[1] : null}
-                    {(fileOne && fileOne[2]) ? fileOne[2] : null}
-                </tr>
-                {fileTwo ?
-                <tr>
-                    {fileTwo[0]}
-                    {fileTwo[1]}
-                    {fileTwo[2]}
-                </tr>
-                : null}
             </tbody>
         );
     }
@@ -782,35 +561,46 @@ var FacetList = browse.FacetList = React.createClass({
 
 var ColumnSorter = React.createClass({
 
-    runFxn: function(e){
+    sortClickFxn: function(e){
         e.preventDefault();
         var reverse = this.props.sortColumn === this.props.val;
-        this.props.fxn(this.props.val, reverse);
+        this.props.sortByFxn(this.props.val, reverse);
     },
 
     render: function(){
         // Make arrow black if selected; flip if sorting in ascending order
         var iconUsed = this.props.sortColumn === this.props.val ?
-            <a className="expset-column-sort-used" href="" onClick={this.runFxn}>
-                {this.props.descend ?
+            <a className="expset-column-sort-used" href="#" onClick={this.sortClickFxn}>
+                { this.props.descend ?
                     <i className="icon sbt-descend" style={{ transform: 'translateY(2px)' }}></i>
                     :
-                    <i className="icon sbt-ascend" style={{ transform: 'translateY(2px)' }}></i>}
+                    <i className="icon sbt-ascend" style={{ transform: 'translateY(2px)' }}></i>
+                }
             </a>
             :
-            <a className="expset-column-sort" href="" onClick={this.runFxn}>
+            <a className="expset-column-sort" href="" onClick={this.sortClickFxn}>
                 <i className="icon sbt-descend" style={{ transform: 'translateY(2px)' }}></i>
             </a>;
         return(
             <span>
-                <span>{this.props.val} </span>
-                {iconUsed}
+                <span>{this.props.val} </span> {iconUsed}
             </span>
         );
     }
 });
 
 var ResultTable = browse.ResultTable = React.createClass({
+    
+    propTypes : {       
+        // Props' type validation based on contents of this.props during render.
+        searchBase      : React.PropTypes.string,
+        restrictions    : React.PropTypes.object,
+        context         : React.PropTypes.object.isRequired,
+        expSetFilters   : React.PropTypes.object,
+        fileFormats     : React.PropTypes.array,
+        targetFiles     : React.PropTypes.instanceOf(Set),
+        onChange        : React.PropTypes.func.isRequired
+    },
 
     getInitialState: function(){
         return {
@@ -843,9 +633,9 @@ var ResultTable = browse.ResultTable = React.createClass({
 
     render: function() {
         var context = this.props.context;
-        console.log(context);
         var results = context['@graph'];
         var resultCount = results.length; // account for empty expt sets
+
         // use first experiment set to grap type (all types are the same in any given graph)
         var setType = results[0].experimentset_type;
         var targetFiles = this.props.targetFiles;
@@ -861,6 +651,7 @@ var ResultTable = browse.ResultTable = React.createClass({
             }
             return facet;
         }.bind(this));
+
         //find ignored filters
         var ignoredFilters = {};
         for(var i=0; i < facets.length; i++){
@@ -886,30 +677,44 @@ var ResultTable = browse.ResultTable = React.createClass({
             }
         }
         var passExperiments = siftExperiments(results, expSetFilters, ignoredFilters);
+        
         // Map view icons to svg icons
         var view2svg = {
             'table': 'table',
             'th': 'matrix'
         };
-        var resultListing = [];
+        
         var columnTemplate = expSetColumnLookup[setType] ? expSetColumnLookup[setType] : expSetColumnLookup['other'];
         var addInfoTemplate = expSetAdditionalInfo[setType] ? expSetAdditionalInfo[setType] : expSetAdditionalInfo['other'];
         var resultHeaders = Object.keys(columnTemplate).map(function(key){
-            var sorter = <ColumnSorter descend={this.state.sortReverse} sortColumn={this.state.sortColumn} fxn={this.sortBy} val={key}/>;
-            return(<th key={key}>{sorter}</th>);
+            return (
+                <th key={key}>
+                    <ColumnSorter 
+                        descend={this.state.sortReverse} 
+                        sortColumn={this.state.sortColumn} 
+                        sortByFxn={this.sortBy} 
+                        val={key}
+                    />
+                </th>
+            );
         }.bind(this));
+        
+        var resultListing = [];
         results.map(function (result) {
             var experimentArray = result.experiments_in_set;
             if(experimentArray.length == 0){
                 resultCount = resultCount - 1;
                 return; // ignore if no expts in the expt set
             }
-            var accession = result.accession ? result.accession : "Experiment set";
+
+            var accession = result.accession ? result.accession : "Experiment Set";
             var intersection = new Set(experimentArray.filter(x => passExperiments.has(x)));
             var href = result['@id'];
             var columns = {};
             var addInfo = {};
             var firstExp = experimentArray[0]; // use only for biological replicates
+
+            // Experiment Set Row Columns
             for (var i=0; i<Object.keys(columnTemplate).length;i++) {
                 if(Object.keys(columnTemplate)[i] === 'Exps'){
                     columns[Object.keys(columnTemplate)[i]] = experimentArray.length;
@@ -925,6 +730,8 @@ var ResultTable = browse.ResultTable = React.createClass({
                 }
                 columns[Object.keys(columnTemplate)[i]] = valueProbe;
             }
+
+            // Experiment Set Row Add'l Info (Lab, etc.)
             for (var i=0; i<Object.keys(addInfoTemplate).length;i++){
                 var splitFilters = addInfoTemplate[Object.keys(addInfoTemplate)[i]].split('.');
                 var valueProbe = firstExp;
@@ -933,6 +740,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                 }
                 addInfo[Object.keys(addInfoTemplate)[i]] = valueProbe;
             }
+
             if(intersection.size > 0){
                 var keyVal = "";
                 if(sortColumn){
@@ -952,6 +760,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                 );
             }
         });
+
         if(sortColumn){
             resultListing.sort(function(a,b){
                 if(Number.isInteger(parseInt(a.key.split('/')[0]))){
@@ -967,7 +776,7 @@ var ResultTable = browse.ResultTable = React.createClass({
         return (
             <div>
                 <div className="row">
-                    {facets.length ?
+                    { facets.length ?
                         <div className="col-sm-5 col-md-4 col-lg-3">
                             <FacetList
                                 {...this.props}
@@ -976,7 +785,10 @@ var ResultTable = browse.ResultTable = React.createClass({
                                 onFilter={this.onFilter}
                                 ignoredFilters={ignoredFilters}
                             />
-                        </div> : ''}
+                        </div> 
+                        : 
+                        null 
+                    }
                     <div className="expset-result-table-fix col-sm-7 col-md-8 col-lg-9">
                         <h5 className='browse-title'>Showing {resultListing.length} of {resultCount} experiment sets.</h5>
                         <div>
@@ -1142,6 +954,7 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
 });
 
 var Browse = browse.Browse = React.createClass({
+    
     contextTypes: {
         location_href: React.PropTypes.string,
         navigate: React.PropTypes.func
@@ -1177,17 +990,24 @@ var Browse = browse.Browse = React.createClass({
     render: function() {
         var context = this.props.context;
         var fileFormats = findFormats(context['@graph']);
+
         // no results found!
         if(context.total === 0 && context.notification){
             return <div className="error-page"><h4>{context.notification}</h4></div>
         }
         var results = context['@graph'];
         var searchBase = url.parse(this.context.location_href).search || '';
+
         // browse is only for experiment sets
         if(searchBase.indexOf('?type=ExperimentSet') === -1){
-            return(<div className="error-page">
-                        <h4><a href='/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all'>Only experiment sets may be browsed.</a></h4>
-                    </div>
+            return(
+                <div className="error-page">
+                    <h4>
+                        <a href='/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all'>
+                            Only experiment sets may be browsed.
+                        </a>
+                    </h4>
+                </div>
             );
         }
 
