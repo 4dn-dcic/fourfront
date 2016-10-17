@@ -382,8 +382,12 @@ var FileEntry = React.createClass({
                         </td>
                     : <td rowSpan="2"></td>
                     }
-                    <td rowSpan="2" className="expset-exp-cell">
-                        <a href={info['@id'] || ''}>
+                    <td rowSpan="2" className="expset-exp-cell expset-exp-accession-title-cell">
+                        <a href={
+                            info['@id']  ? info['@id'] :
+                            info['accession'] ? '/experiments/' + info['accession'] :
+                            ''
+                        }>
                             {info.accession || info.uuid}
                         </a>
                     </td>
