@@ -51,7 +51,7 @@ var IndeterminateCheckbox = React.createClass({
     }
 });
 
-var ExperimentSet = module.exports.ExperimentSet = React.createClass({
+var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
     getInitialState: function() {
     	return {
             open: false,
@@ -813,7 +813,7 @@ var ColumnSorter = React.createClass({
 var ResultTable = browse.ResultTable = React.createClass({
 
     getInitialState: function(){
-        return{
+        return {
             sortColumn: null,
             sortReverse: false
         }
@@ -827,12 +827,12 @@ var ResultTable = browse.ResultTable = React.createClass({
     },
 
     sortBy: function(key, reverse) {
-        if(reverse){
+        if (reverse) {
             this.setState({
                 sortColumn: key,
                 sortReverse: !this.state.sortReverse
             });
-        }else{
+        } else {
             this.setState({
                 sortColumn: key,
                 sortReverse: false
@@ -843,6 +843,7 @@ var ResultTable = browse.ResultTable = React.createClass({
 
     render: function() {
         var context = this.props.context;
+        console.log(context);
         var results = context['@graph'];
         var resultCount = results.length; // account for empty expt sets
         // use first experiment set to grap type (all types are the same in any given graph)
@@ -909,7 +910,7 @@ var ResultTable = browse.ResultTable = React.createClass({
             var columns = {};
             var addInfo = {};
             var firstExp = experimentArray[0]; // use only for biological replicates
-            for (var i=0; i<Object.keys(columnTemplate).length;i++){
+            for (var i=0; i<Object.keys(columnTemplate).length;i++) {
                 if(Object.keys(columnTemplate)[i] === 'Exps'){
                     columns[Object.keys(columnTemplate)[i]] = experimentArray.length;
                     continue;
@@ -937,7 +938,18 @@ var ResultTable = browse.ResultTable = React.createClass({
                 if(sortColumn){
                     keyVal = columns[sortColumn];
                 }
-                resultListing.push(<ExperimentSet addInfo={addInfo} columns={columns} expSetFilters={expSetFilters} targetFiles={targetFiles} href={href} experimentArray={experimentArray} passExperiments={intersection} key={keyVal+href} />);
+                resultListing.push(
+                    <ExperimentSetRow 
+                        addInfo={addInfo} 
+                        columns={columns} 
+                        expSetFilters={expSetFilters} 
+                        targetFiles={targetFiles} 
+                        href={href} 
+                        experimentArray={experimentArray} 
+                        passExperiments={intersection}
+                        key={keyVal+href} 
+                    />
+                );
             }
         });
         if(sortColumn){
