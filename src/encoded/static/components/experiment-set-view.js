@@ -1,7 +1,8 @@
 var React = require('react');
 var globals = require('./globals');
 var Panel = require('react-bootstrap').Panel;
-//var SubIPanel = require('./item').SubIPanel; //For some reason this doesn't work but the below does...
+//var SubIPanel = require('./item').SubIPanel; 
+//For some reason the above doesn't work but the below does...
 import { SubIPanel } from './item';
 
 /**
