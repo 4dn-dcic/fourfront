@@ -14,6 +14,9 @@ var _ = require('underscore');
  * of "selectedFiles" Set and "checked", for integration with other pages/UI.
  */
 
+// TODO (ideally): Functionality to customize columns (e.g. pass in a schema instead of list of 
+// column names, arrange fields appropriately under them).
+
 var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
     propTypes : {
