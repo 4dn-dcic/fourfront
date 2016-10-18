@@ -9,7 +9,6 @@ require('./globals');
 require('./home');
 require('./help');
 require('./about');
-require('./experiment-set-view');
 require('./item');
 require('./experiment-set-view');
 require('./user');
