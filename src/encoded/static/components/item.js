@@ -299,7 +299,7 @@ var Subview = React.createClass({
 });
 
 //Return the properties dictionary from a schema for use as tooltips
-var tipsFromSchema = function(schemas, content){
+var tipsFromSchema = module.exports.tipsFromSchema = function(schemas, content){
     var tips = {};
     if(content['@type']){
         var type = content['@type'][0];
@@ -348,7 +348,7 @@ var formValue = function (schemas, item) {
 
 // Display the item field with a tooltip showing the field description from
 // schema, if available
-var DescriptorField = React.createClass({
+var DescriptorField = module.exports.DescriptorField = React.createClass({
     propTypes: {
         field: React.PropTypes.string.isRequired,
         description: React.PropTypes.string.isRequired
