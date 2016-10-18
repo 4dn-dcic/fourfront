@@ -14,9 +14,6 @@ var _ = require('underscore');
  * of "selectedFiles" Set and "checked", for integration with other pages/UI.
  */
 
-// TODO (ideally): Functionality to customize columns (e.g. pass in a schema instead of list of 
-// column names, arrange fields appropriately under them).
-
 var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
     propTypes : {
@@ -207,6 +204,9 @@ var getFileDetailContainer = module.exports.getFileDetailContainer = function(ex
 
 var FileEntry = React.createClass({
 
+    // TODO (ideally): Functionality to customize columns (e.g. pass in a schema instead of list of 
+    // column names, arrange fields appropriately under them).
+
     getInitialState: function() {
         return {
             checked: true
@@ -274,19 +274,17 @@ var FileEntry = React.createClass({
                     f.push(<td><a href={file['@id'] || ''}>{file.accession || file.uuid || file['@id']}</a></td>);
                 }
 
+                if (!exists) { 
+                    f.push(<td></td>);
+                    continue;
+                }
+
                 if (columnHeadersShortened[i] == 'File Type'){
-                    if (!exists) { 
-                        f.push(<td></td>);
-                        continue;
-                    } 
                     f.push(<td>{file.file_format}</td>);
+                    continue;
                 }
 
                 if (columnHeadersShortened[i] == 'File Info'){
-                    if (!exists) { 
-                        f.push(<td></td>);
-                        continue;
-                    } 
                     if (paired) {
                         f.push(<td>Paired end {file.paired_end}</td>);
                     } else if (file.file_format === 'fastq' || file.file_format === 'fasta') {
@@ -294,6 +292,7 @@ var FileEntry = React.createClass({
                     } else {
                         f.push(<td></td>);
                     }
+                    continue;
                 }
             }
             return f;
