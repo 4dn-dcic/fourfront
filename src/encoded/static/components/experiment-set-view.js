@@ -2,6 +2,8 @@ var React = require('react');
 var globals = require('./globals');
 var Panel = require('react-bootstrap').Panel;
 var SubIPanel = require('./item').SubIPanel; 
+var DescriptorField = require('./item').DescriptorField; 
+var tipsFromSchema = require('./item').tipsFromSchema; 
 
 /**
  * Entire ExperimentSet page view.
@@ -11,18 +13,22 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
     render: function() {
         var itemClass = globals.itemClass(this.props.context, 'view-detail panel');
-        //var tips = tipsFromSchema(this.props.schemas, context);
+        console.log(this.props);
+        var tips = tipsFromSchema(this.props.schemas, this.props.context);
 
         return (
             <div className="item-page-container">
                 <h1 className="page-title">Experiment Set</h1>
                 <ExperimentSetHeader {...this.props} />
+                
                 <br/><br/>
+
                 <Panel className="data-display panel-body-with-header">
                     <dl className="key-value">
                         {Object.keys(this.props.context).sort().map((ikey, idx) =>
                             <div key={ikey} data-test="term-name">
-                                <dt>{ ikey }</dt>
+
+                                <DescriptorField field={ikey} description={tips[ikey] && tips[ikey].description ? tips[ikey].description : ''} />
                                 <dd>{ formValue(this.props.schemas, this.props.context[ikey]) }</dd>
                             </div>
                         )}
