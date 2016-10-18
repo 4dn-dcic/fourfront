@@ -21,6 +21,10 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                 <h1 className="page-title">Experiment Set</h1>
                 <ExperimentSetHeader {...this.props} />
                 
+                <div className="exp-table-container">
+                    {/* <ExperimentTable .. /> */}
+                </div>
+
                 <br/><br/>
 
                 <Panel className="data-display panel-body-with-header">
@@ -40,6 +44,9 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
     }
 
 });
+
+globals.panel_views.register(ExperimentSetView, 'ExperimentSet');
+
 
 var ExperimentSetHeader = React.createClass({
 
@@ -108,8 +115,6 @@ var ExperimentSetHeader = React.createClass({
         );
     }
 });
-
-globals.panel_views.register(ExperimentSetView, 'ExperimentSet');
 
 var formValue = function (schemas, item) {
     var toReturn = [];
