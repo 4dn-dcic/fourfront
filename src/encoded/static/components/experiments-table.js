@@ -37,8 +37,20 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         };
     },
 
+    fileDetailContainer : null,
+
+    componentWillMount : function(){
+        // Cache output for faster re-rendering (?)
+        this.fileDetailContainer = this.getFileDetailContainer();
+    },
+
+    componentWillUpdate : function(nextProps, nextState){
+        this.fileDetailContainer = this.getFileDetailContainer(nextProps);
+    },
+
     handleFileUpdate: function (uuid, add=true){
-        var newSet = this.state.selectedFiles;
+        
+        var newSet = this.props.parentController ? this.props.parentController.state.selectedFiles : this.state.selectedFiles;
         
         if(add){
             if(!newSet.has(uuid)){
@@ -61,17 +73,18 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         
     },
 
-    getFileDetailContainer : function(){
+    getFileDetailContainer : function(props = this.props){
         // Re-use if passed in by a parent as a prop, 
         // otherwise generate from experimentArray & passExperiments props.
-        if (this.props.fileDetailContainer) return this.props.fileDetailContainer; 
-        return getFileDetailContainer(this.props.experimentArray, this.props.passExperiments);
+        if (props.fileDetailContainer) { 
+            return props.fileDetailContainer; 
+        }
+        return getFileDetailContainer(props.experimentArray, props.passExperiments);
     },
 
     render : function(){
-        var fileDetailContainer = this.getFileDetailContainer();
-        var fileDetail = fileDetailContainer.fileDetail;
-        var emptyExps = fileDetailContainer.emptyExps;
+        var fileDetail = this.fileDetailContainer.fileDetail;
+        var emptyExps = this.fileDetailContainer.emptyExps;
 
         var formattedColumnHeaders = this.props.columnHeaders.map(function(columnTitle, i){
             return <th className="text-500" key={i}>{ columnTitle }</th>;
@@ -234,6 +247,7 @@ var FileEntry = React.createClass({
         //         });
         //     }
         // }
+
         if(this.props.parentChecked !== nextProps.parentChecked){
             this.setState({
                 checked: nextProps.parentChecked
@@ -242,9 +256,12 @@ var FileEntry = React.createClass({
     },
 
     // update parent checked state
-    componentDidUpdate(nextProps, nextState){
-        if((nextState.checked !== this.state.checked || !_.isEqual(this.props.expSetFilters, nextProps.expSetFilters)) && this.props.info.data){
-            this.props.handleFileUpdate(this.props.info.data.uuid, this.state.checked);
+    componentWillUpdate(nextProps, nextState){
+        if(
+            (nextState.checked !== this.state.checked || !_.isEqual(this.props.expSetFilters, nextProps.expSetFilters)) 
+            && nextProps.info.data
+        ){
+            this.props.handleFileUpdate(nextProps.info.data.uuid, nextState.checked);
         }
     },
 

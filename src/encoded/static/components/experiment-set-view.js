@@ -4,6 +4,7 @@ var Panel = require('react-bootstrap').Panel;
 var SubIPanel = require('./item').SubIPanel; 
 var DescriptorField = require('./item').DescriptorField; 
 var tipsFromSchema = require('./item').tipsFromSchema; 
+var ExperimentTable = require('./experiments-table');
 
 /**
  * Entire ExperimentSet page view.
@@ -11,13 +12,25 @@ var tipsFromSchema = require('./item').tipsFromSchema;
 
 var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
+    propTypes : {
+        schemas : React.PropTypes.object,
+        context : React.PropTypes.object
+        // Potential ToDo - custom validation for w/e key/vals the page needs.
+    },
+
+    componentWillMount : function(){
+        if (!this.tips) {
+            this.tips = tipsFromSchema(this.props.schemas, this.props.context);
+        }
+    },
+
+    tips : null, // Value assumed immutable so not in state.
+
     render: function() {
-        var itemClass = globals.itemClass(this.props.context, 'view-detail panel');
-        console.log(this.props);
-        var tips = tipsFromSchema(this.props.schemas, this.props.context);
+        var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container');
 
         return (
-            <div className="item-page-container">
+            <div className={itemClass}>
                 <h1 className="page-title">Experiment Set</h1>
                 <ExperimentSetHeader {...this.props} />
                 
@@ -32,7 +45,14 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                         {Object.keys(this.props.context).sort().map((ikey, idx) =>
                             <div key={ikey} data-test="term-name">
 
-                                <DescriptorField field={ikey} description={tips[ikey] && tips[ikey].description ? tips[ikey].description : ''} />
+                                <DescriptorField 
+                                    field={ikey} 
+                                    description={
+                                        this.tips[ikey] && this.tips[ikey].description ? 
+                                            this.tips[ikey].description : ''
+                                    } 
+                                />
+                                
                                 <dd>{ formValue(this.props.schemas, this.props.context[ikey]) }</dd>
                             </div>
                         )}

@@ -73,12 +73,29 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         };
     },
 
+    fileDetailContainer : null,
+
+    componentWillMount : function(){
+        // Cache to prevent re-executing on re-renders.
+        this.fileDetailContainer = getFileDetailContainer(this.props.experimentArray, this.props.passExperiments);
+    },
+
+    componentWillUpdate : function(nextProps, nextState){
+        if (nextProps.experimentArray !== this.props.experimentArray || nextProps.passExperiments !== this.props.passExperiments){
+            this.fileDetailContainer = getFileDetailContainer(nextProps.experimentArray, nextProps.passExperiments);
+        }
+
+        
+    },
+
     componentWillReceiveProps: function(nextProps) {
-        if(!_.isEqual(this.props.expSetFilters, nextProps.expSetFilters)){
+
+        if(this.props.expSetFilters !== nextProps.expSetFilters){
             this.setState({
                 selectedFiles: new Set()
             });
         }
+        
         // var newTargets = [];
         // for(var i=0; i<this.state.files.length; i++){
         //     if(nextProps.targetFiles.has(this.state.files[i].file_format)){
@@ -107,9 +124,8 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
 
     render: function() {
 
-        var fileDetailContainer = getFileDetailContainer(this.props.experimentArray, this.props.passExperiments);
-        var fileDetail = fileDetailContainer.fileDetail;
-        var emptyExps = fileDetailContainer.emptyExps;
+        var fileDetail = this.fileDetailContainer.fileDetail;
+        var emptyExps = this.fileDetailContainer.emptyExps;
 
         var files = Object.keys(fileDetail);
         // unused for now... when format selection is added back in, adapt code below:
@@ -180,8 +196,9 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                                     'File Type',
                                     'File Info'
                                 ]}
-                                fileDetailContainer={fileDetailContainer}
+                                fileDetailContainer={this.fileDetailContainer}
                                 parentController={this}
+                                expSetFilters={this.props.expSetFilters}
                             />
                         </Panel>
                     </td>
@@ -773,6 +790,7 @@ var ResultTable = browse.ResultTable = React.createClass({
         if(this.state.sortReverse){
             resultListing.reverse();
         }
+
         return (
             <div>
                 <div className="row">
@@ -964,7 +982,7 @@ var Browse = browse.Browse = React.createClass({
         // store currently selected filters as a dict of sets
         var tempObj = {};
         var newObj = {};
-        var expSet = this.props.expSetFilters[field] ? this.props.expSetFilters[field] : new Set();
+        var expSet = this.props.expSetFilters[field] ? new Set(this.props.expSetFilters[field]) : new Set();
         if(expSet.has(term)){
             // term is already present, so delete it
             expSet.delete(term);
