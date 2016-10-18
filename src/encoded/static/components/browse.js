@@ -648,19 +648,8 @@ var ResultTable = browse.ResultTable = React.createClass({
 
     },
 
-    render: function() {
-        var context = this.props.context;
-        var results = context['@graph'];
-        var resultCount = results.length; // account for empty expt sets
-
-        // use first experiment set to grap type (all types are the same in any given graph)
-        var setType = results[0].experimentset_type;
-        var targetFiles = this.props.targetFiles;
-        var total = context['total'];
-        var searchBase = this.props.searchBase;
-        var expSetFilters = this.props.expSetFilters;
-        var sortColumn = this.state.sortColumn;
-        var facets = context['facets'].map(function(facet) {
+    adjustedFacets : function(){
+        return this.props.context['facets'].map(function(facet){
             if (this.props.restrictions[facet.field] !== undefined) {
                 facet = _.clone(facet);
                 facet.restrictions = this.props.restrictions[facet.field];
@@ -668,15 +657,16 @@ var ResultTable = browse.ResultTable = React.createClass({
             }
             return facet;
         }.bind(this));
+    },
 
-        //find ignored filters
+    findIgnoredFilters : function(facets){
         var ignoredFilters = {};
         for(var i=0; i < facets.length; i++){
             var ignoredSet = new Set();
             var field = facets[i].field;
             var terms = facets[i].terms;
-            if(expSetFilters[field]){
-                for(let expFilter of expSetFilters[field]){
+            if(this.props.expSetFilters[field]){
+                for(let expFilter of this.props.expSetFilters[field]){
                     var found = false;
                     for(var j=0; j < terms.length; j++){
                         if(expFilter === terms[j].key){
@@ -693,40 +683,28 @@ var ResultTable = browse.ResultTable = React.createClass({
                 }
             }
         }
-        var passExperiments = siftExperiments(results, expSetFilters, ignoredFilters);
-        
-        // Map view icons to svg icons
-        var view2svg = {
-            'table': 'table',
-            'th': 'matrix'
-        };
-        
-        var columnTemplate = expSetColumnLookup[setType] ? expSetColumnLookup[setType] : expSetColumnLookup['other'];
-        var addInfoTemplate = expSetAdditionalInfo[setType] ? expSetAdditionalInfo[setType] : expSetAdditionalInfo['other'];
-        var resultHeaders = Object.keys(columnTemplate).map(function(key){
-            return (
-                <th key={key}>
-                    <ColumnSorter 
-                        descend={this.state.sortReverse} 
-                        sortColumn={this.state.sortColumn} 
-                        sortByFxn={this.sortBy} 
-                        val={key}
-                    />
-                </th>
-            );
-        }.bind(this));
-        
-        var resultListing = [];
-        results.map(function (result) {
+    },
+
+    totalResultCount : function(){
+        // account for empty expt sets
+        var resultCount = this.props.context['@graph'].length;
+        this.props.context['@graph'].map(function(r){
+            if (r.experiments_in_set == 0) resultCount--;
+        });
+        return resultCount;
+    },
+
+    formatExperimentSetListings : function(passExperiments, columnTemplate, addInfoTemplate){
+        var resultListings = [];
+        this.props.context['@graph'].map(function (result) {
             var experimentArray = result.experiments_in_set;
             if(experimentArray.length == 0){
-                resultCount = resultCount - 1;
+                //resultCount = resultCount - 1;
                 return; // ignore if no expts in the expt set
             }
 
             var accession = result.accession ? result.accession : "Experiment Set";
             var intersection = new Set(experimentArray.filter(x => passExperiments.has(x)));
-            var href = result['@id'];
             var columns = {};
             var addInfo = {};
             var firstExp = experimentArray[0]; // use only for biological replicates
@@ -760,26 +738,32 @@ var ResultTable = browse.ResultTable = React.createClass({
 
             if(intersection.size > 0){
                 var keyVal = "";
-                if(sortColumn){
-                    keyVal = columns[sortColumn];
+                if (this.state.sortColumn){
+                    keyVal = columns[this.state.sortColumn];
                 }
-                resultListing.push(
+                resultListings.push(
                     <ExperimentSetRow 
                         addInfo={addInfo} 
                         columns={columns} 
-                        expSetFilters={expSetFilters} 
-                        targetFiles={targetFiles} 
-                        href={href} 
+                        expSetFilters={this.props.expSetFilters} 
+                        targetFiles={this.props.targetFiles} 
+                        href={result['@id']} 
                         experimentArray={experimentArray} 
                         passExperiments={intersection}
-                        key={keyVal+href} 
+                        key={keyVal+result['@id']} 
                     />
                 );
             }
-        });
+        }.bind(this));
 
-        if(sortColumn){
-            resultListing.sort(function(a,b){
+        // Sort
+        if(this.state.sortColumn){
+            resultListings.sort(function(a,b){
+                if (this.state.sortReverse) {
+                    var b2 = b;
+                    b = a;
+                    a = b2;
+                }
                 if(Number.isInteger(parseInt(a.key.split('/')[0]))){
                     return(a.key.split('/')[0] - b.key.split('/')[0]);
                 }else{
@@ -787,9 +771,53 @@ var ResultTable = browse.ResultTable = React.createClass({
                 }
             });
         }
-        if(this.state.sortReverse){
-            resultListing.reverse();
-        }
+
+        return resultListings;
+    },
+
+    render: function() {
+        var results = this.props.context['@graph'];
+
+        // use first experiment set to grap type (all types are the same in any given graph)
+        var setType = results[0].experimentset_type;
+        var targetFiles = this.props.targetFiles;
+        var total = this.props.context['total'];
+        var searchBase = this.props.searchBase;
+        var expSetFilters = this.props.expSetFilters;
+        var sortColumn = this.state.sortColumn;
+        var facets = this.adjustedFacets();
+
+        //find ignored filters
+        var ignoredFilters = this.findIgnoredFilters(facets);
+        var passExperiments = siftExperiments(results, expSetFilters, ignoredFilters);
+        
+        // Map view icons to svg icons
+        var view2svg = {
+            'table': 'table',
+            'th': 'matrix'
+        };
+        
+        var columnTemplate = expSetColumnLookup[setType] ? expSetColumnLookup[setType] : expSetColumnLookup['other'];
+        var additionalInfoTemplate = expSetAdditionalInfo[setType] ? expSetAdditionalInfo[setType] : expSetAdditionalInfo['other'];
+
+        var resultHeaders = Object.keys(columnTemplate).map(function(key){
+            return (
+                <th key={key}>
+                    <ColumnSorter 
+                        descend={this.state.sortReverse} 
+                        sortColumn={this.state.sortColumn} 
+                        sortByFxn={this.sortBy} 
+                        val={key}
+                    />
+                </th>
+            );
+        }.bind(this));
+        
+        var formattedExperimentSetListings = this.formatExperimentSetListings(
+            passExperiments,
+            columnTemplate,
+            additionalInfoTemplate
+        );
 
         return (
             <div>
@@ -808,9 +836,9 @@ var ResultTable = browse.ResultTable = React.createClass({
                         null 
                     }
                     <div className="expset-result-table-fix col-sm-7 col-md-8 col-lg-9">
-                        <h5 className='browse-title'>Showing {resultListing.length} of {resultCount} experiment sets.</h5>
+                        <h5 className='browse-title'>Showing {formattedExperimentSetListings.length} of {this.totalResultCount()} experiment sets.</h5>
                         <div>
-                            { resultListing.length > 0 ?
+                            { formattedExperimentSetListings.length > 0 ?
                             <Table className="expset-table table-tbody-striped" bordered condensed id="result-table">
                                 <thead>
                                     <tr>
@@ -819,7 +847,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                                         { resultHeaders }
                                     </tr>
                                 </thead>
-                                { resultListing }
+                                { formattedExperimentSetListings }
                             </Table>
                             : <div></div> }
                         </div>
