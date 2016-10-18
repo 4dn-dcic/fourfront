@@ -97,6 +97,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                     key={fileDetail[file]['uuid'] + file} 
                     parentChecked={checked} 
                     handleFileUpdate={this.handleFileUpdate}
+                    columnHeaders={this.props.columnHeaders}
                 />
             );
         }.bind(this));
@@ -253,61 +254,99 @@ var FileEntry = React.createClass({
         });
     },
 
-    render: function(){
-        var file = this.props.info.data ? this.props.info.data : null;
-        var info = this.props.info;
-        var relationship = this.props.info.related ? this.props.info.related : null;
-        var relatedFile;
-        if(relationship){
-            relatedFile = this.props.info.related.data ? this.props.info.related.data : null;
-        }
+    fastQFilePairRow : function(file, relatedFile, columnsOffset = 3){
+
+        var columnHeadersShortened = this.props.columnHeaders.slice(columnsOffset);
+
         var fileOne;
         var fileTwo;
         var fileID;
+
+        function fillFileRow(file, paired, exists = true){
+            var f = [];
+            for (var i = 0; i < columnHeadersShortened.length; i++){
+
+                if (columnHeadersShortened[i] == 'File Accession'){
+                    if (!exists) { 
+                        f.push(<td>No files</td>);
+                        continue;
+                    } 
+                    f.push(<td><a href={file['@id'] || ''}>{file.accession || file.uuid || file['@id']}</a></td>);
+                }
+
+                if (columnHeadersShortened[i] == 'File Type'){
+                    if (!exists) { 
+                        f.push(<td></td>);
+                        continue;
+                    } 
+                    f.push(<td>{file.file_format}</td>);
+                }
+
+                if (columnHeadersShortened[i] == 'File Info'){
+                    if (!exists) { 
+                        f.push(<td></td>);
+                        continue;
+                    } 
+                    if (paired) {
+                        f.push(<td>Paired end {file.paired_end}</td>);
+                    } else if (file.file_format === 'fastq' || file.file_format === 'fasta') {
+                        f.push(<td>Unpaired</td>);
+                    } else {
+                        f.push(<td></td>);
+                    }
+                }
+            }
+            return f;
+        }
+
         // code embarrasingly specific to fastq file pairs
         if(file){
             if(file.paired_end && file.paired_end === '1'){
-                fileOne = [];
-                fileOne.push(<td><a href={file['@id'] || ''}>{file.accession || file.uuid || file['@id']}</a></td>);
-                fileOne.push(<td>{file.file_format}</td>);
-                fileOne.push(<td>Paired end {file.paired_end}</td>);
+                fileOne = fillFileRow(file, true, true);
             }else if(file.paired_end && file.paired_end === '2'){
-                fileTwo = [];
-                fileTwo.push(<td><a href={file['@id'] || ''}>{file.accession || file.uuid || file['@id']}</a></td>);
-                fileTwo.push(<td>{file.file_format}</td>);
-                fileTwo.push(<td>Paired end {file.paired_end}</td>);
+                fileTwo = fillFileRow(file, true, true);
             }else{
-                fileOne = [];
                 if(file['@id']){
-                    fileOne.push(<td><a href={file['@id'] || ''}>{file.accession || file.uuid || file['@id']}</a></td>);
-                    fileOne.push(<td>{file.file_format}</td>);
-                    fileOne.push(<td>{(file.file_format === 'fastq' || file.file_format === 'fasta') ? 'Unpaired' : ''}</td>);
+                    fileOne = fillFileRow(file, false, true);
                 }else{
-                    fileOne.push(<td>No files</td>);
-                    fileOne.push(<td></td>);
-                    fileOne.push(<td></td>);
+                    fileOne = fillFileRow(file, false, false);
                 }
             }
             fileID = this.state.checked + "~" + true + "~" + file.file_format + "~" + file.uuid;
         }
         if(relatedFile){
             if(relatedFile.paired_end && relatedFile.paired_end === '1'){
-                fileOne = [];
-                fileOne.push(<td><a href={relatedFile['@id'] || ''}>{relatedFile.accession || relatedFile.uuid || relatedFile['@id']}</a></td>);
-                fileOne.push(<td>{relatedFile.file_format}</td>);
-                fileOne.push(<td>Paired end {relatedFile.paired_end}</td>);
+                fileOne = fillFileRow(relatedFile, true, true);
             }else if(relatedFile.paired_end && relatedFile.paired_end === '2'){
-                fileTwo = [];
-                fileTwo.push(<td><a href={relatedFile['@id'] || ''}>{relatedFile.accession || relatedFile.uuid || relatedFile['@id']}</a></td>);
-                fileTwo.push(<td>{relatedFile.file_format}</td>);
-                fileTwo.push(<td>Paired end {relatedFile.paired_end}</td>);
+                fileTwo = fillFileRow(relatedFile, true, true);
             }else{
-                fileTwo = [];
-                fileTwo.push(<td><a href={relatedFile['@id'] || ''}>{relatedFile.accession || relatedFile.uuid || relatedFile['@id']}</a></td>);
-                fileTwo.push(<td>{relatedFile.file_format}</td>);
-                fileTwo.push(<td></td>);
+                fileTwo = fillFileRow(relatedFile, true, true);
             }
         }
+        return {
+            'fileOne' : fileOne,
+            'fileTwo' : fileTwo,
+            'fileID'  : fileID
+        }
+    },
+
+    render: function(){
+        var file = this.props.info.data ? this.props.info.data : null;
+        var info = this.props.info;
+        var relationship = this.props.info.related ? this.props.info.related : null;
+        var relatedFile;
+
+        if(relationship){
+            relatedFile = this.props.info.related.data ? this.props.info.related.data : null;
+        }
+
+        var fileInfo = this.fastQFilePairRow(file, relatedFile); 
+        // Maybe later can do like switch...case for which function to run (fastQFilePairRow or other)
+        // to fill fileInfo according to type of file or experiment type.
+        var fileOne = fileInfo.fileOne;
+        var fileTwo = fileInfo.fileTwo;
+        var fileID  = fileInfo.fileID; 
+        
         return(
             <tbody>
                 <tr className='expset-sublist-entry'>
