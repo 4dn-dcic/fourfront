@@ -15,7 +15,8 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
     getInitialState : function(){
         return {
-            selectedFiles: new Set()
+            selectedFiles: new Set(),
+            checked : true
         };
     },
 
@@ -37,51 +38,54 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
             this.fileDetailContainer = getFileDetailContainer(this.props.context.experiments_in_set);
         }
         if (!this.labDetails) {
-            this.labDetails = this.getLabDetails();
+            this.labDetails = this.getLinkedPropertyDetailsFromExperiments('lab');
+        }
+        if (!this.awardDetails) {
+            this.awardDetails = this.getLinkedPropertyDetailsFromExperiments('award');
         }
     },
 
     /**
-     * Using similar approach(es) as browse.js to grab lab from experiments_in_set.
-     * Grabs lab from sub-experiment(s) rather than embedding in own JSON output
-     * to keep size of ExperimentSets down as can't remove experiments_in_set.lab
+     * Using similar approach(es) as browse.js to grab property details from experiments_in_set.
+     * Grabs property detail object from sub-experiment(s) rather than embedding in own JSON output
+     * to keep size of ExperimentSets down as can't remove (for example) experiments_in_set.lab
      * from encoded/types/experiment.py > ExperimentSet as it'd affect Browse page
      * experiment filtering & view.
      */
-    getLabDetails : function(){
-        if (typeof this.props.context.lab == 'object' && this.props.context.lab.city && this.props.context.country){
-            // We have lab embedded, lets use it.
-            return this.props.context.lab;
+    getLinkedPropertyDetailsFromExperiments : function(propertyName){
+        if (typeof this.props.context[propertyName] == 'object'){
+            // We have property already embedded as object, lets use it.
+            return this.props.context[propertyName];
         }
 
         // Else, grab from experiment(s) and make sure it is a match.
-        var experiments = this.props.context.experiments_in_set, labID, labInfo = null;
-        if (typeof this.props.context.lab == 'string') { 
-            labID = this.props.context.lab; 
+        var experiments = this.props.context.experiments_in_set, propertyID, propertyInfo = null;
+        if (typeof this.props.context[propertyName] == 'string') { 
+            propertyID = this.props.context[propertyName]; 
         }
 
         for (var i = 0; i < experiments.length; i++){
-            if (!labID){
-                // Fallback : set lab from first experiments' lab if no lab ID in expset.
-                // + Confirm they all match.
+            if (!propertyID){
+                // Fallback : set property from first experiments if no ID in expset.
+                // Then confirm they all match.
                 if (i == 0) {
-                    labInfo = experiments[i].lab; 
+                    propertyInfo = experiments[i][propertyName]; 
                     continue;
-                } else if (experiments[i].lab['@id'] == labInfo['@id']) {
+                } else if (experiments[i][propertyName]['@id'] == propertyInfo['@id']) {
                     continue; // We're ok.
                 } else {
-                    throw new Error("Lab IDs in experiments of ExperimentSet " + this.props.context.accession + " do not all match.");
+                    throw new Error(propertyName + " IDs in experiments of ExperimentSet " + this.props.context.accession + " do not all match.");
                 }
             }
 
-            // If we have lab ID from ExperimentSet, just grab first lab info with matching ID.
-            if (labID == experiments[i].lab['@id']) {
-                labInfo = experiments[i].lab;
+            // If we have property ID from ExperimentSet, just grab first property info with matching ID.
+            if (propertyID == experiments[i][propertyName]['@id']) {
+                propertyInfo = experiments[i][propertyName];
                 break;
             }
         }
 
-        return labInfo;
+        return propertyInfo;
 
     },
 
@@ -91,6 +95,8 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
     render: function() {
         
+        console.log(this.labDetails);
+
         var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container experiment-set-page');
 
         var descriptionBlock = null;
