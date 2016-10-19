@@ -13,22 +13,23 @@ var getFileDetailContainer = require('./experiments-table').getFileDetailContain
 
 var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
-    getInitialState : function(){
-        return {
-            selectedFiles: new Set(),
-            checked : true
-        };
-    },
-
     propTypes : {
         schemas : React.PropTypes.object,
         context : React.PropTypes.object
         // Potential ToDo - custom validation for w/e key/vals the page needs.
     },
 
+    getInitialState : function(){
+        return {
+            selectedFiles: new Set(),
+            checked : true,
+            details_award : null,
+            details_lab : null
+        };
+    },
+
     tips : null, // Value assumed immutable so not in state.
     fileDetailContainer : null,
-    labDetails : null,
 
     componentWillMount : function(){
         if (!this.tips) {
@@ -37,11 +38,22 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         if (!this.fileDetailContainer) {
             this.fileDetailContainer = getFileDetailContainer(this.props.context.experiments_in_set);
         }
-        if (!this.labDetails) {
-            this.labDetails = this.getLinkedPropertyDetailsFromExperiments('lab');
+
+        if (!this.state.details_lab) {
+            var labDetails = this.getLinkedPropertyDetailsFromExperiments('lab', true);
+            if (labDetails){
+                this.setState({
+                    details_lab : labDetails
+                });
+            }
         }
-        if (!this.awardDetails) {
-            this.awardDetails = this.getLinkedPropertyDetailsFromExperiments('award');
+        if (!this.state.details_award) {
+            var awardDetails = this.getLinkedPropertyDetailsFromExperiments('award', true);
+            if (awardDetails){
+                this.setState({
+                    details_award : awardDetails
+                });
+            }
         }
     },
 
@@ -52,62 +64,82 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
      * from encoded/types/experiment.py > ExperimentSet as it'd affect Browse page
      * experiment filtering & view.
      */
-    getLinkedPropertyDetailsFromExperiments : function(propertyName){
-        if (typeof this.props.context[propertyName] == 'object'){
-            // We have property already embedded as object, lets use it.
-            return this.props.context[propertyName];
-        }
+    getLinkedPropertyDetailsFromExperiments : function(propertyName, allowAjaxFallback = false){
+
+        if (!this.props.context[propertyName]) return null;
+
+        // If we have property already embedded as object, lets use it.
+        if (typeof this.props.context[propertyName] == 'object') return this.props.context[propertyName];
+
 
         // Else, grab from experiment(s) and make sure it is a match.
-        var experiments = this.props.context.experiments_in_set, propertyID, propertyInfo = null;
+        var experiments = this.props.context.experiments_in_set,
+            propertyID = null,
+            propertyInfo = null;
+
         if (typeof this.props.context[propertyName] == 'string') { 
             propertyID = this.props.context[propertyName]; 
         }
 
         for (var i = 0; i < experiments.length; i++){
-            if (!propertyID){
-                // Fallback : set property from first experiments if no ID in expset.
-                // Then confirm they all match.
+
+            // If we have property ID from ExperimentSet, just grab first property info with matching ID.
+            if (propertyID && propertyID == experiments[i][propertyName]['@id']) {
+                propertyInfo = experiments[i][propertyName];
+                break;
+            } else if (!propertyID){
+                // Fallback : set property from first experiment if no ID in expset.
+                // Then confirm all other experiments match first experiment's ID.
                 if (i == 0) {
                     propertyInfo = experiments[i][propertyName]; 
                     continue;
                 } else if (experiments[i][propertyName]['@id'] == propertyInfo['@id']) {
-                    continue; // We're ok.
+                    continue; // Good.
                 } else {
-                    throw new Error(propertyName + " IDs in experiments of ExperimentSet " + this.props.context.accession + " do not all match.");
+                    //throw new Error(propertyName + " IDs in experiments of ExperimentSet " + this.props.context.accession + " do not all match.");
+                    return null;
                 }
             }
 
-            // If we have property ID from ExperimentSet, just grab first property info with matching ID.
-            if (propertyID == experiments[i][propertyName]['@id']) {
-                propertyInfo = experiments[i][propertyName];
-                break;
-            }
+        }
+
+        // Uh-oh! ExperimentSet award exists but doesn't match that of any experiments'.
+        // Perhaps fallback to using AJAX. Lol.
+        if (propertyID && !propertyInfo && allowAjaxFallback) {
+        //    throw new Error(propertyName + " " + propertyID + " not found in ExperimentSet " + this.props.context.accession + " experiments.");
+            var newStateAddition = {};
+            newStateAddition['details_' + propertyName] = null;
+            this.setState(newStateAddition);
+            
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function() {
+                if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+                    if (xmlhttp.status == 200) {
+                        newStateAddition = {};
+                        newStateAddition['details_' + propertyName] = JSON.parse(xmlhttp.responseText);
+                        this.setState(newStateAddition);
+                        // Low priority ToDo: 
+                        // Replace this success block w/ optional callback function parameter and remove reliance
+                        // on 'this' var so can export function from component to use on other pages if needed.
+                    } else if (xmlhttp.status == 400) {
+                        console.error('There was an error 400');
+                    } else {
+                        console.error('something else other than 200 was returned');
+                    }
+                }
+            }.bind(this);
+
+            xmlhttp.open("GET", propertyID + '?format=json', true);
+            xmlhttp.send();
         }
 
         return propertyInfo;
 
     },
 
-    componentWillUpdate : function(nextProps, nextState){
-        //console.log(nextState.selectedFiles); // Working
-    },
-
     render: function() {
         
-        console.log(this.labDetails);
-
         var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container experiment-set-page');
-
-        var descriptionBlock = null;
-        if (this.props.context.description){
-            descriptionBlock = (
-                <div className="col-sm-4 description-container">
-                    <strong>Description</strong>
-                    <p>{ this.props.context.description }</p>
-                </div>
-            );
-        }
 
         return (
             <div className={itemClass}>
@@ -115,12 +147,11 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
                 <ExperimentSetHeader {...this.props} />
                 
-                <div className="row info-area">
-                    { descriptionBlock }
-                    <div className={"col-sm-8 right" + (descriptionBlock ? '' : 'col-sm-offset-4' ) }>
-                        <p>Award & Lab info will go here.</p>
-                    </div>
-                </div>
+                <ExperimentSetInfoBlock 
+                    labInfo={ this.state.details_lab }
+                    awardInfo={ this.state.details_award }
+                    {...this.props} 
+                />
 
                 <div className="exp-table-container">
                     <ExperimentsTable 
@@ -234,6 +265,108 @@ var ExperimentSetHeader = React.createClass({
             </div>
         );
     }
+});
+
+
+var ExperimentSetInfoBlock = React.createClass({
+
+    componentWillMount: function(){
+        
+    },
+
+    componentWillUpdate : function(nextProps, nextState){
+
+    },
+
+    formattedDescriptionBlock: function(){
+        if (!this.props.context.description) return null;
+        return (
+            <div className="col-sm-4 description-container">
+                <strong>Description</strong>
+                <p>{ this.props.context.description }</p>
+            </div>
+        );
+    },
+
+    formattedLabInfoBlock : function(){
+        if (!this.props.labInfo) return null;
+        var labInfo = this.props.labInfo;
+        return (
+            <div className="col-sm-6 col-sm-float-right">
+                <div className="info-panel lab">
+
+                    <div className="row">
+                        <div className="col-xs-2 icon-container">
+                            <i className="ss-measuringcup icon"></i>
+                        </div>
+                        <div className="col-xs-10">
+                            <h5>
+                                <a href={ labInfo['@id'] || '#' }>{ labInfo.title }</a>
+                            </h5>
+                            <div className="address">
+                                { 
+                                    labInfo.city + 
+                                    (labInfo.state ? ', ' + labInfo.state : '') + 
+                                    (labInfo.postal_code ? ' ' + labInfo.postal_code : '' ) +
+                                    (labInfo.country ? ', ' + labInfo.country : '')
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        );
+    },
+
+    formattedAwardInfoBlock : function(){
+        if (!this.props.awardInfo) return null;
+        var awardInfo = this.props.awardInfo;
+        return (
+            <div className="col-sm-6 col-sm-float-right">
+                <div className="info-panel award">
+                
+                    <div className="row">
+                        <div className="col-xs-2 icon-container">
+                            <i className="ss-tag icon"></i>
+                        </div>
+                        <div className="col-xs-10">
+                            <h5>
+                                <a href={ awardInfo['@id'] || '#' }>{ awardInfo.title }</a>
+                            </h5>
+                            <div className="address">
+                                TEST
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        );
+    },
+
+    render : function(){
+        var labInfo = this.formattedLabInfoBlock(),
+            awardInfo = this.formattedAwardInfoBlock(),
+            descriptionBlock = this.formattedDescriptionBlock();
+
+        return (
+            <div className="row info-area">
+                { descriptionBlock }
+                <div className={"col-sm-8 " + (descriptionBlock ? '' : 'col-sm-offset-4' ) }>
+                    <div className="row">
+                        
+                        { labInfo }
+                        { awardInfo }
+
+                    </div>
+
+                </div>
+            </div>
+        );
+
+    }
+
 });
 
 var formValue = function (schemas, item) {
