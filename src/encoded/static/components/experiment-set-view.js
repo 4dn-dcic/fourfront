@@ -34,12 +34,16 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         }
     },
 
+    componentWillUpdate : function(nextProps, nextState){
+        //console.log(nextState.selectedFiles); // Working
+    },
+
     tips : null, // Value assumed immutable so not in state.
     fileDetailContainer : null,
 
     render: function() {
         
-        var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container');
+        var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container experiment-set-page');
         var descriptionBlock = null;
         if (this.props.context.description){
             descriptionBlock = (
@@ -53,17 +57,15 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         return (
             <div className={itemClass}>
                 <h1 className="page-title">Experiment Set</h1>
-                <ExperimentSetHeader {...this.props} />
-                <hr/>
 
-                <div className="row">
+                <ExperimentSetHeader {...this.props} />
+                
+                <div className="row info-area">
                     { descriptionBlock }
                     <div className={"col-sm-8 right" + (descriptionBlock ? '' : 'col-sm-offset-4' ) }>
                         <p>Award & Lab info will go here.</p>
                     </div>
                 </div>
-
-                
 
                 <div className="exp-table-container">
                     <ExperimentsTable 

@@ -246,6 +246,29 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 }
 
+.item-page-heading {
+	/* Extending Bootstrap's .flexcol-heading */
+	border-radius: 3px;
+	margin-left: 0;
+	margin-right: 0;
+	box-sizing: border-box;
+	border: 1px solid #e0e0e0;
+	min-height: 42px;
+
+	h4 {
+
+		font-weight: 500;
+
+		small {
+			vertical-align: top;
+			line-height: inherit;
+			letter-spacing: normal;
+		}
+
+	}
+
+}
+
 .set-type-indicators {
 
 	margin-top: 8px;
@@ -292,27 +315,10 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 }
 
-.item-page-heading {
-	/* Extending Bootstrap's .flexcol-heading */
-	border-radius: 3px;
-	margin-left: 0;
-	margin-right: 0;
-	box-sizing: border-box;
-	border: 1px solid #e0e0e0;
-	min-height: 42px;
 
-	h4 {
-
-		font-weight: 500;
-
-		small {
-			vertical-align: top;
-			line-height: inherit;
-			letter-spacing: normal;
-		}
-
-	}
-
+.item-page-container .info-area {
+	margin-top: 18px;
+	margin-bottom: 10px;
 }
 
 
