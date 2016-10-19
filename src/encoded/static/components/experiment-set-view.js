@@ -25,6 +25,10 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         // Potential ToDo - custom validation for w/e key/vals the page needs.
     },
 
+    tips : null, // Value assumed immutable so not in state.
+    fileDetailContainer : null,
+    labDetails : null,
+
     componentWillMount : function(){
         if (!this.tips) {
             this.tips = tipsFromSchema(this.props.schemas, this.props.context);
@@ -32,18 +36,63 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         if (!this.fileDetailContainer) {
             this.fileDetailContainer = getFileDetailContainer(this.props.context.experiments_in_set);
         }
+        if (!this.labDetails) {
+            this.labDetails = this.getLabDetails();
+        }
+    },
+
+    /**
+     * Using similar approach(es) as browse.js to grab lab from experiments_in_set.
+     * Grabs lab from sub-experiment(s) rather than embedding in own JSON output
+     * to keep size of ExperimentSets down as can't remove experiments_in_set.lab
+     * from encoded/types/experiment.py > ExperimentSet as it'd affect Browse page
+     * experiment filtering & view.
+     */
+    getLabDetails : function(){
+        if (typeof this.props.context.lab == 'object' && this.props.context.lab.city && this.props.context.country){
+            // We have lab embedded, lets use it.
+            return this.props.context.lab;
+        }
+
+        // Else, grab from experiment(s) and make sure it is a match.
+        var experiments = this.props.context.experiments_in_set, labID, labInfo = null;
+        if (typeof this.props.context.lab == 'string') { 
+            labID = this.props.context.lab; 
+        }
+
+        for (var i = 0; i < experiments.length; i++){
+            if (!labID){
+                // Fallback : set lab from first experiments' lab if no lab ID in expset.
+                // + Confirm they all match.
+                if (i == 0) {
+                    labInfo = experiments[i].lab; 
+                    continue;
+                } else if (experiments[i].lab['@id'] == labInfo['@id']) {
+                    continue; // We're ok.
+                } else {
+                    throw new Error("Lab IDs in experiments of ExperimentSet " + this.props.context.accession + " do not all match.");
+                }
+            }
+
+            // If we have lab ID from ExperimentSet, just grab first lab info with matching ID.
+            if (labID == experiments[i].lab['@id']) {
+                labInfo = experiments[i].lab;
+                break;
+            }
+        }
+
+        return labInfo;
+
     },
 
     componentWillUpdate : function(nextProps, nextState){
         //console.log(nextState.selectedFiles); // Working
     },
 
-    tips : null, // Value assumed immutable so not in state.
-    fileDetailContainer : null,
-
     render: function() {
         
         var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container experiment-set-page');
+
         var descriptionBlock = null;
         if (this.props.context.description){
             descriptionBlock = (

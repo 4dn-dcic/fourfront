@@ -18,7 +18,8 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
     propTypes : {
         columnHeaders : React.PropTypes.array.isRequired,
-        experimentArray : React.PropTypes.array.isRequired,
+        experimentArray : React.PropTypes.array,
+        fileDetailContainer : React.PropTypes.object,
         passExperiments : React.PropTypes.instanceOf(Set),
         expSetFilters : React.PropTypes.instanceOf(Set),
         parentController : function(props, propName, componentName){
