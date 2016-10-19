@@ -4,13 +4,20 @@ var Panel = require('react-bootstrap').Panel;
 var SubIPanel = require('./item').SubIPanel; 
 var DescriptorField = require('./item').DescriptorField; 
 var tipsFromSchema = require('./item').tipsFromSchema; 
-var ExperimentTable = require('./experiments-table');
+var ExperimentsTable = require('./experiments-table').ExperimentsTable;
+var getFileDetailContainer = require('./experiments-table').getFileDetailContainer;
 
 /**
  * Entire ExperimentSet page view.
  */
 
 var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
+
+    getInitialState : function(){
+        return {
+            selectedFiles: new Set()
+        };
+    },
 
     propTypes : {
         schemas : React.PropTypes.object,
@@ -22,20 +29,36 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         if (!this.tips) {
             this.tips = tipsFromSchema(this.props.schemas, this.props.context);
         }
+        if (!this.fileDetailContainer) {
+            this.fileDetailContainer = getFileDetailContainer(this.props.context.experiments_in_set);
+        }
     },
 
     tips : null, // Value assumed immutable so not in state.
+    fileDetailContainer : null,
 
     render: function() {
+        
         var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container');
 
         return (
             <div className={itemClass}>
                 <h1 className="page-title">Experiment Set</h1>
                 <ExperimentSetHeader {...this.props} />
-                
+                <br /><br />
                 <div className="exp-table-container">
-                    {/* <ExperimentTable .. /> */}
+                    <ExperimentsTable 
+                        columnHeaders={[ 
+                            null, 
+                            'Experiment Accession', 
+                            'Biosample Accession',
+                            'File Accession', 
+                            'File Type',
+                            'File Info'
+                        ]}
+                        fileDetailContainer={this.fileDetailContainer}
+                        parentController={this}
+                    />
                 </div>
 
                 <br/><br/>
