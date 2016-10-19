@@ -228,18 +228,18 @@ var FileEntry = React.createClass({
 
     getInitialState: function() {
         return {
-            checked: true
+            checked: this.props.parentChecked
         };
     },
 
-    // initial checkbox setting
+    // initial checkbox setting if parent is checked
     componentWillMount: function(){
         // if(this.props.exptPassed && _.contains(this.props.filteredFiles, this.props.file.uuid)){
         //     this.setState({
         //         checked: true
         //     });
         // }
-        if(this.props.info.data && typeof this.props.handleFileUpdate == 'function'){
+        if(this.props.info.data && this.state.checked && typeof this.props.handleFileUpdate == 'function'){
             this.props.handleFileUpdate(this.props.info.data.uuid, true);
         }
     },
