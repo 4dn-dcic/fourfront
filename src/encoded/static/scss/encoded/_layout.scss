@@ -180,24 +180,19 @@ h1.page-title + .page-subtitle {
 	margin-right: -10px;
 }
 
-.text-capitalize {
-	// Same class as Bootstrap (in newer version of it?)
-	text-transform: capitalize;
-}
+.text-capitalize 	{ text-transform: capitalize; } // Same class as Bootstrap (in newer version of it?)
+.text-uppercase 	{ text-transform: uppercase; }
+.text-justify 		{ text-align: justify; }
 
-.text-uppercase {
-	text-transform: uppercase;
-}
-
-.text-justify {
-	text-align: justify;
-}
 
 .text-200 { font-weight: 200; }
 .text-300 { font-weight: 300; }
 .text-400 { font-weight: 400; }
 .text-500 { font-weight: 500; }
 .text-600 { font-weight: 600; }
+
+.left { float: left; }
+.right { float: right; }
 
 @media screen and (max-width: 767px){
 

@@ -40,12 +40,31 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
     render: function() {
         
         var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container');
+        var descriptionBlock = null;
+        if (this.props.context.description){
+            descriptionBlock = (
+                <div className="col-sm-4 description-container">
+                    <strong>Description</strong>
+                    <p>{ this.props.context.description }</p>
+                </div>
+            );
+        }
 
         return (
             <div className={itemClass}>
                 <h1 className="page-title">Experiment Set</h1>
                 <ExperimentSetHeader {...this.props} />
-                <br /><br />
+                <hr/>
+
+                <div className="row">
+                    { descriptionBlock }
+                    <div className={"col-sm-8 right" + (descriptionBlock ? '' : 'col-sm-offset-4' ) }>
+                        <p>Award & Lab info will go here.</p>
+                    </div>
+                </div>
+
+                
+
                 <div className="exp-table-container">
                     <ExperimentsTable 
                         columnHeaders={[ 
@@ -62,6 +81,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                 </div>
 
                 <br/><br/>
+                <p>Existing Print-out:</p>
 
                 <Panel className="data-display panel-body-with-header">
                     <dl className="key-value">
@@ -151,7 +171,7 @@ var ExperimentSetHeader = React.createClass({
 
                 <div className="row clearfix bottom-row">
                     <div className="col-sm-6 item-label-extra set-type-indicators">{ this.parsedExperimentSetType() }</div>
-                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra">{ this.parsedCreationDate() }</h5>
+                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra" title="Date Created">{ this.parsedCreationDate() }</h5>
                 </div>
 
             </div>
