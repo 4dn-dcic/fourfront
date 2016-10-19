@@ -60,7 +60,7 @@ def static_resources(config):
         return response
 
     config.add_view(favicon, route_name='favicon.ico')
-    
+
     # Robots.txt
     robots_txt_path_prefix = '/static/'
     if config.route_prefix:
