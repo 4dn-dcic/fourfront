@@ -18,8 +18,9 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
     propTypes : {
         columnHeaders : React.PropTypes.array.isRequired,
+        experimentArray : React.PropTypes.array.isRequired,
         passExperiments : React.PropTypes.instanceOf(Set),
-        experimentArray : React.PropTypes.array,
+        expSetFilters : React.PropTypes.instanceOf(Set),
         parentController : function(props, propName, componentName){
             // Custom validation
             if (props[propName] && 
@@ -102,7 +103,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         var childFileEntryRows = Object.keys(fileDetail).map(function (file) {
             return (
                 <FileEntry 
-                    expSetFilters={this.props.expSetFilters} 
+                    expSetFilters={this.props.expSetFilters || null} 
                     info={fileDetail[file]} 
                     key={fileDetail[file]['uuid'] + file} 
                     parentChecked={checked} 
@@ -133,15 +134,19 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
 /**
  * Returns an object containing fileDetail and emptyExps.
+ * 
+ * @param {Object[]} experimentArray - Array of experiments in set. Required.
+ * @param {Set} [passedExperiments=null] - Set of experiments which match filter(s).
+ * @return {Object} JS object containing two keys with arrays: 'fileDetail' of experiments with formatted details and 'emptyExps' with experiments with no files.
  */
 
-var getFileDetailContainer = module.exports.getFileDetailContainer = function(experimentArray, passedExperiments){
+var getFileDetailContainer = module.exports.getFileDetailContainer = function(experimentArray, passedExperiments = null){
 
     var fileDetail = {}; //use @id field as key
     var emptyExps = [];
 
     for (var i=0; i<experimentArray.length; i++){
-        if(passedExperiments.has(experimentArray[i])){
+        if(passedExperiments == null || passedExperiments.has(experimentArray[i])){
             var tempFiles = [];
             var biosample_accession = experimentArray[i].biosample ? experimentArray[i].biosample.accession : null;
             var biosample_id = biosample_accession ? experimentArray[i].biosample['@id'] : null;
@@ -233,7 +238,7 @@ var FileEntry = React.createClass({
         //         checked: true
         //     });
         // }
-        if(this.props.info.data){
+        if(this.props.info.data && typeof this.props.handleFileUpdate == 'function'){
             this.props.handleFileUpdate(this.props.info.data.uuid, true);
         }
     },
@@ -258,7 +263,7 @@ var FileEntry = React.createClass({
     // update parent checked state
     componentWillUpdate(nextProps, nextState){
         if(
-            (nextState.checked !== this.state.checked || !_.isEqual(this.props.expSetFilters, nextProps.expSetFilters)) 
+            (nextState.checked !== this.state.checked || this.props.expSetFilters !== nextProps.expSetFilters) 
             && nextProps.info.data
         ){
             this.props.handleFileUpdate(nextProps.info.data.uuid, nextState.checked);
@@ -347,13 +352,13 @@ var FileEntry = React.createClass({
     },
 
     render: function(){
-        var file = this.props.info.data ? this.props.info.data : null;
         var info = this.props.info;
-        var relationship = this.props.info.related ? this.props.info.related : null;
-        var relatedFile;
+        var file = info.data ? info.data : null;
+        var relationship = info.related ? info.related : null;
+        var relatedFile = null;
 
-        if(relationship){
-            relatedFile = this.props.info.related.data ? this.props.info.related.data : null;
+        if(relationship && relationship.data){
+            relatedFile = relationship.data;
         }
 
         var fileInfo = this.fastQFilePairRow(file, relatedFile); 
