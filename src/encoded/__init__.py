@@ -80,7 +80,6 @@ def static_resources(config):
 
     config.add_view(robots_txt, route_name='robots.txt')
 
-    
 
 
 def changelogs(config):
