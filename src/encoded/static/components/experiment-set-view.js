@@ -63,6 +63,10 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
      * to keep size of ExperimentSets down as can't remove (for example) experiments_in_set.lab
      * from encoded/types/experiment.py > ExperimentSet as it'd affect Browse page
      * experiment filtering & view.
+     * 
+     * @param {string} propertyName - Name of property/key in schema for which to get details.
+     * @param {boolean} allowAjaxFallback - Whether to start an AJAX request to fetch details if they are not in experiment(s).
+     * @return {Object} Details for the property/key supplied, or null if not available or not matched. 
      */
     getLinkedPropertyDetailsFromExperiments : function(propertyName, allowAjaxFallback = false){
 
@@ -368,6 +372,14 @@ var ExperimentSetInfoBlock = React.createClass({
     }
 
 });
+
+/**
+ * Recursively render keys/values included in a provided item.
+ * Wraps URLs/paths in link elements. Sub-panels for objects.
+ * 
+ * @param {Object} schemas - Object containing schemas for server's JSONized object output.
+ * @param {*|*[]} item - Item(s) to render recursively.
+ */
 
 var formValue = function (schemas, item) {
     var toReturn = [];
