@@ -56,3 +56,10 @@ class Lab(Item):
         'revoked': ALLOW_EVERYONE_VIEW,
         'inactive': ALLOW_EVERYONE_VIEW,
     }
+
+    def __ac_local_roles__(self):
+        """this creates roles that the lab item needs so it can be edited"""
+        roles = {}
+        lab_submitters = 'submits_for.%s' % self.uuid
+        roles[lab_submitters] = 'role.lab_submitter'
+        return roles

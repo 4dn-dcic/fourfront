@@ -298,6 +298,14 @@ def file_item(award, lab):
     }
 
 
+@pytest.fixture
+def lab_item(lab):
+    return {
+        'name': 'test-lab',
+        'title': 'test lab',
+    }
+
+
 def test_submitter_cannot_view_ownitem(ind_human_item, submitter_testapp, wrangler_testapp):
     statuses = ['deleted']
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
@@ -496,3 +504,30 @@ def test_non_member_cannot_view_submitter_file(file_item, submitter_testapp, wra
     for status in statuses:
         wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
         remc_member_testapp.get(res.json['@graph'][0]['@id'], status=403)
+
+
+def test_everyone_can_view_lab_item(lab_item, submitter_testapp, wrangler_testapp, remc_member_testapp):
+    statuses = ['current', 'revoked', 'inactive']
+    apps = [submitter_testapp, wrangler_testapp, remc_member_testapp]
+    res = wrangler_testapp.post_json('/lab', lab_item, status=201)
+    for status in statuses:
+        wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": status}, status=200)
+        for app in apps:
+            app.get(res.json['@graph'][0]['@id'], status=200)
+
+
+def test_noone_can_view_deleted_lab_item(lab_item, submitter_testapp, wrangler_testapp, remc_member_testapp):
+    lab_item['status'] = 'deleted'
+    viewing_apps = [submitter_testapp, remc_member_testapp]
+    res = wrangler_testapp.post_json('/lab', lab_item, status=201)
+    print(res)
+    assert False
+    for app in viewing_apps:
+        app.get(res.json['@graph'][0]['@id'], status=403)
+
+
+def test_lab_submitter_can_edit_lab_item(lab, submitter_testapp, wrangler_testapp):
+    res = submitter_testapp.get(lab['@id'])
+    print(res)
+    wrangler_testapp.patch_json(res.json['@id'], {'status': 'current'}, status=200)
+    submitter_testapp.patch_json(res.json['@id'], {'city': 'My fair city'}, status=200)
