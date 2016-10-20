@@ -201,7 +201,7 @@ var ImpersonateUserForm = React.createClass({
     },
 
     render: function() {
-        var ReactForms = require('react-forms');
+        // var ReactForms = require('react-forms');
         // var ImpersonateUserSchema = ReactForms.Mapping({}, {
         //     userid: ReactForms.Scalar({
         //         label: 'User',
