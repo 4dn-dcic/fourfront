@@ -139,30 +139,38 @@ var UserActions = React.createClass({
 
     render: function() {
         var session_properties = this.context.session_properties;
-        var acctTitle;
+        var acctTitle = (
+            <span>
+                <i className="icon ss-user" style={{ 
+                    transform: 'translateY(2px)',
+                    opacity : session_properties['auth.userid'] ? 1 : 0.25
+                }}></i> Account
+            </span>
+        );
+        
         var actions = this.context.listActionsFor('user_section').map(function (action) {
             if (action.id === "login"){
                 return(<Login key={action.id} />);
-            }else if (action.id === "accountactions"){
+            } else if (action.id === "accountactions"){
                 // link to registration page if logged out or account actions if logged in
                 if (!session_properties['auth.userid']) {
-                    acctTitle = <span>Account</span>;
+                    
                     return(
                         <a href={action.url || ''} key={action.id} className="global-entry">
                             {action.title}
                         </a>
                     );
-                }else{
-                    acctTitle = <span>Account <i className="icon ss-user" style={{ transform: 'translateY(2px)' }}></i></span>;
+                } else {
                     return(<AccountActions key={action.id} />);
                 }
             }else if (action.id === "contextactions") {
                 return(<ContextActions key={action.id} />);
             }
         });
+        
         return (
                 <Nav right={true} acct={true}>
-                    <NavItem dropdownId="context" dropdownTitle={<span>{acctTitle}</span>}>
+                    <NavItem dropdownId="context" dropdownTitle={acctTitle}>
                         <DropdownMenu label="context">
                             {actions}
                         </DropdownMenu>
