@@ -12,6 +12,33 @@ var Login = React.createClass({
             message: ''
         };
     },
+    componentWillMount: function () {
+        // Login / logout actions must be deferred until Auth0 is ready.
+				var lock_ = require('auth0-lock');
+			  // TODO: these should be read in from base and production.ini
+			  this.lock = new lock_.default('DPxEwsZRnKDpk0VfVAxrStRKukN14ILB', 
+																			'hms-dbmi.auth0.com', {
+				auth: {
+					redirect: false
+				},
+				// TODO add theme : logo
+				socialButtonStyle: 'big',
+				languageDictionary: {
+					title: "Log in to data.4dnucleome.org"
+				},
+				allowedConnections: ['github', 'google-oauth2']
+				});
+			  this.lock.on("authenticated", this.handleAuth0Login.bind(this));
+
+        this.setState({session: session});
+        store.dispatch({
+            type: {'href':query_href, 'session_cookie': session_cookie}
+        });
+    },
+		showLock: function() {
+			console.log("in showLock", this.lock);
+			this.lock.showLock()
+		},
     handleToggle: function () {
         this.setState({
   		  isOpen: !this.state.isOpen,
@@ -30,7 +57,7 @@ var Login = React.createClass({
         var message = this.state.message;
         // first case is if user is not logged in
         if (!(session && session['auth.userid'])) {
-			userActionRender = <LoginBoxes handleAuth0Login={this.props.handleAuth0Login} isRefreshing={this.handleToggle} />
+		userActionRender = <LoginBoxes onClick={this.showLock} isRefreshing={this.handleToggle} />
         } else { //if logged in give them a logout link
             userActionRender = <a href="#" onClick={this.handleToggleOut}  data-trigger="logout" className="global-entry">Sign out</a>;
         }
