@@ -169,7 +169,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                 <tr className="expset-table-row">
                     <td className="expset-table-cell dropdown-button-cell">
                         <Button bsSize="xsmall" className="expset-button icon-container" onClick={this.handleToggle}>
-                            <i className={"icon " + (this.state.open ? "ss-navigateup" : "ss-navigatedown")}></i>
+                            <i className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
                         </Button>
                     </td>
                     <td className="expset-table-cell">

@@ -674,11 +674,13 @@ tbody.expset-section td.dropdown-button-cell .expset-button.icon-container {
 }
 
 .expset-button.icon-container > i.icon {
-	padding-top: 3px;
+	/* Re-enable padding if using a Gizmo or BlackTie Icon
+    padding-top: 3px;
 	padding-left: 1px;
+    */
     display: inline-block;
     vertical-align: middle;
-	font-size: 14px;
+	font-size: 12px;
 	line-height: 20px;
 }
 
