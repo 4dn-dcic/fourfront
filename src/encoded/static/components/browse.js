@@ -757,17 +757,22 @@ var ResultTable = browse.ResultTable = React.createClass({
         // Sort
         if(this.state.sortColumn){
             resultListings.sort(function(a,b){
+                a = a.key.split('/')[0];
+                b = b.key.split('/')[0];
                 if (this.state.sortReverse) {
                     var b2 = b;
                     b = a;
                     a = b2;
                 }
-                if(Number.isInteger(parseInt(a.key.split('/')[0]))){
-                    return(a.key.split('/')[0] - b.key.split('/')[0]);
-                }else{
-                    return(a.key.split('/')[0].localeCompare(b.key.split('/')[0]));
+                if(!isNaN(a)){
+                    return (a - b);
+                } else {
+                    //return(a.localeCompare(b));
+                    if (a < b) return -1;
+                    else if (a > b) return 1;
+                    else return 0;
                 }
-            });
+            }.bind(this));
         }
 
         return resultListings;
@@ -810,6 +815,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                 </th>
             );
         }.bind(this));
+
         
         var formattedExperimentSetListings = this.formatExperimentSetListings(
             passExperiments,

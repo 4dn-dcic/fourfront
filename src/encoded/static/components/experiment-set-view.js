@@ -13,6 +13,19 @@ var getFileDetailContainer = require('./experiments-table').getFileDetailContain
 
 var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
+    statics : {
+        // Migrate somewhere better eventually
+        parseDateTime : function(timestamp){
+            return (new Date(timestamp)).toLocaleString(undefined, {
+                year : "numeric",
+                month : "long",
+                day : "numeric",
+                hour : "numeric",
+                minute : "numeric"
+            })
+        }
+    },
+
     propTypes : {
         schemas : React.PropTypes.object,
         context : React.PropTypes.object
@@ -209,13 +222,7 @@ var ExperimentSetHeader = React.createClass({
         if (!('date_created' in this.props.context)) return null;
         return (
             <span>
-            <i className="icon sbt-calendar"></i> { (new Date(this.props.context.date_created)).toLocaleString(undefined, {
-                year : "numeric",
-                month : "long",
-                day : "numeric",
-                hour : "numeric",
-                minute : "numeric"
-            })}
+                <i className="icon sbt-calendar"></i> { ExperimentSetView.parseDateTime(this.props.context.date_created) }
             </span>
         );
     },
@@ -286,8 +293,7 @@ var ExperimentSetInfoBlock = React.createClass({
         if (!this.props.context.description) return null;
         return (
             <div className="col-sm-4 description-container">
-                <strong>Description</strong>
-                <p>{ this.props.context.description }</p>
+                <p className="text-large">{ this.props.context.description }</p>
             </div>
         );
     },
@@ -307,7 +313,7 @@ var ExperimentSetInfoBlock = React.createClass({
                             <h5>
                                 <a href={ labInfo['@id'] || '#' }>{ labInfo.title }</a>
                             </h5>
-                            <div className="address">
+                            <div className="more-details address">
                                 { 
                                     labInfo.city + 
                                     (labInfo.state ? ', ' + labInfo.state : '') + 
@@ -338,8 +344,8 @@ var ExperimentSetInfoBlock = React.createClass({
                             <h5>
                                 <a href={ awardInfo['@id'] || '#' }>{ awardInfo.title }</a>
                             </h5>
-                            <div className="address">
-                                TEST
+                            <div className="more-details project">
+                                { awardInfo.project }
                             </div>
                         </div>
                     </div>
