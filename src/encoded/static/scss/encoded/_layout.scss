@@ -1,5 +1,8 @@
 @charset "UTF-8";
 
+/** Setup some variables for colors **/
+$expset-table-border-color : #eee;
+
 #layout {
 	height: auto !important;
     margin: 0 auto -$footerHeight;
@@ -211,6 +214,8 @@ h1.page-title + .page-subtitle {
 @media screen and (min-width: 960px)    { .col-md-float-right { float : right; } }
 @media screen and (min-width: 1160px)   { .col-lg-float-right { float : right; } }
 
+
+
 /***********************************************************
 Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 ************************************************************/
@@ -326,7 +331,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 .item-page-container .info-area {
 	margin-top: 18px;
 	margin-bottom: 10px;
-    min-height: 95px;
+    min-height: 64px;
 }
 
 .item-page-container .info-area .info-panel {
@@ -334,24 +339,35 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	border: 1px solid #e4e4e4;
 	margin-bottom: 10px;
 	border-radius: 5px;
-}
 
-.item-page-container .info-area .info-panel h5 {
-	margin-bottom: 0;
-	margin-top: 2px;
-	font-weight: 600;
-}
+    h5 {
+        margin-bottom: 0;
+        margin-top: 2px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
 
-.item-page-container .info-area .info-panel .icon-container {
-	text-align: center;
-	padding-top: 5px;
-	font-size: 24px;
-	margin-bottom: -10px;
-	
-	&.col-xs-2 {
-		padding-right: 0px;
-		padding-left: 5px;
-	}
+        a {
+            display: block;
+            overflow: inherit;
+            text-overflow: inherit;
+        }
+
+    }
+
+    .icon-container {
+        text-align: center;
+        padding-top: 5px;
+        font-size: 24px;
+        margin-bottom: -10px;
+        
+        &.col-xs-2 {
+            padding-right: 0px;
+            padding-left: 5px;
+        }
+    }
+
 }
 
 
@@ -616,9 +632,45 @@ p, input {
 	box-shadow: none !important;
 }
 
+/** Primarily for Browse Table / View **/
+
+/*
+tbody.expset-section > tr.expset-table-row > td {
+    min-height : 30px;
+}
+*/
+
+tbody.expset-section td.dropdown-button-cell {
+    padding : 0 !important;
+    border-bottom: 0;
+    border-top: 1px solid $expset-table-border-color !important;
+    width : 30px;
+    height: 30px;
+}
+
+table tbody.expset-section.closed:last-child td.dropdown-button-cell {
+    border-bottom: 1px solid $expset-table-border-color;
+}
+
 .expset-button.icon-container {
 	width: 24px;
 	height: 24px;
+}
+
+tbody.expset-section td.dropdown-button-cell .expset-button.icon-container {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 0;
+
+    &.btn:focus {
+        outline: none;
+        background-color: transparent;
+    }
+
+    &.btn:hover {
+        background-color: $expset-table-border-color;
+    }
 }
 
 .expset-button.icon-container > i.icon {
@@ -746,7 +798,7 @@ p, input {
 .expset-table{
 	border: none !important;
 	>thead>tr>th{
-		border: 1px solid #eee;
+		border: 1px solid $expset-table-border-color;
 	}
 	>thead>tr>:first-child,>tbody>tr>:first-child{
 		border-left: none;
@@ -755,7 +807,7 @@ p, input {
 		border-right: none;
 	}
 	>tbody>tr>td{
-		border: 1px solid #eee;
+		border: 1px solid $expset-table-border-color;
 	}
 }
 

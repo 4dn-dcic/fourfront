@@ -165,23 +165,21 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < files.length;
 
         return (
-            <tbody>
-                <tr>
-                    <td className="expset-table-cell">
-                    <div className="control-cell expset-entry-passed">
+            <tbody className={"expset-section " + (this.state.open ? "open" : "closed")}>
+                <tr className="expset-table-row">
+                    <td className="expset-table-cell dropdown-button-cell">
                         <Button bsSize="xsmall" className="expset-button icon-container" onClick={this.handleToggle}>
                             <i className={"icon " + (this.state.open ? "ss-navigateup" : "ss-navigatedown")}></i>
                         </Button>
-                    </div>
                     </td>
                     <td className="expset-table-cell">
-                    <div className="control-cell">
-                        <IndeterminateCheckbox checked={checked} indeterminate={indeterminate} onChange={this.handleCheck}/>
-                    </div>
+                        <div className="control-cell">
+                            <IndeterminateCheckbox checked={checked} indeterminate={indeterminate} onChange={this.handleCheck}/>
+                        </div>
                     </td>
                     { formattedColumns }
                 </tr>
-                <tr>
+                <tr className="expset-addinfo-row">
                     <td className={this.state.open ? "hidden-col-open" : "hidden-col-closed"} colSpan={Object.keys(this.props.columns).length + 2}>
                         <Panel className="expset-panel" collapsible expanded={this.state.open}>
                             <div className="expset-addinfo">
