@@ -1,32 +1,8 @@
 'use strict';
 var React = require('react');
 
-var Login = React.createClass({
-    contextTypes: {
-        session: React.PropTypes.object
-    },
-    getInitialState: function() {
-    	return {
-            isOpen: false
-        };
-    },
-    render: function() {
-        var session = this.context.session;
-        var userActionRender;
-        // first case is if user is not logged in
-        if (!(session && session['auth.userid'])) {
-		userActionRender = <LoginRenderer {...this.props} onClick={this.showLock} isRefreshing={this.handleToggle} />
-        } else { //if logged in give them a logout link
-            userActionRender = <a href="#" onClick={this.handleToggleOut}  data-trigger="logout" className="global-entry">Log out</a>;
-        }
-        return (
-            <div>{userActionRender}</div>
-        );
-    },
-});
-
 // Component that contains auth0 functions
-var LoginRenderer = React.createClass({
+var Login = React.createClass({
     contextTypes: {
     	fetch: React.PropTypes.func,
     	session: React.PropTypes.object,
@@ -66,6 +42,34 @@ var LoginRenderer = React.createClass({
 		this.lock.show();
 	},
 
+    // triggerLogout: function (event) {
+    //      console.log('Logging out (persona)');
+    //      var session = this.state.session;
+    //      if (!(session && session['auth.userid'])) return;
+    //      this.fetch('/logout?redirect=false', {
+    //          headers: {'Accept': 'application/json'}
+    //      })
+    //      .then(response => {
+    //          if (!response.ok) throw response;
+    //          return response.json();
+    //      })
+    //      .then(data => {
+    //          this.DISABLE_POPSTATE = true;
+    //          var old_path = window.location.pathname + window.location.search;
+    //          window.location.assign('/#logged-out');
+    //          if (old_path == '/') {
+    //              window.location.reload();
+    //          }
+    //      }, err => {
+    //          parseError(err).then(data => {
+    //              data.title = 'Logout failure: ' + data.title;
+    //              store.dispatch({
+    //                  type: {'context':data}
+    //              });
+    //          });
+    //      });
+    //  },
+
     handleAuth0Login: function(authResult, retrying){
         var accessToken = authResult.accessToken;
         if (!accessToken) return;
@@ -89,9 +93,14 @@ var LoginRenderer = React.createClass({
     },
 
     render: function () {
-    	return (
+        var session = this.context.session;
+        var toRender = (session && session['auth.userid']) ?
+            <a href="" data-trigger="logout" className="global-entry">Log out</a>
+            :
+            <a id="loginbtn" href="" className="global-entry" onClick={this.showLock}>Log in</a>;
+        return (
             <div>
-                <a id="loginbtn" href="" className="global-entry" onClick={this.showLock}>Log in</a>
+                {toRender}
             </div>
            );
        },
