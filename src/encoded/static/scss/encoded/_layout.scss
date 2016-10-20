@@ -298,8 +298,9 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		padding-right: 10px;
 		border-radius: 5px;
 		text-transform: capitalize;
-		color: #fff;
+		color: #444;
 
+		/*
 		&[data-set-type="replicates"]{
 			background-color: #56889b;
 		}
@@ -324,6 +325,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			background-color: #7b7b7b;
 			display: none;
 		}
+		*/
 	}
 
 }

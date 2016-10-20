@@ -238,13 +238,17 @@ var ExperimentSetHeader = React.createClass({
                 break;
 
         }
-        return <span><i className={iconClass}></i> { this.props.context.status }</span>;
+        return (
+            <div className="status right" data-status={ this.props.context.status.toLowerCase() }>
+                <i className={iconClass}></i> { this.props.context.status }
+            </div>
+        );
     },
 
     parsedExperimentSetType(){
         if (!('experimentset_type' in this.props.context)) return null;
         return (
-            <div className="experiment-set-type-indicator" data-set-type={ this.props.context.experimentset_type }>
+            <div className="experiment-set-type-indicator right" data-set-type={ this.props.context.experimentset_type }>
                 { this.props.context.experimentset_type }
             </div>
         );
@@ -259,7 +263,8 @@ var ExperimentSetHeader = React.createClass({
                     <h3 className="col-sm-6 item-label-title">
                         { /* PLACEHOLDER / TEMP-EMPTY */ }
                     </h3>
-                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra text-capitalize" title="Status">
+                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra text-capitalize indicators">
+                        { this.parsedExperimentSetType() }
                         { this.parsedStatus() }
                     </h5>
                 </div>

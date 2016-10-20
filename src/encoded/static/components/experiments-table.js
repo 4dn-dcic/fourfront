@@ -21,7 +21,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         experimentArray : React.PropTypes.array,
         fileDetailContainer : React.PropTypes.object,
         passExperiments : React.PropTypes.instanceOf(Set),
-        expSetFilters : React.PropTypes.instanceOf(Set),
+        expSetFilters : React.PropTypes.object,
         parentController : function(props, propName, componentName){
             // Custom validation
             if (props[propName] && 
