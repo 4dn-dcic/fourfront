@@ -634,18 +634,41 @@ p, input {
 
 /** Primarily for Browse Table / View **/
 
-/*
-tbody.expset-section > tr.expset-table-row > td {
-    min-height : 30px;
-}
-*/
+.expset-table{
+	border: none !important;
+	> thead > tr > th {
+		border: 1px solid $expset-table-border-color;
+	}
+	> thead > tr > :first-child,
+	> tbody > tr > :first-child {
+		border-left: none;
+	}
+	> thead > tr > :last-child,
+	> tbody > tr > :last-child {
+		border-right: none;
+	}
+	> tbody > tr > td {
+		border: 1px solid $expset-table-border-color;
+		border-left-color : #f4f4f4;
+		border-right-color: #f4f4f4;
+		border-top: none !important;
+		max-width: 160px;
 
-tbody.expset-section td.dropdown-button-cell {
-    padding : 0 !important;
-    border-bottom: 0;
-    border-top: 1px solid $expset-table-border-color !important;
-    width : 30px;
-    height: 30px;
+		&.dropdown-button-cell {
+			padding : 0 !important;
+			width : 30px;
+			height: 30px;
+		}
+
+	}
+}
+
+.expset-table > tbody.expset-section.open > tr.expset-table-row > td {
+	border-bottom-color: rgba(0,0,0,0.025);
+
+	&.dropdown-button-cell {
+		border-bottom-color: transparent;
+	}
 }
 
 table tbody.expset-section.closed:last-child td.dropdown-button-cell {
@@ -662,6 +685,7 @@ tbody.expset-section td.dropdown-button-cell .expset-button.icon-container {
     height: 100%;
     border: none;
     border-radius: 0;
+	background-color: transparent;
 
     &.btn:focus {
         outline: none;
@@ -795,26 +819,6 @@ tbody.expset-section td.dropdown-button-cell .expset-button.icon-container {
 	&:hover, &:active, &:focus {
         color: #000000;
     }
-}
-
-.expset-table{
-	border: none !important;
-	>thead>tr>th{
-		border: 1px solid $expset-table-border-color;
-	}
-	>thead>tr>:first-child,>tbody>tr>:first-child{
-		border-left: none;
-	}
-	>thead>tr>:last-child,>tbody>tr>:last-child{
-		border-right: none;
-	}
-	>tbody>tr>td{
-		border: 1px solid $expset-table-border-color;
-	}
-}
-
-.expset-table-cell{
-	max-width: 160px !important;
 }
 
 .expset-result-table-fix{
