@@ -1,6 +1,6 @@
 [
     {
-        "email": "admin@admin.com",
+        "email": "4dndcic@gmail.com",
         "first_name": "Admin",
         "groups": ["admin"],
         "job_title": "Admin",
@@ -10,6 +10,17 @@
         "submits_for": ["4dn-dcic-lab"],
         "timezone": "US/Pacific",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267307e3a"
+    },
+    {
+        "email": "carl.vitzthum@gmail.com",
+        "first_name": "Carl",
+        "groups": ["viewer", "submitter"],
+        "job_title": "Data provider",
+        "lab": "test-4dn-lab",
+        "last_name": "Member",
+        "status": "current",
+        "submits_for": ["test-4dn-lab"],
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab267228888"
     },
     {
         "email": "wrangler@wrangler.com",

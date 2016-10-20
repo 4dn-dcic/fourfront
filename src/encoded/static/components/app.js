@@ -19,7 +19,7 @@ var browse = require('./browse');
 var portal = {
     portal_title: '4DN Data Portal',
     global_sections: [
-        {id: 'browse', sid:'sBrowse', title: 'Browse', url: '/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all'},
+        {id: 'browse', sid:'sBrowse', title: 'Browse', url: '/browse/?type=ExperimentSet&experimentset_type=biological+replicates'},
         {id: 'help', sid:'sHelp', title: 'Help', children: [
             {id: 'gettingstarted', title: 'Getting started', url: '/help'},
             {id: 'metadatastructure', title: 'Metadata structure', url: '/help#metadata-structure'},
@@ -276,14 +276,10 @@ var App = React.createClass({
                     {base ? <base href={base}/> : null}
                     <link rel="canonical" href={canonical} />
                     <script async src='//www.google-analytics.com/analytics.js'></script>
-                    <link href="https://fonts.googleapis.com/css?family=Work+Sans:200,300,400,500,600,700" rel="stylesheet" />
+                    <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet" />
                     <link href="https://fonts.googleapis.com/css?family=Yrsa" rel="stylesheet" />
-										<script src="http://cdn.auth0.com/js/lock/10.2/lock.min.js"></script>
-
                     <script data-prop-name="inline" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
                     <link rel="stylesheet" href="/static/css/style.css" />
-                    <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
-                    <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
                 </head>
                 <body onClick={this.handleClick} onSubmit={this.handleSubmit}>
                     <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{
@@ -293,7 +289,7 @@ var App = React.createClass({
                         <div id="application" className={appClass}>
                         <div className="loading-spinner"></div>
                             <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
-                                <Navigation handleAuth0Login={this.handleAuth0Login}/>
+                                <Navigation />
                                 <div id="content" className="container" key={key}>
                                     {content}
                                 </div>

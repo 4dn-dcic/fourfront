@@ -47,7 +47,7 @@ var Navigation = module.exports = React.createClass({
                     <div className="container">
                         <Navbar brand={img} brandlink="/" label="main" navClasses="navbar-main" navID="navbar-icon">
                             <GlobalSections />
-                            <UserActions handleAuth0Login={this.props.handleAuth0Login} />
+                            <UserActions />
                             {/* REMOVE SEARCH FOR NOW: <Search />*/}
                         </Navbar>
                     </div>
@@ -140,10 +140,9 @@ var UserActions = React.createClass({
     render: function() {
         var session_properties = this.context.session_properties;
         var acctTitle;
-		var auth0mixin = this.props.handleAuth0Login;
         var actions = this.context.listActionsFor('user_section').map(function (action) {
             if (action.id === "login"){
-                return(<Login key={action.id} handleAuth0Login={auth0mixin} />);
+                return(<Login key={action.id} />);
             }else if (action.id === "accountactions"){
                 // link to registration page if logged out or account actions if logged in
                 if (!session_properties['auth.userid']) {

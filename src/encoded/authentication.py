@@ -97,7 +97,7 @@ class NamespacedAuthenticationPolicy(object):
         super(NamespacedAuthenticationPolicy, self).__init__(*args, **kw)
 
     def unauthenticated_userid(self, request):
-        cls  = super(NamespacedAuthenticationPolicy, self) 
+        cls  = super(NamespacedAuthenticationPolicy, self)
         userid = super(NamespacedAuthenticationPolicy, self) \
             .unauthenticated_userid(request)
         if userid is not None:
@@ -164,7 +164,6 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
                 self.log(('Invalid assertion: %s (%s)', (e, type(e).__name__)),
                          'unathenticated_userid', request)
                 return None
-
         if user_info['email_verified'] is True:
             email = request._auth0_authenticted = user_info['email'].lower()
             return email
