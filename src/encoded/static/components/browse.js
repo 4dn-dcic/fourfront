@@ -165,7 +165,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < files.length;
 
         return (
-            <tbody className={"expset-section " + (this.state.open ? "open" : "closed")}>
+            <tbody className={"expset-section expset-entry-passed " + (this.state.open ? "open" : "closed")}>
                 <tr className="expset-table-row">
                     <td className="expset-table-cell dropdown-button-cell">
                         <Button bsSize="xsmall" className="expset-button icon-container" onClick={this.handleToggle}>
