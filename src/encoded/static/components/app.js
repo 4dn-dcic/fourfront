@@ -54,7 +54,7 @@ var Title = React.createClass({
 // It lives for the entire duration the page is loaded.
 // App maintains state for the
 var App = React.createClass({
-    mixins: [mixins.Persona, mixins.HistoryAndTriggers],
+    mixins: [mixins.Auth0, mixins.HistoryAndTriggers],
     triggers: {
         login: 'triggerLogin',
         profile: 'triggerProfile',
@@ -278,6 +278,8 @@ var App = React.createClass({
                     <script async src='//www.google-analytics.com/analytics.js'></script>
                     <link href="https://fonts.googleapis.com/css?family=Work+Sans:200,300,400,500,600,700" rel="stylesheet" />
                     <link href="https://fonts.googleapis.com/css?family=Yrsa" rel="stylesheet" />
+										<script src="http://cdn.auth0.com/js/lock/10.2/lock.min.js"></script>
+
                     <script data-prop-name="inline" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
                     <link rel="stylesheet" href="/static/css/style.css" />
                     <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
@@ -291,7 +293,7 @@ var App = React.createClass({
                         <div id="application" className={appClass}>
                         <div className="loading-spinner"></div>
                             <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
-                                <Navigation />
+                                <Navigation handleAuth0Login={this.handleAuth0Login}/>
                                 <div id="content" className="container" key={key}>
                                     {content}
                                 </div>
