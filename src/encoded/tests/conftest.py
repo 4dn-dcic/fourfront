@@ -20,7 +20,7 @@ def autouse_external_tx(external_tx):
 _app_settings = {
     'collection_datastore': 'database',
     'item_datastore': 'database',
-    'multiauth.policies': 'session remoteuser accesskey webuser',
+    'multiauth.policies': 'session remoteuser accesskey auth0',
     'multiauth.groupfinder': 'encoded.authorization.groupfinder',
     'multiauth.policy.session.use': 'encoded.authentication.NamespacedAuthenticationPolicy',
     'multiauth.policy.session.base': 'pyramid.authentication.SessionAuthenticationPolicy',
@@ -32,10 +32,9 @@ _app_settings = {
     'multiauth.policy.accesskey.namespace': 'accesskey',
     'multiauth.policy.accesskey.base': 'encoded.authentication.BasicAuthAuthenticationPolicy',
     'multiauth.policy.accesskey.check': 'encoded.authentication.basic_auth_check',
-    'multiauth.policy.webuser.use' : 'encoded.authentication.NamespacedAuthenticationPolicy',
-    'multiauth.policy.webuser.namespace' : 'webuser',
-    'multiauth.policy.webuser.base' : 'encoded.authentication.WebUserAuthenticationPolicy',
-    #'multiauth.policy.webuser.check' : 'encoded.authentication.basic_auth_check',
+    'multiauth.policy.auth0.use': 'encoded.authentication.NamespacedAuthenticationPolicy',
+    'multiauth.policy.auth0.namespace': 'auth0',
+    'multiauth.policy.auth0.base': 'encoded.authentication.Auth0AuthenticationPolicy',
     'load_test_only': True,
     'testing': True,
     'pyramid.debug_authorization': True,
@@ -44,7 +43,7 @@ _app_settings = {
     'ontology_path': pkg_resources.resource_filename('encoded', '../../ontology.json'),
     # some file specific stuff for testing
     'file_upload_bucket': 'test-bucket',
-    'file_upload_profile_name' : 'test-profile',
+    'file_upload_profile_name': 'test-profile',
 }
 
 
@@ -52,7 +51,7 @@ _app_settings = {
 def app_settings(request, wsgi_server_host_port, conn, DBSession):
     from snovault import DBSESSION
     settings = _app_settings.copy()
-    settings['persona.audiences'] = 'http://%s:%s' % wsgi_server_host_port
+    settings['auth0.audiences'] = 'http://%s:%s' % wsgi_server_host_port
     # add some here for file testing
     settings[DBSESSION] = DBSession
     return settings
