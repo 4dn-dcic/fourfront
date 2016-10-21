@@ -32,13 +32,15 @@
             "description": "A short unique name for the lab, use lower cased and hyphen delimited PI name and lab(e.g. john-doe-lab).",
             "type": "string",
             "pattern": "^[a-z0-9\\-]+lab$",
-            "uniqueKey": "lab:name"
+            "uniqueKey": "lab:name",
+            "permission": "import_items"
         },
         "title": {
             "title": "Title",
             "description": "A unique name for lab & affiliation use PI's first & last name, Lab, comma, and institute label. (e.g. John Doe Lab, UNI).",
             "type": "string",
-            "uniqueKey": "lab:name"
+            "uniqueKey": "lab:name",
+            "permission": "import_items"
         },
         "pi": {
             "title": "P.I.",
