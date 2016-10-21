@@ -188,8 +188,10 @@
                 "deleted",
                 "replaced",
                 "revoked",
-                "released"
-                ]
+                "released",
+                "in review by project",
+                "released to project"
+            ]
         }
     },
     "file_format_file_extension": {
