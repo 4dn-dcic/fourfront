@@ -33,7 +33,7 @@ var Login = React.createClass({
             theme: {
                 logo: '/static/img/4dn_logo.svg'
             },
-            allowedConnections: ['google-oauth2']
+            allowedConnections: ['github', 'google-oauth2']
         });
         this.lock.on("authenticated", this.handleAuth0Login);
     },
@@ -43,30 +43,31 @@ var Login = React.createClass({
 		this.lock.show();
 	},
 
-    logout: function (event) {
-         console.log('Logging out');
-         var session = this.context.session;
-         if (!(session && session['auth.userid'])) return;
-         this.context.fetch('/logout?redirect=false', {
-             headers: {'Accept': 'application/json'}
-         })
-         .then(response => {
-             if (!response.ok) throw response;
-             return response.json();
-         })
-         .then(data => {
+    logout: function (e) {
+        e.preventDefault();
+        console.log('Logging out');
+        var session = this.context.session;
+        if (!(session && session['auth.userid'])) return;
+        this.context.fetch('/logout?redirect=false', {
+            headers: {'Accept': 'application/json'}
+        })
+        .then(response => {
+            if (!response.ok) throw response;
+            return response.json();
+        })
+        .then(data => {
             if(typeof document !== 'undefined'){
                 this.context.navigate('/');
             }
          }, err => {
-             parseError(err).then(data => {
-                 data.title = 'Logout failure: ' + data.title;
-                 store.dispatch({
-                     type: {'context':data}
-                 });
-             });
-         });
-     },
+            parseError(err).then(data => {
+                data.title = 'Logout failure: ' + data.title;
+                store.dispatch({
+                    type: {'context':data}
+                });
+            });
+        });
+    },
 
     handleAuth0Login: function(authResult, retrying){
         var accessToken = authResult.accessToken;
@@ -86,10 +87,14 @@ var Login = React.createClass({
         })
         .then(session_properties => {
             window.location.reload();
-        },
-        function(error) {
+        }, error => {
             console.log("got an error: ", error.statusText);
+            console.log(error);
+            store.dispatch({
+                type: {'context':error, 'href': '/#login-error'}
+            });
         });
+
     },
 
     render: function () {
