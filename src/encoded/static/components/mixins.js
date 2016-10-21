@@ -101,8 +101,7 @@ module.exports.Auth0 = {
     },
 
     componentDidMount: function () {
-			  return;
-        // Login / logout actions must be deferred until Auth0 is ready.
+        // Login / logout actions must be deferred until persona is ready.
         var session_cookie = this.extractSessionCookie();
         var session = this.parseSessionCookie(session_cookie);
         if (session['auth.userid']) {
@@ -114,53 +113,12 @@ module.exports.Auth0 = {
         }else{
             query_href = this.props.href;
         }
-				// this is to create the Auth0 login modal window
-
-				var lock_ = require('auth0-lock');
-			  // TODO: these should be read in from base and production.ini
-			  this.lock = new lock_.default('DPxEwsZRnKDpk0VfVAxrStRKukN14ILB', 
-																			'hms-dbmi.auth0.com', {
-				auth: {
-					redirect: false
-				},
-				// TODO add theme : logo
-				socialButtonStyle: 'big',
-				languageDictionary: {
-					title: "Log in to data.4dnucleome.org"
-				},
-				allowedConnections: ['github', 'google-oauth2']
-				});
-			  this.lock.on("authenticated", this.handleAuth0Login.bind(this));
-
         this.setState({session: session});
         store.dispatch({
             type: {'href':query_href, 'session_cookie': session_cookie}
         });
     },
 
-		handleAuth0Login: function(authResult, retrying){
-			var accessToken = authResult.accessToken;
-			if (!accessToken) return;
-			this.fetch('/login', {
-				method: 'POST',
-				headers: {
-									 'Accept': 'application/json',
-									 'Content-Type': 'application/json'
-								 },
-			  body: JSON.stringify({accessToken: accessToken})
-				})	 
-			  .then(response => {
-						this.lock.hide();
-						if (!response.ok) throw response;
-						return response.json();
-				})
-        .then(session_properties => {
-            //this.context.session['auth.userid'] = data.username;
-            //window.location.reload();
-        },function(error) {
-            console.log("got an error" + error);
-        });
-    },
     fetch: function (url, options) {
         options = _.extend({credentials: 'same-origin'}, options);
         var http_method = options.method || 'GET';
@@ -326,33 +284,7 @@ module.exports.HistoryAndTriggers = {
             type: {'href':document.querySelector('link[rel="canonical"]').getAttribute('href')}
         });
     },
-   triggerLogout: function (event) {
-        console.log('Logging out (persona)');
-        var session = this.state.session;
-        if (!(session && session['auth.userid'])) return;
-        this.fetch('/logout?redirect=false', {
-            headers: {'Accept': 'application/json'}
-        })
-        .then(response => {
-            if (!response.ok) throw response;
-            return response.json();
-        })
-        .then(data => {
-            this.DISABLE_POPSTATE = true;
-            var old_path = window.location.pathname + window.location.search;
-            window.location.assign('/#logged-out');
-            if (old_path == '/') {
-                window.location.reload();
-            }
-        }, err => {
-            parseError(err).then(data => {
-                data.title = 'Logout failure: ' + data.title;
-                store.dispatch({
-                    type: {'context':data}
-                });
-            });
-        });
-    },
+   
     trigger: function (name) {
         var method_name = this.triggers[name];
         if (method_name) {

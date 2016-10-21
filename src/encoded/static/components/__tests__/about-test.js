@@ -32,13 +32,73 @@ describe('Testing about.js', function() {
     });
 
 
-    // Check that has navBar with links
+    // Check that has functional navBar with links
     it('Has global navigation bar & links', function() {
 
         var navBanner = TestUtils.scryRenderedDOMComponentsWithClass(page, 'navbar navbar-main');
         var navBannerLinkWrapper = TestUtils.scryRenderedDOMComponentsWithClass(page, 'nav navbar-nav');
         expect(navBanner.length).toEqual(1);
         expect(navBannerLinkWrapper.length).toBeGreaterThan(0); // Doesn't matter if 1 or more links.
+
+        /** 
+         * Test mobile dropdown (full menu)
+         */
+
+        var menuToggleButton = navBanner[0].children[0].children[0]; // nav.navbar.navbar-main > div.navbar-header > a.navbar-toggle
+        var menuCollapsibleSection = navBanner[0].children[1]; // nav.navbar.navbar-main > div.navbar-collapse.collapse
+        expect(menuToggleButton.className.search('navbar-toggle')).toBeGreaterThan(-1);
+        expect(menuToggleButton.getAttribute('aria-expanded')).toEqual('false');
+        // Make sure 'in' is not in className, as it controls section visibility @ mobile sizes.
+        expect(menuCollapsibleSection.className.search('in')).toBe(-1); 
+        TestUtils.Simulate.click(menuToggleButton); // Open mobile menu
+        expect(menuToggleButton.getAttribute('aria-expanded')).toEqual('true');
+        expect(menuCollapsibleSection.className.search('in')).toBeGreaterThan(-1);
+        TestUtils.Simulate.click(menuToggleButton); // Close mobile menu
+        expect(menuToggleButton.getAttribute('aria-expanded')).toEqual('false');
+        expect(menuCollapsibleSection.className.search('in')).toBe(-1);
+
+        /**
+         * Test navbar dropdown menu items & sub-menus
+         */
+        /*
+        // Custom MouseEvent in lieu of TestUtils.Simulate.click as 
+        // stopImmediatePropagation doesn't work w/ TestUtils events.
+        
+        function customClickEvent(){
+            return new MouseEvent('click', {
+                cancelable : true,
+                bubbles : true,
+                view: window
+            });
+        }
+
+        // NVM - TestUtil's hidden SimulateNative works (but w/o enabling changes..).
+
+        navBannerLinkWrapper.map(function(navList, idx, arr){
+            for (var i = 0; i < navList.children.length; i++){ // .map() doesn't work for node.children
+                if (navList.children[i].children[0].className.search('dropdown-toggle') > -1){
+                    expect(navList.children[i].children[0].getAttribute('aria-expanded')).toEqual('false');
+                    expect(navList.children[i].className.search('dropdown')).toBeGreaterThan(-1);
+                    expect(navList.children[i].className.search('open')).toEqual(-1);
+                    
+                    TestUtils.SimulateNative.click(navList.children[i].children[0]); // Open dropdown item
+                    //navList.children[i].children[0].dispatchEvent(customClickEvent());
+
+                    expect(navList.children[i].children[0].getAttribute('aria-expanded')).toEqual('true');
+                    expect(navList.children[i].className.search('open')).toBeGreaterThan(-1);
+                    
+                    TestUtils.SimulateNative.click(navList.children[i].children[0]); // Close dropdown item
+                    //navList.children[i].children[0].dispatchEvent(customClickEvent());
+
+                    expect(navList.children[i].children[0].getAttribute('aria-expanded')).toEqual('false');
+                    expect(navList.children[i].className.search('open')).toEqual(-1);
+                }
+            }
+        })
+        */
+
+        // ToDo: Issues above - changes in response to menu item dropdown clicks don't take effect in Jest. 
+
     });
 
 
@@ -46,14 +106,14 @@ describe('Testing about.js', function() {
         var staticContainer = TestUtils.findRenderedDOMComponentWithClass(page, "static-page");
         expect(staticContainer).toBeTruthy();
         
-        var staticContainerContentSections = staticContainer.children[0].children; 
+        var staticContainerContentSections = staticContainer.children[1].children; 
         // ^ == div.static-page > div.help-entry > *
 
         // Should at least have 1 child element (title, paragraphs) 
         expect(staticContainerContentSections.length).toBeGreaterThan(1); 
 
         // Finding by className incase title location in DOM changes in future.
-        var staticContainerTitle = TestUtils.findRenderedDOMComponentWithClass(page, "fourDN-section-title");
+        var staticContainerTitle = TestUtils.findRenderedDOMComponentWithClass(page, "page-title");
         expect(staticContainerTitle.innerHTML).toEqual('About');
         
     });
@@ -63,7 +123,7 @@ describe('Testing about.js', function() {
         var contentParagraphs = TestUtils.scryRenderedDOMComponentsWithClass(page, "fourDN-content");
         expect(contentParagraphs.length).toBeGreaterThan(1); // At least 1 paragraph.
         
-        var fullContentParagraphsText = contentParagraphs.map(function(v){ return v.innerHTML }).join('\n');
+        var fullContentParagraphsText = contentParagraphs.map(function(v){ return v.innerHTML; }).join('\n');
         expect(fullContentParagraphsText.search('Burak Alver')).toBeGreaterThan(-1); // .search returns index, or -1.
         expect(fullContentParagraphsText.search('Nils Gehlenborg')).toBeGreaterThan(-1);
         

@@ -114,6 +114,9 @@
         "biosample.modifications_summary": {
             "title": "Modifications"
         },
+        "biosample.modifications_summary_short": {
+            "title": "Modifications"
+        },
         "biosample.treatments_summary": {
             "title": "Treatments"
         },

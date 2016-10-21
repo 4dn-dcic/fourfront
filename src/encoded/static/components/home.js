@@ -18,9 +18,21 @@ var BannerLoader = React.createClass({
 
     render: function() {
         return (
-            <fetched.FetchedData backup={<BannerEntry data={{'total':"-"}} text={this.props.text} destination={this.props.destination} location={this.props.location}/>}>
+            <fetched.FetchedData backup={
+                <BannerEntry 
+                    data={{'total':"-"}} 
+                    text={this.props.text} 
+                    destination={this.props.destination} 
+                    location={this.props.location}
+                />
+            }>
                 <fetched.Param name='data' url={this.props.location} />
-                <BannerEntry defaultFilter={this.props.defaultFilter ? this.props.defaultFilter : null} text={this.props.text} destination={this.props.destination} location={this.props.location}/>
+                <BannerEntry 
+                    defaultFilter={this.props.defaultFilter ? this.props.defaultFilter : null} 
+                    text={this.props.text} 
+                    destination={this.props.destination} 
+                    location={this.props.location}
+                />
             </fetched.FetchedData>
         );
     }
@@ -107,8 +119,8 @@ var HomePageLoader = React.createClass({
 
 var HomePage = module.exports = React.createClass({
     render: function() {
-        var experiment4DNBanner = <BannerLoader text='experiments' defaultFilter="4DN" destination="/browse/?type=ExperimentSet&experimentset_type=biological+replicates" location='/search/?type=Experiment&award.project=4DN'/>;
-        var experimentExtBanner = <BannerLoader text='experiments' defaultFilter="External" destination="/browse/?type=ExperimentSet&experimentset_type=biological+replicates" location='/search/?type=Experiment&award.project=External'/>;
+        var experiment4DNBanner = <BannerLoader text='experiments' defaultFilter="4DN" destination="/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all" location='/search/?type=Experiment&award.project=4DN'/>;
+        var experimentExtBanner = <BannerLoader text='experiments' defaultFilter="External" destination="/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all" location='/search/?type=Experiment&award.project=External'/>;
         var biosourceBanner = <BannerLoader text='cell types' destination='/search/?type=Biosource' location='/search/?type=Biosource'/>;
         var announcements = announcements_data.map(function(announce) {
             return (
@@ -117,17 +129,21 @@ var HomePage = module.exports = React.createClass({
         });
         return (
             <div>
-                <div className="fourDN-banner">
-                    <h2>4DN Data Portal</h2>
-                    <h4>The portal currently hosts {experiment4DNBanner} from the 4DN network and<br/>{experimentExtBanner} from other sources over {biosourceBanner}.</h4>
+                <div className="fourDN-banner text-left">
+                    <h1 className="page-title" style={{ fontSize : '3.25rem' }}>4DN Data Portal</h1>
+                    <h4 className="text-300 col-sm-8" style={{ float: 'none', padding : 0 }}>
+                        The portal currently hosts {experiment4DNBanner} from
+                        the 4DN network and<br/>{experimentExtBanner} from other
+                        sources over {biosourceBanner}.
+                    </h4>
                 </div>
                 <div className="row">
                     <div className="col-md-9 col-xs-12">
                         <h3 className="fourDN-header">Welcome!</h3>
-                        <p className="fourDN-content" dangerouslySetInnerHTML={{__html: statics.homeDescription}}></p>
+                        <p className="fourDN-content text-justify" dangerouslySetInnerHTML={{__html: statics.homeDescription}}></p>
                     </div>
                     <div className="col-md-3 col-xs-12">
-                        <h3 className="fourDN-header">Links</h3>
+                        <h3 className="fourDN-header">4DN Links</h3>
                         <p className="fourDN-content"dangerouslySetInnerHTML={{__html: statics.homeLinks}}></p>
                     </div>
                 </div>

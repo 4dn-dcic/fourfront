@@ -27,7 +27,6 @@ th {
         padding: $table-cell-padding;
         line-height: $line-height-base;
         vertical-align: top;
-        border-top: 1px solid $table-border-color;
       }
     }
   }
@@ -46,10 +45,6 @@ th {
         border-top: 0;
       }
     }
-  }
-  // Account for multiple tbody instances
-  > tbody + tbody {
-    border-top: 2px solid $table-border-color;
   }
 
   // Nesting

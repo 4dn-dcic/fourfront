@@ -10,238 +10,86 @@ var audit = require('./audit');
 var Panel = require('react-bootstrap').Panel;
 var Button = require('react-bootstrap').Button;
 var Checkbox = require('react-bootstrap').Checkbox;
+var Table = require('react-bootstrap').Table;
 var ButtonToolbar = require('react-bootstrap').ButtonToolbar;
 var DropdownButton = require('react-bootstrap').DropdownButton;
 var MenuItem = require('react-bootstrap').MenuItem;
 var store = require('../store');
+var ExperimentsTable = require('./experiments-table').ExperimentsTable;
+var getFileDetailContainer = require('./experiments-table').getFileDetailContainer;
 var AuditIndicators = audit.AuditIndicators;
 var AuditDetail = audit.AuditDetail;
 var AuditMixin = audit.AuditMixin;
+var expSetColumnLookup={
+    // all arrays will be handled by taking the first item
+    'biological replicates':{
+        'Accession': 'accession',
+        'Exp Type':'experiment_type',
+        'Exps': '',
+        'Organism': 'biosample.biosource.individual.organism.name',
+        'Biosource': 'biosample.biosource_summary',
+        'Enzyme': 'digestion_enzyme.name',
+        'Modifications':'biosample.modifications_summary_short'
+
+    },
+    'other':[]
+};
+
+var expSetAdditionalInfo={
+    'biological replicates':{
+        'Lab': 'lab.title',
+        'Treatments':'biosample.treatments_summary',
+        'Modifications':'biosample.modifications_summary'
+    },
+    'other':[]
+};
 
 var IndeterminateCheckbox = React.createClass({
     render: function(){
         var props = this.props;
         return(
-            <input {...props} type="checkbox" ref={function(input) {if (input) {input.indeterminate = props.indeterminate;}}} />
+            <input {...props} type="checkbox" ref={function(input) {if (input) {input.indeterminate = props.checked ? false : props.indeterminate;}}} />
         );
     }
 });
 
-var ExperimentSet = module.exports.ExperimentSet = React.createClass({
-    getInitialState: function() {
-    	return {
-            open: false,
-            checked: false,
-            selectedExpts: new Set(),
-            completeExpts: new Set(),
-            emptyExpts: new Set()
-        };
+var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
+
+    propTypes : {
+        addInfo : React.PropTypes.object,
+        columns : React.PropTypes.object.isRequired,
+        expSetFilters : React.PropTypes.object,
+        experimentArray : React.PropTypes.array.isRequired,
+        href : React.PropTypes.string,
+        passExperiments : React.PropTypes.instanceOf(Set),
+        targetFiles : React.PropTypes.instanceOf(Set),
     },
-
-    handleExptUpdate: function(uuid, complete, add=true){
-        // complete experiments have all files selected
-        // selected experiments have at least one file selected
-        var newCompleteSet = this.state.completeExpts;
-        var newPartialSet = this.state.selectedExpts;
-        if(add){
-            if(!newCompleteSet.has(uuid) && complete){
-                newCompleteSet.add(uuid);
-                this.setState({
-                    completeExpts: newCompleteSet,
-                });
-            }else if(!newPartialSet.has(uuid) && !complete){
-                newPartialSet.add(uuid);
-                this.setState({
-                    selectedExpts: newPartialSet,
-                });
-            }
-        }else{
-            if(newCompleteSet.has(uuid)){
-                newCompleteSet.delete(uuid);
-            }
-            if(newPartialSet.has(uuid)){
-                newPartialSet.delete(uuid);
-            }
-            this.setState({
-                completeExpts: newCompleteSet,
-                selectedExpts: newPartialSet
-            });
-        }
-    },
-
-    handleEmptyExpt: function(uuid){
-        var newEmptySet = this.state.emptyExpts;
-        if(!newEmptySet.has(uuid)){
-            newEmptySet.add(uuid);
-        }
-        if(this.state.emptyExpts !== newEmptySet){
-            this.setState({
-                emptyExpts: newEmptySet,
-            });
-        }
-    },
-
-    // to prevent the case of all sub-expts or files being manually checked, but state.checked not updated
-    componentDidUpdate: function() {
-        if(this.props.experimentArray.length > 0){
-            if(this.state.selectedExpts.size === 0 && this.state.completeExpts.size === 0 && this.state.checked){
-                this.setState({
-                    checked: false
-                });
-            }else if(this.state.completeExpts.size === this.props.experimentArray.length && !this.state.checked){
-                this.setState({
-                    checked: true
-                });
-            }
-        }
-    },
-
-    handleToggle: function (e) {
-        e.preventDefault();
-        this.setState({
-  		    open: !this.state.open,
-  	    });
-    },
-
-    handleCheck: function() {
-        this.setState({
-            checked: !this.state.checked
-        });
-    },
-
-    render: function() {
-        var experimentArray = this.props.experimentArray;
-        var passExperiments = [];
-        var failExperiments = [];
-        for (var i=0; i<experimentArray.length; i++){
-            if(this.props.passExperiments.has(experimentArray[i])){
-                passExperiments.push(experimentArray[i]);
-            }else{
-                failExperiments.push(experimentArray[i].uuid);
-            }
-        }
-        var childExperiments = passExperiments.map(function (experiment) {
-            return (
-                <ExperimentSublist handleEmptyExpt={this.handleEmptyExpt} handleExptUpdate={this.handleExptUpdate} targetFiles={this.props.targetFiles} parentChecked={this.state.checked} passed={true} result={experiment} key={experiment.uuid} />
-            );
-        }.bind(this));
-        // remove hidden experiments from complete/selected records
-        var completeExpts = this.state.completeExpts;
-        var selectedExpts = this.state.selectedExpts;
-        var emptyExpts = this.state.emptyExpts;
-        for (var j=0; j<failExperiments.length; j++){
-            if(completeExpts.has(failExperiments[j])){
-                completeExpts.delete(failExperiments[j]);
-            }
-            if(selectedExpts.has(failExperiments[j])){
-                selectedExpts.delete(failExperiments[j]);
-            }
-            if(emptyExpts.has(failExperiments[j])){
-                emptyExpts.delete(failExperiments[j]);
-            }
-        }
-        var checked = completeExpts.size === childExperiments.length || childExperiments.length === this.state.emptyExpts.size;
-        var indeterminate = (selectedExpts.size > 0 || completeExpts.size > 0) && completeExpts.size !== childExperiments.length;
-        return (
-            <li>
-                <div className="clearfix">
-                    <div className="accession">
-                        <Button bsSize="xsmall" className="expset-button" onClick={this.handleToggle}>{this.state.open ? "-" : "+"}</Button>
-                        <IndeterminateCheckbox checked={checked} indeterminate={indeterminate} className='expset-checkbox' onChange={this.handleCheck}/>
-                        <a className={this.props.passed} href={this.props.href}>
-                            {this.props.title}
-                        </a>
-                        <span className='expset-hits pull-right'>{this.props.exptHits}</span>
-                    </div>
-                    <Panel className="expset-panel" collapsible expanded={this.state.open}>
-                        {childExperiments}
-                    </Panel>
-                </div>
-            </li>
-        );
-    }
-});
-
-var ExperimentSublist = React.createClass({
 
     getInitialState: function() {
     	return {
             open: false,
-            checked: false,
-            selectedFiles: new Set(),
-            files: [],
-            filteredFiles: []
+            checked: true,
+            selectedFiles: new Set()
         };
     },
 
-    componentWillMount: function(){
-        var result = this.props.result;
-        // get files from "files" or "filesets[idx].files_in_set"
-        var files;
-        var filteredFiles = []; // files that match currently selected formats
-        if(result.files){
-            files = result.files;
-        }else if(result.filesets){
-            var tempFiles = [];
-            for(var i=0; i<result.filesets.length; i++){
-                if(result.filesets[i].files_in_set){
-                    tempFiles = tempFiles.concat(result.filesets[i].files_in_set);
-                }
-            }
-            files = tempFiles;
-        }else{
-            files = [];
-        }
-        for(var i=0; i<files.length; i++){
-            if(this.props.targetFiles.has(files[i].file_format)){
-                filteredFiles.push(files[i].uuid);
-            }
-        }
-        this.setState({
-            files: files,
-            filteredFiles: filteredFiles
-        });
-    },
-
-    componentDidMount: function(){
-        if(this.state.filteredFiles.length === 0){
-            this.props.handleEmptyExpt(this.props.result.uuid);
-        }
-    },
-
-    // update checkboxes if parent has changed
     componentWillReceiveProps: function(nextProps) {
-        if(nextProps.parentChecked !== this.props.parentChecked){
+        if(!_.isEqual(this.props.expSetFilters, nextProps.expSetFilters)){
             this.setState({
-                checked: nextProps.parentChecked
+                selectedFiles: new Set()
             });
         }
-        var newTargets = [];
-        for(var i=0; i<this.state.files.length; i++){
-            if(nextProps.targetFiles.has(this.state.files[i].file_format)){
-                newTargets.push(this.state.files[i].uuid);
-            }
-        }
-        if(newTargets.length !== this.state.filteredFiles.length){
-            this.setState({
-                filteredFiles: newTargets
-            });
-        }
-    },
-
-    // to prevent the case of all sub-expts or files being manually checked, but state.checked not updated
-    componentDidUpdate: function() {
-        if(this.state.files.length > 0){
-            if(this.state.selectedFiles.size === 0 && this.state.checked){
-                this.setState({
-                    checked: false
-                });
-            }else if(this.state.selectedFiles.size === this.state.files.length && !this.state.checked){
-                this.setState({
-                    checked: true
-                });
-            }
-        }
+        // var newTargets = [];
+        // for(var i=0; i<this.state.files.length; i++){
+        //     if(nextProps.targetFiles.has(this.state.files[i].file_format)){
+        //         newTargets.push(this.state.files[i].uuid);
+        //     }
+        // }
+        // if(newTargets.length !== this.state.filteredFiles.length){
+        //     this.setState({
+        //         filteredFiles: newTargets
+        //     });
+        // }
     },
 
     handleToggle: function (e) {
@@ -249,31 +97,6 @@ var ExperimentSublist = React.createClass({
         this.setState({
   		  open: !this.state.open
         });
-
-    },
-
-    handleFileUpdate: function (uuid, add=true){
-        var newSet = this.state.selectedFiles;
-        if(add){
-            if(!newSet.has(uuid)){
-                newSet.add(uuid);
-                this.setState({
-                    selectedFiles: newSet
-                });
-            }
-        }else if(newSet.has(uuid)){
-            newSet.delete(uuid);
-            this.setState({
-                selectedFiles: newSet
-            });
-        }
-        if(this.state.selectedFiles.size === this.state.filteredFiles.length){
-            this.props.handleExptUpdate(this.props.result.uuid, true);
-        }else if(this.state.selectedFiles.size > 0){
-            this.props.handleExptUpdate(this.props.result.uuid, false);
-        }else{
-            this.props.handleExptUpdate(this.props.result.uuid, false, false);
-        }
     },
 
     handleCheck: function() {
@@ -283,108 +106,87 @@ var ExperimentSublist = React.createClass({
     },
 
     render: function() {
-        var result = this.props.result;
-        // get files from "files" or "filesets[idx].files_in_set"
-        var files = this.state.files;
-        var filteredFiles = this.state.filteredFiles;
-        var selectedFiles = this.state.selectedFiles;
-        var childFiles = [];
-        var passedFileCount = 0;
-        if(files.length > 0){
-            files.map(function (file) {
-                if(this.props.targetFiles.has(file.file_format)){
-                    passedFileCount += 1;
-                    childFiles.push(<FileSublist handleFileUpdate={this.handleFileUpdate} filteredFiles={filteredFiles} key={file.uuid} parentChecked={this.state.checked} file={file} exptPassed={this.props.passed}/>);
-                }else{
-                    var fileID = false + "~" + this.props.passed + "~" + file.file_format + "~" + file.uuid;
-                    if(selectedFiles.has(file.uuid)){
-                        selectedFiles.delete(file.uuid);
-                    }
-                    childFiles.push(<span className="hidden" name="file-checkbox" id={fileID} key={file.uuid} />);
-                }
-            }.bind(this));
-        }
 
-        var fileHits = "(" + passedFileCount + " of " + this.state.files.length + " files displayed";
-        if(passedFileCount === 0){
-            childFiles.push(<div className='expset-sublist-empty' key="no-files-found"><span>No files found.</span></div>);
-            fileHits += ")";
-        }else{
-            fileHits += "; " + selectedFiles.size + " selected)";
-        }
-        // base checked status solely on files. should NEVER have a file in an experiment multiple times
-        var checked = this.state.selectedFiles.size === filteredFiles.length || passedFileCount === 0;
-        var indeterminate = (this.state.selectedFiles.size !== filteredFiles.length && this.state.selectedFiles.size > 0);
-        return(
-            <div className='expset-sublist-entry' key={result.accession}>
-                <Button bsSize="xsmall" className="expset-button" onClick={this.handleToggle}>{this.state.open ? "-" : "+"}</Button>
-                <IndeterminateCheckbox checked={checked} indeterminate={indeterminate} className='expset-checkbox expset-checkbox-sub' onChange={this.handleCheck}/>
-                <a className="expset-entry" href={result['@id'] || ''}>
-                    {result.experiment_summary || result.accession || result.uuid || result['@id']}
-                </a>
-                <span className='expset-hits pull-right'>{fileHits}</span>
-                <Panel className="expset-panel" collapsible expanded={this.state.open}>
-                    {childFiles}
-                </Panel>
-            </div>
-        );
-    }
-});
+        var fileDetailContainer = getFileDetailContainer(this.props.experimentArray, this.props.passExperiments);
+        var fileDetail = fileDetailContainer.fileDetail;
+        var emptyExps = fileDetailContainer.emptyExps;
 
-var FileSublist = React.createClass({
-    getInitialState: function() {
-        return {
-            checked: false
-        };
-    },
+        var files = Object.keys(fileDetail);
+        // unused for now... when format selection is added back in, adapt code below:
+        // var filteredFiles = [];
+        // for(var i=0; i<files.length; i++){
+        //     if(this.props.targetFiles.has(files[i].file_format)){
+        //         filteredFiles.push(files[i].uuid);
+        //     }
+        // }
 
-    // initial checkbox setting
-    componentWillMount: function(){
-        if(this.props.exptPassed && _.contains(this.props.filteredFiles, this.props.file.uuid)){
-            this.setState({
-                checked: true
-            });
-            this.props.handleFileUpdate(this.props.file.uuid, true);
-        }
-    },
-
-    // update checkboxes if parent has changed
-    componentWillReceiveProps: function(nextProps) {
-        if(this.props.filteredFiles !== nextProps.filteredFiles || this.props.exptPassed !== nextProps.exptPassed){
-            if(nextProps.exptPassed && _.contains(nextProps.filteredFiles, this.props.file.uuid)){
-                this.setState({
-                    checked: true
-                });
+        var formattedColumns = Object.keys(this.props.columns).map(function (key){
+            if(key==="Accession"){
+                return(
+                    <td key={key+this.props.href} className="expset-table-cell">
+                        <a className="expset-entry" href={this.props.href}>
+                            {this.props.columns[key]}
+                        </a>
+                    </td>
+                );
+            }else{
+                return(
+                    <td key={key+this.props.href} className="expset-table-cell">{this.props.columns[key]}</td>
+                );
             }
-        }else if(this.props.parentChecked !== nextProps.parentChecked){
-            this.setState({
-                checked: nextProps.parentChecked
-            });
-        }
-    },
+        }.bind(this));
 
-    // update selected file info for parent expt
-    componentDidUpdate(nextProps, nextState){
-        if(nextState.checked !== this.state.checked){
-            this.props.handleFileUpdate(this.props.file.uuid, this.state.checked);
-        }
-    },
+        var formattedAdditionalInfo = Object.keys(this.props.addInfo).map(function (key){
+            return(
+                <div key={key}>
+                    <span className="expset-addinfo-key">{key}:</span>
+                    <span className="expset-addinfo-val">{this.props.addInfo[key]}</span>
+                </div>
+            );
+        }.bind(this));
 
-    handleCheck: function() {
-        this.setState({
-            checked: !this.state.checked
-        });
-    },
+        var checked = this.state.selectedFiles.size === files.length || files.length === emptyExps.length;
+        var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < files.length;
 
-    render: function() {
-        var fileID = this.state.checked + "~" + this.props.exptPassed + "~" + this.props.file.file_format + "~" + this.props.file.uuid;
-        return(
-            <div className="expset-file">
-                <Checkbox validationState='warning' checked={this.state.checked} name="file-checkbox" id={fileID} className='expset-checkbox expset-checkbox-sub' onChange={this.handleCheck}/>
-                <a href={this.props.file['@id'] || ''}>
-                    {this.props.file.file_format || this.props.file.accession || this.props.file.uuid || this.props.file['@id']}
-                </a>
-            </div>
+        return (
+            <tbody>
+                <tr>
+                    <td className="expset-table-cell">
+                    <div className="control-cell expset-entry-passed">
+                        <Button bsSize="xsmall" className="expset-button icon-container" onClick={this.handleToggle}>
+                            <i className={"icon " + (this.state.open ? "ss-navigateup" : "ss-navigatedown")}></i>
+                        </Button>
+                    </div>
+                    </td>
+                    <td className="expset-table-cell">
+                    <div className="control-cell">
+                        <IndeterminateCheckbox checked={checked} indeterminate={indeterminate} onChange={this.handleCheck}/>
+                    </div>
+                    </td>
+                    { formattedColumns }
+                </tr>
+                <tr>
+                    <td className={this.state.open ? "hidden-col-open" : "hidden-col-closed"} colSpan={Object.keys(this.props.columns).length + 2}>
+                        <Panel className="expset-panel" collapsible expanded={this.state.open}>
+                            <div className="expset-addinfo">
+                                { formattedAdditionalInfo }
+                            </div>
+                            <ExperimentsTable 
+                                columnHeaders={[ 
+                                    null, 
+                                    'Experiment Accession', 
+                                    'Biosample Accession',
+                                    'File Accession', 
+                                    'File Type',
+                                    'File Info'
+                                ]}
+                                fileDetailContainer={fileDetailContainer}
+                                parentController={this}
+                            />
+                        </Panel>
+                    </td>
+                </tr>
+            </tbody>
         );
     }
 });
@@ -481,7 +283,7 @@ function typeSelected(href) {
 // generate href for one term only
 // remove filter fields, apply these filters
 function generateTypeHref(base, field, term) {
-    var generated = base + field + '=' + encodeURIComponent(term).replace(/%20/g, '+');
+    var generated = base + field + '=' + encodeURIComponent(term).replace(/%20/g, '+') + '&limit=all';
     return generated;
 }
 
@@ -549,10 +351,18 @@ var ExpTerm = browse.ExpTerm = React.createClass({
     render: function () {
         var field = this.state.field;
         var term = this.state.term;
-        var count = this.props.term['doc_count'];
         var title = this.props.title || term;
         var graph = this.props.context['@graph'];
+        var passSets = 0;
+        // for now, remove facet info on exp numbers
         var termExperiments = siftExperiments(graph, this.props.expSetFilters, this.props.ignoredFilters, field, term);
+        // find number of exp sets
+        graph.map(function(expSet){
+            var intersection = new Set(expSet.experiments_in_set.filter(x => termExperiments.has(x)));
+            if(intersection.size > 0){
+                passSets += 1;
+            }
+        });
         var expCount = termExperiments.size;
         var selected = false;
         if(this.props.expSetFilters[field] && this.props.expSetFilters[field].has(term)){
@@ -561,11 +371,11 @@ var ExpTerm = browse.ExpTerm = React.createClass({
         return (
             <li id={selected ? "selected" : null} key={term}>
                 <a className={selected ? "expterm-selected" : "expterm"} id={selected ? "selected" : null} href="" onClick={this.handleClick}>
-                    <span className="pull-left facet-selector">{selected ? <i className="icon icon-times-circle-o"></i> : ''}</span>
+                    <span className="pull-left facet-selector">{selected ? <i className="icon icon-times-circle"></i> : ''}</span>
                     <span className="facet-item">
                         {title}
                     </span>
-                    <span className="pull-right facet-count">{expCount}</span>
+                    <span className="pull-right facet-count">{passSets}</span>
                 </a>
             </li>
         );
@@ -684,6 +494,7 @@ var DropdownFacet = browse.DropdownFacet = React.createClass({
 });
 
 var FacetList = browse.FacetList = React.createClass({
+
     contextTypes: {
         session: React.PropTypes.object,
         hidePublicAudits: React.PropTypes.bool
@@ -720,10 +531,7 @@ var FacetList = browse.FacetList = React.createClass({
         normalFacets.map(facet => {
             if ((facet.field == 'type') || (!loggedIn && this.context.hidePublicAudits && facet.field.substring(0, 6) === 'audit.')) {
                 return;
-            } else if (facet.field == 'experimentset_type') {
-                exptypeDropdown = <DropdownFacet {...this.props} key={facet.field} facet={facet} width={width}/>;
-                return;
-            } else {
+            } else if (facet.field != 'experimentset_type') {
                 regularFacets.push(<Facet {...this.props} key={facet.field} facet={facet} width={width}/>);
                 return;
             }
@@ -732,20 +540,17 @@ var FacetList = browse.FacetList = React.createClass({
         return (
             <div>
                 <div className="exptype-box">
-                    {exptypeDropdown}
+                    { exptypeDropdown }
                 </div>
                 <div className={"box facets " + this.props.orientation}>
                     <div className="row">
                         {clearButton ?
-                            <div className="pull-left clear-filters-control">
-                                <a href="" onClick={this.clearFilters}><i className="icon icon-times-circle"></i> Clear Filters </a>
+                            <div className="pull-right clear-filters-control">
+                                <a href="" onClick={this.clearFilters}><i className="icon icon-times-circle"></i> Clear All Filters </a>
                             </div>
-                        :   <div className="pull-left clear-filters-control placeholder">
+                        :   <div className="pull-right clear-filters-control placeholder">
                                 <a>Clear Filters</a>
                             </div>}
-                        <div className="expset-facet-header-group">
-                            <div className="expset-facet-header pull-right"># expts</div>
-                        </div>
                     </div>
                     {regularFacets}
                 </div>
@@ -754,7 +559,55 @@ var FacetList = browse.FacetList = React.createClass({
     }
 });
 
+var ColumnSorter = React.createClass({
+
+    sortClickFxn: function(e){
+        e.preventDefault();
+        var reverse = this.props.sortColumn === this.props.val;
+        this.props.sortByFxn(this.props.val, reverse);
+    },
+
+    render: function(){
+        // Make arrow black if selected; flip if sorting in ascending order
+        var iconUsed = this.props.sortColumn === this.props.val ?
+            <a className="expset-column-sort-used" href="#" onClick={this.sortClickFxn}>
+                { this.props.descend ?
+                    <i className="icon sbt-descend" style={{ transform: 'translateY(2px)' }}></i>
+                    :
+                    <i className="icon sbt-ascend" style={{ transform: 'translateY(2px)' }}></i>
+                }
+            </a>
+            :
+            <a className="expset-column-sort" href="" onClick={this.sortClickFxn}>
+                <i className="icon sbt-descend" style={{ transform: 'translateY(2px)' }}></i>
+            </a>;
+        return(
+            <span>
+                <span>{this.props.val} </span> {iconUsed}
+            </span>
+        );
+    }
+});
+
 var ResultTable = browse.ResultTable = React.createClass({
+    
+    propTypes : {       
+        // Props' type validation based on contents of this.props during render.
+        searchBase      : React.PropTypes.string,
+        restrictions    : React.PropTypes.object,
+        context         : React.PropTypes.object.isRequired,
+        expSetFilters   : React.PropTypes.object,
+        fileFormats     : React.PropTypes.array,
+        targetFiles     : React.PropTypes.instanceOf(Set),
+        onChange        : React.PropTypes.func.isRequired
+    },
+
+    getInitialState: function(){
+        return {
+            sortColumn: null,
+            sortReverse: false
+        }
+    },
 
     getDefaultProps: function() {
         return {
@@ -763,13 +616,33 @@ var ResultTable = browse.ResultTable = React.createClass({
         };
     },
 
+    sortBy: function(key, reverse) {
+        if (reverse) {
+            this.setState({
+                sortColumn: key,
+                sortReverse: !this.state.sortReverse
+            });
+        } else {
+            this.setState({
+                sortColumn: key,
+                sortReverse: false
+            });
+        }
+
+    },
+
     render: function() {
         var context = this.props.context;
         var results = context['@graph'];
+        var resultCount = results.length; // account for empty expt sets
+
+        // use first experiment set to grap type (all types are the same in any given graph)
+        var setType = results[0].experimentset_type;
         var targetFiles = this.props.targetFiles;
         var total = context['total'];
-        var columns = context['columns'];
         var searchBase = this.props.searchBase;
+        var expSetFilters = this.props.expSetFilters;
+        var sortColumn = this.state.sortColumn;
         var facets = context['facets'].map(function(facet) {
             if (this.props.restrictions[facet.field] !== undefined) {
                 facet = _.clone(facet);
@@ -778,14 +651,15 @@ var ResultTable = browse.ResultTable = React.createClass({
             }
             return facet;
         }.bind(this));
+
         //find ignored filters
         var ignoredFilters = {};
         for(var i=0; i < facets.length; i++){
             var ignoredSet = new Set();
             var field = facets[i].field;
             var terms = facets[i].terms;
-            if(this.props.expSetFilters[field]){
-                for(let expFilter of this.props.expSetFilters[field]){
+            if(expSetFilters[field]){
+                for(let expFilter of expSetFilters[field]){
                     var found = false;
                     for(var j=0; j < terms.length; j++){
                         if(expFilter === terms[j].key){
@@ -802,40 +676,135 @@ var ResultTable = browse.ResultTable = React.createClass({
                 }
             }
         }
-        var passExperiments = siftExperiments(results, this.props.expSetFilters, ignoredFilters);
+        var passExperiments = siftExperiments(results, expSetFilters, ignoredFilters);
+        
         // Map view icons to svg icons
         var view2svg = {
             'table': 'table',
             'th': 'matrix'
         };
+        
+        var columnTemplate = expSetColumnLookup[setType] ? expSetColumnLookup[setType] : expSetColumnLookup['other'];
+        var addInfoTemplate = expSetAdditionalInfo[setType] ? expSetAdditionalInfo[setType] : expSetAdditionalInfo['other'];
+        var resultHeaders = Object.keys(columnTemplate).map(function(key){
+            return (
+                <th key={key}>
+                    <ColumnSorter 
+                        descend={this.state.sortReverse} 
+                        sortColumn={this.state.sortColumn} 
+                        sortByFxn={this.sortBy} 
+                        val={key}
+                    />
+                </th>
+            );
+        }.bind(this));
+        
         var resultListing = [];
         results.map(function (result) {
             var experimentArray = result.experiments_in_set;
-            var intersection = new Set(experimentArray.filter(x => passExperiments.has(x)));
-            var passed = "expset-entry";
-            var href = result['@id'];
-            var title = result.description || result.accesion || result.uuid || result['@id'];
-            var exptHits = "(" + intersection.size + " of " + experimentArray.length +" experiments)";
-            if(intersection.size > 0){
-                passed += " expset-entry-passed";
-                resultListing.push(<ExperimentSet targetFiles={targetFiles} passed={passed} href={href} title={title} exptHits={exptHits} experimentArray={experimentArray} passExperiments={passExperiments} key={'a' + result['@id']} />);
+            if(experimentArray.length == 0){
+                resultCount = resultCount - 1;
+                return; // ignore if no expts in the expt set
             }
-        })
-        var plural = resultListing.length === 1 ? "set" : "sets";
+
+            var accession = result.accession ? result.accession : "Experiment Set";
+            var intersection = new Set(experimentArray.filter(x => passExperiments.has(x)));
+            var href = result['@id'];
+            var columns = {};
+            var addInfo = {};
+            var firstExp = experimentArray[0]; // use only for biological replicates
+
+            // Experiment Set Row Columns
+            for (var i=0; i<Object.keys(columnTemplate).length;i++) {
+                if(Object.keys(columnTemplate)[i] === 'Exps'){
+                    columns[Object.keys(columnTemplate)[i]] = experimentArray.length;
+                    continue;
+                }else if(Object.keys(columnTemplate)[i] === 'Accession'){
+                    columns[Object.keys(columnTemplate)[i]] = accession;
+                    continue;
+                }
+                var splitFilters = columnTemplate[Object.keys(columnTemplate)[i]].split('.');
+                var valueProbe = firstExp;
+                for (var j=0; j<splitFilters.length;j++){
+                    valueProbe = Array.isArray(valueProbe) ? valueProbe[0][splitFilters[j]] : valueProbe[splitFilters[j]];
+                }
+                columns[Object.keys(columnTemplate)[i]] = valueProbe;
+            }
+
+            // Experiment Set Row Add'l Info (Lab, etc.)
+            for (var i=0; i<Object.keys(addInfoTemplate).length;i++){
+                var splitFilters = addInfoTemplate[Object.keys(addInfoTemplate)[i]].split('.');
+                var valueProbe = firstExp;
+                for (var j=0; j<splitFilters.length;j++){
+                    valueProbe = Array.isArray(valueProbe) ? valueProbe[0][splitFilters[j]] : valueProbe[splitFilters[j]];
+                }
+                addInfo[Object.keys(addInfoTemplate)[i]] = valueProbe;
+            }
+
+            if(intersection.size > 0){
+                var keyVal = "";
+                if(sortColumn){
+                    keyVal = columns[sortColumn];
+                }
+                resultListing.push(
+                    <ExperimentSetRow 
+                        addInfo={addInfo} 
+                        columns={columns} 
+                        expSetFilters={expSetFilters} 
+                        targetFiles={targetFiles} 
+                        href={href} 
+                        experimentArray={experimentArray} 
+                        passExperiments={intersection}
+                        key={keyVal+href} 
+                    />
+                );
+            }
+        });
+
+        if(sortColumn){
+            resultListing.sort(function(a,b){
+                if(Number.isInteger(parseInt(a.key.split('/')[0]))){
+                    return(a.key.split('/')[0] - b.key.split('/')[0]);
+                }else{
+                    return(a.key.split('/')[0].localeCompare(b.key.split('/')[0]));
+                }
+            });
+        }
+        if(this.state.sortReverse){
+            resultListing.reverse();
+        }
         return (
             <div>
                 <div className="row">
-                    {facets.length ? <div className="col-sm-5 col-md-4 col-lg-3">
-                        <FacetList {...this.props} facets={facets}
-                                    searchBase={searchBase ? searchBase + '&' : searchBase + '?'} onFilter={this.onFilter} ignoredFilters={ignoredFilters}/>
-                    </div> : ''}
-                    <div className="col-sm-7 col-md-8 col-lg-9">
-                        <div className="row">
-                            <h4 className='row browse-title'>Showing {resultListing.length} experiment {plural}.</h4>
+                    { facets.length ?
+                        <div className="col-sm-5 col-md-4 col-lg-3">
+                            <FacetList
+                                {...this.props}
+                                facets={facets}
+                                searchBase={searchBase ? searchBase + '&' : searchBase + '?'}
+                                onFilter={this.onFilter}
+                                ignoredFilters={ignoredFilters}
+                            />
+                        </div> 
+                        : 
+                        null 
+                    }
+                    <div className="expset-result-table-fix col-sm-7 col-md-8 col-lg-9">
+                        <h5 className='browse-title'>Showing {resultListing.length} of {resultCount} experiment sets.</h5>
+                        <div>
+                            { resultListing.length > 0 ?
+                            <Table className="expset-table table-tbody-striped" bordered condensed id="result-table">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th></th>
+                                        { resultHeaders }
+                                    </tr>
+                                </thead>
+                                { resultListing }
+                            </Table>
+                            : <div></div> }
                         </div>
-                        <ul className="nav result-table" id="result-table">
-                            {resultListing}
-                        </ul>
                     </div>
                 </div>
             </div>
@@ -948,7 +917,8 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
         var downloadButton = <Button className="expset-selector-button" bsSize="xsmall" onClick={this.downloadFiles}>Download</Button>;
         return(
             <div>
-                <div className="row">
+
+                {/*<div className="row">
                     <div className="box expset-whole-selector col-sm-12 col-md-10 col-lg-9 col-md-push-2 col-lg-push-3">
                         <div className="col-sm-8 col-md-8 col-lg-8 expset-file-selector">
                             <div className="row">
@@ -973,10 +943,10 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
                             </div>
                         </div>
                     </div>
-                </div>
-                <div className="row">
-                    <ResultTable {...this.props} targetFiles={targetFiles}/>
-                </div>
+                </div>*/}
+
+                <ResultTable {...this.props} targetFiles={targetFiles}/>
+
             </div>
 
         );
@@ -984,6 +954,7 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
 });
 
 var Browse = browse.Browse = React.createClass({
+    
     contextTypes: {
         location_href: React.PropTypes.string,
         navigate: React.PropTypes.func
@@ -1019,24 +990,50 @@ var Browse = browse.Browse = React.createClass({
     render: function() {
         var context = this.props.context;
         var fileFormats = findFormats(context['@graph']);
+
         // no results found!
         if(context.total === 0 && context.notification){
             return <div className="error-page"><h4>{context.notification}</h4></div>
         }
         var results = context['@graph'];
         var searchBase = url.parse(this.context.location_href).search || '';
+
         // browse is only for experiment sets
         if(searchBase.indexOf('?type=ExperimentSet') === -1){
-            return(<div className="error-page">
-                        <h4><a href='/browse/?type=ExperimentSet&experimentset_type=biological+replicates'>Only experiment sets may be browsed.</a></h4>
-                    </div>
+            return(
+                <div className="error-page">
+                    <h4>
+                        <a href='/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all'>
+                            Only experiment sets may be browsed.
+                        </a>
+                    </h4>
+                </div>
             );
         }
+
         return (
-            <div className="panel data-display main-panel">
-                <ControlsAndResults {...this.props} key={undefined} fileFormats={fileFormats} searchBase={searchBase} onChange={this.context.navigate} changeFilters={this.changeFilters}/>
+            <div className="browse-page-container">
+
+                <h1 className="page-title">Data Browser</h1>
+                <h4 className="page-subtitle">Filter & browse experiments</h4>
+
+                <ControlsAndResults
+                    {...this.props}
+                    key={undefined}
+                    fileFormats={fileFormats}
+                    searchBase={searchBase}
+                    onChange={this.context.navigate}
+                    changeFilters={this.changeFilters}
+                />
+
             </div>
         );
+
+        /**
+         * Re: removing .panel above: .panel not really needed; adds extra outer padding which causes
+         * non-alignment w/ navbar logo.
+         */
+
     }
 });
 

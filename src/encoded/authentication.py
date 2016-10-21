@@ -97,7 +97,7 @@ class NamespacedAuthenticationPolicy(object):
         super(NamespacedAuthenticationPolicy, self).__init__(*args, **kw)
 
     def unauthenticated_userid(self, request):
-        cls  = super(NamespacedAuthenticationPolicy, self) 
+        cls  = super(NamespacedAuthenticationPolicy, self)
         userid = super(NamespacedAuthenticationPolicy, self) \
             .unauthenticated_userid(request)
         if userid is not None:
