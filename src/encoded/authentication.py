@@ -165,7 +165,8 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
                          'unathenticated_userid', request)
                 return None
 
-        if user_info['email_verified'] is True:
+        # for strange unknow reasons sometimes user_info comes back empty
+        if user_info and user_info['email_verified'] is True:
             email = request._auth0_authenticted = user_info['email'].lower()
             return email
         else:
