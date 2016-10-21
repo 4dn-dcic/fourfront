@@ -165,7 +165,8 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
             );
         }.bind(this));
 
-        var checked = this.state.selectedFiles.size === files.length || files.length === emptyExps.length;
+        var checked = this.state.selectedFiles.size === files.length;
+        var disabled = files.length === emptyExps.length;
         var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < files.length;
 
         return (
@@ -178,7 +179,12 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                     </td>
                     <td className="expset-table-cell">
                         <div className="control-cell">
-                            <IndeterminateCheckbox checked={checked} indeterminate={indeterminate} onChange={this.handleCheck}/>
+                            <IndeterminateCheckbox 
+                                checked={checked}
+                                indeterminate={indeterminate}
+                                disabled={disabled}
+                                onChange={this.handleCheck}
+                            />
                         </div>
                     </td>
                     { formattedColumns }

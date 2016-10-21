@@ -239,7 +239,12 @@ var FileEntry = React.createClass({
         //         checked: true
         //     });
         // }
-        if(this.props.info.data && this.state.checked && typeof this.props.handleFileUpdate == 'function'){
+        if(
+            this.props.info.data &&
+            this.props.info.data['@id'] &&
+            this.state.checked &&
+            typeof this.props.handleFileUpdate == 'function'
+        ){
             this.props.handleFileUpdate(this.props.info.data.uuid, true);
         }
     },
@@ -264,8 +269,9 @@ var FileEntry = React.createClass({
     // update parent checked state
     componentWillUpdate(nextProps, nextState){
         if(
-            (nextState.checked !== this.state.checked || this.props.expSetFilters !== nextProps.expSetFilters) 
-            && nextProps.info.data
+            (nextState.checked !== this.state.checked || this.props.expSetFilters !== nextProps.expSetFilters) &&
+            nextProps.info.data &&
+            nextProps.info.data['@id']
         ){
             this.props.handleFileUpdate(nextProps.info.data.uuid, nextState.checked);
         }
@@ -372,11 +378,14 @@ var FileEntry = React.createClass({
         return(
             <tbody>
                 <tr className='expset-sublist-entry'>
-                    {file['@id'] ?
+                    { file['@id'] ?
                         <td rowSpan="2" className="expset-exp-cell expset-checkbox-cell">
                             <Checkbox validationState='warning' checked={this.state.checked} name="file-checkbox" id={fileID} className='expset-checkbox-sub' onChange={this.handleCheck}/>
                         </td>
-                    : <td rowSpan="2"></td>
+                    : 
+                        <td rowSpan="2" className="expset-exp-cell expset-checkbox-cell">
+                            <Checkbox checked={false} disabled={true} className='expset-checkbox-sub' />
+                        </td>
                     }
                     <td rowSpan="2" className="expset-exp-cell expset-exp-accession-title-cell">
                         <a href={

@@ -11,8 +11,7 @@ var FacetList = module.exports.FacetList = React.createClass({
     },
 
     propTypes : {
-        // JSON data of (containing) page.
-        context : React.PropTypes.object,
+        context : React.PropTypes.object,       // JSON data of (containing) page.
         /**
          * Array of objects containing - 
          *   'field' : string (schema path), 
@@ -23,13 +22,15 @@ var FacetList = module.exports.FacetList = React.createClass({
         facets : React.PropTypes.array,
         // { '<schemaKey : string > (active facet categories)' : Set (active filters within category) }
         expSetFilters : React.PropTypes.object,
-        // 'vertical' or 'horizontal'
-        orientation : React.PropTypes.string,
-        ignoredFilters : React.PropTypes.any, // Passed down to ExpTerm
+        orientation : React.PropTypes.string,   // 'vertical' or 'horizontal'
+        changeFilters : React.PropTypes.func,   // func(field : string, term : string) - passed down to ExpTerm
+        ignoredFilters : React.PropTypes.any,   // Passed down to ExpTerm
 
-        searchBase : React.PropTypes.string, // Unused
-        restrictions : React.PropTypes.object, // Unused
-        mode : React.PropTypes.string // Unused
+        onFilter : React.PropTypes.func,        // Unused
+        fileFormats : React.PropTypes.array,    // Unused
+        searchBase : React.PropTypes.string,    // Unused
+        restrictions : React.PropTypes.object,  // Unused
+        mode : React.PropTypes.string           // Unused
     },
 
     getDefaultProps: function() {
@@ -71,6 +72,7 @@ var FacetList = module.exports.FacetList = React.createClass({
                         context={context}
                         expSetFilters={this.props.expSetFilters}
                         ignoredFilters={this.props.ignoredFilters}
+                        changeFilters={this.props.changeFilters}
                         key={facet.field}
                         facet={facet}
                         width="inherit"
