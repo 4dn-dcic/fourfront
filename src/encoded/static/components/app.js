@@ -17,6 +17,8 @@ var serialize = require('form-serialize');
 var ga = require('google-analytics');
 var dispatch_dict = {}; //used to store value for simultaneous dispatch
 
+var mixins = require('./mixins');
+
 var portal = {
     portal_title: '4DN Data Portal',
     global_sections: [
@@ -55,7 +57,7 @@ var Title = React.createClass({
 // It lives for the entire duration the page is loaded.
 // App maintains state for the
 var App = React.createClass({
-    mixins: [mixins.Auth0, mixins.HistoryAndTriggers],
+    mixins: [mixins.HistoryAndTriggers],
     triggers: {
         login: 'triggerLogin',
         profile: 'triggerProfile',
@@ -66,7 +68,9 @@ var App = React.createClass({
         return {
             errors: [],
             dropdownComponent: undefined,
-            content: undefined
+            content: undefined,
+            session: null,
+            session_properties: {}
         };
     },
 
@@ -78,7 +82,10 @@ var App = React.createClass({
         location_href: React.PropTypes.string,
         onDropdownChange: React.PropTypes.func,
         portal: React.PropTypes.object,
-        hidePublicAudits: React.PropTypes.bool
+        hidePublicAudits: React.PropTypes.bool,
+        fetch: React.PropTypes.func,
+        session: React.PropTypes.object,
+        session_properties: React.PropTypes.object
     },
 
     // Retrieve current React context
@@ -90,7 +97,10 @@ var App = React.createClass({
             location_href: this.props.href,
             onDropdownChange: this.handleDropdownChange, // Function to process dropdown state change
             portal: portal,
-            hidePublicAudits: true // True if audits should be hidden on the UI while logged out
+            hidePublicAudits: true, // True if audits should be hidden on the UI while logged out
+            fetch: this.fetch,
+            session: this.state.session,
+            session_properties: this.state.session_properties
         };
     },
 
@@ -183,6 +193,129 @@ var App = React.createClass({
     // Once the app component is mounted, bind keydowns to handleKey function
     componentDidMount: function() {
         globals.bindEvent(window, 'keydown', this.handleKey);
+        var session_cookie = this.extractSessionCookie();
+        var session = this.parseSessionCookie(session_cookie);
+        if (session['auth.userid']) {
+            this.fetchSessionProperties();
+        }
+        var query_href;
+        if(document.querySelector('link[rel="canonical"]')){
+            query_href = document.querySelector('link[rel="canonical"]').getAttribute('href');
+        }else{
+            query_href = this.props.href;
+        }
+        this.setState({session: session});
+        store.dispatch({
+            type: {'href':query_href, 'session_cookie': session_cookie}
+        });
+    },
+
+    componentWillReceiveProps: function (nextProps) {
+        if (!this.state.session || (this.props.session_cookie !== nextProps.session_cookie)) {
+            var nextState = {};
+            nextState.session = this.parseSessionCookie(nextProps.session_cookie);
+            if (!nextState.session['auth.userid']) {
+                nextState.session_properties = {};
+            } else if (nextState.session['auth.userid'] !== (this.state.session && this.state.session['auth.userid'])) {
+                this.fetchSessionProperties();
+            }
+            this.setState(nextState);
+        }
+    },
+
+    componentDidUpdate: function (prevProps, prevState) {
+        var key;
+        if (this.props) {
+            for (key in this.props) {
+                if (this.props[key] !== prevProps[key]) {
+                    console.log('changed props: %s', key);
+                }
+            }
+        }
+        if (this.state) {
+            for (key in this.state) {
+                if (this.state[key] !== prevState[key]) {
+                    console.log('changed state: %s', key, this.state[key]);
+                }
+            }
+        }
+    },
+
+    // functions previously in mixins.js
+    fetch: function (url, options) {
+        options = _.extend({credentials: 'same-origin'}, options);
+        var http_method = options.method || 'GET';
+        if (!(http_method === 'GET' || http_method === 'HEAD')) {
+            var headers = options.headers = _.extend({}, options.headers);
+            var session = this.state.session;
+            if (session && session._csrft_) {
+                headers['X-CSRF-Token'] = session._csrft_;
+            }
+        }
+        // Strip url fragment.
+        var url_hash = url.indexOf('#');
+        if (url_hash > -1) {
+            url = url.slice(0, url_hash);
+        }
+        var request = fetch(url, options);
+        request.xhr_begin = 1 * new Date();
+        request.then(response => {
+            request.xhr_end = 1 * new Date();
+            var stats_header = response.headers.get('X-Stats') || '';
+            request.server_stats = require('querystring').parse(stats_header);
+            request.etag = response.headers.get('ETag');
+            var session_cookie = this.extractSessionCookie();
+            if (this.props.session_cookie !== session_cookie) {
+                store.dispatch({
+                    type: {'session_cookie': session_cookie}
+                });
+            }
+        });
+        return request;
+    },
+
+    extractSessionCookie: function () {
+        var cookie = require('cookie-monster');
+        if (cookie(document).get('session')){
+            return cookie(document).get('session');
+        }else{
+            return this.props.session_cookie;
+        }
+
+    },
+
+    parseSessionCookie: function (session_cookie) {
+        var Buffer = require('buffer').Buffer;
+        var session;
+        if (session_cookie) {
+            // URL-safe base64
+            session_cookie = session_cookie.replace(/\-/g, '+').replace(/\_/g, '/');
+            // First 64 chars is the sha-512 server signature
+            // Payload is [accessed, created, data]
+            try {
+                session = JSON.parse(Buffer(session_cookie, 'base64').slice(64).toString())[2];
+            } catch (e) {
+            }
+        }
+        return session || {};
+    },
+
+    fetchSessionProperties: function() {
+        if (this.sessionPropertiesRequest) {
+            return;
+        }
+        this.sessionPropertiesRequest = true;
+        this.fetch('/session-properties', {
+            headers: {'Accept': 'application/json'}
+        })
+        .then(response => {
+            this.sessionPropertiesRequest = null;
+            if (!response.ok) throw response;
+            return response.json();
+        })
+        .then(session_properties => {
+            this.setState({session_properties: session_properties});
+        });
     },
 
     render: function() {
