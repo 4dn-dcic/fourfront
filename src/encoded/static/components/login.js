@@ -32,7 +32,7 @@ var Login = React.createClass({
             theme: {
                 logo: '/static/img/4dn_logo.svg'
             },
-            allowedConnections: ['github',  'google-oauth2']
+            allowedConnections: ['github', 'google-oauth2']
         });
         this.lock.on("authenticated", this.handleAuth0Login);
     },
