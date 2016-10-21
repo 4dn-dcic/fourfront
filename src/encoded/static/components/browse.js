@@ -66,6 +66,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         href : React.PropTypes.string,
         passExperiments : React.PropTypes.instanceOf(Set),
         targetFiles : React.PropTypes.instanceOf(Set),
+        rowNumber : React.PropTypes.number
     },
 
     getInitialState: function() {
@@ -168,7 +169,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < files.length;
 
         return (
-            <tbody className={"expset-section expset-entry-passed " + (this.state.open ? "open" : "closed")}>
+            <tbody className={"expset-section expset-entry-passed " + (this.state.open ? "open" : "closed")} data-row={this.props.rowNumber}>
                 <tr className="expset-table-row">
                     <td className="expset-table-cell dropdown-button-cell">
                         <Button bsSize="xsmall" className="expset-button icon-container" onClick={this.handleToggle}>
@@ -477,7 +478,9 @@ var ResultTable = browse.ResultTable = React.createClass({
     },
 
     formatExperimentSetListings : function(passExperiments, columnTemplate, addInfoTemplate){
-        var resultListings = [];
+        var resultListings = [],
+            resultCount = 0;
+
         this.props.context['@graph'].map(function (result) {
             var experimentArray = result.experiments_in_set;
             if(experimentArray.length == 0){
@@ -532,7 +535,8 @@ var ResultTable = browse.ResultTable = React.createClass({
                         href={result['@id']} 
                         experimentArray={experimentArray} 
                         passExperiments={intersection}
-                        key={keyVal+result['@id']} 
+                        key={keyVal+result['@id']}
+                        rowNumber={resultCount++}
                     />
                 );
             }

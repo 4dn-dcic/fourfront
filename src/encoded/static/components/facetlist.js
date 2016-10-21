@@ -10,6 +10,28 @@ var FacetList = module.exports.FacetList = React.createClass({
         hidePublicAudits: React.PropTypes.bool
     },
 
+    propTypes : {
+        // JSON data of (containing) page.
+        context : React.PropTypes.object,
+        /**
+         * Array of objects containing - 
+         *   'field' : string (schema path), 
+         *   'terms' : [{'doc_count' : integer (# of matching experiments), 'key' : string (term/filter name) }],
+         *   'title' : string (category name),
+         *   'total' : integer (# of experiments)
+         */
+        facets : React.PropTypes.array,
+        // { '<schemaKey : string > (active facet categories)' : Set (active filters within category) }
+        expSetFilters : React.PropTypes.object,
+        // 'vertical' or 'horizontal'
+        orientation : React.PropTypes.string,
+        ignoredFilters : React.PropTypes.any, // Passed down to ExpTerm
+
+        searchBase : React.PropTypes.string, // Unused
+        restrictions : React.PropTypes.object, // Unused
+        mode : React.PropTypes.string // Unused
+    },
+
     getDefaultProps: function() {
         return {orientation: 'vertical'};
     },
@@ -22,8 +44,9 @@ var FacetList = module.exports.FacetList = React.createClass({
     },
 
     render: function() {
+        console.log(this.props);
         var context = this.props.context,
-            term = this.props.term,
+            //term = this.props.term,
             facets = this.props.facets, // Get all facets, and "normal" facets, meaning non-audit facets
             loggedIn = this.context.session && this.context.session['auth.userid'],
             regularFacets = [],
@@ -43,7 +66,15 @@ var FacetList = module.exports.FacetList = React.createClass({
             if ((facet.field == 'type') || (!loggedIn && this.context.hidePublicAudits && facet.field.substring(0, 6) === 'audit.')) {
                 return;
             } else if (facet.field != 'experimentset_type') {
-                regularFacets.push(<Facet {...this.props} key={facet.field} facet={facet} width="inherit" />);
+                regularFacets.push(
+                    <Facet 
+                        context={context}
+                        expSetFilters={this.props.expSetFilters}
+                        ignoredFilters={this.props.ignoredFilters}
+                        key={facet.field}
+                        facet={facet}
+                        width="inherit"
+                    />);
                 return;
             }
         });
