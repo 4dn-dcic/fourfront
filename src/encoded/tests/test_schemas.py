@@ -9,24 +9,47 @@ SCHEMA_FILES = [
     if f.endswith('.json')
 ]
 
+
 @pytest.fixture(scope='module')
 def master_mixins():
     return load_schema('encoded:schemas/mixins.json')
 
+
 @pytest.mark.parametrize('schema', SCHEMA_FILES)
 def test_load_schema(schema, master_mixins):
     loaded_schema = load_schema('encoded:schemas/%s' % schema)
+    if schema == 'experiment_capture_c.json':
+        print(loaded_schema)
+        #assert False
     assert(loaded_schema)
 
     #check the mixin properties for each schema
     if not schema == ('mixins.json'):
         verify_mixins(loaded_schema, master_mixins)
 
+
+@pytest.mark.parametrize('schema', SCHEMA_FILES)
+def test_schema_has_status(schema):
+    schemas_wo_status = [
+        'access_key.json',
+    ]
+    schemas_w_status_as_properties = [
+        'experiment.json',
+        'experiment_capture_c.json',
+        'experiment_hic.json',
+        'file.json',
+        'file_fastq.json',
+        'file_fasta.json',
+
+    ]
+    loaded_schema = load_schema('encoded:schemas/%s' % schema)
+
+
 def verify_mixins(loaded_schema, master_mixins):
     '''
     test to ensure that we didn't accidently overwrite mixins somehow
     '''
-    for mixin in loaded_schema.get('mixinProperties',[]):
+    for mixin in loaded_schema.get('mixinProperties', []):
         # get the mixin name from {'$ref':'mixins.json#/schema_version'}
         mixin_file_name, mixin_name = mixin['$ref'].split('/')
         if mixin_file_name != "mixins.json":
