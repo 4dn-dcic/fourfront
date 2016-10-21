@@ -45,7 +45,7 @@ var ItemLoader = React.createClass({
         return (
             <fetched.FetchedData>
                 <fetched.Param name="schemas" url="/profiles/" />
-                <Item context={this.props.context} />
+                <Item context={this.props.context} expSetFilters={this.props.expSetFilters} />
             </fetched.FetchedData>
         );
     }
@@ -53,7 +53,6 @@ var ItemLoader = React.createClass({
 
 var Item = React.createClass({
     render: function() {
-
         var context = this.props.context;
         var itemClass = globals.itemClass(context, 'view-item');
         var IPanel = globals.panel_views.lookup(context);
@@ -91,7 +90,7 @@ var IPanel = module.exports.IPanel = React.createClass({
         var itemClass = globals.itemClass(context, 'view-detail panel');
         var title = globals.listing_titles.lookup(context)({context: context});
         var sortKeys = Object.keys(context).sort();
-        console.log(this.props);
+        //console.log(this.props);
         var tips = tipsFromSchema(schemas, context);
 
 

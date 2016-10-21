@@ -15,8 +15,6 @@ var DropdownButton = require('react-bootstrap').DropdownButton;
 var MenuItem = require('react-bootstrap').MenuItem;
 var store = require('../store');
 var FacetList = require('./facetlist').FacetList;
-var Facet = require('./facetlist').Facet;
-var ExpTerm = require('./facetlist').ExpTerm;
 var siftExperiments = require('./facetlist').siftExperiments;
 var ExperimentsTable = require('./experiments-table').ExperimentsTable;
 var getFileDetailContainer = require('./experiments-table').getFileDetailContainer;
@@ -166,7 +164,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         }.bind(this));
 
         var checked = this.state.selectedFiles.size === files.length;
-        var disabled = files.length === emptyExps.length;
+        var disabled = files.length === emptyExps.length; // @Carl : Any thoughts? Unsure re: case if multiple files in experiment 
         var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < files.length;
 
         return (
@@ -400,12 +398,11 @@ var ResultTable = browse.ResultTable = React.createClass({
     propTypes : {       
         // Props' type validation based on contents of this.props during render.
         searchBase      : React.PropTypes.string,
-        restrictions    : React.PropTypes.object,
         context         : React.PropTypes.object.isRequired,
         expSetFilters   : React.PropTypes.object,
         fileFormats     : React.PropTypes.array,
         targetFiles     : React.PropTypes.instanceOf(Set),
-        onChange        : React.PropTypes.func.isRequired
+        onChange        : React.PropTypes.func
     },
 
     getInitialState: function(){
@@ -416,8 +413,8 @@ var ResultTable = browse.ResultTable = React.createClass({
     },
 
     getDefaultProps: function() {
+        // 'restrictions' object migrated to facetlist.js > FacetList
         return {
-            restrictions: {},
             searchBase: ''
         };
     },
@@ -435,43 +432,6 @@ var ResultTable = browse.ResultTable = React.createClass({
             });
         }
 
-    },
-
-    adjustedFacets : function(){
-        return this.props.context['facets'].map(function(facet){
-            if (this.props.restrictions[facet.field] !== undefined) {
-                facet = _.clone(facet);
-                facet.restrictions = this.props.restrictions[facet.field];
-                facet.terms = facet.terms.filter(term => _.contains(facet.restrictions, term.key));
-            }
-            return facet;
-        }.bind(this));
-    },
-
-    findIgnoredFilters : function(facets){
-        var ignoredFilters = {};
-        for(var i=0; i < facets.length; i++){
-            var ignoredSet = new Set();
-            var field = facets[i].field;
-            var terms = facets[i].terms;
-            if(this.props.expSetFilters[field]){
-                for(let expFilter of this.props.expSetFilters[field]){
-                    var found = false;
-                    for(var j=0; j < terms.length; j++){
-                        if(expFilter === terms[j].key){
-                            found = true;
-                            break;
-                        }
-                    }
-                    if(!found){
-                        ignoredSet.add(expFilter);
-                    }
-                }
-                if(ignoredSet.size > 0){
-                    ignoredFilters[field] = ignoredSet;
-                }
-            }
-        }
     },
 
     totalResultCount : function(){
@@ -561,7 +521,9 @@ var ResultTable = browse.ResultTable = React.createClass({
                 if(!isNaN(a)){
                     return (a - b);
                 } else {
-                    //return(a.localeCompare(b));
+                    //return(a.localeCompare(b)); 
+                    // Above doesn't assign consistently right values to letters/numbers, e.g. sometimes an int > a letter
+                    // Not sure how important.
                     if (a < b) return -1;
                     else if (a > b) return 1;
                     else return 0;
@@ -582,10 +544,10 @@ var ResultTable = browse.ResultTable = React.createClass({
         var searchBase = this.props.searchBase;
         var expSetFilters = this.props.expSetFilters;
         var sortColumn = this.state.sortColumn;
-        var facets = this.adjustedFacets();
+        var facets = FacetList.adjustedFacets(this.props.context.facets);
 
         //find ignored filters
-        var ignoredFilters = this.findIgnoredFilters(facets);
+        var ignoredFilters = FacetList.findIgnoredFilters(facets, expSetFilters);
         var passExperiments = siftExperiments(results, expSetFilters, ignoredFilters);
         
         // Map view icons to svg icons
@@ -618,37 +580,37 @@ var ResultTable = browse.ResultTable = React.createClass({
         );
 
         return (
-            <div>
-                <div className="row">
-                    { facets.length ?
-                        <div className="col-sm-5 col-md-4 col-lg-3">
-                            <FacetList
-                                {...this.props}
-                                facets={facets}
-                                searchBase={searchBase ? searchBase + '&' : searchBase + '?'}
-                                onFilter={this.onFilter}
-                                ignoredFilters={ignoredFilters}
-                            />
-                        </div> 
-                        : 
-                        null 
-                    }
-                    <div className="expset-result-table-fix col-sm-7 col-md-8 col-lg-9">
-                        <h5 className='browse-title'>Showing {formattedExperimentSetListings.length} of {this.totalResultCount()} experiment sets.</h5>
-                        <div>
-                            { formattedExperimentSetListings.length > 0 ?
-                            <Table className="expset-table table-tbody-striped" bordered condensed id="result-table">
-                                <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th></th>
-                                        { resultHeaders }
-                                    </tr>
-                                </thead>
-                                { formattedExperimentSetListings }
-                            </Table>
-                            : <div></div> }
-                        </div>
+            <div className="row">
+                { facets.length ?
+                    <div className="col-sm-5 col-md-4 col-lg-3">
+                        <FacetList
+                            urlPath={this.props.context['@id']}
+                            experimentSetListJSON={this.props.context['@graph']}
+                            orientation="vertical"
+                            expSetFilters={this.props.expSetFilters}
+                            facets={facets}
+                            onFilter={this.onFilter}
+                            ignoredFilters={ignoredFilters}
+                        />
+                    </div> 
+                    : 
+                    null 
+                }
+                <div className="expset-result-table-fix col-sm-7 col-md-8 col-lg-9">
+                    <h5 className='browse-title'>Showing {formattedExperimentSetListings.length} of {this.totalResultCount()} experiment sets.</h5>
+                    <div>
+                        { formattedExperimentSetListings.length > 0 ?
+                        <Table className="expset-table table-tbody-striped" bordered condensed id="result-table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    { resultHeaders }
+                                </tr>
+                            </thead>
+                            { formattedExperimentSetListings }
+                        </Table>
+                        : <div></div> }
                     </div>
                 </div>
             </div>
@@ -804,36 +766,15 @@ var Browse = browse.Browse = React.createClass({
         navigate: React.PropTypes.func
     },
 
-    changeFilters: function(field, term) {
-        // store currently selected filters as a dict of sets
-        var tempObj = {};
-        var newObj = {};
-        var expSet = this.props.expSetFilters[field] ? new Set(this.props.expSetFilters[field]) : new Set();
-        if(expSet.has(term)){
-            // term is already present, so delete it
-            expSet.delete(term);
-        }else{
-            expSet.add(term);
-        }
-        if(expSet.size > 0){
-            tempObj[field] = expSet;
-            newObj = Object.assign({}, this.props.expSetFilters, tempObj);
-        }else{ //remove key if set is empty
-            newObj = Object.assign({}, this.props.expSetFilters);
-            delete newObj[field];
-        }
-        store.dispatch({
-            type : {'expSetFilters' : newObj}
-        });
-    },
-
     componentWillMount: function() {
-        var searchBase = url.parse(this.context.location_href).search || '';
+        //var searchBase = url.parse(this.context.location_href).search || '';
     },
 
     render: function() {
         var context = this.props.context;
         var fileFormats = findFormats(context['@graph']);
+
+        console.log('Browse', this.props);
 
         // no results found!
         if(context.total === 0 && context.notification){
@@ -867,7 +808,6 @@ var Browse = browse.Browse = React.createClass({
                     fileFormats={fileFormats}
                     searchBase={searchBase}
                     onChange={this.context.navigate}
-                    changeFilters={this.changeFilters}
                 />
 
             </div>

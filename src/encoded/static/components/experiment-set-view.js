@@ -6,6 +6,8 @@ var DescriptorField = require('./item').DescriptorField;
 var tipsFromSchema = require('./item').tipsFromSchema; 
 var ExperimentsTable = require('./experiments-table').ExperimentsTable;
 var getFileDetailContainer = require('./experiments-table').getFileDetailContainer;
+var FacetList = require('./facetlist').FacetList;
+var siftExperiments = require('./facetlist').siftExperiments;
 
 /**
  * Entire ExperimentSet page view.
@@ -30,6 +32,10 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         schemas : React.PropTypes.object,
         context : React.PropTypes.object
         // Potential ToDo - custom validation for w/e key/vals the page needs.
+    },
+
+    contextTypes: {
+        location_href: React.PropTypes.string
     },
 
     getInitialState : function(){
@@ -155,9 +161,25 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
     },
 
     render: function() {
+
+        console.log(this.context);
+        console.log(this.props);
         
+        //console.log(this.props);
         var title = globals.listing_titles.lookup(this.props.context)({context: this.props.context});
         var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container experiment-set-page');
+
+        /*
+        var facetList = (
+            <FacetList
+                urlPath={this.props.context['@id']}
+                experimentSetListJSON={this.props.context.experiments_in_set}
+                orientation="vertical"
+                expSetFilters={this.props.expSetFilters}
+                facets={ this.props.facets }
+            />
+        );
+        */
 
         return (
             <div className={itemClass}>
@@ -165,26 +187,38 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                 <h1 className="page-title">Experiment Set <span className="subtitle prominent">{ title }</span></h1>
 
                 <ExperimentSetHeader {...this.props} />
-                
-                <ExperimentSetInfoBlock 
-                    labInfo={ this.state.details_lab }
-                    awardInfo={ this.state.details_award }
-                    {...this.props} 
-                />
 
-                <div className="exp-table-container">
-                    <ExperimentsTable 
-                        columnHeaders={[ 
-                            null, 
-                            'Experiment Accession', 
-                            'Biosample Accession',
-                            'File Accession', 
-                            'File Type',
-                            'File Info'
-                        ]}
-                        fileDetailContainer={this.fileDetailContainer}
-                        parentController={this}
-                    />
+                <div className="row">
+                
+                    <div className="col-sm-5 col-md-4 col-lg-3">
+
+                    </div>
+
+                    <div className="col-sm-7 col-md-8 col-lg-9">
+
+                        <ExperimentSetInfoBlock 
+                            labInfo={ this.state.details_lab }
+                            awardInfo={ this.state.details_award }
+                            {...this.props} 
+                        />
+
+                        <div className="exp-table-container">
+                            <ExperimentsTable 
+                                columnHeaders={[ 
+                                    null, 
+                                    'Experiment Accession', 
+                                    'Biosample Accession',
+                                    'File Accession', 
+                                    'File Type',
+                                    'File Info'
+                                ]}
+                                fileDetailContainer={this.fileDetailContainer}
+                                parentController={this}
+                            />
+                        </div>
+
+                    </div>
+
                 </div>
 
                 <br/><br/><br /><br /><hr />
@@ -403,7 +437,6 @@ var formValue = function (schemas, item) {
             toReturn.push(formValue(schemas, item[i]));
         }
     }else if (typeof item === 'object') {
-        //console.log(item);
         toReturn.push(<SubIPanel schemas={schemas} content={item}/>);
     }else{
         if (typeof item === 'string' && item.charAt(0) === '/') {
