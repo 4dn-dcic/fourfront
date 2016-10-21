@@ -19,22 +19,6 @@ def includeme(config):
 
 
 @collection(
-    name='labs',
-    unique_key='lab:name',
-    properties={
-        'title': 'Labs',
-        'description': 'Listing of 4D Nucleome labs',
-    })
-class Lab(Item):
-    """Lab class."""
-
-    item_type = 'lab'
-    schema = load_schema('encoded:schemas/lab.json')
-    name_key = 'name'
-    embedded = ['awards']
-
-
-@collection(
     name='protocols',
     properties={
         'title': 'Protocols',
