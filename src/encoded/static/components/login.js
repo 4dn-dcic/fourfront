@@ -1,6 +1,7 @@
 'use strict';
 var React = require('react');
 var store = require('../store');
+var parseError = require('./parseError').parseError;
 
 // Component that contains auth0 functions
 var Login = React.createClass({

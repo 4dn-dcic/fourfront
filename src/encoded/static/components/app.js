@@ -2,7 +2,6 @@
 var React = require('react');
 var jsonScriptEscape = require('../libs/jsonScriptEscape');
 var globals = require('./globals');
-var mixins = require('./mixins');
 var HomePage = require('./home');
 var ErrorPage = require('./error');
 var Navigation = require('./navigation');
@@ -13,8 +12,10 @@ var url = require('url');
 var _ = require('underscore');
 var store = require('../store');
 var browse = require('./browse');
-
-//sid is to allow addition of supplementary ids to navbar link headings
+var origin = require('../libs/origin');
+var serialize = require('form-serialize');
+var ga = require('google-analytics');
+var dispatch_dict = {}; //used to store value for simultaneous dispatch
 
 var portal = {
     portal_title: '4DN Data Portal',

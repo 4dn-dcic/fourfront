@@ -10,37 +10,7 @@ var store = require('../store');
 var dispatch_dict = {}; //used with navigate to store value for simultaneous dispatch
 
 
-var parseError = module.exports.parseError = function (response) {
-    if (response instanceof Error) {
-        return Promise.resolve({
-            status: 'error',
-            title: response.message,
-            '@type': ['AjaxError', 'Error']
-        });
-    }
-    var content_type = response.headers.get('Content-Type') || '';
-    content_type = content_type.split(';')[0];
-    if (content_type == 'application/json') {
-        return response.json();
-    }
-    return Promise.resolve({
-        status: 'error',
-        title: response.statusText,
-        code: response.status,
-        '@type': ['AjaxError', 'Error']
-    });
-};
 
-var parseAndLogError = module.exports.parseAndLogError = function (cause, response) {
-    var promise = parseError(response);
-    promise.then(data => {
-        ga('send', 'exception', {
-            'exDescription': '' + cause + ':' + data.code + ':' + data.title,
-            'location': window.location.href
-        });
-    });
-    return promise;
-};
 
 
 var contentTypeIsJSON = module.exports.contentTypeIsJSON = function (content_type) {
@@ -243,12 +213,6 @@ module.exports.HistoryAndTriggers = {
         };
     },
 
-    getInitialState: function () {
-        return {
-            promisePending: false
-        };
-    },
-
     componentWillMount: function () {
         if (typeof window !== 'undefined') {
             // IE8 compatible event registration
@@ -284,7 +248,7 @@ module.exports.HistoryAndTriggers = {
             type: {'href':document.querySelector('link[rel="canonical"]').getAttribute('href')}
         });
     },
-   
+
     trigger: function (name) {
         var method_name = this.triggers[name];
         if (method_name) {

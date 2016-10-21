@@ -2,7 +2,7 @@
 var React = require('react');
 var url = require('url');
 var globals = require('./globals');
-var parseAndLogError = require('./mixins').parseAndLogError;
+var parseAndLogError = require('./parseError').parseAndLogError;
 var StickyHeader = require('./StickyHeader');
 
 

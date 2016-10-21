@@ -3,7 +3,7 @@
 
 'use strict';
 var _ = require('underscore');
-var parseAndLogError = require('../mixins').parseAndLogError;
+var parseAndLogError = require('../parseError').parseAndLogError;
 
 
 module.exports.ItemStore = class ItemStore {

@@ -1,6 +1,6 @@
 'use strict';
 var React = require('react');
-var parseAndLogError = require('./mixins').parseAndLogError;
+var parseAndLogError = require('./parseError').parseAndLogError;
 var globals = require('./globals');
 var ga = require('google-analytics');
 var _ = require('underscore');
