@@ -10,6 +10,7 @@ require('./home');
 require('./help');
 require('./about');
 require('./item');
+require('./facetlist');
 require('./experiment-set-view');
 require('./user');
 require('./mixins');

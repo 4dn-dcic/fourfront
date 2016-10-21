@@ -54,6 +54,19 @@ h1.page-title {
 	/* Only set font-weight: 200 for h1,
 	   200 doesn't look as nice on smaller sizes. */
 	font-weight: 200;
+
+	.subtitle {
+		/* Subtitles which are part of the title, e.g. Experiment Set <.subtitle>4324ADADF</.subtitle> */
+		display: inline-block;
+		font-size : 0.875em;
+		margin-left: 5px;
+
+		&.prominent {
+			font-weight: 300;
+		}
+
+	}
+
 }
 
 h1.page-title + .page-subtitle {
@@ -225,7 +238,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 @media screen and (min-width: 768px){
 	/* Nudge accession #, etc. closer to title on wide desktop views */
 	.exp-set-header-area {
-		margin-top: -25px;
+		margin-top: -27px;
 	}
 }
 
@@ -267,9 +280,9 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	box-sizing: border-box;
 	border: 1px solid #e0e0e0;
 	min-height: 42px;
+	padding: 10px 15px 9px;
 
 	h4 {
-
 		font-weight: 500;
 
 		small {
@@ -277,16 +290,19 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			line-height: inherit;
 			letter-spacing: normal;
 		}
+	}
 
+	p:last-child {
+		margin-bottom: 0;
 	}
 
 }
 
-.set-type-indicators {
+.indicators {
 
 	margin-top: 8px;
 
-	.experiment-set-type-indicator {
+	.expset-indicator {
 		display: inline-block;
 		box-sizing: border-box;
 		border: 1px solid rgba(0,0,0,0.125);
@@ -299,6 +315,60 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		border-radius: 5px;
 		text-transform: capitalize;
 		color: #444;
+
+		&.right {
+			margin-left: 7px;
+		}
+
+		&.left {
+			margin-right: 7px;
+		}
+
+		&[data-status="released"]{
+			color: #fff;
+			background-color: #308756;
+		}
+
+		&[data-status="current"]{
+			color: #fff;
+			background-color: #56889b;
+		}
+
+		&[data-status="revoked"]{
+			color: #fff;
+			background-color: #812423;
+		}
+
+		&[data-status="deleted"]{
+			color: #fff;
+			background-color: #a90d0b;
+		}
+
+		&[data-status="replaced"]{
+			color: #fff;
+			background-color: #47419a;
+		}
+
+		&[data-status="in review by lab"]{
+			color: #fff;
+			background-color: #47419a;
+		}
+
+		&[data-status="in review by project"]{
+			color: #fff;
+			background-color: #47419a;
+		}
+
+		&[data-status="released to project"]{
+			color: #fff;
+			background-color: #397855;
+		}
+
+		&[data-status="unspecified"]{
+			color: #fff;
+			background-color: #7b7b7b;
+			display: none;
+		}
 
 		/*
 		&[data-set-type="replicates"]{

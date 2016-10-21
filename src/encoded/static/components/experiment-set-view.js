@@ -156,11 +156,13 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
     render: function() {
         
+        var title = globals.listing_titles.lookup(this.props.context)({context: this.props.context});
         var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container experiment-set-page');
 
         return (
             <div className={itemClass}>
-                <h1 className="page-title">Experiment Set</h1>
+
+                <h1 className="page-title">Experiment Set <span className="subtitle prominent">{ title }</span></h1>
 
                 <ExperimentSetHeader {...this.props} />
                 
@@ -185,8 +187,8 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                     />
                 </div>
 
-                <br/><br/>
-                <p>Existing Print-out:</p>
+                <br/><br/><br /><br /><hr />
+                <h6>Existing Print-out (temporary):</h6>
 
                 <Panel className="data-display panel-body-with-header">
                     <dl className="key-value">
@@ -222,13 +224,14 @@ var ExperimentSetHeader = React.createClass({
         if (!('date_created' in this.props.context)) return null;
         return (
             <span>
-                <i className="icon sbt-calendar"></i> { ExperimentSetView.parseDateTime(this.props.context.date_created) }
+                <i className="icon sbt-calendar"></i>&nbsp; { ExperimentSetView.parseDateTime(this.props.context.date_created) }
             </span>
         );
     },
 
     parsedStatus(){
         if (!('status' in this.props.context)) return null;
+        /*  Removed icon in lieu of color indicator for status
         var iconClass = null;
         switch (this.props.context.status){
 
@@ -238,9 +241,10 @@ var ExperimentSetHeader = React.createClass({
                 break;
 
         }
+        */
         return (
-            <div className="status right" data-status={ this.props.context.status.toLowerCase() }>
-                <i className={iconClass}></i> { this.props.context.status }
+            <div className="expset-indicator expset-status right" data-status={ this.props.context.status.toLowerCase() }>
+                { this.props.context.status }
             </div>
         );
     },
@@ -248,14 +252,13 @@ var ExperimentSetHeader = React.createClass({
     parsedExperimentSetType(){
         if (!('experimentset_type' in this.props.context)) return null;
         return (
-            <div className="experiment-set-type-indicator right" data-set-type={ this.props.context.experimentset_type }>
+            <div className="expset-indicator expset-type right" data-set-type={ this.props.context.experimentset_type }>
                 { this.props.context.experimentset_type }
             </div>
         );
     },
 
     render: function() {
-        var title = globals.listing_titles.lookup(this.props.context)({context: this.props.context});
         return (
             <div className="exp-set-header-area">
 
@@ -270,11 +273,11 @@ var ExperimentSetHeader = React.createClass({
                 </div>
 
                 <div className="item-page-heading experiment-heading">
-                    <h4><small>Accession</small>&nbsp; { title }</h4>
+                    <p className="text-large">{ this.props.context.description }</p>
                 </div>
 
                 <div className="row clearfix bottom-row">
-                    <div className="col-sm-6 item-label-extra set-type-indicators">{ this.parsedExperimentSetType() }</div>
+                    <div className="col-sm-6 item-label-extra set-type-indicators">{ /* PLACEHOLDER / TEMP-EMPTY */ }</div>
                     <h5 className="col-sm-6 text-right text-left-xs item-label-extra" title="Date Created">{ this.parsedCreationDate() }</h5>
                 </div>
 
@@ -311,10 +314,10 @@ var ExperimentSetInfoBlock = React.createClass({
                 <div className="info-panel lab">
 
                     <div className="row">
-                        <div className="col-xs-2 icon-container">
-                            <i className="ss-measuringcup icon"></i>
+                        <div className="col-xs-2 col-lg-1 icon-container">
+                            <i className="ss-usergroup icon"></i>
                         </div>
-                        <div className="col-xs-10">
+                        <div className="col-xs-10 col-lg-11">
                             <h5>
                                 <a href={ labInfo['@id'] || '#' }>{ labInfo.title }</a>
                             </h5>
@@ -342,10 +345,10 @@ var ExperimentSetInfoBlock = React.createClass({
                 <div className="info-panel award">
                 
                     <div className="row">
-                        <div className="col-xs-2 icon-container">
+                        <div className="col-xs-2 col-lg-1 icon-container">
                             <i className="ss-tag icon"></i>
                         </div>
-                        <div className="col-xs-10">
+                        <div className="col-xs-10 col-lg-11">
                             <h5>
                                 <a href={ awardInfo['@id'] || '#' }>{ awardInfo.title }</a>
                             </h5>
@@ -367,8 +370,8 @@ var ExperimentSetInfoBlock = React.createClass({
 
         return (
             <div className="row info-area">
-                { descriptionBlock }
-                <div className={"col-sm-8 " + (descriptionBlock ? '' : 'col-sm-offset-4' ) }>
+                {/* descriptionBlock */}
+                <div className={ "col-sm-12" /* "col-sm-8 " + (descriptionBlock ? '' : 'col-sm-offset-4' ) */ }>
                     <div className="row">
                         
                         { labInfo }
