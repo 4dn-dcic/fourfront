@@ -1,5 +1,6 @@
 'use strict';
 var React = require('react');
+var store = require('../store');
 
 // Component that contains auth0 functions
 var Login = React.createClass({
@@ -24,7 +25,6 @@ var Login = React.createClass({
             auth: {
             	redirect: false
             },
-            // TODO add theme : logo
             socialButtonStyle: 'big',
             languageDictionary: {
             	title: "Log in"
@@ -42,33 +42,30 @@ var Login = React.createClass({
 		this.lock.show();
 	},
 
-    // triggerLogout: function (event) {
-    //      console.log('Logging out (persona)');
-    //      var session = this.state.session;
-    //      if (!(session && session['auth.userid'])) return;
-    //      this.fetch('/logout?redirect=false', {
-    //          headers: {'Accept': 'application/json'}
-    //      })
-    //      .then(response => {
-    //          if (!response.ok) throw response;
-    //          return response.json();
-    //      })
-    //      .then(data => {
-    //          this.DISABLE_POPSTATE = true;
-    //          var old_path = window.location.pathname + window.location.search;
-    //          window.location.assign('/#logged-out');
-    //          if (old_path == '/') {
-    //              window.location.reload();
-    //          }
-    //      }, err => {
-    //          parseError(err).then(data => {
-    //              data.title = 'Logout failure: ' + data.title;
-    //              store.dispatch({
-    //                  type: {'context':data}
-    //              });
-    //          });
-    //      });
-    //  },
+    logout: function (event) {
+         console.log('Logging out');
+         var session = this.context.session;
+         if (!(session && session['auth.userid'])) return;
+         this.context.fetch('/logout?redirect=false', {
+             headers: {'Accept': 'application/json'}
+         })
+         .then(response => {
+             if (!response.ok) throw response;
+             return response.json();
+         })
+         .then(data => {
+            if(typeof document !== 'undefined'){
+                this.context.navigate('/');
+            }
+         }, err => {
+             parseError(err).then(data => {
+                 data.title = 'Logout failure: ' + data.title;
+                 store.dispatch({
+                     type: {'context':data}
+                 });
+             });
+         });
+     },
 
     handleAuth0Login: function(authResult, retrying){
         var accessToken = authResult.accessToken;
@@ -86,7 +83,9 @@ var Login = React.createClass({
             if (!response.ok) throw response;
             return response.json();
         })
-        .then(session_properties => {},
+        .then(session_properties => {
+            window.location.reload();
+        },
         function(error) {
             console.log("got an error: ", error.statusText);
         });
@@ -95,7 +94,7 @@ var Login = React.createClass({
     render: function () {
         var session = this.context.session;
         var toRender = (session && session['auth.userid']) ?
-            <a href="" data-trigger="logout" className="global-entry">Log out</a>
+            <a href="" className="global-entry" onClick={this.logout}>Log out</a>
             :
             <a id="loginbtn" href="" className="global-entry" onClick={this.showLock}>Log in</a>;
         return (

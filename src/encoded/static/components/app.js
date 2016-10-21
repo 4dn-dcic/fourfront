@@ -207,6 +207,7 @@ var App = React.createClass({
         }
 
         var canonical = this.props.href;
+
         if (context.canonical_uri) {
             if (href_url.host) {
                 canonical = (href_url.protocol || '') + '//' + href_url.host + context.canonical_uri;
