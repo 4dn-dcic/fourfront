@@ -149,7 +149,6 @@ var FacetList = module.exports.FacetList = React.createClass({
     },
 
     render: function() {
-        console.log('FacetList', this.props);
         var facets = this.props.facets, // Get all facets, and "normal" facets, meaning non-audit facets
             loggedIn = this.context.session && this.context.session['auth.userid'],
             regularFacets = [],

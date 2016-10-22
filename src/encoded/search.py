@@ -951,14 +951,18 @@ def browse(context, request, search_type=None, return_generator=False):
     return search(context, request, search_type, return_generator, forced_type='Browse')
 
 
-# Method to get available facets for an experiment set, built off of search()
 @view_config(route_name='available_facets', request_method='GET', permission='search', renderer='json')
-def get_available_facets(context, request, search_type='Experiment', return_generator=False):
+def get_available_facets(context, request):
+    """
+    Method to get available facets for a content/data type; built off of search() without querying Elasticsearch.
+    Unlike in search(), due to lack of ES query, does not return possible terms nor counts of experiments matching the terms.
+    """
 
-    if search_type is None:
+    requestTypes = request.params.getall('type')
+    if len(requestTypes) == 0:
         doc_types = ['Item']
     else:
-        doc_types = [search_type]
+        doc_types = [requestTypes[0]]
 
     types = request.registry[TYPES]
 
@@ -971,13 +975,13 @@ def get_available_facets(context, request, search_type='Experiment', return_gene
         msg = "Invalid type: {}".format(', '.join(bad_types))
         raise HTTPBadRequest(explanation=msg)
 
-    schemas = (types[item_type].schema for item_type in doc_types)
+    # schemas = (types[item_type].schema for item_type in doc_types)
 
-    facets = [('type', {'title': 'Data Type'}),]
+    facets = [] # [('type', {'title': 'Data Type'}),]
     if len(doc_types) == 1 and 'facets' in types[doc_types[0]].schema:
         facets.extend(types[doc_types[0]].schema['facets'].items())
 
-    ### Mini version of format_facets which ignores Elastic Search query results
+    ### Mini version of format_facets
     result = []
     for field, facet in facets:
         result.append({

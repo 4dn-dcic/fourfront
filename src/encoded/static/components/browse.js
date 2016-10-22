@@ -774,8 +774,6 @@ var Browse = browse.Browse = React.createClass({
         var context = this.props.context;
         var fileFormats = findFormats(context['@graph']);
 
-        console.log('Browse', this.props);
-
         // no results found!
         if(context.total === 0 && context.notification){
             return <div className="error-page"><h4>{context.notification}</h4></div>
