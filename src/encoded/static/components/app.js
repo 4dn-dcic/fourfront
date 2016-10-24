@@ -215,7 +215,13 @@ var App = React.createClass({
                 canonical = context.canonical_uri;
             }
         }
-
+        // check error status
+        var status;
+        if(context.code && context.code == 404){
+            status = 404;
+        }else if(context.status && context.status == 403){
+            status = 403;
+        }
         // add static page routing
         var title;
         var routeList = canonical.split("/");
@@ -235,6 +241,10 @@ var App = React.createClass({
         if (canonical === "about:blank"){
             title = portal.portal_title;
             content = null;
+        // error catching
+        }else if(status){
+            content = <ErrorPage status={status}/>;
+            title = 'Error';
         }else if (currRoute[currRoute.length-1] === 'home' || (currRoute[currRoute.length-1] === href_url.host)){
             content = <HomePage />;
             title = portal.portal_title;
@@ -256,8 +266,8 @@ var App = React.createClass({
                 }
             }else{
                 // Handle the case where context is not loaded correctly
-                content = <ErrorPage />;
-                title="Not Found";
+                content = <ErrorPage status={null}/>;
+                title = 'Error';
             }
         }
         // Google does not update the content of 301 redirected pages
