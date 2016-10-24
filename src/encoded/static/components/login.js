@@ -86,7 +86,7 @@ var Login = React.createClass({
             return response.json();
         })
         .then(session_properties => {
-            window.location.reload();
+            this.context.navigate('', {'inPlace':true});
         }, error => {
             console.log("got an error: ", error.statusText);
             console.log(error);

@@ -217,7 +217,11 @@ module.exports.HistoryAndTriggers = {
     },
 
     // only navigate if href changes
-    confirmNavigation: function(href) {
+    confirmNavigation: function(href, options) {
+        var inPlace;
+        if(options.inPlace && options.inPlace==true){
+            return true
+        }
         if(href===this.props.href){
             return false;
         }
@@ -229,7 +233,7 @@ module.exports.HistoryAndTriggers = {
         // options.replace only used handleSubmit, handlePopState, handlePersonaLogin
         options = options || {};
         href = url.resolve(this.props.href, href);
-        if (!this.confirmNavigation(href)) {
+        if (!this.confirmNavigation(href, options)) {
             return;
         }
         // Strip url fragment.
