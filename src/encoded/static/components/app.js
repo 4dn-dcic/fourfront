@@ -54,7 +54,7 @@ var Title = React.createClass({
 // It lives for the entire duration the page is loaded.
 // App maintains state for the
 var App = React.createClass({
-    mixins: [mixins.Persona, mixins.HistoryAndTriggers],
+    mixins: [mixins.Auth0, mixins.HistoryAndTriggers],
     triggers: {
         login: 'triggerLogin',
         profile: 'triggerProfile',
@@ -207,6 +207,7 @@ var App = React.createClass({
         }
 
         var canonical = this.props.href;
+
         if (context.canonical_uri) {
             if (href_url.host) {
                 canonical = (href_url.protocol || '') + '//' + href_url.host + context.canonical_uri;
@@ -214,7 +215,13 @@ var App = React.createClass({
                 canonical = context.canonical_uri;
             }
         }
-
+        // check error status
+        var status;
+        if(context.code && context.code == 404){
+            status = 404;
+        }else if(context.status && context.status == 403){
+            status = 403;
+        }
         // add static page routing
         var title;
         var routeList = canonical.split("/");
@@ -234,6 +241,10 @@ var App = React.createClass({
         if (canonical === "about:blank"){
             title = portal.portal_title;
             content = null;
+        // error catching
+        }else if(status){
+            content = <ErrorPage status={status}/>;
+            title = 'Error';
         }else if (currRoute[currRoute.length-1] === 'home' || (currRoute[currRoute.length-1] === href_url.host)){
             content = <HomePage />;
             title = portal.portal_title;
@@ -255,8 +266,8 @@ var App = React.createClass({
                 }
             }else{
                 // Handle the case where context is not loaded correctly
-                content = <ErrorPage />;
-                title="Not Found";
+                content = <ErrorPage status={null}/>;
+                title = 'Error';
             }
         }
         // Google does not update the content of 301 redirected pages

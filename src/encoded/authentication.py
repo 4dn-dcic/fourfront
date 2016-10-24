@@ -7,6 +7,7 @@ from pyramid.authentication import (
     BasicAuthAuthenticationPolicy as _BasicAuthAuthenticationPolicy,
     CallbackAuthenticationPolicy
 )
+import requests
 from pyramid.path import (
     DottedNameResolver,
     caller_package,
@@ -18,14 +19,12 @@ from pyramid.security import (
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
+    HTTPFound
 )
 from pyramid.view import (
     view_config,
 )
-from pyramid.settings import (
-    asbool,
-    aslist,
-)
+from pyramid.settings import asbool
 from snovault import ROOT
 from snovault.storage import User
 from snovault import COLLECTIONS
@@ -98,7 +97,7 @@ class NamespacedAuthenticationPolicy(object):
         super(NamespacedAuthenticationPolicy, self).__init__(*args, **kw)
 
     def unauthenticated_userid(self, request):
-        cls  = super(NamespacedAuthenticationPolicy, self) 
+        cls  = super(NamespacedAuthenticationPolicy, self)
         userid = super(NamespacedAuthenticationPolicy, self) \
             .unauthenticated_userid(request)
         if userid is not None:
@@ -128,7 +127,7 @@ class LoginDenied(HTTPForbidden):
 _fake_user = object()
 
 
-class WebUserAuthenticationPolicy(CallbackAuthenticationPolicy):
+class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
 
     login_path = '/login'
     method = 'POST'
@@ -143,18 +142,36 @@ class WebUserAuthenticationPolicy(CallbackAuthenticationPolicy):
             return None
 
         # otherwise do a login, if we aren't already logged in
-        cached = getattr(request, '_webuser_authenticated', _fake_user)
+        cached = getattr(request, '_auth0_authenticated', _fake_user)
         if cached is not _fake_user:
             return cached
 
-        login = request.json.get("username")
-        password = request.json.get("password")
-        if not User.check_password(login, password):
-            request._webuser_authenticated = None
+        try:
+            access_token = request.json['accessToken']
+        except (ValueError, TypeError, KeyError):
+            if self.debug:
+                self._log('Missing assertion.', 'unauthenticated_userid', request)
+            request._auth0_authenticated = None
             return None
 
-        request._webuser_authenticated = login
-        return login
+        user_info = None
+        try:
+            user_url = "https://{domain}/userinfo?access_token={access_token}" \
+                        .format(domain='hms-dbmi.auth0.com',
+                                access_token=access_token)
+            user_info = requests.get(user_url).json()
+        except Exception as e:
+            if self.debug:
+                self.log(('Invalid assertion: %s (%s)', (e, type(e).__name__)),
+                         'unathenticated_userid', request)
+                return None
+
+        # for strange unknow reasons sometimes user_info comes back empty
+        if user_info and user_info['email_verified'] is True:
+            email = request._auth0_authenticted = user_info['email'].lower()
+            return email
+        else:
+            return None
 
     def remember(self, request, principal, **kw):
         return []
@@ -166,13 +183,15 @@ class WebUserAuthenticationPolicy(CallbackAuthenticationPolicy):
 @view_config(route_name='login', request_method='POST',
              permission=NO_PERMISSION_REQUIRED)
 def login(request):
+    '''check the auth0 assertion and remember the user'''
+
     login = request.authenticated_userid
     if login is None:
         namespace = userid = None
     else:
         namespace, userid = login.split('.', 1)
 
-    if namespace != 'webuser':
+    if namespace != 'auth0':
         request.session.invalidate()
         request.response.headerlist.extend(forget(request))
         raise LoginDenied()
@@ -197,6 +216,7 @@ def logout(request):
     if asbool(request.params.get('redirect', True)):
         raise HTTPFound(location=request.resource_path(request.root))
     return {}
+
 
 @view_config(route_name='session-properties', request_method='GET',
              permission=NO_PERMISSION_REQUIRED)
@@ -223,12 +243,13 @@ def session_properties(request):
 
 
 def webuser_check(username, password, request):
-    #webusers have email address for username, thus, make sure we have an email address
+    # webusers have email address for username, thus, make sure we have an email address
     if not '@' in username:
         return None
     if not User.check_password(username, password):
         return None
     return []
+
 
 def basic_auth_check(username, password, request):
     # We may get called before the context is found and the root set
@@ -252,6 +273,7 @@ def basic_auth_check(username, password, request):
     #    replace_user_hash(user, new_hash)
 
     return []
+
 
 @view_config(route_name='impersonate-user', request_method='POST',
              validators=[no_validate_item_content_post],
@@ -277,6 +299,7 @@ def impersonate_user(request):
         user_properties['auth.userid'] = request.session['auth.userid']
 
     return user_properties
+
 
 def generate_user():
     """ Generate a random user name with 64 bits of entropy
