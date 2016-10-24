@@ -572,7 +572,6 @@ var ResultTable = browse.ResultTable = React.createClass({
             );
         }.bind(this));
 
-        
         var formattedExperimentSetListings = this.formatExperimentSetListings(
             passExperiments,
             columnTemplate,

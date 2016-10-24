@@ -12,3 +12,25 @@ var SingleTreatment = module.exports.SingleTreatment = function(treatment) {
     }
     return treatmentText;
 };
+
+var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET'){
+
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+            if (xmlhttp.status == 200) {
+                if (typeof callback == 'function'){
+                    callback(JSON.parse(xmlhttp.responseText));
+                }
+            } else if (xmlhttp.status == 400) {
+                console.error('There was an error 400');
+            } else {
+                console.error('something else other than 200 was returned');
+            }
+        }
+    };
+
+    xmlhttp.open(method, url, true);
+    xmlhttp.send();
+
+}

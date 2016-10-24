@@ -8,6 +8,7 @@ var ExperimentsTable = require('./experiments-table').ExperimentsTable;
 var getFileDetailContainer = require('./experiments-table').getFileDetailContainer;
 var FacetList = require('./facetlist').FacetList;
 var siftExperiments = require('./facetlist').siftExperiments;
+var ajaxLoad = require('./objectutils').ajaxLoad;
 
 /**
  * Entire ExperimentSet page view.
@@ -129,31 +130,18 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         // Uh-oh! ExperimentSet award exists but doesn't match that of any experiments'.
         // Perhaps fallback to using AJAX. Lol.
         if (propertyID && !propertyInfo && allowAjaxFallback) {
-        //    throw new Error(propertyName + " " + propertyID + " not found in ExperimentSet " + this.props.context.accession + " experiments.");
+            // throw new Error(propertyName + " " + propertyID + " not found in ExperimentSet " + this.props.context.accession + " experiments.");
             var newStateAddition = {};
             newStateAddition['details_' + propertyName] = null;
             this.setState(newStateAddition);
             
-            var xmlhttp = new XMLHttpRequest();
-            xmlhttp.onreadystatechange = function() {
-                if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-                    if (xmlhttp.status == 200) {
-                        newStateAddition = {};
-                        newStateAddition['details_' + propertyName] = JSON.parse(xmlhttp.responseText);
-                        this.setState(newStateAddition);
-                        // Low priority ToDo: 
-                        // Replace this success block w/ optional callback function parameter and remove reliance
-                        // on 'this' var so can export function from component to use on other pages if needed.
-                    } else if (xmlhttp.status == 400) {
-                        console.error('There was an error 400');
-                    } else {
-                        console.error('something else other than 200 was returned');
-                    }
-                }
-            }.bind(this);
-
-            xmlhttp.open("GET", propertyID + '?format=json', true);
-            xmlhttp.send();
+            ajaxLoad(propertyID + '?format=json', function(result){
+                newStateAddition = {};
+                newStateAddition['details_' + propertyName] = result;
+                this.setState(newStateAddition);
+                console.log('Obtained details_' + propertyName + ' via AJAX.');
+            }.bind(this), 'GET');
+            
         }
 
         return propertyInfo;
@@ -169,7 +157,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         var title = globals.listing_titles.lookup(this.props.context)({context: this.props.context});
         var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container experiment-set-page');
 
-        /*
+        
         var facetList = (
             <FacetList
                 urlPath={this.props.context['@id']}
@@ -179,7 +167,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                 facets={ this.props.facets }
             />
         );
-        */
+        
 
         return (
             <div className={itemClass}>
@@ -191,7 +179,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                 <div className="row">
                 
                     <div className="col-sm-5 col-md-4 col-lg-3">
-
+                        { facetList }
                     </div>
 
                     <div className="col-sm-7 col-md-8 col-lg-9">
