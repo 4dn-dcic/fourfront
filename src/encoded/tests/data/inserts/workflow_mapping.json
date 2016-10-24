@@ -9,7 +9,7 @@
             {"parameter": "bowtie_index", "value": "mm9.bowtieIndex.tgz"},
             {"parameter": "chrlen_file", "description":"chromosome length file", "value": "mm9.chrlen_file"}
         ],
-        "input_data_parameters": [
+        "experiment_parameters": [
             {"parameter": "biosample.biosource.individual.organism", "value": "mouse"},
             {"parameter": "experiment_type", "value": "in situ HiC"}
         ],

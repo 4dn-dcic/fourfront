@@ -78,11 +78,11 @@
             }
         },
         "experiment_parameters": {
-            "title": "Input Data Parameters",
-            "description": "The parameters that are defining the input_data",
+            "title": "Experiment Parameters",
+            "description": "The experiment parameters that are defining the input data",
             "type": "array",
             "items": {
-                "title": "Input Data Parameter",
+                "title": "Experiment Parameter",
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
