@@ -11,7 +11,6 @@ require('./help');
 require('./about');
 require('./item');
 require('./user');
-require('./mixins');
 require('./statuslabel');
 require('./navigation');
 require('./inputs');
