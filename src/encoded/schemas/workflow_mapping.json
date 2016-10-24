@@ -34,11 +34,11 @@
             "description": "Name of the workflow table.",
             "type": "string"
         },
-        "workflow_id": {
+        "workflow": {
             "title": "Workflow ID",
-            "description": "User defined Workflow ID",
+            "description": "uuid or alias for workflow",
             "type": "string",
-            ""linkTo": "workflow"
+            "linkTo": "Workflow"
         },
         "data_input_type": {
             "title": "Type of input data",
