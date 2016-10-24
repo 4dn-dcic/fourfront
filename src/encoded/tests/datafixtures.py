@@ -455,7 +455,7 @@ def donor_2(testapp, lab, award):
 def analysis_step_bam(testapp, software):
     item = {
         'name': 'bamqc',
-        'software_used': software['@id'],
+        'software_used': analysis_step['@id'],
         "version": "1.0"
     }
     return testapp.post_json('/analysis_step', item).json['@graph'][0]
