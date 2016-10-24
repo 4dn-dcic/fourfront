@@ -14,30 +14,6 @@ var contentTypeIsJSON = module.exports.contentTypeIsJSON = function (content_typ
     return (content_type || '').split(';')[0].split('/').pop().split('+').pop() === 'json';
 };
 
-
-module.exports.RenderLess = {
-    shouldComponentUpdate: function (nextProps, nextState) {
-        var key;
-        if (nextProps) {
-            for (key in nextProps) {
-                if (nextProps[key] !== this.props[key]) {
-                    console.log('changed props: %s', key);
-                    return true;
-                }
-            }
-        }
-        if (nextState) {
-            for (key in nextState) {
-                if (nextState[key] !== this.state[key]) {
-                    console.log('changed state: %s', key);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-};
-
 class Timeout {
     constructor(timeout) {
         this.promise = new Promise(resolve => setTimeout(resolve.bind(undefined, this), timeout));
