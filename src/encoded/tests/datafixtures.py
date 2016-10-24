@@ -396,6 +396,26 @@ def human_biosample(testapp, human_biosource):
 
 
 @pytest.fixture
+def workflow_mapping(testapp, workflow_bam):
+    item = {
+        "name": "test mapping",
+        "workflow_name": "test workflow name",
+        "workflow": workflow_bam['@id'],
+        "data_input_type": "experiment",
+        "workflow_parameters": [
+            {"parameter": "bowtie_index", "value": "some value"}
+        ],
+        "experiment_parameters": [
+            {"parameter": "biosample.biosource.individual.organism", "value": "mouse"}
+        ],
+        "workflow_parameters": [
+            {"parameter": "genome_version", "value": "mm9"}
+        ]
+    }
+    return testapp.post_json('/workflow_mapping', item).json['@graph'][0]
+
+
+@pytest.fixture
 def biosample_1(testapp, human_biosource):
     item = {
         'description': "GM06990 prepared for Hi-C",
