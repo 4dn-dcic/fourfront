@@ -88,7 +88,6 @@ var IPanel = module.exports.IPanel = React.createClass({
         //var itemClass = globals.itemClass(context, 'view-detail panel');
         var title = globals.listing_titles.lookup(context)({context: context});
         var sortKeys = Object.keys(context).sort();
-        //console.log(this.props);
         var tips = tipsFromSchema(schemas, context);
 
 
