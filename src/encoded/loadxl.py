@@ -646,7 +646,7 @@ def create_user(db, email, name, pwd):
     """create user if user not in database."""
     if User.get_by_username(email) is None:
         print('creating user ', email)
-        new_user = User(email=email, password=pwd,name=name)
+        new_user = User(email=email, password=pwd, name=name)
         db.add(new_user)
     else:
         print('user %s already exists, skipping' % (email))
