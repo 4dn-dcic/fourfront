@@ -5,7 +5,6 @@ var SubIPanel = require('./item').SubIPanel;
 var DescriptorField = require('./item').DescriptorField; 
 var tipsFromSchema = require('./item').tipsFromSchema; 
 var ExperimentsTable = require('./experiments-table').ExperimentsTable;
-var getFileDetailContainer = require('./experiments-table').getFileDetailContainer;
 var FacetList = require('./facetlist').FacetList;
 var siftExperiments = require('./facetlist').siftExperiments;
 var ajaxLoad = require('./objectutils').ajaxLoad;
@@ -31,12 +30,20 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
     propTypes : {
         schemas : React.PropTypes.object,
-        context : React.PropTypes.object
-        // Potential ToDo - custom validation for w/e key/vals the page needs.
+        context : React.PropTypes.object,
+        expSetFilters : React.PropTypes.object,     // Set via app.js <ContentView...>
+        // facets = initially blank, but stored here to be shared between ExperimentsTable & FacetList; MUTABLE
+        facets : React.PropTypes.array
     },
 
     contextTypes: {
         location_href: React.PropTypes.string
+    },
+
+    getDefaultProps : function(){
+        return {
+            facets : [] // MUTABLE ARRAY
+        };
     },
 
     getInitialState : function(){
@@ -49,14 +56,10 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
     },
 
     tips : null, // Value assumed immutable so not in state.
-    fileDetailContainer : null,
 
     componentWillMount : function(){
         if (!this.tips) {
             this.tips = tipsFromSchema(this.props.schemas, this.props.context);
-        }
-        if (!this.fileDetailContainer) {
-            this.fileDetailContainer = getFileDetailContainer(this.props.context.experiments_in_set);
         }
 
         if (!this.state.details_lab) {
@@ -75,6 +78,17 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                 });
             }
         }
+    },
+
+    componentWillReceiveProps: function(nextProps) {
+        
+        // Make sure state is updated upon filtering
+        if(this.props.expSetFilters !== nextProps.expSetFilters){
+            this.setState({
+                selectedFiles: new Set()
+            });
+        }
+
     },
 
     /**
@@ -150,13 +164,8 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
     render: function() {
 
-        console.log(this.context);
-        console.log(this.props);
-        
-        //console.log(this.props);
         var title = globals.listing_titles.lookup(this.props.context)({context: this.props.context});
         var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container experiment-set-page');
-
         
         var facetList = (
             <FacetList
@@ -165,6 +174,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                 orientation="vertical"
                 expSetFilters={this.props.expSetFilters}
                 facets={ this.props.facets }
+                experimentsOrSets="experiments"
             />
         );
         
@@ -200,8 +210,10 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                                     'File Type',
                                     'File Info'
                                 ]}
-                                fileDetailContainer={this.fileDetailContainer}
                                 parentController={this}
+                                experimentArray={this.props.context.experiments_in_set}
+                                expSetFilters={this.props.expSetFilters /* Req'd to filter results */}
+                                facets={this.props.facets /* Req'd to find ignoredFilters */ }
                             />
                         </div>
 

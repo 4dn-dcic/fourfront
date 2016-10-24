@@ -2,6 +2,8 @@ var React = require('react');
 var Table = require('react-bootstrap').Table;
 var Checkbox = require('react-bootstrap').Checkbox;
 var _ = require('underscore');
+var siftExperiments = require('./facetlist').siftExperiments;
+var FacetList = require('./facetlist').FacetList; // Only used for statics.
 
 /**
  * To be used within Experiments Set View/Page, or
@@ -19,9 +21,11 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
     propTypes : {
         columnHeaders : React.PropTypes.array.isRequired,
         experimentArray : React.PropTypes.array,
-        fileDetailContainer : React.PropTypes.object,
         passExperiments : React.PropTypes.instanceOf(Set),
         expSetFilters : React.PropTypes.object,
+        // If include completed 'fileDetailContainer', e.g. as from Browse, then
+        // 'passExperiments', 'expSetFilters', and 'facets' are not needed.
+        fileDetailContainer : React.PropTypes.object,
         parentController : function(props, propName, componentName){
             // Custom validation
             if (props[propName] && 
@@ -78,10 +82,24 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
     getFileDetailContainer : function(props = this.props){
         // Re-use if passed in by a parent as a prop, 
         // otherwise generate from experimentArray & passExperiments props.
-        if (props.fileDetailContainer) { 
+
+        if (props.fileDetailContainer) {
+            // If filtering of results is done in parent component.
             return props.fileDetailContainer; 
         }
-        return getFileDetailContainer(props.experimentArray, props.passExperiments);
+
+        var passExperiments = props.passExperiments,
+            ignoredFilters = null;
+
+
+        if (!passExperiments && props.expSetFilters) {
+            if (props.facets && props.facets.length > 0) {
+                ignoredFilters = FacetList.findIgnoredFilters(props.facets, props.expSetFilters);
+            }
+            passExperiments = siftExperiments(props.experimentArray, props.expSetFilters, ignoredFilters);
+        }
+        
+        return getFileDetailContainer(props.experimentArray, passExperiments);
     },
 
     render : function(){
@@ -101,7 +119,33 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             checked = this.state.checked;
         }
 
+        var expsWithFileCounts = {};
         var childFileEntryRows = Object.keys(fileDetail).map(function (file) {
+
+            // Check how many file entries have same exp. accession.
+            // To allow to set rowSpan multiple where exp accession is same between files.
+            if (!expsWithFileCounts[file]) {
+                var skip = false;
+                // Allow only 1 file to have incremented count (for incr. rowspan)
+                Object.keys(expsWithFileCounts).forEach(function(file2){
+                    if (expsWithFileCounts[file2].exp == fileDetail[file]['@id']) { 
+                        skip = true;
+                        return;
+                    }
+                });
+                expsWithFileCounts[file] = { 
+                    'exp' : fileDetail[file]['@id'],
+                    'count' : 0,
+                    'skip' : skip
+                };
+
+            }
+            Object.keys(fileDetail).forEach(function(file2){
+                if (expsWithFileCounts[file].exp == fileDetail[file2]['@id']) { 
+                    if (!expsWithFileCounts[file].skip) expsWithFileCounts[file].count++;
+                }
+            });
+
             return (
                 <FileEntry 
                     expSetFilters={this.props.expSetFilters || null} 
@@ -110,6 +154,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                     parentChecked={checked} 
                     handleFileUpdate={this.handleFileUpdate}
                     columnHeaders={this.props.columnHeaders}
+                    experimentAccessionEntrySpan={expsWithFileCounts[file].count}
                 />
             );
         }.bind(this));
@@ -229,6 +274,12 @@ var FileEntry = React.createClass({
     getInitialState: function() {
         return {
             checked: this.props.parentChecked
+        };
+    },
+
+    getDefaultProps : function(){
+        return {
+            experimentAccessionEntrySpan : 1
         };
     },
 
@@ -374,6 +425,22 @@ var FileEntry = React.createClass({
         var fileOne = fileInfo.fileOne;
         var fileTwo = fileInfo.fileTwo;
         var fileID  = fileInfo.fileID; 
+        var experimentAccessionCell = null;
+
+        // Will need to separate out <tbody> before rowSpan will work correctly
+        //if (this.props.experimentAccessionEntrySpan > 0){
+            experimentAccessionCell = (
+                <td rowSpan={2/* * this.props.experimentAccessionEntrySpan */} className="expset-exp-cell expset-exp-accession-title-cell">
+                    <a href={
+                        info['@id']  ? info['@id'] :
+                        info['accession'] ? '/experiments/' + info['accession'] :
+                        '#'
+                    }>
+                        {info.accession || info.uuid}
+                    </a>
+                </td>
+            );
+        //}
         
         return(
             <tbody>
@@ -387,15 +454,7 @@ var FileEntry = React.createClass({
                             <Checkbox checked={false} disabled={true} className='expset-checkbox-sub' />
                         </td>
                     }
-                    <td rowSpan="2" className="expset-exp-cell expset-exp-accession-title-cell">
-                        <a href={
-                            info['@id']  ? info['@id'] :
-                            info['accession'] ? '/experiments/' + info['accession'] :
-                            '#'
-                        }>
-                            {info.accession || info.uuid}
-                        </a>
-                    </td>
+                    { experimentAccessionCell }
                     <td rowSpan="2" className="expset-exp-cell">
                         <a href={info.biosample_id || ''}>
                             {info.biosample}

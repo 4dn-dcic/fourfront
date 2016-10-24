@@ -64,7 +64,8 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         href : React.PropTypes.string,
         passExperiments : React.PropTypes.instanceOf(Set),
         targetFiles : React.PropTypes.instanceOf(Set),
-        rowNumber : React.PropTypes.number
+        rowNumber : React.PropTypes.number,
+        facets : React.PropTypes.array
     },
 
     getInitialState: function() {
@@ -205,6 +206,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                                 fileDetailContainer={this.fileDetailContainer}
                                 parentController={this}
                                 expSetFilters={this.props.expSetFilters}
+                                facets={this.props.facets /* Not req'd here as using pre-completed fileDetailContainer' */ }
                             />
                         </Panel>
                     </td>
@@ -450,7 +452,6 @@ var ResultTable = browse.ResultTable = React.createClass({
         this.props.context['@graph'].map(function (result) {
             var experimentArray = result.experiments_in_set;
             if(experimentArray.length == 0){
-                //resultCount = resultCount - 1;
                 return; // ignore if no expts in the expt set
             }
 
@@ -503,6 +504,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                         passExperiments={intersection}
                         key={keyVal+result['@id']}
                         rowNumber={resultCount++}
+                        facets={this.props.facets}
                     />
                 );
             }

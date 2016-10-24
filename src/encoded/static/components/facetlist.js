@@ -221,8 +221,6 @@ var FacetList = module.exports.FacetList = React.createClass({
 
     render: function() {
 
-        console.log(this.props);
-
         var facets = this.props.facets, // Get all facets, and "normal" facets, meaning non-audit facets
             loggedIn = this.context.session && this.context.session['auth.userid'],
             regularFacets = [],
@@ -283,7 +281,9 @@ var FacetList = module.exports.FacetList = React.createClass({
 var Facet = module.exports.Facet = React.createClass({
     
     getDefaultProps: function() {
-        return {width: 'inherit'};
+        return {
+            width: 'inherit'
+        };
     },
 
     getInitialState: function () {
@@ -333,6 +333,7 @@ var ExpTerm = module.exports.ExpTerm = React.createClass({
     },
 
     render: function () {
+
         var field = this.state.field;
         var term = this.state.term;
         var title = this.props.title || term;
@@ -340,19 +341,23 @@ var ExpTerm = module.exports.ExpTerm = React.createClass({
 
         // for now, remove facet info on exp numbers
         var termExperiments = siftExperiments(this.props.experimentSetListJSON, this.props.expSetFilters, this.props.ignoredFilters, field, term);
-        
+
         // find number of experiments or experiment sets
-        this.props.experimentSetListJSON.forEach(function(expSet){
-            if (this.props.experimentsOrSets == 'experiments' || !expSet.experiments_in_set){
-                // We have list of experiments, not experiment sets.
-                if (termExperiments.has(expSet)) passSets += 1;
-            } else {
+        if (this.props.experimentsOrSets == 'sets'){
+            this.props.experimentSetListJSON.forEach(function(expSet){
                 var intersection = new Set(expSet.experiments_in_set.filter(x => termExperiments.has(x)));
                 if(intersection.size > 0){
                     passSets += 1;
                 }
+            }, this);
+        } else {
+            // We have list of experiments, not experiment sets.
+            var intersection = new Set(this.props.experimentSetListJSON.filter(x => termExperiments.has(x)));
+            if(intersection.size > 0){
+                passSets += intersection.size;
             }
-        }, this);
+        }
+        
 
         var expCount = termExperiments.size;
         var selected = false;
