@@ -9,10 +9,18 @@ import random
 sbg_base_url = "https://api.sbgenomics.com/v2/"
 download_url_temp_file = 'download_url_temp_file'
 
+def generate_uuid ():
+  rand_uuid_start=''
+  for i in xrange(8):
+    r=random.choice('abcdef1234567890')
+    rand_uuid_start += r
+    uuid=rand_uuid_start + "-49e5-4c33-afab-9ec90d65faf3"
+  return uuid
+
 
 def export_file(sbg_job_report, bucket_name, file_metadata_json, workflow_run_metadata_json, token, output_only=True, no_upload=False, no_download=False):
 
-  workflow_run={ 'input_files':[], 'output_files':[], 'parameters':[] }
+  workflow_run={ 'uuid':generate_uuid(), 'input_files':[], 'output_files':[], 'parameters':[] }
 
   with open(sbg_job_report,'r') as f:
     report_dict=json.load(f)
