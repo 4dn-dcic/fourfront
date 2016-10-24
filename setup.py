@@ -104,6 +104,7 @@ setup(
         migrate-attachments-aws = encoded.commands.migrate_attachments_aws:main
         migrate-dataset-type = encoded.commands.migrate_dataset_type:main
         load-data = encoded.commands.load_data:main
+        dropdb = encoded.commands.dropdb:main
 
         [paste.app_factory]
         main = encoded:main

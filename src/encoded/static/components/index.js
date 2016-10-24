@@ -18,5 +18,6 @@ require('./inputs');
 require('./schema');
 require('./search');
 require('./browse');
+require('./testwarning');
 
 module.exports = require('./app');

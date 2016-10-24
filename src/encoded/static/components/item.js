@@ -11,6 +11,7 @@ var AuditDetail = audit.AuditDetail;
 var AuditMixin = audit.AuditMixin;
 var Table = collection.Table;
 var ErrorPage = require('./error');
+var ExperimentSetView = require('./experiment-set-view');
 
 var Fallback = module.exports.Fallback = React.createClass({
     contextTypes: {
@@ -53,10 +54,11 @@ var ItemLoader = React.createClass({
 
 var Item = React.createClass({
     render: function() {
+
         var context = this.props.context;
         var itemClass = globals.itemClass(context, 'view-item');
-        var title = globals.listing_titles.lookup(context)({context: context});
         var IPanel = globals.panel_views.lookup(context);
+
         // Make string of alternate accessions
         return (
             <div className={itemClass}>
@@ -68,9 +70,7 @@ var Item = React.createClass({
                     </div>
                 </header>
                 <AuditDetail context={context} key="biosample-audit" />
-                <div className="row item-row">
-                     <IPanel {...this.props}/>
-                </div>
+                <IPanel {...this.props}/>
             </div>
         );
     }
@@ -92,29 +92,25 @@ var IPanel = module.exports.IPanel = React.createClass({
         var itemClass = globals.itemClass(context, 'view-detail panel');
         var title = globals.listing_titles.lookup(context)({context: context});
         var sortKeys = Object.keys(context).sort();
+        console.log(this.props);
         var tips = tipsFromSchema(schemas, context);
+
+
         return (
             <Panel className="data-display panel-body-with-header">
-                <div className="flexrow">
-                    <div className="flexcol-sm-6">
-                        <div className="flexcol-heading experiment-heading"><h5>{title}</h5></div>
-                        <dl className="key-value">
-                            {sortKeys.map(function(ikey, idx){
-                                return (
-                                    <div key={ikey} data-test="term-name">
-                                        {formKey(tips,ikey)}
-                                        <dd>{formValue(schemas,context[ikey])}</dd>
-                                    </div>
-                                );
-                            })}
-                        </dl>
-                    </div>
+                <div className="flexcol-heading experiment-heading">
+                    <h4>{ title }</h4>
                 </div>
+                <dl className="key-value">
+                    {sortKeys.map((ikey, idx) =>
+                        <div key={ikey} data-test="term-name">
+                            {formKey(tips,ikey)}
+                            <dd>{formValue(schemas,context[ikey])}</dd>
+                        </div>
+                    )}
+                </dl>
             </Panel>
         );
-        // return (
-        //         <Panel>BasicPanel</Panel>
-        // );
     }
 });
 
@@ -203,7 +199,7 @@ var FetchedRelatedItems = React.createClass({
     },
 
     render: function() {
-        var {Component, context, title, url, ...props} = this.props;
+        var {Component, context, title, url, props} = this.props;
         if (context === undefined) return null;
         var items = context['@graph'];
         if (!items.length) return null;
@@ -211,7 +207,7 @@ var FetchedRelatedItems = React.createClass({
         return (
             <Component {...props} title={title} context={context} total={context.total} items={items} url={url} showControls={false} />
         );
-    },
+    }
 
 });
 
@@ -236,28 +232,7 @@ var RelatedItems = module.exports.RelatedItems = React.createClass({
 
 // ******* Refined item.js code below... *******
 
-// Formats the correct display for each metadata field
-var formValue = function (schemas, item) {
-    var toReturn = [];
-    if(Array.isArray(item)) {
-        for (var i=0; i < item.length; i++){
-            toReturn.push(formValue(schemas, item[i]));
-        }
-    }else if (typeof item === 'object') {
-        toReturn.push(<SubIPanel schemas={schemas} content={item}/>);
-    }else{
-        if (typeof item === 'string' && item.charAt(0) === '/') {
-            toReturn.push(<a key={item} href={item}>{item}</a>)
-        }else{
-            toReturn.push(item);
-        }
-    }
-    return(
-        <div>{toReturn}</div>
-    );
-};
-
-var SubIPanel = React.createClass({
+var SubIPanel = module.exports.SubIPanel = React.createClass({
     getInitialState: function() {
     	return {isOpen: false};
     },
@@ -300,23 +275,25 @@ var Subview = React.createClass({
         var sortKeys = Object.keys(item).sort();
         return(
             <div className="flexcol-sm-6 subview">
-              <Panel className="sub-panel data-display panel-body-with-header">
-                  <div className="flexrow">
-                      <div className="flexcol-sm-6">
-                          <div className="flexcol-heading experiment-heading"><h5>{title}</h5></div>
-                          <dl className="key-value sub-descriptions">
-                              {sortKeys.map(function(ikey, idx){
-                                  return (
-                                    <div className="sub-entry" key={ikey} data-test="term-name">
-                                      {formKey(tips,ikey)}
-                                      <dd>{formValue(schemas, item[ikey])}</dd>
-                                    </div>
-                                  );
-                              })}
-                          </dl>
-                      </div>
-                  </div>
-              </Panel>
+                <Panel className="sub-panel data-display panel-body-with-header">
+                    <div className="flexrow">
+                        <div className="flexcol-sm-6">
+                            <div className="flexcol-heading experiment-heading">
+                                <h5>{title}</h5>
+                            </div>
+                            <dl className="key-value sub-descriptions">
+                                {sortKeys.map(function(ikey, idx){
+                                    return (
+                                        <div className="sub-entry" key={ikey} data-test="term-name">
+                                        {formKey(tips,ikey)}
+                                        <dd>{formValue(schemas, item[ikey])}</dd>
+                                        </div>
+                                    );
+                                })}
+                            </dl>
+                        </div>
+                    </div>
+                </Panel>
             </div>
         );
     }
@@ -334,6 +311,8 @@ var tipsFromSchema = function(schemas, content){
     return tips;
 };
 
+// Formats the correct display for each metadata field
+
 var formKey =  function(tips, key){
     var tooltip = '';
     if (tips[key]){
@@ -346,6 +325,27 @@ var formKey =  function(tips, key){
         <DescriptorField field={key} description={tooltip}/>
     );
 };
+
+var formValue = function (schemas, item) {
+    var toReturn = [];
+    if(Array.isArray(item)) {
+        for (var i=0; i < item.length; i++){
+            toReturn.push(formValue(schemas, item[i]));
+        }
+    }else if (typeof item === 'object') {
+        toReturn.push(<SubIPanel schemas={schemas} content={item}/>);
+    }else{
+        if (typeof item === 'string' && item.charAt(0) === '/') {
+            toReturn.push(<a key={item} href={item}>{item}</a>);
+        }else{
+            toReturn.push(item);
+        }
+    }
+    return(
+        <div>{toReturn}</div>
+    );
+};
+
 
 // Display the item field with a tooltip showing the field description from
 // schema, if available

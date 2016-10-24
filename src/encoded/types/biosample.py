@@ -57,6 +57,18 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         return 'None'
 
     @calculated_property(schema={
+        "title": "Modifications summary short",
+        "description": "Shorter summary of any modifications on the biosample for tables.",
+        "type": "string",
+    })
+    def modifications_summary_short(self, request, modifications=None):
+        if modifications:
+            # use only the first modification
+            mod_props = request.embed(modifications[0], '@@object')
+            return mod_props['modification_name_short']
+        return 'None'
+
+    @calculated_property(schema={
         "title": "Treatments summary",
         "description": "Summary of any treatments on the biosample.",
         "type": "string",
