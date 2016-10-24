@@ -37,7 +37,8 @@
         "workflow_id": {
             "title": "Workflow ID",
             "description": "User defined Workflow ID",
-            "type": "string"
+            "type": "string",
+            ""linkTo": "workflow"
         },
         "data_input_type": {
             "title": "Type of input data",
