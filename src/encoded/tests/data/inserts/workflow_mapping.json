@@ -3,7 +3,7 @@
         "name": "gitar-v0-2_mm9",
         "description": "example workflow mapping table",
         "workflow_name": "gaurav/4dn/gitar-v0-2",
-        "workflow_id": "abcdefg1234",
+        "workflow": "96b9b39a-9254-44f5-a051-872aec7136c0",
         "data_input_type": "experiment",
         "workflow_parameters": [
             {"parameter": "bowtie_index", "value": "mm9.bowtieIndex.tgz"},
