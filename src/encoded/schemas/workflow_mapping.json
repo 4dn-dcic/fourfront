@@ -99,14 +99,13 @@
                     "value": {
                         "title": "Value",
                         "description": "a specified value for the specified parameter",
-                        "type": "string",
-                        "linkTo": "file"
-                    }
+                        "type": "string"
+                    },
                     "file_link": {
                         "title": "File link",
                         "description": "Link to file object",
                         "type": "string",
-                        "linkTo": "file"
+                        "linkTo": "File"
                     }
                 }
             }
