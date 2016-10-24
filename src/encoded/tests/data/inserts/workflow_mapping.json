@@ -1,6 +1,6 @@
 [
     {
-        "name": "example_gitar_v002_mm9",
+        "name": "gitar-v0-2_mm9",
         "description": "example workflow mapping table",
         "workflow_name": "gaurav/4dn/gitar-v0-2",
         "workflow_id": "abcdefg1234",

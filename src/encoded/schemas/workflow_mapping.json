@@ -77,7 +77,7 @@
                 }
             }
         },
-        "input_data_parameters": {
+        "experiment_parameters": {
             "title": "Input Data Parameters",
             "description": "The parameters that are defining the input_data",
             "type": "array",
@@ -99,7 +99,8 @@
                     "value": {
                         "title": "Value",
                         "description": "a specified value for the specified parameter",
-                        "type": "string"
+                        "type": "string",
+                        "linkTo": "file"
                     }
                 }
             }
