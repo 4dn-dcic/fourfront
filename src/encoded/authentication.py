@@ -154,6 +154,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
             request._auth0_authenticated = None
             return None
 
+        user_info = None
         try:
             user_url = "https://{domain}/userinfo?access_token={access_token}" \
                         .format(domain='hms-dbmi.auth0.com',
