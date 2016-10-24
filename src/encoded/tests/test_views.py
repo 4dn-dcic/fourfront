@@ -132,9 +132,9 @@ def _test_antibody_approval_creation(testapp):
 
 
 def test_load_sample_data(
-        access_key,
+        analysis_step,
         award,
-        submitter,
+        human_biosample,
         construct,
         document,
         experiment,
@@ -142,21 +142,19 @@ def test_load_sample_data(
         lab,
         organism,
         publication,
-        human_individual,
-        human_biosource,
-        human_biosample,
         software,
-        analysis_step,
+        human_biosource,
+        submitter,
         workflow_mapping,
         ):
     assert True, 'Fixtures have loaded sample data'
 
 
 def test_abstract_collection(testapp, experiment):
-    # TODO: ASK_BEN how to get experiment to function as catch all
+    #TODO: ASK_BEN how to get experiment to function as catch all
     pass
-    # testapp.get('/experiment/{accession}'.format(**experiment))
-    # testapp.get('/expermient/{accession}'.format(**experiment))
+    #testapp.get('/experiment/{accession}'.format(**experiment))
+    #testapp.get('/expermient/{accession}'.format(**experiment))
 
 
 @pytest.mark.slow
@@ -165,7 +163,7 @@ def test_load_workbook(workbook, testapp, item_type, length):
     # testdata must come before testapp in the funcargs list for their
     # savepoints to be correctly ordered.
     res = testapp.get('/%s/?limit=all' % item_type).maybe_follow(status=200)
-    # TODO ASK_BEN about inherited collections i.e. protocol
+    #TODO ASK_BEN about inherited collections i.e. protocol
     assert len(res.json['@graph']) == length
 
 
