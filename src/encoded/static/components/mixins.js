@@ -78,7 +78,7 @@ class Timeout {
 }
 
 
-module.exports.Persona = {
+module.exports.Auth0 = {
     childContextTypes: {
         fetch: React.PropTypes.func,
         session: React.PropTypes.object,
@@ -284,33 +284,7 @@ module.exports.HistoryAndTriggers = {
             type: {'href':document.querySelector('link[rel="canonical"]').getAttribute('href')}
         });
     },
-   triggerLogout: function (event) {
-        console.log('Logging out (persona)');
-        var session = this.state.session;
-        if (!(session && session['auth.userid'])) return;
-        this.fetch('/logout?redirect=false', {
-            headers: {'Accept': 'application/json'}
-        })
-        .then(response => {
-            if (!response.ok) throw response;
-            return response.json();
-        })
-        .then(data => {
-            this.DISABLE_POPSTATE = true;
-            var old_path = window.location.pathname + window.location.search;
-            window.location.assign('/#logged-out');
-            if (old_path == '/') {
-                window.location.reload();
-            }
-        }, err => {
-            parseError(err).then(data => {
-                data.title = 'Logout failure: ' + data.title;
-                store.dispatch({
-                    type: {'context':data}
-                });
-            });
-        });
-    },
+
     trigger: function (name) {
         var method_name = this.triggers[name];
         if (method_name) {
@@ -457,7 +431,11 @@ module.exports.HistoryAndTriggers = {
     },
 
     // only navigate if href changes
-    confirmNavigation: function(href) {
+    confirmNavigation: function(href, options) {
+        var inPlace;
+        if(options.inPlace && options.inPlace==true){
+            return true;
+        }
         if(href===this.props.href){
             return false;
         }
@@ -469,7 +447,7 @@ module.exports.HistoryAndTriggers = {
         // options.replace only used handleSubmit, handlePopState, handlePersonaLogin
         options = options || {};
         href = url.resolve(this.props.href, href);
-        if (!this.confirmNavigation(href)) {
+        if (!this.confirmNavigation(href, options)) {
             return;
         }
         // Strip url fragment.

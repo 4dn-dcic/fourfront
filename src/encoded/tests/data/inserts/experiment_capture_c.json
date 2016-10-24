@@ -24,7 +24,7 @@
         "crosslinking_method": "1% Formaldehyde",
         "uuid": "75041e2f-3e43-4388-8bbb-e861f209c555",
         "protocol": "131106bc-8535-4448-903e-854af460b244",
-        "submitted_by": "admin@admin.com",
+        "submitted_by": "4dndcic@gmail.com",
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
         "rna_tag": "dUTP",
         "targeted_regions": [
@@ -60,7 +60,7 @@
         "uuid": "75041e2f-3e43-4388-8bbb-e861f209c222",
         "protocol": "131106bc-8535-4448-903e-854af460b244",
         "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEX067APU1"}],
-        "submitted_by": "admin@admin.com",
+        "submitted_by": "4dndcic@gmail.com",
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
         "rna_tag": "biotin-dUTP",
         "targeted_regions": [

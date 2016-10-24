@@ -1,6 +1,6 @@
 [
     {
-        "email": "admin@admin.com",
+        "email": "4dndcic@gmail.com",
         "first_name": "Admin",
         "groups": ["admin"],
         "job_title": "Admin",
@@ -10,5 +10,61 @@
         "submits_for": ["4dn-dcic-lab"],
         "timezone": "US/Pacific",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267307e3a"
+    },
+    {
+        "email": "burak_alver@hms.harvard.edu",
+        "first_name": "Burak",
+        "job_title": "4DN staff",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Alver",
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab267228139"
+    },
+    {
+        "email": "andrew_schroeder@hms.harvard.edu",
+        "first_name": "Andy",
+        "job_title": "4DN staff",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Schroeder",
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab267227777"
+    },
+    {
+        "email": "johnsonjp@gmail.com",
+        "first_name": "Jeremy",
+        "job_title": "4DN staff",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Johnson",
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab267216788"
+    },
+    {
+        "email": "duplexa@gmail.com",
+        "first_name": "Soo",
+        "job_title": "4DN staff",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Lee",
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab267998888"
+    },
+    {
+        "email": "koray_kirli@hms.harvard.edu",
+        "first_name": "Koray",
+        "job_title": "4DN staff",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Kirli",
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab267111888"
+    },
+    {
+        "email": "alexander_balashov@hms.harvard.edu",
+        "first_name": "Alex",
+        "job_title": "4DN staff",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Balashov",
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab245628888"
+    },
+    {
+        "email": "carl_vitzthum@hms.harvard.edu",
+        "first_name": "Carl",
+        "job_title": "4DN staff",
+        "lab": "4dn-dcic-lab",
+        "last_name": "Vitzthum",
+        "uuid": "986b362f-4eb6-4a9c-8173-3ab267226988"
     }
 ]
