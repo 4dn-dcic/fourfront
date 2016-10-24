@@ -365,15 +365,6 @@ def analysis_step(testapp, software):
 
 
 @pytest.fixture
-def task(testapp, analysis_step):
-    item = {
-        'analysis_step': analysis_step['@id'],
-        'job_status': 'finished',
-    }
-    return testapp.post_json('/task', item).json['@graph'][0]
-
-
-@pytest.fixture
 def document(testapp, lab, award):
     item = {
         'award': award['@id'],
@@ -393,26 +384,6 @@ def human_biosample(testapp, human_biosource):
         # "treatments": ["686b362f-4eb6-4a9c-8173-3ab267307e3b"]
     }
     return testapp.post_json('/biosample', item).json['@graph'][0]
-
-
-@pytest.fixture
-def workflow_mapping(testapp, workflow_bam):
-    item = {
-        "name": "test mapping",
-        "workflow_name": "test workflow name",
-        "workflow": workflow_bam['@id'],
-        "data_input_type": "experiment",
-        "workflow_parameters": [
-            {"parameter": "bowtie_index", "value": "some value"}
-        ],
-        "experiment_parameters": [
-            {"parameter": "biosample.biosource.individual.organism", "value": "mouse"}
-        ],
-        "workflow_parameters": [
-            {"parameter": "genome_version", "value": "mm9"}
-        ]
-    }
-    return testapp.post_json('/workflow_mapping', item).json['@graph'][0]
 
 
 @pytest.fixture
@@ -452,23 +423,24 @@ def donor_2(testapp, lab, award):
 
 
 @pytest.fixture
-def analysis_step_bam(testapp):
+def software_bam(testapp):
+    # TODO: ASK_ANDY do we want software_type to be an array?
     item = {
-        'name': 'bamqc',
-        'software_used': 'aligner',
-        "version": "1.0"
+        "name": "Aligner",
+        "software_type": ["indexer", ],
+        "version": "1.0",
     }
-    return testapp.post_json('/analysis_step', item).json['@graph'][0]
+    return testapp.post_json('/software', item).json['@graph'][0]
 
 
 @pytest.fixture
-def task_bam(testapp, analysis_step_bam):
+def analysis_step_bam(testapp, software_bam):
     item = {
-        'analysis_step': analysis_step_bam['@id'],
-        'status': 'finished',
-        'aliases': ['modern:chip-seq-bwa-alignment-step-run-v-1-virtual']
+        'name': 'bamqc',
+        'software_used': software_bam['@id'],
+        "version": "1.0"
     }
-    return testapp.post_json('/task', item).json['@graph'][0]
+    return testapp.post_json('/analysis_step', item).json['@graph'][0]
 
 
 @pytest.fixture
@@ -480,6 +452,26 @@ def workflow_bam(testapp, lab, award, analysis_step_bam):
         'analysis_steps': [analysis_step_bam['@id']]
     }
     return testapp.post_json('/workflow', item).json['@graph'][0]
+
+
+@pytest.fixture
+def workflow_mapping(testapp, workflow_bam):
+    item = {
+        "name": "test mapping",
+        "workflow_name": "test workflow name",
+        "workflow": workflow_bam['@id'],
+        "data_input_type": "experiment",
+        "workflow_parameters": [
+            {"parameter": "bowtie_index", "value": "some value"}
+        ],
+        "experiment_parameters": [
+            {"parameter": "biosample.biosource.individual.organism", "value": "mouse"}
+        ],
+        "workflow_parameters": [
+            {"parameter": "genome_version", "value": "mm9"}
+        ]
+    }
+    return testapp.post_json('/workflow_mapping', item).json['@graph'][0]
 
 
 @pytest.fixture
