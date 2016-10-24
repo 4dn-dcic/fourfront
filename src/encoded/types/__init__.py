@@ -315,6 +315,19 @@ class WorkflowRun(Item):
 
 
 @collection(
+    name='workflow_mappings',
+    properties={
+        'title': 'Workflow Mappings',
+        'description': 'Listing of all workflow mappings',
+    })
+class WorkflowMapping(Item):
+    """The WorkflowRun class that describes execution of a workflow and tasks in it."""
+
+    item_type = 'workflow_mapping'
+    schema = load_schema('encoded:schemas/workflow_mapping.json')
+
+
+@collection(
     name='targets',
     properties={
         'title': 'Targets',

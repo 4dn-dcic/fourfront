@@ -34,10 +34,9 @@
             "type": "string"
         },
         "version": {
-            "titile": "Version",
-            "description": "The version of the analysis step",
-            "type": "integer",
-            "default": 1
+            "title": "Version",
+            "description": "The software version number.",
+            "type": "string"
         },
         "description": {
             "title": "Description",
