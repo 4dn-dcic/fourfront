@@ -45,6 +45,7 @@ ORDER = [
     'task',
     'workflow',
     'workflow_run',
+    'workflow_mapping'
 ]
 
 IS_ATTACHMENT = [

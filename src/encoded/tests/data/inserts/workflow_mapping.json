@@ -1,0 +1,22 @@
+[
+    {
+        "name": "example_gitar_v002_mm9",
+        "description": "example workflow mapping table",
+        "workflow_name": "gaurav/4dn/gitar-v0-2",
+        "workflow_id": "abcdefg1234",
+        "data_input_type": "experiment",
+        "workflow_parameters": [
+            {"parameter": "bowtie_index", "value": "mm9.bowtieIndex.tgz"},
+            {"parameter": "chrlen_file", "description":"chromosome length file", "value": "mm9.chrlen_file"}
+        ],
+        "input_data_parameters": [
+            {"parameter": "biosample.biosource.individual.organism", "value": "mouse"},
+            {"parameter": "experiment_type1", "value": "in situ HiC"},
+            {"parameter": "experiment_type2", "value": "dilution HiC"},
+            {"parameter": "experiment_type3", "value": "capture HiC"}
+        ],
+        "workflow_parameters": [
+            {"parameter": "genome_version", "value": "mm9"}
+        ]
+    }
+]
