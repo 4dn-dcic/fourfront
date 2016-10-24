@@ -446,6 +446,7 @@ def analysis_step_bam(testapp, software_bam):
 @pytest.fixture
 def workflow_bam(testapp, lab, award, analysis_step_bam):
     item = {
+        'title': "test workflow",
         'award': award['@id'],
         'lab': lab['@id'],
         'name': "Histone ChIP-seq",
