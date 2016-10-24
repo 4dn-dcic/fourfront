@@ -283,6 +283,20 @@ class FileFasta(File):
     embedded = File.embedded
 
 
+@collection(
+    name='file-processed',
+    unique_key='accession',
+    properties={
+        'title': 'Processed Files',
+        'description': 'Listing of Processed Files',
+    })
+class FileProcessed(File):
+    """Collection for individual processed files."""
+    item_type = 'file_processed'
+    schema = load_schema('encoded:schemas/file_processed.json')
+    embedded = File.embedded
+
+
 @view_config(name='upload', context=File, request_method='GET',
              permission='edit')
 def get_upload(context, request):
