@@ -24,7 +24,6 @@ var Navigation = module.exports = React.createClass({
     },
 
     hideTestWarning: function(e) {
-
         // Remove the warning banner because the user clicked the close icon
         this.setState({testWarning: false});
 
@@ -141,20 +140,19 @@ var UserActions = React.createClass({
         var session_properties = this.context.session_properties;
         var acctTitle = (
             <span>
-                <i className="icon ss-user" style={{ 
+                <i className="icon ss-user" style={{
                     transform: 'translateY(2px)',
                     opacity : session_properties['auth.userid'] ? 1 : 0.25
                 }}></i> Account
             </span>
         );
-        
+
         var actions = this.context.listActionsFor('user_section').map(function (action) {
             if (action.id === "login"){
                 return(<Login key={action.id} />);
             } else if (action.id === "accountactions"){
                 // link to registration page if logged out or account actions if logged in
                 if (!session_properties['auth.userid']) {
-                    
                     return(
                         <a href={action.url || ''} key={action.id} className="global-entry">
                             {action.title}
@@ -167,7 +165,7 @@ var UserActions = React.createClass({
                 return(<ContextActions key={action.id} />);
             }
         });
-        
+
         return (
                 <Nav right={true} acct={true}>
                     <NavItem dropdownId="context" dropdownTitle={acctTitle}>

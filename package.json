@@ -43,9 +43,11 @@
     "webpack": "^1.13.0"
   },
   "dependencies": {
+    "auth0-lock": "^10.4.0",
     "babel-polyfill": "^6.7.4",
     "brace": "^0.3.0",
     "ckeditor": "file:node_shims/ckeditor",
+    "classnames": "^2.2.5",
     "color": "^0.10.1",
     "cookie-monster": "0.0.7",
     "d3": "^3.4.6",
@@ -57,17 +59,16 @@
     "marked": "^0.3.3",
     "moment": "^2.8.2",
     "query-string": "^4.1.0",
-    "react": "^15.3.1",
-    "react-dom": "^15.3.1",
+    "react": "^15.3.2",
     "react-bootstrap": "^0.30.3",
-    "redux": "^3.5.2",
+    "react-dom": "^15.3.2",
     "react-redux": "^4.4.5",
-    "classnames": "^2.2.5",
-    "react-forms": "2.0.0-beta33",
+    "redux": "^3.5.2",
     "scriptjs": "^2.5.7",
     "source-map-support": "^0.2.7",
     "subprocess-middleware": "^0.1.0",
     "underscore": "^1.8.3",
-    "whatwg-fetch": "git+https://github.com/lrowe/fetch.git#bf5d58b738fb2ed6d60791b944d36075fee8604a"
+    "whatwg-fetch": "git+https://github.com/lrowe/fetch.git#bf5d58b738fb2ed6d60791b944d36075fee8604a",
+    "xhr2": "^0.1.3"
   }
 }
