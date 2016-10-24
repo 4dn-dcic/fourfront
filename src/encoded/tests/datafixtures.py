@@ -444,13 +444,12 @@ def analysis_step_bam(testapp, software_bam):
 
 
 @pytest.fixture
-def workflow_bam(testapp, lab, award, analysis_step_bam):
+def workflow_bam(testapp, lab, award):
     item = {
         'title': "test workflow",
+        'workflow_type': "Hi-C data analysis",
         'award': award['@id'],
-        'lab': lab['@id'],
-        'name': "Histone ChIP-seq",
-        'analysis_steps': [analysis_step_bam['@id']]
+        'lab': lab['@id']
     }
     return testapp.post_json('/workflow', item).json['@graph'][0]
 
