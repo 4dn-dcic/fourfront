@@ -8,6 +8,7 @@ var _ = require('underscore');
 var parseAndLogError = require('./mixins').parseAndLogError;
 // var navigation = require('./navigation');
 var Modal = require('react-bootstrap').Modal;
+var Alert = require('react-bootstrap').Alert;
 var ItemStore = require('./lib/store').ItemStore;
 var ObjectPicker = require('./inputs').ObjectPicker;
 
@@ -194,6 +195,36 @@ var User = module.exports.User = React.createClass({
 
 globals.content_views.register(User, 'User');
 
+var BasicForm = React.createClass({
+    getInitialState: function() {
+        return({
+            value: ''
+        })
+    },
+
+    handleChange: function(e) {
+        this.setState({ value: e.target.value });
+    },
+
+    handleSubmit: function(e){
+        e.preventDefault();
+        if(this.state.value.length == 0){
+            return;
+        }
+        this.props.submitImpersonate(this.state.value);
+        this.setState({ value: '' });
+    },
+
+    render: function() {
+        return(
+            <form onSubmit={this.handleSubmit}>
+                <input className="impersonate-user impersonate-user-field" type='text' placeholder='Enter an email to impersonate...'
+                    onChange={this.handleChange} value={this.state.value}/>
+                <input className="impersonate-user" type="submit" value="Submit" />
+            </form>
+        );
+    }
+});
 
 var ImpersonateUserForm = React.createClass({
     contextTypes: {
@@ -201,17 +232,7 @@ var ImpersonateUserForm = React.createClass({
     },
 
     render: function() {
-        // var ReactForms = require('react-forms');
-        // var ImpersonateUserSchema = ReactForms.Mapping({}, {
-        //     userid: ReactForms.Scalar({
-        //         label: 'User',
-        //         hint: 'Enter the email of the user you want to impersonate.',
-        //     }),
-        // });
-        // var form = <Form schema={ImpersonateUserSchema} submitLabel="Submit"
-        //       method="POST" action="/impersonate-user"
-        //       onFinish={this.finished} />;
-        var form = <div>Form will go here...</div>;
+        var form = <BasicForm submitImpersonate={this.handleSubmit} />;
         return (
             <div>
                 <h2>Impersonate User</h2>
@@ -220,8 +241,26 @@ var ImpersonateUserForm = React.createClass({
         );
     },
 
-    finished: function(data) {
-        this.context.navigate('/');
+    handleSubmit: function(data) {
+        var xmlhttp = new XMLHttpRequest();
+        var url = "/impersonate-user";
+        xmlhttp.onreadystatechange = function() {
+            if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+                if (xmlhttp.status == 200) {
+                    this.context.navigate('/');
+                    alert('Success! ' + data + ' is being impersonated.');
+                } else if (xmlhttp.status == 400) {
+                    console.error('There was an error 400');
+                    alert('Impersonation unsuccessful.\nPlease check to make sure the provided email is correct.');
+                } else {
+                    console.error('something else other than 200 was returned');
+                    alert('Impersonation unsuccessful.\nPlease check to make sure the provided email is correct.');
+                }
+            }
+        }.bind(this);
+        xmlhttp.open("POST", url, true);
+        xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xmlhttp.send(JSON.stringify({'userid':data}));
     }
 });
 globals.content_views.register(ImpersonateUserForm, 'Portal', 'impersonate-user');
