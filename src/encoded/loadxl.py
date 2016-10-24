@@ -44,7 +44,7 @@ ORDER = [
     'software',
     'analysis_step',
     'workflow',
-    'workflow_mapping'
+    'workflow_mapping',
     'workflow_run'
 ]
 
