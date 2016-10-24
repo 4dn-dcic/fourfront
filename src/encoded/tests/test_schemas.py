@@ -18,9 +18,9 @@ def master_mixins():
 @pytest.mark.parametrize('schema', SCHEMA_FILES)
 def test_load_schema(schema, master_mixins):
     loaded_schema = load_schema('encoded:schemas/%s' % schema)
-    if schema == 'experiment_capture_c.json':
+    if schema == 'mixins.json':
         print(loaded_schema)
-        #assert False
+        assert False
     assert(loaded_schema)
 
     #check the mixin properties for each schema
@@ -32,6 +32,7 @@ def test_load_schema(schema, master_mixins):
 def test_schema_has_status(schema):
     schemas_wo_status = [
         'access_key.json',
+        'namespaces.json',
     ]
     schemas_w_status_as_properties = [
         'experiment.json',
@@ -40,9 +41,20 @@ def test_schema_has_status(schema):
         'file.json',
         'file_fastq.json',
         'file_fasta.json',
-
     ]
+    if schema in schemas_wo_status:
+        assert True
     loaded_schema = load_schema('encoded:schemas/%s' % schema)
+    if schema == 'mixins.json':
+        # make sure the status stanza is included
+        pass
+    elif schema in schemas_w_status_as_properties:
+        # check that they do have a property named status
+        # could do this for every schema and not worry if a mixin or not
+        pass
+    else:
+        # check that the mixin is included
+        pass
 
 
 def verify_mixins(loaded_schema, master_mixins):
