@@ -220,7 +220,7 @@ module.exports.HistoryAndTriggers = {
     confirmNavigation: function(href, options) {
         var inPlace;
         if(options.inPlace && options.inPlace==true){
-            return true
+            return true;
         }
         if(href===this.props.href){
             return false;
