@@ -349,7 +349,7 @@ def software(testapp):
     item = {
         "name": "FastQC",
         "software_type": ["indexer", ],
-        "version": "1.0",
+        "version": "1"
     }
     return testapp.post_json('/software', item).json['@graph'][0]
 
@@ -359,7 +359,7 @@ def analysis_step(testapp, software):
     item = {
         'name': 'fastqc',
         "software_used": software['@id'],
-        "version": 1
+        "version": "1"
     }
     return testapp.post_json('/analysis_step', item).json['@graph'][0]
 
@@ -428,7 +428,7 @@ def software_bam(testapp):
     item = {
         "name": "Aligner",
         "software_type": ["indexer", ],
-        "version": "1.0",
+        "version": "1"
     }
     return testapp.post_json('/software', item).json['@graph'][0]
 
@@ -438,7 +438,7 @@ def analysis_step_bam(testapp, software_bam):
     item = {
         'name': 'bamqc',
         'software_used': software_bam['@id'],
-        "version": "1.0"
+        "version": "1"
     }
     return testapp.post_json('/analysis_step', item).json['@graph'][0]
 
