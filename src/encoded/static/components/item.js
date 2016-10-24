@@ -4,7 +4,6 @@ var collection = require('./collection');
 var fetched = require('./fetched');
 var globals = require('./globals');
 var audit = require('./audit');
-var _ = require('underscore');
 var Panel = require('react-bootstrap').Panel;
 var AuditIndicators = audit.AuditIndicators;
 var AuditDetail = audit.AuditDetail;
@@ -86,7 +85,7 @@ var IPanel = module.exports.IPanel = React.createClass({
     render: function() {
         var schemas = this.props.schemas;
         var context = this.props.context;
-        var itemClass = globals.itemClass(context, 'view-detail panel');
+        //var itemClass = globals.itemClass(context, 'view-detail panel');
         var title = globals.listing_titles.lookup(context)({context: context});
         var sortKeys = Object.keys(context).sort();
         //console.log(this.props);

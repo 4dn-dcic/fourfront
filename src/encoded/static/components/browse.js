@@ -115,7 +115,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
     handleToggle: function (e) {
         e.preventDefault();
         this.setState({
-  		  open: !this.state.open
+  		    open: !this.state.open
         });
     },
 

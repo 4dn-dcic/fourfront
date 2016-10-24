@@ -280,7 +280,9 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	box-sizing: border-box;
 	border: 1px solid #e0e0e0;
 	min-height: 42px;
-	padding: 10px 15px 9px;
+	padding: 10px 15px 8px;
+	overflow: hidden;
+	text-overflow: ellipsis;
 
 	h4 {
 		font-weight: 500;
@@ -290,6 +292,11 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			line-height: inherit;
 			letter-spacing: normal;
 		}
+	}
+
+	p {
+		overflow: inherit;
+		text-overflow: inherit;
 	}
 
 	p:last-child {
@@ -402,7 +409,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 
 .item-page-container .info-area {
-	margin-top: 18px;
+	margin-top: 19px;
 	margin-bottom: 10px;
     min-height: 64px;
 }
@@ -411,7 +418,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	padding : 8px 12px;
 	border: 1px solid #e4e4e4;
 	margin-bottom: 10px;
-	border-radius: 5px;
+	border-radius: 3px;
 
     h5 {
         margin-bottom: 0;

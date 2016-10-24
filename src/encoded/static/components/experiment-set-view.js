@@ -254,6 +254,24 @@ globals.panel_views.register(ExperimentSetView, 'ExperimentSet');
 
 var ExperimentSetHeader = React.createClass({
 
+    getInitialState : function(){
+        return {
+            descriptionExpanded : false
+        }
+    },
+
+    componentWillMount : function(){
+        // ToDo : Check if text width would be greater than bounding box width (pre-render?)
+        // if so, apply cursor : pointer style to div.item-page-heading
+    },
+
+    handleDescriptionExpandToggle: function (e) {
+        e.preventDefault();
+        this.setState({
+  		    descriptionExpanded: !this.state.descriptionExpanded
+        });
+    },
+
     parsedCreationDate(){
         if (!('date_created' in this.props.context)) return null;
         return (
@@ -304,9 +322,13 @@ var ExperimentSetHeader = React.createClass({
                         { this.parsedExperimentSetType() }
                         { this.parsedStatus() }
                     </h5>
-                </div>
+                </div>  
 
-                <div className="item-page-heading experiment-heading">
+
+                <div className="item-page-heading experiment-heading" style={{
+                    maxHeight : this.state.descriptionExpanded ? null : 45,
+                    whiteSpace : this.state.descriptionExpanded ? 'normal' : 'nowrap'
+                }} onClick={this.handleDescriptionExpandToggle}>
                     <p className="text-large">{ this.props.context.description }</p>
                 </div>
 
