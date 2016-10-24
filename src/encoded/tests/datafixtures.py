@@ -452,10 +452,10 @@ def donor_2(testapp, lab, award):
 
 
 @pytest.fixture
-def analysis_step_bam(testapp, software):
+def analysis_step_bam(testapp):
     item = {
         'name': 'bamqc',
-        'software_used': analysis_step['@id'],
+        'software_used': 'aligner',
         "version": "1.0"
     }
     return testapp.post_json('/analysis_step', item).json['@graph'][0]
