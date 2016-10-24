@@ -12,49 +12,62 @@ SCHEMA_FILES = [
 
 @pytest.fixture(scope='module')
 def master_mixins():
-    return load_schema('encoded:schemas/mixins.json')
+    mixins = load_schema('encoded:schemas/mixins.json')
+    mixin_keys = [
+        'schema_version',
+        'uuid',
+        'accession',
+        'aliases',
+        'status',
+        'submitted',
+        'modified',
+        'references',
+        'attribution',
+        'notes',
+        'documents',
+        'attachment',
+        'attachments',
+        'dbxrefs',
+        'library',
+    ]
+    for key in mixin_keys:
+        assert(mixins[key])
 
 
 @pytest.mark.parametrize('schema', SCHEMA_FILES)
 def test_load_schema(schema, master_mixins):
     loaded_schema = load_schema('encoded:schemas/%s' % schema)
-    if schema == 'mixins.json':
-        print(loaded_schema)
-        assert False
     assert(loaded_schema)
 
     #check the mixin properties for each schema
     if not schema == ('mixins.json'):
         verify_mixins(loaded_schema, master_mixins)
 
+    if schema not in ['namespaces.json', 'mixins.json']:
+        shared_properties = [
+            'uuid',
+            'schema_version',
+            'aliases',
+            'lab',
+            'award',
+            'date_created',
+            'submitted_by',
+            'status'
+        ]
+        no_alias_or_attribution = ['user.json', 'award.json', 'lab.json', 'organism.json']
+        for prop in shared_properties:
+            if schema == 'experiment.json':
+                # currently experiment is abstract and has no mixin properties
+                continue
+            if schema == 'access_key.json' and prop not in ['uuid', 'schema_version']:
+                continue
+            if schema in no_alias_or_attribution and prop in ['aliases', 'lab', 'award']:
+                continue
+            verify_property(loaded_schema, prop)
 
-@pytest.mark.parametrize('schema', SCHEMA_FILES)
-def test_schema_has_status(schema):
-    schemas_wo_status = [
-        'access_key.json',
-        'namespaces.json',
-    ]
-    schemas_w_status_as_properties = [
-        'experiment.json',
-        'experiment_capture_c.json',
-        'experiment_hic.json',
-        'file.json',
-        'file_fastq.json',
-        'file_fasta.json',
-    ]
-    if schema in schemas_wo_status:
-        assert True
-    loaded_schema = load_schema('encoded:schemas/%s' % schema)
-    if schema == 'mixins.json':
-        # make sure the status stanza is included
-        pass
-    elif schema in schemas_w_status_as_properties:
-        # check that they do have a property named status
-        # could do this for every schema and not worry if a mixin or not
-        pass
-    else:
-        # check that the mixin is included
-        pass
+
+def verify_property(loaded_schema, property):
+    assert(loaded_schema['properties'][property])
 
 
 def verify_mixins(loaded_schema, master_mixins):
