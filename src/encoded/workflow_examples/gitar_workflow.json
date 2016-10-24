@@ -1,4 +1,3 @@
-[
 {
     "cwl_pointer": "https://igor.sbgenomics.com/raw/4dn-dcic/dev/gitar-v0-2/0", 
     "uuid": "c7a60edf-49e5-4c33-afab-9ec90d65faf3", 
@@ -10159,79 +10158,7 @@
             "step_name": "hictool_hdf52matrix"
         }
     ], 
-    "workflow_type": "Hi-C data analysis", 
+    "workflow_type": "Hi-C", 
     "workflow_diagram": "", 
     "description": "GITAR Hi-C data processing pipeline"
-},
-{
-    "cwl_pointer": "https://igor.sbgenomics.com/raw/4dn-dcic/dev/fastqc-0-11-4/0", 
-    "uuid": "5692315e-49e5-4c33-afab-9ec90d65faf3", 
-    "arguments": [
-        {
-            "argument_mapping": [
-                {
-                    "workflow_step": "FastQC", 
-                    "step_argument_name": "limits_file", 
-                    "step_argument_type": "Input file"
-                }
-            ], 
-            "workflow_argument_name": "limits_file", 
-            "argument_type": "Input file"
-        }, 
-        {
-            "argument_mapping": [
-                {
-                    "workflow_step": "FastQC", 
-                    "step_argument_name": "input_fastq", 
-                    "step_argument_type": "Input file"
-                }
-            ], 
-            "workflow_argument_name": "input_fastq", 
-            "argument_type": "Input file"
-        }, 
-        {
-            "argument_mapping": [
-                {
-                    "workflow_step": "FastQC", 
-                    "step_argument_name": "contaminants_file", 
-                    "step_argument_type": "Input file"
-                }
-            ], 
-            "workflow_argument_name": "contaminants_file", 
-            "argument_type": "Input file"
-        }, 
-        {
-            "argument_mapping": [
-                {
-                    "workflow_step": "FastQC", 
-                    "step_argument_name": "adapters_file", 
-                    "step_argument_type": "Input file"
-                }
-            ], 
-            "workflow_argument_name": "adapters_file", 
-            "argument_type": "Input file"
-        }, 
-        {
-            "argument_mapping": [
-                {
-                    "workflow_step": "FastQC", 
-                    "step_argument_name": "report_zip", 
-                    "step_argument_type": "Output file"
-                }
-            ], 
-            "workflow_argument_name": "report_zip", 
-            "argument_type": "Output file"
-        }
-    ], 
-    "title": "FastQC", 
-    "workflow_steps": [
-        {
-            "step": "f7b8cd87-49e5-4c33-afab-9ec90d65faf3", 
-            "step_name": "FastQC"
-        }
-    ], 
-    "workflow_type": "Other", 
-    "workflow_diagram": "", 
-    "description": "FastQC quality control step for fastq files"
 }
-]

@@ -36,15 +36,15 @@ ORDER = [
     'biosample',
     'file_fastq',
     'file_fasta',
+    'file_processed',
     'file_set',
     'experiment_hic',
     'experiment_capture_c',
     'experiment_set',
     'software',
     'analysis_step',
-    'task',
     'workflow',
-    'workflow_run',
+    'workflow_run'
 ]
 
 IS_ATTACHMENT = [
