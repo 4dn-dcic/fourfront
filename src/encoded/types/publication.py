@@ -30,11 +30,15 @@ class Publication(Item):
         abstract = ''
         author_list = []
         authors = ''
+        NIHe = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
+        NIHid = "https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/"
+        DOI = " https://doi.org/"
+        DOIhelp = "http://help.crossref.org/retrieving_doi_information"
         # parse if id is from pubmed
         if p_id.startswith('PMID'):
             pubmed_id = p_id[5:]
-            www = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={id}&rettype=medline".format(
-                   id=pubmed_id)
+            www = "{NIH}efetch.fcgi?db=pubmed&id={id}&rettype=medline".format(
+                   NIH=NIHe, id=pubmed_id)
             r = requests.get(www).text
             full_text = r.replace('\n      ', ' ')
             data_list = [a.split('-', 1) for a in full_text.split('\n') if a != '']
@@ -55,7 +59,10 @@ class Publication(Item):
                 authors = ', '.join(author_list)
 
         elif p_id.startswith('doi'):
-            # doi_id = p_id[4:]
+            doi_id = p_id[4:]
+            www = "{NIH}?ids={id}&format=json".format(
+                   NIH=NIHid, id=doi_id)
+
             pass
         properties['title'] = title
         properties['abstract'] = abstract
