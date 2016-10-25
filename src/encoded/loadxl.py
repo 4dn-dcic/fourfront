@@ -36,15 +36,16 @@ ORDER = [
     'biosample',
     'file_fastq',
     'file_fasta',
+    'file_processed',
     'file_set',
     'experiment_hic',
     'experiment_capture_c',
     'experiment_set',
     'software',
     'analysis_step',
-    'task',
     'workflow',
-    'workflow_run',
+    'workflow_mapping',
+    'workflow_run'
 ]
 
 IS_ATTACHMENT = [
@@ -623,7 +624,7 @@ def create_user(db, email, name, pwd):
     """create user if user not in database."""
     if User.get_by_username(email) is None:
         print('creating user ', email)
-        new_user = User(email=email, password=pwd,name=name)
+        new_user = User(email=email, password=pwd, name=name)
         db.add(new_user)
     else:
         print('user %s already exists, skipping' % (email))

@@ -25,7 +25,7 @@
             "description": "Unique name of the analysis step",
             "comment": "Unique for each parent analysis_step, using a naming system where the pipeline, software used, the purpose and the version of the step is described: rampage-grit-peak-calling-step-v-1",
             "type": "string",
-            "pattern": "^[a-z0-9\\-\\_]+$",
+            "pattern": "^[a-zA-Z0-9\\-\\_]+$",
             "uniqueKey": true
         },
         "title": {
@@ -34,10 +34,9 @@
             "type": "string"
         },
         "version": {
-            "titile": "Version",
-            "description": "The version of the analysis step",
-            "type": "integer",
-            "default": 1
+            "title": "Version",
+            "description": "The software version number.",
+            "type": "string"
         },
         "description": {
             "title": "Description",
@@ -112,7 +111,11 @@
                             "peaks",
                             "genome reference",
                             "genome index",
-                            "blacklisted regions"
+                            "blacklisted regions",
+                            "restriction enzyme site regions",
+                            "intermediate",
+                            "QC report",
+                            "chromosome size"
                         ]
                     },
                     "input_file_format": {
@@ -133,7 +136,10 @@
                             "csv",
                             "tar",
                             "tagAlign",
-                            "wig"
+                            "wig",
+                            "tgz",
+                            "txt",
+                            "zip"
                         ]
                     }
                 }
@@ -163,7 +169,11 @@
                             "peaks",
                             "genome reference",
                             "genome index",
-                            "blacklisted regions"
+                            "blacklisted regions",
+                            "restriction enzyme site regions",
+                            "intermediate",
+                            "QC report",
+                            "chromosome size"
                         ]
                     },
                     "output_file_format": {
@@ -184,7 +194,10 @@
                             "csv",
                             "tar",
                             "tagAlign",
-                            "wig"
+                            "wig",
+                            "tgz",
+                            "txt",
+                            "zip"
                         ]
                     }
                 }

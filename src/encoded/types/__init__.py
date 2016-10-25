@@ -273,18 +273,18 @@ class AnalysisStep(Item):
     embedded = ['software_used', 'qa_stats_generated']
 
 
-@collection(
-    name='tasks',
-    properties={
-        'title': 'Tasks',
-        'description': 'Listing of runs of analysis steps for 4DN analyses',
-    })
-class Task(Item):
-    """The Task class that descrbes a run of an analysis step."""
-
-    item_type = 'task'
-    schema = load_schema('encoded:schemas/task.json')
-    embedded = ['analysis_step']
+# @collection(
+#    name='tasks',
+#     properties={
+#         'title': 'Tasks',
+#         'description': 'Listing of runs of analysis steps for 4DN analyses',
+#     })
+# class Task(Item):
+#     """The Task class that descrbes a run of an analysis step."""
+#
+#     item_type = 'task'
+#     schema = load_schema('encoded:schemas/task.json')
+#     embedded = ['analysis_step']
 
 
 @collection(
@@ -307,11 +307,24 @@ class Workflow(Item):
         'description': 'Listing of executions of 4DN analysis workflows',
     })
 class WorkflowRun(Item):
-    """The WorkflowRun class that describes execution of a workflow and tasks in it."""
+    """The WorkflowRun class that describes execution of a workflow."""
 
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
-    embedded = ['workflow', 'tasks']
+    embedded = ['workflow']
+
+
+@collection(
+    name='workflow_mappings',
+    properties={
+        'title': 'Workflow Mappings',
+        'description': 'Listing of all workflow mappings',
+    })
+class WorkflowMapping(Item):
+    """The WorkflowRun class that describes execution of a workflow and tasks in it."""
+
+    item_type = 'workflow_mapping'
+    schema = load_schema('encoded:schemas/workflow_mapping.json')
 
 
 @collection(
