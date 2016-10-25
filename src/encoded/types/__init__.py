@@ -19,22 +19,6 @@ def includeme(config):
 
 
 @collection(
-    name='labs',
-    unique_key='lab:name',
-    properties={
-        'title': 'Labs',
-        'description': 'Listing of 4D Nucleome labs',
-    })
-class Lab(Item):
-    """Lab class."""
-
-    item_type = 'lab'
-    schema = load_schema('encoded:schemas/lab.json')
-    name_key = 'name'
-    embedded = ['awards']
-
-
-@collection(
     name='protocols',
     properties={
         'title': 'Protocols',
@@ -202,6 +186,19 @@ class Modification(Item):
             return modification_type
         return "None"
 
+    @calculated_property(schema={
+        "title": "Modification name short",
+        "description": "Shorter version of modification name for display on tables.",
+        "type": "string",
+    })
+    def modification_name_short(self, request, modification_type=None, target_of_mod=None):
+        if modification_type and target_of_mod:
+            target = request.embed(target_of_mod, '@@object')
+            return modification_type + " for " + target['target_summary_short']
+        elif modification_type:
+            return modification_type
+        return "None"
+
 
 @collection(
     name='quality_metric_flags',
@@ -230,18 +227,18 @@ class AnalysisStep(Item):
     embedded = ['software_used', 'qa_stats_generated']
 
 
-@collection(
-    name='tasks',
-    properties={
-        'title': 'Tasks',
-        'description': 'Listing of runs of analysis steps for 4DN analyses',
-    })
-class Task(Item):
-    """The Task class that descrbes a run of an analysis step."""
-
-    item_type = 'task'
-    schema = load_schema('encoded:schemas/task.json')
-    embedded = ['analysis_step']
+# @collection(
+#    name='tasks',
+#     properties={
+#         'title': 'Tasks',
+#         'description': 'Listing of runs of analysis steps for 4DN analyses',
+#     })
+# class Task(Item):
+#     """The Task class that descrbes a run of an analysis step."""
+#
+#     item_type = 'task'
+#     schema = load_schema('encoded:schemas/task.json')
+#     embedded = ['analysis_step']
 
 
 @collection(
@@ -264,11 +261,24 @@ class Workflow(Item):
         'description': 'Listing of executions of 4DN analysis workflows',
     })
 class WorkflowRun(Item):
-    """The WorkflowRun class that describes execution of a workflow and tasks in it."""
+    """The WorkflowRun class that describes execution of a workflow."""
 
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
-    embedded = ['workflow', 'tasks']
+    embedded = ['workflow']
+
+
+@collection(
+    name='workflow_mappings',
+    properties={
+        'title': 'Workflow Mappings',
+        'description': 'Listing of all workflow mappings',
+    })
+class WorkflowMapping(Item):
+    """The WorkflowRun class that describes execution of a workflow and tasks in it."""
+
+    item_type = 'workflow_mapping'
+    schema = load_schema('encoded:schemas/workflow_mapping.json')
 
 
 @collection(
@@ -304,6 +314,20 @@ class Target(Item):
             if genomic_region['start_coordinate'] and genomic_region['end_coordinate']:
                 value += ':' + str(genomic_region['start_coordinate']) + '-' + str(genomic_region['end_coordinate'])
             return value
+        return "no target"
+
+    @calculated_property(schema={
+        "title": "Target summary short",
+        "description": "Shortened version of target summary.",
+        "type": "string",
+    })
+    def target_summary_short(self, request, targeted_genes=None, description=None):
+        if targeted_genes:
+            value = ""
+            value += ' and '.join(targeted_genes)
+            return value
+        elif description:
+            return description
         return "no target"
 
 

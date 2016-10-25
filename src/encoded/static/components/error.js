@@ -5,9 +5,24 @@ var React = require('react');
 var ErrorPage = module.exports = React.createClass({
     render: function() {
         var homelink = <a href="/">here</a>;
+        var errorMessage;
+        if(this.props.status == 'invalid_login'){
+            errorMessage =  <div>
+                                <h3>The account you provided is not valid. Please click {homelink} to return to the homepage.</h3>
+                                <h5>Access is restricted to 4DN consortium members.</h5>
+                                <h5><a href="mailto:4DN.DCIC.support@hms-dbmi.atlassian.net">Request an account.</a></h5>
+                            </div>
+        }else if(this.props.status == 'not_found'){
+            errorMessage = <h3>The page you've requested does not exist. Please click {homelink} to return to the homepage.</h3>;
+        }else if(this.props.status == 'forbidden'){
+            errorMessage = <h3>Access was denied to this resource. If you have an account, try logging in. Otherwise, please click {homelink} to return to the homepage.</h3>;
+        }
+        else{
+            errorMessage = <h3>The page you've requested does not exist or you have found an error. Please click {homelink} to return to the homepage.</h3>;
+        }
         return(
             <div className="error-page">
-                <h3>This page does not exist or you have found an error. Please click {homelink} to return to the homepage.</h3>
+                {errorMessage}
             </div>
         );
     }

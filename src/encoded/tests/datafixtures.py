@@ -359,7 +359,7 @@ def software(testapp):
     item = {
         "name": "FastQC",
         "software_type": ["indexer", ],
-        "version": "1.0",
+        "version": "1"
     }
     return testapp.post_json('/software', item).json['@graph'][0]
 
@@ -369,18 +369,9 @@ def analysis_step(testapp, software):
     item = {
         'name': 'fastqc',
         "software_used": software['@id'],
-        "version": 1
+        "version": "1"
     }
     return testapp.post_json('/analysis_step', item).json['@graph'][0]
-
-
-@pytest.fixture
-def task(testapp, analysis_step):
-    item = {
-        'analysis_step': analysis_step['@id'],
-        'job_status': 'finished',
-    }
-    return testapp.post_json('/task', item).json['@graph'][0]
 
 
 @pytest.fixture
@@ -442,34 +433,55 @@ def donor_2(testapp, lab, award):
 
 
 @pytest.fixture
-def analysis_step_bam(testapp):
+def software_bam(testapp):
+    # TODO: ASK_ANDY do we want software_type to be an array?
+    item = {
+        "name": "Aligner",
+        "software_type": ["indexer", ],
+        "version": "1"
+    }
+    return testapp.post_json('/software', item).json['@graph'][0]
+
+
+@pytest.fixture
+def analysis_step_bam(testapp, software_bam):
     item = {
         'name': 'bamqc',
-        'software_used': 'aligner',
-        "version": "1.0"
+        'software_used': software_bam['@id'],
+        "version": "1"
     }
     return testapp.post_json('/analysis_step', item).json['@graph'][0]
 
 
 @pytest.fixture
-def task_bam(testapp, analysis_step_bam):
+def workflow_bam(testapp, lab, award):
     item = {
-        'analysis_step': analysis_step_bam['@id'],
-        'status': 'finished',
-        'aliases': ['modern:chip-seq-bwa-alignment-step-run-v-1-virtual']
+        'title': "test workflow",
+        'workflow_type': "Hi-C data analysis",
+        'award': award['@id'],
+        'lab': lab['@id']
     }
-    return testapp.post_json('/task', item).json['@graph'][0]
+    return testapp.post_json('/workflow', item).json['@graph'][0]
 
 
 @pytest.fixture
-def workflow_bam(testapp, lab, award, analysis_step_bam):
+def workflow_mapping(testapp, workflow_bam):
     item = {
-        'award': award['@id'],
-        'lab': lab['@id'],
-        'name': "Histone ChIP-seq",
-        'analysis_steps': [analysis_step_bam['@id']]
+        "name": "test mapping",
+        "workflow_name": "test workflow name",
+        "workflow": workflow_bam['@id'],
+        "data_input_type": "experiment",
+        "workflow_parameters": [
+            {"parameter": "bowtie_index", "value": "some value"}
+        ],
+        "experiment_parameters": [
+            {"parameter": "biosample.biosource.individual.organism", "value": "mouse"}
+        ],
+        "workflow_parameters": [
+            {"parameter": "genome_version", "value": "mm9"}
+        ]
     }
-    return testapp.post_json('/workflow', item).json['@graph'][0]
+    return testapp.post_json('/workflow_mapping', item).json['@graph'][0]
 
 
 @pytest.fixture

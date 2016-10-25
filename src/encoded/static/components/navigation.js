@@ -4,8 +4,9 @@ var url = require('url');
 var Login = require('./login');
 var {Navbars, Navbar, Nav, NavItem} = require('../libs/bootstrap/navbar');
 var {DropdownMenu} = require('../libs/bootstrap/dropdown-menu');
-var productionHost = require('./globals').productionHost;
 var _ = require('underscore');
+var TestWarning = require('./testwarning');
+var productionHost = require('./globals').productionHost;
 
 
 var Navigation = module.exports = React.createClass({
@@ -18,20 +19,11 @@ var Navigation = module.exports = React.createClass({
 
     getInitialState: function() {
         return {
-            testWarning: false
+            testWarning: this.props.visible || !productionHost[url.parse(this.context.location_href).hostname] || false
         };
     },
 
-    getInitialState: function() {
-        return {
-            testWarning: !productionHost[url.parse(this.context.location_href).hostname]
-        };
-    },
-
-    handleClick: function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-
+    hideTestWarning: function(e) {
         // Remove the warning banner because the user clicked the close icon
         this.setState({testWarning: false});
 
@@ -46,30 +38,24 @@ var Navigation = module.exports = React.createClass({
 
     render: function() {
         var portal = this.context.portal;
-        var img = <img src="/static/img/4dn_logo.svg" height= "70px" width="238px" className="nav-img"/>
+        var img = <img src="/static/img/4dn_logo.svg" className="navbar-logo-image"/>;
         return (
-            <div id="navbar" className="navbar navbar-fixed-top navbar-inverse">
-                <div className="container">
-                    <Navbar brand={img} brandlink="/" label="main" navClasses="navbar-main" navID="navbar-icon">
-                        <GlobalSections />
-                        <UserActions />
-                        {/* REMOVE SEARCH FOR NOW: <Search />*/}
-                    </Navbar>
-                </div>
-                {this.state.testWarning ?
-                    <div className="test-warning">
-                        <div className="container">
-                            <p>
-                                The data displayed on this page is not official and only for testing purposes.
-                                <a href="#" className="test-warning-close icon icon-times-circle-o" onClick={this.handleClick}></a>
-                            </p>
-                        </div>
+            <div style={{ marginBottom: ( this.state.testWarning ? 37 : 0 ) }}>
+                <div id="navbar" className="navbar navbar-fixed-top navbar-inverse">
+                    <TestWarning visible={this.state.testWarning} setHidden={this.hideTestWarning} />
+                    <div className="container">
+                        <Navbar brand={img} brandlink="/" label="main" navClasses="navbar-main" navID="navbar-icon">
+                            <GlobalSections />
+                            <UserActions />
+                            {/* REMOVE SEARCH FOR NOW: <Search />*/}
+                        </Navbar>
                     </div>
-                : null}
+                </div>
             </div>
         );
     }
 });
+
 
 
 // Main navigation menus
@@ -152,10 +138,19 @@ var UserActions = React.createClass({
 
     render: function() {
         var session_properties = this.context.session_properties;
+        var acctTitle = (
+            <span>
+                <i className="icon ss-user" style={{
+                    transform: 'translateY(2px)',
+                    opacity : session_properties['auth.userid'] ? 1 : 0.25
+                }}></i> Account
+            </span>
+        );
+
         var actions = this.context.listActionsFor('user_section').map(function (action) {
             if (action.id === "login"){
                 return(<Login key={action.id} />);
-            }else if (action.id === "accountactions"){
+            } else if (action.id === "accountactions"){
                 // link to registration page if logged out or account actions if logged in
                 if (!session_properties['auth.userid']) {
                     return(
@@ -163,16 +158,17 @@ var UserActions = React.createClass({
                             {action.title}
                         </a>
                     );
-                }else{
+                } else {
                     return(<AccountActions key={action.id} />);
                 }
             }else if (action.id === "contextactions") {
                 return(<ContextActions key={action.id} />);
             }
         });
+
         return (
                 <Nav right={true} acct={true}>
-                    <NavItem dropdownId="context" dropdownTitle='Account'>
+                    <NavItem dropdownId="context" dropdownTitle={acctTitle}>
                         <DropdownMenu label="context">
                             {actions}
                         </DropdownMenu>

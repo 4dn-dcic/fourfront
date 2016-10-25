@@ -42,7 +42,7 @@ describe('Testing help.js', function() {
         expect(helpEntries.length).toBeGreaterThan(0); // Doesn't matter if 1 or more entries.
 
         // Check that first child of first help entry is a title.
-        expect(helpEntries[0].children[0].className.search('fourDN-section-title')).toBeGreaterThan(-1);
+        expect(helpEntries[0].children[0].className.search('fourDN-header')).toBeGreaterThan(-1);
 
         // Make sure second child of first section is a content paragraph.
         expect(helpEntries[0].children[1].className.search('fourDN-content')).toBeGreaterThan(-1);

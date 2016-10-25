@@ -1,7 +1,7 @@
 {
     "title": "Workflow Run",
-    "description": "Schema for submitting metadata on the executation of a computational analysis workflow composed of tasks.",
-    "id": "/profiles/analysis_step.json",
+    "description": "Schema for submitting metadata on the executation of a computational analysis workflow run.",
+    "id": "/profiles/workflow_run.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["workflow"],
@@ -13,6 +13,7 @@
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/notes"}
     ],
@@ -35,10 +36,25 @@
             "description": "The files used as initial input for the workflow.",
             "type": "array",
             "items": {
-                "title": "Input file",
-                "description": "A file used as input for the workflow.",
-                "type": "string",
-                "linkTo": "File"
+                "title": "Input file mapping",
+                "description": "Info on file used as input and mapping to CWL argument for the workflow.",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "workflow_argument_name": {
+                        "title": "Workflow argument name",
+                        "description": "the name of the argument of the workflow that corresponds to the input file",
+                        "type": "string"
+                    },
+                    "value": {
+                        "title": "Input file",
+                        "comment": "for both this and the output file you are linking to a file object but you have titled the field 'Input file ID'?",
+                        "comment": "just want to be sure you aren't trying to add a specific 7bg or some other id here - if so another property will need to be added, if not change title back to Input File I think",
+                        "description": "a specified input file",
+                        "type": "string",
+                        "linkTo": "File"
+                    }
+                }
             }
         },
         "output_files": {
@@ -46,10 +62,51 @@
             "description": "All files that are saved as output of the workflow",
             "type": "array",
             "items": {
-                "title": "Output file",
-                "description": "A file output by the workflow.",
-                "type": "string",
-                "linkTo": "File"
+                "title": "Output file mapping",
+                "description": "Info on file output by the workflow and how it is mapped to CWL arguments.",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "workflow_argument_name": {
+                        "title": "Workflow argument name",
+                        "description": "the name of the argument of the workflow that corresponds to the output file",
+                        "type": "string"
+                    },
+                    "value": {
+                        "title": "Output file",
+                        "description": "a specified output file",
+                        "type": "string",
+                        "linkTo": "File"
+                    }
+                }
+            }
+        },
+        "parameters": {
+            "title": "parameters",
+            "description": "Parameters of the workflow run",
+            "type": "array",
+            "items": {
+                "title": "Parameter",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "workflow_argument_name": {
+                        "title": "Workflow argument name",
+                        "description": "the name of the argument of the workflow that corresponds to the parameter",
+                        "type": "string"
+                    },
+                    "value": {
+                        "title": "Value",
+                        "description": "a specified value for the specified parameter as used in a task",
+                        "comment": "can we specify either number or string?",
+                        "type": "string"
+                    },
+                    "software_parameter": {
+                        "title": "Parameter name",
+                        "description": "the name or flag of the parameter as passed to the software",
+                        "type": "string"
+                    }
+                }
             }
         },
         "workflow": {
@@ -58,25 +115,14 @@
             "type": "string",
             "linkTo": "Workflow"
         },
-        "tasks": {
-            "title": "Run Tasks",
-            "description": "The tasks that make up a run of a workflow.",
-            "type": "array",
-            "items": {
-                "title": "Task",
-                "description": "A task of the run.",
-                "type": "string",
-                "linkTo": "Task"
-            }
-        },
         "run_status": {
             "title": "Status",
             "type": "string",
             "default": "waiting",
             "enum" : [
                 "waiting",
-                "running",
-                "finished",
+                "incomplete",
+                "complete",
                 "error"
             ]
         }

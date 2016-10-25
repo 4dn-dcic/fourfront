@@ -38,8 +38,8 @@ describe('Testing home.js', function() {
         var bannerEntries = TestUtils.scryRenderedDOMComponentsWithClass(page, 'banner-entry');
         expect(banners.length).toEqual(1);
         expect(bannerEntries.length).toEqual(3);
-        expect(bannerEntries[0].getAttribute('href')).toEqual('/browse/?type=ExperimentSet&experimentset_type=biological+replicates');
-        expect(bannerEntries[1].getAttribute('href')).toEqual('/browse/?type=ExperimentSet&experimentset_type=biological+replicates');
+        expect(bannerEntries[0].getAttribute('href')).toEqual('/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all');
+        expect(bannerEntries[1].getAttribute('href')).toEqual('/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all');
         expect(bannerEntries[2].getAttribute('href')).toEqual('/search/?type=Biosource');
     });
 

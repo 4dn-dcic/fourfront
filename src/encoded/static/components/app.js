@@ -19,7 +19,7 @@ var browse = require('./browse');
 var portal = {
     portal_title: '4DN Data Portal',
     global_sections: [
-        {id: 'browse', sid:'sBrowse', title: 'Browse', url: '/browse/?type=ExperimentSet&experimentset_type=biological+replicates'},
+        {id: 'browse', sid:'sBrowse', title: 'Browse', url: '/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all'},
         {id: 'help', sid:'sHelp', title: 'Help', children: [
             {id: 'gettingstarted', title: 'Getting started', url: '/help'},
             {id: 'metadatastructure', title: 'Metadata structure', url: '/help#metadata-structure'},
@@ -54,7 +54,7 @@ var Title = React.createClass({
 // It lives for the entire duration the page is loaded.
 // App maintains state for the
 var App = React.createClass({
-    mixins: [mixins.Persona, mixins.HistoryAndTriggers],
+    mixins: [mixins.Auth0, mixins.HistoryAndTriggers],
     triggers: {
         login: 'triggerLogin',
         profile: 'triggerProfile',
@@ -207,6 +207,7 @@ var App = React.createClass({
         }
 
         var canonical = this.props.href;
+
         if (context.canonical_uri) {
             if (href_url.host) {
                 canonical = (href_url.protocol || '') + '//' + href_url.host + context.canonical_uri;
@@ -214,7 +215,15 @@ var App = React.createClass({
                 canonical = context.canonical_uri;
             }
         }
-
+        // check error status
+        var status;
+        if(context.code && context.code == 404){
+            status = 'not_found';
+        }else if(context.status && context.status == 403){
+            status = 'invalid_login';
+        }else if((context.code && context.code == 403) && (context.title && context.title == 'Forbidden')){
+            status = 'forbidden';
+        }
         // add static page routing
         var title;
         var routeList = canonical.split("/");
@@ -243,6 +252,10 @@ var App = React.createClass({
         }else if (currRoute[currRoute.length-1] === 'about'){
             content = <AboutPage />;
             title = 'About - ' + portal.portal_title;
+        // error catching
+        }else if(status){
+            content = <ErrorPage status={status}/>;
+            title = 'Error';
         }else if (context) {
             var ContentView = globals.content_views.lookup(context, current_action);
             if (ContentView){
@@ -255,8 +268,8 @@ var App = React.createClass({
                 }
             }else{
                 // Handle the case where context is not loaded correctly
-                content = <ErrorPage />;
-                title="Not Found";
+                content = <ErrorPage status={null}/>;
+                title = 'Error';
             }
         }
         // Google does not update the content of 301 redirected pages
@@ -276,10 +289,12 @@ var App = React.createClass({
                     {base ? <base href={base}/> : null}
                     <link rel="canonical" href={canonical} />
                     <script async src='//www.google-analytics.com/analytics.js'></script>
-                    <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet" />
+                    <link href="https://fonts.googleapis.com/css?family=Work+Sans:200,300,400,500,600,700" rel="stylesheet" />
                     <link href="https://fonts.googleapis.com/css?family=Yrsa" rel="stylesheet" />
                     <script data-prop-name="inline" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
                     <link rel="stylesheet" href="/static/css/style.css" />
+                    <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
+                    <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
                 </head>
                 <body onClick={this.handleClick} onSubmit={this.handleSubmit}>
                     <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{
