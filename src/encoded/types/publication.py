@@ -1,6 +1,5 @@
-from snovault.attachment import ItemWithAttachment
+import requests
 from snovault import (
-    calculated_property,
     collection,
     load_schema,
 )
@@ -13,7 +12,7 @@ from .base import (
 
 @collection(
     name='publications',
-    unique_key='publication:PMID',
+    unique_key='publication:ID',
     properties={
         'title': 'Publications',
         'description': 'Publication pages',
@@ -23,28 +22,45 @@ class Publication(Item):
 
     item_type = 'publication'
     schema = load_schema('encoded:schemas/publication.json')
-    '''"title": {
-        "title": "Title",
-        "description": "Title of the publication or communication.",
-        "uniqueKey": true,
-        "type": "string"
-    },
-    "abstract": {
-        "rdfs:subPropertyOf": "dc:abstract",
-        "title": "Abstract",
-        "description": "Abstract of the publication or communication.",
-        "type": "string"
-    },
-    "contact_author": {
-        "title": "Contact Author",
-        "description": "Please select a user as the contact person",
-        "type": "string",
-        "comment": "for use of internal tracking",
-        "linkTo": "User"
-    },
-    "authors": {
-        "title": "Authors",
-        "description": "All authors, with format Bernstein BE, Birney E, Dunham I,...",
-        "type": "string"
-    },
-    '''
+
+    def _update(self, properties, sheets=None):
+        # set name based on what is entered into title
+        p_id = properties['ID']
+        title = ''
+        abstract = ''
+        author_list = []
+        authors = ''
+        # parse if id is from pubmed
+        if p_id.startswith('PMID'):
+            pubmed_id = p_id[5:]
+            www = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={id}&rettype=medline".format(
+                   id=pubmed_id)
+            r = requests.get(www).text
+            full_text = r.replace('\n      ', ' ')
+            data_list = [a.split('-', 1) for a in full_text.split('\n') if a != '']
+            for key_pb, data_pb in data_list:
+                key_pb = key_pb.strip()
+                # grab title
+                if key_pb == 'TI':
+                    title = data_pb.strip()
+                # grab the abstract
+                if key_pb == 'AB':
+                    abstract = data_pb.strip()
+                # accumulate authors
+                if key_pb == 'AU':
+                    author_list.append(data_pb.strip())
+                # add consortiums to author list
+                if key_pb == 'CN':
+                    author_list.append(data_pb.strip())
+                authors = ', '.join(author_list)
+
+        elif p_id.startswith('doi'):
+            # doi_id = p_id[4:]
+            pass
+        properties['title'] = title
+        properties['abstract'] = abstract
+        properties['authors'] = authors
+        super(Publication, self)._update(properties, sheets)
+
+
+
