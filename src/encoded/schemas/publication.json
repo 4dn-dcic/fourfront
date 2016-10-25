@@ -4,7 +4,7 @@
     "id": "/profiles/publication.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "identifyingProperties": ["uuid", "PMID"],
+    "identifyingProperties": ["uuid", "ID"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -19,27 +19,27 @@
         "schema_version": {
             "default": "1"
         },
-        "PMID":{
-            "title": "Pubmed Identifier",
-            "description": "Pubmed ID for the published publication.",
+        "ID":{
+            "title": "Publication Identifier",
+            "description": "PMID or doi for the publication.",
             "type": "string",
-            "uniqueKey":  "publication:PMID",
-            "pattern": "^PMID:[0-9]*",
-            "comment": "Please provide the id in the form of PMID:12345678"
+            "uniqueKey":  "publication:ID",
+            "pattern": "^PMID:[0-9]+$|^doi:10\\.[0-9]{4}[\\d\\S\\:\\.]+$",
+            "comment": "Please provide either in the form of PMID:12345678 or doi:10.1234\\abc123"
         },
         "status": {
             "title": "Status",
             "type": "string",
-            "default": "published",
-            "enum" : [
-                "planned",
-                "in preparation",
-                "submitted",
-                "in revision",
-                "in press",
-                "published",
+            "default": "current",
+            "permission": "import_items",
+            "enum": [
+                "current",
+                "revoked",
                 "deleted",
-                "replaced"
+                "replaced",
+                "in review by lab",
+                "in review by project",
+                "released to project"
             ]
         },
         "published_by": {
