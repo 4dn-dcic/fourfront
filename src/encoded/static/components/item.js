@@ -10,7 +10,6 @@ var AuditIndicators = audit.AuditIndicators;
 var AuditDetail = audit.AuditDetail;
 var AuditMixin = audit.AuditMixin;
 var Table = collection.Table;
-var ErrorPage = require('./error');
 var ExperimentSetView = require('./experiment-set-view');
 
 var Fallback = module.exports.Fallback = React.createClass({
@@ -92,7 +91,6 @@ var IPanel = module.exports.IPanel = React.createClass({
         var itemClass = globals.itemClass(context, 'view-detail panel');
         var title = globals.listing_titles.lookup(context)({context: context});
         var sortKeys = Object.keys(context).sort();
-        console.log(this.props);
         var tips = tipsFromSchema(schemas, context);
 
 

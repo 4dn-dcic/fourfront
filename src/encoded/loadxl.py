@@ -36,15 +36,16 @@ ORDER = [
     'biosample',
     'file_fastq',
     'file_fasta',
+    'file_processed',
     'file_set',
     'experiment_hic',
     'experiment_capture_c',
     'experiment_set',
     'software',
     'analysis_step',
-    'task',
     'workflow',
-    'workflow_run',
+    'workflow_mapping',
+    'workflow_run'
 ]
 
 IS_ATTACHMENT = [
@@ -603,17 +604,6 @@ def load_test_data(app):
     # temp comment out below
     load_all(testapp, inserts, docsdir)
 
-    # load web-users authentication info
-    db = app.registry['dbsession']
-    create_user(db, 'admin@admin.com', 'admin', 'admin')
-    create_user(db, 'wrangler@wrangler.com', 'wrangler', 'wrangler')
-    create_user(db, 'viewer@viewer.com', 'viewer', 'viewer')
-    create_user(db, 'submitter@submitter.com', 'submitter', 'submitter')
-
-    # one transaction to rule them all
-    import transaction
-    transaction.commit()
-
 
 def load_prod_data(app):
     """smth."""
@@ -629,23 +619,12 @@ def load_prod_data(app):
     docsdir = []
     load_all(testapp, inserts, docsdir)
 
-    # load web-users authentication info
-    db = app.registry['dbsession']
-    pwd = os.environ.get('ENCODED_SECRET')
-    if not pwd:
-        print("***************password not set for admin user")
-    create_user(db, 'admin@admin.com', 'admin', pwd)
-
-    # one transaction to rule them all
-    import transaction
-    transaction.commit()
-
 
 def create_user(db, email, name, pwd):
     """create user if user not in database."""
     if User.get_by_username(email) is None:
         print('creating user ', email)
-        new_user = User(email=email, password=pwd,name=name)
+        new_user = User(email=email, password=pwd, name=name)
         db.add(new_user)
     else:
         print('user %s already exists, skipping' % (email))
