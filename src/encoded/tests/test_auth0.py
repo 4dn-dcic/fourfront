@@ -59,13 +59,15 @@ def test_login_logout(testapp, anontestapp, auth0_4dn_user_token,
     testapp.post_json(url, item, status=201)
 
     # Log in
-    res = anontestapp.post_json('/login', auth0_4dn_user_token, status=200)
+    res = anontestapp.post_json('/login', auth0_4dn_user_token)
+    if res.status_int != 200:
+        import pdb; pdb.set_trace()
+
     assert 'Set-Cookie' in res.headers
     assert res.json['auth.userid'] == email
 
     # Log out
-    res = anontestapp.get('/logout?redirect=false', status=302)
-    import pdb; pdb.set_trace()
+    res = anontestapp.get('/logout?redirect=false', status=200)
     assert 'Set-Cookie' in res.headers
     assert 'auth.userid' not in res.json
 
