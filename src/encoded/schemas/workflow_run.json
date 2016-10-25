@@ -120,8 +120,12 @@
             "type": "string",
             "default": "waiting",
             "enum" : [
-                "waiting",
-                "incomplete",
+                "started",
+                "input_file_transferring",
+                "ready_to_run",
+                "running",
+                "output_files_transferring",
+                "output_file_transfer_finished",
                 "complete",
                 "error"
             ]
