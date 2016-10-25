@@ -218,9 +218,11 @@ var App = React.createClass({
         // check error status
         var status;
         if(context.code && context.code == 404){
-            status = 404;
+            status = 'not_found';
         }else if(context.status && context.status == 403){
-            status = 403;
+            status = 'invalid_login';
+        }else if((context.code && context.code == 403) && (context.title && context.title == 'Forbidden')){
+            status = 'forbidden';
         }
         // add static page routing
         var title;
@@ -241,10 +243,6 @@ var App = React.createClass({
         if (canonical === "about:blank"){
             title = portal.portal_title;
             content = null;
-        // error catching
-        }else if(status){
-            content = <ErrorPage status={status}/>;
-            title = 'Error';
         }else if (currRoute[currRoute.length-1] === 'home' || (currRoute[currRoute.length-1] === href_url.host)){
             content = <HomePage />;
             title = portal.portal_title;
@@ -254,6 +252,10 @@ var App = React.createClass({
         }else if (currRoute[currRoute.length-1] === 'about'){
             content = <AboutPage />;
             title = 'About - ' + portal.portal_title;
+        // error catching
+        }else if(status){
+            content = <ErrorPage status={status}/>;
+            title = 'Error';
         }else if (context) {
             var ContentView = globals.content_views.lookup(context, current_action);
             if (ContentView){
