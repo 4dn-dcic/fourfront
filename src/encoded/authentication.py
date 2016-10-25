@@ -213,8 +213,16 @@ def logout(request):
     request.session.invalidate()
     request.session.get_csrf_token()
     request.response.headerlist.extend(forget(request))
-    if asbool(request.params.get('redirect', True)):
-        raise HTTPFound(location=request.resource_path(request.root))
+    #if asbool(request.params.get('redirect', True)):
+    import pdb; pdb.set_trace()
+    redirect_to = request.resource_path(request.root)
+    auth0_logout_url = "https://{domain}/v2/logout?returnTo={redirect}" \
+                .format(domain='hms-dbmi.auth0.com',
+                        redirect=redirect_to)
+
+
+    #raise HTTPFound(location=request.resource_path(request.root))
+    raise HTTPFound(location=auth0_logout_url)
     return {}
 
 
