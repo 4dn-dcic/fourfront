@@ -8,7 +8,6 @@ from .gtex_data import gtexDonorsList
 from .gtex_data import gtexParentsList
 
 
-
 term_mapping = {
     "head": "UBERON:0000033",
     "limb": "UBERON:0002101",
@@ -48,6 +47,16 @@ model_organism_terms = ['model_organism_mating_status',
                         'model_organism_health_status',
                         'model_organism_donor_constructs']
 
+
+@audit_checker('biosample', frame=['biosource', 'biosample_cell_culture'])
+def audit_biosample_tier1_cell_lines_have_required_cell_culture_properties(value, system):
+    '''
+    tier1 cell lines have required fields from biosample_cell_culture
+    that must be present and that depend on the cell_line
+    '''
+    detail = value
+    yield AuditFailure('Data Structure of Value', detail, level='ERROR')
+    return
 
 
 #@audit_checker('biosample', frame=['organism'])
@@ -198,6 +207,7 @@ def audit_biosample_term(value, system):
         yield AuditFailure('mismatched ontology term', detail, level='ERROR')
         return
 
+
 #@audit_checker('biosample', frame='object')
 def audit_biosample_culture_date(value, system):
     '''
@@ -218,6 +228,7 @@ def audit_biosample_culture_date(value, system):
             value['culture_harvest_date'],
             value['culture_start_date'])
         raise AuditFailure('invalid dates', detail, level='ERROR')
+
 
 #@audit_checker('biosample', frame=['organism', 'donor', 'donor.organism', 'donor.mutated_gene', 'donor.mutated_gene.organism'])
 def audit_biosample_donor(value, system):
@@ -263,6 +274,7 @@ def audit_biosample_donor(value, system):
                 donor['@id'],
                 donor['mutated_gene']['name'])
             raise AuditFailure('invalid donor mutated_gene', detail, level='ERROR')
+
 
 #@audit_checker('biosample', frame='object')
 def audit_biosample_subcellular_term_match(value, system):
