@@ -78,4 +78,4 @@ def test_audit_item_status_mismatch(testapp, experiment, embed_testapp):
     res = embed_testapp.get(experiment['@id'] + '/@@audit-self')
     print(res)
     errors_list = res.json['audit']
-    assert any(error['name'] == 'mismatched_status' for error in errors_list)
+    assert any(error['category'] == 'mismatched status' for error in errors_list)
