@@ -44,37 +44,27 @@ def audit_item_schema(value, system):
         detail = 'Object {} has schema error {}'.format(value['@id'], error.message)
         yield AuditFailure(category, detail, level='INTERNAL_ACTION')
 
-
+# 4 levels of status 0-3
+# embedded sub items should have an equal or greater level
+# than that of the item in which they are embedded
 STATUS_LEVEL = {
     # standard_status
-    'released': 100,
+    'released': 3,
+    'current': 3,
+    'revoked': 3,
+    'released to project': 2,
+    'in review by project': 2,
+    'in review by lab': 1,
     'deleted': 0,
     'replaced': 0,
 
-    # shared_status
-    'current': 100,
-    'disabled': 0,
-
-    # file
-    'obsolete': 50,
-
-    # antibody_characterization
-    'compliant': 100,
-    'not compliant': 100,
-    'not reviewed': 100,
-    'not submitted for review by lab': 100,
-
-    # antibody_lot
-    'eligible for new data': 100,
-    'not eligible for new data': 100,
-    'not pursued': 100,
-
-    # dataset / experiment
-    'release ready': 50,
-    'revoked': 100,
+    # additional file statuses
+    'uploading': 1,
+    'uploaded': 1,
+    'upload failed': 1,
 
     # publication
-    'published': 100,
+    'published': 3,
 }
 
 
@@ -83,7 +73,7 @@ def audit_item_status(value, system):
     if 'status' not in value:
         return
 
-    level = STATUS_LEVEL.get(value['status'], 50)
+    level = STATUS_LEVEL.get(value['status'], 1)
     if level == 0:
         return
 
@@ -101,19 +91,12 @@ def audit_item_status(value, system):
             continue
         if linked_value['status'] == 'disabled':
             continue
-        if (  # Special case: A revoked file can have a deleted replicate ticket #2938
-            'File' in value['@type'] and
-            value['status'] == 'revoked' and
-            'Replicate' in linked_value['@type'] and
-            linked_value['status'] == 'deleted'
-        ):
-            continue
         linked_level = STATUS_LEVEL.get(linked_value['status'], 50)
-        if linked_level == 0:
-            detail = '{} {} has {} subobject {}'.format(
-                value['status'], value['@id'], linked_value['status'], linked_value['@id'])
-            yield AuditFailure('mismatched status', detail, level='INTERNAL_ACTION')
-        elif linked_level < level:
+#        if linked_level == 0:
+#            detail = '{} {} has {} subobject {}'.format(
+#                value['status'], value['@id'], linked_value['status'], linked_value['@id'])
+#            yield AuditFailure('mismatched status', detail, level='INTERNAL_ACTION')
+        if linked_level < level:
             detail = '{} {} has {} subobject {}'.format(
                 value['status'], value['@id'], linked_value['status'], linked_value['@id'])
             yield AuditFailure('mismatched status', detail, level='INTERNAL_ACTION')
