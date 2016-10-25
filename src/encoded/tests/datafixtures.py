@@ -345,7 +345,7 @@ def publication(testapp, lab, award):
 @pytest.fixture
 def publication_tracking(testapp, lab, award):
     item = {
-        'uuid': '8312fc0c-b241-4cb2-9b01-1438910550ad',
+        'uuid': '8312fc0c-b241-4cb2-9b01-1438910550ac',
         'award': award['@id'],
         'lab': lab['@id'],
         'PMID': "PMID:12345678",
