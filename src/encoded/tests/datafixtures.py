@@ -232,7 +232,8 @@ def experiment(testapp, lab, award, human_biosample):
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
-        'experiment_type': 'micro-C'
+        'experiment_type': 'micro-C',
+        'status': 'in review by lab'
     }
     return testapp.post_json('/experiment_hic', item).json['@graph'][0]
 
@@ -389,6 +390,7 @@ def human_biosample(testapp, human_biosource):
     item = {
         "description": "GM06990 prepared for Hi-C",
         "biosource": [human_biosource['@id'], ],
+        "status": "in review by lab"
         # "biosample_protocols": ["131106bc-8535-4448-903e-854af460b212"],
         # "modifications": ["431106bc-8535-4448-903e-854af460b254"],
         # "treatments": ["686b362f-4eb6-4a9c-8173-3ab267307e3b"]
