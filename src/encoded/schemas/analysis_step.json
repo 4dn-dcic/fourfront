@@ -10,6 +10,7 @@
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/submitted" },
