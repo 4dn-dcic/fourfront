@@ -337,7 +337,7 @@ def publication(testapp, lab, award):
         'uuid': '8312fc0c-b241-4cb2-9b01-1438910550ad',
         'award': award['@id'],
         'lab': lab['@id'],
-        'PMID': "PMID:12345678",
+        'ID': "PMID:12345678",
     }
     return testapp.post_json('/publication', item).json['@graph'][0]
 

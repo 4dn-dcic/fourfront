@@ -1,7 +1,7 @@
 [
     {
-        "PMID": "PMID:22955616",
-        "status": "published",
+        "ID": "PMID:22955616",
+        "status": "current",
         "published_by": "External",
         "categories": ["integrative analysis"],
         "award": "1U01CA200059-01",
