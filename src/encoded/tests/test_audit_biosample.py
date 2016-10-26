@@ -29,52 +29,78 @@ def tier1_biosource(testapp, protocol):
 
 
 @pytest.fixture
-def tier1_biosample_cell_culture_1_passage(testapp, image):
+def cell_culture(testapp):
+    '''
+    A minimal biosample_cell_culture item with only schema-required field
+    '''
+    return testapp.post_json('/biosample_cell_culture', {'culture_start_date': '2016-01-01'}).json['@graph'][0]
+
+
+@pytest.fixture
+def tier1_cell_culture(testapp, image):
+    '''
+    A biosample_cell_culture item for a tier 1 cell
+    '''
     item = {
         'culture_start_date': '2016-01-01',
-        'passage_number': 1,
         'culture_duration': 2,
         'culture_duration_units': 'days',
+        'passage_number': 1,
         'morphology_image': image['@id']
     }
     return testapp.post_json('/biosample_cell_culture', item).json['@graph'][0]
 
 
 @pytest.fixture
-def tier1_biosample(testapp, tier1_biosource, tier1_biosample_cell_culture_1_passage):
+def tier1_biosample(testapp, tier1_biosource, tier1_cell_culture):
     item = {
         'description': "Tier1 Biosample",
         'biosource': [tier1_biosource['@id']],
-        'cell_culture_details': tier1_biosample_cell_culture_1_passage['@id'],
+        'cell_culture_details': tier1_cell_culture['@id'],
     }
     return testapp.post_json('/biosample', item).json['@graph'][0]
 
 
-def test_audit_biosample_tier1_cell_line_checks(testapp, tier1_biosample):
+def test_audit_biosample_tier1_cell_line_has_required(testapp, tier1_biosample):
+    res = testapp.get(tier1_biosample['@id'] + '/@@audit-self')
+    errors = res.json['audit']
+    assert not any(error['category'] == 'missing mandatory metadata' for error in errors)
+
+
+def test_audit_biosample_tier1_cell_line_missing_required(testapp, tier1_biosample, cell_culture):
+    testapp.patch_json(tier1_biosample['@id'], {'cell_culture_details': cell_culture['@id']}, status=200)
+    res = testapp.get(tier1_biosample['@id'] + '/@@audit-self')
+    errors = res.json['audit']
+    assert any(error['category'] == 'missing mandatory metadata' for error in errors)
+
+
+def test_audit_biosample_tier1_cell_line_10_passages_has_karyotype(testapp, tier1_biosample, tier1_cell_culture, image):
+    testapp.patch_json(
+        tier1_cell_culture['@id'],
+        {'passage_number': 10, 'karyotype_image': image['@id']},
+        status=200)
+    testapp.patch_json(
+        tier1_biosample['@id'],
+        {'cell_culture_details': tier1_cell_culture['@id']},
+        status=200)
     res = testapp.get(tier1_biosample['@id'] + '/@@audit-self')
     print(res)
-    assert False
+    errors = res.json['audit']
+    print(errors)
+    assert not any(error['category'] == 'missing mandatory metadata' for error in errors)
 
 
-def test_audit_item_schema_validation(testapp, organism):
-    testapp.patch_json(organism['@id'] + '?validate=false', {'disallowed': 'errs'})
-    res = testapp.get(organism['@id'] + '@@index-data')
+def test_audit_biosample_tier1_cell_line_10_passages_no_karyotype(testapp, tier1_biosample, tier1_cell_culture, image):
+    testapp.patch_json(
+        tier1_cell_culture['@id'],
+        {'passage_number': 10},
+        status=200)
+    testapp.patch_json(
+        tier1_biosample['@id'],
+        {'cell_culture_details': tier1_cell_culture['@id']},
+        status=200)
+    res = testapp.get(tier1_biosample['@id'] + '/@@audit-self')
     print(res)
     errors = res.json['audit']
-    errors_list = []
-    for error_type in errors:
-        errors_list.extend(errors[error_type])
-    assert any(
-        error['category'] == 'validation error' and error['name'] == 'audit_item_schema'
-        for error in errors_list)
-
-
-def test_audit_item_status_mismatch(testapp, experiment, embed_testapp):
-    patch = {
-        'status': 'released'
-    }
-    testapp.patch_json(experiment['@id'], patch)
-    res = embed_testapp.get(experiment['@id'] + '/@@audit-self')
-    print(res)
-    errors_list = res.json['audit']
-    assert any(error['category'] == 'mismatched status' for error in errors_list)
+    print(errors)
+    assert any(error['category'] == 'missing mandatory metadata' for error in errors)
