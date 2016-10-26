@@ -43,6 +43,11 @@
                 "wig",
                 "other"
             ]
+        },
+        "workflow_run": {
+            "title": "File format",
+            "type": "string",
+            "linkTo": "workflow_run"
         }
     },
     "file_format_file_extension": {
@@ -69,10 +74,5 @@
         "wig": ".wig.gz",
         "sam": ".sam.gz",
         "other": "no_file_extension"
-    }
-    "workflow_run": {
-        "title": "File format",
-        "type": "string",
-        "linkTo": "workflow_run"
     }
 }
