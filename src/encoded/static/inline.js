@@ -4,8 +4,8 @@
 // require.ensure creates & append to <head> a <script src="/static/build/bundle.[chunkName].js" ...> element
 // consisting of compilation from libs/compat.js and browser.js
 require.ensure(['./libs/compat', './browser'], function(require) {
-	require('./libs/compat');  // Shims first
-	require('./browser');
+    require('./libs/compat');  // Shims first
+    require('./browser');
 }, 'bundle');
 
 // Read and clear stats cookie
@@ -18,15 +18,15 @@ cookie.set('X-Stats', '', {path: '/', expires: new Date(0)});
 window.onload = function () {
     window._onload_event_fired = true;
 
-	// Delay non-React script execution until clientside app is mounted (hopefully).
-	setTimeout(function(){
-		// Use a separate tracker for dev / test
-		var ga = require('google-analytics');
-		var trackers = {'www.encodeproject.org': 'UA-47809317-1'};
-		var tracker = trackers[document.location.hostname] || 'UA-47809317-2';
-		ga('create', tracker, {'cookieDomain': 'none', 'siteSpeedSampleRate': 100});
-		ga('send', 'pageview');
-	}, 0);
+    // Delay non-React script execution until clientside app is mounted (hopefully).
+    setTimeout(function(){
+        // Use a separate tracker for dev / test
+        var ga = require('google-analytics');
+        var trackers = {'www.encodeproject.org': 'UA-47809317-1'};
+        var tracker = trackers[document.location.hostname] || 'UA-47809317-2';
+        ga('create', tracker, {'cookieDomain': 'none', 'siteSpeedSampleRate': 100});
+        ga('send', 'pageview');
+    }, 0);
 };
 
 // Not Used
