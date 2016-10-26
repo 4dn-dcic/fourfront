@@ -22,7 +22,6 @@ gulp.task('set-quick-uglified', [], function () {
 });
 
 var webpackOnBuild = function (done) {
-  var date = new Date();
   return function (err, stats) {
     if (err) {
       throw new gutil.PluginError("webpack", err);
