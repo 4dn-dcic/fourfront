@@ -6,7 +6,8 @@
     "test": "jest",
     "build": "gulp build",
     "build-quick": "gulp build-quick",
-    "dev": "gulp dev"
+    "dev": "gulp dev",
+    "dev-uglified" : "gulp dev-uglified"
   },
   "author": "",
   "license": "MIT",
