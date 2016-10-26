@@ -25,6 +25,13 @@ if (env === 'production') {
 	// add chunkhash to chunk names for production only (it's slower)
 	chunkFilename = '[name].[chunkhash].js';
 	sourceMapType = 'source-map';
+} else if (env === 'quick-uglified') {
+	// Uglify JS for dev as well on task 'npm run dev-uglified' - 
+	// slightly slower but reduces invariant violations where
+	// client-side render != server-side reason (*perhaps* allowing clientside JS to exec faster)
+	// set 'beautify : true' to get nicer output (whitespace, linebreaks) for debugging.
+	plugins.push(new webpack.optimize.UglifyJsPlugin({compress: false, mangle: false}));
+	sourceMapType = 'source-map';
 }
 
 var preLoaders = [

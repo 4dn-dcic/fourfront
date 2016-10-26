@@ -5,6 +5,7 @@ var webpack = require('webpack');
 
 gulp.task('default', ['webpack', 'watch']);
 gulp.task('dev', ['default']);
+gulp.task('dev-uglified', ['set-quick-uglified','default']);
 gulp.task('build', ['set-production', 'webpack']);
 gulp.task('build-quick', ['set-quick', 'webpack']);
 
@@ -16,7 +17,12 @@ gulp.task('set-quick', [], function () {
   process.env.NODE_ENV = 'quick';
 });
 
+gulp.task('set-quick-uglified', [], function () {
+  process.env.NODE_ENV = 'quick-uglified';
+});
+
 var webpackOnBuild = function (done) {
+  var date = new Date();
   return function (err, stats) {
     if (err) {
       throw new gutil.PluginError("webpack", err);
@@ -24,6 +30,7 @@ var webpackOnBuild = function (done) {
     gutil.log("[webpack]", stats.toString({
       colors: true
     }));
+    gutil.log("Build Completed"); // Gives (useful) time after each completed compile
     if (done) { done(err); }
   };
 };
