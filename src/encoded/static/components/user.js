@@ -5,13 +5,12 @@
 var React = require('react');
 var globals = require('./globals');
 var _ = require('underscore');
-var parseAndLogError = require('./parseError').parseAndLogError;
 // var navigation = require('./navigation');
 var Modal = require('react-bootstrap').Modal;
 var Alert = require('react-bootstrap').Alert;
 var ItemStore = require('./lib/store').ItemStore;
 var ObjectPicker = require('./inputs').ObjectPicker;
-
+var ajaxLoad = require('./objectutils').ajaxLoad;
 // var Breadcrumbs = navigation.Breadcrumbs;
 
 
@@ -28,7 +27,7 @@ var AccessKeyTable = React.createClass({
 
     contextTypes: {
         fetch: React.PropTypes.func,
-        session_properties: React.PropTypes.object
+        session: React.PropTypes.object
     },
 
     getInitialState: function() {
@@ -72,7 +71,7 @@ var AccessKeyTable = React.createClass({
     create: function(e) {
         e.preventDefault();
         var item = {};
-        if (this.props.user['@id'] != this.context.session_properties.user['@id']) {
+        if (this.props.user['@id'] != this.context.session.user['@id']) {
             item['user'] = this.props.user['@id'];
         }
         this.store.create('/access-keys/', item);
@@ -242,25 +241,16 @@ var ImpersonateUserForm = React.createClass({
     },
 
     handleSubmit: function(data) {
-        var xmlhttp = new XMLHttpRequest();
         var url = "/impersonate-user";
-        xmlhttp.onreadystatechange = function() {
-            if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-                if (xmlhttp.status == 200) {
-                    this.context.navigate('/');
-                    alert('Success! ' + data + ' is being impersonated.');
-                } else if (xmlhttp.status == 400) {
-                    console.error('There was an error 400');
-                    alert('Impersonation unsuccessful.\nPlease check to make sure the provided email is correct.');
-                } else {
-                    console.error('something else other than 200 was returned');
-                    alert('Impersonation unsuccessful.\nPlease check to make sure the provided email is correct.');
-                }
-            }
+        var jsonData = JSON.stringify({'userid':data});
+        var callbackFxn = function() {
+            alert('Success! ' + data + ' is being impersonated.');
+            this.context.navigate('/');
         }.bind(this);
-        xmlhttp.open("POST", url, true);
-        xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        xmlhttp.send(JSON.stringify({'userid':data}));
+        var fallbackFxn = function() {
+            alert('Impersonation unsuccessful.\nPlease check to make sure the provided email is correct.');
+        };
+        ajaxLoad(url, callbackFxn, 'POST', fallbackFxn, jsonData);
     }
 });
 globals.content_views.register(ImpersonateUserForm, 'Portal', 'impersonate-user');

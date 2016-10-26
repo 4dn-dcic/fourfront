@@ -2,7 +2,6 @@
 var React = require('react');
 var url = require('url');
 var globals = require('./globals');
-var parseAndLogError = require('./parseError').parseAndLogError;
 var StickyHeader = require('./StickyHeader');
 
 
@@ -256,7 +255,7 @@ var lookup_column = function (result, column) {
                 .then(data => {
                     self.extractData({context: data});
                     self.setState({communicating: false});
-                }, parseAndLogError.bind(undefined, 'allRequest'));
+                });
                 this.setState({
                     allRequest: request,
                     communicating: true

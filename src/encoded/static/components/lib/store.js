@@ -3,7 +3,6 @@
 
 'use strict';
 var _ = require('underscore');
-var parseAndLogError = require('../parseError').parseAndLogError;
 
 
 module.exports.ItemStore = class ItemStore {
@@ -68,9 +67,7 @@ module.exports.ItemStore = class ItemStore {
             if (!response.ok) throw response;
             return response.json();
         }).then(then).catch(err => {
-            return parseAndLogError('ItemStore', err).then(response => {
-                this.dispatch('onError', response);
-            });
+            this.dispatch('onError', response);
         });
     }
 

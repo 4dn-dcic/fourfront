@@ -1,6 +1,5 @@
 'use strict';
 var React = require('react');
-var parseAndLogError = require('./parseError').parseAndLogError;
 var globals = require('./globals');
 var ga = require('google-analytics');
 var _ = require('underscore');
@@ -60,7 +59,6 @@ var Param = module.exports.Param = React.createClass({
                 if (!response.ok) throw response;
                 return response.json();
             })
-            .catch(parseAndLogError.bind(undefined, 'fetchedRequest'))
             .then(this.receive);
         } else if (this.props.type === 'text') {
             request = this.context.fetch(url);
@@ -68,7 +66,6 @@ var Param = module.exports.Param = React.createClass({
                 if (!response.ok) throw response;
                 return response.text();
             })
-            .catch(parseAndLogError.bind(undefined, 'fetchedRequest'))
             .then(this.receive);
         } else if (this.props.type === 'blob') {
             request = this.context.fetch(url);
@@ -76,7 +73,6 @@ var Param = module.exports.Param = React.createClass({
                 if (!response.ok) throw response;
                 return response.blob();
             })
-            .catch(parseAndLogError.bind(undefined, 'fetchedRequest'))
             .then(this.receive);
         } else {
             throw "Unsupported type: " + this.props.type;

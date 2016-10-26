@@ -19,18 +19,18 @@ var BannerLoader = React.createClass({
     render: function() {
         return (
             <fetched.FetchedData backup={
-                <BannerEntry 
-                    data={{'total':"-"}} 
-                    text={this.props.text} 
-                    destination={this.props.destination} 
+                <BannerEntry
+                    data={{'total':"-"}}
+                    text={this.props.text}
+                    destination={this.props.destination}
                     location={this.props.location}
                 />
             }>
                 <fetched.Param name='data' url={this.props.location} />
-                <BannerEntry 
-                    defaultFilter={this.props.defaultFilter ? this.props.defaultFilter : null} 
-                    text={this.props.text} 
-                    destination={this.props.destination} 
+                <BannerEntry
+                    defaultFilter={this.props.defaultFilter ? this.props.defaultFilter : null}
+                    text={this.props.text}
+                    destination={this.props.destination}
                     location={this.props.location}
                 />
             </fetched.FetchedData>
@@ -119,9 +119,12 @@ var HomePageLoader = React.createClass({
 
 var HomePage = module.exports = React.createClass({
     render: function() {
-        var experiment4DNBanner = <BannerLoader text='experiments' defaultFilter="4DN" destination="/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all" location='/search/?type=Experiment&award.project=4DN'/>;
-        var experimentExtBanner = <BannerLoader text='experiments' defaultFilter="External" destination="/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all" location='/search/?type=Experiment&award.project=External'/>;
-        var biosourceBanner = <BannerLoader text='cell types' destination='/search/?type=Biosource' location='/search/?type=Biosource'/>;
+        // var experiment4DNBanner = <BannerLoader text='experiments' defaultFilter="4DN" destination="/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all" location='/search/?type=Experiment&award.project=4DN'/>;
+        // var experimentExtBanner = <BannerLoader text='experiments' defaultFilter="External" destination="/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all" location='/search/?type=Experiment&award.project=External'/>;
+        // var biosourceBanner = <BannerLoader text='cell types' destination='/search/?type=Biosource' location='/search/?type=Biosource'/>;
+        var experiment4DNBanner = <span />;
+        var experimentExtBanner = <span />;
+        var biosourceBanner = <span />;
         var announcements = announcements_data.map(function(announce) {
             return (
                 <ContentItem key={announce.title} content={announce}/>

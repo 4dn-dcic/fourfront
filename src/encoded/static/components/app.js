@@ -14,8 +14,8 @@ var store = require('../store');
 var browse = require('./browse');
 var origin = require('../libs/origin');
 var serialize = require('form-serialize');
-var ga = require('google-analytics');
-var parseAndLogError = require('./parseError').parseAndLogError;
+var ajaxLoad = require('./objectutils').ajaxLoad;
+var ajaxPromise = require('./objectutils').ajaxPromise;
 var dispatch_dict = {}; //used to store value for simultaneous dispatch
 
 var portal = {
@@ -64,19 +64,14 @@ class Timeout {
 var App = React.createClass({
     SLOW_REQUEST_TIME: 250,
     historyEnabled: !!(typeof window != 'undefined' && window.history && window.history.pushState),
-    triggers: {
-        login: 'triggerLogin',
-        profile: 'triggerProfile',
-        logout: 'triggerLogout'
-    },
 
     getInitialState: function() {
         return {
             errors: [],
             dropdownComponent: undefined,
             content: undefined,
-            session: null,
-            session_properties: {}
+            session: {},
+            user_actions: null
         };
     },
 
@@ -91,8 +86,8 @@ var App = React.createClass({
         hidePublicAudits: React.PropTypes.bool,
         fetch: React.PropTypes.func,
         session: React.PropTypes.object,
-        session_properties: React.PropTypes.object,
-        navigate: React.PropTypes.func
+        navigate: React.PropTypes.func,
+        handleUserActionsUpdate: React.PropTypes.func
     },
 
     // Retrieve current React context
@@ -107,8 +102,8 @@ var App = React.createClass({
             hidePublicAudits: true, // True if audits should be hidden on the UI while logged out
             fetch: this.fetch,
             session: this.state.session,
-            session_properties: this.state.session_properties,
-            navigate: this.navigate
+            navigate: this.navigate,
+            handleUserActionsUpdate: this.handleUserActionsUpdate
         };
     },
 
@@ -136,7 +131,7 @@ var App = React.createClass({
             return portal.user_section;
         }
         if (category === 'user') {
-            return this.state.session_properties.user_actions || [];
+            return this.state.user_actions || [];
         }
         if (category === 'global_sections') {
             return portal.global_sections;
@@ -198,14 +193,15 @@ var App = React.createClass({
         }
     },
 
+    handleUserActionsUpdate: function(actions){
+        this.setState({user_actions: actions});
+    },
+
     // Once the app component is mounted, bind keydowns to handleKey function
     componentDidMount: function() {
         globals.bindEvent(window, 'keydown', this.handleKey);
         var session_cookie = this.extractSessionCookie();
         var session = this.parseSessionCookie(session_cookie);
-        if (session['auth.userid']) {
-            this.fetchSessionProperties();
-        }
         var query_href;
         if(document.querySelector('link[rel="canonical"]')){
             query_href = document.querySelector('link[rel="canonical"]').getAttribute('href');
@@ -237,22 +233,10 @@ var App = React.createClass({
         window.onbeforeunload = this.handleBeforeUnload;
     },
 
-    componentWillMount: function () {
-        if (typeof window !== 'undefined') {
-            // IE8 compatible event registration
-            window.onerror = this.handleError;
-        }
-    },
-
     componentWillReceiveProps: function (nextProps) {
         if (!this.state.session || (this.props.session_cookie !== nextProps.session_cookie)) {
             var nextState = {};
             nextState.session = this.parseSessionCookie(nextProps.session_cookie);
-            if (!nextState.session['auth.userid']) {
-                nextState.session_properties = {};
-            } else if (nextState.session['auth.userid'] !== (this.state.session && this.state.session['auth.userid'])) {
-                this.fetchSessionProperties();
-            }
             this.setState(nextState);
         }
     },
@@ -273,43 +257,24 @@ var App = React.createClass({
                 }
             }
         }
-        var xhr = this.props.contextRequest;
-        if (!xhr || !xhr.xhr_end || xhr.browser_stats) return;
-        var browser_end = 1 * new Date();
-        ga('set', 'location', window.location.href);
-        ga('send', 'pageview');
-        this.constructor.recordServerStats(xhr.server_stats, 'contextRequest');
-
-        xhr.browser_stats = {};
-        xhr.browser_stats['xhr_time'] = xhr.xhr_end - xhr.xhr_begin;
-        xhr.browser_stats['browser_time'] = browser_end - xhr.xhr_end;
-        xhr.browser_stats['total_time'] = browser_end - xhr.xhr_begin;
-        this.constructor.recordBrowserStats(xhr.browser_stats, 'contextRequest');
     },
 
     // functions previously in persona, mixins.js
     fetch: function (url, options) {
         options = _.extend({credentials: 'same-origin'}, options);
         var http_method = options.method || 'GET';
-        if (!(http_method === 'GET' || http_method === 'HEAD')) {
-            var headers = options.headers = _.extend({}, options.headers);
-            var session = this.state.session;
-            if (session && session._csrft_) {
-                headers['X-CSRF-Token'] = session._csrft_;
-            }
-        }
+        var headers = options.headers = _.extend({}, options.headers);
+        // TODO: add JWT here
         // Strip url fragment.
         var url_hash = url.indexOf('#');
         if (url_hash > -1) {
             url = url.slice(0, url_hash);
         }
-        var request = fetch(url, options);
+        var data = options.body ? options.body : null;
+        var request = ajaxPromise(url, http_method, headers, data);
         request.xhr_begin = 1 * new Date();
         request.then(response => {
             request.xhr_end = 1 * new Date();
-            var stats_header = response.headers.get('X-Stats') || '';
-            request.server_stats = require('querystring').parse(stats_header);
-            request.etag = response.headers.get('ETag');
             var session_cookie = this.extractSessionCookie();
             if (this.props.session_cookie !== session_cookie) {
                 store.dispatch({
@@ -346,50 +311,11 @@ var App = React.createClass({
         return session || {};
     },
 
-    fetchSessionProperties: function() {
-        if (this.sessionPropertiesRequest) {
-            return;
-        }
-        this.sessionPropertiesRequest = true;
-        this.fetch('/session-properties', {
-            headers: {'Accept': 'application/json'}
-        })
-        .then(response => {
-            this.sessionPropertiesRequest = null;
-            if (!response.ok) throw response;
-            return response.json();
-        })
-        .then(session_properties => {
-            this.setState({session_properties: session_properties});
-        });
-    },
-
     // functions previously in navigate, mixins.js
     onHashChange: function (event) {
         // IE8/9
         store.dispatch({
             type: {'href':document.querySelector('link[rel="canonical"]').getAttribute('href')}
-        });
-    },
-
-    trigger: function (name) {
-        var method_name = this.triggers[name];
-        if (method_name) {
-            this[method_name].call(this);
-        }
-    },
-
-    handleError: function(msg, url, line, column) {
-        // When an unhandled exception occurs, reload the page on navigation
-        this.historyEnabled = false;
-        var parsed = url && require('url').parse(url);
-        if (url && parsed.hostname === window.location.hostname) {
-            url = parsed.path;
-        }
-        ga('send', 'exception', {
-            'exDescription': url + '@' + line + ',' + column + ': ' + msg,
-            'exFatal': true,
-            'location': window.location.href
         });
     },
 
@@ -408,14 +334,6 @@ var App = React.createClass({
 
         if (target.getAttribute('disabled')) {
             event.preventDefault();
-            return;
-        }
-
-        // data-trigger links invoke custom handlers.
-        var data_trigger = target.getAttribute('data-trigger');
-        if (data_trigger !== null) {
-            event.preventDefault();
-            this.trigger(data_trigger);
             return;
         }
 
@@ -513,7 +431,6 @@ var App = React.createClass({
 
         }
         // Always async update in case of server side changes.
-        // Triggers standard analytics handling.
         this.navigate(href, {'replace': true});
     },
 
@@ -577,10 +494,14 @@ var App = React.createClass({
             });
             return;
         }
-
-        request = this.fetch(href, {
+        var reqHref = href.slice(-1) === '/' ? href + '/?format=json' : href + '&format=json';
+        request = this.fetch(reqHref, {
             headers: {'Accept': 'application/json'}
         });
+        console.log('VVVVVV');
+        console.log(request);
+        console.log('^^^^^^');
+
         this.requestCurrent = true; // Remember we have an outstanding GET request
 
         var timeout = new Timeout(this.SLOW_REQUEST_TIME);
@@ -598,36 +519,37 @@ var App = React.createClass({
                 this.requestCurrent = false;
             }
         });
-
         var promise = request.then(response => {
+            // console.log(JSON.parse(response));
+            // var test = this.contentTypeIsJSON(JSON.parse(response));
+            // console.log('+++++++',test);
             // Request has returned data
             this.requestCurrent = false;
-
             // navigate normally to URL of unexpected non-JSON response so back button works.
-            if (this.contentTypeIsJSON(response.headers.get('Content-Type'))) {
+            if (this.contentTypeIsJSON(response)) {
                 if (options.replace) {
+                    console.log('NAV_____1');
                     window.location.replace(href + fragment);
                 } else {
+                    console.log('NAV_____2');
                     var old_path = ('' + window.location).split('#')[0];
                     window.location.assign(href + fragment);
+                    return;
                 }
             }
             // The URL may have redirected
             var response_url = response.url || href;
 
             if (options.replace) {
+                console.log('NAV_____3');
                 window.history.replaceState(null, '', response_url + fragment);
             } else {
+                console.log('NAV_____4');
                 window.history.pushState(null, '', response_url + fragment);
             }
-
             dispatch_dict.href = response_url + fragment;
-            if (!response.ok) {
-                throw response;
-            }
-            return response.json();
+            return response;
         })
-        .catch(parseAndLogError.bind(undefined, 'contextRequest'))
         .then(this.receiveContextResponse);
 
         if (!options.replace) {
@@ -660,6 +582,8 @@ var App = React.createClass({
             // for the next navigation click.
             this.requestAborted = false;
         }
+        console.log('___DD___');
+        console.log(dispatch_dict);
         store.dispatch({
             type: dispatch_dict
         });
@@ -667,7 +591,13 @@ var App = React.createClass({
     },
 
     contentTypeIsJSON: function (content_type) {
-        return (content_type || '').split(';')[0].split('/').pop().split('+').pop() === 'json';
+        var isJson = true;
+        try{
+            var json = JSON.parse(content_type);
+        }catch(err){
+            isJson = false;
+        }
+        return isJson;
     },
 
     scrollTo: function() {
@@ -732,14 +662,11 @@ var App = React.createClass({
             }
         });
         var currRoute = lowerList.slice(1); // eliminate http
+        console.log('++++curr_route++++',currRoute);
         // first case is fallback
         if (canonical === "about:blank"){
             title = portal.portal_title;
             content = null;
-        // error catching
-        }else if(status){
-            content = <ErrorPage status={status}/>;
-            title = 'Error';
         }else if (currRoute[currRoute.length-1] === 'home' || (currRoute[currRoute.length-1] === href_url.host)){
             content = <HomePage />;
             title = portal.portal_title;
@@ -749,6 +676,10 @@ var App = React.createClass({
         }else if (currRoute[currRoute.length-1] === 'about'){
             content = <AboutPage />;
             title = 'About - ' + portal.portal_title;
+        // error catching
+        }else if(status){
+            content = <ErrorPage status={status}/>;
+            title = 'Error';
         }else if (context) {
             var ContentView = globals.content_views.lookup(context, current_action);
             if (ContentView){
@@ -831,27 +762,6 @@ var App = React.createClass({
             }
             store.dispatch({
                 type: props_dict
-            });
-        },
-        recordServerStats: function (server_stats, timingVar) {
-            // server_stats *_time are microsecond values...
-            Object.keys(server_stats).forEach(function (name) {
-                if (name.indexOf('_time') === -1) return;
-                ga('send', 'timing', {
-                    'timingCategory': name,
-                    'timingVar': timingVar,
-                    'timingValue': Math.round(server_stats[name] / 1000)
-                });
-            });
-        },
-        recordBrowserStats: function (browser_stats, timingVar) {
-            Object.keys(browser_stats).forEach(function (name) {
-                if (name.indexOf('_time') === -1) return;
-                ga('send', 'timing', {
-                    'timingCategory': name,
-                    'timingVar': timingVar,
-                    'timingValue': browser_stats[name]
-                });
             });
         }
     }
