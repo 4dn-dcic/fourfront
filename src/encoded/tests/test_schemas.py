@@ -9,9 +9,30 @@ SCHEMA_FILES = [
     if f.endswith('.json')
 ]
 
+
 @pytest.fixture(scope='module')
 def master_mixins():
-    return load_schema('encoded:schemas/mixins.json')
+    mixins = load_schema('encoded:schemas/mixins.json')
+    mixin_keys = [
+        'schema_version',
+        'uuid',
+        'accession',
+        'aliases',
+        'status',
+        'submitted',
+        'modified',
+        'references',
+        'attribution',
+        'notes',
+        'documents',
+        'attachment',
+        'attachments',
+        'dbxrefs',
+        'library',
+    ]
+    for key in mixin_keys:
+        assert(mixins[key])
+
 
 @pytest.mark.parametrize('schema', SCHEMA_FILES)
 def test_load_schema(schema, master_mixins):
@@ -22,11 +43,38 @@ def test_load_schema(schema, master_mixins):
     if not schema == ('mixins.json'):
         verify_mixins(loaded_schema, master_mixins)
 
+    if schema not in ['namespaces.json', 'mixins.json']:
+        shared_properties = [
+            'uuid',
+            'schema_version',
+            'aliases',
+            'lab',
+            'award',
+            'date_created',
+            'submitted_by',
+            'status'
+        ]
+        no_alias_or_attribution = ['user.json', 'award.json', 'lab.json', 'organism.json']
+        for prop in shared_properties:
+            if schema == 'experiment.json':
+                # currently experiment is abstract and has no mixin properties
+                continue
+            if schema == 'access_key.json' and prop not in ['uuid', 'schema_version']:
+                continue
+            if schema in no_alias_or_attribution and prop in ['aliases', 'lab', 'award']:
+                continue
+            verify_property(loaded_schema, prop)
+
+
+def verify_property(loaded_schema, property):
+    assert(loaded_schema['properties'][property])
+
+
 def verify_mixins(loaded_schema, master_mixins):
     '''
     test to ensure that we didn't accidently overwrite mixins somehow
     '''
-    for mixin in loaded_schema.get('mixinProperties',[]):
+    for mixin in loaded_schema.get('mixinProperties', []):
         # get the mixin name from {'$ref':'mixins.json#/schema_version'}
         mixin_file_name, mixin_name = mixin['$ref'].split('/')
         if mixin_file_name != "mixins.json":
