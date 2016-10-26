@@ -1,7 +1,6 @@
 'use strict';
 var React = require('react');
 var ReactDOM = require('react-dom');
-var fetched = require('./fetched');
 var _ = require('underscore');
 var announcements_data = require('../data/announcements_data');
 var statics = require('../data/statics');
@@ -14,33 +13,46 @@ Will load static entries from a js file
 Uses fetch to get context necessary to populate banner entry
 **************** */
 
-var BannerLoader = React.createClass({
-
-    render: function() {
-        return (
-            <fetched.FetchedData backup={
-                <BannerEntry
-                    data={{'total':"-"}}
-                    text={this.props.text}
-                    destination={this.props.destination}
-                    location={this.props.location}
-                />
-            }>
-                <fetched.Param name='data' url={this.props.location} />
-                <BannerEntry
-                    defaultFilter={this.props.defaultFilter ? this.props.defaultFilter : null}
-                    text={this.props.text}
-                    destination={this.props.destination}
-                    location={this.props.location}
-                />
-            </fetched.FetchedData>
-        );
-    }
-});
-
 var BannerEntry = React.createClass({
+    contextTypes: {
+    	fetch: React.PropTypes.func
+    },
 
-    setFacets: function(){
+    getInitialState: function(){
+        return({
+            count: null
+        });
+    },
+
+    componentDidMount: function(){
+        this.updateCount();
+    },
+
+    componentWillReceiveProps: function(nextProps){
+        if(nextProps.session !== this.props.session){
+            this.updateCount();
+        }
+    },
+
+    updateCount: function(){
+        var request = this.context.fetch(this.props.fetchLoc, {
+            headers: {'Accept': 'application/json',
+                'Content-Type': 'application/json'}
+        })
+        request.then(data => {
+            if(data.total){
+                this.setState({
+                    count: data.total
+                })
+            }else{
+                this.setState({
+                    count: null
+                })
+            }
+        });
+    },
+
+    setFacets: function(e){
         // for 4DN or external filters: if provided, set expSetFilters correctly
         if(this.props.defaultFilter){
             var newObj = {};
@@ -51,16 +63,13 @@ var BannerEntry = React.createClass({
                 type: {'expSetFilters': newObj}
             });
         }
-
     },
 
     render: function() {
-        var total = this.props.data.total;
-        var location = this.props.location;
-        var destination = this.props.destination;
-        var text = total + " " + this.props.text;
+        var count = this.state.count ? this.state.count : 0;
+        var text = count + " " + this.props.text;
         return (
-            <a className="banner-entry" href={destination} onClick={this.setFacets}>{text}</a>
+            <a className="banner-entry" href={this.props.destination} onClick={this.setFacets}>{text}</a>
         );
     }
 });
@@ -106,25 +115,11 @@ var ContentItem = React.createClass({
     }
 });
 
-var HomePageLoader = React.createClass({
-    render: function() {
-        return (
-            <fetched.FetchedData>
-                <fetched.Param name='data' url='/search/?type=Experiment' />
-            </fetched.FetchedData>
-        );
-    }
-});
-
-
 var HomePage = module.exports = React.createClass({
     render: function() {
-        // var experiment4DNBanner = <BannerLoader text='experiments' defaultFilter="4DN" destination="/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all" location='/search/?type=Experiment&award.project=4DN'/>;
-        // var experimentExtBanner = <BannerLoader text='experiments' defaultFilter="External" destination="/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all" location='/search/?type=Experiment&award.project=External'/>;
-        // var biosourceBanner = <BannerLoader text='cell types' destination='/search/?type=Biosource' location='/search/?type=Biosource'/>;
-        var experiment4DNBanner = <span />;
-        var experimentExtBanner = <span />;
-        var biosourceBanner = <span />;
+        var experiment4DNBanner = <BannerEntry session={this.props.session} text='experiments' defaultFilter="4DN" destination="/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all" fetchLoc='/search/?type=Experiment&award.project=4DN&format=json'/>;
+        var experimentExtBanner = <BannerEntry session={this.props.session} text='experiments' defaultFilter="External" destination="/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all" fetchLoc='/search/?type=Experiment&award.project=External&format=json'/>;
+        var biosourceBanner = <BannerEntry session={this.props.session} text='cell types' destination='/search/?type=Biosource' fetchLoc='/search/?type=Biosource&format=json'/>;
         var announcements = announcements_data.map(function(announce) {
             return (
                 <ContentItem key={announce.title} content={announce}/>

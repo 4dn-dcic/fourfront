@@ -668,7 +668,7 @@ var App = React.createClass({
             title = portal.portal_title;
             content = null;
         }else if (currRoute[currRoute.length-1] === 'home' || (currRoute[currRoute.length-1] === href_url.host)){
-            content = <HomePage />;
+            content = <HomePage session={this.state.session}/>;
             title = portal.portal_title;
         }else if (currRoute[currRoute.length-1] === 'help'){
             content = <HelpPage />;
