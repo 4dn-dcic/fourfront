@@ -12,6 +12,8 @@ def fetch_pubmed(PMID):
     author_list = []
     authors = ''
     NIHe = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
+    NIHw = "https://www.ncbi.nlm.nih.gov/pubmed/"
+    url = NIHw + PMID
     www = "{NIH}efetch.fcgi?db=pubmed&id={id}&rettype=medline".format(NIH=NIHe, id=PMID)
     r = requests.get(www).text
     full_text = r.replace('\n      ', ' ')
@@ -31,14 +33,14 @@ def fetch_pubmed(PMID):
         if key_pb == 'CN':
             author_list.append(data_pb.strip())
         authors = ', '.join(author_list)
-    return title, abstract, authors
+    return title, abstract, authors, url
 
 
 def fetch_biorxiv(url):
     title = ''
     abstract = ''
     authors = ''
-    return title, abstract, authors
+    return title, abstract, authors, url
 
 
 def map_doi_pmid(doi):
@@ -58,7 +60,7 @@ def map_doi_biox(doi):
     DOIad = "https://doi.org/"
     www = "{DOIad}{doi}".format(DOIad=DOIad, doi=doi)
     landing_page = requests.get(www).url
-    if "biorxiv" in landing_page.lower:
+    if "biorxiv" in landing_page.lower():
         return landing_page
     else:
         return
@@ -80,24 +82,26 @@ class Publication(Item):
         title = ''
         abstract = ''
         authors = ''
+        url = ''
         p_id = properties['ID']
         # parse if id is from pubmed
         if p_id.startswith('PMID'):
             pubmed_id = p_id[5:]
-            title, abstract, authors = fetch_pubmed(pubmed_id)
+            title, abstract, authors, url = fetch_pubmed(pubmed_id)
         # if id is doi, first check if it maps to pubmed id, else see where it goes
         elif p_id.startswith('doi'):
             doi_id = p_id[4:]
             if map_doi_pmid(doi_id):
                 pubmed_id = map_doi_pmid(doi_id)
-                title, abstract, authors = fetch_pubmed(pubmed_id)
+                title, abstract, authors, url = fetch_pubmed(pubmed_id)
             # if it goes to biorxiv fetch from biorxiv
             elif map_doi_biox(doi_id):
                 biox_url = map_doi_biox(doi_id)
-                title, abstract, authors = fetch_biorxiv(biox_url)
+                title, abstract, authors, url = fetch_biorxiv(biox_url)
             else:
                 pass
         properties['title'] = title
         properties['abstract'] = abstract
         properties['authors'] = authors
+        properties['url'] = url
         super(Publication, self)._update(properties, sheets)

@@ -4,6 +4,7 @@
     "id": "/profiles/publication.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
+    "required": ["ID"],
     "identifyingProperties": ["uuid", "ID"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -74,9 +75,21 @@
                 ]
             }
         },
-        "experiment_sets_in_pub": {
-            "title": "Experiment sets that are part of this publication",
-            "description": "List of experiment sets to be associated with the publication.",
+        "exp_sets_prod_in_pub": {
+            "title": "Experiment sets produced by this publication",
+            "description": "List of experiment sets that are produced by this publication.",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "Experiment Set",
+                "comment": "use accessions for identifiers.",
+                "type": "string",
+                "linkTo": "ExperimentSet"
+            }
+        },
+        "exp_sets_used_in_pub": {
+            "title": "Experiment sets used by this publication (not produced)",
+            "description": "List of experiment sets that are used (not produced) by this publication.",
             "type": "array",
             "uniqueItems": true,
             "items": {
