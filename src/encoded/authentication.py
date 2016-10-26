@@ -224,7 +224,7 @@ def logout(request):
     auth0_logout_url = "https://{domain}/v2/logout" \
                 .format(domain='hms-dbmi.auth0.com')
 
-    auth0_resp = requests.get(auth0_logout_url)
+    requests.get(auth0_logout_url)
 
     if asbool(request.params.get('redirect', True)):
         raise HTTPFound(location=request.resource_path(request.root))
