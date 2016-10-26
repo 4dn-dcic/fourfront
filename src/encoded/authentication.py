@@ -201,7 +201,6 @@ def login(request):
     if namespace != 'auth0':
         request.session.invalidate()
         request.response.headerlist.extend(forget(request))
-        import pdb; pdb.set_trace()
         raise LoginDenied()
 
     request.session.invalidate()
