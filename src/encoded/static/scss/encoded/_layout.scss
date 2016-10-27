@@ -224,10 +224,19 @@ h1.page-title + .page-subtitle {
 
 /** Extending Bootstrap grid to allow blocks to flow right in a row **/
 
-@media screen                           { .col-xs-float-right { float : right; } }
-@media screen and (min-width: 768px)    { .col-sm-float-right { float : right; } }
-@media screen and (min-width: 960px)    { .col-md-float-right { float : right; } }
-@media screen and (min-width: 1160px)   { .col-lg-float-right { float : right; } }
+@media screen                           		 { .col-xs-float-right { float : right; } }
+@media screen and (min-width: $screen-sm-min)    { .col-sm-float-right { float : right; } }
+@media screen and (min-width: $screen-md-min)    { .col-md-float-right { float : right; } }
+@media screen and (min-width: $screen-lg-min)    { .col-lg-float-right { float : right; } }
+
+.nowrap {
+	white-space: nowrap;
+	
+	&.tester {
+		position: absolute;
+		left: -999px;
+	}
+}
 
 
 /***********************************************************
@@ -235,7 +244,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 ************************************************************/
 
 
-@media screen and (min-width: 768px){
+@media screen and (min-width: $screen-sm-min){
 	/* Nudge accession #, etc. closer to title on wide desktop views */
 	.exp-set-header-area {
 		margin-top: -27px;
@@ -263,7 +272,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	}
 }
 
-@media screen and (max-width: 767px){
+@media screen and (max-width: $screen-xs-max){
 
 	.item-label-extra.text-right {
 		// Hackishly making text left-aligned for collapsed mobile view(s)
@@ -410,50 +419,77 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 .item-page-container .info-area {
 	margin-top: 19px;
-	margin-bottom: 10px;
-    min-height: 64px;
-}
+	margin-bottom: 4px;
 
-.item-page-container .info-area .info-panel {
-	padding : 8px 12px;
-	border: 1px solid #e4e4e4;
-	margin-bottom: 10px;
-	border-radius: 3px;
+	.info-panel {
+		/* padding : 8px 12px; */
+		/* padding : 4px 12px 2px; */
+		padding : 4px 12px 12px;
+		border-bottom: 1px solid #e2e2e2;
+		margin-bottom: 10px;
 
-    h5 {
-        margin-bottom: 0;
-        margin-top: 2px;
-        font-weight: 600;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+		> h6 {
+			margin : 0 0 7px /* -3px -> */ -8px;
+			font-weight: 500;
+			color: #646464;
 
-        a {
-            display: block;
-            overflow: inherit;
-            text-overflow: inherit;
-        }
+			&:after {
+				content : "\f105";
+				font-family: "FontAwesome";
+				padding-left: 6px;
+			}
 
-    }
+		}
 
-	div.more-details {
-		white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+		h5 {
+			margin-bottom: 0;
+			margin-top: 2px;
+			font-weight: 600;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+
+			a {
+				display: block;
+				overflow: inherit;
+				text-overflow: inherit;
+			}
+
+		}
+
+		div.more-details {
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.icon-container {
+			text-align: center;
+			padding-top: 4px;
+			font-size: 20px;
+			margin-bottom: -10px;
+			
+			&.col-xs-2 {
+				padding-right: 0px;
+				padding-left: 9px;
+			}
+		}
+
 	}
 
-    .icon-container {
-        text-align: center;
-        padding-top: 5px;
-        font-size: 24px;
-        margin-bottom: -10px;
-        
-        &.col-xs-2 {
-            padding-right: 0px;
-            padding-left: 5px;
-        }
-    }
+}
 
+.item-page-container .description-expand-button {
+	border: none;
+    background: none;
+    padding-top: 2px;
+    margin-left: 7px;
+	outline: none;
+}
+
+.exp-table-container {
+	overflow-x: auto;
+	display: block;
 }
 
 

@@ -1,13 +1,11 @@
 var React = require('react');
 var globals = require('./globals');
 var Panel = require('react-bootstrap').Panel;
-var SubIPanel = require('./item').SubIPanel; 
-var DescriptorField = require('./item').DescriptorField; 
-var tipsFromSchema = require('./item').tipsFromSchema; 
 var ExperimentsTable = require('./experiments-table').ExperimentsTable;
-var FacetList = require('./facetlist').FacetList;
-var siftExperiments = require('./facetlist').siftExperiments;
-var ajaxLoad = require('./objectutils').ajaxLoad;
+var _ = require('underscore');
+var { SubIPanel, DescriptorField, tipsFromSchema } = require('./item');
+var { FacetList, siftExperiments } = require('./facetlist');
+var { ajaxLoad, textContentWidth, gridContainerWidth } = require('./objectutils');
 
 /**
  * Entire ExperimentSet page view.
@@ -166,18 +164,6 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
         var title = globals.listing_titles.lookup(this.props.context)({context: this.props.context});
         var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container experiment-set-page');
-        
-        var facetList = (
-            <FacetList
-                urlPath={this.props.context['@id']}
-                experimentSetListJSON={this.props.context.experiments_in_set}
-                orientation="vertical"
-                expSetFilters={this.props.expSetFilters}
-                facets={ this.props.facets }
-                experimentsOrSets="experiments"
-            />
-        );
-        
 
         return (
             <div className={itemClass}>
@@ -189,7 +175,14 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                 <div className="row">
                 
                     <div className="col-sm-5 col-md-4 col-lg-3">
-                        { facetList }
+                        <FacetList
+                            urlPath={this.props.context['@id']}
+                            experimentSetListJSON={this.props.context.experiments_in_set}
+                            orientation="vertical"
+                            expSetFilters={this.props.expSetFilters}
+                            facets={ this.props.facets }
+                            experimentsOrSets="experiments"
+                        />
                     </div>
 
                     <div className="col-sm-7 col-md-8 col-lg-9">
@@ -237,7 +230,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                                     } 
                                 />
                                 
-                                <dd>{ formValue(this.props.schemas, this.props.context[ikey]) }</dd>
+                                <dd>{ formValue(this.props.schemas, this.props.context[ikey], ikey, 0) }</dd>
                             </div>
                         )}
                     </dl>
@@ -253,24 +246,6 @@ globals.panel_views.register(ExperimentSetView, 'ExperimentSet');
 
 
 var ExperimentSetHeader = React.createClass({
-
-    getInitialState : function(){
-        return {
-            descriptionExpanded : false
-        }
-    },
-
-    componentWillMount : function(){
-        // ToDo : Check if text width would be greater than bounding box width (pre-render?)
-        // if so, apply cursor : pointer style to div.item-page-heading
-    },
-
-    handleDescriptionExpandToggle: function (e) {
-        e.preventDefault();
-        this.setState({
-  		    descriptionExpanded: !this.state.descriptionExpanded
-        });
-    },
 
     parsedCreationDate(){
         if (!('date_created' in this.props.context)) return null;
@@ -294,6 +269,8 @@ var ExperimentSetHeader = React.createClass({
 
         }
         */
+
+        // Status colors are set via CSS (layout.scss) dependent on data-status attribute
         return (
             <div className="expset-indicator expset-status right" data-status={ this.props.context.status.toLowerCase() }>
                 { this.props.context.status }
@@ -318,19 +295,13 @@ var ExperimentSetHeader = React.createClass({
                     <h3 className="col-sm-6 item-label-title">
                         { /* PLACEHOLDER / TEMP-EMPTY */ }
                     </h3>
-                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra text-capitalize indicators">
+                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra text-capitalize indicators clearfix">
                         { this.parsedExperimentSetType() }
                         { this.parsedStatus() }
                     </h5>
                 </div>  
 
-
-                <div className="item-page-heading experiment-heading" style={{
-                    maxHeight : this.state.descriptionExpanded ? null : 45,
-                    whiteSpace : this.state.descriptionExpanded ? 'normal' : 'nowrap'
-                }} onClick={this.handleDescriptionExpandToggle}>
-                    <p className="text-large">{ this.props.context.description }</p>
-                </div>
+                <ExperimentSetHeaderBar description={ this.props.context.description } />
 
                 <div className="row clearfix bottom-row">
                     <div className="col-sm-6 item-label-extra set-type-indicators">{ /* PLACEHOLDER / TEMP-EMPTY */ }</div>
@@ -340,6 +311,77 @@ var ExperimentSetHeader = React.createClass({
             </div>
         );
     }
+});
+
+var ExperimentSetHeaderBar = React.createClass({
+
+    propTypes : {
+        description : React.PropTypes.string
+    },
+
+    getInitialState : function(){
+        return {
+            descriptionExpanded : false,
+            descriptionWillFitOneLine : null
+        }
+    },
+
+    checkWillDescriptionFit : function(){
+        var descTextWidth = textContentWidth(this.props.description, 'p', 'text-large');
+        if (descTextWidth <( gridContainerWidth() - 24)){ // Account for inner padding.
+            return true;
+        }
+        return false;
+    },
+
+    componentWillMount : function(){
+        this.setState({
+            descriptionWillFitOneLine : this.checkWillDescriptionFit()
+        });
+    },
+
+    componentDidMount : function(){
+
+        var debouncedStateChange = _.debounce(() => {
+            // Debounce to prevent from executing more than once every 300ms.
+            var willDescFitInNewWindowSize = this.checkWillDescriptionFit();
+            if (willDescFitInNewWindowSize != this.state.descriptionWillFitOneLine){
+                this.setState({
+                    descriptionWillFitOneLine : willDescFitInNewWindowSize
+                });
+            }
+        }, 300, false);
+
+        window.addEventListener('resize', debouncedStateChange);
+    },
+
+    handleDescriptionExpandToggle: function (e) {
+        e.preventDefault();
+        this.setState({
+  		    descriptionExpanded: !this.state.descriptionExpanded
+        });
+    },
+
+    render : function(){
+        var expandButton;
+        if (!this.state.descriptionWillFitOneLine){
+            expandButton = (
+                <button type="button" className="description-expand-button right" onClick={this.handleDescriptionExpandToggle}>
+                    <i className={"icon icon-" + (this.state.descriptionExpanded ? 'minus' : 'plus' )} />
+                </button>
+            );
+        }
+        return (
+            <div className="item-page-heading experiment-heading" style={{
+                maxHeight : this.state.descriptionExpanded ? null : 45,
+                whiteSpace : this.state.descriptionExpanded ? 'normal' : 'nowrap'
+            }}>
+                { expandButton }
+                <p className="text-large">{ this.props.description }</p>
+            </div>
+        );
+    }
+
 });
 
 
@@ -362,32 +404,33 @@ var ExperimentSetInfoBlock = React.createClass({
         );
     },
 
-    formattedLabInfoBlock : function(){
-        if (!this.props.labInfo) return null;
-        var labInfo = this.props.labInfo;
+    formattedInfoBlock : function(
+        label,
+        iconClass,
+        title,
+        titleHref,
+        detailContent,
+        extraContainerClassName = '',
+        extraDetailClassName = ''
+    ){
         return (
             <div className="col-sm-6 col-sm-float-right">
-                <div className="info-panel lab">
-
+                <div className={"info-panel " + extraContainerClassName}>
+                    <h6 className="info-panel-label">{ label }</h6>
                     <div className="row">
                         <div className="col-xs-2 col-lg-1 icon-container">
-                            <i className="ss-usergroup icon"></i>
+                            <i className={"icon " + iconClass}></i>
                         </div>
                         <div className="col-xs-10 col-lg-11">
                             <h5>
-                                <a href={ labInfo['@id'] || '#' }>{ labInfo.title }</a>
+                                <a href={ titleHref || '#' }>{ title }</a>
                             </h5>
-                            <div className="more-details address">
-                                { 
-                                    labInfo.city + 
-                                    (labInfo.state ? ', ' + labInfo.state : '') + 
-                                    (labInfo.postal_code ? ' ' + labInfo.postal_code : '' ) +
-                                    (labInfo.country ? ', ' + labInfo.country : '')
-                                }
+                            <div className={"more-details " + extraDetailClassName}>
+                                { detailContent }
                             </div>
                         </div>
                     </div>
-                    
+
                 </div>
             </div>
         );
@@ -395,43 +438,45 @@ var ExperimentSetInfoBlock = React.createClass({
 
     formattedAwardInfoBlock : function(){
         if (!this.props.awardInfo) return null;
-        var awardInfo = this.props.awardInfo;
-        return (
-            <div className="col-sm-6 col-sm-float-right">
-                <div className="info-panel award">
-                
-                    <div className="row">
-                        <div className="col-xs-2 col-lg-1 icon-container">
-                            <i className="ss-tag icon"></i>
-                        </div>
-                        <div className="col-xs-10 col-lg-11">
-                            <h5>
-                                <a href={ awardInfo['@id'] || '#' }>{ awardInfo.title }</a>
-                            </h5>
-                            <div className="more-details project">
-                                { awardInfo.project }
-                            </div>
-                        </div>
-                    </div>
+        return this.formattedInfoBlock(
+            'Award',
+            'icon-institution',
+            this.props.awardInfo.title,
+            this.props.awardInfo['@id'],
+            this.props.awardInfo.project,
+            'award',
+            'project'
+        );
+    },
 
-                </div>
-            </div>
+    formattedLabInfoBlock : function(){
+        if (!this.props.labInfo) return null;
+        return this.formattedInfoBlock(
+            'Lab',
+            'icon-users',
+            this.props.labInfo.title,
+            this.props.labInfo['@id'],
+            (
+                (this.props.labInfo.city) + 
+                (this.props.labInfo.state ? ', ' + this.props.labInfo.state : '') + 
+                (this.props.labInfo.postal_code ? ' ' + this.props.labInfo.postal_code : '' ) +
+                (this.props.labInfo.country ? ', ' + this.props.labInfo.country : '')
+            ),
+            'lab',
+            'address'
         );
     },
 
     render : function(){
-        var labInfo = this.formattedLabInfoBlock(),
-            awardInfo = this.formattedAwardInfoBlock(),
-            descriptionBlock = this.formattedDescriptionBlock();
 
         return (
             <div className="row info-area">
-                {/* descriptionBlock */}
-                <div className={ "col-sm-12" /* "col-sm-8 " + (descriptionBlock ? '' : 'col-sm-offset-4' ) */ }>
+                {/* this.formattedDescriptionBlock() */}
+                <div className={ "col-sm-12" }>
                     <div className="row">
                         
-                        { labInfo }
-                        { awardInfo }
+                        { this.formattedLabInfoBlock() }
+                        { this.formattedAwardInfoBlock() }
 
                     </div>
 
@@ -452,14 +497,20 @@ var ExperimentSetInfoBlock = React.createClass({
  * @param {*|*[]} item - Item(s) to render recursively.
  */
 
-var formValue = function (schemas, item) {
+var formValue = function (schemas, item, keyPrefix = '', depth = 0) {
     var toReturn = [];
     if(Array.isArray(item)) {
         for (var i=0; i < item.length; i++){
-            toReturn.push(formValue(schemas, item[i]));
+            toReturn.push(formValue(schemas, item[i], keyPrefix, depth + 1));
         }
     }else if (typeof item === 'object') {
-        toReturn.push(<SubIPanel schemas={schemas} content={item}/>);
+        toReturn.push(
+            <SubIPanel
+                schemas={schemas}
+                content={item}
+                key={item['@id'] || item.name || (keyPrefix.length > 0 ? keyPrefix + '-' : '') + depth + '-' + toReturn.length } 
+            />
+        );
     }else{
         if (typeof item === 'string' && item.charAt(0) === '/') {
             toReturn.push(<a key={item} href={item}>{item}</a>);

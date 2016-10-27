@@ -21,6 +21,7 @@ var getFileDetailContainer = require('./experiments-table').getFileDetailContain
 var AuditIndicators = audit.AuditIndicators;
 var AuditDetail = audit.AuditDetail;
 var AuditMixin = audit.AuditMixin;
+
 var expSetColumnLookup={
     // all arrays will be handled by taking the first item
     'biological replicates':{
@@ -49,7 +50,13 @@ var IndeterminateCheckbox = React.createClass({
     render: function(){
         var props = this.props;
         return(
-            <input {...props} type="checkbox" ref={function(input) {if (input) {input.indeterminate = props.checked ? false : props.indeterminate;}}} />
+            <input
+                checked={this.props.checked}
+                disabled={this.props.disabled}
+                onChange={this.props.onChange}
+                type="checkbox"
+                ref={function(input) {if (input) {input.indeterminate = props.checked ? false : props.indeterminate;}}} 
+            />
         );
     }
 });

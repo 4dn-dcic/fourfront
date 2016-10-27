@@ -34,3 +34,38 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET')
     xmlhttp.send();
 
 }
+
+/**
+ * Check width of text or text-like content if it were to fit on one line.
+ * @param {string} textContent - Either text or text-like content, e.g. with span elements.
+ * @param {string} containerElementType - Type of element to fit into, e.g. 'div' or 'p'.
+ * @param {string} containerClassName - ClassName of containing element, e.g. with 'text-large' to use larger text size.
+ */
+var textContentWidth = module.exports.textContentWidth = function(
+    textContent, 
+    containerElementType = 'div', 
+    containerClassName = ''
+){
+    if (!window || !window.document){
+        return null;
+    };
+    var contElem = document.createElement(containerElementType);
+    contElem.className = "nowrap tester " + containerClassName;
+    contElem.innerHTML = textContent;
+    document.body.appendChild(contElem);
+    var resultWidth = contElem.clientWidth;
+    document.body.removeChild(contElem);
+    return resultWidth;
+}
+
+/**
+ * Get the width of what a 12-column bootstrap section would be in current viewport size.
+ * Keep widths in sync with stylesheet.
+ */
+var gridContainerWidth = module.exports.gridContainerWidth = function(){
+    var docWidth = document.documentElement.clientWidth;
+    if (docWidth < 768) return docWidth - 20; // Account for padding.
+    if (docWidth < 960) return 740;
+    if (docWidth < 1160) return 940;
+    return 1140;
+};
