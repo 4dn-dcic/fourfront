@@ -304,13 +304,20 @@ var FacetList = module.exports.FacetList = React.createClass({
             regularFacets = [],
             exptypeDropdown;
 
-        // ToDo : If !facets.length and !this.state.facetsLoaded, show loading icon or similar.
         if (
             !facets || 
             (!facets.length && this.props.mode != 'picker') ||
             (!facets[0].terms && this.props.mode != 'picker')
         ) {
-            return (<div />);
+            if (!this.state.facetsLoaded) {
+                return (
+                    <div className="text-center" style={{ padding : "162px 0", fontSize : '26px', color : "#aaa" }}>
+                        <i className="icon icon-spin icon-circle-o-notch"></i>
+                    </div>
+                );
+            } else {
+                return null;
+            }
         }
 
         // ignore all audit facets for the time being
