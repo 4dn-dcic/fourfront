@@ -229,14 +229,13 @@ h1.page-title + .page-subtitle {
 @media screen and (min-width: $screen-md-min)    { .col-md-float-right { float : right; } }
 @media screen and (min-width: $screen-lg-min)    { .col-lg-float-right { float : right; } }
 
-.nowrap {
-	white-space: nowrap;
-	
-	&.tester {
-		position: absolute;
-		left: -999px;
-	}
+
+.off-screen {
+	position : absolute;
+	left : -9999px;
 }
+
+
 
 
 /***********************************************************
@@ -292,6 +291,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	padding: 10px 15px 8px;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	transition: height .4s;
 
 	h4 {
 		font-weight: 500;
@@ -419,14 +419,21 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 .item-page-container .info-area {
 	margin-top: 19px;
-	margin-bottom: 4px;
+	/* margin-bottom: 4px; */
+	/*
+	&:after {
+		content : "";
+		display : block;
+		position: relative;
+		border-bottom: 1px solid #ddd;
+		margin: 0 10px;
+	}
+	*/
 
 	.info-panel {
-		/* padding : 8px 12px; */
-		/* padding : 4px 12px 2px; */
-		padding : 4px 12px 12px;
-		border-bottom: 1px solid #e2e2e2;
-		margin-bottom: 10px;
+		padding : 4px 10px 12px;
+		/* border-bottom: 1px solid #e2e2e2; */
+		margin-bottom: 5px;
 
 		> h6 {
 			margin : 0 0 7px /* -3px -> */ -8px;
@@ -445,7 +452,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			margin-bottom: 0;
 			margin-top: 2px;
 			font-weight: 600;
-			white-space: nowrap;
+			/* white-space: nowrap; */
 			overflow: hidden;
 			text-overflow: ellipsis;
 
@@ -471,7 +478,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			
 			&.col-xs-2 {
 				padding-right: 0px;
-				padding-left: 9px;
+				padding-left: 5px;
 			}
 		}
 
@@ -490,6 +497,23 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 .exp-table-container {
 	overflow-x: auto;
 	display: block;
+
+	h3 {
+		font-weight: 300;
+		margin: 0;
+		border-top: 1px solid #eee;
+		padding: 18px 0 12px;
+	}
+
+	/*
+	table tbody tr:first-child td {
+		
+		&:nth-child(1),
+		&:nth-child(2) {
+			border-bottom-color: #c0c0c0;
+		}
+	}
+	*/
 }
 
 

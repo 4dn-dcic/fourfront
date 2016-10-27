@@ -194,6 +194,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                         />
 
                         <div className="exp-table-container">
+                            <h3>Experiments</h3>
                             <ExperimentsTable 
                                 columnHeaders={[ 
                                     null, 
@@ -315,20 +316,41 @@ var ExperimentSetHeader = React.createClass({
 
 var ExperimentSetHeaderBar = React.createClass({
 
+    // ToDo : Separate out stylistic values (padding, border, expand button) as props.
+
     propTypes : {
-        description : React.PropTypes.string
+        description : React.PropTypes.string.isRequired,
+        totalPaddingWidth : React.PropTypes.integer,
+        totalPaddingHeight : React.PropTypes.integer,
+        expandButtonWidth : React.PropTypes.integer
+    },
+
+    getDefaultProps : function(){
+        return {
+            totalPaddingWidth : 32,
+            totalPaddingHeight : 22,
+            expandButtonWidth : 30
+        };
     },
 
     getInitialState : function(){
         return {
             descriptionExpanded : false,
-            descriptionWillFitOneLine : null
+            descriptionWillFitOneLine : null,
+            descriptionWhiteSpace : 'nowrap'
         }
     },
 
-    checkWillDescriptionFit : function(){
-        var descTextWidth = textContentWidth(this.props.description, 'p', 'text-large');
-        if (descTextWidth <( gridContainerWidth() - 24)){ // Account for inner padding.
+    descriptionHeight : null, // Use for animating height, if needed.
+
+    checkWillDescriptionFitOneLineAndUpdateHeight : function(){
+        
+        var containerWidth = gridContainerWidth() - this.props.totalPaddingWidth; // Account for inner padding & border.
+        var { textWidth, containerHeight } = textContentWidth(this.props.description, 'p', 'text-large', containerWidth - this.props.expandButtonWidth); // Account for expand button.
+
+        this.descriptionHeight = containerHeight + this.props.totalPaddingHeight; // Account for padding, border.
+
+        if ( textWidth < containerWidth ){ 
             return true;
         }
         return false;
@@ -336,20 +358,25 @@ var ExperimentSetHeaderBar = React.createClass({
 
     componentWillMount : function(){
         this.setState({
-            descriptionWillFitOneLine : this.checkWillDescriptionFit()
+            descriptionWillFitOneLine : this.checkWillDescriptionFitOneLineAndUpdateHeight()
         });
     },
 
     componentDidMount : function(){
-
+        window.textBox = this;
         var debouncedStateChange = _.debounce(() => {
             // Debounce to prevent from executing more than once every 300ms.
-            var willDescFitInNewWindowSize = this.checkWillDescriptionFit();
-            if (willDescFitInNewWindowSize != this.state.descriptionWillFitOneLine){
-                this.setState({
-                    descriptionWillFitOneLine : willDescFitInNewWindowSize
-                });
-            }
+            setTimeout(()=> {
+                var oldHeight = this.descriptionHeight;
+                var willDescriptionFitAtNewWindowSize = this.checkWillDescriptionFitOneLineAndUpdateHeight();
+                if (willDescriptionFitAtNewWindowSize != this.state.descriptionWillFitOneLine){
+                    this.setState({
+                        descriptionWillFitOneLine : willDescriptionFitAtNewWindowSize
+                    });
+                } else if (this.descriptionHeight != oldHeight) {
+                    this.forceUpdate();
+                }
+            }, 0);
         }, 300, false);
 
         window.addEventListener('resize', debouncedStateChange);
@@ -358,7 +385,17 @@ var ExperimentSetHeaderBar = React.createClass({
     handleDescriptionExpandToggle: function (e) {
         e.preventDefault();
         this.setState({
+            descriptionWhiteSpace : 'normal',
   		    descriptionExpanded: !this.state.descriptionExpanded
+        }, ()=>{
+            if (!this.state.descriptionExpanded) {
+                // Delay whiteSpace style since can't transition it w/ CSS3
+                setTimeout(()=>{
+                    this.setState({
+                        descriptionWhiteSpace : 'nowrap'
+                    })
+                }, 350);
+            }
         });
     },
 
@@ -373,8 +410,8 @@ var ExperimentSetHeaderBar = React.createClass({
         }
         return (
             <div className="item-page-heading experiment-heading" style={{
-                maxHeight : this.state.descriptionExpanded ? null : 45,
-                whiteSpace : this.state.descriptionExpanded ? 'normal' : 'nowrap'
+                height : this.state.descriptionExpanded ? this.descriptionHeight : '45px',
+                whiteSpace : this.state.descriptionWhiteSpace
             }}>
                 { expandButton }
                 <p className="text-large">{ this.props.description }</p>
@@ -423,7 +460,7 @@ var ExperimentSetInfoBlock = React.createClass({
                         </div>
                         <div className="col-xs-10 col-lg-11">
                             <h5>
-                                <a href={ titleHref || '#' }>{ title }</a>
+                                <a href={ titleHref || '#' } title={title}>{ title }</a>
                             </h5>
                             <div className={"more-details " + extraDetailClassName}>
                                 { detailContent }
