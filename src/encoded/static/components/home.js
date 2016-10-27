@@ -136,7 +136,7 @@ var HomePage = module.exports = React.createClass({
                     <h1 className="page-title" style={{ fontSize : '3.25rem' }}>4DN Data Portal</h1>
                     <h4 className="text-300 col-sm-8" style={{ float: 'none', padding : 0 }}>
                         The portal currently hosts {experiment4DNBanner} from
-                        the 4DN network and<br/>{experimentExtBanner} from other
+                        the 4DN network and {experimentExtBanner} from other
                         sources over {biosourceBanner}.
                     </h4>
                 </div>

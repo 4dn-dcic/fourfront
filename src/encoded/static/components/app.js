@@ -627,9 +627,11 @@ var App = React.createClass({
         // check error status
         var status;
         if(context.code && context.code == 404){
-            status = 404;
+            status = 'not_found';
         }else if(context.status && context.status == 403){
-            status = 403;
+            status = 'invalid_login';
+        }else if((context.code && context.code == 403) && (context.title && context.title == 'Forbidden')){
+            status = 'forbidden';
         }
         // add static page routing
         var title;

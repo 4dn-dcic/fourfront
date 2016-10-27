@@ -159,7 +159,14 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
             user_url = "https://{domain}/userinfo?access_token={access_token}" \
                         .format(domain='hms-dbmi.auth0.com',
                                 access_token=access_token)
-            user_info = requests.get(user_url).json()
+            resp  = requests.get(user_url)
+            if resp.status_code == 429:
+                # to many requests... slow down and try again
+                print("to many requests.. waiting a while")
+                import time
+                time.sleep(1)
+                resp  = requests.get(user_url)
+            user_info = resp.json()
         except Exception as e:
             if self.debug:
                 self.log(('Invalid assertion: %s (%s)', (e, type(e).__name__)),
@@ -213,8 +220,15 @@ def logout(request):
     request.session.invalidate()
     request.session.get_csrf_token()
     request.response.headerlist.extend(forget(request))
+    # call auth0 to logout
+    auth0_logout_url = "https://{domain}/v2/logout" \
+                .format(domain='hms-dbmi.auth0.com')
+
+    requests.get(auth0_logout_url)
+
     if asbool(request.params.get('redirect', True)):
         raise HTTPFound(location=request.resource_path(request.root))
+
     return {}
 
 

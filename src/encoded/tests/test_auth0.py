@@ -60,6 +60,7 @@ def test_login_logout(testapp, anontestapp, auth0_4dn_user_token,
 
     # Log in
     res = anontestapp.post_json('/login', auth0_4dn_user_token, status=200)
+
     assert 'Set-Cookie' in res.headers
     assert res.json['auth.userid'] == email
 
