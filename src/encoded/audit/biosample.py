@@ -8,7 +8,6 @@ from .gtex_data import gtexDonorsList
 from .gtex_data import gtexParentsList
 
 
-
 term_mapping = {
     "head": "UBERON:0000033",
     "limb": "UBERON:0002101",
@@ -48,6 +47,48 @@ model_organism_terms = ['model_organism_mating_status',
                         'model_organism_health_status',
                         'model_organism_donor_constructs']
 
+
+@audit_checker('biosample', frame=['biosource', 'cell_culture_details'])
+def audit_biosample_tier1_cell_lines_have_required_cell_culture_properties(value, system):
+    '''
+    tier1 cell lines have required fields from biosample_cell_culture
+    that must be present and that depend on the cell_line
+    '''
+    # check to see if any of the biosources (usually only 1) are Tier1 cell_lines
+    if not any(bs.get('cell_line_tier') == 'Tier 1' for bs in value.get('biosource')):
+        return
+    if len(value['biosource']) != 1:
+        # special case for multi-biosource
+        return
+    required = ['culture_duration', 'morphology_image']
+    cell_cult_info = value['cell_culture_details']
+    if 'passage_number' in cell_cult_info:
+        if cell_cult_info['passage_number'] >= 10:
+            # they need karyotype image so add to required
+            required.append('karyotype_image:karyotype')
+
+    missing = []
+    for prop in required:
+        if prop not in cell_cult_info:
+            if ':' in prop:
+                orred = prop.split(':')
+                ok = None
+                for choice in orred:
+                    if choice in cell_cult_info:
+                        ok = True
+                if not ok:
+                    missing.extend(orred)
+            else:
+                missing.append(prop)
+
+    if missing:
+        detail = 'In Biosample {}'.format(value['@id']) + \
+                 ' - Missing Required Info for Tier 1 Cell Line ' + \
+                 '{}'.format(value['biosource'][0]['cell_line']) + \
+                 ' linked BiosampleCellCulture is missing required {}'.format(missing)
+        yield AuditFailure('missing mandatory metadata', detail,
+                           level='ERROR')
+    return
 
 
 #@audit_checker('biosample', frame=['organism'])
@@ -198,6 +239,7 @@ def audit_biosample_term(value, system):
         yield AuditFailure('mismatched ontology term', detail, level='ERROR')
         return
 
+
 #@audit_checker('biosample', frame='object')
 def audit_biosample_culture_date(value, system):
     '''
@@ -218,6 +260,7 @@ def audit_biosample_culture_date(value, system):
             value['culture_harvest_date'],
             value['culture_start_date'])
         raise AuditFailure('invalid dates', detail, level='ERROR')
+
 
 #@audit_checker('biosample', frame=['organism', 'donor', 'donor.organism', 'donor.mutated_gene', 'donor.mutated_gene.organism'])
 def audit_biosample_donor(value, system):
@@ -263,6 +306,7 @@ def audit_biosample_donor(value, system):
                 donor['@id'],
                 donor['mutated_gene']['name'])
             raise AuditFailure('invalid donor mutated_gene', detail, level='ERROR')
+
 
 #@audit_checker('biosample', frame='object')
 def audit_biosample_subcellular_term_match(value, system):

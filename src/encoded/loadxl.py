@@ -518,6 +518,9 @@ PHASE1_PIPELINES = {
     'file_fasta': [
         remove_keys('experiments', 'filesets'),
     ],
+    'file_processed': [
+        remove_keys('experiments', 'filesets', "workflow_run"),
+    ],
     'file_set': [
         remove_keys('files_in_set'),
     ],
@@ -555,6 +558,9 @@ PHASE2_PIPELINES = {
     ],
     'file_fasta': [
         skip_rows_missing_all_keys('experiments', 'filesets'),
+    ],
+    'file_processed': [
+        skip_rows_missing_all_keys('experiments', 'filesets', "workflow_run"),
     ],
     'file_set': [
         skip_rows_missing_all_keys('files_in_set'),
