@@ -40,6 +40,14 @@ def fetch_biorxiv(url):
     title = ''
     abstract = ''
     authors = ''
+    r = requests.get(url)
+    resp = r.text.encode('utf-8').decode('ascii', 'ignore')
+    soup = BeautifulSoup(resp, "html.parser")
+
+    title = soup.find_all('meta', {'name': "DC.Title"})[0]['content']
+    abstract = soup.find_all('meta', {'name': "DC.Description"})[0]['content']
+    authors = ", ".join([i['content']for i in soup.find_all('meta', {'name': "DC.Contributor"})])
+
     return title, abstract, authors, url
 
 
