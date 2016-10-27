@@ -21,10 +21,18 @@ var FacetList = module.exports.FacetList = React.createClass({
             });
         },
 
+        resetFacetTermsAndCounts : function(facets){
+            facets.forEach(function(facet,i,a){
+                delete facet.terms;
+                delete facet.total;
+            });
+        },
+
         /**
          * Fills facet objects with terms and counts.
          * 
          * @param {Object[]} incompleteFacets - Array of facet objects. Each should have field and title keys/values.
+         * @param {Object[]} exps - Array of experiment objects, obtained from @graph or experiments_in_set property on context.
          */
         fillFacetTermsAndCountFromExps : function(incompleteFacets, exps){
 
@@ -107,6 +115,15 @@ var FacetList = module.exports.FacetList = React.createClass({
                 }
             }
             return ignoredFilters;
+        },
+
+        /** Compare two arrays of experiments to check if contain same experiments, by their ID. **/
+        compareExperimentLists : function(exps1, exps2){
+            if (exps1.length != exps2.length) return false;
+            for (var i; i < exps1.length; i++){
+                if (exps1[i]['@id'] != exps2[i]['@id']) return false;
+            }
+            return true;
         }
         
     },
@@ -170,6 +187,14 @@ var FacetList = module.exports.FacetList = React.createClass({
         }
     },
 
+    componentWillReceiveProps : function(nextProps){
+        // Re-search terms & their counts if new ExperimentSet, don't reload list of possible facets.
+        if (FacetList.compareExperimentLists(nextProps.experimentSetListJSON, this.props.experimentSetListJSON)){
+             FacetList.resetFacetTermsAndCounts(this.props.facets);
+             FacetList.fillFacetTermsAndCountFromExps(this.props.facets, nextProps.experimentSetListJSON);
+        }
+    },
+
     loadFacets : function(){
         ajaxLoad('/facets?type=Experiment&format=json', function(r){
             Array.prototype.push.apply(this.props.facets, r);
@@ -220,6 +245,8 @@ var FacetList = module.exports.FacetList = React.createClass({
     },
 
     render: function() {
+
+        console.log(this);
 
         var facets = this.props.facets, // Get all facets, and "normal" facets, meaning non-audit facets
             loggedIn = this.context.session && this.context.session['auth.userid'],
