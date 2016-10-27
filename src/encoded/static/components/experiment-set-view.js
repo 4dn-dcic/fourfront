@@ -320,9 +320,9 @@ var ExperimentSetHeaderBar = React.createClass({
 
     propTypes : {
         description : React.PropTypes.string.isRequired,
-        totalPaddingWidth : React.PropTypes.integer,
-        totalPaddingHeight : React.PropTypes.integer,
-        expandButtonWidth : React.PropTypes.integer
+        totalPaddingWidth : React.PropTypes.number,
+        totalPaddingHeight : React.PropTypes.number,
+        expandButtonWidth : React.PropTypes.number
     },
 
     getDefaultProps : function(){
