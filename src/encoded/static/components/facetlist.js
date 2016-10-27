@@ -124,6 +124,14 @@ var FacetList = module.exports.FacetList = React.createClass({
                 if (exps1[i]['@id'] != exps2[i]['@id']) return false;
             }
             return true;
+        },
+
+        checkFilledFacets : function(facets){
+            for (var i; i < facets.length; i++){
+                if (typeof facets[i].total != 'number') return false;
+                if (typeof facets[i].terms == 'undefined') return false;
+            }
+            return true;
         }
         
     },
@@ -171,7 +179,8 @@ var FacetList = module.exports.FacetList = React.createClass({
             orientation: 'vertical',
             restrictions : {},
             facets : [],
-            experimentsOrSets : 'sets'
+            experimentsOrSets : 'sets',
+            urlPath : null
         };
     },
 
@@ -182,27 +191,38 @@ var FacetList = module.exports.FacetList = React.createClass({
     },
 
     componentWillMount : function(){
+        console.log(
+            'Mounting FacetList on ' + (this.props.urlPath || 'unknown page.'),
+            'Facets Loaded: ' + this.state.facetsLoaded
+        );
         if (!this.state.facetsLoaded) {
-            this.loadFacets();
+            // Load list of available facets via AJAX once & reuse.
+            this.loadFacets(() => {
+                FacetList.fillFacetTermsAndCountFromExps(this.props.facets, this.props.experimentSetListJSON);
+                this.setState({ facetsLoaded : true });
+            });
+        } else {
+            FacetList.fillFacetTermsAndCountFromExps(this.props.facets, this.props.experimentSetListJSON);
         }
+    },
+
+    componentWillUnmount : function(){
+        FacetList.resetFacetTermsAndCounts(this.props.facets);
     },
 
     componentWillReceiveProps : function(nextProps){
         // Re-search terms & their counts if new ExperimentSet, don't reload list of possible facets.
-        if (FacetList.compareExperimentLists(nextProps.experimentSetListJSON, this.props.experimentSetListJSON)){
-             FacetList.resetFacetTermsAndCounts(this.props.facets);
-             FacetList.fillFacetTermsAndCountFromExps(this.props.facets, nextProps.experimentSetListJSON);
-        }
+        //if (!FacetList.compareExperimentLists(nextProps.experimentSetListJSON, this.props.experimentSetListJSON)){
+        //     FacetList.resetFacetTermsAndCounts(this.props.facets);
+        //     FacetList.fillFacetTermsAndCountFromExps(this.props.facets, nextProps.experimentSetListJSON);
+        //}
     },
 
-    loadFacets : function(){
+    loadFacets : function(callback = null){
         ajaxLoad('/facets?type=Experiment&format=json', function(r){
             Array.prototype.push.apply(this.props.facets, r);
-            FacetList.fillFacetTermsAndCountFromExps(this.props.facets, this.props.experimentSetListJSON);
-            console.log('Loaded Facet List via AJAX & filled');
-            this.setState({
-                facetsLoaded : true
-            });
+            console.log('Loaded Facet List via AJAX');
+            if (typeof callback == 'function') callback();
         }.bind(this));
     },
 
@@ -246,15 +266,17 @@ var FacetList = module.exports.FacetList = React.createClass({
 
     render: function() {
 
-        console.log(this);
-
         var facets = this.props.facets, // Get all facets, and "normal" facets, meaning non-audit facets
             loggedIn = this.context.session && this.context.session['auth.userid'],
             regularFacets = [],
             exptypeDropdown;
 
-        if (!facets || (!facets.length && this.props.mode != 'picker')) return <div />;
-        if (!facets.length || !facets[0].terms) return <div />;
+        // ToDo : If !facets.length and !this.state.facetsLoaded, show loading icon or similar.
+        if (
+            !facets || 
+            (!facets.length && this.props.mode != 'picker') ||
+            (!facets[0].terms && this.props.mode != 'picker')
+        ) return <div />;
 
         // ignore all audit facets for the time being
         var normalFacets = facets.filter(facet => facet.field.substring(0, 6) !== 'audit.');
