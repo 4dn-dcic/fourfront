@@ -71,7 +71,7 @@ var App = React.createClass({
             dropdownComponent: undefined,
             content: undefined,
             session: {},
-            user_actions: null
+            user_actions: []
         };
     },
 
@@ -87,7 +87,7 @@ var App = React.createClass({
         fetch: React.PropTypes.func,
         session: React.PropTypes.object,
         navigate: React.PropTypes.func,
-        handleUserActionsUpdate: React.PropTypes.func
+        contentTypeIsJSON: React.PropTypes.func
     },
 
     // Retrieve current React context
@@ -103,7 +103,7 @@ var App = React.createClass({
             fetch: this.fetch,
             session: this.state.session,
             navigate: this.navigate,
-            handleUserActionsUpdate: this.handleUserActionsUpdate
+            contentTypeIsJSON: this.contentTypeIsJSON
         };
     },
 
@@ -193,10 +193,6 @@ var App = React.createClass({
         }
     },
 
-    handleUserActionsUpdate: function(actions){
-        this.setState({user_actions: actions});
-    },
-
     // Once the app component is mounted, bind keydowns to handleKey function
     componentDidMount: function() {
         globals.bindEvent(window, 'keydown', this.handleKey);
@@ -242,6 +238,16 @@ var App = React.createClass({
     },
 
     componentDidUpdate: function (prevProps, prevState) {
+        // get user actions (a function of log in) from local storage
+        var localActions;
+        if(localStorage.user_actions){
+            localActions = JSON.parse(localStorage.getItem('user_actions'));
+        }else{
+            localActions = [];
+        }
+        if (!_.isEqual(localActions, prevState.user_actions)){
+            this.setState({user_actions:localActions});
+        }
         var key;
         if (this.props) {
             for (key in this.props) {
@@ -498,14 +504,8 @@ var App = React.createClass({
         request = this.fetch(reqHref, {
             headers: {'Accept': 'application/json'}
         });
-        console.log('VVVVVV');
-        console.log(request);
-        console.log('^^^^^^');
-
         this.requestCurrent = true; // Remember we have an outstanding GET request
-
         var timeout = new Timeout(this.SLOW_REQUEST_TIME);
-
         Promise.race([request, timeout.promise]).then(v => {
             if (v instanceof Timeout) {
                 console.log('TIMEOUT!!!');
@@ -520,38 +520,26 @@ var App = React.createClass({
             }
         });
         var promise = request.then(response => {
-            // console.log(JSON.parse(response));
-            // var test = this.contentTypeIsJSON(JSON.parse(response));
-            // console.log('+++++++',test);
-            // Request has returned data
             this.requestCurrent = false;
             // navigate normally to URL of unexpected non-JSON response so back button works.
-            if (this.contentTypeIsJSON(response)) {
+            if (!this.contentTypeIsJSON(response)) {
                 if (options.replace) {
-                    console.log('NAV_____1');
                     window.location.replace(href + fragment);
                 } else {
-                    console.log('NAV_____2');
                     var old_path = ('' + window.location).split('#')[0];
                     window.location.assign(href + fragment);
                     return;
                 }
             }
-            // The URL may have redirected
-            var response_url = response.url || href;
-
             if (options.replace) {
-                console.log('NAV_____3');
-                window.history.replaceState(null, '', response_url + fragment);
+                window.history.replaceState(null, '', href + fragment);
             } else {
-                console.log('NAV_____4');
-                window.history.pushState(null, '', response_url + fragment);
+                window.history.pushState(null, '', href + fragment);
             }
-            dispatch_dict.href = response_url + fragment;
+            dispatch_dict.href = href + fragment;
             return response;
         })
         .then(this.receiveContextResponse);
-
         if (!options.replace) {
             promise = promise.then(this.scrollTo);
         }
@@ -567,13 +555,11 @@ var App = React.createClass({
             // Might fail due to too large data
             window.history.replaceState(null, '', window.location.href);
         }
-
         // Set up new properties for the page after a navigation click. First disable slow now that we've
         // gotten a response. If the requestAborted flag is set, then a request was aborted and so we have
         // the data for a Network Request Error. Don't render that, but clear the requestAboerted flag.
         // Otherwise we have good page data to render.
         // dispatch_dict.slow = false;
-
         if (!this.requestAborted) {
             // Real page to render
             dispatch_dict.context = data;
@@ -582,18 +568,16 @@ var App = React.createClass({
             // for the next navigation click.
             this.requestAborted = false;
         }
-        console.log('___DD___');
-        console.log(dispatch_dict);
         store.dispatch({
             type: dispatch_dict
         });
         dispatch_dict={};
     },
 
-    contentTypeIsJSON: function (content_type) {
+    contentTypeIsJSON: function(content) {
         var isJson = true;
         try{
-            var json = JSON.parse(content_type);
+            var json = JSON.parse(JSON.stringify(content));
         }catch(err){
             isJson = false;
         }
@@ -662,7 +646,6 @@ var App = React.createClass({
             }
         });
         var currRoute = lowerList.slice(1); // eliminate http
-        console.log('++++curr_route++++',currRoute);
         // first case is fallback
         if (canonical === "about:blank"){
             title = portal.portal_title;

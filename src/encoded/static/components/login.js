@@ -8,8 +8,7 @@ var Login = React.createClass({
     contextTypes: {
     	fetch: React.PropTypes.func,
     	session: React.PropTypes.object,
-        navigate: React.PropTypes.func,
-        handleUserActionsUpdate: React.PropTypes.func
+        navigate: React.PropTypes.func
     },
 
     componentWillMount: function () {
@@ -54,7 +53,7 @@ var Login = React.createClass({
                 'Content-Type': 'application/json'}
         })
         .then(data => {
-            this.context.handleUserActionsUpdate([]);
+            localStorage.removeItem("user_actions");
             if(typeof document !== 'undefined'){
                 this.context.navigate('/');
             }
@@ -74,13 +73,12 @@ var Login = React.createClass({
         })
         .then(response => {
             this.lock.hide();
-            console.log('___',response);
             if (response.code || response.status) throw response;
             return response;
         })
         .then(response => {
-            console.log('successful login!');
-            this.context.handleUserActionsUpdate(response.user_actions);
+            // localStorage only holds strings!
+            localStorage.setItem("user_actions", JSON.stringify(response.user_actions));
             this.context.navigate('', {'inPlace':true});
         }, error => {
             console.log("got an error: ", error.description);

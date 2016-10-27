@@ -37,7 +37,8 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
     };
     xmlhttp.open(method, url, true);
     xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    if(method == 'POST' && data){
+    console.log('___DATA___',data);
+    if(data){
         xmlhttp.send(data);
     }else{
         xmlhttp.send();
@@ -58,7 +59,7 @@ var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = n
                 xhr.setRequestHeader(Object.keys(headers)[i], headers[Object.keys(headers)[i]]);
             }
         }
-        if(method == 'POST' && data){
+        if(data){
             xhr.send(data);
         }else{
             xhr.send();

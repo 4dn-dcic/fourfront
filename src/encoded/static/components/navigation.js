@@ -191,7 +191,6 @@ var AccountActions = React.createClass({
             return(<a href="#" className="invis"/>);
         }
         var actions = this.context.listActionsFor('user').map(function (action, idx) {
-            console.log(action.id+idx);
             return (
                 <div key={action.id + idx} >
                     <a href={action.href || ''} className="global-entry">

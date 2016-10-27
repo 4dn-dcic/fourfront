@@ -26,6 +26,7 @@ module.exports.ItemStore = class ItemStore {
             body: JSON.stringify(data),
         }, response => {
             var item = response['@graph'][0];
+            console.log('__CREATE',item);
             this._items.push(item);
             this.dispatch('onCreate', response);
         });
@@ -38,6 +39,7 @@ module.exports.ItemStore = class ItemStore {
             body: JSON.stringify(data),
         }, response => {
             var item = _.find(this._items, i => i['@id'] == data['@id']);
+            console.log('__UPDATE',item);
             _.extend(item, data);
             this.dispatch('onUpdate', item);
         });
@@ -50,6 +52,7 @@ module.exports.ItemStore = class ItemStore {
             body: JSON.stringify({status: 'deleted'}),
         }, response => {
             var item = _.find(this._items, i => i['@id'] == id);
+            console.log('__DELETE',item);
             this._items = _.reject(this._items, i => i['@id'] == id);
             this.dispatch('onDelete', item);
         });
@@ -61,13 +64,14 @@ module.exports.ItemStore = class ItemStore {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
         });
-        return this._fetch(
-            url, options
-        ).then(response => {
-            if (!response.ok) throw response;
-            return response.json();
+        var request = this._fetch(url, options);
+        console.log('======', request);
+        request.then(response => {
+            console.log('********', response);
+            if (response.status != 'success') throw response;
+            return response;
         }).then(then).catch(err => {
-            this.dispatch('onError', response);
+            this.dispatch('onError', err);
         });
     }
 
