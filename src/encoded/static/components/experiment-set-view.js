@@ -316,12 +316,11 @@ var ExperimentSetHeader = React.createClass({
 
 var ExperimentSetHeaderBar = React.createClass({
 
-    // ToDo : Separate out stylistic values (padding, border, expand button) as props.
-
     propTypes : {
         description : React.PropTypes.string.isRequired,
         totalPaddingWidth : React.PropTypes.number,
         totalPaddingHeight : React.PropTypes.number,
+        initialHeight : React.PropTypes.number,
         expandButtonWidth : React.PropTypes.number
     },
 
@@ -329,7 +328,8 @@ var ExperimentSetHeaderBar = React.createClass({
         return {
             totalPaddingWidth : 32,
             totalPaddingHeight : 22,
-            expandButtonWidth : 30
+            expandButtonWidth : 30,
+            initialHeight : 45
         };
     },
 
@@ -410,7 +410,7 @@ var ExperimentSetHeaderBar = React.createClass({
         }
         return (
             <div className="item-page-heading experiment-heading" style={{
-                height : this.state.descriptionExpanded ? this.descriptionHeight : '45px',
+                height : this.state.descriptionExpanded ? this.descriptionHeight : this.props.initialHeight + 'px',
                 whiteSpace : this.state.descriptionWhiteSpace
             }}>
                 { expandButton }
