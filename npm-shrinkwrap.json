@@ -402,7 +402,7 @@
         },
         "object-assign": {
           "version": "4.1.0",
-          "from": "object-assign@>=4.0.1 <5.0.0",
+          "from": "object-assign@>=4.1.0 <5.0.0",
           "resolved": "https://registry.npmjs.org/object-assign/-/object-assign-4.1.0.tgz"
         }
       }
@@ -540,7 +540,7 @@
       "dependencies": {
         "lodash": {
           "version": "4.16.4",
-          "from": "lodash@>=4.2.1 <5.0.0",
+          "from": "lodash@>=4.2.0 <5.0.0",
           "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.16.4.tgz"
         },
         "lodash-es": {
@@ -600,11 +600,6 @@
       "version": "1.8.3",
       "from": "underscore@>=1.8.3 <2.0.0",
       "resolved": "https://registry.npmjs.org/underscore/-/underscore-1.8.3.tgz"
-    },
-    "whatwg-fetch": {
-      "version": "0.7.0",
-      "from": "git+https://github.com/lrowe/fetch.git#bf5d58b738fb2ed6d60791b944d36075fee8604a",
-      "resolved": "git+https://github.com/lrowe/fetch.git#bf5d58b738fb2ed6d60791b944d36075fee8604a"
     },
     "xhr2": {
       "version": "0.1.3",

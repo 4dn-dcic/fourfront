@@ -20,6 +20,21 @@ describe('Testing home.js', function() {
         _ = require('underscore');
         HomePage = require('../home');
         Wrapper = React.createClass({
+            childContextTypes: {
+                fetch: React.PropTypes.func
+            },
+
+            // Retrieve current React context
+            getChildContext: function() {
+                return {
+                    fetch: this.fetch
+                };
+            },
+
+            fetch: function(url, options) {
+                return null;
+            },
+
             render: function() {
                 return (
                     <div>{this.props.children}</div>

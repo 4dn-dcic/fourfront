@@ -53,7 +53,9 @@ var Login = React.createClass({
                 'Content-Type': 'application/json'}
         })
         .then(data => {
-            localStorage.removeItem("user_actions");
+            if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
+                localStorage.removeItem("user_actions");
+            }
             if(typeof document !== 'undefined'){
                 this.context.navigate('/');
             }
@@ -78,7 +80,9 @@ var Login = React.createClass({
         })
         .then(response => {
             // localStorage only holds strings!
-            localStorage.setItem("user_actions", JSON.stringify(response.user_actions));
+            if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
+                localStorage.setItem("user_actions", JSON.stringify(response.user_actions));
+            }
             this.context.navigate('', {'inPlace':true});
         }, error => {
             console.log("got an error: ", error.description);

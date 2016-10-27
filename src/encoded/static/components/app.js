@@ -239,11 +239,11 @@ var App = React.createClass({
 
     componentDidUpdate: function (prevProps, prevState) {
         // get user actions (a function of log in) from local storage
-        var localActions;
-        if(localStorage.user_actions){
-            localActions = JSON.parse(localStorage.getItem('user_actions'));
-        }else{
-            localActions = [];
+        var localActions = [];
+        if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
+            if(localStorage && localStorage.user_actions){
+                localActions = JSON.parse(localStorage.getItem('user_actions'));
+            }
         }
         if (!_.isEqual(localActions, prevState.user_actions)){
             this.setState({user_actions:localActions});

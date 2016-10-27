@@ -70,13 +70,7 @@ var AccessKeyTable = React.createClass({
     create: function(e) {
         e.preventDefault();
         var item = {};
-        // console.log('__----__');
-        // console.log(this.props.user['@id']);
-        // console.log(this.context.session.user['@id']);
-        // console.log('--____--');
-        // if (this.props.user['@id'] != .user['@id']) {
         item['user'] = this.context.session['auth.userid'];
-        // }
         this.store.create('/access-keys/', item);
     },
 

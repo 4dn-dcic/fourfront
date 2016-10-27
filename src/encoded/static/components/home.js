@@ -35,21 +35,26 @@ var BannerEntry = React.createClass({
     },
 
     updateCount: function(){
-        var request = this.context.fetch(this.props.fetchLoc, {
-            headers: {'Accept': 'application/json',
-                'Content-Type': 'application/json'}
-        })
-        request.then(data => {
-            if(data.total){
-                this.setState({
-                    count: data.total
-                })
-            }else{
-                this.setState({
-                    count: null
-                })
-            }
-        });
+        if(this.context.fetch('/?format=json', {}) !== null){ // for test purposes
+            var request = this.context.fetch(this.props.fetchLoc, {
+                headers: {'Accept': 'application/json',
+                    'Content-Type': 'application/json'}
+            })
+            request.then(data => {
+                if(data.total){
+                    this.setState({
+                        count: data.total
+                    })
+                }else{
+                    this.setState({
+                        count: null
+                    })
+                }
+            });
+        }else{
+            return;
+        }
+
     },
 
     setFacets: function(e){
