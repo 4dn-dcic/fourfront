@@ -127,6 +127,7 @@ var FacetList = module.exports.FacetList = React.createClass({
         },
 
         checkFilledFacets : function(facets){
+            if (!facets.length) return false;
             for (var i; i < facets.length; i++){
                 if (typeof facets[i].total != 'number') return false;
                 if (typeof facets[i].terms == 'undefined') return false;
@@ -163,7 +164,9 @@ var FacetList = module.exports.FacetList = React.createClass({
         ignoredFilters : React.PropTypes.any,   // Passed down to ExpTerm
         urlPath : React.PropTypes.string,       // context['@id'], used to get search param.
         restrictions : React.PropTypes.object,
-        experimentsOrSets : React.PropTypes.string, 
+        experimentsOrSets : React.PropTypes.string,
+        expIncompleteFacets : React.PropTypes.array,
+
 
         context : React.PropTypes.object,       // Unused -ish
         onFilter : React.PropTypes.func,        // Unused
@@ -174,54 +177,76 @@ var FacetList = module.exports.FacetList = React.createClass({
         onChange : React.PropTypes.func         // Unused
     },
 
+    facets : null,
+
     getDefaultProps: function() {
         return {
             orientation: 'vertical',
             restrictions : {},
-            facets : [],
+            facets : null,
             experimentsOrSets : 'sets',
             urlPath : null
         };
     },
 
     getInitialState : function(){
-        return {
-            facetsLoaded : this.props.facets.length ? true : false
+
+        var initState = {
+            usingProvidedFacets : !!(this.props.facets), // Convert to bool
+            facetsLoaded : false
         };
+
+        if (initState.usingProvidedFacets) {
+            this.facets = this.props.facets;
+        } else {
+            this.facets = this.props.expIncompleteFacets || []; // Try to get from Redux store via App props.
+            if (this.facets && this.facets.length > 0) {
+                initState.facetsLoaded = true;
+            }
+        }
+
+        return initState;
     },
 
     componentWillMount : function(){
+
         console.log(
             'Mounting FacetList on ' + (this.props.urlPath || 'unknown page.'),
+            '\nFacets Provided: ' + this.state.usingProvidedFacets,
             'Facets Loaded: ' + this.state.facetsLoaded
         );
-        if (!this.state.facetsLoaded) {
-            // Load list of available facets via AJAX once & reuse.
-            this.loadFacets(() => {
-                FacetList.fillFacetTermsAndCountFromExps(this.props.facets, this.props.experimentSetListJSON);
-                this.setState({ facetsLoaded : true });
-            });
-        } else {
-            FacetList.fillFacetTermsAndCountFromExps(this.props.facets, this.props.experimentSetListJSON);
+
+        if (this.state.usingProvidedFacets === false){
+            if (!this.state.facetsLoaded) {
+                // Load list of available facets via AJAX once & reuse.
+                this.loadFacets(() => {
+                    FacetList.fillFacetTermsAndCountFromExps(this.facets, this.props.experimentSetListJSON);
+                    this.setState({ facetsLoaded : true });
+                });
+            } else {
+                FacetList.fillFacetTermsAndCountFromExps(this.facets, this.props.experimentSetListJSON);
+            }
         }
+
     },
 
     componentWillUnmount : function(){
-        FacetList.resetFacetTermsAndCounts(this.props.facets);
-    },
-
-    componentWillReceiveProps : function(nextProps){
-        // Re-search terms & their counts if new ExperimentSet, don't reload list of possible facets.
-        //if (!FacetList.compareExperimentLists(nextProps.experimentSetListJSON, this.props.experimentSetListJSON)){
-        //     FacetList.resetFacetTermsAndCounts(this.props.facets);
-        //     FacetList.fillFacetTermsAndCountFromExps(this.props.facets, nextProps.experimentSetListJSON);
-        //}
+        if (this.state.usingProvidedFacets === false) {
+            FacetList.resetFacetTermsAndCounts(this.facets);
+        }
     },
 
     loadFacets : function(callback = null){
-        ajaxLoad('/facets?type=Experiment&format=json', function(r){
-            Array.prototype.push.apply(this.props.facets, r);
-            console.log('Loaded Facet List via AJAX');
+        var facetType = (this.props.experimentsOrSets == 'sets' ? 'ExperimentSet' : 'Experiment');
+        ajaxLoad('/facets?type=' + facetType + '&format=json', function(r){
+            this.facets = r;
+            console.log('Loaded Facet List via AJAX.');
+            if (facetType == 'Experiment' && !this.props.expIncompleteFacets){
+                store.dispatch({
+                    type : {'expIncompleteFacets' : this.facets}
+                });
+                console.log('Stored Facet List in Redux store.');
+            }
             if (typeof callback == 'function') callback();
         }.bind(this));
     },
@@ -237,6 +262,14 @@ var FacetList = module.exports.FacetList = React.createClass({
         // store currently selected filters as a dict of sets
         var tempObj = {};
         var newObj = {};
+
+        // standardize on field naming convention for expSetFilters before they hit the redux store.
+        if (this.props.experimentsOrSets == 'experiments') {
+            if (field != 'experimentset_type'){ // ToDo: arrays of expSet- and exp- exclusive fields
+                field = 'experiments_in_set.' + field;
+            }
+        }
+
         var expSet = this.props.expSetFilters[field] ? new Set(this.props.expSetFilters[field]) : new Set();
         if(expSet.has(term)){
             // term is already present, so delete it
@@ -266,7 +299,7 @@ var FacetList = module.exports.FacetList = React.createClass({
 
     render: function() {
 
-        var facets = this.props.facets, // Get all facets, and "normal" facets, meaning non-audit facets
+        var facets = this.facets, // Get all facets, and "normal" facets, meaning non-audit facets
             loggedIn = this.context.session && this.context.session['auth.userid'],
             regularFacets = [],
             exptypeDropdown;
@@ -276,7 +309,9 @@ var FacetList = module.exports.FacetList = React.createClass({
             !facets || 
             (!facets.length && this.props.mode != 'picker') ||
             (!facets[0].terms && this.props.mode != 'picker')
-        ) return <div />;
+        ) {
+            return (<div />);
+        }
 
         // ignore all audit facets for the time being
         var normalFacets = facets.filter(facet => facet.field.substring(0, 6) !== 'audit.');
@@ -387,6 +422,11 @@ var ExpTerm = module.exports.ExpTerm = React.createClass({
         var term = this.state.term;
         var title = this.props.title || term;
         var passSets = 0;
+
+        // Correct field to match that of browse page
+        if (this.props.experimentsOrSets == 'experiments'){
+            field = 'experiments_in_set.' + field;
+        }
 
         // for now, remove facet info on exp numbers
         var termExperiments = siftExperiments(this.props.experimentSetListJSON, this.props.expSetFilters, this.props.ignoredFilters, field, term);

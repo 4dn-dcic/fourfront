@@ -30,6 +30,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         schemas : React.PropTypes.object,
         context : React.PropTypes.object,
         expSetFilters : React.PropTypes.object,     // Set via app.js <ContentView...>
+        expIncompleteFacets : React.PropTypes.array,
         // facets = initially blank, but stored here to be shared between ExperimentsTable & FacetList; MUTABLE
         facets : React.PropTypes.array
     },
@@ -40,7 +41,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
     getDefaultProps : function(){
         return {
-            facets : [] // MUTABLE ARRAY
+            facets : null // MUTABLE ARRAY
         };
     },
 
@@ -182,6 +183,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                             expSetFilters={this.props.expSetFilters}
                             facets={ this.props.facets }
                             experimentsOrSets="experiments"
+                            expIncompleteFacets={ this.props.expIncompleteFacets }
                         />
                     </div>
 

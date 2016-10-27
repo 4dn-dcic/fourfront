@@ -43,7 +43,11 @@ var ItemLoader = React.createClass({
         return (
             <fetched.FetchedData>
                 <fetched.Param name="schemas" url="/profiles/" />
-                <Item context={this.props.context} expSetFilters={this.props.expSetFilters} />
+                <Item
+                    context={this.props.context}
+                    expSetFilters={this.props.expSetFilters}
+                    expIncompleteFacets={this.props.expIncompleteFacets}
+                />
             </fetched.FetchedData>
         );
     }

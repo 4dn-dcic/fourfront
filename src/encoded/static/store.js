@@ -66,6 +66,15 @@ const expSetFilters = function(state={}, action) {
     }
 }
 
+const expIncompleteFacets = function(state=null, action) {
+    if (action.type && _.contains(Object.keys(action.type), 'expIncompleteFacets')){
+        var val = action.type.expIncompleteFacets ? action.type.expIncompleteFacets : state;
+        return val
+    }else{
+        return state
+    }
+}
+
 // Combine Reducers
 const reducers = combineReducers({
   href,
@@ -74,7 +83,8 @@ const reducers = combineReducers({
   session_cookie,
   contextRequest,
   slow,
-  expSetFilters
+  expSetFilters,
+  expIncompleteFacets
 });
 
 const store = module.exports = createStore(reducers);
