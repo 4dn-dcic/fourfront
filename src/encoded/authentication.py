@@ -165,10 +165,8 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
             while resp.status_code == 429:
                 reset_time = datetime.utcfromtimestamp(float(resp.headers['X-RateLimit-Reset']))
                 timeDiff = reset_time - datetime.utcnow()
-                
                 # to many requests... slow down and try again
-                print("to many requests.. waiting a while")
-                #import pdb; pdb.set_trace()
+                print("too many requests.. waiting a while")
                 time.sleep(timeDiff.seconds + 1)
                 resp  = requests.get(user_url)
 
