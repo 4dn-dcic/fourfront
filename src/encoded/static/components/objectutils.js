@@ -14,6 +14,7 @@ var SingleTreatment = module.exports.SingleTreatment = function(treatment) {
 };
 
 var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET', fallback = null, data = null){
+    if (typeof window == 'undefined') return null;
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
@@ -80,7 +81,7 @@ var textContentWidth = module.exports.textContentWidth = function(
     containerClassName = '',
     widthForHeightCheck = null
 ){
-    if (!window || !window.document){
+    if (typeof window == 'undefined' || !window.document){
         return null;
     };
     var contElem = document.createElement(containerElementType);
@@ -111,6 +112,7 @@ var textContentWidth = module.exports.textContentWidth = function(
  * @return {integer}
  */
 var gridContainerWidth = module.exports.gridContainerWidth = function(){
+    if (typeof window == 'undefined') return null;
     // Subtract 20 for padding.
     if (window.innerWidth >= 1200) return 1140;
     if (window.innerWidth >= 992) return 940;
