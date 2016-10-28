@@ -39,21 +39,21 @@ var Fallback = module.exports.Fallback = React.createClass({
 var Item = React.createClass({
     mixins: [AuditMixin],
     contextTypes: {
-    	fetch: React.PropTypes.func,
+        fetch: React.PropTypes.func,
         contentTypeIsJSON: React.PropTypes.func
     },
 
     getInitialState: function(){
         return{
             schemas: null
-        }
+        };
     },
 
     componentDidMount: function(){
         var request = this.context.fetch('/profiles/?format=json', {
             headers: {'Accept': 'application/json',
                 'Content-Type': 'application/json'}
-        })
+        });
         request.then(data => {
             if(this.context.contentTypeIsJSON(data)){
                 this.setState({

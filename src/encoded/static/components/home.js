@@ -15,7 +15,7 @@ Uses fetch to get context necessary to populate banner entry
 
 var BannerEntry = React.createClass({
     contextTypes: {
-    	fetch: React.PropTypes.func
+        fetch: React.PropTypes.func
     },
 
     getInitialState: function(){
@@ -39,7 +39,7 @@ var BannerEntry = React.createClass({
             var request = this.context.fetch(this.props.fetchLoc, {
                 headers: {'Accept': 'application/json',
                     'Content-Type': 'application/json'}
-            })
+            });
             request.then(data => {
                 if(data.total){
                     this.setState({
