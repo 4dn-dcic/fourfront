@@ -14,7 +14,6 @@ var SingleTreatment = module.exports.SingleTreatment = function(treatment) {
 };
 
 var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET', fallback = null, data = null){
-
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
@@ -66,3 +65,55 @@ var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = n
         }
     });
 }
+
+/**
+ * Check width of text or text-like content if it were to fit on one line.
+ * @param {string} textContent - Either text or text-like content, e.g. with span elements.
+ * @param {string} [containerElementType] - Type of element to fit into, e.g. 'div' or 'p'.
+ * @param {string} [containerClassName] - ClassName of containing element, e.g. with 'text-large' to use larger text size.
+ * @param {integer} [widthForHeightCheck] - If provided, will return an object which will return height of text content when constrained to width.
+ * @return {integer|Object} - Width of text if whitespace style set to nowrap, or object containing 'containerHeight' & 'textWidth' if widthForHeightCheck is set.
+ */
+var textContentWidth = module.exports.textContentWidth = function(
+    textContent,
+    containerElementType = 'div',
+    containerClassName = '',
+    widthForHeightCheck = null
+){
+    if (!window || !window.document){
+        return null;
+    };
+    var contElem = document.createElement(containerElementType);
+    contElem.className = "off-screen " + containerClassName;
+    contElem.innerHTML = textContent;
+    contElem.style.whiteSpace = "nowrap";
+    document.body.appendChild(contElem);
+    var textLineWidth = contElem.clientWidth;
+    var fullContainerHeight;
+    if (widthForHeightCheck){
+        contElem.style.whiteSpace = "";
+        contElem.style.display = "block";
+        contElem.style.width = widthForHeightCheck + "px";
+        fullContainerHeight = contElem.clientHeight;
+    }
+    document.body.removeChild(contElem);
+    if (fullContainerHeight) {
+        return { containerHeight : fullContainerHeight, textWidth : textLineWidth };
+    }
+    return textLineWidth;
+}
+
+/**
+ * Get the width of what a 12-column bootstrap section would be in current viewport size.
+ * Keep widths in sync with stylesheet, e.g. $screen-sm-min, $screen-md-min, & $screen-lg-min
+ * in src/encoded/static/scss/bootstrap/_variables.scss.
+ *
+ * @return {integer}
+ */
+var gridContainerWidth = module.exports.gridContainerWidth = function(){
+    // Subtract 20 for padding.
+    if (window.innerWidth >= 1200) return 1140;
+    if (window.innerWidth >= 992) return 940;
+    if (window.innerWidth >= 768) return 720;
+    return window.innerWidth - 20;
+};

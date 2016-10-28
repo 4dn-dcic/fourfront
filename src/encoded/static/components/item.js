@@ -3,13 +3,11 @@ var React = require('react');
 var collection = require('./collection');
 var globals = require('./globals');
 var audit = require('./audit');
-var _ = require('underscore');
 var Panel = require('react-bootstrap').Panel;
 var AuditIndicators = audit.AuditIndicators;
 var AuditDetail = audit.AuditDetail;
 var AuditMixin = audit.AuditMixin;
 var Table = collection.Table;
-var ExperimentSetView = require('./experiment-set-view');
 
 var Fallback = module.exports.Fallback = React.createClass({
     contextTypes: {
@@ -104,7 +102,7 @@ var IPanel = module.exports.IPanel = React.createClass({
     render: function() {
         var schemas = this.props.schemas;
         var context = this.props.context;
-        var itemClass = globals.itemClass(context, 'view-detail panel');
+        //var itemClass = globals.itemClass(context, 'view-detail panel');
         var title = globals.listing_titles.lookup(context)({context: context});
         var sortKeys = Object.keys(context).sort();
         var tips = tipsFromSchema(schemas, context);
@@ -226,7 +224,7 @@ var FetchedRelatedItems = React.createClass({
 });
 
 // **** Deprecated when fetch was removed.
-// 
+//
 // var RelatedItems = module.exports.RelatedItems = React.createClass({
 //     getDefaultProps: function() {
 //         return {limit: 5};
@@ -315,7 +313,7 @@ var Subview = React.createClass({
 });
 
 //Return the properties dictionary from a schema for use as tooltips
-var tipsFromSchema = function(schemas, content){
+var tipsFromSchema = module.exports.tipsFromSchema = function(schemas, content){
     var tips = {};
     if(content['@type']){
         var type = content['@type'][0];
@@ -364,7 +362,7 @@ var formValue = function (schemas, item) {
 
 // Display the item field with a tooltip showing the field description from
 // schema, if available
-var DescriptorField = React.createClass({
+var DescriptorField = module.exports.DescriptorField = React.createClass({
     propTypes: {
         field: React.PropTypes.string.isRequired,
         description: React.PropTypes.string.isRequired

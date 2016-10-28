@@ -1,5 +1,8 @@
 @charset "UTF-8";
 
+/** Setup some variables for colors **/
+$expset-table-border-color : #eee;
+
 #layout {
 	height: auto !important;
     margin: 0 auto -$footerHeight;
@@ -51,6 +54,19 @@ h1.page-title {
 	/* Only set font-weight: 200 for h1,
 	   200 doesn't look as nice on smaller sizes. */
 	font-weight: 200;
+
+	.subtitle {
+		/* Subtitles which are part of the title, e.g. Experiment Set <.subtitle>4324ADADF</.subtitle> */
+		display: inline-block;
+		font-size : 0.875em;
+		margin-left: 5px;
+
+		&.prominent {
+			font-weight: 300;
+		}
+
+	}
+
 }
 
 h1.page-title + .page-subtitle {
@@ -180,24 +196,21 @@ h1.page-title + .page-subtitle {
 	margin-right: -10px;
 }
 
-.text-capitalize {
-	// Same class as Bootstrap (in newer version of it?)
-	text-transform: capitalize;
-}
+.text-capitalize 	{ text-transform: capitalize; } // Same class as Bootstrap (in newer version of it?)
+.text-uppercase 	{ text-transform: uppercase; }
+.text-justify 		{ text-align: justify; }
 
-.text-uppercase {
-	text-transform: uppercase;
-}
-
-.text-justify {
-	text-align: justify;
-}
 
 .text-200 { font-weight: 200; }
 .text-300 { font-weight: 300; }
 .text-400 { font-weight: 400; }
 .text-500 { font-weight: 500; }
 .text-600 { font-weight: 600; }
+
+.text-large { font-size: 17.5px; }
+
+.left { float: left; }
+.right { float: right; }
 
 @media screen and (max-width: 767px){
 
@@ -209,15 +222,31 @@ h1.page-title + .page-subtitle {
 
 }
 
+/** Extending Bootstrap grid to allow blocks to flow right in a row **/
+
+@media screen                           		 { .col-xs-float-right { float : right; } }
+@media screen and (min-width: $screen-sm-min)    { .col-sm-float-right { float : right; } }
+@media screen and (min-width: $screen-md-min)    { .col-md-float-right { float : right; } }
+@media screen and (min-width: $screen-lg-min)    { .col-lg-float-right { float : right; } }
+
+
+.off-screen {
+	position : absolute;
+	left : -9999px;
+}
+
+
+
+
 /***********************************************************
 Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 ************************************************************/
 
 
-@media screen and (min-width: 768px){
+@media screen and (min-width: $screen-sm-min){
 	/* Nudge accession #, etc. closer to title on wide desktop views */
 	.exp-set-header-area {
-		margin-top: -25px;
+		margin-top: -27px;
 	}
 }
 
@@ -242,7 +271,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	}
 }
 
-@media screen and (max-width: 767px){
+@media screen and (max-width: $screen-xs-max){
 
 	.item-label-extra.text-right {
 		// Hackishly making text left-aligned for collapsed mobile view(s)
@@ -251,11 +280,45 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 }
 
-.set-type-indicators {
+.item-page-heading {
+	/* Extending Bootstrap's .flexcol-heading */
+	border-radius: 3px;
+	margin-left: 0;
+	margin-right: 0;
+	box-sizing: border-box;
+	border: 1px solid #e0e0e0;
+	min-height: 42px;
+	padding: 10px 15px 8px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	transition: height .4s;
+
+	h4 {
+		font-weight: 500;
+
+		small {
+			vertical-align: top;
+			line-height: inherit;
+			letter-spacing: normal;
+		}
+	}
+
+	p {
+		overflow: inherit;
+		text-overflow: inherit;
+	}
+
+	p:last-child {
+		margin-bottom: 0;
+	}
+
+}
+
+.indicators {
 
 	margin-top: 8px;
 
-	.experiment-set-type-indicator {
+	.expset-indicator {
 		display: inline-block;
 		box-sizing: border-box;
 		border: 1px solid rgba(0,0,0,0.125);
@@ -267,8 +330,63 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		padding-right: 10px;
 		border-radius: 5px;
 		text-transform: capitalize;
-		color: #fff;
+		color: #444;
 
+		&.right {
+			margin-left: 7px;
+		}
+
+		&.left {
+			margin-right: 7px;
+		}
+
+		&[data-status="released"]{
+			color: #fff;
+			background-color: #308756;
+		}
+
+		&[data-status="current"]{
+			color: #fff;
+			background-color: #56889b;
+		}
+
+		&[data-status="revoked"]{
+			color: #fff;
+			background-color: #812423;
+		}
+
+		&[data-status="deleted"]{
+			color: #fff;
+			background-color: #a90d0b;
+		}
+
+		&[data-status="replaced"]{
+			color: #fff;
+			background-color: #47419a;
+		}
+
+		&[data-status="in review by lab"]{
+			color: #fff;
+			background-color: #47419a;
+		}
+
+		&[data-status="in review by project"]{
+			color: #fff;
+			background-color: #47419a;
+		}
+
+		&[data-status="released to project"]{
+			color: #fff;
+			background-color: #397855;
+		}
+
+		&[data-status="unspecified"]{
+			color: #fff;
+			background-color: #7b7b7b;
+			display: none;
+		}
+
+		/*
 		&[data-set-type="replicates"]{
 			background-color: #56889b;
 		}
@@ -293,31 +411,109 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			background-color: #7b7b7b;
 			display: none;
 		}
+		*/
 	}
 
 }
 
-.item-page-heading {
-	/* Extending Bootstrap's .flexcol-heading */
-	border-radius: 3px;
-	margin-left: 0;
-	margin-right: 0;
-	box-sizing: border-box;
-	border: 1px solid #e0e0e0;
-	min-height: 42px;
 
-	h4 {
+.item-page-container .info-area {
+	margin-top: 19px;
+	/* margin-bottom: 4px; */
+	/*
+	&:after {
+		content : "";
+		display : block;
+		position: relative;
+		border-bottom: 1px solid #ddd;
+		margin: 0 10px;
+	}
+	*/
 
-		font-weight: 500;
+	.info-panel {
+		padding : 4px 10px 12px;
+		/* border-bottom: 1px solid #e2e2e2; */
+		margin-bottom: 5px;
 
-		small {
-			vertical-align: top;
-			line-height: inherit;
-			letter-spacing: normal;
+		> h6 {
+			margin : 0 0 7px /* -3px -> */ -8px;
+			font-weight: 500;
+			color: #646464;
+
+			&:after {
+				content : "\f105";
+				font-family: "FontAwesome";
+				padding-left: 6px;
+			}
+
+		}
+
+		h5 {
+			margin-bottom: 0;
+			margin-top: 2px;
+			font-weight: 600;
+			/* white-space: nowrap; */
+			overflow: hidden;
+			text-overflow: ellipsis;
+
+			a {
+				display: block;
+				overflow: inherit;
+				text-overflow: inherit;
+			}
+
+		}
+
+		div.more-details {
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+
+		.icon-container {
+			text-align: center;
+			padding-top: 4px;
+			font-size: 20px;
+			margin-bottom: -10px;
+			
+			&.col-xs-2 {
+				padding-right: 0px;
+				padding-left: 5px;
+			}
 		}
 
 	}
 
+}
+
+.item-page-container .description-expand-button {
+	border: none;
+    background: none;
+    padding-top: 2px;
+    margin-left: 7px;
+	outline: none;
+}
+
+.exp-table-container {
+	overflow-x: auto;
+	display: block;
+
+	h3 {
+		font-weight: 300;
+		margin: 0;
+		border-top: 1px solid #eee;
+		padding: 18px 0 12px;
+	}
+
+	/*
+	table tbody tr:first-child td {
+		
+		&:nth-child(1),
+		&:nth-child(2) {
+			border-bottom-color: #c0c0c0;
+		}
+	}
+	*/
 }
 
 
@@ -582,17 +778,79 @@ p, input {
 	box-shadow: none !important;
 }
 
+/** Primarily for Browse Table / View **/
+
+.expset-table{
+	border: none !important;
+	> thead > tr > th {
+		border: 1px solid $expset-table-border-color;
+	}
+	> thead > tr > :first-child,
+	> tbody > tr > :first-child {
+		border-left: none;
+	}
+	> thead > tr > :last-child,
+	> tbody > tr > :last-child {
+		border-right: none;
+	}
+	> tbody > tr > td {
+		border: 1px solid $expset-table-border-color;
+		border-left-color : #f4f4f4;
+		border-right-color: #f4f4f4;
+		border-top: none !important;
+		max-width: 160px;
+
+		&.dropdown-button-cell {
+			padding : 0 !important;
+			width : 30px;
+			height: 30px;
+		}
+
+	}
+}
+
+.expset-table > tbody.expset-section.open > tr.expset-table-row > td {
+	border-bottom-color: rgba(0,0,0,0.025);
+
+	&.dropdown-button-cell {
+		border-bottom-color: transparent;
+	}
+}
+
+table tbody.expset-section.closed:last-child td.dropdown-button-cell {
+    border-bottom: 1px solid $expset-table-border-color;
+}
+
 .expset-button.icon-container {
 	width: 24px;
 	height: 24px;
 }
 
+tbody.expset-section td.dropdown-button-cell .expset-button.icon-container {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 0;
+	background-color: transparent;
+
+    &.btn:focus {
+        outline: none;
+        background-color: transparent;
+    }
+
+    &.btn:hover {
+        background-color: $expset-table-border-color;
+    }
+}
+
 .expset-button.icon-container > i.icon {
-	padding-top: 3px;
+	/* Re-enable padding if using a Gizmo or BlackTie Icon
+    padding-top: 3px;
 	padding-left: 1px;
+    */
     display: inline-block;
     vertical-align: middle;
-	font-size: 14px;
+	font-size: 12px;
 	line-height: 20px;
 }
 
@@ -707,26 +965,6 @@ p, input {
 	&:hover, &:active, &:focus {
         color: #000000;
     }
-}
-
-.expset-table{
-	border: none !important;
-	>thead>tr>th{
-		border: 1px solid #eee;
-	}
-	>thead>tr>:first-child,>tbody>tr>:first-child{
-		border-left: none;
-	}
-	>thead>tr>:last-child,>tbody>tr>:last-child{
-		border-right: none;
-	}
-	>tbody>tr>td{
-		border: 1px solid #eee;
-	}
-}
-
-.expset-table-cell{
-	max-width: 160px !important;
 }
 
 .expset-result-table-fix{

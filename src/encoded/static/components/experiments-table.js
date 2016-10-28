@@ -2,6 +2,8 @@ var React = require('react');
 var Table = require('react-bootstrap').Table;
 var Checkbox = require('react-bootstrap').Checkbox;
 var _ = require('underscore');
+var siftExperiments = require('./facetlist').siftExperiments;
+var FacetList = require('./facetlist').FacetList; // Only used for statics.
 
 /**
  * To be used within Experiments Set View/Page, or
@@ -18,8 +20,12 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
     propTypes : {
         columnHeaders : React.PropTypes.array.isRequired,
-        passExperiments : React.PropTypes.instanceOf(Set),
         experimentArray : React.PropTypes.array,
+        passExperiments : React.PropTypes.instanceOf(Set),
+        expSetFilters : React.PropTypes.object,
+        // If include completed 'fileDetailContainer', e.g. as from Browse, then
+        // 'passExperiments', 'expSetFilters', and 'facets' are not needed.
+        fileDetailContainer : React.PropTypes.object,
         parentController : function(props, propName, componentName){
             // Custom validation
             if (props[propName] && 
@@ -37,8 +43,20 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         };
     },
 
+    fileDetailContainer : null,
+
+    componentWillMount : function(){
+        // Cache output for faster re-rendering (?)
+        this.fileDetailContainer = this.getFileDetailContainer();
+    },
+
+    componentWillUpdate : function(nextProps, nextState){
+        this.fileDetailContainer = this.getFileDetailContainer(nextProps);
+    },
+
     handleFileUpdate: function (uuid, add=true){
-        var newSet = this.state.selectedFiles;
+        
+        var newSet = this.props.parentController ? this.props.parentController.state.selectedFiles : this.state.selectedFiles;
         
         if(add){
             if(!newSet.has(uuid)){
@@ -61,17 +79,32 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         
     },
 
-    getFileDetailContainer : function(){
+    getFileDetailContainer : function(props = this.props){
         // Re-use if passed in by a parent as a prop, 
         // otherwise generate from experimentArray & passExperiments props.
-        if (this.props.fileDetailContainer) return this.props.fileDetailContainer; 
-        return getFileDetailContainer(this.props.experimentArray, this.props.passExperiments);
+
+        if (props.fileDetailContainer) {
+            // If filtering of results is done in parent component.
+            return props.fileDetailContainer; 
+        }
+
+        var passExperiments = props.passExperiments,
+            ignoredFilters = null;
+
+
+        if (!passExperiments && props.expSetFilters) {
+            if (props.facets && props.facets.length > 0) {
+                ignoredFilters = FacetList.findIgnoredFilters(props.facets, props.expSetFilters);
+            }
+            passExperiments = siftExperiments(props.experimentArray, props.expSetFilters, ignoredFilters);
+        }
+        
+        return getFileDetailContainer(props.experimentArray, passExperiments);
     },
 
     render : function(){
-        var fileDetailContainer = this.getFileDetailContainer();
-        var fileDetail = fileDetailContainer.fileDetail;
-        var emptyExps = fileDetailContainer.emptyExps;
+        var fileDetail = this.fileDetailContainer.fileDetail;
+        var emptyExps = this.fileDetailContainer.emptyExps;
 
         var formattedColumnHeaders = this.props.columnHeaders.map(function(columnTitle, i){
             return <th className="text-500" key={i}>{ columnTitle }</th>;
@@ -86,15 +119,42 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             checked = this.state.checked;
         }
 
+        var expsWithFileCounts = {};
         var childFileEntryRows = Object.keys(fileDetail).map(function (file) {
+
+            // Check how many file entries have same exp. accession.
+            // To allow to set rowSpan multiple where exp accession is same between files.
+            if (!expsWithFileCounts[file]) {
+                var skip = false;
+                // Allow only 1 file to have incremented count (for incr. rowspan)
+                Object.keys(expsWithFileCounts).forEach(function(file2){
+                    if (expsWithFileCounts[file2].exp == fileDetail[file]['@id']) { 
+                        skip = true;
+                        return;
+                    }
+                });
+                expsWithFileCounts[file] = { 
+                    'exp' : fileDetail[file]['@id'],
+                    'count' : 0,
+                    'skip' : skip
+                };
+
+            }
+            Object.keys(fileDetail).forEach(function(file2){
+                if (expsWithFileCounts[file].exp == fileDetail[file2]['@id']) { 
+                    if (!expsWithFileCounts[file].skip) expsWithFileCounts[file].count++;
+                }
+            });
+
             return (
                 <FileEntry 
-                    expSetFilters={this.props.expSetFilters} 
+                    expSetFilters={this.props.expSetFilters || null} 
                     info={fileDetail[file]} 
                     key={fileDetail[file]['uuid'] + file} 
                     parentChecked={checked} 
                     handleFileUpdate={this.handleFileUpdate}
                     columnHeaders={this.props.columnHeaders}
+                    experimentAccessionEntrySpan={expsWithFileCounts[file].count}
                 />
             );
         }.bind(this));
@@ -120,15 +180,19 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
 /**
  * Returns an object containing fileDetail and emptyExps.
+ * 
+ * @param {Object[]} experimentArray - Array of experiments in set. Required.
+ * @param {Set} [passedExperiments=null] - Set of experiments which match filter(s).
+ * @return {Object} JS object containing two keys with arrays: 'fileDetail' of experiments with formatted details and 'emptyExps' with experiments with no files.
  */
 
-var getFileDetailContainer = module.exports.getFileDetailContainer = function(experimentArray, passedExperiments){
+var getFileDetailContainer = module.exports.getFileDetailContainer = function(experimentArray, passedExperiments = null){
 
     var fileDetail = {}; //use @id field as key
     var emptyExps = [];
 
     for (var i=0; i<experimentArray.length; i++){
-        if(passedExperiments.has(experimentArray[i])){
+        if(passedExperiments == null || passedExperiments.has(experimentArray[i])){
             var tempFiles = [];
             var biosample_accession = experimentArray[i].biosample ? experimentArray[i].biosample.accession : null;
             var biosample_id = biosample_accession ? experimentArray[i].biosample['@id'] : null;
@@ -209,18 +273,29 @@ var FileEntry = React.createClass({
 
     getInitialState: function() {
         return {
-            checked: true
+            checked: this.props.parentChecked
         };
     },
 
-    // initial checkbox setting
+    getDefaultProps : function(){
+        return {
+            experimentAccessionEntrySpan : 1
+        };
+    },
+
+    // initial checkbox setting if parent is checked
     componentWillMount: function(){
         // if(this.props.exptPassed && _.contains(this.props.filteredFiles, this.props.file.uuid)){
         //     this.setState({
         //         checked: true
         //     });
         // }
-        if(this.props.info.data){
+        if(
+            this.props.info.data &&
+            this.props.info.data['@id'] &&
+            this.state.checked &&
+            typeof this.props.handleFileUpdate == 'function'
+        ){
             this.props.handleFileUpdate(this.props.info.data.uuid, true);
         }
     },
@@ -234,6 +309,7 @@ var FileEntry = React.createClass({
         //         });
         //     }
         // }
+
         if(this.props.parentChecked !== nextProps.parentChecked){
             this.setState({
                 checked: nextProps.parentChecked
@@ -242,9 +318,13 @@ var FileEntry = React.createClass({
     },
 
     // update parent checked state
-    componentDidUpdate(nextProps, nextState){
-        if((nextState.checked !== this.state.checked || !_.isEqual(this.props.expSetFilters, nextProps.expSetFilters)) && this.props.info.data){
-            this.props.handleFileUpdate(this.props.info.data.uuid, this.state.checked);
+    componentWillUpdate(nextProps, nextState){
+        if(
+            (nextState.checked !== this.state.checked || this.props.expSetFilters !== nextProps.expSetFilters) &&
+            nextProps.info.data &&
+            nextProps.info.data['@id']
+        ){
+            this.props.handleFileUpdate(nextProps.info.data.uuid, nextState.checked);
         }
     },
 
@@ -330,13 +410,13 @@ var FileEntry = React.createClass({
     },
 
     render: function(){
-        var file = this.props.info.data ? this.props.info.data : null;
         var info = this.props.info;
-        var relationship = this.props.info.related ? this.props.info.related : null;
-        var relatedFile;
+        var file = info.data ? info.data : null;
+        var relationship = info.related ? info.related : null;
+        var relatedFile = null;
 
-        if(relationship){
-            relatedFile = this.props.info.related.data ? this.props.info.related.data : null;
+        if(relationship && relationship.data){
+            relatedFile = relationship.data;
         }
 
         var fileInfo = this.fastQFilePairRow(file, relatedFile); 
@@ -345,25 +425,36 @@ var FileEntry = React.createClass({
         var fileOne = fileInfo.fileOne;
         var fileTwo = fileInfo.fileTwo;
         var fileID  = fileInfo.fileID; 
+        var experimentAccessionCell = null;
+
+        // Will need to separate out <tbody> before rowSpan will work correctly
+        //if (this.props.experimentAccessionEntrySpan > 0){
+            experimentAccessionCell = (
+                <td rowSpan={2/* * this.props.experimentAccessionEntrySpan */} className="expset-exp-cell expset-exp-accession-title-cell">
+                    <a href={
+                        info['@id']  ? info['@id'] :
+                        info['accession'] ? '/experiments/' + info['accession'] :
+                        '#'
+                    }>
+                        {info.accession || info.uuid}
+                    </a>
+                </td>
+            );
+        //}
         
         return(
             <tbody>
                 <tr className='expset-sublist-entry'>
-                    {file['@id'] ?
+                    { file['@id'] ?
                         <td rowSpan="2" className="expset-exp-cell expset-checkbox-cell">
                             <Checkbox validationState='warning' checked={this.state.checked} name="file-checkbox" id={fileID} className='expset-checkbox-sub' onChange={this.handleCheck}/>
                         </td>
-                    : <td rowSpan="2"></td>
+                    : 
+                        <td rowSpan="2" className="expset-exp-cell expset-checkbox-cell">
+                            <Checkbox checked={false} disabled={true} className='expset-checkbox-sub' />
+                        </td>
                     }
-                    <td rowSpan="2" className="expset-exp-cell expset-exp-accession-title-cell">
-                        <a href={
-                            info['@id']  ? info['@id'] :
-                            info['accession'] ? '/experiments/' + info['accession'] :
-                            '#'
-                        }>
-                            {info.accession || info.uuid}
-                        </a>
-                    </td>
+                    { experimentAccessionCell }
                     <td rowSpan="2" className="expset-exp-cell">
                         <a href={info.biosample_id || ''}>
                             {info.biosample}
