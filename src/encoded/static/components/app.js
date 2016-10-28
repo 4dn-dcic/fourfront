@@ -259,7 +259,13 @@ var App = React.createClass({
         }else if (context) {
             var ContentView = globals.content_views.lookup(context, current_action);
             if (ContentView){
-                content = <ContentView context={context} expSetFilters={this.props.expSetFilters}/>;
+                content = (
+                    <ContentView
+                        context={context}
+                        expSetFilters={this.props.expSetFilters}
+                        expIncompleteFacets={this.props.expIncompleteFacets}
+                    />
+                );
                 title = context.title || context.name || context.accession || context['@id'];
                 if (title && title != 'Home') {
                     title = title + ' – ' + portal.portal_title;
