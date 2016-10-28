@@ -3,6 +3,11 @@ import requests
 import json
 from snovault import (collection, load_schema)
 from .base import Item
+from html.parser import HTMLParser
+
+################################################
+# Outside methods for online data fetch
+################################################
 
 
 def fetch_pubmed(PMID):
@@ -36,23 +41,43 @@ def fetch_pubmed(PMID):
     return title, abstract, authors, url
 
 
+class BioRxivExtractor(HTMLParser):
+    def __init__(self):
+        HTMLParser.__init__(self)
+        self.title = ''
+        self.abstract = ''
+        self.author_list = []
+        self.authors = ''
+
+    def handle_starttag(self, tag, attrs):
+        attr = ''
+        if tag == 'meta':
+            attr = {k[0]: k[1] for k in attrs}
+            if attr.get('name') == "DC.Title":
+                self.title = attr.get('content')
+            if attr.get('name') == "DC.Description":
+                self.abstract = attr.get('content')
+            if attr.get('name') == "DC.Contributor":
+                self.author_list.append(attr.get('content'))
+
+
 def fetch_biorxiv(url):
+    """Takes Url, uses the BioRxivExtractor class and returns title abstract authors url"""
     title = ''
     abstract = ''
     authors = ''
     r = requests.get(url)
     resp = r.text.encode('utf-8').decode('ascii', 'ignore')
-    soup = BeautifulSoup(resp, "html.parser")
-
-    title = soup.find_all('meta', {'name': "DC.Title"})[0]['content']
-    abstract = soup.find_all('meta', {'name': "DC.Description"})[0]['content']
-    authors = ", ".join([i['content']for i in soup.find_all('meta', {'name': "DC.Contributor"})])
-
+    parser = BioRxivExtractor()
+    parser.feed(resp)
+    title = parser.title
+    abstract = parser.abstract
+    authors = ", ".join(parser.author_list)
     return title, abstract, authors, url
 
 
 def map_doi_pmid(doi):
-    "if a doi is given, checks if it maps to pmid"
+    """If a doi is given, checks if it maps to pmid"""
     NIHid = "https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/"
     www = "{NIH}?ids={id}&versions=no&format=json".format(NIH=NIHid, id=doi)
     r = requests.get(www).text
@@ -72,6 +97,10 @@ def map_doi_biox(doi):
         return landing_page
     else:
         return
+
+################################################
+# Outside methods for online data fetch
+################################################
 
 
 @collection(
