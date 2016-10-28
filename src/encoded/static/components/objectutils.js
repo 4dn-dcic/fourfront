@@ -81,7 +81,7 @@ var textContentWidth = module.exports.textContentWidth = function(
     containerClassName = '',
     widthForHeightCheck = null
 ){
-    if (typeof window == 'undefined' || !window.document){
+    if (typeof window == 'undefined' || !window || !window.document){
         return null;
     };
     var contElem = document.createElement(containerElementType);
