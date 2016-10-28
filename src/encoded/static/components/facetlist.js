@@ -222,7 +222,7 @@ var FacetList = module.exports.FacetList = React.createClass({
             'Facets Loaded: ' + this.state.facetsLoaded
         );
 
-        if (this.state.usingProvidedFacets === false && !this.state.facetsLoaded){
+        if (this.state.usingProvidedFacets === false && !this.state.facetsLoaded && typeof window !== 'undefined'){
             // Load list of available facets via AJAX once & reuse.
             this.loadFacets(() => {
                 FacetList.fillFacetTermsAndCountFromExps(this.facets, this.props.experimentSetListJSON);
