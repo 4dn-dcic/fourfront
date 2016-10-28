@@ -209,24 +209,25 @@ var FacetList = module.exports.FacetList = React.createClass({
     },
 
     componentWillMount : function(){
+        if (this.state.usingProvidedFacets === false && this.state.facetsLoaded){
+            FacetList.fillFacetTermsAndCountFromExps(this.facets, this.props.experimentSetListJSON);
+        }
+    },
+
+    componentDidMount : function(){
+        if (this.state.usingProvidedFacets === false && !this.state.facetsLoaded){
+            // Load list of available facets via AJAX once & reuse.
+            this.loadFacets(() => {
+                FacetList.fillFacetTermsAndCountFromExps(this.facets, this.props.experimentSetListJSON);
+                this.setState({ facetsLoaded : true });
+            });
+        }
 
         console.log(
-            'Mounting FacetList on ' + (this.props.urlPath || 'unknown page.'),
+            'Mounted FacetList on ' + (this.props.urlPath || 'unknown page.'),
             '\nFacets Provided: ' + this.state.usingProvidedFacets,
             'Facets Loaded: ' + this.state.facetsLoaded
         );
-
-        if (this.state.usingProvidedFacets === false){
-            if (!this.state.facetsLoaded) {
-                // Load list of available facets via AJAX once & reuse.
-                this.loadFacets(() => {
-                    FacetList.fillFacetTermsAndCountFromExps(this.facets, this.props.experimentSetListJSON);
-                    this.setState({ facetsLoaded : true });
-                });
-            } else {
-                FacetList.fillFacetTermsAndCountFromExps(this.facets, this.props.experimentSetListJSON);
-            }
-        }
 
     },
 

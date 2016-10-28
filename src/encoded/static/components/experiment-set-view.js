@@ -363,10 +363,6 @@ var ExperimentSetHeaderBar = React.createClass({
         return false;
     },
 
-    componentWillMount : function(){
-        
-    },
-
     componentDidMount : function(){
         var debouncedStateChange = _.debounce(() => {
             // Debounce to prevent from executing more than once every 300ms.
