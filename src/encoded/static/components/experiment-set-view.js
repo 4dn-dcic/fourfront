@@ -364,9 +364,7 @@ var ExperimentSetHeaderBar = React.createClass({
     },
 
     componentWillMount : function(){
-        this.setState({
-            descriptionWillFitOneLine : this.checkWillDescriptionFitOneLineAndUpdateHeight()
-        });
+        
     },
 
     componentDidMount : function(){
@@ -384,6 +382,10 @@ var ExperimentSetHeaderBar = React.createClass({
                 }
             }, 0);
         }, 300, false);
+
+        this.setState({
+            descriptionWillFitOneLine : this.checkWillDescriptionFitOneLineAndUpdateHeight()
+        });
 
         window.addEventListener('resize', debouncedStateChange);
     },
