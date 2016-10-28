@@ -14,7 +14,6 @@ require('./objectutils');
 require('./facetlist');
 require('./experiment-set-view');
 require('./user');
-require('./mixins');
 require('./statuslabel');
 require('./navigation');
 require('./inputs');

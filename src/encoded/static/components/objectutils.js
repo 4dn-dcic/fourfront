@@ -13,8 +13,8 @@ var SingleTreatment = module.exports.SingleTreatment = function(treatment) {
     return treatmentText;
 };
 
-var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET'){
-
+var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET', fallback = null, data = null){
+    if (typeof window == 'undefined') return null;
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
@@ -24,15 +24,47 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET')
                 }
             } else if (xmlhttp.status == 400) {
                 console.error('There was an error 400');
+                if (typeof fallback == 'function'){
+                    fallback();
+                }
             } else {
                 console.error('something else other than 200 was returned');
+                if (typeof fallback == 'function'){
+                    fallback();
+                }
             }
         }
     };
-
     xmlhttp.open(method, url, true);
-    xmlhttp.send();
+    xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    console.log('___DATA___',data);
+    if(data){
+        xmlhttp.send(data);
+    }else{
+        xmlhttp.send();
+    }
+}
 
+var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = null, data = null){
+    return new Promise(function(resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        xhr.onload = function() {
+            // response SHOULD be json
+            resolve(JSON.parse(xhr.responseText));
+        };
+        xhr.onerror = reject;
+        xhr.open(method, url, true);
+        if(headers){
+            for(var i=0; i<Object.keys(headers).length; i++){
+                xhr.setRequestHeader(Object.keys(headers)[i], headers[Object.keys(headers)[i]]);
+            }
+        }
+        if(data){
+            xhr.send(data);
+        }else{
+            xhr.send();
+        }
+    });
 }
 
 /**
@@ -44,12 +76,12 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET')
  * @return {integer|Object} - Width of text if whitespace style set to nowrap, or object containing 'containerHeight' & 'textWidth' if widthForHeightCheck is set.
  */
 var textContentWidth = module.exports.textContentWidth = function(
-    textContent, 
-    containerElementType = 'div', 
+    textContent,
+    containerElementType = 'div',
     containerClassName = '',
     widthForHeightCheck = null
 ){
-    if (!window || !window.document){
+    if (typeof window == 'undefined' || !window.document){
         return null;
     };
     var contElem = document.createElement(containerElementType);
@@ -76,10 +108,11 @@ var textContentWidth = module.exports.textContentWidth = function(
  * Get the width of what a 12-column bootstrap section would be in current viewport size.
  * Keep widths in sync with stylesheet, e.g. $screen-sm-min, $screen-md-min, & $screen-lg-min
  * in src/encoded/static/scss/bootstrap/_variables.scss.
- * 
+ *
  * @return {integer}
  */
 var gridContainerWidth = module.exports.gridContainerWidth = function(){
+    if (typeof window == 'undefined') return null;
     // Subtract 20 for padding.
     if (window.innerWidth >= 1200) return 1140;
     if (window.innerWidth >= 992) return 940;

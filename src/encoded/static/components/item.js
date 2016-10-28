@@ -1,7 +1,6 @@
 'use strict';
 var React = require('react');
 var collection = require('./collection');
-var fetched = require('./fetched');
 var globals = require('./globals');
 var audit = require('./audit');
 var Panel = require('react-bootstrap').Panel;
@@ -37,28 +36,42 @@ var Fallback = module.exports.Fallback = React.createClass({
     }
 });
 
-var ItemLoader = React.createClass({
-    mixins: [AuditMixin],
-    render: function() {
-        return (
-            <fetched.FetchedData>
-                <fetched.Param name="schemas" url="/profiles/" />
-                <Item
-                    context={this.props.context}
-                    expSetFilters={this.props.expSetFilters}
-                    expIncompleteFacets={this.props.expIncompleteFacets}
-                />
-            </fetched.FetchedData>
-        );
-    }
-});
-
 var Item = React.createClass({
+    mixins: [AuditMixin],
+    contextTypes: {
+        fetch: React.PropTypes.func,
+        contentTypeIsJSON: React.PropTypes.func
+    },
+
+    getInitialState: function(){
+        return{
+            schemas: null
+        };
+    },
+
+    componentDidMount: function(){
+        var request = this.context.fetch('/profiles/?format=json', {
+            headers: {'Accept': 'application/json',
+                'Content-Type': 'application/json'}
+        });
+        request.then(data => {
+            if(this.context.contentTypeIsJSON(data)){
+                this.setState({
+                    schemas: data
+                })
+            }else{
+                this.setState({
+                    schemas: {}
+                })
+            }
+        });
+    },
+
     render: function() {
         var context = this.props.context;
         var itemClass = globals.itemClass(context, 'view-item');
         var IPanel = globals.panel_views.lookup(context);
-
+        var schemas = this.state.schemas ? this.state.schemas : {};
         // Make string of alternate accessions
         return (
             <div className={itemClass}>
@@ -70,13 +83,13 @@ var Item = React.createClass({
                     </div>
                 </header>
                 <AuditDetail context={context} key="biosample-audit" />
-                <IPanel {...this.props}/>
+                <IPanel {...this.props} schemas={schemas}/>
             </div>
         );
     }
 });
 
-globals.content_views.register(ItemLoader, 'Item');
+globals.content_views.register(Item, 'Item');
 
 
 // Also use this view as a fallback for anything we haven't registered
@@ -210,24 +223,25 @@ var FetchedRelatedItems = React.createClass({
 
 });
 
-
-var RelatedItems = module.exports.RelatedItems = React.createClass({
-    getDefaultProps: function() {
-        return {limit: 5};
-    },
-
-    render: function() {
-        var url = this.props.url + '&status!=deleted&status!=revoked&status!=replaced';
-        var limited_url = url + '&limit=' + this.props.limit;
-        var unlimited_url = url + '&limit=all';
-        return (
-            <fetched.FetchedData>
-                <fetched.Param name="context" url={limited_url} />
-                <FetchedRelatedItems {...this.props} url={unlimited_url} />
-            </fetched.FetchedData>
-        );
-    },
-});
+// **** Deprecated when fetch was removed.
+//
+// var RelatedItems = module.exports.RelatedItems = React.createClass({
+//     getDefaultProps: function() {
+//         return {limit: 5};
+//     },
+//
+//     render: function() {
+//         var url = this.props.url + '&status!=deleted&status!=revoked&status!=replaced';
+//         var limited_url = url + '&limit=' + this.props.limit;
+//         var unlimited_url = url + '&limit=all';
+//         return (
+//             <fetched.FetchedData>
+//                 <fetched.Param name="context" url={limited_url} />
+//                 <FetchedRelatedItems {...this.props} url={unlimited_url} />
+//             </fetched.FetchedData>
+//         );
+//     },
+// });
 
 // ******* Refined item.js code below... *******
 

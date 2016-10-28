@@ -348,11 +348,16 @@ var ExperimentSetHeaderBar = React.createClass({
     checkWillDescriptionFitOneLineAndUpdateHeight : function(){
         
         var containerWidth = gridContainerWidth() - this.props.totalPaddingWidth; // Account for inner padding & border.
-        var { textWidth, containerHeight } = textContentWidth(this.props.description, 'p', 'text-large', containerWidth - this.props.expandButtonWidth); // Account for expand button.
+        
+        var tcw = textContentWidth(this.props.description, 'p', 'text-large', containerWidth - this.props.expandButtonWidth); // Account for expand button.
 
-        this.descriptionHeight = containerHeight + this.props.totalPaddingHeight; // Account for padding, border.
+        if (!tcw) {
+            return true;
+        }
 
-        if ( textWidth < containerWidth ){ 
+        this.descriptionHeight = tcw.containerHeight + this.props.totalPaddingHeight; // Account for padding, border.
+
+        if ( tcw.textWidth < containerWidth ){ 
             return true;
         }
         return false;

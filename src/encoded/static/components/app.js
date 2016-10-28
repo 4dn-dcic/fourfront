@@ -2,7 +2,6 @@
 var React = require('react');
 var jsonScriptEscape = require('../libs/jsonScriptEscape');
 var globals = require('./globals');
-var mixins = require('./mixins');
 var HomePage = require('./home');
 var ErrorPage = require('./error');
 var Navigation = require('./navigation');
@@ -13,8 +12,11 @@ var url = require('url');
 var _ = require('underscore');
 var store = require('../store');
 var browse = require('./browse');
-
-//sid is to allow addition of supplementary ids to navbar link headings
+var origin = require('../libs/origin');
+var serialize = require('form-serialize');
+var ajaxLoad = require('./objectutils').ajaxLoad;
+var ajaxPromise = require('./objectutils').ajaxPromise;
+var dispatch_dict = {}; //used to store value for simultaneous dispatch
 
 var portal = {
     portal_title: '4DN Data Portal',
@@ -49,23 +51,27 @@ var Title = React.createClass({
     }
 });
 
+class Timeout {
+    constructor(timeout) {
+        this.promise = new Promise(resolve => setTimeout(resolve.bind(undefined, this), timeout));
+    }
+}
+
 
 // App is the root component, mounted on document.body.
 // It lives for the entire duration the page is loaded.
 // App maintains state for the
 var App = React.createClass({
-    mixins: [mixins.Auth0, mixins.HistoryAndTriggers],
-    triggers: {
-        login: 'triggerLogin',
-        profile: 'triggerProfile',
-        logout: 'triggerLogout'
-    },
+    SLOW_REQUEST_TIME: 250,
+    historyEnabled: !!(typeof window != 'undefined' && window.history && window.history.pushState),
 
     getInitialState: function() {
         return {
             errors: [],
             dropdownComponent: undefined,
-            content: undefined
+            content: undefined,
+            session: {},
+            user_actions: []
         };
     },
 
@@ -77,7 +83,11 @@ var App = React.createClass({
         location_href: React.PropTypes.string,
         onDropdownChange: React.PropTypes.func,
         portal: React.PropTypes.object,
-        hidePublicAudits: React.PropTypes.bool
+        hidePublicAudits: React.PropTypes.bool,
+        fetch: React.PropTypes.func,
+        session: React.PropTypes.object,
+        navigate: React.PropTypes.func,
+        contentTypeIsJSON: React.PropTypes.func
     },
 
     // Retrieve current React context
@@ -89,7 +99,11 @@ var App = React.createClass({
             location_href: this.props.href,
             onDropdownChange: this.handleDropdownChange, // Function to process dropdown state change
             portal: portal,
-            hidePublicAudits: true // True if audits should be hidden on the UI while logged out
+            hidePublicAudits: true, // True if audits should be hidden on the UI while logged out
+            fetch: this.fetch,
+            session: this.state.session,
+            navigate: this.navigate,
+            contentTypeIsJSON: this.contentTypeIsJSON
         };
     },
 
@@ -117,7 +131,7 @@ var App = React.createClass({
             return portal.user_section;
         }
         if (category === 'user') {
-            return this.state.session_properties.user_actions || [];
+            return this.state.user_actions || [];
         }
         if (category === 'global_sections') {
             return portal.global_sections;
@@ -182,6 +196,401 @@ var App = React.createClass({
     // Once the app component is mounted, bind keydowns to handleKey function
     componentDidMount: function() {
         globals.bindEvent(window, 'keydown', this.handleKey);
+        var session_cookie = this.extractSessionCookie();
+        var session = this.parseSessionCookie(session_cookie);
+        var query_href;
+        if(document.querySelector('link[rel="canonical"]')){
+            query_href = document.querySelector('link[rel="canonical"]').getAttribute('href');
+        }else{
+            query_href = this.props.href;
+        }
+        this.setState({session: session});
+        store.dispatch({
+            type: {'href':query_href, 'session_cookie': session_cookie}
+        });
+        if (this.historyEnabled) {
+            var data = this.props.context;
+            try {
+                window.history.replaceState(data, '', window.location.href);
+            } catch (exc) {
+                // Might fail due to too large data
+                window.history.replaceState(null, '', window.location.href);
+            }
+            // Avoid popState on load, see: http://stackoverflow.com/q/6421769/199100
+            var register = window.addEventListener.bind(window, 'popstate', this.handlePopState, true);
+            if (window._onload_event_fired) {
+                register();
+            } else {
+                window.addEventListener('load', setTimeout.bind(window, register));
+            }
+        } else {
+            window.onhashchange = this.onHashChange;
+        }
+        window.onbeforeunload = this.handleBeforeUnload;
+    },
+
+    componentWillReceiveProps: function (nextProps) {
+        if (!this.state.session || (this.props.session_cookie !== nextProps.session_cookie)) {
+            var nextState = {};
+            nextState.session = this.parseSessionCookie(nextProps.session_cookie);
+            this.setState(nextState);
+        }
+    },
+
+    componentDidUpdate: function (prevProps, prevState) {
+        // get user actions (a function of log in) from local storage
+        var localActions = [];
+        if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
+            if(localStorage && localStorage.user_actions){
+                localActions = JSON.parse(localStorage.getItem('user_actions'));
+            }
+        }
+        if (!_.isEqual(localActions, prevState.user_actions)){
+            this.setState({user_actions:localActions});
+        }
+        var key;
+        if (this.props) {
+            for (key in this.props) {
+                if (this.props[key] !== prevProps[key]) {
+                    console.log('changed props: %s', key);
+                }
+            }
+        }
+        if (this.state) {
+            for (key in this.state) {
+                if (this.state[key] !== prevState[key]) {
+                    console.log('changed state: %s', key, this.state[key]);
+                }
+            }
+        }
+    },
+
+    // functions previously in persona, mixins.js
+    fetch: function (url, options) {
+        options = _.extend({credentials: 'same-origin'}, options);
+        var http_method = options.method || 'GET';
+        var headers = options.headers = _.extend({}, options.headers);
+        // TODO: add JWT here
+        // Strip url fragment.
+        var url_hash = url.indexOf('#');
+        if (url_hash > -1) {
+            url = url.slice(0, url_hash);
+        }
+        var data = options.body ? options.body : null;
+        var request = ajaxPromise(url, http_method, headers, data);
+        request.xhr_begin = 1 * new Date();
+        request.then(response => {
+            request.xhr_end = 1 * new Date();
+            var session_cookie = this.extractSessionCookie();
+            if (this.props.session_cookie !== session_cookie) {
+                store.dispatch({
+                    type: {'session_cookie': session_cookie}
+                });
+            }
+        });
+        return request;
+    },
+
+    extractSessionCookie: function () {
+        var cookie = require('cookie-monster');
+        if (cookie(document).get('session')){
+            return cookie(document).get('session');
+        }else{
+            return this.props.session_cookie;
+        }
+
+    },
+
+    parseSessionCookie: function (session_cookie) {
+        var Buffer = require('buffer').Buffer;
+        var session;
+        if (session_cookie) {
+            // URL-safe base64
+            session_cookie = session_cookie.replace(/\-/g, '+').replace(/\_/g, '/');
+            // First 64 chars is the sha-512 server signature
+            // Payload is [accessed, created, data]
+            try {
+                session = JSON.parse(Buffer(session_cookie, 'base64').slice(64).toString())[2];
+            } catch (e) {
+            }
+        }
+        return session || {};
+    },
+
+    // functions previously in navigate, mixins.js
+    onHashChange: function (event) {
+        // IE8/9
+        store.dispatch({
+            type: {'href':document.querySelector('link[rel="canonical"]').getAttribute('href')}
+        });
+    },
+
+    handleClick: function(event) {
+        // https://github.com/facebook/react/issues/1691
+        if (event.isDefaultPrevented()) return;
+
+        var target = event.target;
+        var nativeEvent = event.nativeEvent;
+
+        // SVG anchor elements have tagName == 'a' while HTML anchor elements have tagName == 'A'
+        while (target && (target.tagName.toLowerCase() != 'a' || target.getAttribute('data-href'))) {
+            target = target.parentElement;
+        }
+        if (!target) return;
+
+        if (target.getAttribute('disabled')) {
+            event.preventDefault();
+            return;
+        }
+
+        // Ensure this is a plain click
+        if (nativeEvent.which > 1 || nativeEvent.shiftKey || nativeEvent.altKey || nativeEvent.metaKey) return;
+
+        // Skip links with a data-bypass attribute.
+        if (target.getAttribute('data-bypass')) return;
+
+        var href = target.getAttribute('href');
+        if (href === null) href = target.getAttribute('data-href');
+        if (href === null) return;
+
+        // Skip javascript links
+        if (href.indexOf('javascript:') === 0) return;
+
+        // Skip external links
+        if (!origin.same(href)) return;
+
+        // Skip links with a different target
+        if (target.getAttribute('target')) return;
+
+        // Skip @@download links
+        if (href.indexOf('/@@download') != -1) return;
+
+        // With HTML5 history supported, local navigation is passed
+        // through the navigate method.
+        if (this.historyEnabled) {
+            event.preventDefault();
+            this.navigate(href);
+        }
+    },
+
+    // Submitted forms are treated the same as links
+    handleSubmit: function(event) {
+        var target = event.target;
+
+        // Skip POST forms
+        if (target.method != 'get') return;
+
+        // Skip forms with a data-bypass attribute.
+        if (target.getAttribute('data-bypass')) return;
+
+        // Skip external forms
+        if (!origin.same(target.action)) return;
+
+        var options = {};
+        var action_url = url.parse(url.resolve(this.props.href, target.action));
+        options.replace = action_url.pathname == url.parse(this.props.href).pathname;
+        var search = serialize(target);
+        if (target.getAttribute('data-removeempty')) {
+            search = search.split('&').filter(function (item) {
+                return item.slice(-1) != '=';
+            }).join('&');
+        }
+        var href = action_url.pathname;
+        if (search) {
+            href += '?' + search;
+        }
+        options.skipRequest = target.getAttribute('data-skiprequest');
+
+        if (this.historyEnabled) {
+            event.preventDefault();
+            this.navigate(href, options);
+        }
+    },
+
+    handlePopState: function (event) {
+        if (this.DISABLE_POPSTATE) return;
+        if (!this.confirmNavigation()) {
+            window.history.pushState(window.state, '', this.props.href);
+            return;
+        }
+        if (!this.historyEnabled) {
+            window.location.reload();
+            return;
+        }
+        var request = this.props.contextRequest;
+        var href = window.location.href;
+        if (event.state) {
+            // Abort inflight xhr before dispatching
+            if (request && this.requestCurrent) {
+                // Abort the current request, then remember we've aborted it so that we don't render
+                // the Network Request Error page.
+                request.abort();
+                this.requestAborted = true;
+                this.requestCurrent = false;
+            }
+            store.dispatch({
+                type: {'context': event.state}
+            });
+            store.dispatch({
+                type: {'href': href}
+            });
+
+        }
+        // Always async update in case of server side changes.
+        this.navigate(href, {'replace': true});
+    },
+
+    // only navigate if href changes
+    confirmNavigation: function(href, options) {
+        if(options && options.inPlace && options.inPlace==true){
+            return true;
+        }
+        if(href===this.props.href){
+            return false;
+        }
+        return true;
+    },
+
+    navigate: function (href, options) {
+        // options.skipRequest only used by collection search form
+        // options.replace only used handleSubmit, handlePopState, handlePersonaLogin
+        options = options || {};
+        href = url.resolve(this.props.href, href);
+        if (!this.confirmNavigation(href, options)) {
+            return;
+        }
+        // Strip url fragment.
+        var fragment = '';
+        var href_hash_pos = href.indexOf('#');
+        if (href_hash_pos > -1) {
+            fragment = href.slice(href_hash_pos);
+            href = href.slice(0, href_hash_pos);
+        }
+        if (!this.historyEnabled) {
+            if (options.replace) {
+                window.location.replace(href + fragment);
+            } else {
+                var old_path = ('' + window.location).split('#')[0];
+                window.location.assign(href + fragment);
+                if (old_path == href) {
+                    window.location.reload();
+                }
+            }
+            return;
+        }
+
+        var request = this.props.contextRequest;
+
+        if (request && this.requestCurrent) {
+            // Abort the current request, then remember we've aborted the request so that we
+            // don't render the Network Request Error page.
+            request.abort();
+            this.requestAborted = true;
+            this.requestCurrent = false;
+        }
+
+        if (options.skipRequest) {
+            if (options.replace) {
+                window.history.replaceState(window.state, '', href + fragment);
+            } else {
+                window.history.pushState(window.state, '', href + fragment);
+            }
+            store.dispatch({
+                type: {'href':href + fragment}
+            });
+            return;
+        }
+        var reqHref = href.slice(-1) === '/' ? href + '/?format=json' : href + '&format=json';
+        request = this.fetch(reqHref, {
+            headers: {'Accept': 'application/json'}
+        });
+        this.requestCurrent = true; // Remember we have an outstanding GET request
+        var timeout = new Timeout(this.SLOW_REQUEST_TIME);
+        Promise.race([request, timeout.promise]).then(v => {
+            if (v instanceof Timeout) {
+                console.log('TIMEOUT!!!');
+                // TODO: implement some other type of slow?
+                // store.dispatch({
+                //     type: {'slow':true}
+                // });
+
+            } else {
+                // Request has returned data
+                this.requestCurrent = false;
+            }
+        });
+        var promise = request.then(response => {
+            this.requestCurrent = false;
+            // navigate normally to URL of unexpected non-JSON response so back button works.
+            if (!this.contentTypeIsJSON(response)) {
+                if (options.replace) {
+                    window.location.replace(href + fragment);
+                } else {
+                    var old_path = ('' + window.location).split('#')[0];
+                    window.location.assign(href + fragment);
+                    return;
+                }
+            }
+            if (options.replace) {
+                window.history.replaceState(null, '', href + fragment);
+            } else {
+                window.history.pushState(null, '', href + fragment);
+            }
+            dispatch_dict.href = href + fragment;
+            return response;
+        })
+        .then(this.receiveContextResponse);
+        if (!options.replace) {
+            promise = promise.then(this.scrollTo);
+        }
+        dispatch_dict.contextRequest = request;
+        return request;
+    },
+
+    receiveContextResponse: function (data) {
+        // title currently ignored by browsers
+        try {
+            window.history.replaceState(data, '', window.location.href);
+        } catch (exc) {
+            // Might fail due to too large data
+            window.history.replaceState(null, '', window.location.href);
+        }
+        // Set up new properties for the page after a navigation click. First disable slow now that we've
+        // gotten a response. If the requestAborted flag is set, then a request was aborted and so we have
+        // the data for a Network Request Error. Don't render that, but clear the requestAboerted flag.
+        // Otherwise we have good page data to render.
+        // dispatch_dict.slow = false;
+        if (!this.requestAborted) {
+            // Real page to render
+            dispatch_dict.context = data;
+        } else {
+            // data holds network error. Don't render that, but clear the requestAborted flag so we're ready
+            // for the next navigation click.
+            this.requestAborted = false;
+        }
+        store.dispatch({
+            type: dispatch_dict
+        });
+        dispatch_dict={};
+    },
+
+    contentTypeIsJSON: function(content) {
+        var isJson = true;
+        try{
+            var json = JSON.parse(JSON.stringify(content));
+        }catch(err){
+            isJson = false;
+        }
+        return isJson;
+    },
+
+    scrollTo: function() {
+        var hash = window.location.hash;
+        if (hash && document.getElementById(hash.slice(1))) {
+            window.location.replace(hash);
+        } else {
+            window.scrollTo(0, 0);
+        }
     },
 
     render: function() {
@@ -244,7 +653,7 @@ var App = React.createClass({
             title = portal.portal_title;
             content = null;
         }else if (currRoute[currRoute.length-1] === 'home' || (currRoute[currRoute.length-1] === href_url.host)){
-            content = <HomePage />;
+            content = <HomePage session={this.state.session}/>;
             title = portal.portal_title;
         }else if (currRoute[currRoute.length-1] === 'help'){
             content = <HelpPage />;
