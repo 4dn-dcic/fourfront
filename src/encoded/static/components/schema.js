@@ -1,8 +1,6 @@
 'use strict';
 var React = require('react');
 var globals = require('./globals');
-var fetched = require('./fetched');
-
 
 var Markdown = module.exports.Markdown = React.createClass({
     render: function() {
@@ -44,10 +42,6 @@ var SchemaPage = module.exports.SchemaPage = React.createClass({
                         <pre>{JSON.stringify(context, null, 4)}</pre>
                     </div>
                 </section>
-                {changelog && <fetched.FetchedData>
-                    <fetched.Param name="source" url={changelog} type='text' />
-                    <ChangeLog />
-                </fetched.FetchedData>}
             </div>
         );
     }

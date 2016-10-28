@@ -48,23 +48,16 @@ var Login = React.createClass({
         var session = this.context.session;
         if (!(session && session['auth.userid'])) return;
         this.context.fetch('/logout?redirect=false', {
-            headers: {'Accept': 'application/json'}
-        })
-        .then(response => {
-            if (!response.ok) throw response;
-            return response.json();
+            headers: {'Accept': 'application/json',
+                'Content-Type': 'application/json'}
         })
         .then(data => {
+            if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
+                localStorage.removeItem("user_actions");
+            }
             if(typeof document !== 'undefined'){
                 this.context.navigate('/');
             }
-         }, err => {
-            parseError(err).then(data => {
-                data.title = 'Logout failure: ' + data.title;
-                store.dispatch({
-                    type: {'context':data}
-                });
-            });
         });
     },
 
@@ -81,16 +74,20 @@ var Login = React.createClass({
         })
         .then(response => {
             this.lock.hide();
-            if (!response.ok) throw response;
-            return response.json();
+            if (response.code || response.status) throw response;
+            return response;
         })
-        .then(session_properties => {
+        .then(response => {
+            // localStorage only holds strings!
+            if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
+                localStorage.setItem("user_actions", JSON.stringify(response.user_actions));
+            }
             this.context.navigate('', {'inPlace':true});
         }, error => {
-            console.log("got an error: ", error.statusText);
+            console.log("got an error: ", error.description);
             console.log(error);
             store.dispatch({
-                type: {'context':error, 'href': '/#login-error'}
+                type: {'context':error}
             });
         });
 

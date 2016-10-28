@@ -133,16 +133,16 @@ var Search = React.createClass({
 var UserActions = React.createClass({
     contextTypes: {
         listActionsFor: React.PropTypes.func,
-        session_properties: React.PropTypes.object
+        session: React.PropTypes.object
     },
 
     render: function() {
-        var session_properties = this.context.session_properties;
+        var session = this.context.session;
         var acctTitle = (
             <span>
                 <i className="icon ss-user" style={{
                     transform: 'translateY(2px)',
-                    opacity : session_properties['auth.userid'] ? 1 : 0.25
+                    opacity : session['auth.userid'] ? 1 : 0.25
                 }}></i> Account
             </span>
         );
@@ -152,7 +152,7 @@ var UserActions = React.createClass({
                 return(<Login key={action.id} />);
             } else if (action.id === "accountactions"){
                 // link to registration page if logged out or account actions if logged in
-                if (!session_properties['auth.userid']) {
+                if (!session['auth.userid']) {
                     return(
                         <a href={action.url || ''} key={action.id} className="global-entry">
                             {action.title}
@@ -181,19 +181,19 @@ var UserActions = React.createClass({
 var AccountActions = React.createClass({
     contextTypes: {
         listActionsFor: React.PropTypes.func,
-        session_properties: React.PropTypes.object
+        session: React.PropTypes.object
     },
 
     render: function() {
-        var session_properties = this.context.session_properties;
-        if (!session_properties['auth.userid']) {
+        var session = this.context.session;
+        if (!session['auth.userid']) {
             // Logged out, so no user menu at all
             return(<a href="#" className="invis"/>);
         }
-        var actions = this.context.listActionsFor('user').map(function (action) {
+        var actions = this.context.listActionsFor('user').map(function (action, idx) {
             return (
-                <div key={action.id} >
-                    <a href={action.href || ''} data-bypass={action.bypass} data-trigger={action.trigger} className="global-entry">
+                <div key={action.id + idx} >
+                    <a href={action.href || ''} className="global-entry">
                         {action.title}
                     </a>
                 </div>

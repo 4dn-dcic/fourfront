@@ -91,6 +91,7 @@ var Navbar = module.exports.Navbar = React.createClass({
     },
 
     collapseClick: function(e) {
+        e.preventDefault();
         // Click on the Navbar mobile "collapse" button
         console.log('collapse: %s', this.state.expanded);
         this.setState({expanded: !this.state.expanded});
@@ -102,7 +103,7 @@ var Navbar = module.exports.Navbar = React.createClass({
         return (
             <nav className={'navbar ' + (navClasses ? navClasses : 'navbar-default')}>
                 <div className="navbar-header">
-                    <a href="#" data-trigger className="navbar-toggle collapsed" data-toggle="collapse" data-target={label} aria-expanded={this.state.expanded} onClick={this.collapseClick}>
+                    <a href="" className="navbar-toggle collapsed" data-toggle="collapse" data-target={label} aria-expanded={this.state.expanded} onClick={this.collapseClick}>
                         <span className="sr-only">Toggle navigation</span>
                         <span className="icon-bar"></span>
                         <span className="icon-bar"></span>
@@ -161,7 +162,7 @@ var NavItem = module.exports.NavItem = React.createClass({
              <li className={dropdownId ? ('dropdown' + (dropdownOpen ? ' open' : '')) : ''}>
                 {dropdownLink ?
                     <a href={dropdownLink} id={dropdownSId}>{dropdownTitle}</a>
-                :   <a href="#" data-trigger id={dropdownSId} className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded={dropdownOpen} onClick={this.context.dropdownClick.bind(null, dropdownId)}>
+                :   <a href="" id={dropdownSId} className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded={dropdownOpen} onClick={this.context.dropdownClick.bind(null, dropdownId)}>
                          {dropdownTitle}
                     </a>
                 }

@@ -1,7 +1,6 @@
 'use strict';
 var React = require('react');
 var ReactDOM = require('react-dom');
-var queryString = require('query-string');
 var url = require('url');
 var _ = require('underscore');
 var globals = require('./globals');
@@ -15,11 +14,14 @@ var ButtonToolbar = require('react-bootstrap').ButtonToolbar;
 var DropdownButton = require('react-bootstrap').DropdownButton;
 var MenuItem = require('react-bootstrap').MenuItem;
 var store = require('../store');
+var FacetList = require('./facetlist').FacetList;
+var siftExperiments = require('./facetlist').siftExperiments;
 var ExperimentsTable = require('./experiments-table').ExperimentsTable;
 var getFileDetailContainer = require('./experiments-table').getFileDetailContainer;
 var AuditIndicators = audit.AuditIndicators;
 var AuditDetail = audit.AuditDetail;
 var AuditMixin = audit.AuditMixin;
+
 var expSetColumnLookup={
     // all arrays will be handled by taking the first item
     'biological replicates':{
@@ -48,7 +50,13 @@ var IndeterminateCheckbox = React.createClass({
     render: function(){
         var props = this.props;
         return(
-            <input {...props} type="checkbox" ref={function(input) {if (input) {input.indeterminate = props.checked ? false : props.indeterminate;}}} />
+            <input
+                checked={this.props.checked}
+                disabled={this.props.disabled}
+                onChange={this.props.onChange}
+                type="checkbox"
+                ref={function(input) {if (input) {input.indeterminate = props.checked ? false : props.indeterminate;}}} 
+            />
         );
     }
 });
@@ -63,6 +71,8 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         href : React.PropTypes.string,
         passExperiments : React.PropTypes.instanceOf(Set),
         targetFiles : React.PropTypes.instanceOf(Set),
+        rowNumber : React.PropTypes.number,
+        facets : React.PropTypes.array
     },
 
     getInitialState: function() {
@@ -73,12 +83,29 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         };
     },
 
+    fileDetailContainer : null,
+
+    componentWillMount : function(){
+        // Cache to prevent re-executing on re-renders.
+        this.fileDetailContainer = getFileDetailContainer(this.props.experimentArray, this.props.passExperiments);
+    },
+
+    componentWillUpdate : function(nextProps, nextState){
+        if (nextProps.experimentArray !== this.props.experimentArray || nextProps.passExperiments !== this.props.passExperiments){
+            this.fileDetailContainer = getFileDetailContainer(nextProps.experimentArray, nextProps.passExperiments);
+        }
+
+        
+    },
+
     componentWillReceiveProps: function(nextProps) {
-        if(!_.isEqual(this.props.expSetFilters, nextProps.expSetFilters)){
+
+        if(this.props.expSetFilters !== nextProps.expSetFilters){
             this.setState({
                 selectedFiles: new Set()
             });
         }
+        
         // var newTargets = [];
         // for(var i=0; i<this.state.files.length; i++){
         //     if(nextProps.targetFiles.has(this.state.files[i].file_format)){
@@ -95,7 +122,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
     handleToggle: function (e) {
         e.preventDefault();
         this.setState({
-  		  open: !this.state.open
+  		    open: !this.state.open
         });
     },
 
@@ -107,9 +134,8 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
 
     render: function() {
 
-        var fileDetailContainer = getFileDetailContainer(this.props.experimentArray, this.props.passExperiments);
-        var fileDetail = fileDetailContainer.fileDetail;
-        var emptyExps = fileDetailContainer.emptyExps;
+        var fileDetail = this.fileDetailContainer.fileDetail;
+        var emptyExps = this.fileDetailContainer.emptyExps;
 
         var files = Object.keys(fileDetail);
         // unused for now... when format selection is added back in, adapt code below:
@@ -145,27 +171,31 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
             );
         }.bind(this));
 
-        var checked = this.state.selectedFiles.size === files.length || files.length === emptyExps.length;
+        var checked = this.state.selectedFiles.size === files.length;
+        var disabled = files.length === emptyExps.length; // @Carl : Any thoughts? Unsure re: case if multiple files in experiment 
         var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < files.length;
 
         return (
-            <tbody>
-                <tr>
-                    <td className="expset-table-cell">
-                    <div className="control-cell expset-entry-passed">
+            <tbody className={"expset-section expset-entry-passed " + (this.state.open ? "open" : "closed")} data-row={this.props.rowNumber}>
+                <tr className="expset-table-row">
+                    <td className="expset-table-cell dropdown-button-cell">
                         <Button bsSize="xsmall" className="expset-button icon-container" onClick={this.handleToggle}>
-                            <i className={"icon " + (this.state.open ? "ss-navigateup" : "ss-navigatedown")}></i>
+                            <i className={"icon " + (this.state.open ? "icon-minus" : "icon-plus")}></i>
                         </Button>
-                    </div>
                     </td>
                     <td className="expset-table-cell">
-                    <div className="control-cell">
-                        <IndeterminateCheckbox checked={checked} indeterminate={indeterminate} onChange={this.handleCheck}/>
-                    </div>
+                        <div className="control-cell">
+                            <IndeterminateCheckbox 
+                                checked={checked}
+                                indeterminate={indeterminate}
+                                disabled={disabled}
+                                onChange={this.handleCheck}
+                            />
+                        </div>
                     </td>
                     { formattedColumns }
                 </tr>
-                <tr>
+                <tr className="expset-addinfo-row">
                     <td className={this.state.open ? "hidden-col-open" : "hidden-col-closed"} colSpan={Object.keys(this.props.columns).length + 2}>
                         <Panel className="expset-panel" collapsible expanded={this.state.open}>
                             <div className="expset-addinfo">
@@ -180,8 +210,10 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                                     'File Type',
                                     'File Info'
                                 ]}
-                                fileDetailContainer={fileDetailContainer}
+                                fileDetailContainer={this.fileDetailContainer}
                                 parentController={this}
+                                expSetFilters={this.props.expSetFilters}
+                                facets={this.props.facets /* Not req'd here as using pre-completed fileDetailContainer' */ }
                             />
                         </Panel>
                     </td>
@@ -190,76 +222,6 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         );
     }
 });
-
-// Find the component experiments in an experiment set that match the current filters
-function siftExperiments(graph, filters, ignored=null, field=null, term=null) {
-    var passExperiments = new Set();
-    // Start by adding all applicable experiments to set
-    for(var i=0; i < graph.length; i++){
-        var experiment_set = graph[i];
-        if(experiment_set.experiments_in_set){
-            var experiments = experiment_set.experiments_in_set;
-            for(var j=0; j < experiments.length; j++){
-                passExperiments.add(experiments[j]);
-            }
-        }
-    }
-    // search through currently selected expt filters
-    var filterKeys = Object.keys(filters);
-    if (field && !_.contains(filterKeys, field)){
-        filterKeys.push(field);
-    }
-    for(let experiment of passExperiments){
-        var eliminated = false;
-        for(var k=0; k < filterKeys.length; k++){
-            var refinedFilterSet;
-            if(ignored && ignored[filterKeys[k]] && ignored[filterKeys[k]].size > 0){
-                // remove the ignored filters by using the difference between sets
-                var difference = new Set([...filters[filterKeys[k]]].filter(x => !ignored[filterKeys[k]].has(x)));
-                refinedFilterSet = difference;
-            }else{
-                refinedFilterSet = filters[filterKeys[k]];
-            }
-            if(eliminated){
-                break;
-            }
-            var valueProbe = experiment;
-            var filterSplit = filterKeys[k].split('.');
-            for(var l=0; l < filterSplit.length; l++){
-                if(filterSplit[l] === 'experiments_in_set'){
-                    continue;
-                }
-                // for now, use first item in an array (for things such as biosamples)
-                if(Array.isArray(valueProbe)){
-                    valueProbe = valueProbe[0];
-                }
-                if(valueProbe[filterSplit[l]]){
-                    valueProbe = valueProbe[filterSplit[l]];
-                    if(l === filterSplit.length-1){ // last level of filter
-                        if(field && filterKeys[k] === field){
-                            if(valueProbe !== term){
-                                eliminated = true;
-                                passExperiments.delete(experiment);
-                            }
-                        }else if(refinedFilterSet.size > 0 && !refinedFilterSet.has(valueProbe)){ // OR behavior if not active field
-                            eliminated = true;
-                            passExperiments.delete(experiment);
-                        }
-                    }
-                }else{
-                    if(filterKeys[k] !== field && refinedFilterSet.size > 0){
-                        eliminated = true;
-                        passExperiments.delete(experiment);
-                        break;
-                    }else{
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    return passExperiments;
-}
 
 // Use the href to determine if this is the experiment setType selected.
 // If multiple selected (i.e. forced url), use the first
@@ -334,54 +296,6 @@ function findFiles(fileFormats) {
     return fileStats;
 }
 
-var ExpTerm = browse.ExpTerm = React.createClass({
-
-    getInitialState: function() {
-        return {
-            field: this.props.facet['field'],
-            term: this.props.term['key']
-        }
-    },
-
-    handleClick: function(e) {
-        e.preventDefault();
-        this.props.changeFilters(this.state.field, this.state.term);
-    },
-
-    render: function () {
-        var field = this.state.field;
-        var term = this.state.term;
-        var title = this.props.title || term;
-        var graph = this.props.context['@graph'];
-        var passSets = 0;
-        // for now, remove facet info on exp numbers
-        var termExperiments = siftExperiments(graph, this.props.expSetFilters, this.props.ignoredFilters, field, term);
-        // find number of exp sets
-        graph.map(function(expSet){
-            var intersection = new Set(expSet.experiments_in_set.filter(x => termExperiments.has(x)));
-            if(intersection.size > 0){
-                passSets += 1;
-            }
-        });
-        var expCount = termExperiments.size;
-        var selected = false;
-        if(this.props.expSetFilters[field] && this.props.expSetFilters[field].has(term)){
-            selected = true;
-        }
-        return (
-            <li id={selected ? "selected" : null} key={term}>
-                <a className={selected ? "expterm-selected" : "expterm"} id={selected ? "selected" : null} href="" onClick={this.handleClick}>
-                    <span className="pull-left facet-selector">{selected ? <i className="icon icon-times-circle"></i> : ''}</span>
-                    <span className="facet-item">
-                        {title}
-                    </span>
-                    <span className="pull-right facet-count">{passSets}</span>
-                </a>
-            </li>
-        );
-    }
-});
-
 var Term = browse.Term = React.createClass({
     contextTypes: {
         navigate: React.PropTypes.func
@@ -412,43 +326,6 @@ var Term = browse.Term = React.createClass({
                     </span>
                     <span className="pull-right facet-count">{count}</span>
                 </MenuItem>
-            </div>
-        );
-    }
-});
-
-var Facet = browse.Facet = React.createClass({
-    getDefaultProps: function() {
-        return {width: 'inherit'};
-    },
-
-    getInitialState: function () {
-        return {
-            facetOpen: false
-        };
-    },
-
-    handleClick: function (e) {
-        e.preventDefault();
-        this.setState({facetOpen: !this.state.facetOpen});
-    },
-
-    render: function() {
-        var facet = this.props.facet;
-        var title = facet['title'];
-        var field = facet['field'];
-        var total = facet['total'];
-        var terms = facet['terms'];
-        return (
-            <div className="facet" hidden={terms.length === 0} style={{width: this.props.width}}>
-                <h5>{title}</h5>
-                <div className="facet-list nav">
-                    <div>
-                        {terms.map(function (term) {
-                            return <ExpTerm {...this.props} key={term.key} term={term} total={total}/>;
-                        }.bind(this))}
-                    </div>
-                </div>
             </div>
         );
     }
@@ -493,71 +370,7 @@ var DropdownFacet = browse.DropdownFacet = React.createClass({
     }
 });
 
-var FacetList = browse.FacetList = React.createClass({
 
-    contextTypes: {
-        session: React.PropTypes.object,
-        hidePublicAudits: React.PropTypes.bool
-    },
-
-    getDefaultProps: function() {
-        return {orientation: 'vertical'};
-    },
-
-    clearFilters: function(e) {
-        e.preventDefault()
-        store.dispatch({
-            type : {'expSetFilters' : {}}
-        });
-    },
-
-    render: function() {
-        var {context, term} = this.props;
-        var loggedIn = this.context.session && this.context.session['auth.userid'];
-        var exptypeDropdown;
-        var regularFacets = [];
-        // Get all facets, and "normal" facets, meaning non-audit facets
-        var facets = this.props.facets;
-        // ignore all audit facets for the time being
-        var normalFacets = facets.filter(facet => facet.field.substring(0, 6) !== 'audit.');
-        var width = 'inherit';
-        if (!facets.length && this.props.mode != 'picker') return <div />;
-        var clearButton = Object.keys(this.props.expSetFilters).length === 0 ? false : true;
-        var searchQuery = context && context['@id'] && url.parse(context['@id']).search;
-        if (searchQuery) {
-            // Convert search query string to a query object for easy parsing
-            var terms = queryString.parse(searchQuery);
-        }
-        normalFacets.map(facet => {
-            if ((facet.field == 'type') || (!loggedIn && this.context.hidePublicAudits && facet.field.substring(0, 6) === 'audit.')) {
-                return;
-            } else if (facet.field != 'experimentset_type') {
-                regularFacets.push(<Facet {...this.props} key={facet.field} facet={facet} width={width}/>);
-                return;
-            }
-        });
-
-        return (
-            <div>
-                <div className="exptype-box">
-                    { exptypeDropdown }
-                </div>
-                <div className={"box facets " + this.props.orientation}>
-                    <div className="row">
-                        {clearButton ?
-                            <div className="pull-right clear-filters-control">
-                                <a href="" onClick={this.clearFilters}><i className="icon icon-times-circle"></i> Clear All Filters </a>
-                            </div>
-                        :   <div className="pull-right clear-filters-control placeholder">
-                                <a>Clear Filters</a>
-                            </div>}
-                    </div>
-                    {regularFacets}
-                </div>
-            </div>
-        );
-    }
-});
 
 var ColumnSorter = React.createClass({
 
@@ -594,12 +407,11 @@ var ResultTable = browse.ResultTable = React.createClass({
     propTypes : {       
         // Props' type validation based on contents of this.props during render.
         searchBase      : React.PropTypes.string,
-        restrictions    : React.PropTypes.object,
         context         : React.PropTypes.object.isRequired,
         expSetFilters   : React.PropTypes.object,
         fileFormats     : React.PropTypes.array,
         targetFiles     : React.PropTypes.instanceOf(Set),
-        onChange        : React.PropTypes.func.isRequired
+        onChange        : React.PropTypes.func
     },
 
     getInitialState: function(){
@@ -610,8 +422,8 @@ var ResultTable = browse.ResultTable = React.createClass({
     },
 
     getDefaultProps: function() {
+        // 'restrictions' object migrated to facetlist.js > FacetList
         return {
-            restrictions: {},
             searchBase: ''
         };
     },
@@ -631,85 +443,27 @@ var ResultTable = browse.ResultTable = React.createClass({
 
     },
 
-    render: function() {
-        var context = this.props.context;
-        var results = context['@graph'];
-        var resultCount = results.length; // account for empty expt sets
+    totalResultCount : function(){
+        // account for empty expt sets
+        var resultCount = this.props.context['@graph'].length;
+        this.props.context['@graph'].map(function(r){
+            if (r.experiments_in_set == 0) resultCount--;
+        });
+        return resultCount;
+    },
 
-        // use first experiment set to grap type (all types are the same in any given graph)
-        var setType = results[0].experimentset_type;
-        var targetFiles = this.props.targetFiles;
-        var total = context['total'];
-        var searchBase = this.props.searchBase;
-        var expSetFilters = this.props.expSetFilters;
-        var sortColumn = this.state.sortColumn;
-        var facets = context['facets'].map(function(facet) {
-            if (this.props.restrictions[facet.field] !== undefined) {
-                facet = _.clone(facet);
-                facet.restrictions = this.props.restrictions[facet.field];
-                facet.terms = facet.terms.filter(term => _.contains(facet.restrictions, term.key));
-            }
-            return facet;
-        }.bind(this));
+    formatExperimentSetListings : function(passExperiments, columnTemplate, addInfoTemplate){
+        var resultListings = [],
+            resultCount = 0;
 
-        //find ignored filters
-        var ignoredFilters = {};
-        for(var i=0; i < facets.length; i++){
-            var ignoredSet = new Set();
-            var field = facets[i].field;
-            var terms = facets[i].terms;
-            if(expSetFilters[field]){
-                for(let expFilter of expSetFilters[field]){
-                    var found = false;
-                    for(var j=0; j < terms.length; j++){
-                        if(expFilter === terms[j].key){
-                            found = true;
-                            break;
-                        }
-                    }
-                    if(!found){
-                        ignoredSet.add(expFilter);
-                    }
-                }
-                if(ignoredSet.size > 0){
-                    ignoredFilters[field] = ignoredSet;
-                }
-            }
-        }
-        var passExperiments = siftExperiments(results, expSetFilters, ignoredFilters);
-        
-        // Map view icons to svg icons
-        var view2svg = {
-            'table': 'table',
-            'th': 'matrix'
-        };
-        
-        var columnTemplate = expSetColumnLookup[setType] ? expSetColumnLookup[setType] : expSetColumnLookup['other'];
-        var addInfoTemplate = expSetAdditionalInfo[setType] ? expSetAdditionalInfo[setType] : expSetAdditionalInfo['other'];
-        var resultHeaders = Object.keys(columnTemplate).map(function(key){
-            return (
-                <th key={key}>
-                    <ColumnSorter 
-                        descend={this.state.sortReverse} 
-                        sortColumn={this.state.sortColumn} 
-                        sortByFxn={this.sortBy} 
-                        val={key}
-                    />
-                </th>
-            );
-        }.bind(this));
-        
-        var resultListing = [];
-        results.map(function (result) {
+        this.props.context['@graph'].map(function (result) {
             var experimentArray = result.experiments_in_set;
             if(experimentArray.length == 0){
-                resultCount = resultCount - 1;
                 return; // ignore if no expts in the expt set
             }
 
             var accession = result.accession ? result.accession : "Experiment Set";
             var intersection = new Set(experimentArray.filter(x => passExperiments.has(x)));
-            var href = result['@id'];
             var columns = {};
             var addInfo = {};
             var firstExp = experimentArray[0]; // use only for biological replicates
@@ -743,68 +497,128 @@ var ResultTable = browse.ResultTable = React.createClass({
 
             if(intersection.size > 0){
                 var keyVal = "";
-                if(sortColumn){
-                    keyVal = columns[sortColumn];
+                if (this.state.sortColumn){
+                    keyVal = columns[this.state.sortColumn];
                 }
-                resultListing.push(
+                resultListings.push(
                     <ExperimentSetRow 
                         addInfo={addInfo} 
                         columns={columns} 
-                        expSetFilters={expSetFilters} 
-                        targetFiles={targetFiles} 
-                        href={href} 
+                        expSetFilters={this.props.expSetFilters} 
+                        targetFiles={this.props.targetFiles} 
+                        href={result['@id']} 
                         experimentArray={experimentArray} 
                         passExperiments={intersection}
-                        key={keyVal+href} 
+                        key={keyVal+result['@id']}
+                        rowNumber={resultCount++}
+                        facets={this.props.facets}
                     />
                 );
             }
-        });
+        }.bind(this));
 
-        if(sortColumn){
-            resultListing.sort(function(a,b){
-                if(Number.isInteger(parseInt(a.key.split('/')[0]))){
-                    return(a.key.split('/')[0] - b.key.split('/')[0]);
-                }else{
-                    return(a.key.split('/')[0].localeCompare(b.key.split('/')[0]));
+        // Sort
+        if(this.state.sortColumn){
+            resultListings.sort(function(a,b){
+                a = a.key.split('/')[0];
+                b = b.key.split('/')[0];
+                if (this.state.sortReverse) {
+                    var b2 = b;
+                    b = a;
+                    a = b2;
                 }
-            });
+                if(!isNaN(a)){
+                    return (a - b);
+                } else {
+                    //return(a.localeCompare(b)); 
+                    // Above doesn't assign consistently right values to letters/numbers, e.g. sometimes an int > a letter
+                    // Not sure how important.
+                    if (a < b) return -1;
+                    else if (a > b) return 1;
+                    else return 0;
+                }
+            }.bind(this));
         }
-        if(this.state.sortReverse){
-            resultListing.reverse();
-        }
+
+        return resultListings;
+    },
+
+    render: function() {
+        var results = this.props.context['@graph'];
+
+        // use first experiment set to grap type (all types are the same in any given graph)
+        var setType = results[0].experimentset_type;
+        var targetFiles = this.props.targetFiles;
+        var total = this.props.context['total'];
+        var searchBase = this.props.searchBase;
+        var expSetFilters = this.props.expSetFilters;
+        var sortColumn = this.state.sortColumn;
+        var facets = FacetList.adjustedFacets(this.props.context.facets);
+
+        //find ignored filters
+        var ignoredFilters = FacetList.findIgnoredFilters(facets, expSetFilters);
+        var passExperiments = siftExperiments(results, expSetFilters, ignoredFilters);
+        
+        // Map view icons to svg icons
+        var view2svg = {
+            'table': 'table',
+            'th': 'matrix'
+        };
+        
+        var columnTemplate = expSetColumnLookup[setType] ? expSetColumnLookup[setType] : expSetColumnLookup['other'];
+        var additionalInfoTemplate = expSetAdditionalInfo[setType] ? expSetAdditionalInfo[setType] : expSetAdditionalInfo['other'];
+
+        var resultHeaders = Object.keys(columnTemplate).map(function(key){
+            return (
+                <th key={key}>
+                    <ColumnSorter 
+                        descend={this.state.sortReverse} 
+                        sortColumn={this.state.sortColumn} 
+                        sortByFxn={this.sortBy} 
+                        val={key}
+                    />
+                </th>
+            );
+        }.bind(this));
+
+        var formattedExperimentSetListings = this.formatExperimentSetListings(
+            passExperiments,
+            columnTemplate,
+            additionalInfoTemplate
+        );
+
         return (
-            <div>
-                <div className="row">
-                    { facets.length ?
-                        <div className="col-sm-5 col-md-4 col-lg-3">
-                            <FacetList
-                                {...this.props}
-                                facets={facets}
-                                searchBase={searchBase ? searchBase + '&' : searchBase + '?'}
-                                onFilter={this.onFilter}
-                                ignoredFilters={ignoredFilters}
-                            />
-                        </div> 
-                        : 
-                        null 
-                    }
-                    <div className="expset-result-table-fix col-sm-7 col-md-8 col-lg-9">
-                        <h5 className='browse-title'>Showing {resultListing.length} of {resultCount} experiment sets.</h5>
-                        <div>
-                            { resultListing.length > 0 ?
-                            <Table className="expset-table table-tbody-striped" bordered condensed id="result-table">
-                                <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th></th>
-                                        { resultHeaders }
-                                    </tr>
-                                </thead>
-                                { resultListing }
-                            </Table>
-                            : <div></div> }
-                        </div>
+            <div className="row">
+                { facets.length ?
+                    <div className="col-sm-5 col-md-4 col-lg-3">
+                        <FacetList
+                            urlPath={this.props.context['@id']}
+                            experimentSetListJSON={this.props.context['@graph']}
+                            orientation="vertical"
+                            expSetFilters={this.props.expSetFilters}
+                            facets={facets}
+                            onFilter={this.onFilter}
+                            ignoredFilters={ignoredFilters}
+                        />
+                    </div> 
+                    : 
+                    null 
+                }
+                <div className="expset-result-table-fix col-sm-7 col-md-8 col-lg-9">
+                    <h5 className='browse-title'>Showing {formattedExperimentSetListings.length} of {this.totalResultCount()} experiment sets.</h5>
+                    <div>
+                        { formattedExperimentSetListings.length > 0 ?
+                        <Table className="expset-table table-tbody-striped" bordered condensed id="result-table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    { resultHeaders }
+                                </tr>
+                            </thead>
+                            { formattedExperimentSetListings }
+                        </Table>
+                        : <div></div> }
                     </div>
                 </div>
             </div>
@@ -960,31 +774,8 @@ var Browse = browse.Browse = React.createClass({
         navigate: React.PropTypes.func
     },
 
-    changeFilters: function(field, term) {
-        // store currently selected filters as a dict of sets
-        var tempObj = {};
-        var newObj = {};
-        var expSet = this.props.expSetFilters[field] ? this.props.expSetFilters[field] : new Set();
-        if(expSet.has(term)){
-            // term is already present, so delete it
-            expSet.delete(term);
-        }else{
-            expSet.add(term);
-        }
-        if(expSet.size > 0){
-            tempObj[field] = expSet;
-            newObj = Object.assign({}, this.props.expSetFilters, tempObj);
-        }else{ //remove key if set is empty
-            newObj = Object.assign({}, this.props.expSetFilters);
-            delete newObj[field];
-        }
-        store.dispatch({
-            type : {'expSetFilters' : newObj}
-        });
-    },
-
     componentWillMount: function() {
-        var searchBase = url.parse(this.context.location_href).search || '';
+        //var searchBase = url.parse(this.context.location_href).search || '';
     },
 
     render: function() {
@@ -1023,7 +814,6 @@ var Browse = browse.Browse = React.createClass({
                     fileFormats={fileFormats}
                     searchBase={searchBase}
                     onChange={this.context.navigate}
-                    changeFilters={this.changeFilters}
                 />
 
             </div>
