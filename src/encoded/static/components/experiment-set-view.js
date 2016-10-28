@@ -370,7 +370,6 @@ var ExperimentSetHeaderBar = React.createClass({
     },
 
     componentDidMount : function(){
-        window.textBox = this;
         var debouncedStateChange = _.debounce(() => {
             // Debounce to prevent from executing more than once every 300ms.
             setTimeout(()=> {
