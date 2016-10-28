@@ -1,6 +1,8 @@
 import base64
 import os
 from operator import itemgetter
+from datetime import datetime
+import time
 
 from passlib.context import CryptContext
 from pyramid.authentication import (
@@ -160,12 +162,16 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
                         .format(domain='hms-dbmi.auth0.com',
                                 access_token=access_token)
             resp  = requests.get(user_url)
-            if resp.status_code == 429:
+            while resp.status_code == 429:
+                reset_time = datetime.utcfromtimestamp(float(resp.headers['X-RateLimit-Reset']))
+                timeDiff = reset_time - datetime.utcnow()
+                
                 # to many requests... slow down and try again
                 print("to many requests.. waiting a while")
-                import time
-                time.sleep(1)
+                #import pdb; pdb.set_trace()
+                time.sleep(timeDiff.seconds + 1)
                 resp  = requests.get(user_url)
+
             user_info = resp.json()
         except Exception as e:
             if self.debug:
