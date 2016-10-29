@@ -176,7 +176,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
                 <h1 className="page-title">Experiment Set <span className="subtitle prominent">{ title }</span></h1>
 
-                <ExperimentSetHeader {...this.props} />
+                {/* <ExperimentSetHeader {...this.props} /> */}
 
                 <div className="row">
                 
@@ -296,7 +296,7 @@ var ExperimentSetHeader = React.createClass({
     },
 
     render: function() {
-        console.log('render ')
+        console.log('render ExperimentSetHeader')
         return (
             <div className="exp-set-header-area">
 
