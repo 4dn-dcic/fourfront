@@ -338,7 +338,7 @@ var ExperimentSetHeaderBar = React.createClass({
     getInitialState : function(){
         return {
             descriptionExpanded : false,
-            descriptionWillFitOneLine : null,
+            descriptionWillFitOneLine : true,
             descriptionWhiteSpace : 'nowrap'
         }
     },
