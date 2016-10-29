@@ -55,7 +55,7 @@ def audit_biosample_tier1_cell_lines_have_required_cell_culture_properties(value
     that must be present and that depend on the cell_line
     '''
     # check to see if any of the biosources (usually only 1) are Tier1 cell_lines
-    if not any(bs['cell_line_tier'] == 'Tier 1' for bs in value['biosource']):
+    if not any(bs.get('cell_line_tier') == 'Tier 1' for bs in value['biosource']):
         return
     if len(value['biosource']) != 1:
         # special case for multi-biosource
