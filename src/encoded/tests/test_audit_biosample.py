@@ -61,6 +61,12 @@ def tier1_biosample(testapp, tier1_biosource, tier1_cell_culture):
     return testapp.post_json('/biosample', item).json['@graph'][0]
 
 
+def test_audit_biosample_no_audit_if_no_cell_line(testapp, biosample_1):
+    res = testapp.get(biosample_1['@id'] + '/@@audit-self')
+    errors = res.json['audit']
+    assert not any(error['category'] == 'missing mandatory metadata' for error in errors)
+
+
 def test_audit_biosample_tier1_cell_line_has_required(testapp, tier1_biosample):
     res = testapp.get(tier1_biosample['@id'] + '/@@audit-self')
     errors = res.json['audit']
