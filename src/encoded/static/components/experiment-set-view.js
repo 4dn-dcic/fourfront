@@ -60,7 +60,9 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         if (!this.tips) {
             this.tips = tipsFromSchema(this.props.schemas, this.props.context);
         }
+    },
 
+    componentDidMount : function(){
         if (!this.state.details_lab) {
             var labDetails = this.getLinkedPropertyDetailsFromExperiments('lab', true);
             if (labDetails){
@@ -142,7 +144,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
         // Uh-oh! ExperimentSet award exists but doesn't match that of any experiments'.
         // Perhaps fallback to using AJAX. Lol.
-        if (propertyID && !propertyInfo && allowAjaxFallback) {
+        if (typeof window != 'undefined' && propertyID && !propertyInfo && allowAjaxFallback) {
             // throw new Error(propertyName + " " + propertyID + " not found in ExperimentSet " + this.props.context.accession + " experiments.");
             var newStateAddition = {};
             newStateAddition['details_' + propertyName] = null;
