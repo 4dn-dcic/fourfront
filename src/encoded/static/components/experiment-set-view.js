@@ -166,6 +166,8 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         var title = globals.listing_titles.lookup(this.props.context)({context: this.props.context});
         var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container experiment-set-page');
 
+        console.log('render ExperimentSet view');
+
         return (
             <div className={itemClass}>
 
@@ -407,7 +409,7 @@ var ExperimentSetHeaderBar = React.createClass({
     },
 
     render : function(){
-        console.log('render facetlist');
+        console.log('render ExperimentSetHeaderBar');
         var expandButton;
         if (!this.state.descriptionWillFitOneLine){
             expandButton = (
