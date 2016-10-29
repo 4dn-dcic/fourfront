@@ -226,7 +226,6 @@ var FacetList = module.exports.FacetList = React.createClass({
             // Load list of available facets via AJAX once & reuse.
             this.loadFacets(() => {
                 FacetList.fillFacetTermsAndCountFromExps(this.facets, this.props.experimentSetListJSON);
-                this.setState({ facetsLoaded : true });
             });
         }
     },
@@ -242,11 +241,14 @@ var FacetList = module.exports.FacetList = React.createClass({
         ajaxLoad('/facets?type=' + facetType + '&format=json', function(r){
             this.facets = r;
             console.log('Loaded Facet List via AJAX.');
-            if (facetType == 'Experiment' && !this.props.expIncompleteFacets){
-                store.dispatch({
-                    type : {'expIncompleteFacets' : this.facets}
+            if (facetType == 'Experiment' && !this.props.expIncompleteFacets && typeof window !== 'undefined'){
+                window.requestAnimationFrame(()=>{
+                    // Will trigger app re-render & update state.facetsLoaded as well through getInitialState.
+                    store.dispatch({
+                        type : {'expIncompleteFacets' : this.facets}
+                    });
+                    console.log('Stored Facet List in Redux store.');
                 });
-                console.log('Stored Facet List in Redux store.');
             }
             if (typeof callback == 'function') callback();
         }.bind(this));

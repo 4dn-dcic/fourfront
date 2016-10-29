@@ -379,11 +379,14 @@ var ExperimentSetHeaderBar = React.createClass({
             }, 0);
         }, 300, false);
 
-        this.setState({
-            descriptionWillFitOneLine : this.checkWillDescriptionFitOneLineAndUpdateHeight()
-        });
-
-        window.addEventListener('resize', debouncedStateChange);
+        if (typeof window != 'undefined'){
+            window.addEventListener('resize', debouncedStateChange);
+            window.requestAnimationFrame(()=>{
+                this.setState({
+                    descriptionWillFitOneLine : this.checkWillDescriptionFitOneLineAndUpdateHeight()
+                });
+            });
+        }
     },
 
     handleDescriptionExpandToggle: function (e) {
