@@ -222,9 +222,10 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
                 </div>
 
+                {/*
                 <br/><br/><br /><br /><hr />
                 <h6>Existing Print-out (temporary):</h6>
-
+                
                 <Panel className="data-display panel-body-with-header">
                     <dl className="key-value">
                         {Object.keys(this.props.context).sort().map((ikey, idx) =>
@@ -243,6 +244,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                         )}
                     </dl>
                 </Panel>
+                */}
 
             </div>
         );
