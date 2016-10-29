@@ -27,7 +27,7 @@ function mapStateToProps(store) {
 // Treat domready function as the entry point to the application.
 // Inside this function, kick-off all initialization, everything up to this
 // point should be definitions.
-if (window && window.document && !window.TEST_RUNNER) domready(function ready() {
+if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER) domready(function ready() {
     console.log('Browser: ready');
 
     App.getRenderedProps(document);

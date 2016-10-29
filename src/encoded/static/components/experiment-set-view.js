@@ -407,6 +407,7 @@ var ExperimentSetHeaderBar = React.createClass({
     },
 
     render : function(){
+        console.log('render facetlist');
         var expandButton;
         if (!this.state.descriptionWillFitOneLine){
             expandButton = (
