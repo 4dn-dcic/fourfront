@@ -296,6 +296,7 @@ var ExperimentSetHeader = React.createClass({
     },
 
     render: function() {
+        console.log('render ')
         return (
             <div className="exp-set-header-area">
 
@@ -383,7 +384,7 @@ var ExperimentSetHeaderBar = React.createClass({
                 }
             }, 0);
         }, 300, false);
-
+        /*
         if (typeof window != 'undefined'){
             window.addEventListener('resize', debouncedStateChange);
             window.requestAnimationFrame(()=>{
@@ -392,6 +393,7 @@ var ExperimentSetHeaderBar = React.createClass({
                 });
             });
         }
+        */
     },
 
     handleDescriptionExpandToggle: function (e) {
