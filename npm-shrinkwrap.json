@@ -3,14 +3,14 @@
   "version": "0.0.0",
   "dependencies": {
     "auth0-lock": {
-      "version": "10.4.0",
+      "version": "10.5.0",
       "from": "auth0-lock@>=10.4.0 <11.0.0",
-      "resolved": "https://registry.npmjs.org/auth0-lock/-/auth0-lock-10.4.0.tgz",
+      "resolved": "https://registry.npmjs.org/auth0-lock/-/auth0-lock-10.5.0.tgz",
       "dependencies": {
         "auth0-js": {
-          "version": "7.2.1",
-          "from": "auth0-js@7.2.1",
-          "resolved": "https://registry.npmjs.org/auth0-js/-/auth0-js-7.2.1.tgz",
+          "version": "7.3.0",
+          "from": "auth0-js@7.3.0",
+          "resolved": "https://registry.npmjs.org/auth0-js/-/auth0-js-7.3.0.tgz",
           "dependencies": {
             "Base64": {
               "version": "0.1.4",
@@ -52,9 +52,9 @@
               "resolved": "https://registry.npmjs.org/reqwest/-/reqwest-2.0.5.tgz"
             },
             "winchan": {
-              "version": "0.1.2",
-              "from": "auth0/winchan#v0.1.2",
-              "resolved": "git://github.com/auth0/winchan.git#d96ec07cb3b7cfed4005b2970f8aa57e90c5bbca"
+              "version": "0.1.4",
+              "from": "winchan@0.1.4",
+              "resolved": "https://registry.npmjs.org/winchan/-/winchan-0.1.4.tgz"
             },
             "xtend": {
               "version": "2.1.2",
@@ -168,9 +168,9 @@
           "resolved": "https://registry.npmjs.org/core-js/-/core-js-2.4.1.tgz"
         },
         "babel-runtime": {
-          "version": "6.11.6",
+          "version": "6.18.0",
           "from": "babel-runtime@>=6.9.1 <7.0.0",
-          "resolved": "https://registry.npmjs.org/babel-runtime/-/babel-runtime-6.11.6.tgz"
+          "resolved": "https://registry.npmjs.org/babel-runtime/-/babel-runtime-6.18.0.tgz"
         },
         "regenerator-runtime": {
           "version": "0.9.5",
@@ -297,9 +297,9 @@
       "resolved": "https://registry.npmjs.org/marked/-/marked-0.3.6.tgz"
     },
     "moment": {
-      "version": "2.15.1",
+      "version": "2.15.2",
       "from": "moment@>=2.8.2 <3.0.0",
-      "resolved": "https://registry.npmjs.org/moment/-/moment-2.15.1.tgz"
+      "resolved": "https://registry.npmjs.org/moment/-/moment-2.15.2.tgz"
     },
     "query-string": {
       "version": "4.2.3",
@@ -413,9 +413,9 @@
       "resolved": "https://registry.npmjs.org/react-bootstrap/-/react-bootstrap-0.30.5.tgz",
       "dependencies": {
         "babel-runtime": {
-          "version": "6.11.6",
+          "version": "6.18.0",
           "from": "babel-runtime@>=6.11.6 <7.0.0",
-          "resolved": "https://registry.npmjs.org/babel-runtime/-/babel-runtime-6.11.6.tgz",
+          "resolved": "https://registry.npmjs.org/babel-runtime/-/babel-runtime-6.18.0.tgz",
           "dependencies": {
             "core-js": {
               "version": "2.4.1",
@@ -600,11 +600,6 @@
       "version": "1.8.3",
       "from": "underscore@>=1.8.3 <2.0.0",
       "resolved": "https://registry.npmjs.org/underscore/-/underscore-1.8.3.tgz"
-    },
-    "whatwg-fetch": {
-      "version": "0.7.0",
-      "from": "git+https://github.com/lrowe/fetch.git#bf5d58b738fb2ed6d60791b944d36075fee8604a",
-      "resolved": "git+https://github.com/lrowe/fetch.git#bf5d58b738fb2ed6d60791b944d36075fee8604a"
     },
     "xhr2": {
       "version": "0.1.3",

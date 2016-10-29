@@ -1,5 +1,7 @@
 import pytest
 import requests
+import time
+from datetime import datetime
 pytestmark = pytest.mark.working
 
 
@@ -37,8 +39,16 @@ def auth0_4dn_user_profile(auth0_access_token):
     user_url = "https://{domain}/userinfo?access_token={access_token}" \
                 .format(domain='hms-dbmi.auth0.com',
                         access_token=auth0_access_token)
-    user_info = requests.get(user_url).json()
-    return user_info
+    resp = requests.get(user_url)
+    while resp.status_code == 429:
+        reset_time = datetime.utcfromtimestamp(float(resp.headers['X-RateLimit-Reset']))
+        timeDiff = reset_time - datetime.utcnow()
+        # import pdb; pdb.set_trace()
+        time.sleep(timeDiff.seconds + 1)
+        resp = requests.get(user_url)
+    if resp.status_code == 429:
+        print("To many requests to auth0 please try again")
+    return resp.json()
 
 
 def test_login_unknown_user(anontestapp, auth0_4dn_user_token):
@@ -46,7 +56,6 @@ def test_login_unknown_user(anontestapp, auth0_4dn_user_token):
     assert 'Set-Cookie' in res.headers
 
 
-@pytest.skip('work in progress')
 def test_login_logout(testapp, anontestapp, auth0_4dn_user_token,
                       auth0_4dn_user_profile):
     # Create a user with the persona email
@@ -60,7 +69,8 @@ def test_login_logout(testapp, anontestapp, auth0_4dn_user_token,
     testapp.post_json(url, item, status=201)
 
     # Log in
-    res = anontestapp.post_json('/login', auth0_4dn_user_token, status=200)
+    res = anontestapp.post_json('/login', auth0_4dn_user_token)
+
     assert 'Set-Cookie' in res.headers
     assert res.json['auth.userid'] == email
 

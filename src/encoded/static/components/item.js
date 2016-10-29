@@ -1,16 +1,13 @@
 'use strict';
 var React = require('react');
 var collection = require('./collection');
-var fetched = require('./fetched');
 var globals = require('./globals');
 var audit = require('./audit');
-var _ = require('underscore');
 var Panel = require('react-bootstrap').Panel;
 var AuditIndicators = audit.AuditIndicators;
 var AuditDetail = audit.AuditDetail;
 var AuditMixin = audit.AuditMixin;
 var Table = collection.Table;
-var ExperimentSetView = require('./experiment-set-view');
 
 var Fallback = module.exports.Fallback = React.createClass({
     contextTypes: {
@@ -39,25 +36,42 @@ var Fallback = module.exports.Fallback = React.createClass({
     }
 });
 
-var ItemLoader = React.createClass({
-    mixins: [AuditMixin],
-    render: function() {
-        return (
-            <fetched.FetchedData>
-                <fetched.Param name="schemas" url="/profiles/" />
-                <Item context={this.props.context} />
-            </fetched.FetchedData>
-        );
-    }
-});
-
 var Item = React.createClass({
-    render: function() {
+    mixins: [AuditMixin],
+    contextTypes: {
+        fetch: React.PropTypes.func,
+        contentTypeIsJSON: React.PropTypes.func
+    },
 
+    getInitialState: function(){
+        return{
+            schemas: null
+        };
+    },
+
+    componentDidMount: function(){
+        var request = this.context.fetch('/profiles/?format=json', {
+            headers: {'Accept': 'application/json',
+                'Content-Type': 'application/json'}
+        });
+        request.then(data => {
+            if(this.context.contentTypeIsJSON(data)){
+                this.setState({
+                    schemas: data
+                })
+            }else{
+                this.setState({
+                    schemas: {}
+                })
+            }
+        });
+    },
+
+    render: function() {
         var context = this.props.context;
         var itemClass = globals.itemClass(context, 'view-item');
         var IPanel = globals.panel_views.lookup(context);
-
+        var schemas = this.state.schemas ? this.state.schemas : {};
         // Make string of alternate accessions
         return (
             <div className={itemClass}>
@@ -69,13 +83,13 @@ var Item = React.createClass({
                     </div>
                 </header>
                 <AuditDetail context={context} key="biosample-audit" />
-                <IPanel {...this.props}/>
+                <IPanel {...this.props} schemas={schemas}/>
             </div>
         );
     }
 });
 
-globals.content_views.register(ItemLoader, 'Item');
+globals.content_views.register(Item, 'Item');
 
 
 // Also use this view as a fallback for anything we haven't registered
@@ -88,7 +102,7 @@ var IPanel = module.exports.IPanel = React.createClass({
     render: function() {
         var schemas = this.props.schemas;
         var context = this.props.context;
-        var itemClass = globals.itemClass(context, 'view-detail panel');
+        //var itemClass = globals.itemClass(context, 'view-detail panel');
         var title = globals.listing_titles.lookup(context)({context: context});
         var sortKeys = Object.keys(context).sort();
         var tips = tipsFromSchema(schemas, context);
@@ -209,24 +223,25 @@ var FetchedRelatedItems = React.createClass({
 
 });
 
-
-var RelatedItems = module.exports.RelatedItems = React.createClass({
-    getDefaultProps: function() {
-        return {limit: 5};
-    },
-
-    render: function() {
-        var url = this.props.url + '&status!=deleted&status!=revoked&status!=replaced';
-        var limited_url = url + '&limit=' + this.props.limit;
-        var unlimited_url = url + '&limit=all';
-        return (
-            <fetched.FetchedData>
-                <fetched.Param name="context" url={limited_url} />
-                <FetchedRelatedItems {...this.props} url={unlimited_url} />
-            </fetched.FetchedData>
-        );
-    },
-});
+// **** Deprecated when fetch was removed.
+//
+// var RelatedItems = module.exports.RelatedItems = React.createClass({
+//     getDefaultProps: function() {
+//         return {limit: 5};
+//     },
+//
+//     render: function() {
+//         var url = this.props.url + '&status!=deleted&status!=revoked&status!=replaced';
+//         var limited_url = url + '&limit=' + this.props.limit;
+//         var unlimited_url = url + '&limit=all';
+//         return (
+//             <fetched.FetchedData>
+//                 <fetched.Param name="context" url={limited_url} />
+//                 <FetchedRelatedItems {...this.props} url={unlimited_url} />
+//             </fetched.FetchedData>
+//         );
+//     },
+// });
 
 // ******* Refined item.js code below... *******
 
@@ -298,7 +313,7 @@ var Subview = React.createClass({
 });
 
 //Return the properties dictionary from a schema for use as tooltips
-var tipsFromSchema = function(schemas, content){
+var tipsFromSchema = module.exports.tipsFromSchema = function(schemas, content){
     var tips = {};
     if(content['@type']){
         var type = content['@type'][0];
@@ -347,7 +362,7 @@ var formValue = function (schemas, item) {
 
 // Display the item field with a tooltip showing the field description from
 // schema, if available
-var DescriptorField = React.createClass({
+var DescriptorField = module.exports.DescriptorField = React.createClass({
     propTypes: {
         field: React.PropTypes.string.isRequired,
         description: React.PropTypes.string.isRequired
