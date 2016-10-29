@@ -148,6 +148,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
             newStateAddition['details_' + propertyName] = null;
             this.setState(newStateAddition);
             
+            console.log('Obtaining details_' + propertyName + ' via AJAX.');
             ajaxLoad(propertyID + '?format=json', function(result){
                 newStateAddition = {};
                 newStateAddition['details_' + propertyName] = result;
