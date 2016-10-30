@@ -5,7 +5,7 @@ var ExperimentsTable = require('./experiments-table').ExperimentsTable;
 var _ = require('underscore');
 var { SubIPanel, DescriptorField, tipsFromSchema } = require('./item');
 var { FacetList, siftExperiments } = require('./facetlist');
-var { ajaxLoad, textContentWidth, gridContainerWidth } = require('./objectutils');
+var { ajaxLoad, textContentWidth, gridContainerWidth, isServerSide } = require('./objectutils');
 
 /**
  * Entire ExperimentSet page view.
@@ -16,6 +16,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
     statics : {
         // Migrate somewhere better eventually
         parseDateTime : function(timestamp){
+            if (isServerSide()) return null;
             return (new Date(timestamp)).toLocaleString(undefined, {
                 year : "numeric",
                 month : "long",
@@ -176,7 +177,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
                 <h1 className="page-title">Experiment Set <span className="subtitle prominent">{ title }</span></h1>
 
-                {/* <ExperimentSetHeader {...this.props} /> */}
+                <ExperimentSetHeader {...this.props} />
 
                 <div className="row">
                 
@@ -258,7 +259,7 @@ globals.panel_views.register(ExperimentSetView, 'ExperimentSet');
 var ExperimentSetHeader = React.createClass({
 
     parsedCreationDate(){
-        if (!('date_created' in this.props.context)) return null;
+        if (!('date_created' in this.props.context)) return <span><i></i></span>;
         return (
             <span>
                 <i className="icon sbt-calendar"></i>&nbsp; { ExperimentSetView.parseDateTime(this.props.context.date_created) }
@@ -267,7 +268,7 @@ var ExperimentSetHeader = React.createClass({
     },
 
     parsedStatus(){
-        if (!('status' in this.props.context)) return null;
+        if (!('status' in this.props.context)) return <div></div>;
         /*  Removed icon in lieu of color indicator for status
         var iconClass = null;
         switch (this.props.context.status){
@@ -289,7 +290,7 @@ var ExperimentSetHeader = React.createClass({
     },
 
     parsedExperimentSetType(){
-        if (!('experimentset_type' in this.props.context)) return null;
+        if (!('experimentset_type' in this.props.context)) return <div></div>;
         return (
             <div className="expset-indicator expset-type right" data-set-type={ this.props.context.experimentset_type }>
                 { this.props.context.experimentset_type }
@@ -316,7 +317,7 @@ var ExperimentSetHeader = React.createClass({
 
                 <div className="row clearfix bottom-row">
                     <div className="col-sm-6 item-label-extra set-type-indicators">{ /* PLACEHOLDER / TEMP-EMPTY */ }</div>
-                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra" title="Date Created">{ this.parsedCreationDate() }</h5>
+                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra" title="Date Created">{/* this.parsedCreationDate() */}</h5>
                 </div>
 
             </div>
@@ -353,7 +354,10 @@ var ExperimentSetHeaderBar = React.createClass({
 
     descriptionHeight : null, // Use for animating height, if needed.
 
+    
     checkWillDescriptionFitOneLineAndUpdateHeight : function(){
+
+        if (isServerSide()) return true;
         
         var containerWidth = gridContainerWidth() - this.props.totalPaddingWidth; // Account for inner padding & border.
         
@@ -369,9 +373,12 @@ var ExperimentSetHeaderBar = React.createClass({
             return true;
         }
         return false;
+
     },
+    
 
     componentDidMount : function(){
+        
         var debouncedStateChange = _.debounce(() => {
             // Debounce to prevent from executing more than once every 300ms.
             setTimeout(()=> {
@@ -386,7 +393,7 @@ var ExperimentSetHeaderBar = React.createClass({
                 }
             }, 0);
         }, 300, false);
-        /*
+        
         if (typeof window != 'undefined'){
             window.addEventListener('resize', debouncedStateChange);
             window.requestAnimationFrame(()=>{
@@ -395,7 +402,7 @@ var ExperimentSetHeaderBar = React.createClass({
                 });
             });
         }
-        */
+        
     },
 
     handleDescriptionExpandToggle: function (e) {
