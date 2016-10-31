@@ -1,7 +1,7 @@
 {
     "title": "SOPs with fields",
     "description": "For items with SOPs stores a mapping of the fields and the default values for that SOP.",
-    "id": "/profiles/sop_fields.json",
+    "id": "/profiles/sop_map.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "additionalProperties": false,

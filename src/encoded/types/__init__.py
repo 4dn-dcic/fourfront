@@ -298,16 +298,16 @@ class WorkflowMapping(Item):
 
 
 @collection(
-    name='sop_fields',
+    name='sop_maps',
     properties={
-        'title': 'SOP and fields',
+        'title': 'SOP and field mappings',
         'description': 'Listing of SOPs with the default values for fields from them',
     })
-class SopField(Item):
-    """The SopField class that lists the default values of fields if the SOP is followed."""
+class SopMap(Item):
+    """The SopFields class that lists the default values of fields if the SOP is followed."""
 
-    item_type = 'sop_fields'
-    schema = load_schema('encoded:schemas/sop_fields.json')
+    item_type = 'sop_map'
+    schema = load_schema('encoded:schemas/sop_map.json')
 
 
 @collection(
