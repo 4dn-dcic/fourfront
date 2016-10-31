@@ -102,7 +102,6 @@
         "title": {
             "title": "Title",
             "description": "Title of the publication or communication.",
-            "uniqueKey": true,
             "type": "string"
         },
         "abstract": {
