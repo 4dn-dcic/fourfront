@@ -36,6 +36,12 @@
             "description": "A short description of the SOP and what it's used for.",
             "type": "string"
         },
+        "sop_protocol": {
+            "title": "Protocol Document",
+            "description": "A document describing the SOP",
+            "type": "string",
+            "linkTo": "Protocol"
+        },
         "fields_in_sop": {
             "title": "SOP fields",
             "description": "The data fields that have SOP defaults",
