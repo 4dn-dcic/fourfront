@@ -317,70 +317,96 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 .indicators {
 
 	margin-top: 8px;
+	margin-bottom: 8px;
 
 	.expset-indicator {
 		display: inline-block;
 		box-sizing: border-box;
-		border: 1px solid rgba(0,0,0,0.125);
-		height: 28px;
-		line-height: 26px;
+		/* border: 1px solid rgba(0,0,0,0.125); */
+		/* border-radius: 5px; */
+		line-height: 20px;
 		color : #000;
 		font-weight: 400;
 		padding-left: 10px;
 		padding-right: 10px;
-		border-radius: 5px;
 		text-transform: capitalize;
 		color: #444;
 
 		&.right {
-			margin-left: 7px;
+			padding-left: 10px;
+			padding-right: 0;
+			margin-left : 10px;
+			border-left: 1px solid rgba(0,0,0,0.125);
+			&:last-child{
+				border-left: none;
+				padding-left: 0;
+				margin-left: 0;
+			}
 		}
 
 		&.left {
-			margin-right: 7px;
+			padding-right: 10px;
+			padding-left: 0;
+			margin-right : 10px;
+			border-right: 1px solid rgba(0,0,0,0.125);
+			&:last-child{
+				border-right: none;
+				padding-right: 0;
+				margin-right: 0;
+			}
 		}
 
-		&[data-status="released"]{
+		&.expset-status:before {
+			content: "";
+			width: 9px;
+			height : 9px;
+			display: inline-block;
+			position: relative;
+			margin-right: 7px;
+			border-radius: 50%;
+		}
+
+		&.expset-status[data-status="released"]:before {
 			color: #fff;
 			background-color: #308756;
 		}
 
-		&[data-status="current"]{
+		&.expset-status[data-status="current"]:before {
 			color: #fff;
 			background-color: #56889b;
 		}
 
-		&[data-status="revoked"]{
+		&.expset-status[data-status="revoked"]:before {
 			color: #fff;
 			background-color: #812423;
 		}
 
-		&[data-status="deleted"]{
+		&.expset-status[data-status="deleted"]:before {
 			color: #fff;
 			background-color: #a90d0b;
 		}
 
-		&[data-status="replaced"]{
+		&.expset-status[data-status="replaced"]:before {
 			color: #fff;
 			background-color: #47419a;
 		}
 
-		&[data-status="in review by lab"]{
+		&.expset-status[data-status="in review by lab"]:before {
 			color: #fff;
 			background-color: #47419a;
 		}
 
-		&[data-status="in review by project"]{
+		&.expset-status[data-status="in review by project"]:before {
 			color: #fff;
 			background-color: #47419a;
 		}
 
-		&[data-status="released to project"]{
+		&.expset-status[data-status="released to project"]:before {
 			color: #fff;
 			background-color: #397855;
 		}
 
-		&[data-status="unspecified"]{
+		&.expset-status[data-status="unspecified"]:before {
 			color: #fff;
 			background-color: #7b7b7b;
 			display: none;

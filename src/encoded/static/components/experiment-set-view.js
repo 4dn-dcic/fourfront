@@ -463,33 +463,49 @@ var ExperimentSetInfoBlock = React.createClass({
         titleHref,
         detailContent,
         extraContainerClassName = '',
-        extraDetailClassName = ''
+        extraDetailClassName = '',
+        loading = false
     ){
+        var innerContent;
+        if (loading) {
+            innerContent = (
+                <div className="row">
+                    <div className="col-xs-12 text-center" style={{ color : '#aaa', fontSize : '22px', paddingTop : 3 }}>
+                        <i className="icon icon-spin icon-circle-o-notch"></i>
+                    </div>
+                </div>
+            );
+        } else {
+            innerContent = (
+                <div className="row">
+                    <div className="col-xs-2 col-lg-1 icon-container">
+                        <i className={"icon " + iconClass}></i>
+                    </div>
+                    <div className="col-xs-10 col-lg-11">
+                        <h5>
+                            <a href={ titleHref || '#' } title={title}>{ title }</a>
+                        </h5>
+                        <div className={"more-details " + extraDetailClassName}>
+                            { detailContent }
+                        </div>
+                    </div>
+                </div>
+            );
+        }
         return (
             <div className="col-sm-6 col-sm-float-right">
                 <div className={"info-panel " + extraContainerClassName}>
                     <h6 className="info-panel-label">{ label }</h6>
-                    <div className="row">
-                        <div className="col-xs-2 col-lg-1 icon-container">
-                            <i className={"icon " + iconClass}></i>
-                        </div>
-                        <div className="col-xs-10 col-lg-11">
-                            <h5>
-                                <a href={ titleHref || '#' } title={title}>{ title }</a>
-                            </h5>
-                            <div className={"more-details " + extraDetailClassName}>
-                                { detailContent }
-                            </div>
-                        </div>
-                    </div>
-
+                    { innerContent }
                 </div>
             </div>
         );
     },
 
     formattedAwardInfoBlock : function(){
-        if (!this.props.awardInfo) return null;
+        if (!this.props.awardInfo) {
+            return this.formattedInfoBlock('Award', 'icon-institution', null, null, null, 'award', 'project', true);
+        };
         return this.formattedInfoBlock(
             'Award',
             'icon-institution',
@@ -497,12 +513,15 @@ var ExperimentSetInfoBlock = React.createClass({
             this.props.awardInfo['@id'],
             this.props.awardInfo.project,
             'award',
-            'project'
+            'project',
+            false
         );
     },
 
     formattedLabInfoBlock : function(){
-        if (!this.props.labInfo) return null;
+        if (!this.props.labInfo) {
+            return this.formattedInfoBlock('Lab', 'icon-users', null, null, null, 'lab', 'address', true);
+        };
         return this.formattedInfoBlock(
             'Lab',
             'icon-users',
@@ -515,7 +534,8 @@ var ExperimentSetInfoBlock = React.createClass({
                 (this.props.labInfo.country ? ', ' + this.props.labInfo.country : '')
             ),
             'lab',
-            'address'
+            'address',
+            false
         );
     },
 
