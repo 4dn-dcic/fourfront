@@ -6,6 +6,7 @@ var _ = require('underscore');
 var { SubIPanel, DescriptorField, tipsFromSchema } = require('./item');
 var { FacetList, siftExperiments } = require('./facetlist');
 var { ajaxLoad, textContentWidth, gridContainerWidth, isServerSide } = require('./objectutils');
+var moment = require('moment');
 
 /**
  * Entire ExperimentSet page view.
@@ -16,14 +17,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
     statics : {
         // Migrate somewhere better eventually
         parseDateTime : function(timestamp){
-            if (isServerSide()) return null;
-            return (new Date(timestamp)).toLocaleString(undefined, {
-                year : "numeric",
-                month : "long",
-                day : "numeric",
-                hour : "numeric",
-                minute : "numeric"
-            })
+            return moment(timestamp).format("MMMM Do, YYYY");
         }
     },
 
@@ -262,7 +256,7 @@ var ExperimentSetHeader = React.createClass({
         if (!('date_created' in this.props.context)) return <span><i></i></span>;
         return (
             <span>
-                <i className="icon sbt-calendar"></i>&nbsp; { ExperimentSetView.parseDateTime(this.props.context.date_created) }
+                <i className="icon sbt-calendar"></i>&nbsp; Added { ExperimentSetView.parseDateTime(this.props.context.date_created) }
             </span>
         );
     },
@@ -317,7 +311,7 @@ var ExperimentSetHeader = React.createClass({
 
                 <div className="row clearfix bottom-row">
                     <div className="col-sm-6 item-label-extra set-type-indicators">{ /* PLACEHOLDER / TEMP-EMPTY */ }</div>
-                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra" title="Date Created">{/* this.parsedCreationDate() */}</h5>
+                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra" title="Date Added">{ this.parsedCreationDate() }</h5>
                 </div>
 
             </div>
