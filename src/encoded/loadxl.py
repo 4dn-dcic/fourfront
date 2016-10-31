@@ -24,6 +24,7 @@ ORDER = [
     'document',
     'vendor',
     'protocol',
+    'sop_fields',
     'biosample_cell_culture',
     'individual_human',
     'individual_mouse',
@@ -382,7 +383,7 @@ def pipeline_logger(item_type, phase):
 
         loaded = created + updated
         logger.info('Loaded %d of %d %s (phase %s). CREATED: %d, UPDATED: %d, SKIPPED: %d, ERRORS: %d' % (
-             loaded, count, item_type, phase, created, updated, skipped, errors))
+            loaded, count, item_type, phase, created, updated, skipped, errors))
 
     return component
 

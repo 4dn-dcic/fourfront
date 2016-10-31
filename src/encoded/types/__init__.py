@@ -257,20 +257,6 @@ class AnalysisStep(Item):
     embedded = ['software_used', 'qa_stats_generated']
 
 
-# @collection(
-#    name='tasks',
-#     properties={
-#         'title': 'Tasks',
-#         'description': 'Listing of runs of analysis steps for 4DN analyses',
-#     })
-# class Task(Item):
-#     """The Task class that descrbes a run of an analysis step."""
-#
-#     item_type = 'task'
-#     schema = load_schema('encoded:schemas/task.json')
-#     embedded = ['analysis_step']
-
-
 @collection(
     name='workflows',
     properties={
@@ -309,6 +295,19 @@ class WorkflowMapping(Item):
 
     item_type = 'workflow_mapping'
     schema = load_schema('encoded:schemas/workflow_mapping.json')
+
+
+@collection(
+    name='sop_fields',
+    properties={
+        'title': 'SOP and fields',
+        'description': 'Listing of SOPs with the default values for fields from them',
+    })
+class SopField(Item):
+    """The SopField class that lists the default values of fields if the SOP is followed."""
+
+    item_type = 'sop_fields'
+    schema = load_schema('encoded:schemas/sop_fields.json')
 
 
 @collection(
