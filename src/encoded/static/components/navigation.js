@@ -140,10 +140,7 @@ var UserActions = React.createClass({
         var session = this.context.session;
         var acctTitle = (
             <span>
-                <i className="icon ss-user" style={{
-                    transform: 'translateY(2px)',
-                    opacity : session['auth.userid'] ? 1 : 0.25
-                }}></i> Account
+                <i className={"icon icon-user" + (session['auth.userid'] ? "" : "-o")}></i>&nbsp; Account
             </span>
         );
 

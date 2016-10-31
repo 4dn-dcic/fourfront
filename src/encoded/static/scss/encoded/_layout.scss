@@ -396,7 +396,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 		&.expset-status[data-status="current"]:before {
 			color: #fff;
-			background-color: #56889b;
+			background-color: #308756;
 		}
 
 		&.expset-status[data-status="revoked"]:before {
@@ -416,12 +416,12 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 		&.expset-status[data-status="in review by lab"]:before {
 			color: #fff;
-			background-color: #47419a;
+			background-color: #d8bd22;
 		}
 
 		&.expset-status[data-status="in review by project"]:before {
 			color: #fff;
-			background-color: #47419a;
+			background-color: #d8bd22;
 		}
 
 		&.expset-status[data-status="released to project"]:before {
