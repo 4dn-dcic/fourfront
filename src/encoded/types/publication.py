@@ -149,9 +149,14 @@ class Publication(Item):
                     pass
         except:
             pass
-        properties['title'] = title
-        properties['abstract'] = abstract
-        properties['authors'] = authors
-        properties['url'] = url
-        properties['date_published'] = date
+        if title != "":
+            properties['title'] = title
+        if abstract != "":
+            properties['abstract'] = abstract
+        if authors != "":
+            properties['authors'] = authors
+        if url != "":
+            properties['url'] = url
+        if date != "":
+            properties['date_published'] = date
         super(Publication, self)._update(properties, sheets)
