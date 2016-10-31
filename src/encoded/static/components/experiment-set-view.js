@@ -274,7 +274,11 @@ var ExperimentSetHeader = React.createClass({
 
         // Status colors are set via CSS (layout.scss) dependent on data-status attribute
         return (
-            <div className="expset-indicator expset-status right" data-status={ this.props.context.status.toLowerCase() }>
+            <div
+                className="expset-indicator expset-status right"
+                data-status={ this.props.context.status.toLowerCase() }
+                title="Review Status"
+            >
                 { this.props.context.status }
             </div>
         );
@@ -283,7 +287,11 @@ var ExperimentSetHeader = React.createClass({
     parsedExperimentSetType(){
         if (!('experimentset_type' in this.props.context)) return <div></div>;
         return (
-            <div className="expset-indicator expset-type right" data-set-type={ this.props.context.experimentset_type }>
+            <div
+                className="expset-indicator expset-type right"
+                data-set-type={ this.props.context.experimentset_type }
+                title="Experiment Set Type"
+            >
                 { this.props.context.experimentset_type }
             </div>
         );

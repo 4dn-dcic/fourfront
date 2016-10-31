@@ -243,7 +243,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 ************************************************************/
 
 
-@media screen and (min-width: $screen-sm-min){
+@media screen and (min-width: $screen-md-min){
 	/* Nudge accession #, etc. closer to title on wide desktop views */
 	.exp-set-header-area {
 		margin-top: -27px;
@@ -332,27 +332,50 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		text-transform: capitalize;
 		color: #444;
 
+		&.right, .left {
+			max-width: 50%;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			&:after {
+				content : "";
+				display: block;
+				position: absolute;
+				height: 100%;
+				top: 0;
+			}
+		}
+
 		&.right {
-			padding-left: 10px;
+			padding-left: 21px;
 			padding-right: 0;
-			margin-left : 10px;
-			border-left: 1px solid rgba(0,0,0,0.125);
-			&:last-child{
-				border-left: none;
+			&:after {
+				margin-left: -11px;
+				border-left: 1px solid rgba(0,0,0,0.125);
+			}
+			&:last-child {
 				padding-left: 0;
 				margin-left: 0;
+			}
+			&:last-child:after {
+				display: none;
 			}
 		}
 
 		&.left {
-			padding-right: 10px;
+			padding-right: 21px;
 			padding-left: 0;
-			margin-right : 10px;
-			border-right: 1px solid rgba(0,0,0,0.125);
-			&:last-child{
-				border-right: none;
+			max-width: 50%;
+			&:after {
+				margin-right: -11px;
+				border-right: 1px solid rgba(0,0,0,0.125);
+			}
+			&:last-child {
 				padding-right: 0;
 				margin-right: 0;
+			}
+			&:last-child:after {
+				display: none;
 			}
 		}
 
