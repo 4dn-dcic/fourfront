@@ -18,7 +18,7 @@
             {"field_name": "ligation_volume", "field_value": "1"},
             {"field_name": "fragmentation_method", "field_value": "sonication"},
             {"field_name": "fragment_size_range", "field_value": "300-500"},
-            {"field_name": "fragment_size_selection_method", "field_value": "SPRI beads"},
+            {"field_name": "fragment_size_selection_method", "field_value": "SPRI beads"}
         ]
     }
 ]
