@@ -28,7 +28,7 @@ def fetch_pubmed(PMID):
         if key_pb == 'AB':
             abstract = data_pb.strip()
         # grab the date
-        if key_pb == 'DA':
+        if key_pb == 'DP':
             date = data_pb.strip()
         # accumulate authors
         if key_pb == 'AU':
