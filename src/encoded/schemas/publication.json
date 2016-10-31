@@ -106,7 +106,6 @@
             "type": "string"
         },
         "abstract": {
-            "rdfs:subPropertyOf": "dc:abstract",
             "title": "Abstract",
             "description": "Abstract of the publication or communication.",
             "type": "string"
@@ -114,6 +113,11 @@
         "authors": {
             "title": "Authors",
             "description": "All authors, with format Bernstein BE, Birney E, Dunham I,...",
+            "type": "string"
+        },
+        "date_published": {
+            "title": "Publication date",
+            "description": "Publication date.",
             "type": "string"
         },
         "url": {
