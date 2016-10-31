@@ -5,7 +5,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "additionalProperties": false,
-    "identifyingProperties": ["uuid", "aliases"],
+    "identifyingProperties": ["uuid", "aliases", "sop_name"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/aliases" },
@@ -24,6 +24,12 @@
             "title": "SOP",
             "description": "Name of the SOP.",
             "type": "string"
+        },
+        "sop_version": {
+            "title": "Version",
+            "description": "Version of the SOP",
+            "type": "number",
+            "default": 1
         },
         "description": {
             "title": "Description",
