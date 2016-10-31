@@ -209,25 +209,25 @@ var FacetList = module.exports.FacetList = React.createClass({
     },
 
     componentWillMount : function(){
+        if (this.state.usingProvidedFacets === false && this.state.facetsLoaded){
+            FacetList.fillFacetTermsAndCountFromExps(this.facets, this.props.experimentSetListJSON);
+        }
+    },
+
+    componentDidMount : function(){
 
         console.log(
-            'Mounting FacetList on ' + (this.props.urlPath || 'unknown page.'),
+            'Mounted FacetList on ' + (this.props.urlPath || 'unknown page.'),
             '\nFacets Provided: ' + this.state.usingProvidedFacets,
             'Facets Loaded: ' + this.state.facetsLoaded
         );
 
-        if (this.state.usingProvidedFacets === false){
-            if (!this.state.facetsLoaded) {
-                // Load list of available facets via AJAX once & reuse.
-                this.loadFacets(() => {
-                    FacetList.fillFacetTermsAndCountFromExps(this.facets, this.props.experimentSetListJSON);
-                    this.setState({ facetsLoaded : true });
-                });
-            } else {
+        if (this.state.usingProvidedFacets === false && !this.state.facetsLoaded && typeof window !== 'undefined'){
+            // Load list of available facets via AJAX once & reuse.
+            this.loadFacets(() => {
                 FacetList.fillFacetTermsAndCountFromExps(this.facets, this.props.experimentSetListJSON);
-            }
+            });
         }
-
     },
 
     componentWillUnmount : function(){
@@ -241,11 +241,14 @@ var FacetList = module.exports.FacetList = React.createClass({
         ajaxLoad('/facets?type=' + facetType + '&format=json', function(r){
             this.facets = r;
             console.log('Loaded Facet List via AJAX.');
-            if (facetType == 'Experiment' && !this.props.expIncompleteFacets){
-                store.dispatch({
-                    type : {'expIncompleteFacets' : this.facets}
+            if (facetType == 'Experiment' && !this.props.expIncompleteFacets && typeof window !== 'undefined'){
+                window.requestAnimationFrame(()=>{
+                    // Will trigger app re-render & update state.facetsLoaded as well through getInitialState.
+                    store.dispatch({
+                        type : {'expIncompleteFacets' : this.facets}
+                    });
+                    console.log('Stored Facet List in Redux store.');
                 });
-                console.log('Stored Facet List in Redux store.');
             }
             if (typeof callback == 'function') callback();
         }.bind(this));
@@ -298,7 +301,7 @@ var FacetList = module.exports.FacetList = React.createClass({
     },
 
     render: function() {
-
+        console.log('render facetlist');
         var facets = this.facets, // Get all facets, and "normal" facets, meaning non-audit facets
             loggedIn = this.context.session && this.context.session['auth.userid'],
             regularFacets = [],

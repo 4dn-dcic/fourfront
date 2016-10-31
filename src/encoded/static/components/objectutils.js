@@ -45,6 +45,16 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
     }
 }
 
+/**
+ * Adapted from react/node_modules/fbjs/lib/ExecutionEnvironment.canUseDOM()
+ */
+var isServerSide = module.exports.isServerSide = function(){
+    if (typeof window == 'undefined' || !window || !window.document || !window.document.createElement){
+        return true;
+    }
+    return false;
+}
+
 var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = null, data = null){
     return new Promise(function(resolve, reject) {
         var xhr = new XMLHttpRequest();
@@ -81,7 +91,7 @@ var textContentWidth = module.exports.textContentWidth = function(
     containerClassName = '',
     widthForHeightCheck = null
 ){
-    if (typeof window == 'undefined' || !window.document){
+    if (isServerSide()){
         return null;
     };
     var contElem = document.createElement(containerElementType);
@@ -112,7 +122,7 @@ var textContentWidth = module.exports.textContentWidth = function(
  * @return {integer}
  */
 var gridContainerWidth = module.exports.gridContainerWidth = function(){
-    if (typeof window == 'undefined') return null;
+    if (isServerSide()) return 1140;
     // Subtract 20 for padding.
     if (window.innerWidth >= 1200) return 1140;
     if (window.innerWidth >= 992) return 940;

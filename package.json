@@ -41,7 +41,7 @@
     "jsdom": "^8.4.0",
     "json-loader": "^0.5.4",
     "string-replace-loader": "^1.0.0",
-    "webpack": "^1.13.0"
+    "webpack": "^1.13.3"
   },
   "dependencies": {
     "auth0-lock": "^10.4.0",

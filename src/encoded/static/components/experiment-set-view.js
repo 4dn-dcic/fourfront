@@ -5,7 +5,7 @@ var ExperimentsTable = require('./experiments-table').ExperimentsTable;
 var _ = require('underscore');
 var { SubIPanel, DescriptorField, tipsFromSchema } = require('./item');
 var { FacetList, siftExperiments } = require('./facetlist');
-var { ajaxLoad, textContentWidth, gridContainerWidth } = require('./objectutils');
+var { ajaxLoad, textContentWidth, gridContainerWidth, isServerSide } = require('./objectutils');
 
 /**
  * Entire ExperimentSet page view.
@@ -16,6 +16,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
     statics : {
         // Migrate somewhere better eventually
         parseDateTime : function(timestamp){
+            if (isServerSide()) return null;
             return (new Date(timestamp)).toLocaleString(undefined, {
                 year : "numeric",
                 month : "long",
@@ -60,7 +61,9 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         if (!this.tips) {
             this.tips = tipsFromSchema(this.props.schemas, this.props.context);
         }
+    },
 
+    componentDidMount : function(){
         if (!this.state.details_lab) {
             var labDetails = this.getLinkedPropertyDetailsFromExperiments('lab', true);
             if (labDetails){
@@ -142,12 +145,13 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
         // Uh-oh! ExperimentSet award exists but doesn't match that of any experiments'.
         // Perhaps fallback to using AJAX. Lol.
-        if (propertyID && !propertyInfo && allowAjaxFallback) {
+        if (typeof window != 'undefined' && propertyID && !propertyInfo && allowAjaxFallback) {
             // throw new Error(propertyName + " " + propertyID + " not found in ExperimentSet " + this.props.context.accession + " experiments.");
             var newStateAddition = {};
             newStateAddition['details_' + propertyName] = null;
             this.setState(newStateAddition);
             
+            console.log('Obtaining details_' + propertyName + ' via AJAX.');
             ajaxLoad(propertyID + '?format=json', function(result){
                 newStateAddition = {};
                 newStateAddition['details_' + propertyName] = result;
@@ -165,6 +169,8 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
         var title = globals.listing_titles.lookup(this.props.context)({context: this.props.context});
         var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container experiment-set-page');
+
+        console.log('render ExperimentSet view');
 
         return (
             <div className={itemClass}>
@@ -217,9 +223,10 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
                 </div>
 
+                {/*
                 <br/><br/><br /><br /><hr />
                 <h6>Existing Print-out (temporary):</h6>
-
+                
                 <Panel className="data-display panel-body-with-header">
                     <dl className="key-value">
                         {Object.keys(this.props.context).sort().map((ikey, idx) =>
@@ -238,6 +245,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                         )}
                     </dl>
                 </Panel>
+                */}
 
             </div>
         );
@@ -251,7 +259,7 @@ globals.panel_views.register(ExperimentSetView, 'ExperimentSet');
 var ExperimentSetHeader = React.createClass({
 
     parsedCreationDate(){
-        if (!('date_created' in this.props.context)) return null;
+        if (!('date_created' in this.props.context)) return <span><i></i></span>;
         return (
             <span>
                 <i className="icon sbt-calendar"></i>&nbsp; { ExperimentSetView.parseDateTime(this.props.context.date_created) }
@@ -260,7 +268,7 @@ var ExperimentSetHeader = React.createClass({
     },
 
     parsedStatus(){
-        if (!('status' in this.props.context)) return null;
+        if (!('status' in this.props.context)) return <div></div>;
         /*  Removed icon in lieu of color indicator for status
         var iconClass = null;
         switch (this.props.context.status){
@@ -282,7 +290,7 @@ var ExperimentSetHeader = React.createClass({
     },
 
     parsedExperimentSetType(){
-        if (!('experimentset_type' in this.props.context)) return null;
+        if (!('experimentset_type' in this.props.context)) return <div></div>;
         return (
             <div className="expset-indicator expset-type right" data-set-type={ this.props.context.experimentset_type }>
                 { this.props.context.experimentset_type }
@@ -291,6 +299,7 @@ var ExperimentSetHeader = React.createClass({
     },
 
     render: function() {
+        console.log('render ExperimentSetHeader')
         return (
             <div className="exp-set-header-area">
 
@@ -308,7 +317,7 @@ var ExperimentSetHeader = React.createClass({
 
                 <div className="row clearfix bottom-row">
                     <div className="col-sm-6 item-label-extra set-type-indicators">{ /* PLACEHOLDER / TEMP-EMPTY */ }</div>
-                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra" title="Date Created">{ this.parsedCreationDate() }</h5>
+                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra" title="Date Created">{/* this.parsedCreationDate() */}</h5>
                 </div>
 
             </div>
@@ -338,14 +347,17 @@ var ExperimentSetHeaderBar = React.createClass({
     getInitialState : function(){
         return {
             descriptionExpanded : false,
-            descriptionWillFitOneLine : null,
+            descriptionWillFitOneLine : true,
             descriptionWhiteSpace : 'nowrap'
         }
     },
 
     descriptionHeight : null, // Use for animating height, if needed.
 
+    
     checkWillDescriptionFitOneLineAndUpdateHeight : function(){
+
+        if (isServerSide()) return true;
         
         var containerWidth = gridContainerWidth() - this.props.totalPaddingWidth; // Account for inner padding & border.
         
@@ -361,16 +373,12 @@ var ExperimentSetHeaderBar = React.createClass({
             return true;
         }
         return false;
-    },
 
-    componentWillMount : function(){
-        this.setState({
-            descriptionWillFitOneLine : this.checkWillDescriptionFitOneLineAndUpdateHeight()
-        });
     },
+    
 
     componentDidMount : function(){
-        window.textBox = this;
+        
         var debouncedStateChange = _.debounce(() => {
             // Debounce to prevent from executing more than once every 300ms.
             setTimeout(()=> {
@@ -385,8 +393,16 @@ var ExperimentSetHeaderBar = React.createClass({
                 }
             }, 0);
         }, 300, false);
-
-        window.addEventListener('resize', debouncedStateChange);
+        
+        if (typeof window != 'undefined'){
+            window.addEventListener('resize', debouncedStateChange);
+            window.requestAnimationFrame(()=>{
+                this.setState({
+                    descriptionWillFitOneLine : this.checkWillDescriptionFitOneLineAndUpdateHeight()
+                });
+            });
+        }
+        
     },
 
     handleDescriptionExpandToggle: function (e) {
@@ -407,6 +423,7 @@ var ExperimentSetHeaderBar = React.createClass({
     },
 
     render : function(){
+        console.log('render ExperimentSetHeaderBar');
         var expandButton;
         if (!this.state.descriptionWillFitOneLine){
             expandButton = (
