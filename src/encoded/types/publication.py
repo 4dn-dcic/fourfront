@@ -113,5 +113,5 @@ class Publication(Item):
         properties['abstract'] = abstract
         properties['authors'] = authors
         properties['url'] = url
-        properties['date'] = date
+        properties['date_published'] = date
         super(Publication, self)._update(properties, sheets)
