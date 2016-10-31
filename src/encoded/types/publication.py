@@ -134,17 +134,17 @@ class Publication(Item):
         try:
             if p_id.startswith('PMID'):
                 pubmed_id = p_id[5:]
-                title, abstract, authors, url = fetch_pubmed(pubmed_id)
+                title, abstract, authors, url, date = fetch_pubmed(pubmed_id)
             # if id is doi, first check if it maps to pubmed id, else see where it goes
             elif p_id.startswith('doi'):
                 doi_id = p_id[4:]
                 if map_doi_pmid(doi_id):
                     pubmed_id = map_doi_pmid(doi_id)
-                    title, abstract, authors, url = fetch_pubmed(pubmed_id)
+                    title, abstract, authors, url, date = fetch_pubmed(pubmed_id)
                 # if it goes to biorxiv fetch from biorxiv
                 elif map_doi_biox(doi_id):
                     biox_url = map_doi_biox(doi_id)
-                    title, abstract, authors, url = fetch_biorxiv(biox_url)
+                    title, abstract, authors, url, date = fetch_biorxiv(biox_url)
                 else:
                     pass
         except:
