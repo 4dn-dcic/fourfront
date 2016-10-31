@@ -5,21 +5,13 @@ var ExperimentsTable = require('./experiments-table').ExperimentsTable;
 var _ = require('underscore');
 var { SubIPanel, DescriptorField, tipsFromSchema } = require('./item');
 var { FacetList, siftExperiments } = require('./facetlist');
-var { ajaxLoad, textContentWidth, gridContainerWidth, isServerSide } = require('./objectutils');
-var moment = require('moment');
+var { ajaxLoad, textContentWidth, gridContainerWidth, isServerSide, parseDateTime } = require('./objectutils');
 
 /**
  * Entire ExperimentSet page view.
  */
 
 var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
-
-    statics : {
-        // Migrate somewhere better eventually
-        parseDateTime : function(timestamp){
-            return moment(timestamp).format("MMMM Do, YYYY");
-        }
-    },
 
     propTypes : {
         schemas : React.PropTypes.object,
@@ -55,20 +47,25 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         if (!this.tips) {
             this.tips = tipsFromSchema(this.props.schemas, this.props.context);
         }
+        this.setLinkedDetails(false);
     },
 
     componentDidMount : function(){
+        this.setLinkedDetails(true);
+    },
+
+    setLinkedDetails : function(fallbackToAjax = false){
         if (!this.state.details_lab) {
-            var labDetails = this.getLinkedPropertyDetailsFromExperiments('lab', true);
-            if (labDetails){
+            var labDetails = this.getLinkedPropertyDetailsFromExperiments('lab', fallbackToAjax);
+            if (labDetails !== null){
                 this.setState({
                     details_lab : labDetails
                 });
             }
         }
         if (!this.state.details_award) {
-            var awardDetails = this.getLinkedPropertyDetailsFromExperiments('award', true);
-            if (awardDetails){
+            var awardDetails = this.getLinkedPropertyDetailsFromExperiments('award', fallbackToAjax);
+            if (awardDetails !== null){
                 this.setState({
                     details_award : awardDetails
                 });
@@ -153,9 +150,9 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                 console.log('Obtained details_' + propertyName + ' via AJAX.');
             }.bind(this), 'GET');
             
+        } else {
+            return propertyInfo;
         }
-
-        return propertyInfo;
 
     },
 
@@ -256,7 +253,7 @@ var ExperimentSetHeader = React.createClass({
         if (!('date_created' in this.props.context)) return <span><i></i></span>;
         return (
             <span>
-                <i className="icon sbt-calendar"></i>&nbsp; Added { ExperimentSetView.parseDateTime(this.props.context.date_created) }
+                <i className="icon sbt-calendar"></i>&nbsp; Added { parseDateTime(this.props.context.date_created) }
             </span>
         );
     },
