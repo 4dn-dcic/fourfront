@@ -2,7 +2,6 @@
 var React = require('react');
 var url = require('url');
 var globals = require('./globals');
-var parseAndLogError = require('./mixins').parseAndLogError;
 var StickyHeader = require('./StickyHeader');
 
 
@@ -111,7 +110,8 @@ var lookup_column = function (result, column) {
     var Table = module.exports.Table = React.createClass({
         contextTypes: {
             fetch: React.PropTypes.func,
-            location_href: React.PropTypes.string
+            location_href: React.PropTypes.string,
+            contentTypeIsJSON: React.PropTypes.func
         },
 
 
@@ -255,16 +255,17 @@ var lookup_column = function (result, column) {
             if (context.all) {
                 communicating = true;
                 request = this.context.fetch(context.all, {
-                    headers: {'Accept': 'application/json'}
+                    headers: {'Accept': 'application/json',
+                        'Content-Type': 'application/json'}
                 });
                 request.then(response => {
-                    if (!response.ok) throw response;
-                    return response.json();
+                    if (!this.context.contentTypeIsJSON(response)) throw response;
+                    return response;
                 })
                 .then(data => {
                     self.extractData({context: data});
                     self.setState({communicating: false});
-                }, parseAndLogError.bind(undefined, 'allRequest'));
+                });
                 this.setState({
                     allRequest: request,
                     communicating: true

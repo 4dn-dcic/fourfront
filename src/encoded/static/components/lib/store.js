@@ -3,7 +3,6 @@
 
 'use strict';
 var _ = require('underscore');
-var parseAndLogError = require('../mixins').parseAndLogError;
 
 
 module.exports.ItemStore = class ItemStore {
@@ -57,20 +56,18 @@ module.exports.ItemStore = class ItemStore {
     }
 
     /* call the backend */
-    fetch(url, options, then) {
+    fetch(url, options, callback) {
         options.headers = _.extend(options.headers || {}, {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
         });
-        return this._fetch(
-            url, options
-        ).then(response => {
-            if (!response.ok) throw response;
-            return response.json();
-        }).then(then).catch(err => {
-            return parseAndLogError('ItemStore', err).then(response => {
-                this.dispatch('onError', response);
-            });
+        var request = this._fetch(url, options);
+        request.then(response => {
+            console.log(response);
+            if (response.status && response.status != 'success') throw response;
+            return response;
+        }).then(callback).catch(err => {
+            this.dispatch('onError', err);
         });
     }
 

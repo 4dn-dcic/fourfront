@@ -32,6 +32,7 @@ def includeme(config):
     config.add_route('browse', '/browse{slash:/?}')
     config.add_route('report', '/report{slash:/?}')
     config.add_route('matrix', '/matrix{slash:/?}')
+    config.add_route('available_facets', '/facets{slash:/?}')
     config.scan(__name__)
 
 
@@ -948,3 +949,44 @@ def matrix(context, request):
 def browse(context, request, search_type=None, return_generator=False):
     # import pdb; pdb.set_trace()
     return search(context, request, search_type, return_generator, forced_type='Browse')
+
+
+@view_config(route_name='available_facets', request_method='GET', permission='search', renderer='json')
+def get_available_facets(context, request):
+    """
+    Method to get available facets for a content/data type; built off of search() without querying Elasticsearch.
+    Unlike in search(), due to lack of ES query, does not return possible terms nor counts of experiments matching the terms.
+    """
+
+    requestTypes = request.params.getall('type')
+    if len(requestTypes) == 0:
+        doc_types = ['Item']
+    else:
+        doc_types = [requestTypes[0]]
+
+    types = request.registry[TYPES]
+
+    # Normalize to item_type
+    try:
+        doc_types = sorted({types[name].name for name in doc_types})
+    except KeyError:
+        # Check for invalid types
+        bad_types = [t for t in doc_types if t not in types]
+        msg = "Invalid type: {}".format(', '.join(bad_types))
+        raise HTTPBadRequest(explanation=msg)
+
+    # schemas = (types[item_type].schema for item_type in doc_types)
+
+    facets = [] # [('type', {'title': 'Data Type'}),]
+    if len(doc_types) == 1 and 'facets' in types[doc_types[0]].schema:
+        facets.extend(types[doc_types[0]].schema['facets'].items())
+
+    ### Mini version of format_facets
+    result = []
+    for field, facet in facets:
+        result.append({
+            'field': field,
+            'title': facet.get('title', field)
+        })
+
+    return result
