@@ -16,6 +16,7 @@ def fetch_pubmed(PMID):
     abstract = ''
     author_list = []
     authors = ''
+    date = ''
     NIHe = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
     NIHw = "https://www.ncbi.nlm.nih.gov/pubmed/"
     url = NIHw + PMID
@@ -31,6 +32,9 @@ def fetch_pubmed(PMID):
         # grab the abstract
         if key_pb == 'AB':
             abstract = data_pb.strip()
+        # grab the date
+        if key_pb == 'DP':
+            date = data_pb.strip()
         # accumulate authors
         if key_pb == 'AU':
             author_list.append(data_pb.strip())
@@ -38,7 +42,7 @@ def fetch_pubmed(PMID):
         if key_pb == 'CN':
             author_list.append(data_pb.strip())
         authors = ', '.join(author_list)
-    return title, abstract, authors, url
+    return title, abstract, authors, url, date
 
 
 class BioRxivExtractor(HTMLParser):
@@ -47,7 +51,7 @@ class BioRxivExtractor(HTMLParser):
         self.title = ''
         self.abstract = ''
         self.author_list = []
-        self.authors = ''
+        self.date = ''
 
     def handle_starttag(self, tag, attrs):
         attr = ''
@@ -59,6 +63,8 @@ class BioRxivExtractor(HTMLParser):
                 self.abstract = attr.get('content')
             if attr.get('name') == "DC.Contributor":
                 self.author_list.append(attr.get('content'))
+            if attr.get('name') == "DC.Date":
+                self.date = attr.get('content')
 
 
 def fetch_biorxiv(url):
@@ -66,14 +72,16 @@ def fetch_biorxiv(url):
     title = ''
     abstract = ''
     authors = ''
+    date = ''
     r = requests.get(url)
     resp = r.text.encode('utf-8').decode('ascii', 'ignore')
     parser = BioRxivExtractor()
     parser.feed(resp)
     title = parser.title
     abstract = parser.abstract
+    date = parser.date
     authors = ", ".join(parser.author_list)
-    return title, abstract, authors, url
+    return title, abstract, authors, url, date
 
 
 def map_doi_pmid(doi):
@@ -120,25 +128,30 @@ class Publication(Item):
         abstract = ''
         authors = ''
         url = ''
+        date = ''
         p_id = properties['ID']
         # parse if id is from pubmed
-        if p_id.startswith('PMID'):
-            pubmed_id = p_id[5:]
-            title, abstract, authors, url = fetch_pubmed(pubmed_id)
-        # if id is doi, first check if it maps to pubmed id, else see where it goes
-        elif p_id.startswith('doi'):
-            doi_id = p_id[4:]
-            if map_doi_pmid(doi_id):
-                pubmed_id = map_doi_pmid(doi_id)
+        try:
+            if p_id.startswith('PMID'):
+                pubmed_id = p_id[5:]
                 title, abstract, authors, url = fetch_pubmed(pubmed_id)
-            # if it goes to biorxiv fetch from biorxiv
-            elif map_doi_biox(doi_id):
-                biox_url = map_doi_biox(doi_id)
-                title, abstract, authors, url = fetch_biorxiv(biox_url)
-            else:
-                pass
+            # if id is doi, first check if it maps to pubmed id, else see where it goes
+            elif p_id.startswith('doi'):
+                doi_id = p_id[4:]
+                if map_doi_pmid(doi_id):
+                    pubmed_id = map_doi_pmid(doi_id)
+                    title, abstract, authors, url = fetch_pubmed(pubmed_id)
+                # if it goes to biorxiv fetch from biorxiv
+                elif map_doi_biox(doi_id):
+                    biox_url = map_doi_biox(doi_id)
+                    title, abstract, authors, url = fetch_biorxiv(biox_url)
+                else:
+                    pass
+        except:
+            pass
         properties['title'] = title
         properties['abstract'] = abstract
         properties['authors'] = authors
         properties['url'] = url
+        properties['date'] = date
         super(Publication, self)._update(properties, sheets)
