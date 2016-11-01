@@ -638,7 +638,6 @@ var App = React.createClass({
                 lowerList.push(value.toLowerCase());
             }
         });
-        console.log('===>>',status);
         var currRoute = lowerList.slice(1); // eliminate http
         // check error status
         var status;

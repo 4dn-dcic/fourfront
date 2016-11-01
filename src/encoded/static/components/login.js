@@ -67,13 +67,12 @@ var Login = React.createClass({
     handleAuth0Login: function(authResult, retrying){
         var accessToken = authResult.accessToken;
         var idToken = authResult.idToken; //JWT
-        // this code not appropriate to push:
-        process.env.JWT_SECRET = 'poopysecret';
-        console.log('......');
-        console.log('ID TOKEN.......',idToken);
-        jwt.verify(idToken,new Buffer(process.env.JWT_SECRET, 'base64'),function(err,decoded){
+        try {
+            var decoded = jwt.verify(idToken,new Buffer('poopysecret', 'base64'));
             console.log('------VERIFIED');
-        });
+        } catch(err) {
+            console.log('------ERROR');
+        }
         if (!accessToken) return;
         this.context.fetch('/login', {
             method: 'POST',
@@ -89,8 +88,12 @@ var Login = React.createClass({
             return response;
         })
         .then(response => {
+            //NOT THE PLACE TO SET process.env!
+            //DO NOT MERGE THIS CODE
+            process.env.JWT_SECRET = 'poopysecret';
             if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
                 localStorage.setItem("user_actions", JSON.stringify(response.user_actions));
+                localStorage.setItem("idToken", idToken);
             }
             this.context.navigate('', {'inPlace':true});
         }, error => {
