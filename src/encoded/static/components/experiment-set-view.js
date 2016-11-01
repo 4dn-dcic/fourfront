@@ -77,10 +77,12 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
             this.updateFileDetailAndCachedCounts(true);
         }
 
+        /* For debugging
         if (!isServerSide()){
             window.table = this.refs.experimentsTable;
             window.view = this;
         }
+        */
 
     },
 
