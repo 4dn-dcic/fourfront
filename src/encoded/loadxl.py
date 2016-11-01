@@ -21,6 +21,7 @@ ORDER = [
     'genomic_region',
     'target',
     'publication',
+    'publication_tracking',
     'document',
     'vendor',
     'protocol',
@@ -534,6 +535,9 @@ PHASE1_PIPELINES = {
         remove_keys('experiments_in_set'),
     ],
     'publication': [
+        remove_keys('exp_sets_prod_in_pub', 'exp_sets_used_in_pub'),
+    ],
+    'publication_tracking': [
         remove_keys('experiment_sets_in_pub'),
     ]
 }
@@ -572,6 +576,9 @@ PHASE2_PIPELINES = {
         skip_rows_missing_all_keys('experiments_in_set'),
     ],
     'publication': [
+        skip_rows_missing_all_keys('exp_sets_prod_in_pub', 'exp_sets_used_in_pub'),
+    ],
+    'publication_tracking': [
         skip_rows_missing_all_keys('experiment_sets_in_pub'),
     ]
 }
