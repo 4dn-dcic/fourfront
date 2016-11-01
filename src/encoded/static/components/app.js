@@ -500,10 +500,13 @@ var App = React.createClass({
             });
             return;
         }
+        var idToken = localStorage.getItem('idToken') || null;
+        var reqHeaders = {headers: {'Accept': 'application/json'}}
+        if(idToken){
+            reqHeaders.headers['Authorization'] = 'Bearer '+idToken;
+        }
         var reqHref = href.slice(-1) === '/' ? href + '/?format=json' : href + '&format=json';
-        request = this.fetch(reqHref, {
-            headers: {'Accept': 'application/json'}
-        });
+        request = this.fetch(reqHref, reqHeaders);
         this.requestCurrent = true; // Remember we have an outstanding GET request
         var timeout = new Timeout(this.SLOW_REQUEST_TIME);
         Promise.race([request, timeout.promise]).then(v => {

@@ -26,7 +26,7 @@ var Login = React.createClass({
             auth: {
             	redirect: false,
                 responseType: 'token',
-                params: {scope: 'openid email email_verified'}
+                params: {scope: 'openid email'}
             },
             socialButtonStyle: 'big',
             languageDictionary: {
@@ -47,15 +47,18 @@ var Login = React.createClass({
 
     logout: function (e) {
         e.preventDefault();
+        var idToken = localStorage.getItem('idToken') || "";
         console.log('Logging out');
         var session = this.context.session;
         if (!(session && session['auth.userid'])) return;
         this.context.fetch('/logout?redirect=false', {
             headers: {'Accept': 'application/json',
-                'Content-Type': 'application/json'}
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer '+idToken}
         })
         .then(data => {
             if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
+                localStorage.removeItem("idToken");
                 localStorage.removeItem("user_actions");
             }
             if(typeof document !== 'undefined'){
@@ -67,18 +70,13 @@ var Login = React.createClass({
     handleAuth0Login: function(authResult, retrying){
         var accessToken = authResult.accessToken;
         var idToken = authResult.idToken; //JWT
-        try {
-            var decoded = jwt.verify(idToken,new Buffer('poopysecret', 'base64'));
-            console.log('------VERIFIED');
-        } catch(err) {
-            console.log('------ERROR');
-        }
         if (!accessToken) return;
         this.context.fetch('/login', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer '+idToken
             },
             body: JSON.stringify({accessToken: accessToken})
         })
@@ -88,9 +86,7 @@ var Login = React.createClass({
             return response;
         })
         .then(response => {
-            //NOT THE PLACE TO SET process.env!
-            //DO NOT MERGE THIS CODE
-            process.env.JWT_SECRET = 'poopysecret';
+            //Keep JWT in localStorage so that it persists across refresh
             if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
                 localStorage.setItem("user_actions", JSON.stringify(response.user_actions));
                 localStorage.setItem("idToken", idToken);
