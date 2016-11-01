@@ -624,15 +624,6 @@ var App = React.createClass({
                 canonical = context.canonical_uri;
             }
         }
-        // check error status
-        var status;
-        if(context.code && context.code == 404){
-            status = 'not_found';
-        }else if(context.status && context.status == 403){
-            status = 'invalid_login';
-        }else if((context.code && context.code == 403) && (context.title && context.title == 'Forbidden')){
-            status = 'forbidden';
-        }
         // add static page routing
         var title;
         var routeList = canonical.split("/");
@@ -647,11 +638,31 @@ var App = React.createClass({
                 lowerList.push(value.toLowerCase());
             }
         });
+        console.log('===>>',status);
         var currRoute = lowerList.slice(1); // eliminate http
+        // check error status
+        var status;
+        if(context.code && context.code == 404){
+            // check to ensure we're not looking at a static page
+            var route = currRoute[currRoute.length-1];
+            if(route != 'help' && route != 'about' && route != 'home'){
+                status = 'not_found';
+            }
+        }else if(context.code && context.code == 403){
+            if(context.title && context.title == 'Login failure'){
+                status = 'invalid_login';
+            }else if(context.title && context.title == 'Forbidden'){
+                status = 'forbidden';
+            }
+        }
         // first case is fallback
         if (canonical === "about:blank"){
             title = portal.portal_title;
             content = null;
+        // error catching
+        }else if(status){
+            content = <ErrorPage currRoute={currRoute[currRoute.length-1]} status={status}/>;
+            title = 'Error';
         }else if (currRoute[currRoute.length-1] === 'home' || (currRoute[currRoute.length-1] === href_url.host)){
             content = <HomePage session={this.state.session}/>;
             title = portal.portal_title;
@@ -661,10 +672,6 @@ var App = React.createClass({
         }else if (currRoute[currRoute.length-1] === 'about'){
             content = <AboutPage />;
             title = 'About - ' + portal.portal_title;
-        // error catching
-        }else if(status){
-            content = <ErrorPage status={status}/>;
-            title = 'Error';
         }else if (context) {
             var ContentView = globals.content_views.lookup(context, current_action);
             if (ContentView){

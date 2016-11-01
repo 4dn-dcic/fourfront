@@ -1,6 +1,7 @@
 'use strict';
 var React = require('react');
 var store = require('../store');
+var jwt = require('jsonwebtoken');
 
 // Component that contains auth0 functions
 var Login = React.createClass({
@@ -23,7 +24,9 @@ var Login = React.createClass({
         this.lock = new lock_('DPxEwsZRnKDpk0VfVAxrStRKukN14ILB',
             'hms-dbmi.auth0.com', {
             auth: {
-            	redirect: false
+            	redirect: false,
+                responseType: 'token',
+                params: {scope: 'openid email email_verified'}
             },
             socialButtonStyle: 'big',
             languageDictionary: {
@@ -63,6 +66,14 @@ var Login = React.createClass({
 
     handleAuth0Login: function(authResult, retrying){
         var accessToken = authResult.accessToken;
+        var idToken = authResult.idToken; //JWT
+        // this code not appropriate to push:
+        process.env.JWT_SECRET = 'poopysecret';
+        console.log('......');
+        console.log('ID TOKEN.......',idToken);
+        jwt.verify(idToken,new Buffer(process.env.JWT_SECRET, 'base64'),function(err,decoded){
+            console.log('------VERIFIED');
+        });
         if (!accessToken) return;
         this.context.fetch('/login', {
             method: 'POST',
@@ -78,7 +89,6 @@ var Login = React.createClass({
             return response;
         })
         .then(response => {
-            // localStorage only holds strings!
             if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
                 localStorage.setItem("user_actions", JSON.stringify(response.user_actions));
             }

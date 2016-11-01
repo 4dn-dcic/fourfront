@@ -57,6 +57,7 @@
     "form-serialize": "^0.6.0",
     "google-analytics": "file:node_shims/google-analytics",
     "immutable": "^3.7.5",
+    "jsonwebtoken": "^7.1.9",
     "marked": "^0.3.3",
     "moment": "^2.8.2",
     "query-string": "^4.1.0",
