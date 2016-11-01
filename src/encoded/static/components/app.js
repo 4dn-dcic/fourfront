@@ -501,8 +501,9 @@ var App = React.createClass({
             return;
         }
         var idToken = localStorage.getItem('idToken') || null;
-        var reqHeaders = {headers: {'Accept': 'application/json'}}
-        if(idToken){
+        var reqHeaders = {headers: {'Accept': 'application/json'}};
+        if(idToken && this.state.session['auth.userid']){
+            console.log('... JWT added to request');
             reqHeaders.headers['Authorization'] = 'Bearer '+idToken;
         }
         var reqHref = href.slice(-1) === '/' ? href + '/?format=json' : href + '&format=json';

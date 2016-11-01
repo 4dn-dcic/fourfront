@@ -17,7 +17,7 @@ var SingleTreatment = module.exports.SingleTreatment = function(treatment) {
 /**
  * Check if JS is processing on serverside, vs in browser (clientside).
  * Adapted from react/node_modules/fbjs/lib/ExecutionEnvironment.canUseDOM()
- * 
+ *
  * @return {boolean} - True if processing on serverside.
  */
 var isServerSide = module.exports.isServerSide = function(){
@@ -52,7 +52,6 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
     };
     xmlhttp.open(method, url, true);
     xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    console.log('___DATA___',data);
     if(data){
         xmlhttp.send(data);
     }else{
@@ -84,7 +83,7 @@ var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = n
 
 /**
  * Format a timestamp to pretty output. Uses moment.js, which uses Date() object in underlying code.
- * 
+ *
  * @param {string} timestamp - Timestamp as provided by server output. No timezone corrections currently.
  * @param {string} [outputFormat] - Defaults to "MMMM Do, YYYY" for, e.g. "October 31st, 2016".
  * @return {string} Prettified date/time output.

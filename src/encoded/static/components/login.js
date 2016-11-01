@@ -87,6 +87,7 @@ var Login = React.createClass({
         })
         .then(response => {
             //Keep JWT in localStorage so that it persists across refresh
+            //In the future, store user_actions in jwt and use jwt.decode to extract
             if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
                 localStorage.setItem("user_actions", JSON.stringify(response.user_actions));
                 localStorage.setItem("idToken", idToken);
