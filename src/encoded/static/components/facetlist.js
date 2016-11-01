@@ -398,7 +398,7 @@ var Facet = module.exports.Facet = React.createClass({
         var total = facet['total'];
         var terms = facet['terms'];
         return (
-            <div className="facet" hidden={terms.length === 0} style={{width: this.props.width}}>
+            <div className="facet" hidden={terms.length === 0} style={{width: this.props.width}} data-field={field}>
                 <h5>{title}</h5>
                 <div className="facet-list nav">
                     <div>
