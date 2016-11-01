@@ -336,12 +336,55 @@ def construct(testapp):
 def publication(testapp, lab, award):
     item = {
         'uuid': '8312fc0c-b241-4cb2-9b01-1438910550ad',
-        'title': "Test publication",
         'award': award['@id'],
         'lab': lab['@id'],
-        'identifiers': ["doi:10.1214/11-AOAS466"],
+        'ID': "PMID:22955616",
     }
     return testapp.post_json('/publication', item).json['@graph'][0]
+
+
+@pytest.fixture
+def publication_PMID(testapp, lab, award):
+    item = {
+        'uuid': '8312fc0c-b241-4cb2-9b01-143891055000',
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'ID': "PMID:26673895",
+    }
+    return testapp.post_json('/publication', item).json['@graph'][0]
+
+
+@pytest.fixture
+def publication_doi_pubmed(testapp, lab, award):
+    item = {
+        'uuid': '8312fc0c-b241-4cb2-9b01-143891055001',
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'ID': "doi:10.1093/nar/gkv1046",
+    }
+    return testapp.post_json('/publication', item).json['@graph'][0]
+
+
+@pytest.fixture
+def publication_doi_biorxiv(testapp, lab, award):
+    item = {
+        'uuid': '8312fc0c-b241-4cb2-9b01-143891055002',
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'ID': "doi:10.1101/000091"
+    }
+    return testapp.post_json('/publication', item).json['@graph'][0]
+
+
+@pytest.fixture
+def publication_tracking(testapp, lab, award):
+    item = {
+        'uuid': '8312fc0c-b241-4cb2-9b01-1438910550ac',
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'PMID': "PMID:12345678",
+    }
+    return testapp.post_json('/publication_tracking', item).json['@graph'][0]
 
 
 @pytest.fixture

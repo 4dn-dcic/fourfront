@@ -78,36 +78,6 @@ class Organism(Item):
 
 
 @collection(
-    name='publications',
-    unique_key='publication:identifier',
-    properties={
-        'title': 'Publications',
-        'description': 'Publication pages',
-    })
-class Publication(Item):
-    """Publication class."""
-
-    item_type = 'publication'
-    schema = load_schema('encoded:schemas/publication.json')
-    # embedded = ['datasets']
-
-    def unique_keys(self, properties):
-        """unique keys."""
-        keys = super(Publication, self).unique_keys(properties)
-        if properties.get('identifiers'):
-            keys.setdefault('alias', []).extend(properties['identifiers'])
-        return keys
-
-    @calculated_property(condition='date_published', schema={
-        "title": "Publication year",
-        "type": "string",
-    })
-    def publication_year(self, date_published):
-        """publication year."""
-        return date_published.partition(' ')[0]
-
-
-@collection(
     name='documents',
     properties={
         'title': 'Documents',
