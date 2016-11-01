@@ -1,0 +1,115 @@
+{
+    "title": "Publication",
+    "description": "Schema for a publication page.",
+    "id": "/profiles/publication.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "identifyingProperties": ["uuid"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/attachment" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "PMID":{
+            "title": "Pubmed Identifier",
+            "description": "Pubmed ID for the published publication.",
+            "type": "string",
+            "uniqueKey":  "publication:PMID",
+            "pattern": "^PMID:[0-9]*",
+            "comment": "If a PMID is supplied then it is assumed the paper has been published",
+            "comment": "and that relevant data can be retrieved from pubmed and other fields",
+            "comment": "will be automatically populated via calculated properties"
+        },
+        "status": {
+            "title": "Status",
+            "type": "string",
+            "default": "in preparation",
+            "enum" : [
+                "planned",
+                "in preparation",
+                "submitted",
+                "in revision",
+                "in press",
+                "published",
+                "deleted",
+                "replaced"
+            ]
+        },
+        "title": {
+            "title": "Title",
+            "description": "Title of the publication or communication.",
+            "uniqueKey": true,
+            "type": "string"
+        },
+        "abstract": {
+            "rdfs:subPropertyOf": "dc:abstract",
+            "title": "Abstract",
+            "description": "Abstract of the publication or communication.",
+            "type": "string"
+        },
+        "contact_author": {
+            "title": "Contact Author",
+            "description": "Please select a user as the contact person",
+            "type": "string",
+            "comment": "for use of internal tracking",
+            "linkTo": "User"
+        },
+        "authors": {
+            "title": "Authors",
+            "description": "All authors, with format Bernstein BE, Birney E, Dunham I,...",
+            "type": "string"
+        },
+        "published_by": {
+            "title": "Published by",
+            "type": "string",
+            "enum": [
+                "4DN",
+                "External"
+                ]
+        },
+        "categories": {
+            "title": "Categories",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "Category",
+                "type": "string",
+                "enum" : [
+                    "human disease",
+                    "basic biology",
+                    "software tool",
+                    "database",
+                    "integrative analysis",
+                    "technology development",
+                    "data standard",
+                    "key publication",
+                    "pilot phase publication",
+                    "model organism biology",
+                    "tutorial",
+                    "genomic annotations",
+                    "production"
+                ]
+            }
+        },
+        "experiment_sets_in_pub": {
+            "title": "Experiment sets that are part of this publication",
+            "description": "List of experiment sets to be associated with the publication.",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "title": "Experiment Set",
+                "comment": "use accessions for identifiers.",
+                "type": "string",
+                "linkTo": "ExperimentSet"
+            }
+        }
+    }
+}

@@ -13,6 +13,21 @@ var SingleTreatment = module.exports.SingleTreatment = function(treatment) {
     return treatmentText;
 };
 
+
+/**
+ * Check if JS is processing on serverside, vs in browser (clientside).
+ * Adapted from react/node_modules/fbjs/lib/ExecutionEnvironment.canUseDOM()
+ * 
+ * @return {boolean} - True if processing on serverside.
+ */
+var isServerSide = module.exports.isServerSide = function(){
+    if (typeof window == 'undefined' || !window || !window.document || !window.document.createElement){
+        return true;
+    }
+    return false;
+}
+
+
 var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET', fallback = null, data = null){
     if (typeof window == 'undefined') return null;
     var xmlhttp = new XMLHttpRequest();
@@ -45,16 +60,6 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
     }
 }
 
-/**
- * Adapted from react/node_modules/fbjs/lib/ExecutionEnvironment.canUseDOM()
- */
-var isServerSide = module.exports.isServerSide = function(){
-    if (typeof window == 'undefined' || !window || !window.document || !window.document.createElement){
-        return true;
-    }
-    return false;
-}
-
 var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = null, data = null){
     return new Promise(function(resolve, reject) {
         var xhr = new XMLHttpRequest();
@@ -76,6 +81,22 @@ var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = n
         }
     });
 }
+
+/**
+ * Format a timestamp to pretty output. Uses moment.js, which uses Date() object in underlying code.
+ * 
+ * @param {string} timestamp - Timestamp as provided by server output. No timezone corrections currently.
+ * @param {string} [outputFormat] - Defaults to "MMMM Do, YYYY" for, e.g. "October 31st, 2016".
+ * @return {string} Prettified date/time output.
+ */
+var parseDateTime = module.exports.parseDateTime = function(timestamp, outputFormat = "MMMM Do, YYYY"){
+    if (!Date) {
+        return timestamp; // Date object may or may not be available server-side.
+    } else {
+        var moment = require('moment'); // require allows to load code in conditionally, so lets do that until more funcs require moment.
+        return moment(timestamp).format(outputFormat);
+    }
+};
 
 /**
  * Check width of text or text-like content if it were to fit on one line.

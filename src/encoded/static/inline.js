@@ -22,8 +22,8 @@ window.onload = function () {
     setTimeout(function(){
         // Use a separate tracker for dev / test
         var ga = require('google-analytics');
-        var trackers = {'www.encodeproject.org': 'UA-47809317-1'};
-        var tracker = trackers[document.location.hostname] || 'UA-47809317-2';
+        var trackers = {'data.4dnucleome.org': 'UA-86655305-1'};
+        var tracker = trackers[document.location.hostname] || 'UA-86655305-1';
         ga('create', tracker, {'cookieDomain': 'none', 'siteSpeedSampleRate': 100});
         ga('send', 'pageview');
     }, 0);
