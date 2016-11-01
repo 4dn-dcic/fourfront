@@ -635,7 +635,7 @@ var Search = search.Search = React.createClass({
                     <div className="panel data-display main-panel">
                         <ResultTable {...this.props} key={undefined} searchBase={searchBase} onChange={this.context.navigate} />
                     </div>
-                : <h4>{notification}</h4>}
+                : <div className='error-page'><h4>{notification}</h4></div>}
             </div>
         );
     }
