@@ -26,6 +26,9 @@
         "protocol": "131106bc-8535-4448-903e-854af460b244",
         "submitted_by": "4dndcic@gmail.com",
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
+        "biosample_quantity": 2000000,
+        "biosample_quantity_units": "cells",
+        "follows_sop": true,
         "experiment_sets":["431106bc-8535-4448-903e-854af460b260"]
     },
     {

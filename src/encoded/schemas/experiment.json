@@ -10,6 +10,10 @@
     "additionalProperties": false,
     "mixinProperties": [
     ],
+    "dependencies": {
+      "biosample_quantity": ["biosample_quantity_units"],
+      "biosample_quantity_units": ["biosample_quantity"]
+    },
     "properties": {
         "schema_version": {
             "default": "1"
@@ -94,6 +98,24 @@
             "type": "string",
             "linkTo": "Biosample"
         },
+        "biosample_quantity": {
+            "title": "Biological Sample Quantity",
+            "description": "The amount of starting Biological sample going into the experiment",
+            "type": "number"
+        },
+        "biosample_quantity_units": {
+            "title": "Quantity Units",
+            "description": "The units that go along with the biological sample quantity",
+            "type": "string",
+            "enum": [
+                "g",
+                "mg",
+                "μg",
+                "ml",
+                "cells/ml",
+                "cells"
+            ]
+        },
         "files": {
             "title": "Data files",
             "description": "Information about the data files associated with the experiment.",
@@ -138,6 +160,12 @@
                 "type": "string",
                 "linkTo": "QualityMetricFlag"
             }
+        },
+        "follows_sop": {
+            "title": "Follows SOP",
+            "description": "Flag to indicate if the 4DN SOP for the selected type of experiment was followed - true or false",
+            "type": "boolean",
+            "enum": [true, false]
         }
     }
 }
