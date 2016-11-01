@@ -350,7 +350,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			padding-left: 21px;
 			padding-right: 0;
 			&:after {
-				margin-left: -11px;
+				margin-left: -10px;
 				border-left: 1px solid rgba(0,0,0,0.125);
 			}
 			&:last-child {
@@ -367,7 +367,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			padding-left: 0;
 			max-width: 50%;
 			&:after {
-				margin-right: -11px;
+				margin-right: -10px;
 				border-right: 1px solid rgba(0,0,0,0.125);
 			}
 			&:last-child {
@@ -551,7 +551,12 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		font-weight: 300;
 		margin: 0;
 		border-top: 1px solid #eee;
-		padding: 18px 0 12px;
+		padding: 16px 0 16px;
+
+		span.exp-number {
+			padding-top: 5px;
+		}
+
 	}
 
 	/*
@@ -829,7 +834,26 @@ p, input {
 
 /** Primarily for Browse Table / View **/
 
-.expset-table{
+.expset-result-table-fix {
+	&.overflowing:after {
+		/*
+		content : "";
+		height: 100%;
+		position: absolute;
+		top: 0;
+		right: -1px;
+		border-right: 1px solid transparent;
+		box-shadow: 0px 0 8px #000;
+		*/
+	}
+}
+
+.expset-table-container {
+	overflow-x: auto;
+	position: relative;
+}
+
+.expset-table {
 	border: none !important;
 	> thead > tr > th {
 		border: 1px solid $expset-table-border-color;
@@ -853,6 +877,7 @@ p, input {
 			padding : 0 !important;
 			width : 30px;
 			height: 30px;
+			min-width: 26px;
 		}
 
 	}

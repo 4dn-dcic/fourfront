@@ -464,8 +464,8 @@ var ExpTerm = module.exports.ExpTerm = React.createClass({
             selected = true;
         }
         return (
-            <li id={selected ? "selected" : null} key={term}>
-                <a className={selected ? "expterm-selected" : "expterm"} id={selected ? "selected" : null} href="" onClick={this.handleClick}>
+            <li className={selected ? "selected" : null} key={term}>
+                <a className={selected ? "expterm-selected selected" : "expterm"} href="#" onClick={this.handleClick}>
                     <span className="pull-left facet-selector">{selected ? <i className="icon icon-times-circle"></i> : ''}</span>
                     <span className="facet-item">
                         {title}
