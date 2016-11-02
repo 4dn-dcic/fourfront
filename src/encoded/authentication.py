@@ -214,6 +214,9 @@ def login(request):
         request.response.headerlist.extend(forget(request))
         raise LoginDenied()
 
+    request.session.invalidate()
+    request.response.headerlist.extend(remember(request, 'mailto.' + userid))
+  
     properties = request.embed('/session-properties', as_user=userid)
     #if 'auth.userid' in request.session:
     properties['auth.userid'] = userid
@@ -227,6 +230,8 @@ def login(request):
              permission=NO_PERMISSION_REQUIRED, http_cache=0)
 def logout(request):
     """View to forget the user"""
+    request.session.invalidate()
+    request.response.headerlist.extend(forget(request))
 
     # call auth0 to logout
     auth0_logout_url = "https://{domain}/v2/logout" \
