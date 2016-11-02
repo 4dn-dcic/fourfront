@@ -244,7 +244,7 @@ var User = module.exports.User = React.createClass({
                         <div className="col-sm-9 col-md-7 col-lg-6">
 
                             <div className="panel user-info">
-                                <h3 className="user-title">{usr.title}</h3>
+                                <h2 className="user-title">{usr.title}</h2>
                                 <div className="row email">
                                     <div className="col-sm-3 text-right text-left-xs">
                                         <label htmlFor="email">Email</label>
@@ -271,9 +271,9 @@ var User = module.exports.User = React.createClass({
                     </div>
                     
                     {usr.access_keys ?
-                        <div className="access-keys">
+                        <div className="access-keys panel">
                             <h3 className="text-300">Access Keys</h3>
-                            <div className="panel data-display">
+                            <div className="data-display">
                                 <AccessKeyTable user={usr} access_keys={usr.access_keys} />
                             </div>
                         </div>

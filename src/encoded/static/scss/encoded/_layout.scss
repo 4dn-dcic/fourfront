@@ -609,6 +609,16 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		padding-bottom: 17px;
 		border-bottom: 1px solid #eee;
 		font-weight: 400;
+		font-size: 2rem;
+	}
+}
+
+.panel.access-keys {
+	margin-top: 0;
+	> h3 {
+		margin-bottom: 17px;
+	    padding-bottom: 17px;
+    	border-bottom: 1px solid #eee;
 	}
 }
 
