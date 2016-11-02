@@ -489,9 +489,25 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 }
 
 .formatted-info-panel {
-	padding : 4px 10px 12px;
+	padding : 0 10px 12px;
 	/* border-bottom: 1px solid #e2e2e2; */
 	margin-bottom: 5px;
+
+	/* Adjustments based on available props, ToDo: .no-title */
+
+	&.has-border {
+		padding : 8px 18px 15px;
+	}
+
+	&.no-icon {
+		padding-bottom : 4px;
+		margin-bottom: 0;
+
+		.details-col {
+			padding-left: 0;
+		}
+
+	}
 
 	> h6 {
 		margin : 0 0 7px /* -3px -> */ -8px;
@@ -520,6 +536,10 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		transition: opacity .5s;
 	}
 
+	.row .icon-container {
+		max-width: 50px;
+	}
+
 	h5 {
 		margin-bottom: 0;
 		margin-top: 2px;
@@ -529,9 +549,13 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		text-overflow: ellipsis;
 
 		a {
-			display: block;
+			/* display: block; */
 			overflow: inherit;
 			text-overflow: inherit;
+		}
+
+		&.no-link {
+			font-weight: 500;
 		}
 
 	}
@@ -603,6 +627,10 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	border: 1px solid #c8c8c8;
     box-shadow: 0px 1px 9px -3px rgba(0,0,0,0.5);
 
+	> .row {
+		margin-bottom: 5px;
+	}
+
 	> .user-title {
 		margin-top: 2px;
 		margin-bottom: 17px;
@@ -611,6 +639,15 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		font-weight: 400;
 		font-size: 2rem;
 	}
+
+	label {
+		font-weight: 500;
+	}
+
+	.formatted-info-panel {
+		min-height: 40px;
+	}
+
 }
 
 .panel.access-keys {

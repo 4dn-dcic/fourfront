@@ -45,7 +45,7 @@ var isDebugging = module.exports.isDebugging = function(){
  * Custom patched console for debugging. Only print out statements if debugging/development environment.
  * Prevent potential issues where console might not be available (earlier IE).
  */
-var console = module.exports.console = (function(){
+var patchedConsole = module.exports.console = (function(){
 
     if (!isServerSide() && window.patchedConsole) return window.patchedConsole; // Re-use instance if available.
     
@@ -108,12 +108,12 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
                     callback(JSON.parse(xmlhttp.responseText));
                 }
             } else if (xmlhttp.status == 400) {
-                console.error('There was an error 400');
+                (patchedConsole || console).error('There was an error 400');
                 if (typeof fallback == 'function'){
                     fallback();
                 }
             } else {
-                console.error('something else other than 200 was returned');
+                (patchedConsole || console).error('something else other than 200 was returned');
                 if (typeof fallback == 'function'){
                     fallback();
                 }
@@ -122,7 +122,7 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
     };
     xmlhttp.open(method, url, true);
     xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    console.log('___DATA___',data);
+    (patchedConsole || console).log('___DATA___',data);
     if(data){
         xmlhttp.send(data);
     }else{

@@ -6,7 +6,7 @@
 var React = require('react');
 var globals = require('./globals');
 var _ = require('underscore');
-var { Modal, Alert } = require('react-bootstrap').Modal;
+var { Modal, Alert } = require('react-bootstrap');
 var { ItemStore } = require('./lib/store');
 var { ajaxLoad, console } = require('./objectutils');
 var { FormattedInfoBlock } = require('./experiment-set-view');
@@ -209,8 +209,6 @@ var User = module.exports.User = React.createClass({
             }
             return (
                 <FormattedInfoBlock
-                    label="Lab"
-                    iconClass="icon-users"
                     title={this.state.details_lab ? this.state.details_lab.title : null }
                     titleHref={this.state.details_lab ? this.state.details_lab['@id'] : null }
                     detailContent={ this.state.details_lab ? (
@@ -241,7 +239,7 @@ var User = module.exports.User = React.createClass({
 
                     <div className="row first-row">
 
-                        <div className="col-sm-9 col-md-7 col-lg-6">
+                        <div className="col-sm-9 col-md-7">
 
                             <div className="panel user-info">
                                 <h2 className="user-title">{usr.title}</h2>
@@ -251,6 +249,14 @@ var User = module.exports.User = React.createClass({
                                     </div>
                                     <div id="email" className="col-sm-9">
                                         <a href={'mailto:' + usr.email}>{usr.email}</a>
+                                    </div>
+                                </div>
+                                <div className="row lab">
+                                    <div className="col-sm-3 text-right text-left-xs">
+                                        <label htmlFor="lab">Lab</label>
+                                    </div>
+                                    <div id="lab" className="col-sm-9">
+                                        { labInfo() }
                                     </div>
                                 </div>
                                 <div className="row job_title">
@@ -265,7 +271,7 @@ var User = module.exports.User = React.createClass({
 
                         </div>
                         <div className="col-sm-9 col-md-5 col-lg-6" style={{ paddingTop : '15px' }}>
-                            { labInfo() }
+                            {/* labInfo() */}
                         </div>
 
                     </div>

@@ -430,6 +430,20 @@ var ExperimentSetHeaderBar = React.createClass({
 
     componentDidMount : function(){
         if (typeof window != 'undefined'){
+
+            this.debouncedLayoutResizeStateChange = _.debounce(() => {
+                // Debounce to prevent from executing more than once every 300ms.
+                var oldHeight = this.descriptionHeight;
+                var willDescriptionFitAtNewWindowSize = this.checkWillDescriptionFitOneLineAndUpdateHeight();
+                if (willDescriptionFitAtNewWindowSize != this.state.descriptionWillFitOneLine){
+                    this.setState({
+                        descriptionWillFitOneLine : willDescriptionFitAtNewWindowSize
+                    });
+                } else if (this.descriptionHeight != oldHeight) {
+                    this.forceUpdate();
+                }
+            }, 300, false);
+
             window.addEventListener('resize', this.debouncedLayoutResizeStateChange);
             window.requestAnimationFrame(()=>{
                 this.setState({
@@ -445,21 +459,6 @@ var ExperimentSetHeaderBar = React.createClass({
             window.removeEventListener('resize', this.debouncedLayoutResizeStateChange);
         }
     },
-
-    debouncedLayoutResizeStateChange : _.debounce(() => {
-        // Debounce to prevent from executing more than once every 300ms.
-        setTimeout(()=> {
-            var oldHeight = this.descriptionHeight;
-            var willDescriptionFitAtNewWindowSize = this.checkWillDescriptionFitOneLineAndUpdateHeight();
-            if (willDescriptionFitAtNewWindowSize != this.state.descriptionWillFitOneLine){
-                this.setState({
-                    descriptionWillFitOneLine : willDescriptionFitAtNewWindowSize
-                });
-            } else if (this.descriptionHeight != oldHeight) {
-                this.forceUpdate();
-            }
-        }, 0);
-    }, 300, false),
 
     handleDescriptionExpandToggle: function (e) {
         e.preventDefault();
@@ -559,6 +558,20 @@ var FormattedInfoBlock = module.exports.FormattedInfoBlock = React.createClass({
     
     render : function(){
         var innerContent;
+
+        var blockClassName = function(){
+            var classes = ["formatted-info-panel"];
+            if (!this.props.iconClass) classes.push('no-icon');
+            if (!this.props.label) classes.push('no-label');
+            if (!this.props.detailContent) classes.push('no-details');
+            if (!this.props.title) classes.push('no-title');
+            if (this.props.loading) classes.push('loading');
+            else classes.push('loaded');
+            if (this.state.transitionDelayElapsed) classes.push('transitioned');         
+            if (this.props.extraContainerClassName) classes.push(this.props.extraContainerClassName);
+            return classes.join(' ');
+        }.bind(this);
+
         if (this.props.loading) {
             innerContent = (
                 <div className="row">
@@ -570,23 +583,31 @@ var FormattedInfoBlock = module.exports.FormattedInfoBlock = React.createClass({
         } else {
             innerContent = (
                 <div className="row loaded">
+                    { this.props.iconClass ? 
                     <div className="col-xs-2 col-lg-1 icon-container">
                         <i className={"icon " + this.props.iconClass}></i>
                     </div>
-                    <div className="col-xs-10 col-lg-11">
-                        <h5>
-                            <a href={ this.props.titleHref } title={this.props.title}>{ this.props.title }</a>
-                        </h5>
+                    : null }
+                    <div className={"details-col " + (this.props.iconClass ? "col-xs-10 col-lg-11" : "col-sm-12") }>
+                        { this.props.title ?
+                        
+                            this.props.titleHref ? 
+                                <h5 className="block-title"><a href={ this.props.titleHref } title={this.props.title}>{ this.props.title }</a></h5>
+                              : <h5 className="block-title no-link">{ this.props.title }</h5>
+                        
+                        : null }
+                        { this.props.detailContent ?
                         <div className={"more-details " + this.props.extraDetailClassName}>
                             { this.props.detailContent }
                         </div>
+                        : null }
                     </div>
                 </div>
             );
         }
         return (
-            <div className={"formatted-info-panel " + this.props.extraContainerClassName + (this.props.loading ? ' loading' : ' loaded') + (this.state.transitionDelayElapsed ? ' transitioned' : '') }>
-                <h6 className="info-panel-label">{ this.props.label }</h6>
+            <div className={ blockClassName() }>
+                { this.props.label ? <h6 className="info-panel-label">{ this.props.label }</h6> : null }
                 { innerContent }
             </div>
         );
