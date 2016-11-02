@@ -129,6 +129,31 @@ class LoginDenied(HTTPForbidden):
 _fake_user = object()
 
 
+def get_token_info(jwt):
+    ''' 
+    given a jwt get token info from auth0, handle
+    retrying and what not
+    '''
+    try:
+        # validate jwt and get user info
+        user_url = "https://{domain}/tokeninfo".format(domain='hms-dbmi.auth0.com')
+        resp  = requests.post(user_url, {'id_token':jwt})
+        while resp.status_code == 429:
+            reset_time = datetime.utcfromtimestamp(float(resp.headers['X-RateLimit-Reset']))
+            timeDiff = reset_time - datetime.utcnow()
+            # to many requests... slow down and try again
+            print("too many requests.. waiting a while")
+            time.sleep(timeDiff.seconds + 1)
+            resp  = requests.post(user_url, {'id_token': jwt})
+
+    except Exception as e:
+        if self.debug:
+            self.log(('Invalid assertion: %s (%s)', (e, type(e).__name__)),
+                     'unathenticated_userid', request)
+            return None
+
+    return resp.json()
+
 class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
 
     login_path = '/login'
@@ -149,33 +174,15 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
             return cached
 
         try:
-            access_token = request.json['accessToken']
+            id_token = request.json['id_token']
         except (ValueError, TypeError, KeyError):
             if self.debug:
                 self._log('Missing assertion.', 'unauthenticated_userid', request)
             request._auth0_authenticated = None
             return None
 
-        user_info = None
-        try:
-            user_url = "https://{domain}/userinfo?access_token={access_token}" \
-                        .format(domain='hms-dbmi.auth0.com',
-                                access_token=access_token)
-            resp  = requests.get(user_url)
-            while resp.status_code == 429:
-                reset_time = datetime.utcfromtimestamp(float(resp.headers['X-RateLimit-Reset']))
-                timeDiff = reset_time - datetime.utcnow()
-                # to many requests... slow down and try again
-                print("too many requests.. waiting a while")
-                time.sleep(timeDiff.seconds + 1)
-                resp  = requests.get(user_url)
-
-            user_info = resp.json()
-        except Exception as e:
-            if self.debug:
-                self.log(('Invalid assertion: %s (%s)', (e, type(e).__name__)),
-                         'unathenticated_userid', request)
-                return None
+        user_info = get_token_info(id_token)
+        if not user_info: return None
 
         # for strange unknow reasons sometimes user_info comes back empty
         if user_info and user_info['email_verified'] is True:
@@ -207,13 +214,12 @@ def login(request):
         request.response.headerlist.extend(forget(request))
         raise LoginDenied()
 
-    request.session.invalidate()
-    request.session.get_csrf_token()
-    request.response.headerlist.extend(remember(request, 'mailto.' + userid))
-
     properties = request.embed('/session-properties', as_user=userid)
-    if 'auth.userid' in request.session:
-        properties['auth.userid'] = request.session['auth.userid']
+    #if 'auth.userid' in request.session:
+    properties['auth.userid'] = userid
+    if request.json and 'id_token' in request.json:
+        properties['id_token'] = request.json['id_token']
+
     return properties
 
 
@@ -221,9 +227,7 @@ def login(request):
              permission=NO_PERMISSION_REQUIRED, http_cache=0)
 def logout(request):
     """View to forget the user"""
-    request.session.invalidate()
-    request.session.get_csrf_token()
-    request.response.headerlist.extend(forget(request))
+
     # call auth0 to logout
     auth0_logout_url = "https://{domain}/v2/logout" \
                 .format(domain='hms-dbmi.auth0.com')
@@ -250,7 +254,7 @@ def session_properties(request):
     user_actions = calculate_properties(user, request, category='user_action')
 
     properties = {
-        'user': request.embed(request.resource_path(user)),
+        #'user': request.embed(request.resource_path(user)),
         'user_actions': [v for k, v in sorted(user_actions.items(), key=itemgetter(0))]
     }
 

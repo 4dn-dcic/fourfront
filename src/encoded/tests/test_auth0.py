@@ -2,6 +2,7 @@ import pytest
 import requests
 import time
 from datetime import datetime
+from encoded.authentication import get_token_info
 pytestmark = pytest.mark.working
 
 
@@ -23,32 +24,20 @@ def auth0_access_token():
         pytest.skip("Error retrieving auth0 test user access token: %r" % e)
 
     data = res.json()
-    if 'access_token' not in data:
-        pytest.skip("Missing 'access_token' in auth0 test user access token: %r" % data)
+    if 'id_token' not in data:
+        pytest.skip("Missing 'id_token' in auth0 test user access token: %r" % data)
 
-    return data['access_token']
+    return data['id_token']
 
 
 @pytest.fixture(scope='session')
 def auth0_4dn_user_token(auth0_access_token):
-    return {'accessToken': auth0_access_token}
+    return {'id_token': auth0_access_token}
 
 
 @pytest.fixture(scope='session')
 def auth0_4dn_user_profile(auth0_access_token):
-    user_url = "https://{domain}/userinfo?access_token={access_token}" \
-                .format(domain='hms-dbmi.auth0.com',
-                        access_token=auth0_access_token)
-    resp = requests.get(user_url)
-    while resp.status_code == 429:
-        reset_time = datetime.utcfromtimestamp(float(resp.headers['X-RateLimit-Reset']))
-        timeDiff = reset_time - datetime.utcnow()
-        # import pdb; pdb.set_trace()
-        time.sleep(timeDiff.seconds + 1)
-        resp = requests.get(user_url)
-    if resp.status_code == 429:
-        print("To many requests to auth0 please try again")
-    return resp.json()
+    return get_token_info(auth0_access_token)
 
 
 def test_login_unknown_user(anontestapp, auth0_4dn_user_token):
@@ -71,13 +60,18 @@ def test_login_logout(testapp, anontestapp, auth0_4dn_user_token,
     # Log in
     res = anontestapp.post_json('/login', auth0_4dn_user_token)
 
-    assert 'Set-Cookie' in res.headers
+    assert 'Set-Cookie' not in res.headers
     assert res.json['auth.userid'] == email
+    assert 'id_token' in res.json
+    assert 'user_actions' in res.json
 
     # Log out
     res = anontestapp.get('/logout?redirect=false', status=200)
-    assert 'Set-Cookie' in res.headers
+    #no more cookies
+    assert 'Set-Cookie' not in res.headers
     assert 'auth.userid' not in res.json
+    assert 'id_token' not in res.json
+    assert 'user_actions' not in res.json
 
 
 def test_impersonate_user(anontestapp, admin, submitter):
