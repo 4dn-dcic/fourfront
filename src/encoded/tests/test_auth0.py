@@ -60,7 +60,7 @@ def test_login_logout(testapp, anontestapp, auth0_4dn_user_token,
     # Log in
     res = anontestapp.post_json('/login', auth0_4dn_user_token)
 
-    assert 'Set-Cookie' not in res.headers
+    assert 'Set-Cookie' in res.headers
     assert res.json['auth.userid'] == email
     assert 'id_token' in res.json
     assert 'user_actions' in res.json
@@ -68,7 +68,7 @@ def test_login_logout(testapp, anontestapp, auth0_4dn_user_token,
     # Log out
     res = anontestapp.get('/logout?redirect=false', status=200)
     #no more cookies
-    assert 'Set-Cookie' not in res.headers
+    assert 'Set-Cookie' in res.headers
     assert 'auth.userid' not in res.json
     assert 'id_token' not in res.json
     assert 'user_actions' not in res.json
