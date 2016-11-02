@@ -269,6 +269,7 @@ class WorkflowMapping(Item):
 
 @collection(
     name='sop_maps',
+    unique_key='id',
     properties={
         'title': 'SOP and field mappings',
         'description': 'Listing of SOPs with the default values for fields from them',
@@ -277,7 +278,22 @@ class SopMap(Item):
     """The SopFields class that lists the default values of fields if the SOP is followed."""
 
     item_type = 'sop_map'
+    name_key = 'id'
     schema = load_schema('encoded:schemas/sop_map.json')
+
+    @calculated_property(schema={
+        "title": "ID",
+        "description": "Composite uniquely identifying ID for sop map",
+        "type": "string"
+    })
+    def mapid(self, request, schema_version, associated_item_type, id_fields=None):
+        id_string = associated_item_type + ':'
+        if id_fields is not None:
+            for f in id_fields:
+                id_string = id_string + f + ':'
+
+        id_string = id_string.rstrip(':')
+        return id_string + '_' + schema_version
 
 
 @collection(

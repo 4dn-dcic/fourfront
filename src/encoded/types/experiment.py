@@ -92,7 +92,7 @@ class ExperimentSet(Item):
                 "experiments_in_set.lab", "experiments_in_set.award", "experiments_in_set.biosample",
                 "experiments_in_set.biosample.biosource", "experiments_in_set.biosample.modifications",
                 "experiments_in_set.biosample.treatments", "experiments_in_set.biosample.biosource.individual.organism",
-                "experiments_in_set.files", "experiments_in_set.filesets",  "experiments_in_set.filesets.files_in_set", "experiments_in_set.digestion_enzyme"]
+                "experiments_in_set.files", "experiments_in_set.filesets", "experiments_in_set.filesets.files_in_set", "experiments_in_set.digestion_enzyme"]
 
     def _update(self, properties, sheets=None):
         # update self first
@@ -145,6 +145,22 @@ class ExperimentHiC(Experiment):
             sum_str += (' with ' + de_name)
         return sum_str
 
+    @calculated_property(schema={
+        "title": "SOP map",
+        "description": "The mapping of fields default values from SOP",
+        "type": "object",
+        "linkTo": "SopMap"
+    })
+    def sop_mapping(self, request, experiment_type='Undefined'):
+        pass
+        #sop_maps = {
+        #    "in situ Hi-C": "aafb608a-1c08-11e4-8c21-0800200c9a66"
+        #}
+        # get the object with that uuid and embed it?
+        #if experiment_type in sop_maps:
+        #    uuid = sop_maps[experiment_type]
+        #    return request.embed('/sop_maps/' + uuid + '/', '@@object')
+
 
 @collection(
     name='experiments-capture-hic',
@@ -175,3 +191,18 @@ class ExperimentCaptureC(Experiment):
             de_name = de_props['name']
             sum_str += (' with ' + de_name)
         return sum_str
+
+    @calculated_property(schema={
+        "title": "SOP map",
+        "description": "The mapping of fields default values from SOP",
+        "type": "object",
+        "linkTo": "SopMap"
+    })
+    def sop_mapping(self, request, experiment_type='Undefined'):
+        pass
+        #sop_maps = self.collection.get('/sop_maps/')
+        #print(sop_maps)
+        # get the object with that uuid and embed it?
+        #if experiment_type in sop_maps:
+        #    uuid = sop_maps[experiment_type]
+        #    return request.embed('/sop_maps/' + uuid + '/', '@@object')

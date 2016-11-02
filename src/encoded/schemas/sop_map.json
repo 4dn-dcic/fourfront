@@ -5,7 +5,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "additionalProperties": false,
-    "identifyingProperties": ["uuid", "aliases", "sop_name"],
+    "identifyingProperties": ["uuid", "aliases", "mapid"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/aliases" },
@@ -31,14 +31,29 @@
             "type": "number",
             "default": 1
         },
+        "associated_item_type": {
+            "title": "Item type",
+            "description": "The type of the item to which the SOP map can be linked",
+            "type": "string"
+        },
+        "id_fields": {
+            "title": "ID fields",
+            "description": "fields from item that can be used specify the map to use",
+            "type": "array",
+            "items": {
+                "title": "Field",
+                "description": "Identifying field name - use dotted name convention if from embedded object",
+                "type": "string"
+            }
+        },
         "description": {
             "title": "Description",
             "description": "A short description of the SOP and what it's used for.",
             "type": "string"
         },
         "sop_protocol": {
-            "title": "Protocol Document",
-            "description": "A document describing the SOP",
+            "title": "SOP Protocol",
+            "description": "The Protocol item that describes the SOP",
             "type": "string",
             "linkTo": "Protocol"
         },

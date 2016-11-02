@@ -1,9 +1,12 @@
 [
     {
         "uuid": "aafb608a-1c08-11e4-8c21-0800200c9a66",
-        "sop_name": "in situ Hi-C SOP",
+        "sop_name": "in situ Hi-C SOP map",
         "sop_version": 1,
-        "description": "SOP for in situ Hi-C experiments as per ??",
+        "associated_item_type": "ExperimentHiC",
+        "id_fields": ["experiment_type"],
+        "notes": "This is just a dummy insert not linked to true SOP protocol",
+        "description": "Fields with specified defaults in the SOP for in situ Hi-C experiments as per ??",
         "sop_protocol": "131106bc-8535-4448-903e-854af460b244",
         "fields_in_sop": [
             {"field_name": "digestion_enzyme", "field_value": "MboI"},
