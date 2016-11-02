@@ -420,11 +420,12 @@ var App = React.createClass({
         var request = this.props.contextRequest;
         var href = window.location.href;
         if (event.state) {
+            console.log("+++++=REQ ABORT 1");
             // Abort inflight xhr before dispatching
             if (request && this.requestCurrent) {
                 // Abort the current request, then remember we've aborted it so that we don't render
                 // the Network Request Error page.
-                request.abort();
+                // request.abort(); // commented out because code didn't actually do anything
                 this.requestAborted = true;
                 this.requestCurrent = false;
             }
@@ -484,7 +485,7 @@ var App = React.createClass({
         if (request && this.requestCurrent) {
             // Abort the current request, then remember we've aborted the request so that we
             // don't render the Network Request Error page.
-            request.abort();
+            // request.abort(); // commented out because code didn't actually do anything
             this.requestAborted = true;
             this.requestCurrent = false;
         }

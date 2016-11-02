@@ -64,6 +64,7 @@ var Navbars = module.exports.Navbars = {
 
     dropdownClick: function(dropdownId, e) {
         // After clicking the dropdown trigger button, don't allow the event to bubble to the rest of the DOM.
+        // e.preventDefault();
         e.nativeEvent.stopImmediatePropagation();
         this.setState({openDropdown: dropdownId === this.state.openDropdown ? '' : dropdownId});
     }
