@@ -18,6 +18,7 @@ var FacetList = require('./facetlist').FacetList;
 var siftExperiments = require('./facetlist').siftExperiments;
 var ExperimentsTable = require('./experiments-table').ExperimentsTable;
 var getFileDetailContainer = require('./experiments-table').getFileDetailContainer;
+var isServerSide = require('./objectutils').isServerSide;
 var AuditIndicators = audit.AuditIndicators;
 var AuditDetail = audit.AuditDetail;
 var AuditMixin = audit.AuditMixin;
@@ -417,7 +418,8 @@ var ResultTable = browse.ResultTable = React.createClass({
     getInitialState: function(){
         return {
             sortColumn: null,
-            sortReverse: false
+            sortReverse: false,
+            overflowingRight : false
         }
     },
 
@@ -426,6 +428,23 @@ var ResultTable = browse.ResultTable = React.createClass({
         return {
             searchBase: ''
         };
+    },
+
+    componentDidMount : function(){
+        this.setOverflowingRight();
+        var debouncedSetOverflowRight = _.debounce(this.setOverflowingRight, 300);
+        window.addEventListener('resize', debouncedSetOverflowRight);
+    },
+
+    setOverflowingRight : function(){
+        if (isServerSide()) return;
+        if (this.refs.expSetTableContainer){
+            if (this.refs.expSetTableContainer.offsetWidth < this.refs.expSetTableContainer.scrollWidth){
+                this.setState({ overflowingRight : true });
+            } else {
+                this.setState({ overflowingRight : false });
+            }
+        }
     },
 
     sortBy: function(key, reverse) {
@@ -604,9 +623,9 @@ var ResultTable = browse.ResultTable = React.createClass({
                     : 
                     null 
                 }
-                <div className="expset-result-table-fix col-sm-7 col-md-8 col-lg-9">
+                <div className={"expset-result-table-fix col-sm-7 col-md-8 col-lg-9" + (this.state.overflowingRight ? " overflowing" : "")}>
                     <h5 className='browse-title'>Showing {formattedExperimentSetListings.length} of {this.totalResultCount()} experiment sets.</h5>
-                    <div>
+                    <div className="expset-table-container" ref="expSetTableContainer">
                         { formattedExperimentSetListings.length > 0 ?
                         <Table className="expset-table table-tbody-striped" bordered condensed id="result-table">
                             <thead>

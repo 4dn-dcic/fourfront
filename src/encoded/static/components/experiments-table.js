@@ -18,8 +18,66 @@ var FacetList = require('./facetlist').FacetList; // Only used for statics.
 
 var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
+    statics : {
+
+        totalExperimentsCount : function(experimentArray = null){
+            if (!experimentArray) return null;
+            var experimentsCount = 0;
+            var fileSet = new Set();
+            for (var i = 0; i < experimentArray.length; i++){
+                if (experimentArray[i].files && experimentArray[i].files.length > 0){
+                    experimentsCount++; // Exclude empty experiments
+                    for (var j = 0; j < experimentArray[i].files.length; j++){
+                        if (!fileSet.has(experimentArray[i].files[j]['@id'])){
+                            fileSet.add(experimentArray[i].files[j]['@id']);
+                        }
+                    }
+                } else if (experimentArray[i].filesets && experimentArray[i].filesets.length > 0){
+                    experimentsCount++;
+                    for (var j = 0; j < experimentArray[i].filesets.length; j++){
+                        for (var k = 0; k < experimentArray[i].filesets[j].files_in_set.length; k++){
+                            if (!fileSet.has(experimentArray[i].filesets[j].files_in_set[k]['@id'])){
+                                fileSet.add(experimentArray[i].filesets[j].files_in_set[k]['@id']);
+                            }
+                        }
+                    }
+                } else {
+                    console.error("Couldn't find files for experiment - excluding from total count", experimentArray[i]);
+                }
+            }
+            return {
+                'experiments' : experimentsCount,
+                'files' : fileSet.size
+            };
+        },
+
+        visibleExperimentsCount : function(fileDetailContainer){
+            if (!fileDetailContainer) return null;
+            var fileKeys = Object.keys(fileDetailContainer.fileDetail);
+            var experiments = new Set();
+            var fileSet = new Set(fileKeys);
+
+            for (var i = 0; i < fileKeys.length; i++){
+                if (!experiments.has(fileDetailContainer.fileDetail[fileKeys[i]]['@id'])){
+                    experiments.add(fileDetailContainer.fileDetail[fileKeys[i]]['@id']);
+                }
+                if (fileDetailContainer.fileDetail[fileKeys[i]].related && fileDetailContainer.fileDetail[fileKeys[i]].related.file){
+                    if (!fileSet.has(fileDetailContainer.fileDetail[fileKeys[i]].related.file)){
+                        fileSet.add(fileDetailContainer.fileDetail[fileKeys[i]].related.file);
+                    }
+                }
+            }
+            return {
+                'experiments' : experiments.size,
+                'files' : fileSet.size,
+                'emptyExperiments' : fileDetailContainer.emptyExps.length
+            };
+        }
+
+    },
+
     propTypes : {
-        columnHeaders : React.PropTypes.array.isRequired,
+        columnHeaders : React.PropTypes.array,
         experimentArray : React.PropTypes.array,
         passExperiments : React.PropTypes.instanceOf(Set),
         expSetFilters : React.PropTypes.object,
@@ -33,7 +91,22 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             ){
                 return new Error('parentController must be a React Component passed in as "this", with "selectedFiles" (Set) and "checked" (bool) in its state.');
             } 
-        }
+        },
+        keepCounts : React.PropTypes.bool // Whether to run updateCachedCounts and store output in this.counts (get from instance if ref, etc.) 
+    },
+
+    getDefaultProps : function(){
+        return {
+            keepCounts : false,
+            columnHeaders : [ 
+                null, 
+                'Experiment Accession', 
+                'Biosample Accession',
+                'File Accession', 
+                'File Type',
+                'File Info'
+            ]
+        };
     },
 
     getInitialState: function() {
@@ -43,15 +116,46 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         };
     },
 
+    // Mutable non-state data, e.g. value caching.
     fileDetailContainer : null,
+    counts : {
+        visibleExperiments : null,
+        visibleFiles : null,
+        totalExperiments : null,
+        totalFiles : null
+    },
 
     componentWillMount : function(){
         // Cache output for faster re-rendering (?)
         this.fileDetailContainer = this.getFileDetailContainer();
+        this.updateCachedCounts(true);
     },
 
-    componentWillUpdate : function(nextProps, nextState){
-        this.fileDetailContainer = this.getFileDetailContainer(nextProps);
+    componentWillReceiveProps : function(nextProps){
+        if (
+            nextProps.fileDetailContainer !== this.props.fileDetailContainer ||
+            nextProps.passExperiments !== this.props.passExperiments ||
+            nextProps.experimentArray !== this.props.experimentArray ||
+            nextProps.expSetFilters !== this.props.expSetFilters
+        ){
+            this.fileDetailContainer = this.getFileDetailContainer(nextProps);
+            this.updateCachedCounts(nextProps.experimentArray !== this.props.experimentArray);
+        }
+    },
+
+    updateCachedCounts : function(updateTotals = false){
+        if (!this.props.keepCounts) return; // Prevent execution if not necessary (specify in props)
+        var visibleCounts = ExperimentsTable.visibleExperimentsCount(this.fileDetailContainer);
+        this.counts.visibleExperiments = visibleCounts.experiments;
+        this.counts.visibleFiles = visibleCounts.files;
+        if (updateTotals && this.props.experimentArray && Array.isArray(this.props.experimentArray)){
+            // Only available if experimentArray is passed to props.
+            var totalCounts = ExperimentsTable.totalExperimentsCount(this.props.experimentArray);
+            if (totalCounts){
+                this.counts.totalExperiments = totalCounts.experiments;
+                this.counts.totalFiles = totalCounts.files;
+            }
+        }
     },
 
     handleFileUpdate: function (uuid, add=true){

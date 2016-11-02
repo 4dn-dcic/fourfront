@@ -73,37 +73,53 @@
 .facet-list { margin: 0; }
 
 .facet-list li {
-    padding: 3px 10px 3px 0px;
     margin-bottom: 1px;
     position: relative;
     @include font-size(0.9);
-    line-height: 1;
+    line-height: 1rem;
+
     i {
         line-height: 14px;
     }
-}
 
-.facet-list #selected {
-    background-color: #248bac;
-}
-
-.facet-list a#selected {
-    text-decoration: none;
-    color: #fff;
-}
-
-
-.facet-list li {
-    > a{
+    > a {
+        border-radius: 3px;
+        padding: 4px 3px 1px 24px;
         text-decoration: none;
-        margin-left: 20px;
         display: block;
-        color: #999999;
+        color: #888;
+        background-color: rgba(0,0,0,0.0125);
         &:hover{
             color: #000000;
         }
+        &.selected {
+            text-decoration: none;
+            color: #f8f8f8;
+            background-color: #248bac;
+        }
+        &.selected:hover {
+            color: #fff;
+            .facet-item, .facet-count {
+                text-shadow: 0px 0px 0px #fff;
+            }
+        }
+
+
     }
 }
+
+/* Capitalize facet terms belonging to certain 'safe-to-capitalize' facets */
+.facet {
+    
+    &[data-field="biosample.biosource.individual.organism.name"] .facet-list li > a,
+    &[data-field="experiments_in_set.biosample.biosource.individual.organism.name"] .facet-list li > a,
+    &[data-field="biosample.biosource.biosource_type"] .facet-list li > a,
+    &[data-field="experiments_in_set.biosample.biosource.biosource_type"] .facet-list li > a,
+    &[data-field="biosample.biosource_summary"] .facet-list li > a,
+    &[data-field="experiments_in_set.biosample.biosource_summary"] .facet-list li > a {
+        text-transform: capitalize;
+    }
+} 
 
 .facet-item {
     display:inline-block;
@@ -123,11 +139,11 @@
     }
 }
 
-.facet-entry-container#selected{
+.facet-entry-container.selected{
     background-color: #87c487;
 }
 
-.facet-entry a#selected{
+.facet-entry a.selected{
     color: #000000 !important;
 }
 
