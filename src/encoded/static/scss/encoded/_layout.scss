@@ -37,11 +37,12 @@ $expset-table-border-color : #eee;
 	margin: 0;
 }
 
+.page-container,
 .item-page-container,
 .browse-page-container,
 .static-page {
 	/* Consistent margin between top navbar & content among pages */
-	margin-top: 18px;
+	margin-top: 23px;
 
 }
 
@@ -50,10 +51,17 @@ $expset-table-border-color : #eee;
 		HEADER & TOP AREAS (Navbar, Page Titles, etc.)
 ************************************************************/
 
+@media (min-width: $screen-md-min) {
+	.navbar-container.test-warning-visible {
+		margin-bottom: 37px;
+	}
+}
+
 h1.page-title {
 	/* Only set font-weight: 200 for h1,
 	   200 doesn't look as nice on smaller sizes. */
 	font-weight: 200;
+	margin-top: 14px;
 
 	.subtitle {
 		/* Subtitles which are part of the title, e.g. Experiment Set <.subtitle>4324ADADF</.subtitle> */
@@ -212,7 +220,7 @@ h1.page-title + .page-subtitle {
 .left { float: left; }
 .right { float: right; }
 
-@media screen and (max-width: 767px){
+@media screen and (max-width: $screen-xs-max){
 
 	.text-left-xs {
 		// Make text left-aligned for collapsed mobile view(s),
@@ -478,59 +486,72 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		margin: 0 10px;
 	}
 	*/
+}
 
-	.info-panel {
-		padding : 4px 10px 12px;
-		/* border-bottom: 1px solid #e2e2e2; */
-		margin-bottom: 5px;
+.formatted-info-panel {
+	padding : 4px 10px 12px;
+	/* border-bottom: 1px solid #e2e2e2; */
+	margin-bottom: 5px;
 
-		> h6 {
-			margin : 0 0 7px /* -3px -> */ -8px;
-			font-weight: 500;
-			color: #646464;
+	> h6 {
+		margin : 0 0 7px /* -3px -> */ -8px;
+		font-weight: 500;
+		color: #646464;
 
-			&:after {
-				content : "\f105";
-				font-family: "FontAwesome";
-				padding-left: 6px;
-			}
-
+		&:after {
+			content : "\f105";
+			font-family: "FontAwesome";
+			padding-left: 6px;
 		}
 
-		h5 {
-			margin-bottom: 0;
-			margin-top: 2px;
-			font-weight: 600;
-			/* white-space: nowrap; */
-			overflow: hidden;
-			text-overflow: ellipsis;
+	}
 
-			a {
-				display: block;
-				overflow: inherit;
-				text-overflow: inherit;
-			}
+	&.loading > .row {
+		opacity : 1;
+	}
 
+	&.loaded > .row {
+		opacity : 0;
+		transition: opacity 0s;
+	}
+
+	&.loaded.transitioned > .row {
+		opacity : 1;
+		transition: opacity .5s;
+	}
+
+	h5 {
+		margin-bottom: 0;
+		margin-top: 2px;
+		font-weight: 600;
+		/* white-space: nowrap; */
+		overflow: hidden;
+		text-overflow: ellipsis;
+
+		a {
+			display: block;
+			overflow: inherit;
+			text-overflow: inherit;
 		}
 
-		div.more-details {
-			white-space: nowrap;
-			overflow: hidden;
-			text-overflow: ellipsis;
-		}
+	}
 
-		.icon-container {
-			text-align: center;
-			padding-top: 4px;
-			font-size: 20px;
-			margin-bottom: -10px;
-			
-			&.col-xs-2 {
-				padding-right: 0px;
-				padding-left: 5px;
-			}
-		}
+	div.more-details {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
 
+	.icon-container {
+		text-align: center;
+		padding-top: 4px;
+		font-size: 20px;
+		margin-bottom: -10px;
+		
+		&.col-xs-2 {
+			padding-right: 0px;
+			padding-left: 5px;
+		}
 	}
 
 }
@@ -570,6 +591,26 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	*/
 }
 
+/**********************************************************
+		User Profile Page
+***********************************************************/
+
+.page-container > .row.first-row {
+	margin-top: 15px;
+}
+
+.panel.user-info {
+	border: 1px solid #c8c8c8;
+    box-shadow: 0px 1px 9px -3px rgba(0,0,0,0.5);
+
+	> .user-title {
+		margin-top: 2px;
+		margin-bottom: 17px;
+		padding-bottom: 17px;
+		border-bottom: 1px solid #eee;
+		font-weight: 400;
+	}
+}
 
 /* *********************************************************
 		CARL'S LOGIN BOX

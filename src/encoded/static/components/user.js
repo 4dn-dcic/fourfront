@@ -2,14 +2,15 @@
 /* ^ see http://stackoverflow.com/questions/30110437/leading-underscore-transpiled-wrong-with-es6-classes */
 
 'use strict';
+
 var React = require('react');
 var globals = require('./globals');
 var _ = require('underscore');
+var { Modal, Alert } = require('react-bootstrap').Modal;
+var { ItemStore } = require('./lib/store');
+var { ajaxLoad, console } = require('./objectutils');
+var { FormattedInfoBlock } = require('./experiment-set-view');
 // var navigation = require('./navigation');
-var Modal = require('react-bootstrap').Modal;
-var Alert = require('react-bootstrap').Alert;
-var ItemStore = require('./lib/store').ItemStore;
-var ajaxLoad = require('./objectutils').ajaxLoad;
 // var Breadcrumbs = navigation.Breadcrumbs;
 
 
@@ -24,6 +25,22 @@ class AccessKeyStore extends ItemStore {
 
 var AccessKeyTable = React.createClass({
 
+    propTypes : {
+        access_keys : React.PropTypes.array.isRequired,
+        user : React.PropTypes.shape({
+            '@id' : React.PropTypes.string.isRequired,
+            'access_keys' : React.PropTypes.array.isRequired,
+            'email' : React.PropTypes.string,
+            'first_name' : React.PropTypes.string,
+            'last_name' : React.PropTypes.string,
+            'groups' : React.PropTypes.array,
+            'lab' : React.PropTypes.string,
+            'status' : React.PropTypes.string,
+            'timezone' : React.PropTypes.string,
+            'job_title' : React.PropTypes.string
+        })
+    },
+
     contextTypes: {
         fetch: React.PropTypes.func,
         session: React.PropTypes.object
@@ -32,10 +49,13 @@ var AccessKeyTable = React.createClass({
     getInitialState: function() {
         var access_keys = this.props.access_keys;
         this.store = new AccessKeyStore(access_keys, this, 'access_keys');
-        return {access_keys: access_keys};
+        return {
+            access_keys: access_keys
+        };
     },
 
     render: function() {
+        console.log('AccessKeyTable: ', this);
         return (
             <div>
                 <a className="btn btn-success" onClick={this.create}>Add Access Key</a>
@@ -140,49 +160,126 @@ var AccessKeyTable = React.createClass({
 
 
 var User = module.exports.User = React.createClass({
+
+    propTypes : {
+        'context' : React.PropTypes.shape({
+            '@id' : React.PropTypes.string.isRequired,
+            'access_keys' : React.PropTypes.array,
+            'email' : React.PropTypes.string,
+            'first_name' : React.PropTypes.string,
+            'last_name' : React.PropTypes.string,
+            'title' : React.PropTypes.string,
+            'groups' : React.PropTypes.array,
+            'lab' : React.PropTypes.string,
+            'status' : React.PropTypes.string,
+            'timezone' : React.PropTypes.string,
+            'job_title' : React.PropTypes.string
+        })
+    },
+
+    getInitialState : function(){
+        return {
+            details_lab : null
+        };
+    },
+
+    componentDidMount : function(){
+        if (typeof this.props.context.lab == 'string' && !this.state.details_lab){
+            // Fetch lab info & update into User instance state via the -for mixin-like-usage ajaxPropertyDetails func.
+            FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.context.lab, 'lab');
+        }
+    },
+
     render: function() {
-        var context = this.props.context;
+
+        console.log('User', this);
+
+        var usr = this.props.context;
         var crumbs = [
             {id: 'Users'}
         ];
+
+        var labInfo = function(){
+            if (typeof usr.lab !== 'string') { // Probably no lab
+                return (
+                    <div>
+                        <h4 className="text-300">No Labs</h4>
+                    </div>
+                );
+            }
+            return (
+                <FormattedInfoBlock
+                    label="Lab"
+                    iconClass="icon-users"
+                    title={this.state.details_lab ? this.state.details_lab.title : null }
+                    titleHref={this.state.details_lab ? this.state.details_lab['@id'] : null }
+                    detailContent={ this.state.details_lab ? (
+                            (this.state.details_lab.city) + 
+                            (this.state.details_lab.state ? ', ' + this.state.details_lab.state : '') + 
+                            (this.state.details_lab.postal_code ? ' ' + this.state.details_lab.postal_code : '' ) +
+                            (this.state.details_lab.country ? ', ' + this.state.details_lab.country : '')
+                        ) : null
+                    }
+                    extraContainerClassName="lab"
+                    extraDetailClassName="address"
+                    loading={!this.state.details_lab}
+                />
+            );
+        }.bind(this);
+
         return (
-            <div>
+            <div className="user-profile-page">
+
                 <header className="row">
                     <div className="col-sm-12">
-                        <h1 className="page-title">{context.title}</h1>
                     </div>
                 </header>
-                <div className="panel data-display">
-                    <dl className="key-value">
-                        <div>
-                            <dt>Title</dt>
-                            <dd>{context.job_title}</dd>
+
+                <div className="page-container data-display">
+
+                    <h1 className="page-title">Profile</h1>
+
+                    <div className="row first-row">
+
+                        <div className="col-sm-9 col-md-7 col-lg-6">
+
+                            <div className="panel user-info">
+                                <h3 className="user-title">{usr.title}</h3>
+                                <div className="row email">
+                                    <div className="col-sm-3 text-right text-left-xs">
+                                        <label htmlFor="email">Email</label>
+                                    </div>
+                                    <div id="email" className="col-sm-9">
+                                        <a href={'mailto:' + usr.email}>{usr.email}</a>
+                                    </div>
+                                </div>
+                                <div className="row job_title">
+                                    <div className="col-sm-3 text-right text-left-xs">
+                                        <label htmlFor="job_title">Role</label>
+                                    </div>
+                                    <div id="job_title" className="col-sm-9">
+                                        { usr.job_title }
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
-                        <div>
-                            <dt>Lab</dt>
-                            <dd>{context.lab ? context.lab.title : ''}</dd>
+                        <div className="col-sm-9 col-md-5 col-lg-6" style={{ paddingTop : '15px' }}>
+                            { labInfo() }
                         </div>
-                    </dl>
+
+                    </div>
+                    
+                    {usr.access_keys ?
+                        <div className="access-keys">
+                            <h3 className="text-300">Access Keys</h3>
+                            <div className="panel data-display">
+                                <AccessKeyTable user={usr} access_keys={usr.access_keys} />
+                            </div>
+                        </div>
+                    : ''}
+
                 </div>
-                {context.email ?
-                    <div>
-                        <h3>Contact Info</h3>
-                        <div className="panel data-display">
-                            <dl className="key-value">
-                                <dt>Email</dt>
-                                <dd><a href={'mailto:' + context.email}>{context.email}</a></dd>
-                            </dl>
-                        </div>
-                    </div>
-                : ''}
-                {context.access_keys ?
-                    <div className="access-keys">
-                        <h3>Access Keys</h3>
-                        <div className="panel data-display">
-                            <AccessKeyTable user={context} access_keys={context.access_keys} />
-                        </div>
-                    </div>
-                : ''}
             </div>
         );
     }
