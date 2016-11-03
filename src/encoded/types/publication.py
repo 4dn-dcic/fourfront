@@ -32,9 +32,10 @@ def fetch_pubmed(PMID):
         # grab the abstract
         if key_pb == 'AB':
             abstract = data_pb.strip()
-        # grab the date
-        if key_pb == 'DP':
-            date = data_pb.strip()
+        # grab the date added
+        if key_pb == 'DA':
+            date_flat = data_pb.strip()
+            date = date_flat[:4]+"-"+date_flat[4:6]+"-"+date_flat[6:8]
         # accumulate authors
         if key_pb == 'AU':
             author_list.append(data_pb.strip())
