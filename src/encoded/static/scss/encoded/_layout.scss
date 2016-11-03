@@ -1,8 +1,5 @@
 @charset "UTF-8";
 
-/** Setup some variables for colors **/
-$expset-table-border-color : #eee;
-
 #layout {
 	height: auto !important;
     margin: 0 auto -$footerHeight;
@@ -342,7 +339,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 .item-page-heading {
 	/* Extending Bootstrap's .flexcol-heading */
-	border-radius: 3px;
+	border-radius: $border-radius-base;
 	margin-left: 0;
 	margin-right: 0;
 	box-sizing: border-box;
@@ -671,7 +668,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	margin-bottom: 0;
 
 	.row.profile-field-entry {
-		margin-bottom: 5px;
+		padding-bottom: 5px;
 
 		label, #email {
 			font-weight: 500;
@@ -682,8 +679,33 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		}
 	}
 
+	.row.profile-field-entry > ul {
+		margin: 0;
+
+	 	> li {
+			list-style-position: inside;
+
+			&.submit_for-item > i.icon {
+				position: relative;
+				top: 1px;
+				color: #d2d2d2;
+			}
+		}
+	}
+
 	.formatted-info-panel {
-		min-height: 40px;
+
+		&:not(.no-details){
+			min-height: 41px;
+		}
+
+		/* When in list (maybe ToDo: li > .formatted-info-panel) ... */
+		&.no-details.no-icon.no-label {
+			display: inline-block;
+			padding: 0;
+			vertical-align: text-bottom;
+		}
+
 		.block-title,
 		.block-title a {
 			font-weight: 500;
@@ -739,6 +761,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		width: 70px;
 		height: 70px;
 		float: right;
+		border-radius: $border-radius-base;
 	}
 
 	@media screen and (max-width: $screen-xs-max){
@@ -795,9 +818,9 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			td {
 				border-bottom: 1px solid #eee;
 				&.access-key-buttons {
-					text-align: right;
+					width: 140px;
 					.btn.btn-xs {
-						margin-left: 8px;
+						margin: 0 4px;
 					}
 				}
 			}

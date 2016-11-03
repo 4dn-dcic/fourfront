@@ -5,7 +5,7 @@ var { ExperimentsTable, getFileDetailContainer } = require('./experiments-table'
 var _ = require('underscore');
 var { SubIPanel, DescriptorField, tipsFromSchema } = require('./item');
 var { FacetList, siftExperiments } = require('./facetlist');
-var { ajaxLoad, textContentWidth, gridContainerWidth, isServerSide, parseDateTime, console } = require('./objectutils');
+var { ajaxLoad, textContentWidth, gridContainerWidth, isServerSide, DateUtility, console } = require('./objectutils');
 
 /**
  * Entire ExperimentSet page view.
@@ -305,7 +305,7 @@ var ExperimentSetHeader = React.createClass({
         if (!('date_created' in this.props.context)) return <span><i></i></span>;
         return (
             <span>
-                <i className="icon sbt-calendar"></i>&nbsp; Added { parseDateTime(this.props.context.date_created) }
+                <i className="icon sbt-calendar"></i>&nbsp; Added { DateUtility.format(this.props.context.date_created, 'date-time-md', ' at ') }
             </span>
         );
     },
@@ -510,6 +510,13 @@ var FormattedInfoBlock = module.exports.FormattedInfoBlock = React.createClass({
          * 
          * @param {string} endpoint - REST endpoint to get from. Usually a '@id' field in schema-derived JSON data.
          * @param {string} propertyName - The second part of state variable to load into, after 'details_'. E.g. 'lab' for 'details_lab'.
+         * 
+         * @example
+         * componentDidMount : function(){
+         *     if (typeof this.props.context.lab == 'string' && this.props.context.lab.length > 0){
+         *         FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.context.lab, 'lab');
+         *     }
+         * },
          */
         ajaxPropertyDetails : function(endpoint, propertyName){
             console.log('Obtaining details_' + propertyName + ' via AJAX.');
@@ -521,42 +528,62 @@ var FormattedInfoBlock = module.exports.FormattedInfoBlock = React.createClass({
             }.bind(this), 'GET');
         },
 
-        /* Preset generator for Lab details. */
-        Lab : function(details_lab, includeIcon = true, includeLabel = true){
-            return (
-                <FormattedInfoBlock
-                    label={includeLabel ? "Lab" : null}
-                    iconClass={includeIcon ? "icon-users" : null}
-                    title={details_lab ? details_lab.title : null }
-                    titleHref={details_lab ? details_lab['@id'] : null }
-                    extraContainerClassName="lab"
-                    extraDetailClassName="address"
-                    loading={!details_lab}
-                >
-                    { details_lab ?
+        /**
+         * Preset generator for Lab detail block.
+         * @see FormattedInfoBlock.generate
+         * 
+         * @param {Object} details_lab - Object containing Lab Details.
+         * @param {boolean|string} [includeIcon] - Include icon or not. Supply string to override default lab icon. Defaults to true.
+         * @param {boolean} [includeLabel] - Include 'Lab >' label in top left corner, or not. Defaults to true.
+         * @param {boolean} [includeDetail] - Include description/details or not. Defaults to true.
+         * @param {string} [key] - Unique key to add to generated element, supply if generating a collection/array.
+         */
+        Lab : function(details_lab, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
+            return FormattedInfoBlock.generate(
+                details_lab,
+                typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-users" : null),
+                includeLabel ? "Lab" : null,
+                details_lab && includeDetail ?
                         (details_lab.city) + 
                         (details_lab.state ? ', ' + details_lab.state : '') + 
                         (details_lab.postal_code ? ' ' + details_lab.postal_code : '' ) +
                         (details_lab.country ? ', ' + details_lab.country : '')
-                    : null
-                    }
-                </FormattedInfoBlock>
+                    : ( includeDetail ? true : null ),
+                'lab',
+                'address',
+                key
             );
         },
 
-        /* Preset generator for Award details. */
-        Award : function(details_award, includeIcon = true, includeLabel = true){
+        /**
+         * Preset generator for Award detail block.
+         * @see FormattedInfoBlock.Lab
+         */
+        Award : function(details_award, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
+            return FormattedInfoBlock.generate(
+                details_award,
+                typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-institution" : null),
+                includeLabel ? "Award" : null,
+                details_award && includeDetail ? details_award.project : null,
+                'award',
+                'project',
+                key
+            );
+        },
+
+        generate : function(detail, iconClass = null, label = null, contents = null, extraContainerClassName = null, extraDetailClassName = null, key = null){
             return (
                 <FormattedInfoBlock
-                    label="Award"
-                    iconClass="icon-institution"
-                    title={details_award ? details_award.title : null }
-                    titleHref={details_award ? details_award['@id'] : null }
-                    extraContainerClassName="award"
-                    extraDetailClassName="project"
-                    loading={!details_award}
+                    key={key}
+                    label={label}
+                    iconClass={iconClass}
+                    title={detail ? detail.title : null }
+                    titleHref={detail ? detail['@id'] : null }
+                    extraContainerClassName={extraContainerClassName}
+                    extraDetailClassName={extraDetailClassName}
+                    loading={!detail}
                 >
-                    { details_award ? details_award.project : null }
+                    { contents }
                 </FormattedInfoBlock>
             );
         }
@@ -582,7 +609,8 @@ var FormattedInfoBlock = module.exports.FormattedInfoBlock = React.createClass({
             detailContent : null,
             extraContainerClassName : null,
             extraDetailClassName : null,
-            loading : false
+            loading : false,
+            children : null // Inner contents of <FormattedInfoBlock>...</FormattedInfoBlock>
         };
     },
 
@@ -607,7 +635,7 @@ var FormattedInfoBlock = module.exports.FormattedInfoBlock = React.createClass({
             var classes = ["formatted-info-panel"];
             if (!this.props.iconClass) classes.push('no-icon');
             if (!this.props.label) classes.push('no-label');
-            if (!this.props.detailContent && !this.props.children) classes.push('no-details');
+            if (this.props.detailContent == null && this.props.children == null) classes.push('no-details');
             if (!this.props.title) classes.push('no-title');
             if (this.props.loading) classes.push('loading');
             else classes.push('loaded');

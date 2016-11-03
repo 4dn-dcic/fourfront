@@ -155,21 +155,108 @@ var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = {
     });
 }
 
-/**
- * Format a timestamp to pretty output. Uses moment.js, which uses Date() object in underlying code.
- * 
- * @param {string} timestamp - Timestamp as provided by server output. No timezone corrections currently.
- * @param {string} [outputFormat] - Defaults to "MMMM Do, YYYY" for, e.g. "October 31st, 2016".
- * @return {string} Prettified date/time output.
- */
-var parseDateTime = module.exports.parseDateTime = function(timestamp, outputFormat = "MMMM Do, YYYY"){
-    if (!Date) {
-        return timestamp; // Date object may or may not be available server-side.
-    } else {
-        var moment = require('moment'); // require allows to load code in conditionally, so lets do that until more funcs require moment.
+
+var DateUtility = module.exports.DateUtility = (function(){
+
+    // ToDo : Handle locales (w/ moment)
+
+    // 'require' allows to load code in conditionally, so lets do that here until more funcs require moment.
+    var moment = require('moment');
+
+    // Class itself, if need to create non-static instance at some point.
+    var DateUtility = function(timestamp = null){
+        this._dateClassExists = DateUtility.dateClassExists();
+        this._timestamp = timestamp || null;
+        this._moment = timestamp && this._dateClassExists ? moment(timestamp) : null;
+
+        this.format = function(outputFormat){
+            return this._moment.format(outputFormat);
+        }
+    };
+
+    // Static Class Methods
+
+    /** Check that Date class/object exists in execution environment. */
+    DateUtility.dateClassExists = function(){ return !!Date; }
+
+    /**
+     * Presets for date/time output formats for 4DN.
+     * Uses bootstrap grid sizing name convention, so may utilize with responsiveGridState
+     * to set responsively according to screen size, e.g. in a (debounced/delayed) window 
+     * resize event listener.
+     * 
+     * @see responsiveGridState
+     * @param {string} [formatType] - Key for date/time format to display. Defaults to 'date-md'.
+     * @param {string} [dateTimeSeparator] - Separator between date and time if formatting a date-time. Defaults to ' '.
+     */
+    DateUtility.preset = function(formatType = 'date-md', dateTimeSeparator = " "){
+
+        function date(ft){
+            switch(ft){
+                case 'date-xs':
+                    // 11/03/2016
+                    return "MM/DD/YYYY";
+                case 'date-sm':
+                    // Nov 3rd, 2016
+                    return "MMM Do, YYYY";
+                case 'date-md':
+                    // November 3rd, 2016   (default)
+                    return "MMMM Do, YYYY";
+                case 'date-lg':
+                    // Thursday, November 3rd, 2016
+                    return "dddd, MMMM Do, YYYY";
+            }
+        }
+
+        function time(ft){
+            switch(ft){
+                case 'time-xs':
+                    // 12pm
+                    return "ha";
+                case 'time-sm':
+                case 'time-md':
+                    // 12:27pm
+                    return "h:mma";
+                case 'time-lg':
+                    // 12:27:34 pm
+                    return "h:mm:ss a";
+            }
+        }
+
+        if (formatType.indexOf('date-time-') > -1){
+            return date(formatType.replace('time-','')) + dateTimeSeparator + time(formatType.replace('date-',''));
+        } else if (formatType.indexOf('date-') > -1){
+            return date(formatType);
+        } else if (formatType.indexOf('time-') > -1){
+            return date(formatType);
+        }
+        return null;
+    };
+
+    /**
+     * Format a timestamp to pretty output. Uses moment.js, which uses Date() object in underlying code.
+     * @see DateUtility.preset
+     * 
+     * @param {string} timestamp - Timestamp as provided by server output. No timezone corrections currently.
+     * @param {string} [formatType] - Preset format to use. Defaults to 'date-md', e.g. "October 31st, 2016".
+     * @param {string} [customOutputFormat] - Custom format to use in lieu of formatType.
+     * @return {string} Prettified date/time output.
+     */
+    DateUtility.format = function(timestamp, formatType = 'date-md', dateTimeSeparator = " ", customOutputFormat = null){
+        if (!DateUtility.dateClassExists) return timestamp;
+        
+        var outputFormat;
+        if (customOutputFormat) {
+            outputFormat = customOutputFormat;
+        } else {
+            outputFormat = DateUtility.preset(formatType, dateTimeSeparator);
+        }
+        
         return moment(timestamp).format(outputFormat);
-    }
-};
+    };
+
+    return DateUtility;
+})();
 
 /**
  * Check width of text or text-like content if it were to fit on one line.

@@ -8,7 +8,7 @@ var globals = require('./globals');
 var _ = require('underscore');
 var { Modal, Alert } = require('react-bootstrap');
 var { ItemStore } = require('./lib/store');
-var { ajaxLoad, console, isServerSide } = require('./objectutils');
+var { ajaxLoad, DateUtility, console, isServerSide } = require('./objectutils');
 var { FormattedInfoBlock } = require('./experiment-set-view');
 var md5 = require('js-md5');
 // var navigation = require('./navigation');
@@ -55,14 +55,20 @@ var AccessKeyTable = React.createClass({
         };
     },
 
-    render: function() {
-        console.log('AccessKeyTable: ', this); 
-
+    renderTable : function(){
+        if (!this.state.access_keys || !this.state.access_keys.length){
+            return (
+                <div className="no-access-keys">
+                    <hr/><span>No access keys set.</span>
+                </div>
+            );
+        }
         var row = function(key){
             return (
                 <tr key={key.access_key_id}>
-                    <td className="access-key-id">{key.access_key_id}</td>
-                    <td>{key.description}</td>
+                    <td className="access-key-id">{ key.access_key_id }</td>
+                    <td>{ DateUtility.format(key.date_created, 'date-time-md', ' - ') }</td>
+                    <td>{ key.description }</td>
                     <td className="access-key-buttons">
                         <a href="#" className="btn btn-xs btn-success" onClick={this.doAction.bind(this, 'resetSecret', key['@id'])}>Reset</a>
                         <a href="#" className="btn btn-xs btn-danger" onClick={this.doAction.bind(this, 'delete', key['@id'])}>Delete</a>
@@ -72,21 +78,33 @@ var AccessKeyTable = React.createClass({
         }.bind(this);
 
         return (
+            <table className="table access-keys-table">
+                <thead>
+                    <tr>
+                        <th>Access Key ID</th>
+                        <th>Created</th>
+                        <th>Description</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    { this.state.access_keys.map(row) }
+                </tbody>
+            </table>
+        );
+
+    },
+
+    render: function() {
+        console.log('AccessKeyTable: ', this); 
+
+        return (
             <div className="access-keys-table-container clearfix">
-                {this.state.access_keys.length ?
-                    <table className="table access-keys-table">
-                      <thead>
-                        <tr>
-                          <th>Access Key ID</th>
-                          <th>Description</th>
-                          <th></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        { this.state.access_keys.map(row) }
-                      </tbody>
-                    </table>
-                : <div className="no-access-keys"><hr/>No access keys set.</div> }
+                { this.state.access_keys.length ?
+                    this.renderTable()
+                    : 
+                    <div className="no-access-keys"><hr/>No access keys set.</div> 
+                }
                 <a href="#add-access-key" id="add-access-key" className="btn btn-success" onClick={this.create}>Add Access Key</a>
                 {this.state.modal}
             </div>
@@ -170,7 +188,7 @@ var User = module.exports.User = React.createClass({
     statics : {
         buildGravatarURL : function(email, size=null){
             var url = 'https://www.gravatar.com/avatar/' + md5(email);
-            url += "?d=http://media2.giphy.com/media/xT1XGvQsbTq3JRF7YQ/giphy.gif";
+            url += "?d=https://media.giphy.com/media/PcFPiuGZVqK2I/giphy.gif";
             if (size) url += '&s=' + size;
             return url;
         },
@@ -282,7 +300,11 @@ var ProfileContactFields = React.createClass({
                         <label htmlFor="email">Email</label>
                     </div>
                     <div id="email" className="col-sm-9">
-                        <a href={'mailto:' + user.email}>{user.email}</a>
+                        { user.email ? 
+                            <a href={'mailto:' + user.email}>{user.email}</a> 
+                            :
+                            <span className="not-set">No email address</span>
+                        }
                     </div>
                 </div>
                 <div className="row profile-field-entry phone">
@@ -290,7 +312,7 @@ var ProfileContactFields = React.createClass({
                         <label htmlFor="phone">Phone</label>
                     </div>
                     <div id="phone" className="col-sm-9">
-                        { user.phone || <span className="not-set">No Phone Number</span> }
+                        { user.phone || <span className="not-set">No phone number</span> }
                     </div>
                 </div>
                 <div className="row profile-field-entry fax">
@@ -298,7 +320,7 @@ var ProfileContactFields = React.createClass({
                         <label htmlFor="fax">Fax</label>
                     </div>
                     <div id="fax" className="col-sm-9">
-                        { user.fax || <span className="not-set">No Fax Number</span> }
+                        { user.fax || <span className="not-set">No fax number</span> }
                     </div>
                 </div>
                 <div className="row profile-field-entry skype">
@@ -306,7 +328,7 @@ var ProfileContactFields = React.createClass({
                         <label htmlFor="skype">Skype</label>
                     </div>
                     <div id="skype" className="col-sm-9">
-                        { user.skype || <span className="not-set">No Skype ID</span> }
+                        { user.skype || <span className="not-set">No skype ID</span> }
                     </div>
                 </div>
                 
@@ -314,6 +336,10 @@ var ProfileContactFields = React.createClass({
         );
     }
 
+});
+
+var EditableField = React.createClass({
+    render : function(){return null;}
 });
 
 var ProfileWorkFields = React.createClass({
@@ -336,30 +362,62 @@ var ProfileWorkFields = React.createClass({
             // Fetch lab info & update into User instance state via the -for mixin-like-usage ajaxPropertyDetails func.
             FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.user.lab, 'lab');
         }
+        if (Array.isArray(this.props.user.submits_for) && this.props.user.submits_for.length && !this.state.details_submits_for) {
+            var submitsForArray = [];
+            this.props.user.submits_for.forEach(function(orgID, i){
+
+                // Check if lab/org is same as state.details_lab, reuse it if so
+                // Probably doesn't execute since AJAX requests sent @ about same time (ToDo)
+                if (this.state.details_lab && this.state.details_lab['@id'] == orgID){
+                    submitsForArray[i] = this.state.details_lab;
+                    return;
+                }
+
+                // Load w. AJAX otherwise.
+                console.log('Obtaining submitsForArray[' + i + '] via AJAX.');
+                ajaxLoad(orgID + '?format=json', function(result){
+                    submitsForArray[i] = result;
+                    console.log('Obtained submitsForArray[' + i + '] via AJAX.');
+                    if (submitsForArray.length == this.props.user.submits_for.length){
+                        // All loaded
+                        this.setState({ details_submits_for : submitsForArray });
+                        console.log('Obtained details_submits_for via AJAX: ', submitsForArray);
+                    }
+                }.bind(this), 'GET');
+            }.bind(this));
+        }
     },
 
     renderLabInfo : function(user = this.props.user){
         if (typeof user.lab !== 'string') { // Probably no lab
             return (
-                <div>
-                    <h4 className="text-300">No Labs</h4>
-                </div>
+                <span className="not-set">No Labs</span>
             );
         }
         return FormattedInfoBlock.Lab(this.state.details_lab, false, false);
     },
 
     renderSubmitsFor : function(user = this.props.user){
+        // No labs/orgs in user.submits_for
         if (!Array.isArray(user.submits_for) || user.submits_for.length == 0){
             return (
-                <div>
-                    <h4 className="text-300">Not submitting for any organizations.</h4>
-                </div>
+                <span className="not-set">Not submitting for any organizations.</span>
             );
         }
-        return user.submits_for.map((v,i)=> {
-            /* TODO : ajax fetch each + render */
-        });
+
+        // Labs/orgs in user.submits_for exist, but not loaded to state yet.
+        if (!this.state.details_submits_for){
+            return user.submits_for.map((orgID,i)=>
+                <li key={'submits_for-' + i} className="submit_for-item loading">
+                    <i className="icon icon-spin icon-circle-o-notch"></i>
+                </li>
+            );
+        }
+
+        // All loaded
+        return this.state.details_submits_for.map((org,i) =>
+            <li key={'submits_for-' + i} className="submit_for-item">{ FormattedInfoBlock.Lab(org, false, false, false) }</li>
+        );
     },
 
     render : function(){
@@ -387,11 +445,11 @@ var ProfileWorkFields = React.createClass({
                 </div>
                 <div className="row profile-field-entry submits_for">
                     <div className="col-sm-3 text-right text-left-xs">
-                        <label htmlFor="submits_for">Submitting for</label>
+                        <label htmlFor="submits_for">Submit For</label>
                     </div>
-                    <div id="submits_for" className="col-sm-9">
-                        { user.job_title || <span className="not-set">No Organizations</span> }
-                    </div>
+                    <ul id="submits_for" className="col-sm-9">
+                        { this.renderSubmitsFor() }
+                    </ul>
                 </div>
             </div>
         );
