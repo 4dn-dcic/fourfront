@@ -228,7 +228,7 @@ var DateUtility = module.exports.DateUtility = (function(){
         } else if (formatType.indexOf('date-') > -1){
             return date(formatType);
         } else if (formatType.indexOf('time-') > -1){
-            return date(formatType);
+            return time(formatType);
         }
         return null;
     };
@@ -251,7 +251,7 @@ var DateUtility = module.exports.DateUtility = (function(){
         } else {
             outputFormat = DateUtility.preset(formatType, dateTimeSeparator);
         }
-        
+
         return moment(timestamp).format(outputFormat);
     };
 
