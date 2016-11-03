@@ -8,8 +8,9 @@ var globals = require('./globals');
 var _ = require('underscore');
 var { Modal, Alert } = require('react-bootstrap');
 var { ItemStore } = require('./lib/store');
-var { ajaxLoad, console } = require('./objectutils');
+var { ajaxLoad, console, isServerSide } = require('./objectutils');
 var { FormattedInfoBlock } = require('./experiment-set-view');
+var md5 = require('js-md5');
 // var navigation = require('./navigation');
 // var Breadcrumbs = navigation.Breadcrumbs;
 
@@ -55,12 +56,25 @@ var AccessKeyTable = React.createClass({
     },
 
     render: function() {
-        console.log('AccessKeyTable: ', this);
+        console.log('AccessKeyTable: ', this); 
+
+        var row = function(key){
+            return (
+                <tr key={key.access_key_id}>
+                    <td className="access-key-id">{key.access_key_id}</td>
+                    <td>{key.description}</td>
+                    <td className="access-key-buttons">
+                        <a href="#" className="btn btn-xs btn-success" onClick={this.doAction.bind(this, 'resetSecret', key['@id'])}>Reset</a>
+                        <a href="#" className="btn btn-xs btn-danger" onClick={this.doAction.bind(this, 'delete', key['@id'])}>Delete</a>
+                    </td>
+                </tr>
+            );
+        }.bind(this);
+
         return (
-            <div>
-                <a className="btn btn-success" onClick={this.create}>Add Access Key</a>
+            <div className="access-keys-table-container clearfix">
                 {this.state.access_keys.length ?
-                    <table className="table">
+                    <table className="table access-keys-table">
                       <thead>
                         <tr>
                           <th>Access Key ID</th>
@@ -69,19 +83,11 @@ var AccessKeyTable = React.createClass({
                         </tr>
                       </thead>
                       <tbody>
-                        {this.state.access_keys.map(k =>
-                            <tr key={k.access_key_id}>
-                              <td>{k.access_key_id}</td>
-                              <td>{k.description}</td>
-                              <td>
-                                <a href="" onClick={this.doAction.bind(this, 'resetSecret', k['@id'])}>reset</a>
-                                {' '}<a href="" onClick={this.doAction.bind(this, 'delete', k['@id'])}>delete</a>
-                              </td>
-                            </tr>
-                            )}
+                        { this.state.access_keys.map(row) }
                       </tbody>
                     </table>
-                : ''}
+                : <div className="no-access-keys"><hr/>No access keys set.</div> }
+                <a href="#add-access-key" id="add-access-key" className="btn btn-success" onClick={this.create}>Add Access Key</a>
                 {this.state.modal}
             </div>
         );
@@ -161,6 +167,24 @@ var AccessKeyTable = React.createClass({
 
 var User = module.exports.User = React.createClass({
 
+    statics : {
+        buildGravatarURL : function(email, size=null){
+            var url = 'https://www.gravatar.com/avatar/' + md5(email);
+            url += "?d=http://media2.giphy.com/media/xT1XGvQsbTq3JRF7YQ/giphy.gif";
+            if (size) url += '&s=' + size;
+            return url;
+        },
+        gravatar : function(email, size=null, className=null){
+            return (
+                <img 
+                    src={ User.buildGravatarURL(email, size)}
+                    className={'gravatar ' + className}
+                    title="Obtained via Gravatar"
+                />
+            );
+        }
+    },
+
     propTypes : {
         'context' : React.PropTypes.shape({
             '@id' : React.PropTypes.string.isRequired,
@@ -183,47 +207,14 @@ var User = module.exports.User = React.createClass({
         };
     },
 
-    componentDidMount : function(){
-        if (typeof this.props.context.lab == 'string' && !this.state.details_lab){
-            // Fetch lab info & update into User instance state via the -for mixin-like-usage ajaxPropertyDetails func.
-            FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.context.lab, 'lab');
-        }
-    },
-
     render: function() {
 
         console.log('User', this);
 
-        var usr = this.props.context;
+        var user = this.props.context;
         var crumbs = [
             {id: 'Users'}
         ];
-
-        var labInfo = function(){
-            if (typeof usr.lab !== 'string') { // Probably no lab
-                return (
-                    <div>
-                        <h4 className="text-300">No Labs</h4>
-                    </div>
-                );
-            }
-            return (
-                <FormattedInfoBlock
-                    title={this.state.details_lab ? this.state.details_lab.title : null }
-                    titleHref={this.state.details_lab ? this.state.details_lab['@id'] : null }
-                    detailContent={ this.state.details_lab ? (
-                            (this.state.details_lab.city) + 
-                            (this.state.details_lab.state ? ', ' + this.state.details_lab.state : '') + 
-                            (this.state.details_lab.postal_code ? ' ' + this.state.details_lab.postal_code : '' ) +
-                            (this.state.details_lab.country ? ', ' + this.state.details_lab.country : '')
-                        ) : null
-                    }
-                    extraContainerClassName="lab"
-                    extraDetailClassName="address"
-                    loading={!this.state.details_lab}
-                />
-            );
-        }.bind(this);
 
         return (
             <div className="user-profile-page">
@@ -237,50 +228,36 @@ var User = module.exports.User = React.createClass({
 
                     <h1 className="page-title">Profile</h1>
 
-                    <div className="row first-row">
+                    <div className="row first-row row-eq-height-md">
 
                         <div className="col-sm-9 col-md-7">
 
-                            <div className="panel user-info">
-                                <h2 className="user-title">{usr.title}</h2>
-                                <div className="row email">
-                                    <div className="col-sm-3 text-right text-left-xs">
-                                        <label htmlFor="email">Email</label>
-                                    </div>
-                                    <div id="email" className="col-sm-9">
-                                        <a href={'mailto:' + usr.email}>{usr.email}</a>
-                                    </div>
-                                </div>
-                                <div className="row lab">
-                                    <div className="col-sm-3 text-right text-left-xs">
-                                        <label htmlFor="lab">Lab</label>
-                                    </div>
-                                    <div id="lab" className="col-sm-9">
-                                        { labInfo() }
+                            <div className="panel user-info shadow-border">
+                                <div className="user-title-container">
+                                    <div className="row title-row">
+                                        <div className="col-sm-3 gravatar-container">
+                                            { User.gravatar(user.email, 70) }
+                                        </div>
+                                        <div className="col-sm-9">
+                                            <h1 className="user-title">{ user.title }</h1>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="row job_title">
-                                    <div className="col-sm-3 text-right text-left-xs">
-                                        <label htmlFor="job_title">Role</label>
-                                    </div>
-                                    <div id="job_title" className="col-sm-9">
-                                        { usr.job_title }
-                                    </div>
-                                </div>
+                                <ProfileContactFields user={user}/>
                             </div>
 
                         </div>
-                        <div className="col-sm-9 col-md-5 col-lg-6" style={{ paddingTop : '15px' }}>
-                            {/* labInfo() */}
+                        <div className="col-sm-9 col-md-5">
+                            <ProfileWorkFields user={user} containerClassName="panel user-work-info shadow-border" />
                         </div>
 
                     </div>
                     
-                    {usr.access_keys ?
-                        <div className="access-keys panel">
+                    {user.access_keys ?
+                        <div className="access-keys-container">
                             <h3 className="text-300">Access Keys</h3>
                             <div className="data-display">
-                                <AccessKeyTable user={usr} access_keys={usr.access_keys} />
+                                <AccessKeyTable user={user} access_keys={user.access_keys} />
                             </div>
                         </div>
                     : ''}
@@ -291,8 +268,137 @@ var User = module.exports.User = React.createClass({
     }
 });
 
-
 globals.content_views.register(User, 'User');
+
+
+var ProfileContactFields = React.createClass({
+
+    render: function(){
+        var user = this.props.user;
+        return (
+            <div>
+                <div className="row profile-field-entry email">
+                    <div className="col-sm-3 text-right text-left-xs">
+                        <label htmlFor="email">Email</label>
+                    </div>
+                    <div id="email" className="col-sm-9">
+                        <a href={'mailto:' + user.email}>{user.email}</a>
+                    </div>
+                </div>
+                <div className="row profile-field-entry phone">
+                    <div className="col-sm-3 text-right text-left-xs">
+                        <label htmlFor="phone">Phone</label>
+                    </div>
+                    <div id="phone" className="col-sm-9">
+                        { user.phone || <span className="not-set">No Phone Number</span> }
+                    </div>
+                </div>
+                <div className="row profile-field-entry fax">
+                    <div className="col-sm-3 text-right text-left-xs">
+                        <label htmlFor="fax">Fax</label>
+                    </div>
+                    <div id="fax" className="col-sm-9">
+                        { user.fax || <span className="not-set">No Fax Number</span> }
+                    </div>
+                </div>
+                <div className="row profile-field-entry skype">
+                    <div className="col-sm-3 text-right text-left-xs">
+                        <label htmlFor="skype">Skype</label>
+                    </div>
+                    <div id="skype" className="col-sm-9">
+                        { user.skype || <span className="not-set">No Skype ID</span> }
+                    </div>
+                </div>
+                
+            </div>
+        );
+    }
+
+});
+
+var ProfileWorkFields = React.createClass({
+
+    getDefaultProps : function(){
+        return {
+            containerClassName : 'panel'
+        };
+    },
+
+    getInitialState : function(){
+        return {
+            details_lab : null,         // Use FormattedInfoBlock.ajaxPropertyDetails.call(this, args...) to set.
+            details_submits_for : null  // Use custom ajax func to set, b/c is an array.
+        };
+    },
+
+    componentDidMount : function(){
+        if (typeof this.props.user.lab == 'string' && !this.state.details_lab){
+            // Fetch lab info & update into User instance state via the -for mixin-like-usage ajaxPropertyDetails func.
+            FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.user.lab, 'lab');
+        }
+    },
+
+    renderLabInfo : function(user = this.props.user){
+        if (typeof user.lab !== 'string') { // Probably no lab
+            return (
+                <div>
+                    <h4 className="text-300">No Labs</h4>
+                </div>
+            );
+        }
+        return FormattedInfoBlock.Lab(this.state.details_lab, false, false);
+    },
+
+    renderSubmitsFor : function(user = this.props.user){
+        if (!Array.isArray(user.submits_for) || user.submits_for.length == 0){
+            return (
+                <div>
+                    <h4 className="text-300">Not submitting for any organizations.</h4>
+                </div>
+            );
+        }
+        return user.submits_for.map((v,i)=> {
+            /* TODO : ajax fetch each + render */
+        });
+    },
+
+    render : function(){
+        var user = this.props.user;
+        return (
+            <div className={this.props.containerClassName}>
+                <h3 className="text-300 block-title">
+                    <i className="icon icon-users icon-fw"></i> Organizations
+                </h3>
+                <div className="row profile-field-entry lab">
+                    <div className="col-sm-3 text-right text-left-xs">
+                        <label htmlFor="lab">Primary Lab</label>
+                    </div>
+                    <div id="lab" className="col-sm-9">
+                        { this.renderLabInfo(user) }
+                    </div>
+                </div>
+                <div className="row profile-field-entry job_title">
+                    <div className="col-sm-3 text-right text-left-xs">
+                        <label htmlFor="job_title">Role</label>
+                    </div>
+                    <div id="job_title" className="col-sm-9">
+                        { user.job_title || <span className="not-set">No Job Title</span> }
+                    </div>
+                </div>
+                <div className="row profile-field-entry submits_for">
+                    <div className="col-sm-3 text-right text-left-xs">
+                        <label htmlFor="submits_for">Submitting for</label>
+                    </div>
+                    <div id="submits_for" className="col-sm-9">
+                        { user.job_title || <span className="not-set">No Organizations</span> }
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+});
+
 
 var BasicForm = React.createClass({
     getInitialState: function() {

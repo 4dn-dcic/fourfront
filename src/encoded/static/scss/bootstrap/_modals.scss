@@ -16,7 +16,6 @@
 .modal {
   display: none;
   overflow: auto;
-  overflow-y: scroll;
   position: fixed;
   top: 0;
   right: 0;
@@ -87,6 +86,14 @@
 .modal-title {
   margin: 0;
   line-height: $modal-title-line-height;
+}
+
+h1.modal-title, h2.modal-title {
+  font-weight: 300;
+}
+
+h5.modal-title, h4.modal-title, h3.modal-title {
+  font-weight: 600;
 }
 
 // Modal body

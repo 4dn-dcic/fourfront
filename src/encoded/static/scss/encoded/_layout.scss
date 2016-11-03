@@ -237,6 +237,58 @@ h1.page-title + .page-subtitle {
 @media screen and (min-width: $screen-md-min)    { .col-md-float-right { float : right; } }
 @media screen and (min-width: $screen-lg-min)    { .col-lg-float-right { float : right; } }
 
+/** Equal Height Columns in Bootstrap Row on IE9+ **/
+
+.row.row-eq-height-xs {
+	display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+}
+
+@media screen and (min-width: $screen-sm-min) {
+	.row.row-eq-height-sm {
+		display: -webkit-box;
+		display: -webkit-flex;
+		display: -ms-flexbox;
+		display: flex;
+		.panel {
+			margin-top: 0;
+			margin-bottom: 0;
+			height: 100%;
+		}
+	}
+}
+
+@media screen and (min-width: $screen-md-min) {
+	.row.row-eq-height-md {
+		display: -webkit-box;
+		display: -webkit-flex;
+		display: -ms-flexbox;
+		display: flex;
+		.panel {
+			margin-top: 0;
+			margin-bottom: 0;
+			height: 100%;
+		}
+	}
+}
+
+@media screen and (min-width: $screen-lg-min) {
+	.row.row-eq-height-lg {
+		display: -webkit-box;
+		display: -webkit-flex;
+		display: -ms-flexbox;
+		display: flex;
+		.panel {
+			margin-top: 0;
+			margin-bottom: 0;
+			height: 100%;
+		}
+	}
+}
+
+
 
 .off-screen {
 	position : absolute;
@@ -475,17 +527,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 
 .item-page-container .info-area {
-	margin-top: 19px;
-	/* margin-bottom: 4px; */
-	/*
-	&:after {
-		content : "";
-		display : block;
-		position: relative;
-		border-bottom: 1px solid #ddd;
-		margin: 0 10px;
-	}
-	*/
+	margin-top: 24px;
 }
 
 .formatted-info-panel {
@@ -620,43 +662,158 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 ***********************************************************/
 
 .page-container > .row.first-row {
-	margin-top: 15px;
+	margin-top: 29px;
 }
 
-.panel.user-info {
-	border: 1px solid #c8c8c8;
-    box-shadow: 0px 1px 9px -3px rgba(0,0,0,0.5);
+.panel.user-info,
+.panel.user-work-info {
 
-	> .row {
+	margin-bottom: 0;
+
+	.row.profile-field-entry {
 		margin-bottom: 5px;
-	}
 
-	> .user-title {
-		margin-top: 2px;
-		margin-bottom: 17px;
-		padding-bottom: 17px;
-		border-bottom: 1px solid #eee;
-		font-weight: 400;
-		font-size: 2rem;
-	}
+		label, #email {
+			font-weight: 500;
+		}
 
-	label {
-		font-weight: 500;
+		.not-set {
+			color: #bbb; 
+		}
 	}
 
 	.formatted-info-panel {
 		min-height: 40px;
+		.block-title,
+		.block-title a {
+			font-weight: 500;
+		}
 	}
 
 }
 
-.panel.access-keys {
-	margin-top: 0;
+.panel.user-info {
+	/* for fun - comment out bottom transform in Inspect Element */
+	transform: rotateZ(0deg) scale3d(1, 1, 1) translateX(0);
+    opacity: 1;
+	left: 0px;
+	transition: transform 1.2s ease-out, opacity 1.5s ease-out, left 1.2s ease-out;
+	position: relative;
+	z-index: 2;
+	background-color: #fff;
+
+	&.transition { transform: rotateZ(-900deg) scale3d(0.1, 0.1, 0.1) translateX(-1200px); opacity: 0; left: -900px; }
+
+	.user-title-container {
+		margin-bottom: 20px;
+		border-bottom: 1px solid #eee;
+	}
+
+	.user-title {
+		margin-top: 0px;
+		margin-bottom: 0px;
+		padding-top: 2px;
+		padding-bottom: 17px;
+		font-weight: 300;
+		font-size: 2.6rem;
+	}
+
+	@media screen and (min-width: $screen-sm-min){ 
+		.user-title {
+			padding-top: 15px;
+			height: 85px;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+	}
+
+	@media screen and (max-width: $screen-xs-max){
+		.user-title {
+			font-size: 2rem;
+			font-weight: 400;
+		}
+	}
+
+	img.gravatar {
+		width: 70px;
+		height: 70px;
+		float: right;
+	}
+
+	@media screen and (max-width: $screen-xs-max){
+		img.gravatar {
+			width: 94px; /* Account for border */
+			height: 70px;
+			position: relative;
+			z-index: 2;
+			margin-bottom: -30px;
+			margin-top: 5px;
+			border-left: 24px solid #FFF;
+		}
+	}
+
+}
+
+.panel.user-work-info {
+
+	> .block-title {
+		margin-bottom: 20px;
+		padding-bottom: 15px;
+		border-bottom: 1px solid #eee;
+		padding-top: 0;
+		
+		> i.icon.icon-fw {
+			margin-right: 5px;
+			font-size: 1.5rem;
+		}
+	}
+
+}
+
+.access-keys-container {
+	padding-top: 15px;
+
 	> h3 {
+		
 		margin-bottom: 17px;
+		/*
 	    padding-bottom: 17px;
     	border-bottom: 1px solid #eee;
+		*/
 	}
+
+	table.access-keys-table {
+		margin-bottom: 20px;
+		
+		tr {
+			/*
+			&:nth-child(2n-1) {
+				background-color: #f8f8f8;
+			}
+			*/
+			td {
+				border-bottom: 1px solid #eee;
+				&.access-key-buttons {
+					text-align: right;
+					.btn.btn-xs {
+						margin-left: 8px;
+					}
+				}
+			}
+		}
+	}
+
+	#add-access-key.btn{
+		float: right;
+		min-width: 180px;
+	}
+
+	.no-access-keys > hr:first-child {
+		margin-top: 0;
+		margin-bottom: 17px;
+	}
+
 }
 
 /* *********************************************************
@@ -890,6 +1047,8 @@ p, input {
 	}
 }
 
+/** Primarily for Browse Table / View **/
+
 .exptype-box{
 
 	//display: none; /* TEMPORARY - FOR ALIGNMENT */
@@ -906,12 +1065,18 @@ p, input {
 	}
 }
 
-.expset-panel {
-	margin: 0px !important;
-	>div>.panel-body{
-		padding-right: 0px;
-		padding-left: 40px;
+.expset-table-container {
+
+	.expset-panel {
+		margin: 0px;
+		border: none;
+
+		>div>.panel-body{
+			padding-right: 0px;
+			padding-left: 40px;
+		}
 	}
+
 }
 
 .expset-button{
@@ -919,8 +1084,6 @@ p, input {
 	text-align: center;
 	box-shadow: none !important;
 }
-
-/** Primarily for Browse Table / View **/
 
 .expset-result-table-fix {
 	&.overflowing:after {
