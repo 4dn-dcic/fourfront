@@ -252,8 +252,11 @@ var ImpersonateUserForm = React.createClass({
     handleSubmit: function(data) {
         var url = "/impersonate-user";
         var jsonData = JSON.stringify({'userid':data});
-        var callbackFxn = function() {
+        var callbackFxn = function(payload) {
             alert('Success! ' + data + ' is being impersonated.');
+            if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
+                localStorage.setItem("user_info", JSON.stringify(payload));
+            }
             this.context.navigate('/');
         }.bind(this);
         var fallbackFxn = function() {
