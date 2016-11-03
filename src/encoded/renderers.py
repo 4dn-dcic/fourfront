@@ -7,6 +7,7 @@ from pyramid.httpexceptions import (
     HTTPMovedPermanently,
     HTTPPreconditionFailed,
     HTTPUnauthorized,
+    HTTPForbidden,
     HTTPUnsupportedMediaType,
 )
 from pyramid.security import forget
@@ -91,7 +92,8 @@ def security_tween_factory(handler, registry):
         if auth_challenge or request.authorization is not None:
             login = request.authenticated_userid
             if login is None:
-                raise HTTPUnauthorized(headerlist=forget(request))
+                #raise HTTPForbidden(headerlist=forget(request))
+                raise HTTPForbidden(title="no access")
 
         if request.method in ('GET', 'HEAD'):
             return handler(request)
@@ -100,13 +102,13 @@ def security_tween_factory(handler, registry):
             detail = "%s is not 'application/json'" % request.content_type
             raise HTTPUnsupportedMediaType(detail)
 
-        token = request.headers.get('X-CSRF-Token')
-        if token is not None:
-            # Avoid dirtying the session and adding a Set-Cookie header
-            # XXX Should consider if this is a good idea or not and timeouts
-            if token == dict.get(request.session, '_csrft_', None):
-                return handler(request)
-            raise CSRFTokenError('Incorrect CSRF token')
+        #token = request.headers.get('X-CSRF-Token')
+        #if token is not None:
+        #    # Avoid dirtying the session and adding a Set-Cookie header
+        #    # XXX Should consider if this is a good idea or not and timeouts
+        #    if token == dict.get(request.session, '_csrft_', None):
+        #        return handler(request)
+        #    raise CSRFTokenError('Incorrect CSRF token')
 
         return handler(request)
 

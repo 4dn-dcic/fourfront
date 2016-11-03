@@ -42,6 +42,7 @@ def auth0_4dn_user_profile(auth0_access_token):
 
 def test_login_unknown_user(anontestapp, auth0_4dn_user_token):
     res = anontestapp.post_json('/login', auth0_4dn_user_token, status=403)
+    import pdb; pdb.set_trace()
     assert 'Set-Cookie' in res.headers
 
 
