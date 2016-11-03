@@ -659,7 +659,7 @@ var App = React.createClass({
                 status = 'not_found';
             }
         }else if(context.code && context.code == 403){
-            if(context.title && context.title == 'Login failure'){
+            if(context.title && (context.title == 'Login failure' || context.title == 'no access')){
                 status = 'invalid_login';
             }else if(context.title && context.title == 'Forbidden'){
                 status = 'forbidden';
