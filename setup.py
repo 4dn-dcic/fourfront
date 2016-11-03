@@ -44,6 +44,7 @@ requires = [
     'subprocess_middleware',
     'xlrd',
     'zope.sqlalchemy',
+    'pyJWT',
 ]
 
 if sys.version_info.major == 2:
