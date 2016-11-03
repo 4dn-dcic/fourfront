@@ -339,7 +339,21 @@ var ProfileContactFields = React.createClass({
 });
 
 var EditableField = React.createClass({
-    render : function(){return null;}
+
+    propTypes : {
+        
+    },
+
+    getInitialState : function(){
+        return {
+            isEditing : false
+        }
+    },
+
+    render : function(){
+        return null;
+    }
+
 });
 
 var ProfileWorkFields = React.createClass({
