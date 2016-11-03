@@ -111,7 +111,7 @@ def test_json_basic_auth(anonhtmltestapp):
     from pyramid.compat import ascii_native_
     url = '/'
     value = "Authorization: Basic %s" % ascii_native_(b64encode(b'nobody:pass'))
-    res = anonhtmltestapp.get(url, headers={'Authorization': value}, status=401)
+    res = anonhtmltestapp.get(url, headers={'Authorization': value}, status=403)
     assert res.content_type == 'application/json'
 
 
@@ -205,7 +205,7 @@ def test_collection_post_bad_(anontestapp):
     from base64 import b64encode
     from pyramid.compat import ascii_native_
     value = "Authorization: Basic %s" % ascii_native_(b64encode(b'nobody:pass'))
-    anontestapp.post_json('/organism', {}, headers={'Authorization': value}, status=401)
+    anontestapp.post_json('/organism', {}, headers={'Authorization': value}, status=403)
 
 
 def test_collection_actions_filtered_by_permission(workbook, testapp, anontestapp):

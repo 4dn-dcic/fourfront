@@ -1,6 +1,7 @@
 import pytest
 import requests
 import time
+import os
 from datetime import datetime
 pytestmark = pytest.mark.working
 
@@ -91,15 +92,46 @@ def test_jwt_is_stateless_so_doesnt_actually_need_login(testapp, anontestapp, au
     assert '@id' in res2.json['@graph'][0]
 
 
+def test_jwt_works_without_keys(testapp, anontestapp, auth0_4dn_user_token,
+                      auth0_4dn_user_profile, headers):
+    # Create a user with the proper email
+
+    url = '/users/'
+    email = auth0_4dn_user_profile['email']
+    item = {
+        'email': email,
+        'first_name': 'Auth0',
+        'last_name': 'Test User',
+    }
+    testapp.post_json(url, item, status=201)
+
+    #clear out keys
+    old_key = anontestapp.app.registry.settings['auth0.secret'] 
+    anontestapp.app.registry.settings['auth0.secret'] = None
+    res2 = anontestapp.get('/users/', headers=headers, status=200)
+
+    anontestapp.app.registry.settings['auth0.secret'] = old_key 
+    assert '@id' in res2.json['@graph'][0]
+
 
 def test_impersonate_user(anontestapp, admin, submitter):
+    if not os.environ.get('Auth0Secret'):
+        pytest.skip("need the keys to impersonate user, which aren't here")
+
     res = anontestapp.post_json(
         '/impersonate-user', {'userid':
                               submitter['email']},
         extra_environ={'REMOTE_USER':
-                       str(admin['email'])},
-        status=200)
+                       str(admin['email'])})
 
-    assert 'Set-Cookie' in res.headers
-    assert res.json['auth.userid'] == submitter['email']
-    assert res.json['auth.userid'] == submitter['email']
+    #we should get back a new token
+    assert 'user_actions' in res.json
+    assert 'id_token' in res.json
+
+
+    # and we should be able to use that token as the new user
+    headers = {'Accept': 'applicatin/json', 'Content-Type': 'application/json', 'Authorization': 'Bearer ' +
+     res.json['id_token']}
+    res2 = anontestapp.get('/users/', headers=headers)
+    assert '@id' in res2.json['@graph'][0]
+

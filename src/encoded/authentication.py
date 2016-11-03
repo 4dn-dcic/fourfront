@@ -29,7 +29,6 @@ from pyramid.view import (
     view_config,
 )
 from pyramid.settings import asbool
-from pyramid.threadlocal import get_current_registry
 from snovault import ROOT
 from snovault.storage import User
 from snovault import COLLECTIONS
@@ -190,15 +189,9 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
                 # else this is an auth0 token, lets get user info
                 user_url = "https://{domain}/tokeninfo".format(domain='hms-dbmi.auth0.com')
                 resp  = requests.post(user_url, {'id_token':token})
-                while resp.status_code == 429:
-                    reset_time = datetime.utcfromtimestamp(float(resp.headers['X-RateLimit-Reset']))
-                    timeDiff = reset_time - datetime.utcnow()
-                    # to many requests... slow down and try again
-                    print("too many requests.. waiting a while")
-                    time.sleep(timeDiff.seconds + 1)
-                    resp  = requests.post(user_url, {'id_token': token})
-                if 'email' in resp.json and res.json.get('email_verified') is True:
-                    return resp.json
+                payload = resp.json()
+                if 'email' in payload and payload.get('email_verified') is True:
+                    return payload
 
         except Exception as e:
             print('Invalid assertion: %s (%s)', (e, type(e).__name__))
@@ -332,13 +325,21 @@ def impersonate_user(request):
     if user.properties.get('status') != 'current':
         raise ValidationFailure('body', ['userid'], 'User is not enabled.')
 
-    #request.session.invalidate()
-    #request.session.get_csrf_token()
-    #request.response.headerlist.extend(remember(request, 'mailto.' + userid))
-
     user_properties = request.embed('/session-properties', as_user=userid)
-    #if 'auth.userid' in request.session:
-    #    user_properties['auth.userid'] = request.session['auth.userid']
+
+    #make a key
+    registry = request.registry
+    auth0_client = registry.settings.get('auth0.client')
+    auth0_secret = registry.settings.get('auth0.secret')
+    if not(auth0_client and auth0_secret):
+        raise HTTPForbidden(title="no keys to impersonate user")
+
+    payload = {'email': userid,
+               'email_verified': True,
+               'aud': auth0_client,
+              }
+    id_token = jwt.encode(payload, b64decode(auth0_secret, '-_'), algorithm='HS256')
+    user_properties['id_token'] = id_token.decode('utf-8')
 
     return user_properties
 
