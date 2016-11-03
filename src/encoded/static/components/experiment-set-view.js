@@ -1,7 +1,7 @@
 var React = require('react');
 var globals = require('./globals');
 var Panel = require('react-bootstrap').Panel;
-var ExperimentsTable = require('./experiments-table').ExperimentsTable;
+var { ExperimentsTable, getFileDetailContainer } = require('./experiments-table');
 var _ = require('underscore');
 var { SubIPanel, DescriptorField, tipsFromSchema } = require('./item');
 var { FacetList, siftExperiments } = require('./facetlist');
@@ -43,34 +43,26 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
     tips : null, // Value assumed immutable so not in state.
 
+    // Mutable but not in state, e.g. cached output values that may rely on other state.
+    fileDetailContainer : null,
+    counts : {
+        visibleExperiments : null,
+        visibleFiles : null,
+        totalExperiments : null,
+        totalFiles : null
+    },
+
     componentWillMount : function(){
         if (!this.tips) {
             this.tips = tipsFromSchema(this.props.schemas, this.props.context);
         }
+
+        this.updateFileDetailAndCachedCounts(true); // Sets this.counts and this.fileDetailContainer -- in lieu of having ExperimentsTable handle it.
         this.setLinkedDetails(false);
     },
 
     componentDidMount : function(){
         this.setLinkedDetails(true);
-    },
-
-    setLinkedDetails : function(fallbackToAjax = false){
-        if (!this.state.details_lab) {
-            var labDetails = this.getLinkedPropertyDetailsFromExperiments('lab', fallbackToAjax);
-            if (labDetails !== null){
-                this.setState({
-                    details_lab : labDetails
-                });
-            }
-        }
-        if (!this.state.details_award) {
-            var awardDetails = this.getLinkedPropertyDetailsFromExperiments('award', fallbackToAjax);
-            if (awardDetails !== null){
-                this.setState({
-                    details_award : awardDetails
-                });
-            }
-        }
     },
 
     componentWillReceiveProps: function(nextProps) {
@@ -80,8 +72,72 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
             this.setState({
                 selectedFiles: new Set()
             });
+            this.updateFileDetailAndCachedCounts(false);
+        } else if (this.props.context.experiments_in_set !== nextProps.context.experiments_in_set){
+            this.updateFileDetailAndCachedCounts(true);
         }
 
+        /* For debugging
+        if (!isServerSide()){
+            window.table = this.refs.experimentsTable;
+            window.view = this;
+        }
+        */
+
+    },
+
+    /** Same functionality as exists in ExperimentsTable */
+    updateFileDetailAndCachedCounts : function(updateTotals = false){
+
+        // Set fileDetailContainer
+        var passExperiments = null, ignoredFilters = null, experimentArray = this.props.context.experiments_in_set;
+
+        if (!passExperiments && this.props.expSetFilters) {
+            if (this.props.facets && this.props.facets.length > 0) {
+                ignoredFilters = FacetList.findIgnoredFilters(this.props.facets, this.props.expSetFilters);
+            }
+            passExperiments = siftExperiments(experimentArray, this.props.expSetFilters, ignoredFilters);
+        }
+        
+        this.fileDetailContainer = getFileDetailContainer(experimentArray, passExperiments);
+
+        var visibleCounts = ExperimentsTable.visibleExperimentsCount(this.fileDetailContainer);
+        this.counts.visibleExperiments = visibleCounts.experiments;
+        this.counts.visibleFiles = visibleCounts.files;
+        if (updateTotals && experimentArray && Array.isArray(experimentArray)){
+            var totalCounts = ExperimentsTable.totalExperimentsCount(experimentArray);
+            if (totalCounts){
+                this.counts.totalExperiments = totalCounts.experiments;
+                this.counts.totalFiles = totalCounts.files;
+            }
+        }
+    },
+
+    /**
+     * Get data for nested properties - Award and Lab. Save to state or use state object in callback.
+     * 
+     * @param {boolean} [fallbackToAjax] - Whether to revert to AJAX to fetch info if not in provided ExpSet object.
+     * @param {function} [callback] - A function ran after execution, before any AJAX fetching, which takes ones parameter - an object representing resulting state change. Used in place of setState if have more state to apply.
+     * @param {Object} [newState] - State object to use. Defaults to empty object.
+     */
+    setLinkedDetails : function(fallbackToAjax = false, callback = null, newState = {}){
+        if (!this.state.details_lab) {
+            var labDetails = this.getLinkedPropertyDetailsFromExperiments('lab', fallbackToAjax);
+            if (labDetails !== null){
+                newState.details_lab = labDetails;
+            }
+        }
+        if (!this.state.details_award) {
+            var awardDetails = this.getLinkedPropertyDetailsFromExperiments('award', fallbackToAjax);
+            if (awardDetails !== null){
+                newState.details_award = awardDetails;
+            }
+        }
+        if (typeof callback == 'function') { 
+            callback(newState);
+        } else if (Object.keys(newState).length > 0) {
+            this.setState(newState);
+        } 
     },
 
     /**
@@ -193,8 +249,16 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                         />
 
                         <div className="exp-table-container">
-                            <h3>Experiments</h3>
+                            <h3>
+                                <span>Experiments</span>
+                                <span className="exp-number small right">
+                                    <span className="hidden-xs">Showing </span>
+                                    { this.counts.visibleExperiments } of { this.counts.totalExperiments }
+                                    <span className="hidden-xs"> Experiments</span>
+                                </span>
+                            </h3>
                             <ExperimentsTable 
+                                ref="experimentsTable"
                                 columnHeaders={[ 
                                     null, 
                                     'Experiment Accession', 
@@ -204,9 +268,8 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                                     'File Info'
                                 ]}
                                 parentController={this}
-                                experimentArray={this.props.context.experiments_in_set}
-                                expSetFilters={this.props.expSetFilters /* Req'd to filter results */}
-                                facets={this.props.facets /* Req'd to find ignoredFilters */ }
+                                fileDetailContainer={this.fileDetailContainer}
+                                keepCounts={false}
                             />
                         </div>
 
@@ -274,7 +337,11 @@ var ExperimentSetHeader = React.createClass({
 
         // Status colors are set via CSS (layout.scss) dependent on data-status attribute
         return (
-            <div className="expset-indicator expset-status right" data-status={ this.props.context.status.toLowerCase() }>
+            <div
+                className="expset-indicator expset-status right"
+                data-status={ this.props.context.status.toLowerCase() }
+                title="Review Status"
+            >
                 { this.props.context.status }
             </div>
         );
@@ -283,7 +350,11 @@ var ExperimentSetHeader = React.createClass({
     parsedExperimentSetType(){
         if (!('experimentset_type' in this.props.context)) return <div></div>;
         return (
-            <div className="expset-indicator expset-type right" data-set-type={ this.props.context.experimentset_type }>
+            <div
+                className="expset-indicator expset-type right"
+                data-set-type={ this.props.context.experimentset_type }
+                title="Experiment Set Type"
+            >
                 { this.props.context.experimentset_type }
             </div>
         );
@@ -463,33 +534,49 @@ var ExperimentSetInfoBlock = React.createClass({
         titleHref,
         detailContent,
         extraContainerClassName = '',
-        extraDetailClassName = ''
+        extraDetailClassName = '',
+        loading = false
     ){
+        var innerContent;
+        if (loading) {
+            innerContent = (
+                <div className="row">
+                    <div className="col-xs-12 text-center" style={{ color : '#aaa', fontSize : '22px', paddingTop : 3 }}>
+                        <i className="icon icon-spin icon-circle-o-notch"></i>
+                    </div>
+                </div>
+            );
+        } else {
+            innerContent = (
+                <div className="row">
+                    <div className="col-xs-2 col-lg-1 icon-container">
+                        <i className={"icon " + iconClass}></i>
+                    </div>
+                    <div className="col-xs-10 col-lg-11">
+                        <h5>
+                            <a href={ titleHref || '#' } title={title}>{ title }</a>
+                        </h5>
+                        <div className={"more-details " + extraDetailClassName}>
+                            { detailContent }
+                        </div>
+                    </div>
+                </div>
+            );
+        }
         return (
             <div className="col-sm-6 col-sm-float-right">
                 <div className={"info-panel " + extraContainerClassName}>
                     <h6 className="info-panel-label">{ label }</h6>
-                    <div className="row">
-                        <div className="col-xs-2 col-lg-1 icon-container">
-                            <i className={"icon " + iconClass}></i>
-                        </div>
-                        <div className="col-xs-10 col-lg-11">
-                            <h5>
-                                <a href={ titleHref || '#' } title={title}>{ title }</a>
-                            </h5>
-                            <div className={"more-details " + extraDetailClassName}>
-                                { detailContent }
-                            </div>
-                        </div>
-                    </div>
-
+                    { innerContent }
                 </div>
             </div>
         );
     },
 
     formattedAwardInfoBlock : function(){
-        if (!this.props.awardInfo) return null;
+        if (!this.props.awardInfo) {
+            return this.formattedInfoBlock('Award', 'icon-institution', null, null, null, 'award', 'project', true);
+        };
         return this.formattedInfoBlock(
             'Award',
             'icon-institution',
@@ -497,12 +584,15 @@ var ExperimentSetInfoBlock = React.createClass({
             this.props.awardInfo['@id'],
             this.props.awardInfo.project,
             'award',
-            'project'
+            'project',
+            false
         );
     },
 
     formattedLabInfoBlock : function(){
-        if (!this.props.labInfo) return null;
+        if (!this.props.labInfo) {
+            return this.formattedInfoBlock('Lab', 'icon-users', null, null, null, 'lab', 'address', true);
+        };
         return this.formattedInfoBlock(
             'Lab',
             'icon-users',
@@ -515,7 +605,8 @@ var ExperimentSetInfoBlock = React.createClass({
                 (this.props.labInfo.country ? ', ' + this.props.labInfo.country : '')
             ),
             'lab',
-            'address'
+            'address',
+            false
         );
     },
 

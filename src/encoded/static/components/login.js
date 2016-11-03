@@ -7,7 +7,7 @@ var jwt = require('jsonwebtoken');
 var Login = React.createClass({
     contextTypes: {
     	fetch: React.PropTypes.func,
-    	session: React.PropTypes.object,
+    	session: React.PropTypes.bool,
         navigate: React.PropTypes.func
     },
 
@@ -47,10 +47,10 @@ var Login = React.createClass({
 
     logout: function (e) {
         e.preventDefault();
-        var idToken = localStorage.getItem('idToken') || "";
+        var userInfo = localStorage.getItem('user_info') || "";
+        var idToken = JSON.parse(userInfo).id_token;
         console.log('Logging out');
-        var session = this.context.session;
-        if (!(session && session['auth.userid'])) return;
+        if (!this.context.session) return;
         this.context.fetch('/logout?redirect=false', {
             headers: {'Accept': 'application/json',
                 'Content-Type': 'application/json',
@@ -58,19 +58,18 @@ var Login = React.createClass({
         })
         .then(data => {
             if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
-                localStorage.removeItem("idToken");
-                localStorage.removeItem("user_actions");
+                localStorage.removeItem("user_info");
             }
             if(typeof document !== 'undefined'){
-                this.context.navigate('/');
+                // TODO: should logout redirect to home?
+                this.context.navigate('', {'inPlace':true});
             }
         });
     },
 
     handleAuth0Login: function(authResult, retrying){
-        var accessToken = authResult.accessToken;
         var idToken = authResult.idToken; //JWT
-        if (!accessToken) return;
+        if (!idToken) return;
         this.context.fetch('/login', {
             method: 'POST',
             headers: {
@@ -78,7 +77,7 @@ var Login = React.createClass({
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer '+idToken
             },
-            body: JSON.stringify({accessToken: accessToken})
+            body: JSON.stringify({id_token: idToken})
         })
         .then(response => {
             this.lock.hide();
@@ -89,8 +88,9 @@ var Login = React.createClass({
             //Keep JWT in localStorage so that it persists across refresh
             //In the future, store user_actions in jwt and use jwt.decode to extract
             if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
-                localStorage.setItem("user_actions", JSON.stringify(response.user_actions));
-                localStorage.setItem("idToken", idToken);
+                localStorage.setItem("user_info", JSON.stringify(response));
+            }else{
+                alert('Please upgrade your browser to one that supports local storage!');
             }
             this.context.navigate('', {'inPlace':true});
         }, error => {
@@ -104,8 +104,7 @@ var Login = React.createClass({
     },
 
     render: function () {
-        var session = this.context.session;
-        var toRender = (session && session['auth.userid']) ?
+        var toRender = this.context.session ?
             <a href="" className="global-entry" onClick={this.logout}>Log out</a>
             :
             <a id="loginbtn" href="" className="global-entry" onClick={this.showLock}>Log in</a>;

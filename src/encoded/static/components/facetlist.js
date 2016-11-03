@@ -30,7 +30,7 @@ var FacetList = module.exports.FacetList = React.createClass({
 
         /**
          * Fills facet objects with terms and counts.
-         * 
+         *
          * @param {Object[]} incompleteFacets - Array of facet objects. Each should have field and title keys/values.
          * @param {Object[]} exps - Array of experiment objects, obtained from @graph or experiments_in_set property on context.
          */
@@ -39,7 +39,7 @@ var FacetList = module.exports.FacetList = React.createClass({
             // Recursively find Facet Term Value(s)
             function findFacetValue(facetValue, fieldHierarchyLevels, level = 0){
                 if (level == fieldHierarchyLevels.length) return facetValue;
-                
+
                 if (Array.isArray(facetValue)){
                     var facetValues = [];
                     for (var i = 0; i < facetValue.length; i++){
@@ -48,13 +48,13 @@ var FacetList = module.exports.FacetList = React.createClass({
                     return facetValues;
                 } else {
                     return findFacetValue(
-                        facetValue[fieldHierarchyLevels[level]], 
+                        facetValue[fieldHierarchyLevels[level]],
                         fieldHierarchyLevels,
                         ++level
                     );
                 }
             };
-            
+
             incompleteFacets.forEach(function(facet,i,a){
 
                 var fieldHierarchyLevels = facet.field.split('.'); // E.g. [biosample, biosource, individual,..]
@@ -64,17 +64,17 @@ var FacetList = module.exports.FacetList = React.createClass({
                 for (var i = 0; i < exps.length; i++){
 
                     var facetTerm = findFacetValue(exps[i], fieldHierarchyLevels);
-                    
+
                     if (Array.isArray(facetTerm)) {
                         for (var j = 0; j < facetTerm.length; j++){
                             if (!termCounts.hasOwnProperty(facetTerm[j])) termCounts[facetTerm[j]] = 0;
                             termCounts[facetTerm[j]]++;
                         }
-                    } else { 
+                    } else {
                         if (!termCounts.hasOwnProperty(facetTerm)) termCounts[facetTerm] = 0;
                         termCounts[facetTerm]++;
                     }
-                    
+
                 }
 
                 facet.total = 0;
@@ -87,7 +87,7 @@ var FacetList = module.exports.FacetList = React.createClass({
                 });
 
             }, this);
-            
+
         },
 
         findIgnoredFilters : function(facets, expSetFilters){
@@ -134,19 +134,19 @@ var FacetList = module.exports.FacetList = React.createClass({
             }
             return true;
         }
-        
+
     },
 
     contextTypes: {
-        session: React.PropTypes.object,
+        session: React.PropTypes.bool,
         hidePublicAudits: React.PropTypes.bool,
         location_href : React.PropTypes.string
     },
 
     propTypes : {
         /**
-         * Array of objects containing - 
-         *   'field' : string (schema path), 
+         * Array of objects containing -
+         *   'field' : string (schema path),
          *   'terms' : [{'doc_count' : integer (# of matching experiments), 'key' : string (term/filter name) }],
          *   'title' : string (category name),
          *   'total' : integer (# of experiments)
@@ -303,12 +303,12 @@ var FacetList = module.exports.FacetList = React.createClass({
     render: function() {
         console.log('render facetlist');
         var facets = this.facets, // Get all facets, and "normal" facets, meaning non-audit facets
-            loggedIn = this.context.session && this.context.session['auth.userid'],
+            loggedIn = this.context.session,
             regularFacets = [],
             exptypeDropdown;
 
         if (
-            !facets || 
+            !facets ||
             (!facets.length && this.props.mode != 'picker') ||
             (!facets[0].terms && this.props.mode != 'picker')
         ) {
@@ -326,17 +326,17 @@ var FacetList = module.exports.FacetList = React.createClass({
         // ignore all audit facets for the time being
         var normalFacets = facets.filter(facet => facet.field.substring(0, 6) !== 'audit.');
         var clearButton = Object.keys(this.props.expSetFilters).length === 0 ? false : true;
-        
+
         //var terms = this.searchQueryTerms();
         //var searchBase = url.parse(this.context.location_href).search || '';
-        //searchBase = searchBase && searchBase.length > 0 ? searchBase + '&' : searchBase + '?'; 
+        //searchBase = searchBase && searchBase.length > 0 ? searchBase + '&' : searchBase + '?';
 
         normalFacets.map(facet => {
             if ((facet.field == 'type') || (!loggedIn && this.context.hidePublicAudits && facet.field.substring(0, 6) === 'audit.')) {
                 return;
             } else if (facet.field != 'experimentset_type') {
                 regularFacets.push(
-                    <Facet 
+                    <Facet
                         experimentSetListJSON={ this.props.experimentSetListJSON || this.props.context['@graph'] || null }
                         expSetFilters={this.props.expSetFilters}
                         ignoredFilters={ this.props.ignoredFilters || FacetList.findIgnoredFilters(facets, this.props.expSetFilters) }
@@ -373,7 +373,7 @@ var FacetList = module.exports.FacetList = React.createClass({
 });
 
 var Facet = module.exports.Facet = React.createClass({
-    
+
     getDefaultProps: function() {
         return {
             width: 'inherit'
@@ -398,7 +398,7 @@ var Facet = module.exports.Facet = React.createClass({
         var total = facet['total'];
         var terms = facet['terms'];
         return (
-            <div className="facet" hidden={terms.length === 0} style={{width: this.props.width}}>
+            <div className="facet" hidden={terms.length === 0} style={{width: this.props.width}} data-field={field}>
                 <h5>{title}</h5>
                 <div className="facet-list nav">
                     <div>
@@ -456,7 +456,7 @@ var ExpTerm = module.exports.ExpTerm = React.createClass({
                 passSets += intersection.size;
             }
         }
-        
+
 
         var expCount = termExperiments.size;
         var selected = false;
@@ -464,8 +464,8 @@ var ExpTerm = module.exports.ExpTerm = React.createClass({
             selected = true;
         }
         return (
-            <li id={selected ? "selected" : null} key={term}>
-                <a className={selected ? "expterm-selected" : "expterm"} id={selected ? "selected" : null} href="" onClick={this.handleClick}>
+            <li className={selected ? "selected" : null} key={term}>
+                <a className={selected ? "expterm-selected selected" : "expterm"} href="#" onClick={this.handleClick}>
                     <span className="pull-left facet-selector">{selected ? <i className="icon icon-times-circle"></i> : ''}</span>
                     <span className="facet-item">
                         {title}

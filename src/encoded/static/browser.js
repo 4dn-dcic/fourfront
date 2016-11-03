@@ -16,7 +16,6 @@ function mapStateToProps(store) {
        href: store.href,
        context: store.context,
        inline: store.inline,
-       session_cookie: store.session_cookie,
        contextRequest: store.contextRequest,
        slow: store.slow,
        expSetFilters: store.expSetFilters,

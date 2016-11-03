@@ -34,7 +34,6 @@ describe("Server rendering", function () {
             'href':home_url,
             'context':home,
             'inline':'',
-            'session_cookie':'',
             'contextRequest':{},
             'slow':false
         };
