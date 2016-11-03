@@ -4,7 +4,7 @@
         "sop_name": "in situ Hi-C SOP map",
         "sop_version": 1,
         "associated_item_type": "ExperimentHiC",
-        "id_fields": ["experiment_type"],
+        "id_values": ["in situ Hi-C"],
         "notes": "This is just a dummy insert not linked to true SOP protocol",
         "description": "Fields with specified defaults in the SOP for in situ Hi-C experiments as per ??",
         "sop_protocol": "131106bc-8535-4448-903e-854af460b244",

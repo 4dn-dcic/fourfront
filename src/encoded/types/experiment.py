@@ -145,21 +145,43 @@ class ExperimentHiC(Experiment):
             sum_str += (' with ' + de_name)
         return sum_str
 
+    def generate_mapid(self, experiment_type, num):
+        delim = '_'
+        mapid = str(type(self).__name__)
+        mapid = mapid + delim + ''.join(experiment_type.split())
+        return mapid + delim + str(num)
+
     @calculated_property(schema={
         "title": "SOP map",
         "description": "The mapping of fields default values from SOP",
         "type": "object",
         "linkTo": "SopMap"
     })
-    def sop_mapping(self, request, experiment_type='Undefined'):
-        pass
-        #sop_maps = {
-        #    "in situ Hi-C": "aafb608a-1c08-11e4-8c21-0800200c9a66"
-        #}
-        # get the object with that uuid and embed it?
-        #if experiment_type in sop_maps:
-        #    uuid = sop_maps[experiment_type]
-        #    return request.embed('/sop_maps/' + uuid + '/', '@@object')
+    def sop_mapping(self, request, experiment_type):
+        maps = []
+        # mapobj = SopMap()
+        print(experiment_type)
+        suffnum = 1
+        mapid = self.generate_mapid(experiment_type, suffnum)
+        # bs = '4DNBS9PTSURF'
+        bs = "231111bc-8535-4448-903e-854af460b255"
+        print(mapid)
+        while(True):
+            m = self.collection.get('/biosamples/' + bs + '/')
+            #m = mapobj.collection.get('/sop_maps/' + mapid + '/')
+            print(m)
+            if not m:
+                break
+            maps.append(m)
+            suffnum += 1
+            mapid = self.generate_mapid(experiment_type, suffnum)
+
+        if len(maps) > 0:
+            lmap = maps[-1]
+            print(lmap)
+            return request.embed('/sop_maps/' + lmap['@id'] + '/', '@@object')
+        else:
+            return None
 
 
 @collection(
