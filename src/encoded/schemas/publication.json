@@ -103,8 +103,7 @@
             "title": "Title",
             "description": "DON'T SUBMIT, auto-generated.",
             "uniqueKey": true,
-            "type": "string",
-
+            "type": "string"
         },
         "abstract": {
             "title": "Abstract",
