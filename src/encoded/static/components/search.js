@@ -389,7 +389,7 @@ var TextFilter = search.TextFilter = React.createClass({
 
 var FacetList = search.FacetList = React.createClass({
     contextTypes: {
-        session: React.PropTypes.object,
+        session: React.PropTypes.bool,
         hidePublicAudits: React.PropTypes.bool
     },
 
@@ -399,7 +399,7 @@ var FacetList = search.FacetList = React.createClass({
 
     render: function() {
         var {context, term} = this.props;
-        var loggedIn = this.context.session && this.context.session['auth.userid'];
+        var loggedIn = this.context.session;
 
         // Get all facets, and "normal" facets, meaning non-audit facets
         var facets = this.props.facets;

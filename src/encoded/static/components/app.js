@@ -70,7 +70,7 @@ var App = React.createClass({
             errors: [],
             dropdownComponent: undefined,
             content: undefined,
-            session: {},
+            session: false,
             user_actions: []
         };
     },
@@ -85,7 +85,7 @@ var App = React.createClass({
         portal: React.PropTypes.object,
         hidePublicAudits: React.PropTypes.bool,
         fetch: React.PropTypes.func,
-        session: React.PropTypes.object,
+        session: React.PropTypes.bool,
         navigate: React.PropTypes.func,
         contentTypeIsJSON: React.PropTypes.func
     },
@@ -196,8 +196,48 @@ var App = React.createClass({
     // Once the app component is mounted, bind keydowns to handleKey function
     componentDidMount: function() {
         globals.bindEvent(window, 'keydown', this.handleKey);
-        var session_cookie = this.extractSessionCookie();
-        var session = this.parseSessionCookie(session_cookie);
+        // check existing user_info in local storage and authenticate
+        var idToken;
+        var session = false;
+        if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
+            if(localStorage && localStorage.user_info){
+                idToken = JSON.parse(localStorage.getItem('user_info')).id_token;
+            }
+        }
+        if(idToken){ // if JWT present, try to authenticate
+            this.fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer '+idToken
+                },
+                body: JSON.stringify({id_token: idToken})
+            })
+            .then(response => {
+                if (response.code || response.status || response.id_token !== idToken) throw response;
+                return response;
+            })
+            .then(response => {
+                if(typeof(Storage) !== 'undefined'){
+                    localStorage.setItem("user_info", JSON.stringify(response));
+                }
+                session = true;
+            }, error => {
+                //error, clear localStorage and session
+                if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
+                    localStorage.removeItem("user_info");
+                }
+                if(error.code || error.status){
+                    store.dispatch({
+                        type: {'context':error}
+                    });
+                }else{ // JWTs must be unequal
+                    this.navigate('', {'inPlace':true});
+                }
+
+            });
+        }
         var query_href;
         if(document.querySelector('link[rel="canonical"]')){
             query_href = document.querySelector('link[rel="canonical"]').getAttribute('href');
@@ -206,7 +246,7 @@ var App = React.createClass({
         }
         this.setState({session: session});
         store.dispatch({
-            type: {'href':query_href, 'session_cookie': session_cookie}
+            type: {'href':query_href}
         });
         if (this.historyEnabled) {
             var data = this.props.context;
@@ -229,25 +269,8 @@ var App = React.createClass({
         window.onbeforeunload = this.handleBeforeUnload;
     },
 
-    componentWillReceiveProps: function (nextProps) {
-        if (!this.state.session || (this.props.session_cookie !== nextProps.session_cookie)) {
-            var nextState = {};
-            nextState.session = this.parseSessionCookie(nextProps.session_cookie);
-            this.setState(nextState);
-        }
-    },
-
     componentDidUpdate: function (prevProps, prevState) {
-        // get user actions (a function of log in) from local storage
-        var localActions = [];
-        if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
-            if(localStorage && localStorage.user_actions){
-                localActions = JSON.parse(localStorage.getItem('user_actions'));
-            }
-        }
-        if (!_.isEqual(localActions, prevState.user_actions)){
-            this.setState({user_actions:localActions});
-        }
+        this.updateUserInfo(prevState.user_actions, prevState.session);
         var key;
         if (this.props) {
             for (key in this.props) {
@@ -281,40 +304,24 @@ var App = React.createClass({
         request.xhr_begin = 1 * new Date();
         request.then(response => {
             request.xhr_end = 1 * new Date();
-            var session_cookie = this.extractSessionCookie();
-            if (this.props.session_cookie !== session_cookie) {
-                store.dispatch({
-                    type: {'session_cookie': session_cookie}
-                });
-            }
         });
         return request;
     },
 
-    extractSessionCookie: function () {
-        var cookie = require('cookie-monster');
-        if (cookie(document).get('session')){
-            return cookie(document).get('session');
-        }else{
-            return this.props.session_cookie;
-        }
-
-    },
-
-    parseSessionCookie: function (session_cookie) {
-        var Buffer = require('buffer').Buffer;
-        var session;
-        if (session_cookie) {
-            // URL-safe base64
-            session_cookie = session_cookie.replace(/\-/g, '+').replace(/\_/g, '/');
-            // First 64 chars is the sha-512 server signature
-            // Payload is [accessed, created, data]
-            try {
-                session = JSON.parse(Buffer(session_cookie, 'base64').slice(64).toString())[2];
-            } catch (e) {
+    updateUserInfo: function(previousUA=[], previousSess={}){
+        // get user actions (a function of log in) from local storage
+        var userActions = [];
+        var session = false;
+        if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
+            if(localStorage && localStorage.user_info){
+                var userInfo = JSON.parse(localStorage.getItem('user_info'));
+                userActions = userInfo.user_actions;
+                session = true;
             }
         }
-        return session || {};
+        if (!_.isEqual(userActions, previousUA) || !_.isEqual(session, previousSess)){
+            this.setState({user_actions:userActions, session:session});
+        }
     },
 
     // functions previously in navigate, mixins.js
@@ -420,7 +427,6 @@ var App = React.createClass({
         var request = this.props.contextRequest;
         var href = window.location.href;
         if (event.state) {
-            console.log("+++++=REQ ABORT 1");
             // Abort inflight xhr before dispatching
             if (request && this.requestCurrent) {
                 // Abort the current request, then remember we've aborted it so that we don't render
@@ -501,10 +507,10 @@ var App = React.createClass({
             });
             return;
         }
-        var idToken = localStorage.getItem('idToken') || null;
+        var userInfo = localStorage.getItem('user_info') || null;
+        var idToken = userInfo ? JSON.parse(userInfo).id_token : null;
         var reqHeaders = {headers: {'Accept': 'application/json'}};
-        if(idToken && this.state.session['auth.userid']){
-            console.log('... JWT added to request');
+        if(userInfo && this.state.session){
             reqHeaders.headers['Authorization'] = 'Bearer '+idToken;
         }
         var reqHref = href.slice(-1) === '/' ? href + '/?format=json' : href + '&format=json';

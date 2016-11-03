@@ -10,6 +10,7 @@ var Modal = require('react-bootstrap').Modal;
 var Alert = require('react-bootstrap').Alert;
 var ItemStore = require('./lib/store').ItemStore;
 var ajaxLoad = require('./objectutils').ajaxLoad;
+var jwt = require('jsonwebtoken');
 // var Breadcrumbs = navigation.Breadcrumbs;
 
 
@@ -26,7 +27,7 @@ var AccessKeyTable = React.createClass({
 
     contextTypes: {
         fetch: React.PropTypes.func,
-        session: React.PropTypes.object
+        session: React.PropTypes.bool
     },
 
     getInitialState: function() {
@@ -70,7 +71,18 @@ var AccessKeyTable = React.createClass({
     create: function(e) {
         e.preventDefault();
         var item = {};
-        item['user'] = this.context.session['auth.userid'];
+        if(this.context.session){
+            if(typeof(Storage) !== 'undefined'){
+                if(localStorage && localStorage.user_info){
+                    var idToken = JSON.parse(localStorage.getItem('user_info')).id_token;
+                    var decoded = jwt.decode(idToken);
+                    item['user'] = decoded.email_verified ? decoded.email : "";
+                }else{
+                    console.log("Access key aborted");
+                    return;
+                }
+            }
+        }
         this.store.create('/access-keys/', item);
     },
 
