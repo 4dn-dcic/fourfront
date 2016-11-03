@@ -230,6 +230,9 @@ def main(global_config, **local_config):
     settings['snovault.jsonld.namespaces'] = json_asset('encoded:schemas/namespaces.json')
     settings['snovault.jsonld.terms_namespace'] = 'https://www.encodeproject.org/terms/'
     settings['snovault.jsonld.terms_prefix'] = 'encode'
+    # set auth0 keys
+    settings['auth0.secret'] = os.environ.get("Auth0Secret")
+    settings['auth0.client'] = os.environ.get("Auth0Client")
     config = Configurator(settings=settings)
 
     from snovault.elasticsearch import APP_FACTORY
@@ -241,7 +244,6 @@ def main(global_config, **local_config):
     # Override default authz policy set by pyramid_multiauth
     config.set_authorization_policy(LocalRolesAuthorizationPolicy())
     config.include(session)
-    #config.include('.persona')
 
     config.include(configure_dbsession)
     config.include('snovault')
