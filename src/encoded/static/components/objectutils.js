@@ -177,7 +177,7 @@ var DateUtility = module.exports.DateUtility = (function(){
     // Static Class Methods
 
     /** Check that Date class/object exists in execution environment. */
-    DateUtility.dateClassExists = function(){ return !!Date; }
+    DateUtility.dateClassExists = function(){ return !!Date; };
 
     /**
      * Presets for date/time output formats for 4DN.
