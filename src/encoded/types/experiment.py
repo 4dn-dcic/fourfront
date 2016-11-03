@@ -159,16 +159,13 @@ class ExperimentHiC(Experiment):
     })
     def sop_mapping(self, request, experiment_type):
         maps = []
-        # mapobj = SopMap()
-        print(experiment_type)
         suffnum = 1
         mapid = self.generate_mapid(experiment_type, suffnum)
-        # bs = '4DNBS9PTSURF'
-        bs = "231111bc-8535-4448-903e-854af460b255"
         print(mapid)
+        bs = '4DNBS1234567'
         while(True):
-            m = self.collection.get('/biosamples/' + bs + '/')
-            #m = mapobj.collection.get('/sop_maps/' + mapid + '/')
+            m = self.collection.get(mapid)
+            #m = self.collection.get(bs)
             print(m)
             if not m:
                 break

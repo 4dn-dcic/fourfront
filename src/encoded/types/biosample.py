@@ -27,7 +27,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
 
     item_type = 'biosample'
     schema = load_schema('encoded:schemas/biosample.json')
-    name_key = 'accession'
+    #name_key = 'accession'
     embedded = [
         'biosource',
         'biosource.individual',
@@ -102,14 +102,14 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
                 return 'None'
         return 'None'
 
-    @calculated_property(schema={
-        "title": "SOP map",
-        "description": "The mapping of fields default values from SOP",
-        "type": "object",
-        "linkTo": "SopMap"
-    })
-    def sop_mapping(self, request, biosource=None):
-        pass
+    # @calculated_property(schema={
+    #     "title": "SOP map",
+    #     "description": "The mapping of fields default values from SOP",
+    #     "type": "object",
+    #     "linkTo": "SopMap"
+    # })
+    # def sop_mapping(self, request, biosource=None):
+    #     pass
         # sop_maps = {"GM06990": "aafb608a-1c08-11e4-8c21-0800200c9a66"}
         # if biosource is not None:
         #     for i in range(len(biosource)):
