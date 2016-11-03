@@ -101,10 +101,10 @@
         },
         "title": {
             "title": "Title",
-            "description": "Title of the publication or communication.",
+            "description": "DON'T SUBMIT, auto-generated.",
             "uniqueKey": true,
             "type": "string",
-            "exclude_from": "submit4dn"
+
         },
         "abstract": {
             "title": "Abstract",
