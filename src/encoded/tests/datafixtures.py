@@ -187,6 +187,16 @@ def worthington_biochemical(testapp, award, lab):
 
 
 @pytest.fixture
+def mboI(testapp, worthington_biochemical):
+    item = {
+        "name": "MboI",
+        "enzyme_source": worthington_biochemical['@id'],
+        'status': 'current'
+    }
+    return testapp.post_json('/enzyme', item).json['@graph'][0]
+
+
+@pytest.fixture
 def human_biosource(testapp, human_individual, worthington_biochemical):
     item = {
         "description": "GM06990 cells",
@@ -224,6 +234,17 @@ def mouse(testapp):
 @pytest.fixture
 def organism(human):
     return human
+
+
+@pytest.fixture
+def experiment_set(testapp, lab, award):
+    item = {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'experimentset_type': 'biological replicates',
+        'status': 'in review by lab'
+    }
+    return testapp.post_json('/experiment_set', item).json['@graph'][0]
 
 
 @pytest.fixture
@@ -520,10 +541,76 @@ def workflow_mapping(testapp, workflow_bam):
 
 
 @pytest.fixture
+def target_w_genes(testapp):
+    item = {
+        "targeted_genes": ["eeny", "meeny"],
+    }
+    return testapp.post_json('/target', item).json['@graph'][0]
+
+
+@pytest.fixture
+def target_w_region(testapp, genomic_region_w_chrloc):
+    item = {
+        "targeted_region": genomic_region_w_chrloc['@id'],
+    }
+    return testapp.post_json('/target', item).json['@graph'][0]
+
+
+@pytest.fixture
+def target_w_desc(testapp):
+    item = {
+        "description": "I'm a region"
+    }
+    return testapp.post_json('/target', item).json['@graph'][0]
+
+
+@pytest.fixture
+def targets(target_w_desc, target_w_region, target_w_genes):
+    return {'target_w_desc': target_w_desc,
+            'target_w_region': target_w_region,
+            'target_w_genes': target_w_genes}
+
+
+@pytest.fixture
+def basic_genomic_region(testapp):
+    item = {
+        "genome_assembly": "GRCh38",
+    }
+    return testapp.post_json('/genomic_region', item).json['@graph'][0]
+
+
+@pytest.fixture
+def genomic_region_w_chrloc(testapp):
+    item = {
+        "genome_assembly": "GRCh38",
+        "chromosome": "X",
+        "start_coordinate": 1,
+        "end_coordinate": 3
+    }
+    return testapp.post_json('/genomic_region', item).json['@graph'][0]
+
+
+@pytest.fixture
+def genomic_region_w_onlyendloc(testapp):
+    item = {
+        "genome_assembly": "assembly",
+        "end_coordinate": 3
+    }
+    return testapp.post_json('/genomic_region', item).json['@graph'][0]
+
+
+@pytest.fixture
+def genomic_regions(genomic_region_w_onlyendloc, genomic_region_w_chrloc, basic_genomic_region):
+    return {'genomic_region_w_onlyendloc': genomic_region_w_onlyendloc,
+            'genomic_region_w_chrloc': genomic_region_w_chrloc,
+            'basic_genomic_region': basic_genomic_region}
+
+
+@pytest.fixture
 def encode_lab(testapp):
     item = {
         'name': 'encode-processing-pipeline',
         'title': 'ENCODE Processing Pipeline',
         'status': 'current'
-        }
+    }
     return testapp.post_json('/lab', item, status=201).json['@graph'][0]
