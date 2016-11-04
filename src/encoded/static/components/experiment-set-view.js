@@ -429,7 +429,7 @@ var ExperimentSetHeaderBar = React.createClass({
     
 
     componentDidMount : function(){
-        if (typeof window != 'undefined'){
+        if (!isServerSide()){
 
             this.debouncedLayoutResizeStateChange = _.debounce(() => {
                 // Debounce to prevent from executing more than once every 300ms.

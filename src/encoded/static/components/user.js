@@ -220,12 +220,6 @@ var User = module.exports.User = React.createClass({
         })
     },
 
-    getInitialState : function(){
-        return {
-            details_lab : null
-        };
-    },
-
     render: function() {
 
         console.log('User', this);
@@ -296,42 +290,22 @@ var ProfileContactFields = React.createClass({
         var user = this.props.user;
         return (
             <div>
-                <div className="row profile-field-entry email">
-                    <div className="col-sm-3 text-right text-left-xs">
-                        <label htmlFor="email">Email</label>
-                    </div>
-                    <div id="email" className="col-sm-9">
-                        { user.email ? 
-                            <a href={'mailto:' + user.email}>{user.email}</a> 
-                            :
-                            <span className="not-set">No email address</span>
-                        }
-                    </div>
-                </div>
-                <div className="row profile-field-entry phone">
-                    <div className="col-sm-3 text-right text-left-xs">
-                        <label htmlFor="phone">Phone</label>
-                    </div>
-                    <div id="phone" className="col-sm-9">
-                        { user.phone || <span className="not-set">No phone number</span> }
-                    </div>
-                </div>
-                <div className="row profile-field-entry fax">
-                    <div className="col-sm-3 text-right text-left-xs">
-                        <label htmlFor="fax">Fax</label>
-                    </div>
-                    <div id="fax" className="col-sm-9">
-                        { user.fax || <span className="not-set">No fax number</span> }
-                    </div>
-                </div>
-                <div className="row profile-field-entry skype">
-                    <div className="col-sm-3 text-right text-left-xs">
-                        <label htmlFor="skype">Skype</label>
-                    </div>
-                    <div id="skype" className="col-sm-9">
-                        { user.skype || <span className="not-set">No skype ID</span> }
-                    </div>
-                </div>
+                
+                <EditableProfileField label="Email" labelID="email" fallbackText="No email address" fieldType="email">
+                    <a href={'mailto:' + user.email}>{ user.email }</a>
+                </EditableProfileField>
+
+                <EditableProfileField label="Phone" labelID="phone" fallbackText="No phone number" fieldType="phone">
+                    { user.phone }
+                </EditableProfileField>
+                
+                <EditableProfileField label="Fax" labelID="fax" fallbackText="No fax number" fieldType="phone">
+                    { user.fax }
+                </EditableProfileField>
+                
+                <EditableProfileField label="Skype" labelID="skype" fallbackText="No skype ID" fieldType="string">
+                    { user.skype }
+                </EditableProfileField>
                 
             </div>
         );
@@ -339,10 +313,14 @@ var ProfileContactFields = React.createClass({
 
 });
 
-var EditableField = React.createClass({
+var EditableProfileField = React.createClass({
 
     propTypes : {
-        
+        label : React.PropTypes.string,
+        labelID : React.PropTypes.string,
+        fallbackText : React.PropTypes.string,
+        fieldType : React.PropTypes.string, // ToDo : Use for validation
+        children : React.PropTypes.any // Saved Value
     },
 
     getInitialState : function(){
@@ -351,8 +329,61 @@ var EditableField = React.createClass({
         }
     },
 
+    enterEditState : function(){
+        this.setState({ isEditing : true });
+    },
+
+    renderSaved : function(){
+        return (
+            <div className={"row profile-field-entry " + this.props.labelID}>
+                <div className="col-sm-3 text-right text-left-xs">
+                    <label htmlFor={ this.props.labelID }>{ this.props.label }</label>
+                </div>
+                <div className="col-sm-9">
+                    { this.props.children ?
+                        <span id={ this.props.labelID } className="set">{ this.props.children }</span>
+                        :
+                        <span className="not-set">{ this.props.fallbackText || ('No ' + this.props.labelID) }</span> 
+                    }
+                    <button type="button" className="right" onClick={this.enterEditState}>
+                        <i className="icon icon-pencil icon-fw"></i>
+                    </button>
+                </div>
+            </div>
+        );
+    },
+
+    inputField : function(){
+        var inputType;
+        if (!this.props.fieldType) inputType = 'text';
+
+        if (this.props.fieldType == 'string'){
+            return (
+                <input type="text" id={ this.props.labelID } name={ this.props.labelID }  />
+            );
+        }
+        return <span>No edit field created yet.</span>;
+    },
+
+    renderEditing : function(){
+        return (
+            <div className={"row profile-field-entry editing " + this.props.labelID}>
+                <div className="col-sm-3 text-right text-left-xs">
+                    <label htmlFor={ this.props.labelID }>{ this.props.label }</label>
+                </div>
+                <div id={ this.props.labelID } className="col-sm-9 editing">
+                    { this.inputField() }
+                </div>
+            </div>
+        );
+    },
+
     render : function(){
-        return null;
+        if (this.state.isEditing) {
+            return this.renderEditing();
+        } else {
+            return this.renderSaved();
+        }
     }
 
 });
