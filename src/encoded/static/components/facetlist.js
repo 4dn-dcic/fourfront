@@ -90,17 +90,24 @@ var FacetList = module.exports.FacetList = React.createClass({
             
         },
 
+        /**
+         * Find filters to ignore - i.e. filters which are set in expSetFilters but are
+         * not present in facets.
+         * 
+         * @param {Object[]} facets - Array of complete facet objects (must have 'terms' & 'fields' properties).
+         * @param {Object} expSetFilters - Object containing facet fields and their enabled terms:
+         *     '{string} Field in item JSON hierarchy, using object dot notation : {Set} terms'.
+         */
         findIgnoredFilters : function(facets, expSetFilters){
             var ignoredFilters = {};
             for(var i=0; i < facets.length; i++){
                 var ignoredSet = new Set();
-                var field = facets[i].field;
-                var terms = facets[i].terms;
-                if(expSetFilters[field]){
-                    for(let expFilter of expSetFilters[field]){
+                
+                if(expSetFilters[facets[i].field]){
+                    for(let expFilter of expSetFilters[facets[i].field]){
                         var found = false;
-                        for(var j=0; j < terms.length; j++){
-                            if(expFilter === terms[j].key){
+                        for(var j=0; j < facets[i].terms.length; j++){
+                            if(expFilter === facets[i].terms[j].key){
                                 found = true;
                                 break;
                             }
@@ -110,10 +117,12 @@ var FacetList = module.exports.FacetList = React.createClass({
                         }
                     }
                     if(ignoredSet.size > 0){
-                        ignoredFilters[field] = ignoredSet;
+                        ignoredFilters[facets[i].field] = ignoredSet;
                     }
                 }
+
             }
+            if (Object.keys(ignoredFilters).length) console.log("Found Ignored Filters: ", ignoredFilters);
             return ignoredFilters;
         },
 
@@ -178,6 +187,7 @@ var FacetList = module.exports.FacetList = React.createClass({
     },
 
     facets : null,
+    ignoredFilters : null,
 
     getDefaultProps: function() {
         return {
@@ -226,8 +236,11 @@ var FacetList = module.exports.FacetList = React.createClass({
             // Load list of available facets via AJAX once & reuse.
             this.loadFacets(() => {
                 FacetList.fillFacetTermsAndCountFromExps(this.facets, this.props.experimentSetListJSON);
+                if (!this.props.ignoredFilters) {
+                    this.ignoredFilters = FacetList.findIgnoredFilters(this.facets, this.props.expSetFilters);
+                } // else: @see getInitialState
             });
-        }
+        } // else if (this.state.usingProvidedFacets === false && this.state.facetsLoaded) : @see componentWillMount
     },
 
     componentWillUnmount : function(){
@@ -236,11 +249,30 @@ var FacetList = module.exports.FacetList = React.createClass({
         }
     },
 
+    componentWillReceiveProps : function(nextProps){
+        if (
+            this.props.ignoredFilters !== nextProps.ignoredFilters ||
+            this.props.expSetFilters !== nextProps.expSetFilters ||
+            this.props.facets !== nextProps.facets
+        ){
+
+            if (this.state.usingProvidedFacets === true && this.props.facets !== nextProps.facets){
+                this.facets = nextProps.facets;
+                console.log('FacetList props.facets updated.');
+            }
+
+            if (!this.props.ignoredFilters && (this.state.usingProvidedFacets === true || this.state.facetsLoaded)){
+                this.ignoredFilters = FacetList.findIgnoredFilters(this.facets, this.props.expSetFilters);
+            } // else: See @componentDidMount > this.loadFacets() callback param
+        }
+    },
+
     loadFacets : function(callback = null){
         var facetType = (this.props.experimentsOrSets == 'sets' ? 'ExperimentSet' : 'Experiment');
         ajaxLoad('/facets?type=' + facetType + '&format=json', function(r){
             this.facets = r;
             console.log('Loaded Facet List via AJAX.');
+            if (typeof callback == 'function') callback();
             if (facetType == 'Experiment' && !this.props.expIncompleteFacets && typeof window !== 'undefined'){
                 window.requestAnimationFrame(()=>{
                     // Will trigger app re-render & update state.facetsLoaded as well through getInitialState.
@@ -250,46 +282,52 @@ var FacetList = module.exports.FacetList = React.createClass({
                     console.log('Stored Facet List in Redux store.');
                 });
             }
-            if (typeof callback == 'function') callback();
         }.bind(this));
     },
 
     clearFilters: function(e) {
-        e.preventDefault()
-        store.dispatch({
-            type : {'expSetFilters' : {}}
-        });
+        e.preventDefault();
+        setTimeout(function(){
+            store.dispatch({
+                type : {'expSetFilters' : {}}
+            });
+        }, 0);
     },
 
     changeFilters: function(field, term) {
-        // store currently selected filters as a dict of sets
-        var tempObj = {};
-        var newObj = {};
 
-        // standardize on field naming convention for expSetFilters before they hit the redux store.
-        if (this.props.experimentsOrSets == 'experiments') {
-            if (field != 'experimentset_type'){ // ToDo: arrays of expSet- and exp- exclusive fields
-                field = 'experiments_in_set.' + field;
+        setTimeout(function(){
+
+            // store currently selected filters as a dict of sets
+            var tempObj = {};
+            var newObj = {};
+
+            // standardize on field naming convention for expSetFilters before they hit the redux store.
+            if (this.props.experimentsOrSets == 'experiments') {
+                if (field != 'experimentset_type'){ // ToDo: arrays of expSet- and exp- exclusive fields
+                    field = 'experiments_in_set.' + field;
+                }
             }
-        }
 
-        var expSet = this.props.expSetFilters[field] ? new Set(this.props.expSetFilters[field]) : new Set();
-        if(expSet.has(term)){
-            // term is already present, so delete it
-            expSet.delete(term);
-        }else{
-            expSet.add(term);
-        }
-        if(expSet.size > 0){
-            tempObj[field] = expSet;
-            newObj = Object.assign({}, this.props.expSetFilters, tempObj);
-        }else{ //remove key if set is empty
-            newObj = Object.assign({}, this.props.expSetFilters);
-            delete newObj[field];
-        }
-        store.dispatch({
-            type : {'expSetFilters' : newObj}
-        });
+            var expSet = this.props.expSetFilters[field] ? new Set(this.props.expSetFilters[field]) : new Set();
+            if(expSet.has(term)){
+                // term is already present, so delete it
+                expSet.delete(term);
+            }else{
+                expSet.add(term);
+            }
+            if(expSet.size > 0){
+                tempObj[field] = expSet;
+                newObj = Object.assign({}, this.props.expSetFilters, tempObj);
+            }else{ //remove key if set is empty
+                newObj = Object.assign({}, this.props.expSetFilters);
+                delete newObj[field];
+            }
+            store.dispatch({
+                type : {'expSetFilters' : newObj}
+            });
+
+        }.bind(this), 0);
     },
 
     searchQueryTerms : function(){
@@ -339,7 +377,7 @@ var FacetList = module.exports.FacetList = React.createClass({
                     <Facet 
                         experimentSetListJSON={ this.props.experimentSetListJSON || this.props.context['@graph'] || null }
                         expSetFilters={this.props.expSetFilters}
-                        ignoredFilters={ this.props.ignoredFilters || FacetList.findIgnoredFilters(facets, this.props.expSetFilters) }
+                        ignoredFilters={ this.props.ignoredFilters || this.ignoredFilters }
                         changeFilters={this.changeFilters}
                         key={facet.field}
                         facet={facet}
