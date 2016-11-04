@@ -50,7 +50,9 @@ def test_login_unknown_user(anontestapp, auth0_4dn_user_token):
 
 
 def test_login_logout(testapp, anontestapp, headers,
-                      auth0_4dn_user_profile):
+                      auth0_4dn_user_profile,
+                      auth0_4dn_user_token):
+
     # Create a user with the persona email
     url = '/users/'
     email = auth0_4dn_user_profile['email']
@@ -62,9 +64,9 @@ def test_login_logout(testapp, anontestapp, headers,
     testapp.post_json(url, item, status=201)
 
     # Log in
-    res = anontestapp.post_json('/login', headers=headers)
+    res = anontestapp.post_json('/login', auth0_4dn_user_token, headers=headers)
 
-    assert res.json.get('auth.userid') is None 
+    assert res.json.get('auth.userid') is None
     assert 'id_token' in res.json
     assert 'user_actions' in res.json
 

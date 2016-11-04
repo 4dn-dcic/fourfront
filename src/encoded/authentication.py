@@ -181,7 +181,9 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
             auth0_client = registry.settings.get('auth0.client')
             auth0_secret = registry.settings.get('auth0.secret')
             if auth0_client and auth0_secret:
-                payload = jwt.decode(token, b64decode(auth0_secret, '-_'), audience=auth0_client)
+                # leeway accounts for clock drift between us and auth0
+                payload = jwt.decode(token, b64decode(auth0_secret, '-_'),
+                                     audience=auth0_client, leeway=30)
                 if 'email' in payload and payload.get('email_verified') is True:
                     return payload
 
