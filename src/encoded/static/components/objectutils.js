@@ -177,7 +177,7 @@ var DateUtility = module.exports.DateUtility = (function(){
     // Static Class Methods
 
     /** Check that Date class/object exists in execution environment. */
-    DateUtility.dateClassExists = function(){ return !!Date; }
+    DateUtility.dateClassExists = function(){ return !!Date; };
 
     /**
      * Presets for date/time output formats for 4DN.
@@ -224,7 +224,7 @@ var DateUtility = module.exports.DateUtility = (function(){
         }
 
         if (formatType.indexOf('date-time-') > -1){
-            return date(formatType.replace('time-','')) + dateTimeSeparator + time(formatType.replace('date-',''));
+            return date(formatType.replace('time-','')) + '[' + dateTimeSeparator + ']' + time(formatType.replace('date-',''));
         } else if (formatType.indexOf('date-') > -1){
             return date(formatType);
         } else if (formatType.indexOf('time-') > -1){

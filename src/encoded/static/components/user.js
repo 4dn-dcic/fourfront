@@ -10,7 +10,6 @@ var { Modal, Alert } = require('react-bootstrap');
 var { ItemStore } = require('./lib/store');
 var { ajaxLoad, DateUtility, console, isServerSide } = require('./objectutils');
 var { FormattedInfoBlock } = require('./experiment-set-view');
-var md5 = require('js-md5');
 // var navigation = require('./navigation');
 // var Breadcrumbs = navigation.Breadcrumbs;
 
@@ -38,7 +37,8 @@ var AccessKeyTable = React.createClass({
             'lab' : React.PropTypes.string,
             'status' : React.PropTypes.string,
             'timezone' : React.PropTypes.string,
-            'job_title' : React.PropTypes.string
+            'job_title' : React.PropTypes.string,
+            'submits_for' : React.PropTypes.array
         })
     },
 
@@ -187,6 +187,7 @@ var User = module.exports.User = React.createClass({
 
     statics : {
         buildGravatarURL : function(email, size=null){
+            var md5 = require('js-md5');
             var url = 'https://www.gravatar.com/avatar/' + md5(email);
             url += "?d=https://media.giphy.com/media/PcFPiuGZVqK2I/giphy.gif";
             if (size) url += '&s=' + size;
@@ -271,7 +272,7 @@ var User = module.exports.User = React.createClass({
 
                     </div>
                     
-                    {user.access_keys ?
+                    {user.access_keys && user.submits_for && user.submits_for.length ?
                         <div className="access-keys-container">
                             <h3 className="text-300">Access Keys</h3>
                             <div className="data-display">

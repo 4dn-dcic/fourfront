@@ -71,13 +71,14 @@ def static_resources(config):
     if config.route_prefix:
         robots_txt_path = '/%s%s' % (config.route_prefix, robots_txt_path)
 
+    config.add_route('robots.txt-conditional', '/robots.txt')
+
     def robots_txt(request):
         subreq = request.copy()
         subreq.path_info = robots_txt_path
         response = request.invoke_subrequest(subreq)
         return response
 
-    config.add_route('robots.txt-conditional', '/robots.txt')
     config.add_view(robots_txt, route_name='robots.txt-conditional')
 
 
