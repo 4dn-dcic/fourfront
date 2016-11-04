@@ -88,9 +88,9 @@
         text-decoration: none;
         display: block;
         color: #888;
-        background-color: rgba(0,0,0,0.0125);
         &:hover{
             color: #000000;
+            background-color: #f1f7f9;
         }
         &.selected {
             text-decoration: none;

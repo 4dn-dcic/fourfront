@@ -28,6 +28,76 @@ var isServerSide = module.exports.isServerSide = function(){
 }
 
 
+/**
+ * Check if process.env.NODE_ENV is not on 'production'.
+ * 
+ * @return {boolean} - True if NODE_ENV != 'production'.
+ */
+var isDebugging = module.exports.isDebugging = function(){
+    // process.env.NODE_ENV is set in webpack.config.js if running 'npm run build'
+    if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'production') {
+        return false;
+    }
+    return true;
+}
+
+/** 
+ * Custom patched console for debugging. Only print out statements if debugging/development environment.
+ * Prevent potential issues where console might not be available (earlier IE).
+ */
+var patchedConsole = module.exports.console = (function(){
+
+    if (!isServerSide() && window.patchedConsole) return window.patchedConsole; // Re-use instance if available.
+    
+    var PatchedConsole = function(){
+        this._initArgs = arguments; // arguments variable contains any arguments passed to function in an array.
+        this._enabled = true; // Default
+        this._available = true;
+
+        if (!console || !console.log) { // Check for seldomly incompatible browsers
+            this._available = false;
+        }
+
+        if (!isDebugging) {
+            this._enabled = false; // Be silent on production.
+        }
+
+        this._methods = ['log', 'assert', 'dir', 'error', 'info', 'warn', 'clear', 'profile', 'profileEnd'];
+        this._nativeConsole = console;
+
+        this._patchMethods = function(){
+            this._methods.forEach(function(methodName){
+                if (!(this._enabled && this._available)) {
+                    this[methodName] = function(){return false;};
+                } else {
+                    this[methodName] = this._nativeConsole[methodName];
+                }
+            }.bind(this));
+        }.bind(this);
+
+        // Ability to override, e.g. on production.
+        this.on = function(){
+            this._enabled = true;
+            this._patchMethods();
+        }.bind(this);
+
+        this.off = function(){
+            this._enabled = false;
+            this._patchMethods();
+        }.bind(this);
+
+        this._patchMethods();
+    }
+
+    var patchedConsole = new PatchedConsole();
+
+    if (!isServerSide()) {
+        window.patchedConsole = patchedConsole;
+    }
+    return patchedConsole;
+})();
+
+
 var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET', fallback = null, data = null){
     if (typeof window == 'undefined') return null;
     var xmlhttp = new XMLHttpRequest();
@@ -38,12 +108,12 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
                     callback(JSON.parse(xmlhttp.responseText));
                 }
             } else if (xmlhttp.status == 400) {
-                console.error('There was an error 400');
+                (patchedConsole || console).error('There was an error 400');
                 if (typeof fallback == 'function'){
                     fallback();
                 }
             } else {
-                console.error('something else other than 200 was returned');
+                (patchedConsole || console).error('something else other than 200 was returned');
                 if (typeof fallback == 'function'){
                     fallback();
                 }
@@ -52,7 +122,7 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
     };
     xmlhttp.open(method, url, true);
     xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    console.log('___DATA___',data);
+    (patchedConsole || console).log('___DATA___',data);
     if(data){
         xmlhttp.send(data);
     }else{
@@ -60,7 +130,7 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
     }
 }
 
-var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = null, data = null){
+var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = {}, data = null){
     return new Promise(function(resolve, reject) {
         var xhr = new XMLHttpRequest();
         xhr.onload = function() {
@@ -69,11 +139,14 @@ var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = n
         };
         xhr.onerror = reject;
         xhr.open(method, url, true);
-        if(headers){
-            for(var i=0; i<Object.keys(headers).length; i++){
-                xhr.setRequestHeader(Object.keys(headers)[i], headers[Object.keys(headers)[i]]);
-            }
+        if (typeof headers["Content-Type"] == 'undefined'){
+            headers["Content-Type"] = "application/json;charset=UTF-8";
         }
+        var headerKeys = Object.keys(headers);
+        for (var i=0; i < headerKeys.length; i++){
+            xhr.setRequestHeader(headerKeys[i], headers[headerKeys[i]]);
+        }
+    
         if(data){
             xhr.send(data);
         }else{
@@ -82,21 +155,108 @@ var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = n
     });
 }
 
-/**
- * Format a timestamp to pretty output. Uses moment.js, which uses Date() object in underlying code.
- * 
- * @param {string} timestamp - Timestamp as provided by server output. No timezone corrections currently.
- * @param {string} [outputFormat] - Defaults to "MMMM Do, YYYY" for, e.g. "October 31st, 2016".
- * @return {string} Prettified date/time output.
- */
-var parseDateTime = module.exports.parseDateTime = function(timestamp, outputFormat = "MMMM Do, YYYY"){
-    if (!Date) {
-        return timestamp; // Date object may or may not be available server-side.
-    } else {
-        var moment = require('moment'); // require allows to load code in conditionally, so lets do that until more funcs require moment.
+
+var DateUtility = module.exports.DateUtility = (function(){
+
+    // ToDo : Handle locales (w/ moment)
+
+    // 'require' allows to load code in conditionally, so lets do that here until more funcs require moment.
+    var moment = require('moment');
+
+    // Class itself, if need to create non-static instance at some point.
+    var DateUtility = function(timestamp = null){
+        this._dateClassExists = DateUtility.dateClassExists();
+        this._timestamp = timestamp || null;
+        this._moment = timestamp && this._dateClassExists ? moment(timestamp) : null;
+
+        this.format = function(outputFormat){
+            return this._moment.format(outputFormat);
+        }
+    };
+
+    // Static Class Methods
+
+    /** Check that Date class/object exists in execution environment. */
+    DateUtility.dateClassExists = function(){ return !!Date; };
+
+    /**
+     * Presets for date/time output formats for 4DN.
+     * Uses bootstrap grid sizing name convention, so may utilize with responsiveGridState
+     * to set responsively according to screen size, e.g. in a (debounced/delayed) window 
+     * resize event listener.
+     * 
+     * @see responsiveGridState
+     * @param {string} [formatType] - Key for date/time format to display. Defaults to 'date-md'.
+     * @param {string} [dateTimeSeparator] - Separator between date and time if formatting a date-time. Defaults to ' '.
+     */
+    DateUtility.preset = function(formatType = 'date-md', dateTimeSeparator = " "){
+
+        function date(ft){
+            switch(ft){
+                case 'date-xs':
+                    // 11/03/2016
+                    return "MM/DD/YYYY";
+                case 'date-sm':
+                    // Nov 3rd, 2016
+                    return "MMM Do, YYYY";
+                case 'date-md':
+                    // November 3rd, 2016   (default)
+                    return "MMMM Do, YYYY";
+                case 'date-lg':
+                    // Thursday, November 3rd, 2016
+                    return "dddd, MMMM Do, YYYY";
+            }
+        }
+
+        function time(ft){
+            switch(ft){
+                case 'time-xs':
+                    // 12pm
+                    return "ha";
+                case 'time-sm':
+                case 'time-md':
+                    // 12:27pm
+                    return "h:mma";
+                case 'time-lg':
+                    // 12:27:34 pm
+                    return "h:mm:ss a";
+            }
+        }
+
+        if (formatType.indexOf('date-time-') > -1){
+            return date(formatType.replace('time-','')) + '[' + dateTimeSeparator + ']' + time(formatType.replace('date-',''));
+        } else if (formatType.indexOf('date-') > -1){
+            return date(formatType);
+        } else if (formatType.indexOf('time-') > -1){
+            return time(formatType);
+        }
+        return null;
+    };
+
+    /**
+     * Format a timestamp to pretty output. Uses moment.js, which uses Date() object in underlying code.
+     * @see DateUtility.preset
+     * 
+     * @param {string} timestamp - Timestamp as provided by server output. No timezone corrections currently.
+     * @param {string} [formatType] - Preset format to use. Defaults to 'date-md', e.g. "October 31st, 2016".
+     * @param {string} [customOutputFormat] - Custom format to use in lieu of formatType.
+     * @return {string} Prettified date/time output.
+     */
+    DateUtility.format = function(timestamp, formatType = 'date-md', dateTimeSeparator = " ", customOutputFormat = null){
+        if (!DateUtility.dateClassExists) return timestamp;
+        
+        var outputFormat;
+        if (customOutputFormat) {
+            outputFormat = customOutputFormat;
+        } else {
+            outputFormat = DateUtility.preset(formatType, dateTimeSeparator);
+        }
+
         return moment(timestamp).format(outputFormat);
-    }
-};
+    };
+
+    return DateUtility;
+})();
 
 /**
  * Check width of text or text-like content if it were to fit on one line.
@@ -137,16 +297,39 @@ var textContentWidth = module.exports.textContentWidth = function(
 
 /**
  * Get the width of what a 12-column bootstrap section would be in current viewport size.
- * Keep widths in sync with stylesheet, e.g. $screen-sm-min, $screen-md-min, & $screen-lg-min
+ * Keep widths in sync with stylesheet, e.g. 
+ * $container-tablet - $grid-gutter-width, 
+ * $container-desktop - $grid-gutter-width, and
+ * $container-large-desktop - $grid-gutter-width 
  * in src/encoded/static/scss/bootstrap/_variables.scss.
  *
  * @return {integer}
  */
 var gridContainerWidth = module.exports.gridContainerWidth = function(){
-    if (isServerSide()) return 1140;
-    // Subtract 20 for padding.
-    if (window.innerWidth >= 1200) return 1140;
-    if (window.innerWidth >= 992) return 940;
-    if (window.innerWidth >= 768) return 720;
-    return window.innerWidth - 20;
+    // Subtract 20 for padding/margins.
+    switch(responsiveGridState()){
+        case 'lg': return 1140;
+        case 'md': return 940;
+        case 'sm': return 720;
+        case 'xs':
+            if (isServerSide()) return 400;
+            return window.innerWidth - 20;
+    }
+
+};
+
+/**
+ * Get current grid size, if need to sidestep CSS.
+ * Keep widths in sync with stylesheet, e.g. $screen-sm-min, $screen-md-min, & $screen-lg-min
+ * in src/encoded/static/scss/bootstrap/_variables.scss.
+ *
+ * @return {string} - Abbreviation for column/grid Bootstrap size, e.g. 'lg', 'md', 'sm', or 'xs'.
+ */
+
+var responsiveGridState = module.exports.responsiveGridState = function(){
+    if (isServerSide()) return 'lg';
+    if (window.innerWidth >= 1200) return 'lg';
+    if (window.innerWidth >= 992) return 'md';
+    if (window.innerWidth >= 768) return 'sm';
+    return 'xs';
 };
