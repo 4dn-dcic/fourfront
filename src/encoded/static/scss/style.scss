@@ -22,6 +22,9 @@ $brand-success: #4C994C;
 $brand-danger: #B24342;
 $brand-info: #4F689E;
 
+/** Setup some other variables for tables, etc. **/
+$expset-table-border-color : #eee;
+
 // Core variables and mixins
 @import "bootstrap/variables";
 @import "bootstrap/mixins";

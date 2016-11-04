@@ -1,12 +1,12 @@
 /* Panels */
 .panel {
-    font-family: 'Yrsa', serif;
+    /* font-family: 'Yrsa', serif; */
     background-color: inherit;
     margin-top: 15px;
     margin-bottom: 15px;
     padding: 15px 20px;
     overflow: visible;
-    border: none;
+    border: 1px solid transparent; /* So bordered and border-less panels have same padding */
     @include box-shadow(0px 0px 0px rgba(0,0,0,0));
     &.panel-default {
         padding: 0;
@@ -19,6 +19,19 @@
             }
         }
     }
+
+    > h1:first-child, > h2:first-child, 
+    > h3:first-child, > h4:first-child, 
+    > h5:first-child, > h6:first-child {
+        margin-top: 0;
+        padding-top: 2px;
+    }
+
+    &.shadow-border {
+        border: 1px solid #c8c8c8;
+        box-shadow: 0px 1px 9px -3px rgba(0,0,0,0.5);
+    }
+
 }
 
 .panel-heading {

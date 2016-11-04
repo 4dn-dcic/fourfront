@@ -40,7 +40,7 @@ var Navigation = module.exports = React.createClass({
         var portal = this.context.portal;
         var img = <img src="/static/img/4dn_logo.svg" className="navbar-logo-image"/>;
         return (
-            <div style={{ marginBottom: ( this.state.testWarning ? 37 : 0 ) }}>
+            <div className={"navbar-container" + (this.state.testWarning ? " test-warning-visible" : "")}>
                 <div id="navbar" className="navbar navbar-fixed-top navbar-inverse">
                     <TestWarning visible={this.state.testWarning} setHidden={this.hideTestWarning} />
                     <div className="container">
@@ -140,7 +140,7 @@ var UserActions = React.createClass({
         var session = this.context.session;
         var acctTitle = (
             <span>
-                <i className={"icon icon-user" + (session['auth.userid'] ? "" : "-o")}></i>&nbsp; Account
+                <i title={ session['auth.userid'] ? "Signed In" : null } className={"icon icon-user" + (session['auth.userid'] ? "" : "-o")}></i>&nbsp; Account
             </span>
         );
 

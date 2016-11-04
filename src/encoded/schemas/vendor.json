@@ -32,7 +32,7 @@
             "type": "string"
         },
         "name": {
-            "comment": "Do not submit, value is auto generated from the title as lower cased and hyphen delimited.",
+            "description": "DON'T SUBMIT, auto-generated, use for referencing vendors in other sheets.",
             "type": "string",
             "pattern": "^[a-z0-9\\-]+$",
             "uniqueKey": true

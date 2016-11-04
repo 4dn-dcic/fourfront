@@ -14,8 +14,7 @@ var store = require('../store');
 var browse = require('./browse');
 var origin = require('../libs/origin');
 var serialize = require('form-serialize');
-var ajaxLoad = require('./objectutils').ajaxLoad;
-var ajaxPromise = require('./objectutils').ajaxPromise;
+var { ajaxLoad, ajaxPromise, console } = require('./objectutils');
 var dispatch_dict = {}; //used to store value for simultaneous dispatch
 
 var portal = {

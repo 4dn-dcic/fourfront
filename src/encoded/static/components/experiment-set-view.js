@@ -5,7 +5,7 @@ var { ExperimentsTable, getFileDetailContainer } = require('./experiments-table'
 var _ = require('underscore');
 var { SubIPanel, DescriptorField, tipsFromSchema } = require('./item');
 var { FacetList, siftExperiments } = require('./facetlist');
-var { ajaxLoad, textContentWidth, gridContainerWidth, isServerSide, parseDateTime } = require('./objectutils');
+var { ajaxLoad, textContentWidth, gridContainerWidth, isServerSide, DateUtility, console } = require('./objectutils');
 
 /**
  * Entire ExperimentSet page view.
@@ -194,18 +194,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         // Perhaps fallback to using AJAX. Lol.
         if (typeof window != 'undefined' && propertyID && !propertyInfo && allowAjaxFallback) {
             // throw new Error(propertyName + " " + propertyID + " not found in ExperimentSet " + this.props.context.accession + " experiments.");
-            var newStateAddition = {};
-            newStateAddition['details_' + propertyName] = null;
-            this.setState(newStateAddition);
-            
-            console.log('Obtaining details_' + propertyName + ' via AJAX.');
-            ajaxLoad(propertyID + '?format=json', function(result){
-                newStateAddition = {};
-                newStateAddition['details_' + propertyName] = result;
-                this.setState(newStateAddition);
-                console.log('Obtained details_' + propertyName + ' via AJAX.');
-            }.bind(this), 'GET');
-            
+            FormattedInfoBlock.ajaxPropertyDetails.call(this, propertyID, propertyName);
         } else {
             return propertyInfo;
         }
@@ -242,7 +231,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
                     <div className="col-sm-7 col-md-8 col-lg-9">
 
-                        <ExperimentSetInfoBlock 
+                        <ExperimentSetInfoArea 
                             labInfo={ this.state.details_lab }
                             awardInfo={ this.state.details_award }
                             {...this.props} 
@@ -316,7 +305,7 @@ var ExperimentSetHeader = React.createClass({
         if (!('date_created' in this.props.context)) return <span><i></i></span>;
         return (
             <span>
-                <i className="icon sbt-calendar"></i>&nbsp; Added { parseDateTime(this.props.context.date_created) }
+                <i className="icon sbt-calendar"></i>&nbsp; Added { DateUtility.format(this.props.context.date_created, 'date-time-md', ' at ') }
             </span>
         );
     },
@@ -440,10 +429,10 @@ var ExperimentSetHeaderBar = React.createClass({
     
 
     componentDidMount : function(){
-        
-        var debouncedStateChange = _.debounce(() => {
-            // Debounce to prevent from executing more than once every 300ms.
-            setTimeout(()=> {
+        if (typeof window != 'undefined'){
+
+            this.debouncedLayoutResizeStateChange = _.debounce(() => {
+                // Debounce to prevent from executing more than once every 300ms.
                 var oldHeight = this.descriptionHeight;
                 var willDescriptionFitAtNewWindowSize = this.checkWillDescriptionFitOneLineAndUpdateHeight();
                 if (willDescriptionFitAtNewWindowSize != this.state.descriptionWillFitOneLine){
@@ -453,11 +442,9 @@ var ExperimentSetHeaderBar = React.createClass({
                 } else if (this.descriptionHeight != oldHeight) {
                     this.forceUpdate();
                 }
-            }, 0);
-        }, 300, false);
-        
-        if (typeof window != 'undefined'){
-            window.addEventListener('resize', debouncedStateChange);
+            }, 300, false);
+
+            window.addEventListener('resize', this.debouncedLayoutResizeStateChange);
             window.requestAnimationFrame(()=>{
                 this.setState({
                     descriptionWillFitOneLine : this.checkWillDescriptionFitOneLineAndUpdateHeight()
@@ -465,6 +452,12 @@ var ExperimentSetHeaderBar = React.createClass({
             });
         }
         
+    },
+
+    componentWillUnmount: function(){
+        if (typeof window != 'undefined'){
+            window.removeEventListener('resize', this.debouncedLayoutResizeStateChange);
+        }
     },
 
     handleDescriptionExpandToggle: function (e) {
@@ -507,16 +500,195 @@ var ExperimentSetHeaderBar = React.createClass({
 
 });
 
+var FormattedInfoBlock = module.exports.FormattedInfoBlock = React.createClass({
 
-var ExperimentSetInfoBlock = React.createClass({
+    statics : {
+        /**
+         * Set a parent component's state to have 'details_' + propertyName data fetched via AJAX.
+         * Must supply 'this' from parent component, via .call/.apply/.bind(this, args...),
+         * AKA use like a mixin.
+         * 
+         * @param {string} endpoint - REST endpoint to get from. Usually a '@id' field in schema-derived JSON data.
+         * @param {string} propertyName - The second part of state variable to load into, after 'details_'. E.g. 'lab' for 'details_lab'.
+         * 
+         * @example
+         * componentDidMount : function(){
+         *     if (typeof this.props.context.lab == 'string' && this.props.context.lab.length > 0){
+         *         FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.context.lab, 'lab');
+         *     }
+         * },
+         */
+        ajaxPropertyDetails : function(endpoint, propertyName){
+            console.log('Obtaining details_' + propertyName + ' via AJAX.');
+            ajaxLoad(endpoint + '?format=json', function(result){
+                var newStateAddition = {};
+                newStateAddition['details_' + propertyName] = result;
+                this.setState(newStateAddition);
+                console.log('Obtained details_' + propertyName + ' via AJAX.');
+            }.bind(this), 'GET');
+        },
 
-    componentWillMount: function(){
-        
+        /**
+         * Preset generator for Lab detail block.
+         * @see FormattedInfoBlock.generate
+         * 
+         * @param {Object} details_lab - Object containing Lab Details.
+         * @param {boolean|string} [includeIcon] - Include icon or not. Supply string to override default lab icon. Defaults to true.
+         * @param {boolean} [includeLabel] - Include 'Lab >' label in top left corner, or not. Defaults to true.
+         * @param {boolean} [includeDetail] - Include description/details or not. Defaults to true.
+         * @param {string} [key] - Unique key to add to generated element, supply if generating a collection/array.
+         */
+        Lab : function(details_lab, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
+            return FormattedInfoBlock.generate(
+                details_lab,
+                typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-users" : null),
+                includeLabel ? "Lab" : null,
+                details_lab && includeDetail ?
+                        (details_lab.city) + 
+                        (details_lab.state ? ', ' + details_lab.state : '') + 
+                        (details_lab.postal_code ? ' ' + details_lab.postal_code : '' ) +
+                        (details_lab.country ? ', ' + details_lab.country : '')
+                    : ( includeDetail ? true : null ),
+                'lab',
+                'address',
+                key
+            );
+        },
+
+        /**
+         * Preset generator for Award detail block.
+         * @see FormattedInfoBlock.Lab
+         */
+        Award : function(details_award, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
+            return FormattedInfoBlock.generate(
+                details_award,
+                typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-institution" : null),
+                includeLabel ? "Award" : null,
+                details_award && includeDetail ? details_award.project : null,
+                'award',
+                'project',
+                key
+            );
+        },
+
+        generate : function(detail, iconClass = null, label = null, contents = null, extraContainerClassName = null, extraDetailClassName = null, key = null){
+            return (
+                <FormattedInfoBlock
+                    key={key}
+                    label={label}
+                    iconClass={iconClass}
+                    title={detail ? detail.title : null }
+                    titleHref={detail ? detail['@id'] : null }
+                    extraContainerClassName={extraContainerClassName}
+                    extraDetailClassName={extraDetailClassName}
+                    loading={!detail}
+                >
+                    { contents }
+                </FormattedInfoBlock>
+            );
+        }
+
     },
 
-    componentWillUpdate : function(nextProps, nextState){
-
+    propTypes : {
+        label : React.PropTypes.string,
+        iconClass : React.PropTypes.string,
+        title : React.PropTypes.string,
+        titleHref : React.PropTypes.string,
+        detailContent : React.PropTypes.any,
+        extraContainerClassName : React.PropTypes.string,
+        extraDetailClassName : React.PropTypes.string,
+        loading : React.PropTypes.bool
     },
+
+    getDefaultProps : function(){
+        return {
+            label : null,
+            title : null,
+            titleHref : "#",
+            detailContent : null,
+            extraContainerClassName : null,
+            extraDetailClassName : null,
+            loading : false,
+            children : null // Inner contents of <FormattedInfoBlock>...</FormattedInfoBlock>
+        };
+    },
+
+    getInitialState : function(){
+        return {
+            transitionDelayElapsed : !this.props.loading
+        };
+    },
+
+    componentDidUpdate : function(prevProps, prevState){
+        if (prevProps.loading === true && this.props.loading === false && !this.state.transitionDelayElapsed){
+            setTimeout(()=>{
+                this.setState({ transitionDelayElapsed : true });
+            }, 100);
+        }
+    },
+    
+    render : function(){
+        var innerContent;
+
+        var blockClassName = function(){
+            var classes = ["formatted-info-panel"];
+            if (!this.props.iconClass) classes.push('no-icon');
+            if (!this.props.label) classes.push('no-label');
+            if (this.props.detailContent == null && this.props.children == null) classes.push('no-details');
+            if (!this.props.title) classes.push('no-title');
+            if (this.props.loading) classes.push('loading');
+            else classes.push('loaded');
+            if (this.state.transitionDelayElapsed) classes.push('transitioned');         
+            if (this.props.extraContainerClassName) classes.push(this.props.extraContainerClassName);
+            return classes.join(' ');
+        }.bind(this);
+
+        if (this.props.loading) {
+            innerContent = (
+                <div className="row">
+                    <div className="col-xs-12 text-center" style={{ color : '#d2d2d2', fontSize : '22px', paddingTop : 3 }}>
+                        <i className="icon icon-spin icon-circle-o-notch"></i>
+                    </div>
+                </div>
+            );
+        } else {
+            innerContent = (
+                <div className="row loaded">
+                    { this.props.iconClass ? 
+                    <div className="col-xs-2 col-lg-1 icon-container">
+                        <i className={"icon " + this.props.iconClass}></i>
+                    </div>
+                    : null }
+                    <div className={"details-col " + (this.props.iconClass ? "col-xs-10 col-lg-11" : "col-sm-12") }>
+                        { this.props.title ?
+                        
+                            this.props.titleHref ? 
+                                <h5 className="block-title"><a href={ this.props.titleHref } title={this.props.title}>{ this.props.title }</a></h5>
+                              : <h5 className="block-title no-link">{ this.props.title }</h5>
+                        
+                        : null }
+                        { this.props.detailContent || this.props.children ?
+                        <div className={"more-details " + this.props.extraDetailClassName}>
+                            { this.props.detailContent || this.props.children }
+                        </div>
+                        : null }
+                    </div>
+                </div>
+            );
+        }
+        return (
+            <div className={ blockClassName() }>
+                { this.props.label ? <h6 className="info-panel-label">{ this.props.label }</h6> : null }
+                { innerContent }
+            </div>
+        );
+    }
+
+});
+
+
+var ExperimentSetInfoArea = React.createClass({
 
     formattedDescriptionBlock: function(){
         if (!this.props.context.description) return null;
@@ -524,89 +696,6 @@ var ExperimentSetInfoBlock = React.createClass({
             <div className="col-sm-4 description-container">
                 <p className="text-large">{ this.props.context.description }</p>
             </div>
-        );
-    },
-
-    formattedInfoBlock : function(
-        label,
-        iconClass,
-        title,
-        titleHref,
-        detailContent,
-        extraContainerClassName = '',
-        extraDetailClassName = '',
-        loading = false
-    ){
-        var innerContent;
-        if (loading) {
-            innerContent = (
-                <div className="row">
-                    <div className="col-xs-12 text-center" style={{ color : '#aaa', fontSize : '22px', paddingTop : 3 }}>
-                        <i className="icon icon-spin icon-circle-o-notch"></i>
-                    </div>
-                </div>
-            );
-        } else {
-            innerContent = (
-                <div className="row">
-                    <div className="col-xs-2 col-lg-1 icon-container">
-                        <i className={"icon " + iconClass}></i>
-                    </div>
-                    <div className="col-xs-10 col-lg-11">
-                        <h5>
-                            <a href={ titleHref || '#' } title={title}>{ title }</a>
-                        </h5>
-                        <div className={"more-details " + extraDetailClassName}>
-                            { detailContent }
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-        return (
-            <div className="col-sm-6 col-sm-float-right">
-                <div className={"info-panel " + extraContainerClassName}>
-                    <h6 className="info-panel-label">{ label }</h6>
-                    { innerContent }
-                </div>
-            </div>
-        );
-    },
-
-    formattedAwardInfoBlock : function(){
-        if (!this.props.awardInfo) {
-            return this.formattedInfoBlock('Award', 'icon-institution', null, null, null, 'award', 'project', true);
-        };
-        return this.formattedInfoBlock(
-            'Award',
-            'icon-institution',
-            this.props.awardInfo.title,
-            this.props.awardInfo['@id'],
-            this.props.awardInfo.project,
-            'award',
-            'project',
-            false
-        );
-    },
-
-    formattedLabInfoBlock : function(){
-        if (!this.props.labInfo) {
-            return this.formattedInfoBlock('Lab', 'icon-users', null, null, null, 'lab', 'address', true);
-        };
-        return this.formattedInfoBlock(
-            'Lab',
-            'icon-users',
-            this.props.labInfo.title,
-            this.props.labInfo['@id'],
-            (
-                (this.props.labInfo.city) + 
-                (this.props.labInfo.state ? ', ' + this.props.labInfo.state : '') + 
-                (this.props.labInfo.postal_code ? ' ' + this.props.labInfo.postal_code : '' ) +
-                (this.props.labInfo.country ? ', ' + this.props.labInfo.country : '')
-            ),
-            'lab',
-            'address',
-            false
         );
     },
 
@@ -618,8 +707,12 @@ var ExperimentSetInfoBlock = React.createClass({
                 <div className={ "col-sm-12" }>
                     <div className="row">
                         
-                        { this.formattedLabInfoBlock() }
-                        { this.formattedAwardInfoBlock() }
+                        <div className="col-sm-6 col-sm-float-right">
+                            { FormattedInfoBlock.Lab(this.props.labInfo) }
+                        </div>
+                        <div className="col-sm-6 col-sm-float-right">
+                            { FormattedInfoBlock.Award(this.props.awardInfo) }
+                        </div>
 
                     </div>
 
