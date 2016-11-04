@@ -10,7 +10,6 @@ var { Modal, Alert } = require('react-bootstrap');
 var { ItemStore } = require('./lib/store');
 var { ajaxLoad, DateUtility, console, isServerSide } = require('./objectutils');
 var { FormattedInfoBlock } = require('./experiment-set-view');
-var md5 = require('js-md5');
 // var navigation = require('./navigation');
 // var Breadcrumbs = navigation.Breadcrumbs;
 
@@ -187,6 +186,7 @@ var User = module.exports.User = React.createClass({
 
     statics : {
         buildGravatarURL : function(email, size=null){
+            var md5 = require('js-md5');
             var url = 'https://www.gravatar.com/avatar/' + md5(email);
             url += "?d=https://media.giphy.com/media/PcFPiuGZVqK2I/giphy.gif";
             if (size) url += '&s=' + size;
