@@ -368,7 +368,7 @@ var ExperimentSetHeader = React.createClass({
 
                 <div className="row clearfix bottom-row">
                     <div className="col-sm-6 item-label-extra set-type-indicators">{ /* PLACEHOLDER / TEMP-EMPTY */ }</div>
-                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra" title="Date Added">{ this.parsedCreationDate() }</h5>
+                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra" title="Date Added - UTC/GMT">{ this.parsedCreationDate() }</h5>
                 </div>
 
             </div>
