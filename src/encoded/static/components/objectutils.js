@@ -161,6 +161,7 @@ var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = {
             resolve(JSON.parse(xhr.responseText));
         };
         xhr.onerror = reject;
+        xhr.open(method,url,true);
         xhr = setJWTHeaders(xhr, headers);
 
         if(data){
