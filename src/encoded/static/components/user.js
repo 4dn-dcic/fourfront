@@ -262,7 +262,14 @@ var ImpersonateUserForm = React.createClass({
         var fallbackFxn = function() {
             alert('Impersonation unsuccessful.\nPlease check to make sure the provided email is correct.');
         };
-        ajaxLoad(url, callbackFxn, 'POST', fallbackFxn, jsonData);
+
+        var userInfo = localStorage.getItem('user_info') || null;
+        var idToken = userInfo ? JSON.parse(userInfo).id_token : null;
+        var reqHeaders = {'Accept': 'application/json'};
+        if(userInfo){
+            reqHeaders['Authorization'] = 'Bearer '+idToken;
+        }
+        ajaxLoad(url, callbackFxn, 'POST', fallbackFxn, jsonData, reqHeaders);
     }
 });
 globals.content_views.register(ImpersonateUserForm, 'Portal', 'impersonate-user');

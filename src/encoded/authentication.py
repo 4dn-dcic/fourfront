@@ -143,6 +143,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
         login view... not sure why, but yeah..
         '''
 
+
         # we will cache it for the life of this request, cause pyramids does traversal
         cached = getattr(request, '_auth0_authenticated', _fake_user)
         if cached is not _fake_user:
@@ -316,6 +317,7 @@ def basic_auth_check(username, password, request):
              permission='impersonate')
 def impersonate_user(request):
     """As an admin, impersonate a different user."""
+    import pdb; pdb.set_trace()
     userid = request.validated['userid']
     users = request.registry[COLLECTIONS]['user']
 

@@ -108,11 +108,11 @@ def test_jwt_works_without_keys(testapp, anontestapp, auth0_4dn_user_token,
     testapp.post_json(url, item, status=201)
 
     #clear out keys
-    old_key = anontestapp.app.registry.settings['auth0.secret'] 
+    old_key = anontestapp.app.registry.settings['auth0.secret']
     anontestapp.app.registry.settings['auth0.secret'] = None
     res2 = anontestapp.get('/users/', headers=headers, status=200)
 
-    anontestapp.app.registry.settings['auth0.secret'] = old_key 
+    anontestapp.app.registry.settings['auth0.secret'] = old_key
     assert '@id' in res2.json['@graph'][0]
 
 

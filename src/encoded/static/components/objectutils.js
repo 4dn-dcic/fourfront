@@ -28,7 +28,7 @@ var isServerSide = module.exports.isServerSide = function(){
 }
 
 
-var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET', fallback = null, data = null){
+var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET', fallback = null, data = null, headers = null){
     if (typeof window == 'undefined') return null;
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
@@ -52,6 +52,12 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
     };
     xmlhttp.open(method, url, true);
     xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    if(headers){
+        for(var i=0; i<Object.keys(headers).length; i++){
+            xmlhttp.setRequestHeader(Object.keys(headers)[i], 
+              headers[Object.keys(headers)[i]]);
+        }
+    }
     if(data){
         xmlhttp.send(data);
     }else{
