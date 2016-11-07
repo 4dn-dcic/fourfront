@@ -164,20 +164,9 @@ var DateUtility = module.exports.DateUtility = (function(){
     var moment = require('moment');
 
     // Class itself, if need to create non-static instance at some point.
-    var DateUtility = function(timestamp = null){
-        this._dateClassExists = DateUtility.dateClassExists();
-        this._timestamp = timestamp || null;
-        this._moment = timestamp && this._dateClassExists ? moment(timestamp) : null;
-
-        this.format = function(outputFormat){
-            return this._moment.format(outputFormat);
-        }
-    };
+    var DateUtility = function(timestamp = null){};
 
     // Static Class Methods
-
-    /** Check that Date class/object exists in execution environment. */
-    DateUtility.dateClassExists = function(){ return !!Date; };
 
     /**
      * Presets for date/time output formats for 4DN.
@@ -238,12 +227,12 @@ var DateUtility = module.exports.DateUtility = (function(){
      * @see DateUtility.preset
      * 
      * @param {string} timestamp - Timestamp as provided by server output. No timezone corrections currently.
-     * @param {string} [formatType] - Preset format to use. Defaults to 'date-md', e.g. "October 31st, 2016".
+     * @param {string} [formatType] - Preset format to use. Ignored if customOutputFormat is provided. Defaults to 'date-md', e.g. "October 31st, 2016".
+     * @param {string} [dateTimeSeparator] - Separator between date & time if both are in preset formattype. Defaults to " ".
      * @param {string} [customOutputFormat] - Custom format to use in lieu of formatType.
      * @return {string} Prettified date/time output.
      */
     DateUtility.format = function(timestamp, formatType = 'date-md', dateTimeSeparator = " ", customOutputFormat = null){
-        if (!DateUtility.dateClassExists) return timestamp;
         
         var outputFormat;
         if (customOutputFormat) {
@@ -252,7 +241,7 @@ var DateUtility = module.exports.DateUtility = (function(){
             outputFormat = DateUtility.preset(formatType, dateTimeSeparator);
         }
 
-        return moment(timestamp).format(outputFormat);
+        return moment.utc(timestamp).format(outputFormat);
     };
 
     return DateUtility;

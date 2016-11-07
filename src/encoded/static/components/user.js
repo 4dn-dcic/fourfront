@@ -9,9 +9,7 @@ var _ = require('underscore');
 var { Modal, Alert } = require('react-bootstrap');
 var { ItemStore } = require('./lib/store');
 var { ajaxLoad, DateUtility, console, isServerSide } = require('./objectutils');
-var { FormattedInfoBlock } = require('./experiment-set-view');
-// var navigation = require('./navigation');
-// var Breadcrumbs = navigation.Breadcrumbs;
+var FormattedInfoBlock = require('./formatted-info-block');
 
 
 class AccessKeyStore extends ItemStore {
@@ -329,7 +327,8 @@ var EditableProfileField = React.createClass({
         }
     },
 
-    enterEditState : function(){
+    enterEditState : function(e){
+        e.preventDefault();
         this.setState({ isEditing : true });
     },
 
@@ -339,15 +338,15 @@ var EditableProfileField = React.createClass({
                 <div className="col-sm-3 text-right text-left-xs">
                     <label htmlFor={ this.props.labelID }>{ this.props.label }</label>
                 </div>
-                <div className="col-sm-9">
+                <div className="col-sm-9 value">
+                    <a href={ "#edit-" + this.props.labelID } className="right edit-button" onClick={this.enterEditState}>
+                        <i className="icon icon-pencil icon-fw"></i>
+                    </a>
                     { this.props.children ?
                         <span id={ this.props.labelID } className="set">{ this.props.children }</span>
                         :
                         <span className="not-set">{ this.props.fallbackText || ('No ' + this.props.labelID) }</span> 
                     }
-                    <button type="button" className="right" onClick={this.enterEditState}>
-                        <i className="icon icon-pencil icon-fw"></i>
-                    </button>
                 </div>
             </div>
         );
@@ -371,7 +370,7 @@ var EditableProfileField = React.createClass({
                 <div className="col-sm-3 text-right text-left-xs">
                     <label htmlFor={ this.props.labelID }>{ this.props.label }</label>
                 </div>
-                <div id={ this.props.labelID } className="col-sm-9 editing">
+                <div className="col-sm-9 value editing">
                     { this.inputField() }
                 </div>
             </div>
@@ -477,7 +476,7 @@ var ProfileWorkFields = React.createClass({
                     <div className="col-sm-3 text-right text-left-xs">
                         <label htmlFor="lab">Primary Lab</label>
                     </div>
-                    <div id="lab" className="col-sm-9">
+                    <div id="lab" className="col-sm-9 value">
                         { this.renderLabInfo(user) }
                     </div>
                 </div>
@@ -485,7 +484,7 @@ var ProfileWorkFields = React.createClass({
                     <div className="col-sm-3 text-right text-left-xs">
                         <label htmlFor="job_title">Role</label>
                     </div>
-                    <div id="job_title" className="col-sm-9">
+                    <div id="job_title" className="col-sm-9 value">
                         { user.job_title || <span className="not-set">No Job Title</span> }
                     </div>
                 </div>
@@ -493,7 +492,7 @@ var ProfileWorkFields = React.createClass({
                     <div className="col-sm-3 text-right text-left-xs">
                         <label htmlFor="submits_for">Submit For</label>
                     </div>
-                    <ul id="submits_for" className="col-sm-9">
+                    <ul id="submits_for" className="col-sm-9 value">
                         { this.renderSubmitsFor() }
                     </ul>
                 </div>

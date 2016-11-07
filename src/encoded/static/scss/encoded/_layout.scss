@@ -303,7 +303,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 @media screen and (min-width: $screen-md-min){
 	/* Nudge accession #, etc. closer to title on wide desktop views */
 	.exp-set-header-area {
-		margin-top: -27px;
+		margin-top: -17px;
 	}
 }
 
@@ -668,14 +668,34 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	margin-bottom: 0;
 
 	.row.profile-field-entry {
-		padding-bottom: 5px;
+
+		label {
+			margin-bottom: 0;
+		}
 
 		label, #email {
 			font-weight: 500;
 		}
 
-		.not-set {
-			color: #bbb; 
+		.value {
+			word-break : break-all;
+			padding-bottom: 10px;
+
+			.not-set {
+				color: #bbb; 
+			}
+
+			.edit-button {
+				color: #eee;
+			}
+
+			&:hover .edit-button {
+				color : #bbb;
+				&:hover {
+					color: #000;
+				}
+			}
+
 		}
 	}
 
