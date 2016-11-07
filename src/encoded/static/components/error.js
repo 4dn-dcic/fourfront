@@ -4,7 +4,12 @@ var React = require('react');
 
 var ErrorPage = module.exports = React.createClass({
     render: function() {
-        var homelink = <a href="/">here</a>;
+        var homelink;
+        if(this.props.currRoute == 'home'){
+            homelink = <a href="/">here</a>;
+        }else{
+            homelink = <a href="/home">here</a>;
+        }
         var errorMessage;
         if(this.props.status == 'invalid_login'){
             errorMessage =  <div>
@@ -16,8 +21,7 @@ var ErrorPage = module.exports = React.createClass({
             errorMessage = <h3>The page you've requested does not exist. Please click {homelink} to return to the homepage.</h3>;
         }else if(this.props.status == 'forbidden'){
             errorMessage = <h3>Access was denied to this resource. If you have an account, try logging in. Otherwise, please click {homelink} to return to the homepage.</h3>;
-        }
-        else{
+        }else{
             errorMessage = <h3>The page you've requested does not exist or you have found an error. Please click {homelink} to return to the homepage.</h3>;
         }
         return(

@@ -133,7 +133,7 @@ var Search = React.createClass({
 var UserActions = React.createClass({
     contextTypes: {
         listActionsFor: React.PropTypes.func,
-        session: React.PropTypes.object
+        session: React.PropTypes.bool
     },
 
     render: function() {
@@ -149,7 +149,7 @@ var UserActions = React.createClass({
                 return(<Login key={action.id} />);
             } else if (action.id === "accountactions"){
                 // link to registration page if logged out or account actions if logged in
-                if (!session['auth.userid']) {
+                if (!session) {
                     return(
                         <a href={action.url || '#'} key={action.id} className="global-entry">
                             {action.title}
@@ -178,14 +178,13 @@ var UserActions = React.createClass({
 var AccountActions = React.createClass({
     contextTypes: {
         listActionsFor: React.PropTypes.func,
-        session: React.PropTypes.object
+        session: React.PropTypes.bool
     },
 
     render: function() {
-        var session = this.context.session;
-        if (!session['auth.userid']) {
+        if (!this.context.session) {
             // Logged out, so no user menu at all
-            return(<a href="#" className="invis"/>);
+            return(<a href="" className="invis"/>);
         }
         var actions = this.context.listActionsFor('user').map(function (action, idx) {
             return (

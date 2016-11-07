@@ -26,7 +26,7 @@ if (env === 'production') {
     chunkFilename = '[name].[chunkhash].js';
     sourceMapType = 'source-map';
 } else if (env === 'quick-uglified') {
-    // Uglify JS for dev as well on task 'npm run dev-uglified' - 
+    // Uglify JS for dev as well on task 'npm run dev-uglified' -
     // slightly slower but reduces invariant violations where
     // client-side render != server-side reason (*perhaps* allowing clientside JS to exec faster)
     // set 'beautify : true' to get nicer output (whitespace, linebreaks) for debugging.
@@ -71,6 +71,13 @@ module.exports = [
             publicPath: '/static/build/',
             filename: '[name].js',
             chunkFilename: chunkFilename,
+        },
+        // https://github.com/hapijs/joi/issues/665
+        // stub modules on client side depended on by joi (a dependency of jwt)
+        node: {
+            net: "empty",
+            tls: "empty",
+            dns: "empty",
         },
         module: {
             preLoaders: preLoaders,

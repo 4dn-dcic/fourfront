@@ -10,6 +10,7 @@ var { Modal, Alert } = require('react-bootstrap');
 var { ItemStore } = require('./lib/store');
 var { ajaxLoad, DateUtility, console, isServerSide } = require('./objectutils');
 var FormattedInfoBlock = require('./formatted-info-block');
+var jwt = require('jsonwebtoken');
 
 
 class AccessKeyStore extends ItemStore {
@@ -42,7 +43,7 @@ var AccessKeyTable = React.createClass({
 
     contextTypes: {
         fetch: React.PropTypes.func,
-        session: React.PropTypes.object
+        session: React.PropTypes.bool
     },
 
     getInitialState: function() {
@@ -112,7 +113,18 @@ var AccessKeyTable = React.createClass({
     create: function(e) {
         e.preventDefault();
         var item = {};
-        item['user'] = this.context.session['auth.userid'];
+        if(this.context.session){
+            if(typeof(Storage) !== 'undefined'){
+                if(localStorage && localStorage.user_info){
+                    var idToken = JSON.parse(localStorage.getItem('user_info')).id_token;
+                    var decoded = jwt.decode(idToken);
+                    item['user'] = decoded.email_verified ? decoded.email : "";
+                }else{
+                    console.log("Access key aborted");
+                    return;
+                }
+            }
+        }
         this.store.create('/access-keys/', item);
     },
 
@@ -552,14 +564,25 @@ var ImpersonateUserForm = React.createClass({
     handleSubmit: function(data) {
         var url = "/impersonate-user";
         var jsonData = JSON.stringify({'userid':data});
-        var callbackFxn = function() {
+        var callbackFxn = function(payload) {
             alert('Success! ' + data + ' is being impersonated.');
+            console.log(JSON.stringify(payload))
+            if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
+                localStorage.setItem("user_info", JSON.stringify(payload));
+            }
             this.context.navigate('/');
         }.bind(this);
         var fallbackFxn = function() {
             alert('Impersonation unsuccessful.\nPlease check to make sure the provided email is correct.');
         };
-        ajaxLoad(url, callbackFxn, 'POST', fallbackFxn, jsonData);
+
+        var userInfo = localStorage.getItem('user_info') || null;
+        var idToken = userInfo ? JSON.parse(userInfo).id_token : null;
+        var reqHeaders = {'Accept': 'application/json'};
+        if(userInfo){
+            reqHeaders['Authorization'] = 'Bearer '+idToken;
+        }
+        ajaxLoad(url, callbackFxn, 'POST', fallbackFxn, jsonData, reqHeaders);
     }
 });
 globals.content_views.register(ImpersonateUserForm, 'Portal', 'impersonate-user');

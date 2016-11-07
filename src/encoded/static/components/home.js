@@ -25,7 +25,12 @@ var BannerEntry = React.createClass({
     },
 
     componentDidMount: function(){
+        this._isMounted = true;
         this.updateCount();
+    },
+
+    componentWillUnmount: function(){
+        this._isMounted = false;
     },
 
     componentWillReceiveProps: function(nextProps){
@@ -41,14 +46,16 @@ var BannerEntry = React.createClass({
                     'Content-Type': 'application/json'}
             });
             request.then(data => {
-                if(data.total){
-                    this.setState({
-                        count: data.total
-                    })
-                }else{
-                    this.setState({
-                        count: null
-                    })
+                if(this._isMounted){
+                    if(data.total){
+                        this.setState({
+                            count: data.total
+                        })
+                    }else{
+                        this.setState({
+                            count: null
+                        })
+                    }
                 }
             });
         }else{

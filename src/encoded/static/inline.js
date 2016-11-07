@@ -1,18 +1,12 @@
 'use strict';
 
-// Load the rest of the app as a separate chunk. 
+// Load the rest of the app as a separate chunk.
 // require.ensure creates & append to <head> a <script src="/static/build/bundle.[chunkName].js" ...> element
 // consisting of compilation from libs/compat.js and browser.js
 require.ensure(['./libs/compat', './browser'], function(require) {
     require('./libs/compat');  // Shims first
     require('./browser');
 }, 'bundle');
-
-// Read and clear stats cookie
-var cookie = require('cookie-monster')(document);
-window.stats_cookie = cookie.get('X-Stats') || '';
-cookie.set('X-Stats', '', {path: '/', expires: new Date(0)});
-
 
 // Need to know if onload event has fired for safe history api usage.
 window.onload = function () {

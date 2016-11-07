@@ -17,7 +17,7 @@ var SingleTreatment = module.exports.SingleTreatment = function(treatment) {
 /**
  * Check if JS is processing on serverside, vs in browser (clientside).
  * Adapted from react/node_modules/fbjs/lib/ExecutionEnvironment.canUseDOM()
- * 
+ *
  * @return {boolean} - True if processing on serverside.
  */
 var isServerSide = module.exports.isServerSide = function(){
@@ -26,7 +26,6 @@ var isServerSide = module.exports.isServerSide = function(){
     }
     return false;
 }
-
 
 /**
  * Check if process.env.NODE_ENV is not on 'production'.
@@ -98,14 +97,37 @@ var patchedConsole = module.exports.console = (function(){
 })();
 
 
+var setJWTHeaders = function(xhr, headers = {}) { 
+    if (typeof headers["Content-Type"] == 'undefined'){
+        headers["Content-Type"] = "application/json;charset=UTF-8";
+        headers['Accept'] = 'aplication/json';
+    }
+
+    var userInfo = localStorage.getItem('user_info') || null;
+    var idToken = userInfo ? JSON.parse(userInfo).id_token : null;
+
+    // Add req'd headers if not exist already
+    if(userInfo && typeof headers['Authorization'] == 'undefined'){
+        headers['Authorization'] = 'Bearer '+idToken;
+    }
+
+    // put everything in the header
+    var headerKeys = Object.keys(headers);
+    for (var i=0; i < headerKeys.length; i++){
+        xhr.setRequestHeader(headerKeys[i], headers[headerKeys[i]]);
+    }
+
+    return xhr;
+}
+
 var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET', fallback = null, data = null, headers = {}){
     if (typeof window == 'undefined') return null;
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-            if (xmlhttp.status == 200) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState == XMLHttpRequest.DONE ) {
+            if (xhr.status == 200) {
                 if (typeof callback == 'function'){
-                    callback(JSON.parse(xmlhttp.responseText));
+                    callback(JSON.parse(xhr.responseText));
                 }
             } else if (xmlhttp.status == 400) {
                 (patchedConsole || console).error('There was an error 400');
@@ -120,27 +142,14 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
             }
         }
     };
-    
-    xmlhttp.open(method, url, true);
 
-    // Add req'd headers if not exist already
-    if (typeof headers["Content-Type"] == 'undefined'){
-        headers["Content-Type"] = "application/json;charset=UTF-8";
-    }
-
-    // ToDO : if (typeof headers['JWT token'] == 'undefined') put it in.
-
-    var headerKeys = Object.keys(headers);
-    for (var i=0; i < headerKeys.length; i++){
-        xmlhttp.setRequestHeader(headerKeys[i], headers[headerKeys[i]]);
-    }
-    
-    (patchedConsole || console).log('___DATA___',data);
+    xhr.open(method, url, true);
+    xhr = setJWTHeaders(xhr, headers);
 
     if(data){
-        xmlhttp.send(data);
+        xhr.send(data);
     }else{
-        xmlhttp.send();
+        xhr.send();
     }
 }
 
@@ -152,18 +161,8 @@ var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = {
             resolve(JSON.parse(xhr.responseText));
         };
         xhr.onerror = reject;
-        xhr.open(method, url, true);
-        
-        // Add req'd headers if not exist already
-        if (typeof headers["Content-Type"] == 'undefined'){
-            headers["Content-Type"] = "application/json;charset=UTF-8";
-        }
-        
-        var headerKeys = Object.keys(headers);
-        for (var i=0; i < headerKeys.length; i++){
-            xhr.setRequestHeader(headerKeys[i], headers[headerKeys[i]]);
-        }
-    
+        xhr = setJWTHeaders(xhr, headers);
+
         if(data){
             xhr.send(data);
         }else{
@@ -171,7 +170,6 @@ var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = {
         }
     });
 }
-
 
 var DateUtility = module.exports.DateUtility = (function(){
 
@@ -268,6 +266,7 @@ var DateUtility = module.exports.DateUtility = (function(){
 
     return DateUtility;
 })();
+
 
 /**
  * Check width of text or text-like content if it were to fit on one line.
