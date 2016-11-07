@@ -28,27 +28,27 @@ var isServerSide = module.exports.isServerSide = function(){
 }
 
 var setJWTHeaders = function(xhr, headers = {}) {
-        if (typeof headers["Content-Type"] == 'undefined'){
-          headers["Content-Type"] = "application/json;charset=UTF-8";
-          headers['Accept'] = 'application/json';
-        }
+    if (typeof headers["Content-Type"] == 'undefined'){
+        headers["Content-Type"] = "application/json;charset=UTF-8";
+        headers['Accept'] = 'application/json';
+    }
 
-        var userInfo = localStorage.getItem('user_info') || null;
-        var idToken = userInfo ? JSON.parse(userInfo).id_token : null;
+    var userInfo = localStorage.getItem('user_info') || null;
+    var idToken = userInfo ? JSON.parse(userInfo).id_token : null;
 
-        //Add req'd headers if not exist already
-        if(userInfo && typeof headers['Authorization'] == 'undefined'){
-          headers['Authorization'] = 'Bearer '+idToken;
-        }
+    //Add req'd headers if not exist already
+    if(userInfo && typeof headers['Authorization'] == 'undefined'){
+        headers['Authorization'] = 'Bearer '+idToken;
+    }
 
-        // put everything in the header
-        var headerKeys = Object.keys(headers);
-        for (var i=0; i < headerKeys.length; i++){
-          xhr.setRequestHeader(headerKeys[i], headers[headerKeys[i]]);
-        }
+    // put everything in the header
+    var headerKeys = Object.keys(headers);
+    for (var i=0; i < headerKeys.length; i++){
+        xhr.setRequestHeader(headerKeys[i], headers[headerKeys[i]]);
+    }
 
-        return xhr;
-      }
+    return xhr;
+}
 
 /**
  * Check if process.env.NODE_ENV is not on 'production'.
