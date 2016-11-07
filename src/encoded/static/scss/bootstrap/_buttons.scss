@@ -133,6 +133,10 @@
   @include button-size($padding-xs-vertical, $padding-xs-horizontal, $font-size-small, $line-height-small, $border-radius-small);
 }
 
+.btn.btn-xs {
+  font-weight: 400;
+}
+
 
 // Block button
 // --------------------------------------------------

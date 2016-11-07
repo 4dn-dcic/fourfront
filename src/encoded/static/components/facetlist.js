@@ -3,7 +3,7 @@ var url = require('url');
 var queryString = require('query-string');
 var _ = require('underscore');
 var store = require('../store');
-var ajaxLoad = require('./objectutils').ajaxLoad;
+var { ajaxLoad, console } = require('./objectutils');
 
 var FacetList = module.exports.FacetList = React.createClass({
 

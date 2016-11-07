@@ -1,8 +1,5 @@
 @charset "UTF-8";
 
-/** Setup some variables for colors **/
-$expset-table-border-color : #eee;
-
 #layout {
 	height: auto !important;
     margin: 0 auto -$footerHeight;
@@ -37,11 +34,12 @@ $expset-table-border-color : #eee;
 	margin: 0;
 }
 
+.page-container,
 .item-page-container,
 .browse-page-container,
 .static-page {
 	/* Consistent margin between top navbar & content among pages */
-	margin-top: 18px;
+	margin-top: 23px;
 
 }
 
@@ -50,10 +48,17 @@ $expset-table-border-color : #eee;
 		HEADER & TOP AREAS (Navbar, Page Titles, etc.)
 ************************************************************/
 
+@media (min-width: $screen-md-min) {
+	.navbar-container.test-warning-visible {
+		margin-bottom: 37px;
+	}
+}
+
 h1.page-title {
 	/* Only set font-weight: 200 for h1,
 	   200 doesn't look as nice on smaller sizes. */
 	font-weight: 200;
+	margin-top: 14px;
 
 	.subtitle {
 		/* Subtitles which are part of the title, e.g. Experiment Set <.subtitle>4324ADADF</.subtitle> */
@@ -212,7 +217,7 @@ h1.page-title + .page-subtitle {
 .left { float: left; }
 .right { float: right; }
 
-@media screen and (max-width: 767px){
+@media screen and (max-width: $screen-xs-max){
 
 	.text-left-xs {
 		// Make text left-aligned for collapsed mobile view(s),
@@ -228,6 +233,58 @@ h1.page-title + .page-subtitle {
 @media screen and (min-width: $screen-sm-min)    { .col-sm-float-right { float : right; } }
 @media screen and (min-width: $screen-md-min)    { .col-md-float-right { float : right; } }
 @media screen and (min-width: $screen-lg-min)    { .col-lg-float-right { float : right; } }
+
+/** Equal Height Columns in Bootstrap Row on IE9+ **/
+
+.row.row-eq-height-xs {
+	display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+}
+
+@media screen and (min-width: $screen-sm-min) {
+	.row.row-eq-height-sm {
+		display: -webkit-box;
+		display: -webkit-flex;
+		display: -ms-flexbox;
+		display: flex;
+		.panel {
+			margin-top: 0;
+			margin-bottom: 0;
+			height: 100%;
+		}
+	}
+}
+
+@media screen and (min-width: $screen-md-min) {
+	.row.row-eq-height-md {
+		display: -webkit-box;
+		display: -webkit-flex;
+		display: -ms-flexbox;
+		display: flex;
+		.panel {
+			margin-top: 0;
+			margin-bottom: 0;
+			height: 100%;
+		}
+	}
+}
+
+@media screen and (min-width: $screen-lg-min) {
+	.row.row-eq-height-lg {
+		display: -webkit-box;
+		display: -webkit-flex;
+		display: -ms-flexbox;
+		display: flex;
+		.panel {
+			margin-top: 0;
+			margin-bottom: 0;
+			height: 100%;
+		}
+	}
+}
+
 
 
 .off-screen {
@@ -282,7 +339,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 .item-page-heading {
 	/* Extending Bootstrap's .flexcol-heading */
-	border-radius: 3px;
+	border-radius: $border-radius-base;
 	margin-left: 0;
 	margin-right: 0;
 	box-sizing: border-box;
@@ -467,70 +524,97 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 
 .item-page-container .info-area {
-	margin-top: 19px;
-	/* margin-bottom: 4px; */
-	/*
-	&:after {
-		content : "";
-		display : block;
-		position: relative;
-		border-bottom: 1px solid #ddd;
-		margin: 0 10px;
+	margin-top: 24px;
+}
+
+.formatted-info-panel {
+	padding : 0 10px 12px;
+	/* border-bottom: 1px solid #e2e2e2; */
+	margin-bottom: 5px;
+
+	/* Adjustments based on available props, ToDo: .no-title */
+
+	&.has-border {
+		padding : 8px 18px 15px;
 	}
-	*/
 
-	.info-panel {
-		padding : 4px 10px 12px;
-		/* border-bottom: 1px solid #e2e2e2; */
-		margin-bottom: 5px;
+	&.no-icon {
+		padding-bottom : 4px;
+		margin-bottom: 0;
 
-		> h6 {
-			margin : 0 0 7px /* -3px -> */ -8px;
+		.details-col {
+			padding-left: 0;
+		}
+
+	}
+
+	> h6 {
+		margin : 0 0 7px /* -3px -> */ -8px;
+		font-weight: 500;
+		color: #646464;
+
+		&:after {
+			content : "\f105";
+			font-family: "FontAwesome";
+			padding-left: 6px;
+		}
+
+	}
+
+	&.loading > .row {
+		opacity : 1;
+	}
+
+	&.loaded > .row {
+		opacity : 0;
+		transition: opacity 0s;
+	}
+
+	&.loaded.transitioned > .row {
+		opacity : 1;
+		transition: opacity .5s;
+	}
+
+	.row .icon-container {
+		max-width: 50px;
+	}
+
+	h5 {
+		margin-bottom: 0;
+		margin-top: 2px;
+		font-weight: 600;
+		/* white-space: nowrap; */
+		overflow: hidden;
+		text-overflow: ellipsis;
+
+		a {
+			/* display: block; */
+			overflow: inherit;
+			text-overflow: inherit;
+		}
+
+		&.no-link {
 			font-weight: 500;
-			color: #646464;
-
-			&:after {
-				content : "\f105";
-				font-family: "FontAwesome";
-				padding-left: 6px;
-			}
-
 		}
 
-		h5 {
-			margin-bottom: 0;
-			margin-top: 2px;
-			font-weight: 600;
-			/* white-space: nowrap; */
-			overflow: hidden;
-			text-overflow: ellipsis;
+	}
 
-			a {
-				display: block;
-				overflow: inherit;
-				text-overflow: inherit;
-			}
+	div.more-details {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
 
+	.icon-container {
+		text-align: center;
+		padding-top: 4px;
+		font-size: 20px;
+		margin-bottom: -10px;
+		
+		&.col-xs-2 {
+			padding-right: 0px;
+			padding-left: 5px;
 		}
-
-		div.more-details {
-			white-space: nowrap;
-			overflow: hidden;
-			text-overflow: ellipsis;
-		}
-
-		.icon-container {
-			text-align: center;
-			padding-top: 4px;
-			font-size: 20px;
-			margin-bottom: -10px;
-			
-			&.col-xs-2 {
-				padding-right: 0px;
-				padding-left: 5px;
-			}
-		}
-
 	}
 
 }
@@ -570,6 +654,190 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	*/
 }
 
+/**********************************************************
+		User Profile Page
+***********************************************************/
+
+.page-container > .row.first-row {
+	margin-top: 29px;
+}
+
+.panel.user-info,
+.panel.user-work-info {
+
+	margin-bottom: 0;
+
+	.row.profile-field-entry {
+		padding-bottom: 5px;
+
+		label, #email {
+			font-weight: 500;
+		}
+
+		.not-set {
+			color: #bbb; 
+		}
+	}
+
+	.row.profile-field-entry > ul {
+		margin: 0;
+
+	 	> li {
+			list-style-position: inside;
+
+			&.submit_for-item > i.icon {
+				position: relative;
+				top: 1px;
+				color: #d2d2d2;
+			}
+		}
+	}
+
+	.formatted-info-panel {
+
+		&:not(.no-details){
+			min-height: 41px;
+		}
+
+		/* When in list (maybe ToDo: li > .formatted-info-panel) ... */
+		&.no-details.no-icon.no-label {
+			display: inline-block;
+			padding: 0;
+			vertical-align: text-bottom;
+		}
+
+		.block-title,
+		.block-title a {
+			font-weight: 500;
+		}
+	}
+
+}
+
+.panel.user-info {
+	/* for fun - comment out bottom transform in Inspect Element */
+	transform: rotateZ(0deg) scale3d(1, 1, 1) translateX(0);
+    opacity: 1;
+	left: 0px;
+	transition: transform 1.2s ease-out, opacity 1.5s ease-out, left 1.2s ease-out;
+	position: relative;
+	z-index: 2;
+	background-color: #fff;
+
+	&.transition { transform: rotateZ(-900deg) scale3d(0.1, 0.1, 0.1) translateX(-1200px); opacity: 0; left: -900px; }
+
+	.user-title-container {
+		margin-bottom: 20px;
+		border-bottom: 1px solid #eee;
+	}
+
+	.user-title {
+		margin-top: 0px;
+		margin-bottom: 0px;
+		padding-top: 2px;
+		padding-bottom: 17px;
+		font-weight: 300;
+		font-size: 2.6rem;
+	}
+
+	@media screen and (min-width: $screen-sm-min){ 
+		.user-title {
+			padding-top: 15px;
+			height: 85px;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+	}
+
+	@media screen and (max-width: $screen-xs-max){
+		.user-title {
+			font-size: 2rem;
+			font-weight: 400;
+		}
+	}
+
+	img.gravatar {
+		width: 70px;
+		height: 70px;
+		float: right;
+		border-radius: $border-radius-base;
+	}
+
+	@media screen and (max-width: $screen-xs-max){
+		img.gravatar {
+			width: 94px; /* Account for border */
+			height: 70px;
+			position: relative;
+			z-index: 2;
+			margin-bottom: -30px;
+			margin-top: 5px;
+			border-left: 24px solid #FFF;
+		}
+	}
+
+}
+
+.panel.user-work-info {
+
+	> .block-title {
+		margin-bottom: 20px;
+		padding-bottom: 15px;
+		border-bottom: 1px solid #eee;
+		padding-top: 0;
+		
+		> i.icon.icon-fw {
+			margin-right: 5px;
+			font-size: 1.5rem;
+		}
+	}
+
+}
+
+.access-keys-container {
+	padding-top: 15px;
+
+	> h3 {
+		
+		margin-bottom: 17px;
+		/*
+	    padding-bottom: 17px;
+    	border-bottom: 1px solid #eee;
+		*/
+	}
+
+	table.access-keys-table {
+		margin-bottom: 20px;
+		
+		tr {
+			/*
+			&:nth-child(2n-1) {
+				background-color: #f8f8f8;
+			}
+			*/
+			td {
+				border-bottom: 1px solid #eee;
+				&.access-key-buttons {
+					width: 140px;
+					.btn.btn-xs {
+						margin: 0 4px;
+					}
+				}
+			}
+		}
+	}
+
+	#add-access-key.btn{
+		float: right;
+		min-width: 180px;
+	}
+
+	.no-access-keys > hr:first-child {
+		margin-top: 0;
+		margin-bottom: 17px;
+	}
+
+}
 
 /* *********************************************************
 		CARL'S LOGIN BOX
@@ -802,6 +1070,8 @@ p, input {
 	}
 }
 
+/** Primarily for Browse Table / View **/
+
 .exptype-box{
 
 	//display: none; /* TEMPORARY - FOR ALIGNMENT */
@@ -818,12 +1088,18 @@ p, input {
 	}
 }
 
-.expset-panel {
-	margin: 0px !important;
-	>div>.panel-body{
-		padding-right: 0px;
-		padding-left: 40px;
+.expset-table-container {
+
+	.expset-panel {
+		margin: 0px;
+		border: none;
+
+		>div>.panel-body{
+			padding-right: 0px;
+			padding-left: 40px;
+		}
 	}
+
 }
 
 .expset-button{
@@ -831,8 +1107,6 @@ p, input {
 	text-align: center;
 	box-shadow: none !important;
 }
-
-/** Primarily for Browse Table / View **/
 
 .expset-result-table-fix {
 	&.overflowing:after {

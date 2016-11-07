@@ -62,23 +62,24 @@ def static_resources(config):
     config.add_view(favicon, route_name='favicon.ico')
 
     # Robots.txt
-    robots_txt_path_prefix = '/static/'
+    robots_txt_path = None
+    if config.registry.settings.get('testing') in [True, 'true', 'True']:
+        robots_txt_path = '/static/dev-robots.txt'
+    else:
+        robots_txt_path = '/static/robots.txt'
+
     if config.route_prefix:
-        robots_txt_path_prefix = '/%s%s' % (config.route_prefix, robots_txt_path_prefix)
-    config.add_route('robots.txt', '/robots.txt')
+        robots_txt_path = '/%s%s' % (config.route_prefix, robots_txt_path)
+
+    config.add_route('robots.txt-conditional', '/robots.txt')
 
     def robots_txt(request):
-        robots_txt_path = None
-        if '4dnucleome.org' not in request.domain:
-            robots_txt_path = robots_txt_path_prefix + 'dev-robots.txt'
-        else:
-            robots_txt_path = robots_txt_path_prefix + 'robots.txt'
         subreq = request.copy()
         subreq.path_info = robots_txt_path
         response = request.invoke_subrequest(subreq)
         return response
 
-    config.add_view(robots_txt, route_name='robots.txt')
+    config.add_view(robots_txt, route_name='robots.txt-conditional')
 
 
 
