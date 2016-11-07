@@ -317,7 +317,6 @@ def basic_auth_check(username, password, request):
              permission='impersonate')
 def impersonate_user(request):
     """As an admin, impersonate a different user."""
-    import pdb; pdb.set_trace()
     userid = request.validated['userid']
     users = request.registry[COLLECTIONS]['user']
 
@@ -329,7 +328,10 @@ def impersonate_user(request):
     if user.properties.get('status') != 'current':
         raise ValidationFailure('body', ['userid'], 'User is not enabled.')
 
-    user_properties = request.embed('/session-properties', as_user=userid)
+    user_actions = calculate_properties(users[userid], request, category='user_action')
+    user_properties = {
+        'user_actions': [v for k, v in sorted(user_actions.items(), key=itemgetter(0))]
+    }
 
     #make a key
     registry = request.registry
