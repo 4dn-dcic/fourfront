@@ -70,7 +70,8 @@ var App = React.createClass({
             dropdownComponent: undefined,
             content: undefined,
             session: false,
-            user_actions: []
+            user_actions: [],
+            authLoading : false
         };
     },
 
@@ -204,6 +205,7 @@ var App = React.createClass({
             }
         }
         if(idToken){ // if JWT present, try to authenticate
+            this.setState({ authLoading: true });
             this.fetch('/login', {
                 method: 'POST',
                 headers: {
@@ -222,6 +224,12 @@ var App = React.createClass({
                     localStorage.setItem("user_info", JSON.stringify(response));
                 }
                 session = true;
+                this.setState({ session: session }, ()=>{
+                    this.navigate('', {'inPlace':true}, ()=>{
+                        // In callback, b/c might take second or few to reload page.
+                        this.setState({ authLoading : false });
+                    });
+                });
             }, error => {
                 //error, clear localStorage and session
                 if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
@@ -243,10 +251,14 @@ var App = React.createClass({
         }else{
             query_href = this.props.href;
         }
-        this.setState({session: session});
-        store.dispatch({
-            type: {'href':query_href}
-        });
+        if (this.state.session != session){
+            this.setState({ session: session });
+        }
+        if (query_href != this.props.href){
+            store.dispatch({
+                type: {'href':query_href}
+            });
+        }
         if (this.historyEnabled) {
             var data = this.props.context;
             try {
@@ -457,7 +469,7 @@ var App = React.createClass({
         return true;
     },
 
-    navigate: function (href, options) {
+    navigate: function (href, options, callback) {
         // options.skipRequest only used by collection search form
         // options.replace only used handleSubmit, handlePopState, handlePersonaLogin
         options = options || {};
@@ -486,6 +498,8 @@ var App = React.createClass({
         }
 
         var request = this.props.contextRequest;
+
+        console.log('navigate() > ',request);
 
         if (request && this.requestCurrent) {
             // Abort the current request, then remember we've aborted the request so that we
@@ -547,6 +561,11 @@ var App = React.createClass({
                 window.history.pushState(null, '', href + fragment);
             }
             dispatch_dict.href = href + fragment;
+
+            if (typeof callback == 'function'){
+                callback(response);
+            }
+
             return response;
         })
         .then(this.receiveContextResponse);
@@ -604,7 +623,7 @@ var App = React.createClass({
     },
 
     render: function() {
-        console.log('render app');
+        console.log('render app', this);
         var context = this.props.context;
         var content;
         var href_url = url.parse(this.props.href);
@@ -660,7 +679,7 @@ var App = React.createClass({
         }else if(context.code && context.code == 403){
             if(context.title && (context.title == 'Login failure' || context.title == 'no access')){
                 status = 'invalid_login';
-            }else if(context.title && context.title == 'Forbidden'){
+            }else if(context.title && context.title == 'Forbidden' && !this.state.authLoading){
                 status = 'forbidden';
             }
         }
@@ -689,6 +708,7 @@ var App = React.createClass({
                         context={context}
                         expSetFilters={this.props.expSetFilters}
                         expIncompleteFacets={this.props.expIncompleteFacets}
+                        authLoading={this.state.authLoading}
                     />
                 );
                 title = context.title || context.name || context.accession || context['@id'];
@@ -697,7 +717,15 @@ var App = React.createClass({
                 } else {
                     title = portal.portal_title;
                 }
-            }else{
+            } else if (this.state.authLoading) {
+                // Temporary, doesn't actually show for most pages (as they have context &--> ContentView)
+                content = (
+                    <div>
+                        <h1 class="page-title">Logging In</h1>
+                        <h3>Please wait...</h3>
+                    </div>
+                );
+            } else {
                 // Handle the case where context is not loaded correctly
                 content = <ErrorPage status={null}/>;
                 title = 'Error';
