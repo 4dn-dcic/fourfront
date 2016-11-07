@@ -365,7 +365,7 @@ var ExperimentSetHeader = React.createClass({
                         { this.parsedExperimentSetType() }
                         { this.parsedStatus() }
                     </h5>
-                </div>  
+                </div>
 
                 <ExperimentSetHeaderBar description={ this.props.context.description } />
 

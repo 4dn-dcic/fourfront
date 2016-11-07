@@ -98,7 +98,7 @@ var patchedConsole = module.exports.console = (function(){
 })();
 
 
-var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET', fallback = null, data = null){
+var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET', fallback = null, data = null, headers = {}){
     if (typeof window == 'undefined') return null;
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
@@ -120,9 +120,23 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
             }
         }
     };
+    
     xmlhttp.open(method, url, true);
-    xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+
+    // Add req'd headers if not exist already
+    if (typeof headers["Content-Type"] == 'undefined'){
+        headers["Content-Type"] = "application/json;charset=UTF-8";
+    }
+
+    // ToDO : if (typeof headers['JWT token'] == 'undefined') put it in.
+
+    var headerKeys = Object.keys(headers);
+    for (var i=0; i < headerKeys.length; i++){
+        xmlhttp.setRequestHeader(headerKeys[i], headers[headerKeys[i]]);
+    }
+    
     (patchedConsole || console).log('___DATA___',data);
+
     if(data){
         xmlhttp.send(data);
     }else{
@@ -139,9 +153,12 @@ var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = {
         };
         xhr.onerror = reject;
         xhr.open(method, url, true);
+        
+        // Add req'd headers if not exist already
         if (typeof headers["Content-Type"] == 'undefined'){
             headers["Content-Type"] = "application/json;charset=UTF-8";
         }
+        
         var headerKeys = Object.keys(headers);
         for (var i=0; i < headerKeys.length; i++){
             xhr.setRequestHeader(headerKeys[i], headers[headerKeys[i]]);
@@ -229,16 +246,21 @@ var DateUtility = module.exports.DateUtility = (function(){
      * @param {string} timestamp - Timestamp as provided by server output. No timezone corrections currently.
      * @param {string} [formatType] - Preset format to use. Ignored if customOutputFormat is provided. Defaults to 'date-md', e.g. "October 31st, 2016".
      * @param {string} [dateTimeSeparator] - Separator between date & time if both are in preset formattype. Defaults to " ".
+     * @param {boolean} [localize] - Output in local timezone instead of UTC.
      * @param {string} [customOutputFormat] - Custom format to use in lieu of formatType.
      * @return {string} Prettified date/time output.
      */
-    DateUtility.format = function(timestamp, formatType = 'date-md', dateTimeSeparator = " ", customOutputFormat = null){
+    DateUtility.format = function(timestamp, formatType = 'date-md', dateTimeSeparator = " ", localize = false, customOutputFormat = null){
         
         var outputFormat;
         if (customOutputFormat) {
             outputFormat = customOutputFormat;
         } else {
             outputFormat = DateUtility.preset(formatType, dateTimeSeparator);
+        }
+        
+        if (localize){
+            return moment.utc(timestamp).local().format(outputFormat);
         }
 
         return moment.utc(timestamp).format(outputFormat);
