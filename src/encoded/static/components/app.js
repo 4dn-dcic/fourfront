@@ -15,6 +15,7 @@ var browse = require('./browse');
 var origin = require('../libs/origin');
 var serialize = require('form-serialize');
 var { ajaxLoad, ajaxPromise, console } = require('./objectutils');
+var jwt = require('jsonwebtoken');
 var dispatch_dict = {}; //used to store value for simultaneous dispatch
 
 var portal = {
@@ -316,6 +317,18 @@ var App = React.createClass({
             if(localStorage && localStorage.user_info){
                 var userInfo = JSON.parse(localStorage.getItem('user_info'));
                 userActions = userInfo.user_actions;
+                // inflexible removal of impersonate_user from userActions
+                // if user != 4dndcic@gmail.command
+                // TODO: considering changing snovault
+                if(userActions.length > 1){
+                    var decoded =jwt.decode(userInfo.id_token);
+                    var email = decoded.email;
+                    for(var i = 0; i < userActions.length; i++){
+                        if(email != '4dndcic@gmail.com' && userActions[i].id == "impersonate"){
+                            userActions.splice(i,1);
+                        }
+                    }
+                }
                 session = true;
             }
         }
