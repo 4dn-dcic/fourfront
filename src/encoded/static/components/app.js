@@ -222,6 +222,7 @@ var App = React.createClass({
                     localStorage.setItem("user_info", JSON.stringify(response));
                 }
                 session = true;
+                this.navigate('', {'inPlace':true});
             }, error => {
                 //error, clear localStorage and session
                 if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
@@ -237,13 +238,13 @@ var App = React.createClass({
 
             });
         }
+        this.setState({session: session});
         var query_href;
         if(document.querySelector('link[rel="canonical"]')){
             query_href = document.querySelector('link[rel="canonical"]').getAttribute('href');
         }else{
             query_href = this.props.href;
         }
-        this.setState({session: session});
         store.dispatch({
             type: {'href':query_href}
         });

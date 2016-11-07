@@ -30,7 +30,7 @@ var isServerSide = module.exports.isServerSide = function(){
 var setJWTHeaders = function(xhr, headers = {}) {
         if (typeof headers["Content-Type"] == 'undefined'){
           headers["Content-Type"] = "application/json;charset=UTF-8";
-          headers['Accept'] = 'aplication/json';
+          headers['Accept'] = 'application/json';
         }
 
         var userInfo = localStorage.getItem('user_info') || null;
@@ -120,7 +120,7 @@ var patchedConsole = module.exports.console = (function(){
 })();
 
 
-var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET', fallback = null, data = null){
+var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET', fallback = null, data = null, headers = {}){
     if (typeof window == 'undefined') return null;
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
