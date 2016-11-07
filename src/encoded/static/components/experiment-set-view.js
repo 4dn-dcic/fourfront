@@ -194,14 +194,16 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         }
 
         // Uh-oh! ExperimentSet award exists but doesn't match that of any experiments'.
-        // Perhaps fallback to using AJAX. Lol.
-        if (typeof window != 'undefined' && propertyID && !propertyInfo && allowAjaxFallback) {
-            // throw new Error(propertyName + " " + propertyID + " not found in ExperimentSet " + this.props.context.accession + " experiments.");
-            FormattedInfoBlock.ajaxPropertyDetails.call(this, propertyID, propertyName);
-        } else {
-            return propertyInfo;
+        // Perhaps fallback to using AJAX.
+        if (!propertyInfo && propertyID){
+            console.warn("ExperimentSetView > details_" + propertyName + " could not be gotten from available data.");
+            if (typeof window != 'undefined' && allowAjaxFallback) {
+                console.warn("ExperimentSetView > Reverting to AJAX.");
+                FormattedInfoBlock.ajaxPropertyDetails.call(this, propertyID, propertyName);
+            }
         }
 
+        return propertyInfo;
     },
 
     render: function() {
