@@ -11,7 +11,7 @@ jest.dontMock('underscore');
 
 
 describe('Testing item.js', function() {
-    var React, Search, testSearch, searchLoc, TestUtils, FetchContext, context, schemas, _, Wrapper;
+    var React, Search, testSearch, TestUtils, FetchContext, context, schemas, _, Wrapper;
 
     beforeEach(function() {
         React = require('react');
@@ -19,7 +19,6 @@ describe('Testing item.js', function() {
         _ = require('underscore');
         Search = require('../search').Search;
         context = require('../testdata/expt_search');
-        searchLoc
         Wrapper = React.createClass({
             childContextTypes: {
                 location_href: React.PropTypes.string,
