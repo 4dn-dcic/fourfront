@@ -51,14 +51,14 @@ var AuditIndicators = module.exports.AuditIndicators = React.createClass({
     contextTypes: {
         auditDetailOpen: React.PropTypes.bool,
         auditStateToggle: React.PropTypes.func,
-        session: React.PropTypes.object,
+        session: React.PropTypes.bool,
         hidePublicAudits: React.PropTypes.bool
     },
 
     render: function() {
         var auditCounts = {};
         var audits = this.props.audits;
-        var loggedIn = this.context.session && this.context.session['auth.userid'];
+        var loggedIn = this.context.session;
 
         if ((!this.context.hidePublicAudits || loggedIn) && audits && Object.keys(audits).length) {
             // Sort the audit levels by their level number, using the first element of each warning category
@@ -104,7 +104,7 @@ var AuditIndicators = module.exports.AuditIndicators = React.createClass({
 var AuditDetail = module.exports.AuditDetail = React.createClass({
     contextTypes: {
         auditDetailOpen: React.PropTypes.bool,
-        session: React.PropTypes.object
+        session: React.PropTypes.bool
     },
 
     render: function() {
@@ -114,7 +114,7 @@ var AuditDetail = module.exports.AuditDetail = React.createClass({
         if (this.context.auditDetailOpen) {
             // Sort the audit levels by their level number, using the first element of each warning category
             var sortedAuditLevelNames = _(Object.keys(auditLevels)).sortBy(level => -auditLevels[level][0].level);
-            var loggedIn = this.context.session && this.context.session['auth.userid'];
+            var loggedIn = this.context.session;
 
             // First loop by audit level, then by audit group
             return (
@@ -152,7 +152,7 @@ var AuditGroup = module.exports.AuditGroup = React.createClass({
     },
 
     contextTypes: {
-        session: React.PropTypes.object
+        session: React.PropTypes.bool
     },
 
     getInitialState: function() {
@@ -174,7 +174,7 @@ var AuditGroup = module.exports.AuditGroup = React.createClass({
         var levelClass = 'audit-level-' + auditLevelName;
         var level = auditLevelName.toLowerCase();
         var categoryName = group[0].category.uppercaseFirstChar();
-        var loggedIn = this.context.session && this.context.session['auth.userid'];
+        var loggedIn = this.context.session;
 
         return (
             <div className={alertClass}>
