@@ -26,22 +26,21 @@ class Biosource(Item):
     embedded = ["individual", "individual.organism"]
 
     def _update(self, properties, sheets=None):
-        # populate cell_line_termid by what is in cell_line field
+        #populate cell_line_termid by what is in cell_line field
         name2id = {
             'H1-hESC': 'EFO_0003042',
             'GM12878': 'EFO_0002784',
             'IMR-90': 'EFO_0001196',
             'K562': 'EFO_0002067',
             'HEK293': 'EFO_0001182',
-            'HAP-1': 'EFO_0007598',
-            'U2OS': 'EFO_0002869',
             'H9': 'EFO_0003045',
+            'U2OS': 'EFO_0002869',
         }
         if 'cell_line' in properties:
             if properties['cell_line'] in name2id:
                 properties['cell_line_termid'] = name2id[properties['cell_line']]
-                # for now call to super lives here as only need update if cell_line is in dict
-                super(Biosource, self)._update(properties, sheets)
+
+        super(Biosource, self)._update(properties, sheets)
 
     @calculated_property(schema={
         "title": "Biosource name",
