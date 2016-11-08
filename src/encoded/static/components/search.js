@@ -229,6 +229,8 @@ var Term = search.Term = React.createClass({
             width:  Math.ceil( (count/this.props.total) * 100) + "%"
         };
         var selected = termSelected(term, field, filters);
+        if(selected){
+        }
         var href;
         if (selected && !this.props.canDeselect) {
             href = null;
@@ -238,10 +240,10 @@ var Term = search.Term = React.createClass({
             href = this.props.searchBase + field + '=' + encodeURIComponent(term).replace(/%20/g, '+');
         }
         return (
-            <li id={selected ? "selected" : null} key={term}>
+            <li className={selected ? 'selected-facet' : ""} id={selected ? "selected" : null} key={term}>
                 <span className="bar" style={barStyle}></span>
                 {field === 'lot_reviews.status' ? <span className={globals.statusClass(term, 'indicator pull-left facet-term-key icon icon-circle')}></span> : null}
-                <a id={selected ? "selected" : null} href={href} onClick={href ? this.props.onFilter : null}>
+                <a className="facet-link" id={selected ? "selected" : null} href={href} onClick={href ? this.props.onFilter : null}>
                     <span className="pull-left facet-selector">{selected && this.props.canDeselect ? <i className="icon icon-times-circle-o"></i> : ''}</span>
                     <span className="facet-item">
                         {em ? <em>{title}</em> : <span>{title}</span>}
