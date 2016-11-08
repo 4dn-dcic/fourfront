@@ -229,14 +229,7 @@ var App = React.createClass({
                 if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
                     localStorage.removeItem("user_info");
                 }
-                if(error.code || error.status){
-                    store.dispatch({
-                        type: {'context':error}
-                    });
-                }else{ // JWTs must be unequal
-                    this.navigate('', {'inPlace':true});
-                }
-
+                this.navigate('', {'inPlace':true});
             });
         }
         this.setState({session: session});
@@ -317,18 +310,6 @@ var App = React.createClass({
             if(localStorage && localStorage.user_info){
                 var userInfo = JSON.parse(localStorage.getItem('user_info'));
                 userActions = userInfo.user_actions;
-                // inflexible removal of impersonate_user from userActions
-                // if user != 4dndcic@gmail.command
-                // TODO: considering changing snovault
-                if(userActions.length > 1){
-                    var decoded =jwt.decode(userInfo.id_token);
-                    var email = decoded.email;
-                    for(var i = 0; i < userActions.length; i++){
-                        if(email != '4dndcic@gmail.com' && userActions[i].id == "impersonate"){
-                            userActions.splice(i,1);
-                        }
-                    }
-                }
                 session = true;
             }
         }

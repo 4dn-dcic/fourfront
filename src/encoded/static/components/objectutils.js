@@ -129,7 +129,7 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
                 if (typeof callback == 'function'){
                     callback(JSON.parse(xhr.responseText));
                 }
-            } else if (xmlhttp.status == 400) {
+            } else if (xhr.status == 400) {
                 (patchedConsole || console).error('There was an error 400');
                 if (typeof fallback == 'function'){
                     fallback();
