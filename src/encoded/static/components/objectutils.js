@@ -243,7 +243,6 @@ var DateUtility = module.exports.DateUtility = (function(){
      * @return {string} Prettified date/time output.
      */
     DateUtility.format = function(timestamp, formatType = 'date-md', dateTimeSeparator = " ", customOutputFormat = null){
-        if (!DateUtility.dateClassExists) return timestamp;
         
         var outputFormat;
         if (customOutputFormat) {
@@ -252,7 +251,7 @@ var DateUtility = module.exports.DateUtility = (function(){
             outputFormat = DateUtility.preset(formatType, dateTimeSeparator);
         }
 
-        return moment(timestamp).format(outputFormat);
+        return moment.utc(timestamp).format(outputFormat);
     };
 
     return DateUtility;
