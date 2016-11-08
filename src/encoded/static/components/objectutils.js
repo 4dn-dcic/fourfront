@@ -30,7 +30,7 @@ var isServerSide = module.exports.isServerSide = function(){
 var setJWTHeaders = function(xhr, headers = {}) {
     if (typeof headers["Content-Type"] == 'undefined'){
         headers["Content-Type"] = "application/json;charset=UTF-8";
-        headers['Accept'] = 'application/json';
+        headers.Accept = 'application/json';
     }
 
     var userInfo = localStorage.getItem('user_info') || null;
