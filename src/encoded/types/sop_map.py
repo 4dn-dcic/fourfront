@@ -11,7 +11,7 @@ from .base import (
 
 @collection(
     name='sop_maps',
-    unique_key='mapid',
+    unique_key='sop_map:mapid',
     properties={
         'title': 'SOP and field mappings',
         'description': 'Listing of SOPs with the default values for fields from them',
@@ -20,8 +20,8 @@ class SopMap(Item):
     """The SopFields class that lists the default values of fields if the SOP is followed."""
 
     item_type = 'sop_map'
-    #name_key = 'mapid'
     schema = load_schema('encoded:schemas/sop_map.json')
+    name_key = 'mapid'
 
     def _update(self, properties, sheets=None):
         delim = '_'
