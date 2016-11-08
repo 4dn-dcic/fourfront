@@ -52,11 +52,30 @@
               "type": "string",
               "linkTo": "Individual"
           },
+          "modifications": {
+              "title": "Stable genomic modifications",
+              "description": "Expression or targeting vectors stably transfected to generate Crispr'ed or other genomic modification",
+              "type": "array",
+              "default": [],
+              "uniqueItems": true,
+              "items": {
+                  "title": "Modifications",
+                  "description": "A single stable genomic modification of the biosource.",
+                  "type":  "string",
+                  "linkTo": "Modification"
+              }
+          },
           "cell_line": {
               "title": "Cell line name",
               "description": "Ontology term for the cell line used.",
               "type":  "string",
               "comment": "enforce EFO ontology term for a cell line?"
+          },
+          "cell_line_termid": {
+              "title": "Cell Line Term ID",
+              "description": "EFO term ID for cell line",
+              "type": "string",
+              "permission": "import_items"
           },
           "cell_line_tier": {
               "title": "Cell line tier",

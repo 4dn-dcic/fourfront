@@ -35,6 +35,16 @@
                 {"format": "date"}
             ]
         },
+        "culture_harvest_date": {
+            "title": "Culture harvest date",
+            "description": "The date the culture was harvested.",
+            "comment": "Date can be submitted in as YYYY-MM-DD or YYYY-MM-DDTHH:MM:SSTZD ((TZD is the time zone designator; use Z to express time in UTC or for time expressed in local time add a time zone offset from UTC +HH:MM or -HH:MM).",
+            "type": "string",
+            "anyOf": [
+                {"format": "date-time"},
+                {"format": "date"}
+            ]
+        },
         "culture_duration":{
             "title":"Culture duration",
             "description":"Time cells in culture since first thaw",
