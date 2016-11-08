@@ -11,6 +11,11 @@ var { ItemStore } = require('./lib/store');
 var { ajaxLoad, DateUtility, console, isServerSide } = require('./objectutils');
 var { FormattedInfoBlock } = require('./experiment-set-view');
 // var navigation = require('./navigation');
+var Modal = require('react-bootstrap').Modal;
+var Alert = require('react-bootstrap').Alert;
+var ItemStore = require('./lib/store').ItemStore;
+var ajaxLoad = require('./objectutils').ajaxLoad;
+var jwt = require('jsonwebtoken');
 // var Breadcrumbs = navigation.Breadcrumbs;
 
 
@@ -43,7 +48,7 @@ var AccessKeyTable = React.createClass({
 
     contextTypes: {
         fetch: React.PropTypes.func,
-        session: React.PropTypes.object
+        session: React.PropTypes.bool
     },
 
     getInitialState: function() {
@@ -95,14 +100,14 @@ var AccessKeyTable = React.createClass({
     },
 
     render: function() {
-        console.log('AccessKeyTable: ', this); 
+        console.log('AccessKeyTable: ', this);
 
         return (
             <div className="access-keys-table-container clearfix">
                 { this.state.access_keys.length ?
                     this.renderTable()
-                    : 
-                    <div className="no-access-keys"><hr/>No access keys set.</div> 
+                    :
+                    <div className="no-access-keys"><hr/>No access keys set.</div>
                 }
                 <a href="#add-access-key" id="add-access-key" className="btn btn-success" onClick={this.create}>Add Access Key</a>
                 {this.state.modal}
@@ -113,7 +118,18 @@ var AccessKeyTable = React.createClass({
     create: function(e) {
         e.preventDefault();
         var item = {};
-        item['user'] = this.context.session['auth.userid'];
+        if(this.context.session){
+            if(typeof(Storage) !== 'undefined'){
+                if(localStorage && localStorage.user_info){
+                    var idToken = JSON.parse(localStorage.getItem('user_info')).id_token;
+                    var decoded = jwt.decode(idToken);
+                    item['user'] = decoded.email_verified ? decoded.email : "";
+                }else{
+                    console.log("Access key aborted");
+                    return;
+                }
+            }
+        }
         this.store.create('/access-keys/', item);
     },
 
@@ -194,7 +210,7 @@ var User = module.exports.User = React.createClass({
         },
         gravatar : function(email, size=null, className=null){
             return (
-                <img 
+                <img
                     src={ User.buildGravatarURL(email, size)}
                     className={'gravatar ' + className}
                     title="Obtained via Gravatar"
@@ -270,7 +286,7 @@ var User = module.exports.User = React.createClass({
                         </div>
 
                     </div>
-                    
+
                     {user.access_keys ?
                         <div className="access-keys-container">
                             <h3 className="text-300">Access Keys</h3>
@@ -300,8 +316,8 @@ var ProfileContactFields = React.createClass({
                         <label htmlFor="email">Email</label>
                     </div>
                     <div id="email" className="col-sm-9">
-                        { user.email ? 
-                            <a href={'mailto:' + user.email}>{user.email}</a> 
+                        { user.email ?
+                            <a href={'mailto:' + user.email}>{user.email}</a>
                             :
                             <span className="not-set">No email address</span>
                         }
@@ -331,7 +347,7 @@ var ProfileContactFields = React.createClass({
                         { user.skype || <span className="not-set">No skype ID</span> }
                     </div>
                 </div>
-                
+
             </div>
         );
     }
@@ -507,14 +523,25 @@ var ImpersonateUserForm = React.createClass({
     handleSubmit: function(data) {
         var url = "/impersonate-user";
         var jsonData = JSON.stringify({'userid':data});
-        var callbackFxn = function() {
+        var callbackFxn = function(payload) {
             alert('Success! ' + data + ' is being impersonated.');
+            console.log(JSON.stringify(payload))
+            if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
+                localStorage.setItem("user_info", JSON.stringify(payload));
+            }
             this.context.navigate('/');
         }.bind(this);
         var fallbackFxn = function() {
             alert('Impersonation unsuccessful.\nPlease check to make sure the provided email is correct.');
         };
-        ajaxLoad(url, callbackFxn, 'POST', fallbackFxn, jsonData);
+
+        var userInfo = localStorage.getItem('user_info') || null;
+        var idToken = userInfo ? JSON.parse(userInfo).id_token : null;
+        var reqHeaders = {'Accept': 'application/json'};
+        if(userInfo){
+            reqHeaders['Authorization'] = 'Bearer '+idToken;
+        }
+        ajaxLoad(url, callbackFxn, 'POST', fallbackFxn, jsonData, reqHeaders);
     }
 });
 globals.content_views.register(ImpersonateUserForm, 'Portal', 'impersonate-user');
