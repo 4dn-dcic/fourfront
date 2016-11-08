@@ -69,7 +69,21 @@
               "title": "Cell line name",
               "description": "Ontology term for the cell line used.",
               "type":  "string",
-              "comment": "enforce EFO ontology term for a cell line?"
+              "enum": [
+                  "H1-hESC",
+                  "GM12878",
+                  "IMR-90",
+                  "HFF-hTERT",
+                  "F121-9-CASKx129",
+                  "K562",
+                  "RPE-hTERT",
+                  "HEK293",
+                  "HAP-1",
+                  "U2OS",
+                  "WTC-11",
+                  "H9",
+                  "F123-CASKx129"
+              ]
           },
           "cell_line_termid": {
               "title": "Cell Line Term ID",
@@ -81,6 +95,7 @@
               "title": "Cell line tier",
               "description": "Tier into which the cell line has been classified",
               "type": "string",
+              "permission": "import_items",
               "enum": [
                   "Tier 1",
                   "Tier 2",
