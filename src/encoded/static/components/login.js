@@ -8,7 +8,8 @@ var Login = React.createClass({
     contextTypes: {
     	fetch: React.PropTypes.func,
     	session: React.PropTypes.bool,
-        navigate: React.PropTypes.func
+        navigate: React.PropTypes.func,
+        updateUserInfo: React.PropTypes.func
     },
 
     componentWillMount: function () {
@@ -62,6 +63,7 @@ var Login = React.createClass({
             }
             if(typeof document !== 'undefined'){
                 // TODO: should logout redirect to home?
+                this.context.updateUserInfo();
                 this.context.navigate('', {'inPlace':true});
             }
         });
@@ -92,6 +94,7 @@ var Login = React.createClass({
             }else{
                 alert('Please upgrade your browser to one that supports local storage!');
             }
+            this.context.updateUserInfo();
             this.context.navigate('', {'inPlace':true});
         }, error => {
             console.log("got an error: ", error.description);
