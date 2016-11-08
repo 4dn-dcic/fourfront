@@ -222,17 +222,16 @@ var App = React.createClass({
                 if(typeof(Storage) !== 'undefined'){
                     localStorage.setItem("user_info", JSON.stringify(response));
                 }
-                session = true;
+                this.setState({session: true});
                 this.navigate('', {'inPlace':true});
             }, error => {
                 //error, clear localStorage and session
                 if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
                     localStorage.removeItem("user_info");
                 }
-                this.navigate('', {'inPlace':true});
             });
         }
-        this.setState({session: session});
+
         var query_href;
         if(document.querySelector('link[rel="canonical"]')){
             query_href = document.querySelector('link[rel="canonical"]').getAttribute('href');
@@ -287,7 +286,6 @@ var App = React.createClass({
         options = _.extend({credentials: 'same-origin'}, options);
         var http_method = options.method || 'GET';
         var headers = options.headers = _.extend({}, options.headers);
-        // TODO: add JWT here
         // Strip url fragment.
         var url_hash = url.indexOf('#');
         if (url_hash > -1) {
