@@ -208,7 +208,11 @@ def get_jwt(request):
     try:
         return request.headers['Authorization'][7:]
     except (ValueError, TypeError, KeyError):
-        return None
+        try:
+            return request.cookies['jwtToken']
+        except:
+            pass
+    return None
 
 
 @view_config(route_name='login', request_method='POST',
