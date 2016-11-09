@@ -72,7 +72,6 @@ var Login = React.createClass({
         if (!idToken) return;
 
         JWT.save(idToken); // We just got token from Auth0 so probably isn't outdated.
-        this.lock.hide();
 
         this.context.fetch('/login', {
             method: 'POST',
@@ -84,6 +83,7 @@ var Login = React.createClass({
             body: JSON.stringify({id_token: idToken})
         })
         .then(response => {
+            this.lock.hide();
             if (response.code || response.status) throw response;
             return response;
         })
