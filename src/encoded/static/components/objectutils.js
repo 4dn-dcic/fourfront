@@ -17,7 +17,7 @@ var SingleTreatment = module.exports.SingleTreatment = function(treatment) {
 /**
  * Check if JS is processing on serverside, vs in browser (clientside).
  * Adapted from react/node_modules/fbjs/lib/ExecutionEnvironment.canUseDOM()
- * 
+ *
  * @return {boolean} - True if processing on serverside.
  */
 var isServerSide = module.exports.isServerSide = function(){
@@ -27,10 +27,32 @@ var isServerSide = module.exports.isServerSide = function(){
     return false;
 }
 
+var setJWTHeaders = function(xhr, headers = {}) {
+    if (typeof headers["Content-Type"] == 'undefined'){
+        headers["Content-Type"] = "application/json;charset=UTF-8";
+        headers.Accept = 'application/json';
+    }
+
+    var userInfo = localStorage.getItem('user_info') || null;
+    var idToken = userInfo ? JSON.parse(userInfo).id_token : null;
+
+    //Add req'd headers if not exist already
+    if(userInfo && typeof headers['Authorization'] == 'undefined'){
+        headers['Authorization'] = 'Bearer '+idToken;
+    }
+
+    // put everything in the header
+    var headerKeys = Object.keys(headers);
+    for (var i=0; i < headerKeys.length; i++){
+        xhr.setRequestHeader(headerKeys[i], headers[headerKeys[i]]);
+    }
+
+    return xhr;
+}
 
 /**
  * Check if process.env.NODE_ENV is not on 'production'.
- * 
+ *
  * @return {boolean} - True if NODE_ENV != 'production'.
  */
 var isDebugging = module.exports.isDebugging = function(){
@@ -41,14 +63,14 @@ var isDebugging = module.exports.isDebugging = function(){
     return true;
 }
 
-/** 
+/**
  * Custom patched console for debugging. Only print out statements if debugging/development environment.
  * Prevent potential issues where console might not be available (earlier IE).
  */
 var patchedConsole = module.exports.console = (function(){
 
     if (!isServerSide() && window.patchedConsole) return window.patchedConsole; // Re-use instance if available.
-    
+
     var PatchedConsole = function(){
         this._initArgs = arguments; // arguments variable contains any arguments passed to function in an array.
         this._enabled = true; // Default
@@ -98,16 +120,16 @@ var patchedConsole = module.exports.console = (function(){
 })();
 
 
-var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET', fallback = null, data = null){
+var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET', fallback = null, data = null, headers = {}){
     if (typeof window == 'undefined') return null;
-    var xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
-            if (xmlhttp.status == 200) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState == XMLHttpRequest.DONE ) {
+            if (xhr.status == 200) {
                 if (typeof callback == 'function'){
-                    callback(JSON.parse(xmlhttp.responseText));
+                    callback(JSON.parse(xhr.responseText));
                 }
-            } else if (xmlhttp.status == 400) {
+            } else if (xhr.status == 400) {
                 (patchedConsole || console).error('There was an error 400');
                 if (typeof fallback == 'function'){
                     fallback();
@@ -120,13 +142,12 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
             }
         }
     };
-    xmlhttp.open(method, url, true);
-    xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    (patchedConsole || console).log('___DATA___',data);
+    xhr.open(method, url, true);
+    xhr = setJWTHeaders(xhr, headers);
     if(data){
-        xmlhttp.send(data);
+        xhr.send(data);
     }else{
-        xmlhttp.send();
+        xhr.send();
     }
 }
 
@@ -139,14 +160,7 @@ var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = {
         };
         xhr.onerror = reject;
         xhr.open(method, url, true);
-        if (typeof headers["Content-Type"] == 'undefined'){
-            headers["Content-Type"] = "application/json;charset=UTF-8";
-        }
-        var headerKeys = Object.keys(headers);
-        for (var i=0; i < headerKeys.length; i++){
-            xhr.setRequestHeader(headerKeys[i], headers[headerKeys[i]]);
-        }
-    
+        xhr = setJWTHeaders(xhr, headers);
         if(data){
             xhr.send(data);
         }else{
@@ -155,6 +169,21 @@ var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = {
     });
 }
 
+/**
+ * Format a timestamp to pretty output. Uses moment.js, which uses Date() object in underlying code.
+ *
+ * @param {string} timestamp - Timestamp as provided by server output. No timezone corrections currently.
+ * @param {string} [outputFormat] - Defaults to "MMMM Do, YYYY" for, e.g. "October 31st, 2016".
+ * @return {string} Prettified date/time output.
+ */
+var parseDateTime = module.exports.parseDateTime = function(timestamp, outputFormat = "MMMM Do, YYYY"){
+    if (!Date) {
+        return timestamp; // Date object may or may not be available server-side.
+    } else {
+        var moment = require('moment'); // require allows to load code in conditionally, so lets do that until more funcs require moment.
+        return moment(timestamp).format(outputFormat);
+    }
+};
 
 var DateUtility = module.exports.DateUtility = (function(){
 
@@ -182,9 +211,9 @@ var DateUtility = module.exports.DateUtility = (function(){
     /**
      * Presets for date/time output formats for 4DN.
      * Uses bootstrap grid sizing name convention, so may utilize with responsiveGridState
-     * to set responsively according to screen size, e.g. in a (debounced/delayed) window 
+     * to set responsively according to screen size, e.g. in a (debounced/delayed) window
      * resize event listener.
-     * 
+     *
      * @see responsiveGridState
      * @param {string} [formatType] - Key for date/time format to display. Defaults to 'date-md'.
      * @param {string} [dateTimeSeparator] - Separator between date and time if formatting a date-time. Defaults to ' '.
@@ -236,14 +265,14 @@ var DateUtility = module.exports.DateUtility = (function(){
     /**
      * Format a timestamp to pretty output. Uses moment.js, which uses Date() object in underlying code.
      * @see DateUtility.preset
-     * 
+     *
      * @param {string} timestamp - Timestamp as provided by server output. No timezone corrections currently.
      * @param {string} [formatType] - Preset format to use. Defaults to 'date-md', e.g. "October 31st, 2016".
      * @param {string} [customOutputFormat] - Custom format to use in lieu of formatType.
      * @return {string} Prettified date/time output.
      */
     DateUtility.format = function(timestamp, formatType = 'date-md', dateTimeSeparator = " ", customOutputFormat = null){
-        
+
         var outputFormat;
         if (customOutputFormat) {
             outputFormat = customOutputFormat;
@@ -296,10 +325,10 @@ var textContentWidth = module.exports.textContentWidth = function(
 
 /**
  * Get the width of what a 12-column bootstrap section would be in current viewport size.
- * Keep widths in sync with stylesheet, e.g. 
- * $container-tablet - $grid-gutter-width, 
+ * Keep widths in sync with stylesheet, e.g.
+ * $container-tablet - $grid-gutter-width,
  * $container-desktop - $grid-gutter-width, and
- * $container-large-desktop - $grid-gutter-width 
+ * $container-large-desktop - $grid-gutter-width
  * in src/encoded/static/scss/bootstrap/_variables.scss.
  *
  * @return {integer}

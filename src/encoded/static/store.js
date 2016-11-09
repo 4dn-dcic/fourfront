@@ -30,15 +30,6 @@ var inline = function(state='', action) {
     }
 }
 
-var session_cookie = function(state='', action) {
-    if (action.type && _.contains(Object.keys(action.type), 'session_cookie')){
-        var val = action.type.session_cookie ? action.type.session_cookie : state;
-        return val
-    }else{
-        return state
-    }
-}
-
 var contextRequest = function(state={}, action) {
     if (action.type && _.contains(Object.keys(action.type), 'contextRequest')){
         var val = action.type.contextRequest ? action.type.contextRequest : state;
@@ -80,7 +71,6 @@ var reducers = combineReducers({
     href,
     context,
     inline,
-    session_cookie,
     contextRequest,
     slow,
     expSetFilters,

@@ -1,13 +1,15 @@
 'use strict';
 var React = require('react');
 var store = require('../store');
+var jwt = require('jsonwebtoken');
 
 // Component that contains auth0 functions
 var Login = React.createClass({
     contextTypes: {
     	fetch: React.PropTypes.func,
-    	session: React.PropTypes.object,
-        navigate: React.PropTypes.func
+    	session: React.PropTypes.bool,
+        navigate: React.PropTypes.func,
+        updateUserInfo: React.PropTypes.func
     },
 
     componentWillMount: function () {
@@ -23,7 +25,9 @@ var Login = React.createClass({
         this.lock = new lock_('DPxEwsZRnKDpk0VfVAxrStRKukN14ILB',
             'hms-dbmi.auth0.com', {
             auth: {
-            	redirect: false
+            	redirect: false,
+                responseType: 'token',
+                params: {scope: 'openid email'}
             },
             socialButtonStyle: 'big',
             languageDictionary: {
@@ -44,33 +48,38 @@ var Login = React.createClass({
 
     logout: function (e) {
         e.preventDefault();
+        var userInfo = localStorage.getItem('user_info') || "";
+        var idToken = JSON.parse(userInfo).id_token;
         console.log('Logging out');
-        var session = this.context.session;
-        if (!(session && session['auth.userid'])) return;
+        if (!this.context.session) return;
         this.context.fetch('/logout?redirect=false', {
             headers: {'Accept': 'application/json',
-                'Content-Type': 'application/json'}
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer '+idToken}
         })
         .then(data => {
             if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
-                localStorage.removeItem("user_actions");
+                localStorage.removeItem("user_info");
             }
             if(typeof document !== 'undefined'){
-                this.context.navigate('/');
+                // TODO: should logout redirect to home?
+                this.context.updateUserInfo();
+                this.context.navigate('', {'inPlace':true});
             }
         });
     },
 
     handleAuth0Login: function(authResult, retrying){
-        var accessToken = authResult.accessToken;
-        if (!accessToken) return;
+        var idToken = authResult.idToken; //JWT
+        if (!idToken) return;
         this.context.fetch('/login', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer '+idToken
             },
-            body: JSON.stringify({accessToken: accessToken})
+            body: JSON.stringify({id_token: idToken})
         })
         .then(response => {
             this.lock.hide();
@@ -78,10 +87,14 @@ var Login = React.createClass({
             return response;
         })
         .then(response => {
-            // localStorage only holds strings!
+            //Keep JWT in localStorage so that it persists across refresh
+            //In the future, store user_actions in jwt and use jwt.decode to extract
             if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
-                localStorage.setItem("user_actions", JSON.stringify(response.user_actions));
+                localStorage.setItem("user_info", JSON.stringify(response));
+            }else{
+                alert('Please upgrade your browser to one that supports local storage!');
             }
+            this.context.updateUserInfo();
             this.context.navigate('', {'inPlace':true});
         }, error => {
             console.log("got an error: ", error.description);
@@ -94,8 +107,7 @@ var Login = React.createClass({
     },
 
     render: function () {
-        var session = this.context.session;
-        var toRender = (session && session['auth.userid']) ?
+        var toRender = this.context.session ?
             <a href="" className="global-entry" onClick={this.logout}>Log out</a>
             :
             <a id="loginbtn" href="" className="global-entry" onClick={this.showLock}>Log in</a>;

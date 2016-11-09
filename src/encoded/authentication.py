@@ -3,6 +3,8 @@ import os
 from operator import itemgetter
 from datetime import datetime
 import time
+import jwt
+from base64 import b64decode
 
 from passlib.context import CryptContext
 from pyramid.authentication import (
@@ -129,6 +131,7 @@ class LoginDenied(HTTPForbidden):
 _fake_user = object()
 
 
+
 class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
 
     login_path = '/login'
@@ -139,56 +142,73 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
         So basically this is used to do a login, instead of the actual
         login view... not sure why, but yeah..
         '''
-        # if we aren't posting to login just return None
-        if request.method != self.method or request.path != self.login_path:
-            return None
 
-        # otherwise do a login, if we aren't already logged in
+
+        # we will cache it for the life of this request, cause pyramids does traversal
         cached = getattr(request, '_auth0_authenticated', _fake_user)
         if cached is not _fake_user:
             return cached
 
-        try:
-            access_token = request.json['accessToken']
-        except (ValueError, TypeError, KeyError):
+        # try to find the token in the request (should be in the header)
+        id_token = get_jwt(request)
+        if not id_token:
+            # can I thrown an 403 here?
             if self.debug:
                 self._log('Missing assertion.', 'unauthenticated_userid', request)
-            request._auth0_authenticated = None
             return None
 
-        user_info = None
-        try:
-            user_url = "https://{domain}/userinfo?access_token={access_token}" \
-                        .format(domain='hms-dbmi.auth0.com',
-                                access_token=access_token)
-            resp  = requests.get(user_url)
-            while resp.status_code == 429:
-                reset_time = datetime.utcfromtimestamp(float(resp.headers['X-RateLimit-Reset']))
-                timeDiff = reset_time - datetime.utcnow()
-                # to many requests... slow down and try again
-                print("too many requests.. waiting a while")
-                time.sleep(timeDiff.seconds + 1)
-                resp  = requests.get(user_url)
-
-            user_info = resp.json()
-        except Exception as e:
-            if self.debug:
-                self.log(('Invalid assertion: %s (%s)', (e, type(e).__name__)),
-                         'unathenticated_userid', request)
-                return None
-
-        # for strange unknow reasons sometimes user_info comes back empty
-        if user_info and user_info['email_verified'] is True:
-            email = request._auth0_authenticted = user_info['email'].lower()
-            return email
-        else:
+        user_info = self.get_token_info(id_token, request)
+        if not user_info:
             return None
+
+        email = request._auth0_authenticated = user_info['email'].lower()
+        return email
 
     def remember(self, request, principal, **kw):
         return []
 
     def forget(self, request):
         return []
+
+
+    def get_token_info(self, token, request):
+        '''
+        given a jwt get token info from auth0, handle
+        retrying and what not
+        '''
+        try:
+            # lets see if we have an auth0 token or our own
+            registry = request.registry
+            auth0_client = registry.settings.get('auth0.client')
+            auth0_secret = registry.settings.get('auth0.secret')
+            if auth0_client and auth0_secret:
+                # leeway accounts for clock drift between us and auth0
+                payload = jwt.decode(token, b64decode(auth0_secret, '-_'),
+                                     audience=auth0_client, leeway=30)
+                if 'email' in payload and payload.get('email_verified') is True:
+                    return payload
+
+            else: # we don't have the key, let auth0 do the work for us
+                # else this is an auth0 token, lets get user info
+                user_url = "https://{domain}/tokeninfo".format(domain='hms-dbmi.auth0.com')
+                resp  = requests.post(user_url, {'id_token':token})
+                payload = resp.json()
+                if 'email' in payload and payload.get('email_verified') is True:
+                    return payload
+
+        except Exception as e:
+            print('Invalid assertion: %s (%s)', (e, type(e).__name__))
+            return None
+
+        print("didn't get email or email is not verified")
+        return None
+
+
+def get_jwt(request):
+    try:
+        return request.headers['Authorization'][7:]
+    except (ValueError, TypeError, KeyError):
+        return None
 
 
 @view_config(route_name='login', request_method='POST',
@@ -203,17 +223,16 @@ def login(request):
         namespace, userid = login.split('.', 1)
 
     if namespace != 'auth0':
-        request.session.invalidate()
-        request.response.headerlist.extend(forget(request))
+        #request.session.invalidate()
+        #request.response.headerlist.extend(forget(request))
         raise LoginDenied()
 
-    request.session.invalidate()
-    request.session.get_csrf_token()
-    request.response.headerlist.extend(remember(request, 'mailto.' + userid))
+    #request.session.invalidate()
+    #request.response.headerlist.extend(remember(request, 'mailto.' + userid))
 
     properties = request.embed('/session-properties', as_user=userid)
-    if 'auth.userid' in request.session:
-        properties['auth.userid'] = request.session['auth.userid']
+    properties['id_token'] = get_jwt(request)
+
     return properties
 
 
@@ -221,9 +240,9 @@ def login(request):
              permission=NO_PERMISSION_REQUIRED, http_cache=0)
 def logout(request):
     """View to forget the user"""
-    request.session.invalidate()
-    request.session.get_csrf_token()
-    request.response.headerlist.extend(forget(request))
+    #request.session.invalidate()
+    #request.response.headerlist.extend(forget(request))
+
     # call auth0 to logout
     auth0_logout_url = "https://{domain}/v2/logout" \
                 .format(domain='hms-dbmi.auth0.com')
@@ -250,12 +269,12 @@ def session_properties(request):
     user_actions = calculate_properties(user, request, category='user_action')
 
     properties = {
-        'user': request.embed(request.resource_path(user)),
+        #'user': request.embed(request.resource_path(user)),
         'user_actions': [v for k, v in sorted(user_actions.items(), key=itemgetter(0))]
     }
 
-    if 'auth.userid' in request.session:
-        properties['auth.userid'] = request.session['auth.userid']
+    #if 'auth.userid' in request.session:
+    #    properties['auth.userid'] = request.session['auth.userid']
 
     return properties
 
@@ -309,12 +328,25 @@ def impersonate_user(request):
     if user.properties.get('status') != 'current':
         raise ValidationFailure('body', ['userid'], 'User is not enabled.')
 
-    request.session.invalidate()
-    request.session.get_csrf_token()
-    request.response.headerlist.extend(remember(request, 'mailto.' + userid))
-    user_properties = request.embed('/session-properties', as_user=userid)
-    if 'auth.userid' in request.session:
-        user_properties['auth.userid'] = request.session['auth.userid']
+    user_actions = calculate_properties(users[userid], request, category='user_action')
+    user_properties = {
+        'user_actions': [v for k, v in sorted(user_actions.items(), key=itemgetter(0))]
+    }
+    # pop off impersonate user action if not admin
+    user_properties['user_actions'] = [x for x in user_properties['user_actions'] if (x['id'] and x['id'] != 'impersonate')]
+    # make a key
+    registry = request.registry
+    auth0_client = registry.settings.get('auth0.client')
+    auth0_secret = registry.settings.get('auth0.secret')
+    if not(auth0_client and auth0_secret):
+        raise HTTPForbidden(title="no keys to impersonate user")
+
+    payload = {'email': userid,
+               'email_verified': True,
+               'aud': auth0_client,
+              }
+    id_token = jwt.encode(payload, b64decode(auth0_secret, '-_'), algorithm='HS256')
+    user_properties['id_token'] = id_token.decode('utf-8')
 
     return user_properties
 

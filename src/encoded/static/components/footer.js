@@ -3,7 +3,7 @@ var React = require('react');
 
 var Footer = React.createClass({
     contextTypes: {
-        session: React.PropTypes.object
+        session: React.PropTypes.bool
     },
 
     propTypes: {
