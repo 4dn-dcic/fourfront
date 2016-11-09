@@ -654,6 +654,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	*/
 }
 
+
 /**********************************************************
 		User Profile Page
 ***********************************************************/
@@ -667,50 +668,8 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 	margin-bottom: 0;
 
-	.row.profile-field-entry {
-
-		label {
-			margin-bottom: 0;
-		}
-
-		label, #email {
-			font-weight: 500;
-		}
-
-		.value {
-			word-break : break-all;
-			padding-bottom: 10px;
-
-			.not-set {
-				color: #bbb; 
-			}
-
-			.edit-button {
-				color: #eee;
-			}
-
-			&:hover .edit-button {
-				color : #bbb;
-				&:hover {
-					color: #000;
-				}
-			}
-
-		}
-	}
-
-	.row.profile-field-entry > ul {
-		margin: 0;
-
-	 	> li {
-			list-style-position: inside;
-
-			&.submit_for-item > i.icon {
-				position: relative;
-				top: 1px;
-				color: #d2d2d2;
-			}
-		}
+	#email {
+		font-weight: 500;
 	}
 
 	.formatted-info-panel {
@@ -746,24 +705,30 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 	&.transition { transform: rotateZ(-900deg) scale3d(0.1, 0.1, 0.1) translateX(-1200px); opacity: 0; left: -900px; }
 
-	.user-title-container {
+	.user-title-row-container {
 		margin-bottom: 20px;
 		border-bottom: 1px solid #eee;
+	}
+
+	.user-title-col {
+		padding-bottom: 17px;
 	}
 
 	.user-title {
 		margin-top: 0px;
 		margin-bottom: 0px;
-		padding-top: 2px;
-		padding-bottom: 17px;
 		font-weight: 300;
 		font-size: 2.6rem;
 	}
 
-	@media screen and (min-width: $screen-sm-min){ 
-		.user-title {
+	@media screen and (min-width: $screen-sm-min){
+
+		.user-title-col {
 			padding-top: 15px;
 			height: 85px;
+		}
+
+		.user-title {
 			white-space: nowrap;
 			overflow: hidden;
 			text-overflow: ellipsis;
@@ -771,6 +736,11 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	}
 
 	@media screen and (max-width: $screen-xs-max){
+
+		.user-title-col {
+			padding-top: 2px;
+		}
+
 		.user-title {
 			font-size: 2rem;
 			font-weight: 400;

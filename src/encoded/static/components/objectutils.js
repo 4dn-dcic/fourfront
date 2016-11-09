@@ -129,13 +129,13 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
                 if (typeof callback == 'function'){
                     callback(JSON.parse(xhr.responseText));
                 }
-            } else if (xmlhttp.status == 400) {
+            } else if (xhr.status == 400) {
                 (patchedConsole || console).error('There was an error 400');
                 if (typeof fallback == 'function'){
                     fallback();
                 }
             } else {
-                (patchedConsole || console).error('something else other than 200 was returned');
+                (patchedConsole || console).error('Something else other than 200 was returned: ',JSON.parse(xhr.responseText));
                 if (typeof fallback == 'function'){
                     fallback();
                 }
@@ -169,8 +169,45 @@ var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = {
         }else{
             xhr.send();
         }
+        return xhr;
     });
 }
+
+/**
+ * Find property within an object using a propertyName in object dot notation.
+ * Recursively travels down object tree following dot-delimited property names.
+ * If any node is an array, will return array of results.
+ * 
+ * @param {Object} object - Item to traverse or find propertyName in.
+ * @param {string|string[]} propertyName - (Nested) property in object to retrieve, in dot notation or ordered array.
+ * @return {*} - Value corresponding to propertyName.
+ */
+
+var getNestedProperty = module.exports.getNestedProperty = function(object, propertyName){
+
+    if (typeof propertyName === 'string') propertyName = propertyName.split('.'); 
+    if (!Array.isArray(propertyName)) throw new Error('Using improper propertyName in objectutils.getNestedProperty.');
+
+    return (function findNestedValue(currentNode, fieldHierarchyLevels, level = 0){
+        if (level == fieldHierarchyLevels.length) return currentNode;
+
+        if (Array.isArray(currentNode)){
+            var arrayVals = [];
+            for (var i = 0; i < currentNode.length; i++){
+                arrayVals.push( findNestedValue(currentNode[i], fieldHierarchyLevels, level) );
+            }
+            return arrayVals;
+        } else {
+            return findNestedValue(
+                currentNode[fieldHierarchyLevels[level]],
+                fieldHierarchyLevels,
+                ++level
+            );
+        }
+    })(object, propertyName);
+
+};
+
 
 var DateUtility = module.exports.DateUtility = (function(){
 

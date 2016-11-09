@@ -3,7 +3,7 @@ var url = require('url');
 var queryString = require('query-string');
 var _ = require('underscore');
 var store = require('../store');
-var { ajaxLoad, console } = require('./objectutils');
+var { ajaxLoad, getNestedProperty, console } = require('./objectutils');
 
 var FacetList = module.exports.FacetList = React.createClass({
 
@@ -36,25 +36,6 @@ var FacetList = module.exports.FacetList = React.createClass({
          */
         fillFacetTermsAndCountFromExps : function(incompleteFacets, exps){
 
-            // Recursively find Facet Term Value(s)
-            function findFacetValue(facetValue, fieldHierarchyLevels, level = 0){
-                if (level == fieldHierarchyLevels.length) return facetValue;
-
-                if (Array.isArray(facetValue)){
-                    var facetValues = [];
-                    for (var i = 0; i < facetValue.length; i++){
-                        facetValues.push( findFacetValue(facetValue[i], fieldHierarchyLevels, level) );
-                    }
-                    return facetValues;
-                } else {
-                    return findFacetValue(
-                        facetValue[fieldHierarchyLevels[level]],
-                        fieldHierarchyLevels,
-                        ++level
-                    );
-                }
-            };
-
             incompleteFacets.forEach(function(facet,i,a){
 
                 var fieldHierarchyLevels = facet.field.split('.'); // E.g. [biosample, biosource, individual,..]
@@ -63,7 +44,7 @@ var FacetList = module.exports.FacetList = React.createClass({
                 // Loop through experiments to find all terms and counts per term.
                 for (var i = 0; i < exps.length; i++){
 
-                    var facetTerm = findFacetValue(exps[i], fieldHierarchyLevels);
+                    var facetTerm = getNestedProperty(exps[i], fieldHierarchyLevels);
 
                     if (Array.isArray(facetTerm)) {
                         for (var j = 0; j < facetTerm.length; j++){
