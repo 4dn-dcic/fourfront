@@ -162,7 +162,7 @@ class ExperimentHiC(Experiment):
         suffnum = 1
         mapid = self.generate_mapid(experiment_type, suffnum)
         print(mapid)
-        bs = '4DNBS1234567'
+        #bs = '4DNBS1234567'
         while(True):
             m = self.collection.get(mapid)
             #m = self.collection.get(bs)
@@ -210,18 +210,3 @@ class ExperimentCaptureC(Experiment):
             de_name = de_props['name']
             sum_str += (' with ' + de_name)
         return sum_str
-
-    @calculated_property(schema={
-        "title": "SOP map",
-        "description": "The mapping of fields default values from SOP",
-        "type": "object",
-        "linkTo": "SopMap"
-    })
-    def sop_mapping(self, request, experiment_type='Undefined'):
-        pass
-        #sop_maps = self.collection.get('/sop_maps/')
-        #print(sop_maps)
-        # get the object with that uuid and embed it?
-        #if experiment_type in sop_maps:
-        #    uuid = sop_maps[experiment_type]
-        #    return request.embed('/sop_maps/' + uuid + '/', '@@object')
