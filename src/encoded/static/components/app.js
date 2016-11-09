@@ -70,7 +70,7 @@ var App = React.createClass({
             errors: [],
             dropdownComponent: undefined,
             content: undefined,
-            //session: !!(JWT.get('cookie')),
+            //session: !!(JWT.get('cookie')), // ToDo : Make this work for faster app state change on page load
             session: false,
             user_actions: []
         };
@@ -199,7 +199,7 @@ var App = React.createClass({
     authenticateUser : function(callback = null){
         // check existing user_info in local storage and authenticate
         var idToken = JWT.get();
-        if(idToken){ // if JWT present, but no session yet, try to authenticate
+        if(idToken){ // if JWT present, try to authenticate
             this.fetch('/login', {
                 method: 'POST',
                 headers: {

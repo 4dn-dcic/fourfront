@@ -48,7 +48,7 @@ var Login = React.createClass({
 
     logout: function (e) {
         e.preventDefault();
-        JWT.remove('any');
+        JWT.remove();
         console.log('Logging out');
         if (!this.context.session) return;
 
