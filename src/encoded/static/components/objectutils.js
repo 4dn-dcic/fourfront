@@ -27,9 +27,10 @@ var isServerSide = module.exports.isServerSide = function(){
     return false;
 }
 
+
 /**
  * Check if process.env.NODE_ENV is not on 'production'.
- * 
+ *
  * @return {boolean} - True if NODE_ENV != 'production'.
  */
 var isDebugging = module.exports.isDebugging = function(){
@@ -40,14 +41,14 @@ var isDebugging = module.exports.isDebugging = function(){
     return true;
 }
 
-/** 
+/**
  * Custom patched console for debugging. Only print out statements if debugging/development environment.
  * Prevent potential issues where console might not be available (earlier IE).
  */
 var patchedConsole = module.exports.console = (function(){
 
     if (!isServerSide() && window.patchedConsole) return window.patchedConsole; // Re-use instance if available.
-    
+
     var PatchedConsole = function(){
         this._initArgs = arguments; // arguments variable contains any arguments passed to function in an array.
         this._enabled = true; // Default
@@ -119,6 +120,7 @@ var setJWTHeaders = function(xhr, headers = {}) {
 
     return xhr;
 }
+
 
 var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET', fallback = null, data = null, headers = {}){
     if (typeof window == 'undefined') return null;
@@ -224,9 +226,9 @@ var DateUtility = module.exports.DateUtility = (function(){
     /**
      * Presets for date/time output formats for 4DN.
      * Uses bootstrap grid sizing name convention, so may utilize with responsiveGridState
-     * to set responsively according to screen size, e.g. in a (debounced/delayed) window 
+     * to set responsively according to screen size, e.g. in a (debounced/delayed) window
      * resize event listener.
-     * 
+     *
      * @see responsiveGridState
      * @param {string} [formatType] - Key for date/time format to display. Defaults to 'date-md'.
      * @param {string} [dateTimeSeparator] - Separator between date and time if formatting a date-time. Defaults to ' '.
@@ -278,7 +280,7 @@ var DateUtility = module.exports.DateUtility = (function(){
     /**
      * Format a timestamp to pretty output. Uses moment.js, which uses Date() object in underlying code.
      * @see DateUtility.preset
-     * 
+     *
      * @param {string} timestamp - Timestamp as provided by server output. No timezone corrections currently.
      * @param {string} [formatType] - Preset format to use. Ignored if customOutputFormat is provided. Defaults to 'date-md', e.g. "October 31st, 2016".
      * @param {string} [dateTimeSeparator] - Separator between date & time if both are in preset formattype. Defaults to " ".
@@ -286,8 +288,8 @@ var DateUtility = module.exports.DateUtility = (function(){
      * @param {string} [customOutputFormat] - Custom format to use in lieu of formatType.
      * @return {string} Prettified date/time output.
      */
+
     DateUtility.format = function(timestamp, formatType = 'date-md', dateTimeSeparator = " ", localize = false, customOutputFormat = null){
-        
         var outputFormat;
         if (customOutputFormat) {
             outputFormat = customOutputFormat;
@@ -345,10 +347,10 @@ var textContentWidth = module.exports.textContentWidth = function(
 
 /**
  * Get the width of what a 12-column bootstrap section would be in current viewport size.
- * Keep widths in sync with stylesheet, e.g. 
- * $container-tablet - $grid-gutter-width, 
+ * Keep widths in sync with stylesheet, e.g.
+ * $container-tablet - $grid-gutter-width,
  * $container-desktop - $grid-gutter-width, and
- * $container-large-desktop - $grid-gutter-width 
+ * $container-large-desktop - $grid-gutter-width
  * in src/encoded/static/scss/bootstrap/_variables.scss.
  *
  * @return {integer}

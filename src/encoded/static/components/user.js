@@ -100,8 +100,8 @@ var AccessKeyTable = React.createClass({
             <div className="access-keys-table-container clearfix">
                 { this.state.access_keys.length ?
                     this.renderTable()
-                    : 
-                    <div className="no-access-keys"><hr/>No access keys set.</div> 
+                    :
+                    <div className="no-access-keys"><hr/>No access keys set.</div>
                 }
                 <a href="#add-access-key" id="add-access-key" className="btn btn-success" onClick={this.create}>Add Access Key</a>
                 {this.state.modal}
@@ -204,7 +204,7 @@ var User = module.exports.User = React.createClass({
         },
         gravatar : function(email, size=null, className=null){
             return (
-                <img 
+                <img
                     src={ User.buildGravatarURL(email, size)}
                     className={'gravatar ' + className}
                     title="Obtained via Gravatar"
@@ -837,7 +837,8 @@ var BasicForm = React.createClass({
 
 var ImpersonateUserForm = React.createClass({
     contextTypes: {
-        navigate: React.PropTypes.func
+        navigate: React.PropTypes.func,
+        updateUserInfo: React.PropTypes.func
     },
 
     render: function() {
@@ -855,10 +856,10 @@ var ImpersonateUserForm = React.createClass({
         var jsonData = JSON.stringify({'userid':data});
         var callbackFxn = function(payload) {
             alert('Success! ' + data + ' is being impersonated.');
-            console.log(JSON.stringify(payload))
             if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
                 localStorage.setItem("user_info", JSON.stringify(payload));
             }
+            this.context.updateUserInfo();
             this.context.navigate('/');
         }.bind(this);
         var fallbackFxn = function() {

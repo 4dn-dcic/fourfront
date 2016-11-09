@@ -332,8 +332,9 @@ def impersonate_user(request):
     user_properties = {
         'user_actions': [v for k, v in sorted(user_actions.items(), key=itemgetter(0))]
     }
-
-    #make a key
+    # pop off impersonate user action if not admin
+    user_properties['user_actions'] = [x for x in user_properties['user_actions'] if (x['id'] and x['id'] != 'impersonate')]
+    # make a key
     registry = request.registry
     auth0_client = registry.settings.get('auth0.client')
     auth0_secret = registry.settings.get('auth0.secret')

@@ -15,6 +15,7 @@ var browse = require('./browse');
 var origin = require('../libs/origin');
 var serialize = require('form-serialize');
 var { ajaxLoad, ajaxPromise, console } = require('./objectutils');
+var jwt = require('jsonwebtoken');
 var dispatch_dict = {}; //used to store value for simultaneous dispatch
 
 var portal = {
@@ -87,7 +88,8 @@ var App = React.createClass({
         fetch: React.PropTypes.func,
         session: React.PropTypes.bool,
         navigate: React.PropTypes.func,
-        contentTypeIsJSON: React.PropTypes.func
+        contentTypeIsJSON: React.PropTypes.func,
+        updateUserInfo: React.PropTypes.func
     },
 
     // Retrieve current React context
@@ -103,7 +105,8 @@ var App = React.createClass({
             fetch: this.fetch,
             session: this.state.session,
             navigate: this.navigate,
-            contentTypeIsJSON: this.contentTypeIsJSON
+            contentTypeIsJSON: this.contentTypeIsJSON,
+            updateUserInfo: this.updateUserInfo
         };
     },
 
@@ -198,7 +201,6 @@ var App = React.createClass({
         globals.bindEvent(window, 'keydown', this.handleKey);
         // check existing user_info in local storage and authenticate
         var idToken;
-        var session = false;
         if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
             if(localStorage && localStorage.user_info){
                 idToken = JSON.parse(localStorage.getItem('user_info')).id_token;
@@ -223,42 +225,25 @@ var App = React.createClass({
                 if(typeof(Storage) !== 'undefined'){
                     localStorage.setItem("user_info", JSON.stringify(response));
                 }
-                session = true;
-                this.setState({ session: session }, ()=>{
-                    this.navigate('', {'inPlace':true}, ()=>{
-                        // In callback, b/c might take second or few to reload page.
-                        this.setState({ authLoading : false });
-                    });
-                });
+                this.updateUserInfo();
             }, error => {
                 //error, clear localStorage and session
                 if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
                     localStorage.removeItem("user_info");
                 }
-                if(error.code || error.status){
-                    store.dispatch({
-                        type: {'context':error}
-                    });
-                }else{ // JWTs must be unequal
-                    this.navigate('', {'inPlace':true});
-                }
-
+                this.updateUserInfo();
             });
         }
+
         var query_href;
         if(document.querySelector('link[rel="canonical"]')){
             query_href = document.querySelector('link[rel="canonical"]').getAttribute('href');
         }else{
             query_href = this.props.href;
         }
-        if (this.state.session != session){
-            this.setState({ session: session });
-        }
-        if (query_href != this.props.href){
-            store.dispatch({
-                type: {'href':query_href}
-            });
-        }
+        store.dispatch({
+            type: {'href':query_href}
+        });
         if (this.historyEnabled) {
             var data = this.props.context;
             try {
@@ -281,7 +266,6 @@ var App = React.createClass({
     },
 
     componentDidUpdate: function (prevProps, prevState) {
-        this.updateUserInfo(prevState.user_actions, prevState.session);
         var key;
         if (this.props) {
             for (key in this.props) {
@@ -304,7 +288,6 @@ var App = React.createClass({
         options = _.extend({credentials: 'same-origin'}, options);
         var http_method = options.method || 'GET';
         var headers = options.headers = _.extend({}, options.headers);
-        // TODO: add JWT here
         // Strip url fragment.
         var url_hash = url.indexOf('#');
         if (url_hash > -1) {
@@ -319,7 +302,7 @@ var App = React.createClass({
         return request;
     },
 
-    updateUserInfo: function(previousUA=[], previousSess={}){
+    updateUserInfo: function(){
         // get user actions (a function of log in) from local storage
         var userActions = [];
         var session = false;
@@ -330,7 +313,7 @@ var App = React.createClass({
                 session = true;
             }
         }
-        if (!_.isEqual(userActions, previousUA) || !_.isEqual(session, previousSess)){
+        if (!_.isEqual(userActions, this.state.user_actions) || !_.isEqual(session, this.state.session)){
             this.setState({user_actions:userActions, session:session});
         }
     },
