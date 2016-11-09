@@ -74,7 +74,7 @@
                   "GM12878",
                   "IMR-90",
                   "HFF-hTERT",
-                  "F121-9-CASKx129",
+                  "F121-9-CASTx129",
                   "K562",
                   "RPE-hTERT",
                   "HEK293",
@@ -82,7 +82,7 @@
                   "U2OS",
                   "WTC-11",
                   "H9",
-                  "F123-CASKx129"
+                  "F123-CASTx129"
               ]
           },
           "cell_line_termid": {

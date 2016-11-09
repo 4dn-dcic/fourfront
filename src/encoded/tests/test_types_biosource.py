@@ -17,7 +17,7 @@ def F123_biosource(testapp):
     item = {
         "accession": "4DNSR000AAQ2",
         "biosource_type": "stem cell",
-        "cell_line": "F123-CASKx129",
+        "cell_line": "F123-CASTx129",
     }
     return testapp.post_json('/biosource', item).json['@graph'][0]
 
@@ -62,16 +62,26 @@ def test_biosource_update_termids(testapp, cell_lines):
                 assert 'cell_line_termid' not in cell
 
 
-# data from test/datafixtures
+def test_biosource_update_cell_line_tier(testapp, biosources):
+    acc2tier = {'4DNSR000AAQ1': 'Tier 1', '4DNSR000AAQ2': 'Tier 2'}
+    for biosource in biosources:
+        acc = biosource.get('accession')
+        print(acc)
+        if acc in acc2tier:
+            print(biosource)
+            assert biosource['cell_line_tier'] == acc2tier[acc]
+        else:
+            assert 'cell_line_tier' not in biosource
+
+
 def test_calculated_biosource_name(testapp, biosources):
-    print(biosources)
     for biosource in biosources:
         biotype = biosource['biosource_type']
         name = biosource['biosource_name']
         if biotype == 'immortalized cell line':
             assert name == 'GM12878'
         if biotype == 'stem cell':
-            assert name == 'F123-CASKx129'
+            assert name == 'F123-CASTx129'
         if biotype == 'tissue':
             assert name == 'lung'
         if biotype == 'whole organisms':
