@@ -164,7 +164,7 @@ class ExperimentHiC(Experiment):
         print(mapid)
         #bs = '4DNBS1234567'
         while(True):
-            m = self.collection.get(mapid)
+            m = self.collection.get('ExperimentHiC_insituHi-C_1')
             #m = self.collection.get(bs)
             print(m)
             if not m:
