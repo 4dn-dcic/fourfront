@@ -63,6 +63,7 @@
     "query-string": "^4.1.0",
     "react": "^15.3.2",
     "react-bootstrap": "^0.30.3",
+    "react-cookie" : "^0.4.8",
     "react-dom": "^15.3.2",
     "react-redux": "^4.4.5",
     "redux": "^3.5.2",

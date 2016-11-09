@@ -14,7 +14,7 @@ var store = require('../store');
 var browse = require('./browse');
 var origin = require('../libs/origin');
 var serialize = require('form-serialize');
-var { ajaxLoad, ajaxPromise, console } = require('./objectutils');
+var { ajaxLoad, ajaxPromise, JWT, console } = require('./objectutils');
 var jwt = require('jsonwebtoken');
 var dispatch_dict = {}; //used to store value for simultaneous dispatch
 
@@ -66,11 +66,12 @@ var App = React.createClass({
     historyEnabled: !!(typeof window != 'undefined' && window.history && window.history.pushState),
 
     getInitialState: function() {
+        console.log(!!(JWT.get('cookie')));
         return {
             errors: [],
             dropdownComponent: undefined,
             content: undefined,
-            session: false,
+            session: !!(JWT.get('cookie')),
             user_actions: []
         };
     },
@@ -195,16 +196,9 @@ var App = React.createClass({
         }
     },
 
-    // Once the app component is mounted, bind keydowns to handleKey function
-    componentDidMount: function() {
-        globals.bindEvent(window, 'keydown', this.handleKey);
+    authenticateUser : function(callback = null){
         // check existing user_info in local storage and authenticate
-        var idToken;
-        if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
-            if(localStorage && localStorage.user_info){
-                idToken = JSON.parse(localStorage.getItem('user_info')).id_token;
-            }
-        }
+        var idToken = JWT.get();
         if(idToken){ // if JWT present, try to authenticate
             this.fetch('/login', {
                 method: 'POST',
@@ -220,18 +214,24 @@ var App = React.createClass({
                 return response;
             })
             .then(response => {
-                if(typeof(Storage) !== 'undefined'){
-                    localStorage.setItem("user_info", JSON.stringify(response));
-                }
-                this.updateUserInfo();
+                JWT.save(response.id_token);
+                JWT.saveUserInfoLocalStorage(response);
+                if (typeof callback === 'function') callback(response);
             }, error => {
                 //error, clear localStorage and session
-                if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
-                    localStorage.removeItem("user_info");
-                }
-                this.updateUserInfo();
+                JWT.remove();
+                if (typeof callback === 'function') callback(error);
             });
+            return idToken;
         }
+        return null;
+    },
+
+    // Once the app component is mounted, bind keydowns to handleKey function
+    componentDidMount: function() {
+        globals.bindEvent(window, 'keydown', this.handleKey);
+
+        this.authenticateUser(this.updateUserInfo);
 
         var query_href;
         if(document.querySelector('link[rel="canonical"]')){
