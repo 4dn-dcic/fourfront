@@ -199,10 +199,10 @@ def mboI(testapp, worthington_biochemical):
 @pytest.fixture
 def human_biosource(testapp, human_individual, worthington_biochemical):
     item = {
-        "description": "GM06990 cells",
+        "description": "GM12878 cells",
         "biosource_type": "immortalized cell line",
         "individual": human_individual['@id'],
-        "cell_line": "GM06990",
+        "cell_line": "GM12878",
         "biosource_vendor": worthington_biochemical['@id'],
         "status": "current"
     }
@@ -442,7 +442,7 @@ def document(testapp, lab, award):
 @pytest.fixture
 def human_biosample(testapp, human_biosource):
     item = {
-        "description": "GM06990 prepared for Hi-C",
+        "description": "GM12878 prepared for Hi-C",
         "biosource": [human_biosource['@id'], ],
         "status": "in review by lab"
         # "biosample_protocols": ["131106bc-8535-4448-903e-854af460b212"],
@@ -455,7 +455,7 @@ def human_biosample(testapp, human_biosource):
 @pytest.fixture
 def biosample_1(testapp, human_biosource):
     item = {
-        'description': "GM06990 prepared for Hi-C",
+        'description': "GM12878 prepared for Hi-C",
         'biosource': [human_biosource['@id'], ],
     }
     return testapp.post_json('/biosample', item).json['@graph'][0]
@@ -464,7 +464,7 @@ def biosample_1(testapp, human_biosource):
 @pytest.fixture
 def biosample_2(testapp, human_biosource):
     item = {
-        'description': "GM06990 prepared for Hi-C",
+        'description': "GM12878 prepared for Hi-C",
         'biosource': [human_biosource['@id'], ],
     }
     return testapp.post_json('/biosample', item).json['@graph'][0]

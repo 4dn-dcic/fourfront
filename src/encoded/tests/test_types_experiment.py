@@ -38,6 +38,6 @@ def test_experiment_set_update_experiment_sets(testapp, experiment_set, experime
 
 
 def test_calculated_experiment_summary(testapp, experiment, mboI):
-    summary = 'micro-C on GM06990 with MboI'
+    summary = 'micro-C on GM12878 with MboI'
     res = testapp.patch_json(experiment['@id'], {'digestion_enzyme': mboI['@id']}, status=200)
     assert res.json['@graph'][0]['experiment_summary'] == summary

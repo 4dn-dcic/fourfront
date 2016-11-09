@@ -1,7 +1,7 @@
 [
     {
         "uuid": "231111bc-8535-4448-903e-854af460b254",
-        "description": "GM06990 prepared for Hi-C",
+        "description": "GM12878 prepared for Hi-C",
         "biosource": ["331111bc-8535-4448-903e-854af460b254"],
         "biosample_protocols": ["131106bc-8535-4448-903e-854af460b244"],
         "cell_culture_details": "131106bc-8535-4448-903e-854af460b212",
@@ -15,7 +15,7 @@
     },
     {
         "uuid": "231111bc-8535-4448-903e-854af460ba4d",
-        "description": "GM06990 prepared for Hi-C",
+        "description": "GM12878 prepared for Hi-C",
         "biosource": ["331111bc-8535-4448-903e-854af46abcd4"],
         "biosample_protocols": ["131106bc-8535-4448-903e-854af460b244"],
         "modifications": ["431106bc-8535-4448-903e-854af460b265"],
@@ -23,7 +23,7 @@
     },
     {
         "uuid": "231111bc-8535-4448-903e-854af460c13f",
-        "description": "GM06990 prepared for Hi-C",
+        "description": "GM12878 prepared for Hi-C",
         "biosource": ["331111bc-8535-4448-903e-854af460b666"],
         "biosample_protocols": ["131106bc-8535-4448-903e-854af460b244"],
         "modifications": ["431106bc-8535-4448-903e-854af460b276"],
@@ -31,7 +31,7 @@
     },
     {
         "uuid": "231111bc-8535-4448-903e-854af460b255",
-        "description": "GM06990 prepared for Hi-C",
+        "description": "GM12878 prepared for Hi-C",
         "biosource": ["331111bc-8535-4448-903e-854af460b254"],
         "biosample_protocols": ["131106bc-8535-4448-903e-854af460b244"],
         "modifications": ["431106bc-8535-4448-903e-854af460b254"],
