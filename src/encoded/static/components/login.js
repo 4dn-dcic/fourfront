@@ -1,7 +1,7 @@
 'use strict';
 var React = require('react');
 var store = require('../store');
-var jwt = require('jsonwebtoken');
+var JWT = require('./objectutils').JWT;
 
 // Component that contains auth0 functions
 var Login = React.createClass({
@@ -48,19 +48,17 @@ var Login = React.createClass({
 
     logout: function (e) {
         e.preventDefault();
-        var userInfo = localStorage.getItem('user_info') || "";
-        var idToken = JSON.parse(userInfo).id_token;
+        JWT.remove('any');
         console.log('Logging out');
         if (!this.context.session) return;
+
         this.context.fetch('/logout?redirect=false', {
-            headers: {'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer '+idToken}
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
         })
         .then(data => {
-            if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
-                localStorage.removeItem("user_info");
-            }
             if(typeof document !== 'undefined'){
                 // TODO: should logout redirect to home?
                 this.context.updateUserInfo();
@@ -72,6 +70,10 @@ var Login = React.createClass({
     handleAuth0Login: function(authResult, retrying){
         var idToken = authResult.idToken; //JWT
         if (!idToken) return;
+
+        JWT.save(idToken); // We just got token from Auth0 so probably isn't outdated.
+        this.lock.hide();
+
         this.context.fetch('/login', {
             method: 'POST',
             headers: {
@@ -82,18 +84,11 @@ var Login = React.createClass({
             body: JSON.stringify({id_token: idToken})
         })
         .then(response => {
-            this.lock.hide();
             if (response.code || response.status) throw response;
             return response;
         })
         .then(response => {
-            //Keep JWT in localStorage so that it persists across refresh
-            //In the future, store user_actions in jwt and use jwt.decode to extract
-            if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
-                localStorage.setItem("user_info", JSON.stringify(response));
-            }else{
-                alert('Please upgrade your browser to one that supports local storage!');
-            }
+            JWT.saveUserInfoLocalStorage(response);
             this.context.updateUserInfo();
             this.context.navigate('', {'inPlace':true});
         }, error => {

@@ -138,16 +138,29 @@ var JWT = module.exports.JWT = {
         return true;
     },
 
-    remove : function(source = 'cookie'){
-        if (source === 'cookie'){
-            cookie.remove(JWT.COOKIE_ID);
-            return true;
+    saveUserInfo : function(user_info){
+        // Delegate JWT token to cookie, keep extended user_info obj (w/ copy of token) in localStorage.
+        JWT.save(user_info.idToken || user_info.id_token, 'cookie');
+        JWT.saveUserInfoLocalStorage(user_info);
+    },
+
+    remove : function(source = 'all'){
+        if (source === 'any' || source === '*') source = 'all';
+
+        var removedCookie = false,
+            removedLocalStorage = false;
+
+        if (source === 'cookie' || source === 'all'){
+            cookie.remove(JWT.COOKIE_ID, { path : '/' });
+            removedCookie = true;
         }
-        if (source === 'localStorage'){
+        if (source === 'localStorage' || source === 'all'){
             if(typeof(Storage) === 'undefined') return false;
             localStorage.removeItem("user_info");
-            return true;
+            removedLocalStorage = true;
         }
+        console.info('Removed JWT: ' + removedCookie + ' (cookie) ' + removedLocalStorage + ' (localStorage)');
+        return { removedCookie, removedLocalStorage };
     },
 
     addToHeaders : function(headers = {}){

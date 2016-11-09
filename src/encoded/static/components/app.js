@@ -66,7 +66,6 @@ var App = React.createClass({
     historyEnabled: !!(typeof window != 'undefined' && window.history && window.history.pushState),
 
     getInitialState: function() {
-        console.log(JWT.get('cookie'));
         return {
             errors: [],
             dropdownComponent: undefined,
@@ -215,8 +214,7 @@ var App = React.createClass({
                 return response;
             })
             .then(response => {
-                JWT.save(response.id_token);
-                JWT.saveUserInfoLocalStorage(response);
+                JWT.saveUserInfo(response);
                 if (typeof callback === 'function') callback(response);
             }, error => {
                 //error, clear localStorage and session
