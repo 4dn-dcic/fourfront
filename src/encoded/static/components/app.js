@@ -66,12 +66,13 @@ var App = React.createClass({
     historyEnabled: !!(typeof window != 'undefined' && window.history && window.history.pushState),
 
     getInitialState: function() {
-        console.log(!!(JWT.get('cookie')));
+        console.log(JWT.get('cookie'));
         return {
             errors: [],
             dropdownComponent: undefined,
             content: undefined,
-            session: !!(JWT.get('cookie')),
+            //session: !!(JWT.get('cookie')),
+            session: false,
             user_actions: []
         };
     },
@@ -199,7 +200,7 @@ var App = React.createClass({
     authenticateUser : function(callback = null){
         // check existing user_info in local storage and authenticate
         var idToken = JWT.get();
-        if(idToken){ // if JWT present, try to authenticate
+        if(idToken){ // if JWT present, but no session yet, try to authenticate
             this.fetch('/login', {
                 method: 'POST',
                 headers: {
