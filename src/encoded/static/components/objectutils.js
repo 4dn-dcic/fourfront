@@ -160,13 +160,13 @@ var JWT = module.exports.JWT = {
             removedLocalStorage = true;
         }
         console.info('Removed JWT: ' + removedCookie + ' (cookie) ' + removedLocalStorage + ' (localStorage)');
-        return { removedCookie, removedLocalStorage };
+        return { 'removedCookie' : removedCookie, 'removedLocalStorage' : removedLocalStorage };
     },
 
     addToHeaders : function(headers = {}){
         var idToken = JWT.get();
-        if(idToken && typeof headers['Authorization'] == 'undefined'){
-            headers['Authorization'] = 'Bearer ' + idToken;
+        if(idToken && typeof headers.Authorization == 'undefined'){
+            headers.Authorization = 'Bearer ' + idToken;
         }
         return headers;
     }
