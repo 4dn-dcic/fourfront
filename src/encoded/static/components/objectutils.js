@@ -105,6 +105,7 @@ var JWT = module.exports.JWT = {
     COOKIE_ID : 'jwtToken',
     
     get : function(source = 'any'){
+        if (source === 'all' || source === '*') source = 'any';
 
         var idToken = null;
 

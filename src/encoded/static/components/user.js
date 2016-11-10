@@ -259,7 +259,10 @@ var User = module.exports.User = React.createClass({
                                             { User.gravatar(user.email, 70) }
                                         </div>
                                         <div className="col-sm-9 user-title-col">
-                                            <h1 className="user-title">{ user.first_name } { user.last_name }</h1>
+                                            <h1 className="user-title">
+                                                <EditableField context={user} parent={this} style="inline" inputSize="lg" labelID="first_name" fallbackText="No first name set"/>
+                                                <EditableField context={user} parent={this} style="inline" inputSize="lg" labelID="last_name" fallbackText="No last name set"/>
+                                            </h1>
                                         </div>
                                     </div>
                                 </div>

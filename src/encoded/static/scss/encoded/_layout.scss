@@ -719,6 +719,18 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		margin-bottom: 0px;
 		font-weight: 300;
 		font-size: 2.6rem;
+
+		.editable-field-entry {
+			max-width: 50%; // Need to fit 2 inline editable fields on one row for users full name.
+			.value {
+				.edit-button,
+				.save-button,
+				.cancel-button {
+					font-size: 1.25rem;
+				}
+			}
+		}
+
 	}
 
 	@media screen and (min-width: $screen-sm-min){

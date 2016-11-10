@@ -163,7 +163,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 	}
 }
 
-.row.editable-field-entry {
+.editable-field-entry {
 	transition: filter .75s, opacity .5s, min-height .5s linear;
 	opacity: 1;
 	min-height: 30px;
@@ -187,7 +187,6 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 		.field-loading-icon {
 			padding: 0 6px;
 			line-height: 100%;
-			display: block;
 			height: 100%;
 			> i.icon {
 				vertical-align: middle;
@@ -196,11 +195,21 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 			}
 		}
 
+		.edit-button.right,
+		.cancel-button.right,
+		.save-button.right,
+		.field-loading-icon.right {
+			display: block;
+		}
+
 		.cancel-button,
 		.save-button {
-			padding-top: 8px;
+			padding-top: 9px;
 			font-size: 1.1em;
 			margin-bottom: -10px;
+			position: relative;
+			z-index: 4;
+
 			&:hover {
 				color: #000;
 			}
@@ -219,7 +228,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 		}
 
 		&.editing .field-loading-icon {
-			padding-top: 8px;
+			padding-top: 9px;
 			margin-bottom: -10px;
 		}
 
@@ -240,16 +249,85 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 	&.editing {
 
 		min-height: 45px;
-	
-		input[type=text],
-		input[type=email],
-		input[type=tel] {
-			margin-top: 3px;
-			margin-bottom: -15px; // For min-height transition.
+
+		span.input-wrapper { 
+			// This wrapper is present when a help-block exists below the input element.
+			margin-bottom : -100px; // For min-height transition (prevent jumping).
+			margin-right: 75px; // Room for action icons/buttons.
 			display: block;
-			width: 75%;
+			position: relative;
+			z-index: 2;
+			
+			input[type=text],
+			input[type=email],
+			input[type=tel] {
+				margin-top: 3px;
+				display: block;
+				margin-bottom: 0px;
+				width: 100%;
+				position: relative;
+				z-index: 3;
+			}
+
+			span.help-block {
+				font-size: .85em;
+				padding: 5px 3px 7px;
+				margin: 0;
+				background-color: #fff;
+				border-bottom: 1px solid #eee;
+				box-shadow: 0 10px 15px 0px rgba(255,255,255,0.75);
+				word-break: break-word;
+				transition: opacity .35s .15s;
+			}
+
 		}
 
+		&.inline {
+			display: inline-block;
+
+			span.input-wrapper {
+				display: inline-block;
+				margin-bottom: 0px;
+				span.help-block {
+					position: absolute;
+					width: 100%;
+				}
+			}
+
+			.save-button {
+				position: absolute;
+				right: 36px;
+			}
+			.cancel-button {
+				position: absolute;
+				right: 6px;
+			}
+
+			&.input-size-lg {
+				.save-button,
+				.cancel-button {
+					top: 8px;
+				}
+			}
+
+		}
+
+	}
+
+	&.editing.has-error {
+		min-height: 105px;
+
+		span.help-block {
+			opacity : 1;
+		}
+	}
+
+	&.editing:not(.has-error) {
+
+		span.help-block {
+			opacity : 0;
+			transition: opacity .35s, color .5s .5s !important;
+		}
 	}
 
 }
