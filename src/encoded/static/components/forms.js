@@ -123,11 +123,16 @@ var EditableField = module.exports.EditableField = React.createClass({
             } else if (typeof nestedObj[nKey] !== 'undefined') {
                 // Field doesn't exist on hostObj, but does on nestedObj == new field.
                 hostObj[nKey] = nestedObj[nKey];
+                return true;
             } else {
                 // Whoops, doesn't seem like fields match.
                 return false;
             }
         }
+    },
+
+    contextTypes: {
+        navigate: React.PropTypes.func
     },
 
     propTypes : {
@@ -223,6 +228,7 @@ var EditableField = module.exports.EditableField = React.createClass({
                     } else {
                         // Couldn't insert into current context, refetch from server :s.
                         console.warn("Couldn't update current context, fetching from server.");
+                        this.context.navigate('', {'inPlace':true});
                         // ToDo : ...navigate(inPlace)...
                     }
                 }
