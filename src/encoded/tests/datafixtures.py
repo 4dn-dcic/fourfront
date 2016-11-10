@@ -227,15 +227,44 @@ def organism(human):
 
 
 @pytest.fixture
-def experiment(testapp, lab, award, human_biosample):
+def protocol(testapp):
+    item ={
+        'description' : 'my super awesome protocol',
+    }
+    return testapp.post_json('/protocol', item).json['@graph'][0]
+
+
+@pytest.fixture
+def sop_map(testapp, protocol):
     item = {
+        "sop_name": "in situ Hi-C SOP map",
+        "sop_version": 1,
+        "associated_item_type": "ExperimentHiC",
+        "id_values": ["micro-C"],
+        "notes": "This is just a dummy insert not linked to true SOP protocol",
+        "description": "Fields with specified defaults in the SOP for in situ Hi-C experiments as per ??",
+        "sop_protocol": protocol['@id'],
+        "fields_in_sop": [
+            {"field_name": "digestion_enzyme", "field_value": "MboI"},
+        ]
+    }
+    return testapp.post_json("/sop_map", item).json['@graph'][0]
+
+
+@pytest.fixture
+def experiment(testapp, experiment_data):
+    return testapp.post_json('/experiment_hic', experiment_data).json['@graph'][0]
+
+
+@pytest.fixture
+def experiment_data(lab, award, human_biosample):
+    return  {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
         'experiment_type': 'micro-C',
         'status': 'in review by lab'
     }
-    return testapp.post_json('/experiment_hic', item).json['@graph'][0]
 
 
 @pytest.fixture

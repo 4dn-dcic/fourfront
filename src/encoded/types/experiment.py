@@ -161,12 +161,9 @@ class ExperimentHiC(Experiment):
         maps = []
         suffnum = 1
         mapid = self.generate_mapid(experiment_type, suffnum)
-        print(mapid)
-        bs = '4DNBS1234567'
+        sop_coll = self.registry['collections']['SopMap']
         while(True):
-            m = self.collection.get(mapid)
-            #m = self.collection.get(bs)
-            print(m)
+            m = sop_coll.get(mapid)
             if not m:
                 break
             maps.append(m)
@@ -175,8 +172,7 @@ class ExperimentHiC(Experiment):
 
         if len(maps) > 0:
             lmap = maps[-1]
-            print(lmap)
-            return request.embed('/sop_maps/' + lmap['@id'] + '/', '@@object')
+            return request.embed('/sop_maps/' + str(lmap.uuid) + '/', '@@object')
         else:
             return None
 
