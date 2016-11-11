@@ -74,6 +74,37 @@ class Experiment(Item):
                     target_exp_set.properties["experiments_in_set"].append(acc)
                     target_exp_set.update(target_exp_set.properties)
 
+    def generate_mapid(self, experiment_type, num):
+        delim = '_'
+        mapid = str(type(self).__name__)
+        mapid = mapid + delim + ''.join(experiment_type.split())
+        return mapid + delim + str(num)
+
+    @calculated_property(schema={
+        "title": "SOP map",
+        "description": "The mapping of fields default values from SOP",
+        "type": "object",
+        "linkTo": "SopMap"
+    })
+    def sop_mapping(self, request, experiment_type):
+        maps = []
+        suffnum = 1
+        mapid = self.generate_mapid(experiment_type, suffnum)
+        sop_coll = self.registry['collections']['SopMap']
+        while(True):
+            m = sop_coll.get(mapid)
+            if not m:
+                break
+            maps.append(m)
+            suffnum += 1
+            mapid = self.generate_mapid(experiment_type, suffnum)
+
+        if len(maps) > 0:
+            lmap = maps[-1]
+            return request.embed('/sop_maps/' + str(lmap.uuid) + '/', '@@object')
+        else:
+            return None
+
 
 @collection(
     name='experiment-sets',
@@ -144,37 +175,6 @@ class ExperimentHiC(Experiment):
             de_name = de_props['name']
             sum_str += (' with ' + de_name)
         return sum_str
-
-    def generate_mapid(self, experiment_type, num):
-        delim = '_'
-        mapid = str(type(self).__name__)
-        mapid = mapid + delim + ''.join(experiment_type.split())
-        return mapid + delim + str(num)
-
-    @calculated_property(schema={
-        "title": "SOP map",
-        "description": "The mapping of fields default values from SOP",
-        "type": "object",
-        "linkTo": "SopMap"
-    })
-    def sop_mapping(self, request, experiment_type):
-        maps = []
-        suffnum = 1
-        mapid = self.generate_mapid(experiment_type, suffnum)
-        sop_coll = self.registry['collections']['SopMap']
-        while(True):
-            m = sop_coll.get(mapid)
-            if not m:
-                break
-            maps.append(m)
-            suffnum += 1
-            mapid = self.generate_mapid(experiment_type, suffnum)
-
-        if len(maps) > 0:
-            lmap = maps[-1]
-            return request.embed('/sop_maps/' + str(lmap.uuid) + '/', '@@object')
-        else:
-            return None
 
 
 @collection(
