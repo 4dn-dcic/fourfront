@@ -41,3 +41,8 @@ def test_calculated_experiment_summary(testapp, experiment, mboI):
     summary = 'micro-C on GM06990 with MboI'
     res = testapp.patch_json(experiment['@id'], {'digestion_enzyme': mboI['@id']}, status=200)
     assert res.json['@graph'][0]['experiment_summary'] == summary
+
+
+def test_experiment_hic_sop_map(testapp, experiment_data, sop_map):
+    res = testapp.post_json('/experiment_hic', experiment_data)
+    assert 'sop_mapping' in res.json['@graph'][0]
