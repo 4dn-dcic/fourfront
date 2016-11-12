@@ -33,7 +33,7 @@ var FieldSet = module.exports.FieldSet = React.createClass({
         return {
             parent : null, // if null, use own state
             context : {},
-            className : '',
+            className : null,
             endpoint : null
         };
     },
@@ -61,8 +61,8 @@ var FieldSet = module.exports.FieldSet = React.createClass({
                 if (!child.props.context || _.isEmpty(child.props.context)) newProps.context = this.props.context;
                 if (!child.props.parent) newProps.parent = this.props.parent || this;
                 if (!child.props.endpoint && this.props.endpoint) newProps.endpoint = this.props.endpoint;
-                if (!child.props.inputSize && this.props.inputSize) newProps.inputSize = this.props.inputSize;
-                if (!child.props.style && this.props.style) newProps.style = this.props.style;
+                if (this.props.inputSize) newProps.inputSize = this.props.inputSize; // Overwrite, since EditableField has default props.
+                if (this.props.style) newProps.style = this.props.style;
                 child = React.cloneElement(child, newProps);
             };
             return child;
@@ -76,8 +76,10 @@ var FieldSet = module.exports.FieldSet = React.createClass({
     fullClassName : function(){
         var stateHolder = this.props.parent || this; // Fallback to using self as state holder.
         return (
-            this.props.className + 
-            " editable-fields fieldset" + 
+            (this.props.className ? this.props.className + ' ' : '') + 
+            "editable-fields fieldset" + 
+            (this.props.style ? ' ' + this.props.style : '') +
+            (this.props.inputSize ? ' size-' + this.props.inputSize : '') +
             (
                 stateHolder.state && 
                 stateHolder.state.currentlyEditing && 
@@ -88,11 +90,10 @@ var FieldSet = module.exports.FieldSet = React.createClass({
     },
 
     render : function(){
-        return (
-            <div className={this.fullClassName()}>
-                { this.children }
-            </div>
-        );
+        if (this.props.style === 'inline'){
+            return <span className={this.fullClassName()}>{ this.children }</span>;
+        }
+        return <div className={this.fullClassName()}>{ this.children }</div>;
     }
 
 });
@@ -196,27 +197,29 @@ var EditableField = module.exports.EditableField = React.createClass({
 
     getInitialState : function(){
         var value = getNestedProperty(this.props.context, this.props.labelID);
-        console.log('VALUE', value);
         return {
             'value' : value || null,      // Changes on input field change
             'savedValue' : value || null, // Changes only on sync w/ server.
             'serverErrors' : [],          // Validation state sent from server.
             'serverErrorsMessage' : null,
-            'loading' : false             // True if in middle of save or fetch request.
+            'loading' : false,            // True if in middle of save or fetch request.
+            'dispatching' : false
         };
     },
 
     componentWillReceiveProps : function(newProps){
         if (
-            (this.props.context !== newProps.context) ||
-            (this.props.labelID !== newProps.labelID)
+            !this.state.dispatching && (
+                (this.props.context !== newProps.context) ||
+                (this.props.labelID !== newProps.labelID)
+            )
         ) {
-            var value = getNestedProperty(this.props.context, this.props.labelID);
+            var value = getNestedProperty(newProps.context, this.props.labelID);
             this.setState({ 'value' : value || null, 'savedValue' : value || null });
         }
     },
 
-    isSet : function(){ return typeof this.props.context !== 'undefined' && this.state.savedValue !== null; },
+    isSet : function(){ return typeof this.props.context === 'object' && !_.isEmpty(this.props.context) && this.state.savedValue !== null && this.state.savedValue !== '' ; },
 
     enterEditState : function(e){
         e.preventDefault();
@@ -248,13 +251,13 @@ var EditableField = module.exports.EditableField = React.createClass({
             // ToDo : Bigger notification to end user that something is wrong.
             console.error("Cannot save " + this.props.labelID + "; value is not valid:", this.state.value);
             return;
-        }  
+        } else if (this.state.value === this.state.savedValue){
+            return this.cancelEditState(e);
+        }
 
         this.save(()=>{
             // Success callback
-            this.props.parent.setState({ currentlyEditing : null }, ()=> {
-                console.info("Saved " + this.props.labelID + " : " + this.state.savedValue);
-            });
+            console.info("Saved " + this.props.labelID + " : " + this.state.savedValue);
         });
     },
 
@@ -268,25 +271,36 @@ var EditableField = module.exports.EditableField = React.createClass({
     save : function(successCallback = null, errorCallback = null){
 
         this.setState({ loading : true }, ()=>{
-            var patchData = EditableField.generateNestedProperty(this.props.labelID, this.state.value);
+            var value = this.state.value;
+            var patchData = EditableField.generateNestedProperty(this.props.labelID, value);
             ajaxLoad(this.props.endpoint || this.props.context['@id'], (r)=>{
                 if (r.status === 'error'){
+
                     // ToDo display errors
                     console.error("Error: ", r);
                     this.setState({ serverErrors : r.errors, serverErrorsMessage : r.description, loading : false }, errorCallback);
                     return;
+
                 } else if (r.status === 'success') {
-                    // Update context (yes, tis modifying a prop)
+
                     var updatedContext = _.clone(this.props.context);
                     var inserted = EditableField.deepInsertObj(updatedContext, patchData);
-                    console.log(patchData, updatedContext);
                     if (inserted){
-                        store.dispatch({
-                            type: { 'context': updatedContext }
+                        this.setState({ 'savedValue' : value, 'value' : value, 'dispatching' : true }, ()=> {
+                            var unsubscribe = store.subscribe(()=>{
+                                unsubscribe();
+                                setTimeout(()=>{
+                                    this.props.parent.setState({ currentlyEditing : null }, ()=> {
+                                        this.setState({ 'loading' : false, 'dispatching' : false });
+                                        if (typeof successCallback === 'function') successCallback(r);
+                                    });
+                                },0);
+                            });
+                            store.dispatch({
+                                type: { 'context': updatedContext }
+                            });
                         });
-                        this.setState({ savedValue : this.state.value, loading : false }, ()=> {
-                            if (typeof successCallback === 'function') successCallback(r);
-                        });
+                        
                     } else {
                         // Couldn't insert into current context, refetch from server :s.
                         console.warn("Couldn't update current context, fetching from server.");
@@ -447,7 +461,8 @@ var EditableField = module.exports.EditableField = React.createClass({
             className : 'form-control input-' + this.props.inputSize,
             value : this.state.value || '',
             onChange : this.handleChange,
-            name : this.props.labelID
+            name : this.props.labelID,
+            autoFocus: true
         }, commonProps);
 
         switch(this.props.fieldType){

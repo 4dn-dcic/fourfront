@@ -217,10 +217,12 @@ var App = React.createClass({
             })
             .then(response => {
                 JWT.saveUserInfo(response);
+                this.setState({ authLoading: false });
                 if (typeof callback === 'function') callback(response);
             }, error => {
                 //error, clear localStorage and session
                 JWT.remove();
+                this.setState({ authLoading: false });
                 if (typeof callback === 'function') callback(error);
             });
             return idToken;

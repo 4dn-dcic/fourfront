@@ -149,18 +149,29 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 		Editable Fields & FieldSets (e.g. in User.js)
 ***********************************************************/
 
-.fieldset.editable-fields { 
-	padding-bottom: 15px; 
-	transition: padding-bottom .5s linear; 
+.fieldset.editable-fields,
+.editable-fields-container {
+
+	&.editing {
+
+		.editable-field-entry:not(.editing) {
+			filter: blur(0.75px) grayscale(75%);
+			opacity: 0.75;
+			pointer-events: none;
+		}
+
+	}
 }
 
-.fieldset.editable-fields.editing {
-	padding-bottom: 0px;
-	> .row.editable-field-entry:not(.editing) {
-		filter: blur(0.75px) grayscale(75%);
-		opacity: 0.75;
-		pointer-events: none;
+div.fieldset.editable-fields {
+
+	padding-bottom: 15px; 
+	transition: padding-bottom .5s linear;
+
+	&.editing {
+		padding-bottom: 0px;
 	}
+
 }
 
 .editable-field-entry {
@@ -188,18 +199,14 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 			padding: 0 6px;
 			line-height: 100%;
 			height: 100%;
+			vertical-align: middle;
+			&.right { display: block; }
+
 			> i.icon {
-				vertical-align: middle;
+				vertical-align: inherit;
 				height: inherit;
 				line-height: inherit;
 			}
-		}
-
-		.edit-button.right,
-		.cancel-button.right,
-		.save-button.right,
-		.field-loading-icon.right {
-			display: block;
 		}
 
 		.cancel-button,
@@ -234,7 +241,14 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 
 		.edit-button {
 			color: #f8f8f8;
-			transform: translateY(2px);
+			&.right {
+				transform: translateY(2px);
+			}
+			&.inline {
+				position: relative;
+				top: -6px;
+				padding: 0 3px;
+			}
 		}
 
 		&:hover .edit-button {
@@ -288,13 +302,15 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 			span.input-wrapper {
 				display: inline-block;
 				margin-bottom: 0px;
+				top: -5px;
 				span.help-block {
 					position: absolute;
 					width: 100%;
 				}
 			}
 
-			.save-button {
+			.save-button,
+			.field-loading-icon {
 				position: absolute;
 				right: 36px;
 			}
@@ -305,8 +321,14 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 
 			&.input-size-lg {
 				.save-button,
-				.cancel-button {
-					top: 8px;
+				.cancel-button,
+				.field-loading-icon {
+					padding-top: 12px;
+					font-size: 1.25rem;
+				}
+				.field-loading-icon {
+					height: auto;
+					padding-top: 11px;
 				}
 			}
 

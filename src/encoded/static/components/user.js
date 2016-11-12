@@ -229,12 +229,13 @@ var User = module.exports.User = React.createClass({
 
     render: function() {
 
-        console.log('User', this);
-
         var user = this.props.context;
+
         var crumbs = [
             {id: 'Users'}
         ];
+
+        var ifCurrentlyEditingClass = this.state && this.state.currentlyEditing ? ' editing editable-fields-container' : '';
 
         return (
             <div className="user-profile-page">
@@ -244,7 +245,7 @@ var User = module.exports.User = React.createClass({
                     </div>
                 </header>
 
-                <div className="page-container data-display">
+                <div className={"page-container data-display" + ifCurrentlyEditingClass}>
 
                     <h1 className="page-title">Profile</h1>
 
@@ -260,8 +261,10 @@ var User = module.exports.User = React.createClass({
                                         </div>
                                         <div className="col-sm-9 user-title-col">
                                             <h1 className="user-title">
-                                                <EditableField context={user} parent={this} style="inline" inputSize="lg" labelID="first_name" fallbackText="No first name set"/>
-                                                <EditableField context={user} parent={this} style="inline" inputSize="lg" labelID="last_name" fallbackText="No last name set"/>
+                                                <FieldSet context={user} parent={this} style="inline" inputSize="lg">
+                                                    <EditableField labelID="first_name" fallbackText="No first name set"/>
+                                                    <EditableField labelID="last_name" fallbackText="No last name set"/>
+                                                </FieldSet>
                                             </h1>
                                         </div>
                                     </div>
