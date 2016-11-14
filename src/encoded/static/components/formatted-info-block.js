@@ -3,9 +3,135 @@
 var React = require('react');
 var { ajaxLoad, isServerSide, console } = require('./objectutils');
 
+/**
+ * Optional container of FormattedInfoBlocks, wrapping them in a <UL> and <LI> elements.
+ * Encapsulates all required ajax/aggregation for fetching array of fields/data.
+ * Available via FormattedInfoBlock.List
+ * 
+ * Takes four props:
+ *   - details (optional) - Array of complete details to display.
+ *   - endpoints (required if details is blank) - Array of endpoints to AJAX details from.
+ *   - renderFunction (required) - Render function for items. Should return a FormattedInfoBlock component.
+ *   - fallbackMsg (optional) - What to display if both details and endpoints don't exist or are empty.
+ *   - propertyName (optional) - Descriptive unique ID of property/ies displayed.
+ *   - ajaxCallback (optional) - Callback to execute with details, if/after they are fetched w/ AJAX. 
+ */
+var FormattedInfoBlockList = React.createClass({
+
+    statics : {
+        
+        ajaxPropertyDetails : function(endpoints, propertyName, callback = null){
+            if (!Array.isArray(endpoints) || endpoints.length === 0) return false;
+
+            var results = [];
+            endpoints.forEach(function(endpoint, i){
+
+                console.log('Obtaining submitsForArray[' + i + '] via AJAX.');
+                ajaxLoad(endpoint + '?format=json', function(result){
+                    results[i] = result;
+                    console.log('Obtained submitsForArray[' + i + '] via AJAX.');
+                    if (results.length == endpoints.length){
+                        // All loaded
+                        var newState = {};
+                        newState['details_' + propertyName] = results;
+                        this.setState(newState, ()=>{
+                            if (typeof callback == 'function'){
+                                callback(results);
+                            }
+                        });
+                        console.log('Obtained details_submits_for via AJAX: ', results);
+                    }
+                }.bind(this), 'GET');
+            }.bind(this));
+        },
+
+    },
+
+    propTypes : {
+        details : React.PropTypes.array,        // Complete detail data for all list items, if available.
+        endpoints : React.PropTypes.array,      // Endpoints to use for fetching detail data. Required if details is empty.
+        propertyName : React.PropTypes.string,  // Property from which array is gotten.
+        renderFunction : React.PropTypes.func,  // Function used to render child FormattedInfoBlocks
+        ajaxCallback : React.PropTypes.func,    // Function used to render child FormattedInfoBlocks
+        fallbackMsg : React.PropTypes.any       // Fallback text or component(s) if endpoints not set.
+    },
+
+    getDefaultProps : function(){
+        return {
+            propertyName : 'property',
+            fallbackMsg : 'Not set'
+        };
+    },
+
+    getInitialState : function(props = this.props){
+        var state = {};
+        if (this.detailsValid(props)) {
+            state['details_' + props.propertyName] = props.details;
+        } else {
+            state['details_' + props.propertyName] = null;
+        }
+        return state;
+    },
+
+    componentDidMount : function(){
+        if (!this.state['details_' + this.props.propertyName] && this.endpointsValid()){
+            FormattedInfoBlockList.ajaxPropertyDetails.call(this, this.props.endpoints, this.props.propertyName, this.props.ajaxCallback);
+        }
+    },
+
+    componentWillReceiveProps : function(newProps){
+        if (this.props.details !== newProps.details){
+            this.setState(this.getInitialState(newProps));
+        }
+    },
+
+    endpointsValid : function(){
+        return this.props.endpoints && Array.isArray(this.props.endpoints) && this.props.endpoints.length > 0;
+    },
+
+    detailsValid : function(props = this.props){
+        return (
+            (props.details && Array.isArray(props.details) && props.details.length > 0) &&
+            (!props.endpoints || (this.endpointsValid() && props.endpoints.length === props.details.length))
+        );
+    },
+
+    render: function(){
+
+        if (!this.detailsValid() && !this.endpointsValid()){
+            return <span className="not-set">{ this.props.fallbackMsg }</span>;
+        }
+
+        var blocks;
+
+        if (this.props.endpoints && (!this.state || !this.state['details_' + this.props.propertyName])){
+            // Not loaded yet, but endpoints exist.
+            blocks = this.props.endpoints.map((orgID,i)=>
+                <li key={this.props.propertyName + '-' + i} className={this.props.propertyName + "-item"}>
+                    <i className="icon icon-spin icon-circle-o-notch"></i>
+                </li>
+            );
+        } else if (this.state && this.state['details_' + this.props.propertyName]){
+            blocks = this.state['details_' + this.props.propertyName].map((item,i) => {
+                return (
+                    <li key={this.props.propertyName + '-' + i} className={this.props.propertyName + "-item"}>
+                        { this.props.renderFunction(item) }
+                    </li>
+                );
+            });
+        }
+        
+        return <ul id={this.props.propertyName}>{ blocks }</ul>;
+    }
+
+});
+
 var FormattedInfoBlock = module.exports = React.createClass({
 
     statics : {
+
+        List : FormattedInfoBlockList, // Extension/wrapper component to house multiple blocks in a <UL> list.
+
         /**
          * Set a parent component's state to have 'details_' + propertyName data fetched via AJAX.
          * Must supply 'this' from parent component, via .call/.apply/.bind(this, args...),

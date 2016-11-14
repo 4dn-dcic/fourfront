@@ -89,11 +89,11 @@ describe('Testing user.js', function() {
 
         var childElemIndicesByStyle = {
             // Minimal style is not tested & subject to change (not used yet in front-end)
-            valueContainer : { 'row' : 1, 'inline' : 0, 'minimal' : 0 },
-            editButton : { 'row' : 0, 'inline' : 1, 'minimal' : 0 },
-            valueElement : { 'row' : 1, 'inline' : 0, 'minimal' : 1 },
-            cancelButton : { 'row' : 0, 'inline' : 1, 'minimal' : 0 },
-            saveButton : { 'row' : 1, 'inline' : 2, 'minimal' : 1 }
+            valueContainer : { 'row' : 1, 'inline' : 0, 'minimal' : 0 },    // 'row' style has label column as first child
+            editButton : { 'row' : 0, 'inline' : 1, 'minimal' : 0 },        // row & minimal styles have button before value, floating right
+            valueElement : { 'row' : 1, 'inline' : 0, 'minimal' : 1 },      // inverse of editButton position
+            cancelButton : { 'row' : 0, 'inline' : 1, 'minimal' : 0 },      // see editButton position
+            saveButton : { 'row' : 1, 'inline' : 2, 'minimal' : 1 }         // save button is after cancel button
         };
 
         function testEditField(className, initialVal, finalVal, inputFieldID, save=false){

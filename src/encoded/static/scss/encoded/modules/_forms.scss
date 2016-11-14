@@ -174,10 +174,8 @@ div.fieldset.editable-fields {
 
 }
 
-.editable-field-entry {
-	transition: filter .75s, opacity .5s, min-height .5s linear;
-	opacity: 1;
-	min-height: 30px;
+.editable-field-entry,
+.field-entry {
 
 	label {
 		margin-bottom: 0;
@@ -191,6 +189,39 @@ div.fieldset.editable-fields {
 		.not-set {
 			color: #bbb; 
 		}
+
+	}
+
+	&.row {
+
+		> ul,
+		> div.value > ul {
+			margin: 0;
+			padding: 0;
+
+			> li {
+				list-style-position: inside;
+
+				> i.icon {
+					position: relative;
+					top: 1px;
+					color: #d2d2d2;
+				}
+			}
+
+		}
+		
+	}
+
+}
+
+
+.editable-field-entry {
+	transition: filter .75s, opacity .5s, min-height .5s linear;
+	opacity: 1;
+	min-height: 30px;
+
+	.value {
 
 		.edit-button,
 		.cancel-button,
@@ -357,18 +388,4 @@ div.fieldset.editable-fields {
 		}
 	}
 
-}
-
-.row.editable-field-entry > ul {
-	margin: 0;
-
-	> li {
-		list-style-position: inside;
-
-		&.submit_for-item > i.icon {
-			position: relative;
-			top: 1px;
-			color: #d2d2d2;
-		}
-	}
 }

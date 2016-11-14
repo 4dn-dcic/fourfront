@@ -682,7 +682,9 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		&.no-details.no-icon.no-label {
 			display: inline-block;
 			padding: 0;
-			vertical-align: text-bottom;
+			vertical-align: text-top;
+			max-width: 85%;
+			word-break: break-word;
 		}
 
 		.block-title,

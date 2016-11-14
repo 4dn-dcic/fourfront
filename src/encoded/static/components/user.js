@@ -343,8 +343,8 @@ var ProfileWorkFields = React.createClass({
 
     getInitialState : function(){
         return {
-            details_lab : null,         // Use FormattedInfoBlock.ajaxPropertyDetails.call(this, args...) to set.
-            details_submits_for : null  // Use custom ajax func to set, b/c is an array.
+            details_lab : null,        // Use FormattedInfoBlock.ajaxPropertyDetails.call(this, args...) to set.
+            awards_list : null
         };
     },
 
@@ -353,30 +353,20 @@ var ProfileWorkFields = React.createClass({
             // Fetch lab info & update into User instance state via the -for mixin-like-usage ajaxPropertyDetails func.
             FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.user.lab, 'lab');
         }
-        if (Array.isArray(this.props.user.submits_for) && this.props.user.submits_for.length && !this.state.details_submits_for) {
-            var submitsForArray = [];
-            this.props.user.submits_for.forEach(function(orgID, i){
+    },
 
-                // Check if lab/org is same as state.details_lab, reuse it if so
-                // Probably doesn't execute since AJAX requests sent @ about same time (ToDo)
-                if (this.state.details_lab && this.state.details_lab['@id'] == orgID){
-                    submitsForArray[i] = this.state.details_lab;
-                    return;
+    setAwardsList : function(labDetails){
+        // Awards are embedded within labs, so we get full details.
+        var awardsList = [];
+        for (var i = 0; i < labDetails.length; i++){
+            if (typeof labDetails[i].awards !== 'undefined' && Array.isArray(labDetails[i].awards)){
+                for (var j = 0; j < labDetails[i].awards.length; j++){
+                    if (awardsList.indexOf(labDetails[i].awards[j]) === -1) awardsList.push(labDetails[i].awards[j]);
                 }
-
-                // Load w. AJAX otherwise.
-                console.log('Obtaining submitsForArray[' + i + '] via AJAX.');
-                ajaxLoad(orgID + '?format=json', function(result){
-                    submitsForArray[i] = result;
-                    console.log('Obtained submitsForArray[' + i + '] via AJAX.');
-                    if (submitsForArray.length == this.props.user.submits_for.length){
-                        // All loaded
-                        this.setState({ details_submits_for : submitsForArray });
-                        console.log('Obtained details_submits_for via AJAX: ', submitsForArray);
-                    }
-                }.bind(this), 'GET');
-            }.bind(this));
+            }
         }
+        this.setState({ 'awards_list' : awardsList });
+        return awardsList;
     },
 
     renderLabInfo : function(user = this.props.user){
@@ -388,37 +378,35 @@ var ProfileWorkFields = React.createClass({
         return FormattedInfoBlock.Lab(this.state.details_lab, false, false);
     },
 
-    renderSubmitsFor : function(user = this.props.user){
-        // No labs/orgs in user.submits_for
-        if (!Array.isArray(user.submits_for) || user.submits_for.length == 0){
-            return (
-                <span className="not-set">Not submitting for any organizations.</span>
-            );
-        }
-
-        // Labs/orgs in user.submits_for exist, but not loaded to state yet.
-        if (!this.state.details_submits_for){
-            return user.submits_for.map((orgID,i)=>
-                <li key={'submits_for-' + i} className="submit_for-item loading">
-                    <i className="icon icon-spin icon-circle-o-notch"></i>
-                </li>
-            );
-        }
-
-        // All loaded
-        return this.state.details_submits_for.map((org,i) =>
-            <li key={'submits_for-' + i} className="submit_for-item">{ FormattedInfoBlock.Lab(org, false, false, false) }</li>
+    renderAwardsField : function(){
+        if (this.state.awards_list === null) return null;
+        return (
+            <div className="row field-entry awards">
+                <div className="col-sm-3 text-right text-left-xs">
+                    <label htmlFor="awards">Awards</label>
+                </div>
+                <div className="col-sm-9 value">
+                    <FormattedInfoBlock.List
+                        details={this.state.awards_list}
+                        renderFunction={(detail) => FormattedInfoBlock.Award(detail, false, false, false) }
+                        propertyName="awards"
+                        fallbackMsg="No awards"
+                    />
+                </div>
+            </div>
         );
     },
 
     render : function(){
         var user = this.props.user;
+        // THESE FIELDS ARE NOT EDITABLE.
+        // To be modified by admins, potentially w/ exception of 'Primary Lab' (e.g. select from submits_for list).
         return (
             <div className={this.props.containerClassName}>
                 <h3 className="text-300 block-title">
                     <i className="icon icon-users icon-fw"></i> Organizations
                 </h3>
-                <div className="row editable-field-entry lab">
+                <div className="row field-entry lab">
                     <div className="col-sm-3 text-right text-left-xs">
                         <label htmlFor="lab">Primary Lab</label>
                     </div>
@@ -426,7 +414,7 @@ var ProfileWorkFields = React.createClass({
                         { this.renderLabInfo(user) }
                     </div>
                 </div>
-                <div className="row editable-field-entry job_title">
+                <div className="row field-entry job_title">
                     <div className="col-sm-3 text-right text-left-xs">
                         <label htmlFor="job_title">Role</label>
                     </div>
@@ -434,14 +422,21 @@ var ProfileWorkFields = React.createClass({
                         { user.job_title || <span className="not-set">No Job Title</span> }
                     </div>
                 </div>
-                <div className="row editable-field-entry submits_for">
+                <div className="row field-entry submits_for">
                     <div className="col-sm-3 text-right text-left-xs">
                         <label htmlFor="submits_for">Submit For</label>
                     </div>
-                    <ul id="submits_for" className="col-sm-9 value">
-                        { this.renderSubmitsFor() }
-                    </ul>
+                    <div className="col-sm-9 value">
+                        <FormattedInfoBlock.List
+                            renderFunction={(detail) => FormattedInfoBlock.Lab(detail, false, false, false) }
+                            endpoints={user.submits_for}
+                            propertyName="submits_for"
+                            fallbackMsg="Not submitting for any organizations"
+                            ajaxCallback={this.setAwardsList}
+                        />
+                    </div>
                 </div>
+                { this.renderAwardsField() }
             </div>
         );
     }
