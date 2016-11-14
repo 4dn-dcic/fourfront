@@ -56,7 +56,7 @@ var FieldSet = module.exports.FieldSet = React.createClass({
     adjustedChildren : function(){
         // Add common props to children EditableField elements.
         return React.Children.map(this.props.children, (child)=>{
-            if (child.type.displayName == 'EditableField'){
+            if (child.type && child.type.displayName == 'EditableField'){
                 var newProps = {};
                 if (!child.props.context || _.isEmpty(child.props.context)) newProps.context = this.props.context;
                 if (!child.props.parent) newProps.parent = this.props.parent || this;
@@ -70,7 +70,11 @@ var FieldSet = module.exports.FieldSet = React.createClass({
     },
 
     getChildrenIDs : function(){
-        return React.Children.map((this.children || this.props.children), (child) => child.props.labelID );
+        var childIDs = [];
+        React.Children.map((this.children || this.props.children), (child) => { 
+            if (child.props && child.props.labelID) childIDs.push(child.props.labelID);
+        });
+        return childIDs;
     },
 
     fullClassName : function(){
@@ -409,7 +413,7 @@ var EditableField = module.exports.EditableField = React.createClass({
         }
         if (this.props.style === 'inline'){
             return (
-                <span className={"editable-field-entry " + this.props.labelID}>
+                <span className={"editable-field-entry inline " + this.props.labelID}>
                     <span className="value">
                         { this.isSet() ?
                             <span id={ this.props.labelID } className="set">{ renderedValue }</span>

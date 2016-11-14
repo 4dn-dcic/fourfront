@@ -245,14 +245,19 @@ div.fieldset.editable-fields {
 				transform: translateY(2px);
 			}
 			&.inline {
-				position: relative;
-				top: -6px;
-				padding: 0 3px;
+				position: absolute;
+				margin-top: -5px;
+				padding: 0;
+				height: 20px;
+				width: 20px;
+				text-align: center;
+				border-radius: 50%;
 			}
 		}
 
 		&:hover .edit-button {
 			color : #bbb;
+			&.inline { background-color: rgba(255,255,255,0.5); }
 			&:hover {
 				color: #000;
 			}
@@ -302,7 +307,7 @@ div.fieldset.editable-fields {
 			span.input-wrapper {
 				display: inline-block;
 				margin-bottom: 0px;
-				top: -5px;
+				vertical-align: top;
 				span.help-block {
 					position: absolute;
 					width: 100%;
