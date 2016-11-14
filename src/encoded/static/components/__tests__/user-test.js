@@ -17,8 +17,7 @@ function mapStateToProps(store) {
 }
 
 describe('Testing user.js', function() {
-    var React, User, testItem, TestUtils, page, store, context, filters, _, Wrapper;
-
+    var React, User, testItem, TestUtils, page, store, context, filters, _, Wrapper, sinon, getNestedProperty;
     beforeEach(function() {
         React = require('react');
         var { Provider, connect } = require('react-redux');
@@ -27,6 +26,7 @@ describe('Testing user.js', function() {
         User = require('../user').User;
         context = require('../testdata/submitter');
         store = require('../../store');
+        getNestedProperty = require('../objectutils').getNestedProperty;
         var dispatch_vals = {
             'context' : context
         };
@@ -82,17 +82,29 @@ describe('Testing user.js', function() {
         expect(emailField[0].children[1].children[0].textContent.trim()).toEqual('4dndcic@gmail.com'); // Initial value via ../testdata/submitter.js
     });
 
-    it('Check Editable Fields - edit, check validation, cancel (no saving)', function() {
+    it('Editable Fields - editing, validation check, cancel (no save), and saving + value updates in response', function() {
 
-        function testEditField(className, initialVal, inputFieldID){
-            var isRow = className.indexOf('row') > -1;
-            var fields = TestUtils.scryRenderedDOMComponentsWithClass(page, 'editable-field-entry ' + className); // FaxField is 'row' style.
+        sinon = require('sinon');
+        var server = sinon.fakeServer.create();
+
+        var childElemIndicesByStyle = {
+            // Minimal style is not tested & subject to change (not used yet in front-end)
+            valueContainer : { 'row' : 1, 'inline' : 0, 'minimal' : 0 },
+            editButton : { 'row' : 0, 'inline' : 1, 'minimal' : 0 },
+            valueElement : { 'row' : 1, 'inline' : 0, 'minimal' : 1 },
+            cancelButton : { 'row' : 0, 'inline' : 1, 'minimal' : 0 },
+            saveButton : { 'row' : 1, 'inline' : 2, 'minimal' : 1 }
+        };
+
+        function testEditField(className, initialVal, finalVal, inputFieldID, save=false){
+            var fieldStyle = className.indexOf('row') > -1 ? 'row' : className.indexOf('inline') > -1 ? 'inline' : 'minimal';
+            var fields = TestUtils.scryRenderedDOMComponentsWithClass(page, 'editable-field-entry ' + className);
             var field = fields[0];
 
-            var fieldValue = isRow ? field.children[1] : field.children[0]; // First child is label if row.
-            var fieldValueEditButton = isRow ? fieldValue.children[0] : fieldValue.children[1];
-            var fieldValueElement = isRow ? fieldValue.children[1] : fieldValue.children[0];
-            expect(fieldValueElement.textContent).toEqual(initialVal); // Initial value
+            var fieldValue = field.children[childElemIndicesByStyle.valueContainer[fieldStyle]];
+            var fieldValueEditButton = fieldValue.children[childElemIndicesByStyle.editButton[fieldStyle]];
+            var fieldValueElement = fieldValue.children[childElemIndicesByStyle.valueElement[fieldStyle]];
+            expect(fieldValueElement.textContent.trim()).toEqual(initialVal); // Initial value
             expect(fieldValue.className.indexOf('editing')).toBe(-1); // Initial state (not editing)
             expect(field.className.indexOf('has-error')).toBe(-1); // Shouldn't display any errors
 
@@ -100,51 +112,87 @@ describe('Testing user.js', function() {
             // Make sure we're now in 'edit' mode -
             expect(fieldValue.className.indexOf('editing')).toBeGreaterThan(-1);
 
-            // Should now have 1 input element on screen w/ id == fax.
+            // Should now have 1 input element on screen w/ id == inputFieldID.
             var inputFields = TestUtils.scryRenderedDOMComponentsWithClass(page, 'form-control');
             expect(inputFields.length).toEqual(1);
             var inputField = inputFields[0];
             expect(inputField.id).toBe(inputFieldID);
 
-            // Pretend we're typing
-            
-            TestUtils.Simulate.change(inputField, {
-                target : {
-                    value : '123456789abcde',
-                    validity : { valid : false },
-                    validationMessage: "Some error message"
-                }
-            });
+            // Pretend we're typing (change event)
 
+            // Try a value that'd be error-ful re: validation depending on field's inputmode.
             if (inputField.getAttribute('inputmode') === 'tel'){
-                // Should have an error now (no letters)
-                expect(field.className.indexOf('has-error')).toBeGreaterThan(-1);
 
-                // Fix error
                 TestUtils.Simulate.change(inputField, {
                     target : {
-                        value : '16175551234',
-                        validity : { valid : true }, // We mock event validation result as this is performed by browser.
-                        validationMessage: ""
+                        value : '123456789abcde',
+                        validity : { valid : false },
+                        validationMessage: "Some error message"
                     }
                 });
 
-                expect(field.className.indexOf('has-error')).toBe(-1);
+                // Should have an error now (no letters in phone format excl. extension)
+                expect(field.className.indexOf('has-error')).toBeGreaterThan(-1);
             }
 
-            // Cancel out (no REST server running to test save)
-            var cancelButton = isRow ? fieldValue.children[0] : fieldValue.children[1];
-            TestUtils.Simulate.click(cancelButton);
+            // Correct input value
+            TestUtils.Simulate.change(inputField, {
+                target : {
+                    value : finalVal || '16175551234',
+                    validity : { valid : true }, // We mock event validation result as this is performed by browser.
+                    validationMessage: ""
+                }
+            });
 
-            // Make sure we're out of edit mode -
-            expect(fieldValue.className.indexOf('editing')).toBe(-1);
+            expect(field.className.indexOf('has-error')).toBe(-1);
+
+            if (!save){
+                // Cancel out
+                var cancelButton = fieldValue.children[childElemIndicesByStyle.cancelButton[fieldStyle]];
+                TestUtils.Simulate.click(cancelButton);
+                // Make sure we're out of edit mode -
+                expect(fieldValue.className.indexOf('editing')).toBe(-1);
+            } else {
+                // Save
+                var saveButton = fieldValue.children[childElemIndicesByStyle.saveButton[fieldStyle]];
+
+                // Setup dummy server response (success)
+                server.respondWith(
+                    "PATCH",
+                    context['@id'],
+                    [
+                        200, 
+                        { "Content-Type" : "application/json" },
+                        '{ "status" : "success" }'
+                    ]
+                );
+
+                TestUtils.Simulate.click(saveButton);
+                server.respond();
+                jest.runAllTimers(); // There is a 0ms setTimeout between store.dispatch (update Redux context prop) & setState in EditableField.
+                
+                // Make sure we're out of edit mode -
+                expect(fieldValue.className.indexOf('editing')).toBe(-1);
+
+                // Make sure value is now up-to-date in EditableField component on front-end view.
+                fieldValueElement = fieldValue.children[childElemIndicesByStyle.valueElement[fieldStyle]]; // Update element reference
+                expect(fieldValueElement.textContent.trim()).toBe(finalVal);
+
+                // Make sure value is now up-to-date in Redux store/context
+                var updatedContext = store.getState().context;
+                var updatedValueInContext = getNestedProperty(updatedContext,inputFieldID);
+                expect(updatedValueInContext).toBe(finalVal);
+            }
+
         }
 
-        testEditField('row fax', 'No fax number', 'fax');
-        testEditField('row phone1', 'No phone number', 'phone1');
-        testEditField('row skype', 'No skype ID', 'skype');
-        testEditField('inline first_name', 'Ad', 'first_name');
-        testEditField('inline last_name', 'Est', 'last_name');
+        testEditField('row fax', 'No fax number', '16175551234' , 'fax', false);
+        testEditField('row phone1', 'No phone number', '16175551234', 'phone1', true);
+        testEditField('row skype', 'No skype ID', 'alexkb0009', 'skype', false);
+        testEditField('inline first_name', 'Ad', 'Alex', 'first_name', false);
+        testEditField('inline last_name', 'Est', 'Balashov', 'last_name', true);
+
+        server.restore();
 
     });
 
