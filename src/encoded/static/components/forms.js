@@ -515,11 +515,13 @@ var EditableField = module.exports.EditableField = React.createClass({
             case 'username' : return (
                 <span className="input-wrapper">
                     <input type="text" inputMode="latin-name" autoComplete="username" {...commonPropsTextInput} />
+                    { this.validationFeedbackMessage() }
                 </span>
             );
             case 'text' : return (
                 <span className="input-wrapper">
                     <input type="text" inputMode="latin" {...commonPropsTextInput} />
+                    { this.validationFeedbackMessage() }
                 </span>
             );
         }
