@@ -52,6 +52,7 @@ def fake_request(headers):
         
         def __init__(self):
             self.headers = headers
+            self.cookies = {}
 
     return FakeRequest()
 
@@ -63,7 +64,15 @@ def test_get_jwt_gets_bearer_auth(fake_request, auth0_access_token):
 def test_get_jwt_skips_basic_auth(fake_request):
     fake_request.headers['Authorization'] = 'Basic test_token'
     jwt = get_jwt(fake_request)
-    assert jwt is None 
+    assert jwt is None
+
+
+def test_get_jwt_falls_back_to_cookie(fake_request):
+    fake_request.cookies['jwtToken'] = 'test_token'
+    fake_request.headers['Authorization'] = 'Basic test_token'
+    jwt = get_jwt(fake_request)
+    assert jwt == 'test_token'
+
 
 def test_login_unknown_user(anontestapp, auth0_4dn_user_token):
     res = anontestapp.post_json('/login', auth0_4dn_user_token, status=403)

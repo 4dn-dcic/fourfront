@@ -210,9 +210,10 @@ def get_jwt(request):
         auth_type = request.headers['Authorization'][:6]
         if auth_type.strip().lower() == 'bearer':
             return request.headers['Authorization'][7:]
-        return None
     except (ValueError, TypeError, KeyError):
-        return request.cookies.get('jwtToken', None)
+        pass
+
+    return request.cookies.get('jwtToken', None)
 
 
 @view_config(route_name='login', request_method='POST',
