@@ -112,7 +112,6 @@
                 "mg",
                 "μg",
                 "ml",
-                "cells/ml",
                 "cells"
             ]
         },
@@ -163,9 +162,9 @@
         },
         "follows_sop": {
             "title": "Follows SOP",
-            "description": "Flag to indicate if the 4DN SOP for the selected type of experiment was followed - true or false",
-            "type": "boolean",
-            "enum": [true, false]
+            "description": "Flag to indicate if the 4DN SOP for the selected type of experiment was followed - Yes or No",
+            "type": "string",
+            "enum": ["Yes", "No"]
         }
     }
 }
