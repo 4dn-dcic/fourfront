@@ -19,16 +19,13 @@ from .base import (
 
 
 
-ONLY_ADMIN_VIEW_ALLOWS = [
+ONLY_ADMIN_VIEW = [
     (Allow, 'group.admin', ['view', 'edit']),
     (Allow, 'group.read-only-admin', ['view']),
     (Allow, 'remoteuser.INDEXER', ['view']),
     (Allow, 'remoteuser.EMBED', ['view']),
+    (Deny, Everyone, ['view', 'edit'])
 ]
-
-ONLY_ADMIN_VIEW = [
-    (Deny, Everyone, ['view', 'edit']),
-] + ONLY_ADMIN_VIEW_ALLOWS
 
 ALLOW_EVERYONE_VIEW = [
     (Allow, Everyone, 'view'),
@@ -37,7 +34,7 @@ ALLOW_EVERYONE_VIEW = [
 ALLOW_EVERYONE_VIEW_AND_SUBMITTER_EDIT = [
     (Allow, Everyone, 'view'),
     (Allow, 'role.lab_submitter', 'edit'),
-] + ONLY_ADMIN_VIEW_ALLOWS
+] + ONLY_ADMIN_VIEW
 
 
 @collection(
@@ -62,12 +59,12 @@ class Lab(Item):
         'inactive': ALLOW_EVERYONE_VIEW,
     }
 
-    #def __init__(self, registry, models):
-    #    super().__init__(registry, models)
-    #    if hasattr(self, 'STATUS_ACL'):
-    #        self.STATUS_ACL.update(self.__class__.STATUS_ACL)
-    #    else:
-    #        self.STATUS_ACL = self.__class__.STATUS_ACL
+    def __init__(self, registry, models):
+        super().__init__(registry, models)
+        if hasattr(self, 'STATUS_ACL'):
+            self.STATUS_ACL.update(self.__class__.STATUS_ACL)
+        else:
+            self.STATUS_ACL = self.__class__.STATUS_ACL
 
     def __ac_local_roles__(self):
         """this creates roles that the lab item needs so it can be edited & viewed"""
