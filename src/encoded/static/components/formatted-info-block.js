@@ -187,6 +187,7 @@ var FormattedInfoBlock = module.exports = React.createClass({
          * 
          * @param {string} endpoint - REST endpoint to get from. Usually a '@id' field in schema-derived JSON data.
          * @param {string} propertyName - The second part of state variable to save results into, after 'details_'. E.g. 'lab' for 'details_lab'.
+         * @param {function} [callback] - Optional callback.
          * 
          * @example
          * componentDidMount : function(){
@@ -195,12 +196,16 @@ var FormattedInfoBlock = module.exports = React.createClass({
          *     }
          * },
          */
-        ajaxPropertyDetails : function(endpoint, propertyName){
+        ajaxPropertyDetails : function(endpoint, propertyName, callback = null){
             console.info('Obtaining details_' + propertyName + ' via AJAX.');
             ajaxLoad(endpoint + '?format=json', function(result){
                 var newStateAddition = {};
                 newStateAddition['details_' + propertyName] = result;
-                this.setState(newStateAddition);
+                this.setState(newStateAddition, ()=>{
+                    if (typeof callback == 'function'){
+                        callback(result);
+                    }
+                });
                 console.info('Obtained details_' + propertyName + ' via AJAX.');
             }.bind(this), 'GET');
         },

@@ -275,7 +275,7 @@ var User = module.exports.User = React.createClass({
 
                         </div>
                         <div className="col-sm-10 col-sm-offset-1 col-md-offset-0 col-md-6 col-lg-5">
-                            <ProfileWorkFields user={user} containerClassName="panel user-work-info shadow-border" parent={this} />
+                            <ProfileWorkFields user={user} parent={this} />
                         </div>
 
                     </div>
@@ -337,7 +337,7 @@ var ProfileWorkFields = React.createClass({
 
     getDefaultProps : function(){
         return {
-            containerClassName : 'panel'
+            containerClassName : 'panel user-work-info shadow-border'
         };
     },
 
@@ -351,11 +351,18 @@ var ProfileWorkFields = React.createClass({
     componentDidMount : function(){
         if (typeof this.props.user.lab == 'string' && !this.state.details_lab){
             // Fetch lab info & update into User instance state via the -for mixin-like-usage ajaxPropertyDetails func.
-            FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.user.lab, 'lab');
+            FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.user.lab, 'lab', (detail) => this.updateAwardsList([detail]) );
         }
     },
 
-    setAwardsList : function(labDetails){
+    /** 
+     * Get list of all awards (unique) from list of labs.
+     * ToDo : Migrate somewhere more static-cy.
+     * 
+     * @param {Object[]} labDetails - Array of lab objects with embedded award details.
+     * @return {Object[]} List of all unique awards in labs.
+     */
+    getAwardsList : function(labDetails){
         // Awards are embedded within labs, so we get full details.
         var awardsList = [];
         for (var i = 0; i < labDetails.length; i++){
@@ -365,37 +372,26 @@ var ProfileWorkFields = React.createClass({
                 }
             }
         }
-        this.setState({ 'awards_list' : awardsList });
         return awardsList;
     },
 
-    renderLabInfo : function(user = this.props.user){
-        if (typeof user.lab !== 'string') { // Probably no lab
-            return (
-                <span className="not-set">No Labs</span>
-            );
+    /**
+     * Update state.awards_list with award details from list of lab details.
+     * 
+     * @param {Object[]} labDetails - Array of lab objects with embedded award details.
+     */
+    updateAwardsList : function(labDetails){
+        var currentAwardsList = (this.state.awards_list || []).slice(0);
+        var currentAwardsListIDs = currentAwardsList.map((awd) => awd['@id']);
+        var newAwards = this.getAwardsList(labDetails);
+        for (var i = 0; i < newAwards.length; i++){
+            if (currentAwardsListIDs.indexOf(newAwards[i]['@id']) === -1){
+                currentAwardsList.push(newAwards[i]);
+            }
         }
-        return FormattedInfoBlock.Lab(this.state.details_lab, false, false);
-    },
-
-    renderAwardsField : function(){
-        //if (this.state.awards_list === null) return null;
-        return (
-            <div className="row field-entry awards">
-                <div className="col-sm-3 text-right text-left-xs">
-                    <label htmlFor="awards">Awards</label>
-                </div>
-                <div className="col-sm-9 value">
-                    <FormattedInfoBlock.List
-                        details={this.state.awards_list}
-                        renderItem={(detail) => FormattedInfoBlock.Award(detail, false, false, false) }
-                        propertyName="awards"
-                        fallbackMsg="No awards"
-                        loading={this.state.awards_list === null}
-                    />
-                </div>
-            </div>
-        );
+        if (this.state.awards_list.length < currentAwardsList.length){
+            this.setState({'awards_list' : currentAwardsList});
+        }
     },
 
     render : function(){
@@ -412,7 +408,11 @@ var ProfileWorkFields = React.createClass({
                         <label htmlFor="lab">Primary Lab</label>
                     </div>
                     <div id="lab" className="col-sm-9 value">
-                        { this.renderLabInfo(user) }
+                        { typeof user.lab === 'string' ? 
+                            FormattedInfoBlock.Lab(this.state.details_lab, false, false)
+                            : 
+                            <span className="not-set">No Labs</span>
+                        }
                     </div>
                 </div>
                 <div className="row field-entry job_title">
@@ -433,11 +433,24 @@ var ProfileWorkFields = React.createClass({
                             endpoints={user.submits_for}
                             propertyName="submits_for"
                             fallbackMsg="Not submitting for any organizations"
-                            ajaxCallback={this.setAwardsList}
+                            ajaxCallback={this.updateAwardsList}
                         />
                     </div>
                 </div>
-                { this.renderAwardsField() }
+                <div className="row field-entry awards">
+                    <div className="col-sm-3 text-right text-left-xs">
+                        <label htmlFor="awards">Awards</label>
+                    </div>
+                    <div className="col-sm-9 value">
+                        <FormattedInfoBlock.List
+                            details={this.state.awards_list}
+                            renderItem={(detail) => FormattedInfoBlock.Award(detail, false, false, false) }
+                            propertyName="awards"
+                            fallbackMsg="No awards"
+                            loading={this.state.awards_list === null}
+                        />
+                    </div>
+                </div>
             </div>
         );
     }
