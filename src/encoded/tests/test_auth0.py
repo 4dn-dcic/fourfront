@@ -4,6 +4,7 @@ import time
 import os
 from datetime import datetime
 pytestmark = pytest.mark.working
+from encoded.authentication import get_jwt
 
 
 @pytest.fixture(scope='session')
@@ -44,9 +45,28 @@ def headers(auth0_access_token):
     return {'Accept': 'applicatin/json', 'Content-Type': 'application/json', 'Authorization': 'Bearer ' +
      auth0_access_token}
 
+@pytest.fixture(scope='session')
+def fake_request(headers):
+
+    class FakeRequest(object):
+        
+        def __init__(self):
+            self.headers = headers
+
+    return FakeRequest()
+
+def test_get_jwt_gets_bearer_auth(fake_request, auth0_access_token):
+    jwt = get_jwt(fake_request)
+    assert jwt == auth0_access_token
+
+
+def test_get_jwt_skips_basic_auth(fake_request):
+    fake_request.headers['Authorization'] = 'Basic test_token'
+    jwt = get_jwt(fake_request)
+    assert jwt is None 
+
 def test_login_unknown_user(anontestapp, auth0_4dn_user_token):
     res = anontestapp.post_json('/login', auth0_4dn_user_token, status=403)
-    #assert 'Set-Cookie' in res.headers
 
 
 def test_login_logout(testapp, anontestapp, headers,
