@@ -72,8 +72,7 @@ var App = React.createClass({
             content: undefined,
             //session: !!(JWT.get('cookie')), // ToDo : Make this work for faster app state change on page load
             session: false,
-            user_actions: [],
-            authLoading : false
+            user_actions: []
         };
     },
 
@@ -201,7 +200,6 @@ var App = React.createClass({
         // check existing user_info in local storage and authenticate
         var idToken = JWT.get();
         if(idToken){ // if JWT present, try to authenticate
-            this.setState({ authLoading: true });
             this.fetch('/login', {
                 method: 'POST',
                 headers: {
@@ -217,12 +215,10 @@ var App = React.createClass({
             })
             .then(response => {
                 JWT.saveUserInfo(response);
-                this.setState({ authLoading: false });
                 if (typeof callback === 'function') callback(response);
             }, error => {
                 //error, clear localStorage and session
                 JWT.remove();
-                this.setState({ authLoading: false });
                 if (typeof callback === 'function') callback(error);
             });
             return idToken;
@@ -607,7 +603,7 @@ var App = React.createClass({
     },
 
     render: function() {
-        console.log('render app', this);
+        console.log('render app');
         var context = this.props.context;
         var content;
         var href_url = url.parse(this.props.href);
@@ -663,7 +659,7 @@ var App = React.createClass({
         }else if(context.code && context.code == 403){
             if(context.title && (context.title == 'Login failure' || context.title == 'no access')){
                 status = 'invalid_login';
-            }else if(context.title && context.title == 'Forbidden' && !this.state.authLoading){
+            }else if(context.title && context.title == 'Forbidden'){
                 status = 'forbidden';
             }
         }
@@ -692,7 +688,6 @@ var App = React.createClass({
                         context={context}
                         expSetFilters={this.props.expSetFilters}
                         expIncompleteFacets={this.props.expIncompleteFacets}
-                        authLoading={this.state.authLoading}
                     />
                 );
                 title = context.title || context.name || context.accession || context['@id'];
@@ -701,14 +696,6 @@ var App = React.createClass({
                 } else {
                     title = portal.portal_title;
                 }
-            } else if (this.state.authLoading) {
-                // Temporary, doesn't actually show for most pages (as they have context &--> ContentView)
-                content = (
-                    <div>
-                        <h1 class="page-title">Logging In</h1>
-                        <h3>Please wait...</h3>
-                    </div>
-                );
             } else {
                 // Handle the case where context is not loaded correctly
                 content = <ErrorPage status={null}/>;
