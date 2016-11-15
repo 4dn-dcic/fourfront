@@ -274,52 +274,57 @@ var EditableField = module.exports.EditableField = React.createClass({
 
     save : function(successCallback = null, errorCallback = null){
 
+        var errorFallback = function(r){
+            // ToDo display (bigger?) errors
+            console.error("Error: ", r);
+            this.setState({ serverErrors : r.errors, serverErrorsMessage : r.description, loading : false }, errorCallback);
+            return;
+        }.bind(this);
+
         this.setState({ loading : true }, ()=>{
             var value = this.state.value;
             var patchData = EditableField.generateNestedProperty(this.props.labelID, value);
             var timestamp = Math.floor(Date.now ? Date.now() / 1000 : (new Date()).getTime() / 1000);
             ajaxLoad((this.props.endpoint || this.props.context['@id']) + '?ts=' + timestamp, (r)=>{
                 console.log('EditableField Save Result:', r);
-                if (r.status === 'error'){
 
-                    // ToDo display (bigger?) errors
-                    console.error("Error: ", r);
-                    this.setState({ serverErrors : r.errors, serverErrorsMessage : r.description, loading : false }, errorCallback);
-                    return;
+                if (r.status !== 'success'){
+                    return errorFallback(r);
+                } 
 
-                } else if (r.status === 'success') {
-
-                    var updatedContext = _.clone(this.props.context);
-                    var inserted = EditableField.deepInsertObj(updatedContext, patchData);
-                    if (inserted){
-                        this.setState({ 'savedValue' : value, 'value' : value, 'dispatching' : true }, ()=> {
-                            var unsubscribe = store.subscribe(()=>{
-                                unsubscribe();
-                                setTimeout(()=>{
-                                    this.props.parent.setState({ currentlyEditing : null }, ()=> {
-                                        this.setState({ 'loading' : false, 'dispatching' : false });
-                                        if (typeof successCallback === 'function') successCallback(r);
-                                    });
-                                },0);
-                            });
-                            store.dispatch({
-                                type: { 'context': updatedContext }
-                            });
+                var updatedContext = _.clone(this.props.context);
+                var inserted = EditableField.deepInsertObj(updatedContext, patchData);
+                if (inserted){
+                    this.setState({ 'savedValue' : value, 'value' : value, 'dispatching' : true }, ()=> {
+                        var unsubscribe = store.subscribe(()=>{
+                            unsubscribe();
+                            setTimeout(()=>{
+                                this.props.parent.setState({ currentlyEditing : null }, ()=> {
+                                    this.setState({ 'loading' : false, 'dispatching' : false });
+                                    if (typeof successCallback === 'function') successCallback(r);
+                                });
+                            },0);
                         });
-                        
-                    } else {
-                        // Couldn't insert into current context, refetch from server :s.
-                        console.warn("Couldn't update current context, fetching from server.");
-                        this.context.navigate('', {'inPlace':true});
-                        // ToDo : ...navigate(inPlace)...
-                    }
+                        store.dispatch({
+                            type: { 'context': updatedContext }
+                        });
+                    });
+                    
+                } else {
+                    // Couldn't insert into current context, refetch from server :s.
+                    console.warn("Couldn't update current context, fetching from server.");
+                    this.context.navigate('', {'inPlace':true});
+                    // ToDo : ...navigate(inPlace)...
                 }
-            }, 'PATCH', null, JSON.stringify(patchData));
+
+            }, 'PATCH', errorFallback, JSON.stringify(patchData));
         });
     },
 
     handleChange : function(e){
-        var state = { value : e.target.value };
+        var state = {
+            'value' : (e.target.value === '' ? null : e.target.value) 
+        };
         if (e.target.validity){
             if (typeof e.target.validity.valid == 'boolean') {
                 state.valid = e.target.validity.valid;
@@ -328,6 +333,13 @@ var EditableField = module.exports.EditableField = React.createClass({
         if (e.target.validationMessage){
             state.validationMessage = e.target.validationMessage;
         }
+
+        // Reset serverErrors if any
+        if (this.state.serverErrors && this.state.serverErrors.length > 0) {
+            state.serverErrors = [];
+            state.serverErrorsMessage = null;
+        }
+
         // ToDo : cross-browser validation check + set error state then use for styling, etc.
         this.setState(state);
     },
@@ -433,15 +445,30 @@ var EditableField = module.exports.EditableField = React.createClass({
     validationFeedbackMessage : function(){
         //if (this.isValid(true)) return null;
         // ^ Hide via CSS instead.
-        switch(this.props.fieldType){
 
-            case 'phone': return (
+        if (this.state.serverErrors && this.state.serverErrors.length > 0) {
+            return (
                 <span className="help-block">
-                    Only use digits &mdash; no dashes, spaces, or parantheses.
-                    Optionally may include leading '+' or extension.<br/>
-                    <b>e.g.:</b> <code>+######### x###</code>
+                    { this.state.serverErrorsMessage ? <b>{ this.state.serverErrorsMessage }</b> : null }
+                    { this.state.serverErrors.map((e, i)=> (
+                        <div key={'error-' + i}>
+                            { (this.state.serverErrors.length === 1 ? '' : (i + 1) + '. ') + e.description }
+                        </div>
+                    ) ) }
                 </span>
             );
+        }
+
+        switch(this.props.fieldType){
+
+            case 'phone': 
+                return (
+                    <span className="help-block">
+                        Only use digits &mdash; no dashes, spaces, or parantheses.
+                        Optionally may include leading '+' or extension.<br/>
+                        <b>e.g.:</b> <code>+######### x###</code>
+                    </span>
+                );
             case 'email': return (
                 <span className="help-block">
                     Please enter a valid email address.
