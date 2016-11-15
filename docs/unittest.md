@@ -9,7 +9,7 @@ UNIT Testing
 
 ## JavaScript
 
-Unit tests in JavaScript are performed with [**Jest**](https://facebook.github.io/jest/), and initialized via `npm test <testfilenameprefix>` where testfilenameprefix is the first part (before `.js`) of the filename located in `src/encoded/static/components/__tests__`. Run `npm test` without arguments to run all tests.
+Unit tests in JavaScript are performed with [**Jest**](https://facebook.github.io/jest/), and initialized via `npm test <testfilenameprefix>` where testfilenameprefix is the first part (before `.js`) of the filename located in `src/encoded/static/components/__tests__`. Run `npm test` without arguments to run all tests. Execution of all tests is also automatically triggered in Travis upon committing or pull requesting to the GitHub repository.
 
 ### Guidelines
 
@@ -32,6 +32,7 @@ server.respondWith(
     ]
 );
 
+// Body of test
 doSomeFunctionsHereWhichSendAJAXCalls();          // Any code with AJAX/XHR calls.
 server.respond();                                 // Respond to any AJAX requests currently in queue.
 expect(myNewValue).toBe(whatMyNewValueShouldBe);  // Assert state in Jest that may have changed in response to or after AJAX call completion.
