@@ -323,7 +323,7 @@ var EditableField = module.exports.EditableField = React.createClass({
 
     handleChange : function(e){
         var state = {
-            'value' : (e.target.value === '' ? null : e.target.value) 
+            'value' : e.target.value // ToDo: change to (e.target.value === '' ? null : e.target.value)  and enable to process it on backend.
         };
         if (e.target.validity){
             if (typeof e.target.validity.valid == 'boolean') {
