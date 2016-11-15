@@ -137,7 +137,9 @@ var FormattedInfoBlockList = React.createClass({
     render: function(){
 
         if (!this.propDetailsValid() && !this.propEndpointsValid() && !this.state.loading){
-            return <span className="not-set">{ this.props.fallbackMsg }</span>;
+            return (
+                <span className="not-set">{ this.props.fallbackMsg }</span>
+            );
         }
 
         var blocks;
