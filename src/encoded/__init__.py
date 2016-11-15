@@ -226,10 +226,6 @@ def main(global_config, **local_config):
     """ This function returns a Pyramid WSGI application.
     """
 
-    # Print hostname where running
-    import socket
-    print('Booting up on ' + socket.gethostname())
-
     settings = global_config
     settings.update(local_config)
 
