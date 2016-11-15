@@ -165,6 +165,13 @@
             "description": "Flag to indicate if the 4DN SOP for the selected type of experiment was followed - Yes or No",
             "type": "string",
             "enum": ["Yes", "No"]
+        },
+        "sop_mapping": {
+            "title": "SOP map",
+            "permission": "import-items",
+            "description": "The mapping of fields default values from SOP current at time of submission",
+            "type": "object",
+            "linkTo": "SopMap"
         }
     }
 }

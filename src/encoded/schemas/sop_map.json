@@ -65,8 +65,18 @@
             "type": "string",
             "linkTo": "Protocol"
         },
-        "fields_in_sop": {
-            "title": "SOP fields",
+        "necessary_fields": {
+            "title": "Non-empty SOP fields",
+            "description": "The data fields that need a value but do not have default values",
+            "type": "array",
+            "items": {
+                "title": "Field name",
+                "description": "Name of the field that must have any value",
+                "type": "string"
+            }
+        },
+        "fields_with_default": {
+            "title": "SOP fields with defaults",
             "description": "The data fields that have SOP defaults",
             "type": "array",
             "items": {
@@ -83,6 +93,61 @@
                         "title": "Value",
                         "description": "a specified value for the specified parameter",
                         "type": "string"
+                    }
+                }
+            }
+        },
+        "fields_with_options": {
+            "title": "SOP fields that can have more than one possible value",
+            "description": "The data fields that have more than one possible acceptable value in SOP",
+            "comment": "example - for in situ Hi-C can use either MboI or DpnII for digestion",
+            "type": "array",
+            "items": {
+                "title": "Field Info",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "field_name": {
+                        "title": "Field name",
+                        "description": "the name of the field",
+                        "type": "string"
+                    },
+                    "field_options": {
+                        "title": "List of options",
+                        "description": "All acceptable values for the specified parameter",
+                        "type": "array",
+                        "items": {
+                            "title": "Value",
+                            "description": "An acceptable value for a field with options",
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "range_fields": {
+            "title": "Range fields",
+            "description": "The data fields that specify an acceptable range of values",
+            "type": "array",
+            "items": {
+                "title": "Field Info",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "field_name": {
+                        "title": "Field name",
+                        "description": "the name of the field",
+                        "type": "string"
+                    },
+                    "minimum_value": {
+                        "title": "Minimum Value",
+                        "description": "The specified minimum value for the given range field",
+                        "type": "number"
+                    },
+                    "maximum_value": {
+                        "title": "Maximum Value",
+                        "description": "The specified maximum value for the given range field",
+                        "type": "number"
                     }
                 }
             }

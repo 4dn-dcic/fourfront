@@ -29,6 +29,29 @@ class Experiment(Item):
                 "biosample.treatments", "biosample.biosource.individual.organism"]
     name_key = 'accession'
 
+    def generate_mapid(self, experiment_type, num):
+        delim = '_'
+        mapid = str(type(self).__name__)
+        mapid = mapid + delim + ''.join(experiment_type.split())
+        return mapid + delim + str(num)
+
+    def find_current_sop_map(self, experiment_type):
+        maps = []
+        suffnum = 1
+        mapid = self.generate_mapid(experiment_type, suffnum)
+        sop_coll = self.registry['collections']['SopMap']
+        while(True):
+            m = sop_coll.get(mapid)
+            if not m:
+                break
+            maps.append(m)
+            suffnum += 1
+            mapid = self.generate_mapid(experiment_type, suffnum)
+
+        if len(maps) > 0:
+            return maps[-1]
+        return None
+
     def _update(self, properties, sheets=None):
         # update self first to ensure 'experiment_relation' are stored in self.properties
         super(Experiment, self)._update(properties, sheets)
@@ -74,36 +97,11 @@ class Experiment(Item):
                     target_exp_set.properties["experiments_in_set"].append(acc)
                     target_exp_set.update(target_exp_set.properties)
 
-    def generate_mapid(self, experiment_type, num):
-        delim = '_'
-        mapid = str(type(self).__name__)
-        mapid = mapid + delim + ''.join(experiment_type.split())
-        return mapid + delim + str(num)
-
-    @calculated_property(schema={
-        "title": "SOP map",
-        "description": "The mapping of fields default values from SOP",
-        "type": "object",
-        "linkTo": "SopMap"
-    })
-    def sop_mapping(self, request, experiment_type):
-        maps = []
-        suffnum = 1
-        mapid = self.generate_mapid(experiment_type, suffnum)
-        sop_coll = self.registry['collections']['SopMap']
-        while(True):
-            m = sop_coll.get(mapid)
-            if not m:
-                break
-            maps.append(m)
-            suffnum += 1
-            mapid = self.generate_mapid(experiment_type, suffnum)
-
-        if len(maps) > 0:
-            lmap = maps[-1]
-            return request.embed('/sop_maps/' + str(lmap.uuid) + '/', '@@object')
-        else:
-            return None
+        # if the sop_map_at_submit field is not present populate it
+        if 'sop_mapping' not in properties.keys():
+            sopmap = self.find_current_sop_map(properties['experiment_type'])
+            properties['sop_mapping'] = str(sopmap.uuid)
+            super(Experiment, self)._update(properties, sheets)
 
 
 @collection(
