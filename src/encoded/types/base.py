@@ -146,9 +146,9 @@ class Item(snovault.Item):
         'published': ALLOW_CURRENT,
     }
 
-    def __init__(self, registry, models):
-        super().__init__(registry, models)
-        self.STATUS_ACL = self.__class__.STATUS_ACL
+    #def __init__(self, registry, models):
+    #    super().__init__(registry, models)
+    #    self.STATUS_ACL = self.__class__.STATUS_ACL
 
     @property
     def __name__(self):

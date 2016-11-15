@@ -62,12 +62,12 @@ class Lab(Item):
         'inactive': ALLOW_EVERYONE_VIEW,
     }
 
-    def __init__(self, registry, models):
-        super().__init__(registry, models)
-        if hasattr(self, 'STATUS_ACL'):
-            self.STATUS_ACL.update(self.__class__.STATUS_ACL)
-        else:
-            self.STATUS_ACL = self.__class__.STATUS_ACL
+    #def __init__(self, registry, models):
+    #    super().__init__(registry, models)
+    #    if hasattr(self, 'STATUS_ACL'):
+    #        self.STATUS_ACL.update(self.__class__.STATUS_ACL)
+    #    else:
+    #        self.STATUS_ACL = self.__class__.STATUS_ACL
 
     def __ac_local_roles__(self):
         """this creates roles that the lab item needs so it can be edited & viewed"""
