@@ -23,21 +23,24 @@ def _award_viewing_group(award_uuid, root):
 
 # Item acls
 
-ONLY_ADMIN_VIEW = [
+ONLY_ADMIN_VIEW_ALLOWS = [
     (Allow, 'group.admin', ['view', 'edit']),
     (Allow, 'group.read-only-admin', ['view']),
     (Allow, 'remoteuser.INDEXER', ['view']),
     (Allow, 'remoteuser.EMBED', ['view']),
-    (Deny, Everyone, ['view', 'edit']),
 ]
+
+ONLY_ADMIN_VIEW = [
+    (Deny, Everyone, ['view', 'edit']),
+] + ONLY_ADMIN_VIEW_ALLOWS
 
 ALLOW_EVERYONE_VIEW = [
     (Allow, Everyone, 'view'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW_ALLOWS
 
 ALLOW_LAB_MEMBER_VIEW = [
     (Allow, 'role.lab_member', 'view'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW_ALLOWS
 
 ALLOW_VIEWING_GROUP_VIEW = [
     (Allow, 'role.viewing_group_member', 'view'),
@@ -51,7 +54,7 @@ ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT = [
 ALLOW_LAB_SUBMITTER_EDIT = [
     (Allow, 'role.lab_member', 'view'),
     (Allow, 'role.lab_submitter', 'edit'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW_ALLOWS
 
 ALLOW_CURRENT_AND_SUBMITTER_EDIT = [
     (Allow, Everyone, 'view'),
@@ -60,7 +63,7 @@ ALLOW_CURRENT_AND_SUBMITTER_EDIT = [
 
 ALLOW_CURRENT = [
     (Allow, Everyone, 'view'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW_ALLOWS
 
 DELETED = [
     (Deny, Everyone, 'visible_for_edit')
@@ -142,6 +145,10 @@ class Item(snovault.Item):
         # publication
         'published': ALLOW_CURRENT,
     }
+
+    def __init__(self, registry, models):
+        super().__init__(registry, models)
+        self.STATUS_ACL = self.__class__.STATUS_ACL
 
     @property
     def __name__(self):

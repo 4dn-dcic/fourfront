@@ -205,12 +205,12 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
             } else if (xhr.status == 400) {
                 (patchedConsole || console).error('There was an error 400');
                 if (typeof fallback == 'function'){
-                    fallback();
+                    fallback(JSON.parse(xhr.responseText));
                 }
             } else {
                 (patchedConsole || console).error('Something else other than 200 was returned: ',JSON.parse(xhr.responseText));
                 if (typeof fallback == 'function'){
-                    fallback();
+                    fallback(JSON.parse(xhr.responseText));
                 }
             }
         }
@@ -227,8 +227,9 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
 }
 
 var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = {}, data = null){
-    return new Promise(function(resolve, reject) {
-        var xhr = new XMLHttpRequest();
+    var xhr;
+    var promise = new Promise(function(resolve, reject) {
+        xhr = new XMLHttpRequest();
         xhr.onload = function() {
             // response SHOULD be json
             resolve(JSON.parse(xhr.responseText));
@@ -244,6 +245,9 @@ var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = {
         }
         return xhr;
     });
+    promise.xhr = xhr;
+    promise.abort = xhr.abort;
+    return promise;
 }
 
 /**

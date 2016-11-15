@@ -207,7 +207,14 @@ var FormattedInfoBlock = module.exports = React.createClass({
                     }
                 });
                 console.info('Obtained details_' + propertyName + ' via AJAX.');
-            }.bind(this), 'GET');
+            }.bind(this), 'GET', function(error){
+                var newStateAddition = {};
+                newStateAddition['details_' + propertyName] = {
+                    'error' : true,
+                    'body' : error
+                };
+                this.setState(newStateAddition);
+            }.bind(this));
         },
 
         /**
@@ -221,6 +228,9 @@ var FormattedInfoBlock = module.exports = React.createClass({
          * @param {string} [key] - Unique key to add to generated element, supply if generating a collection/array.
          */
         Lab : function(details_lab, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
+            if (details_lab && typeof details_lab.error !== 'undefined' && details_lab.error) {
+                return FormattedInfoBlock.Error.apply(this, arguments);
+            }
             return FormattedInfoBlock.generate(
                 details_lab,
                 typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-users" : null),
@@ -242,6 +252,9 @@ var FormattedInfoBlock = module.exports = React.createClass({
          * @see FormattedInfoBlock.Lab
          */
         Award : function(details_award, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
+            if (details_award && typeof details_award.error !== 'undefined' && details_award.error) {
+                return FormattedInfoBlock.Error.apply(this, arguments);
+            }
             return FormattedInfoBlock.generate(
                 details_award,
                 typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-institution" : null),
@@ -253,6 +266,18 @@ var FormattedInfoBlock = module.exports = React.createClass({
             );
         },
 
+        Error : function(details_error, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
+            return FormattedInfoBlock.generate(
+                details_error.body,
+                typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-exclamation-circle" : null),
+                includeLabel ? "Error" : null,
+                details_error && details_error.body && includeDetail ? details_error.body.detail : null,
+                'error-block',
+                'error-message',
+                key
+            );
+        },
+
         generate : function(detail, iconClass = null, label = null, contents = null, extraContainerClassName = null, extraDetailClassName = null, key = null){
             return (
                 <FormattedInfoBlock
@@ -260,7 +285,7 @@ var FormattedInfoBlock = module.exports = React.createClass({
                     label={label}
                     iconClass={iconClass}
                     title={detail ? detail.title : null }
-                    titleHref={detail ? detail['@id'] : null }
+                    titleHref={detail && detail['@id'] ? detail['@id'] : null }
                     extraContainerClassName={extraContainerClassName}
                     extraDetailClassName={extraDetailClassName}
                     loading={!detail}

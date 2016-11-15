@@ -96,6 +96,7 @@ var Login = React.createClass({
             store.dispatch({
                 type: {'context':error}
             });
+            this.lock.hide.bind(this.lock);
         });
 
     },

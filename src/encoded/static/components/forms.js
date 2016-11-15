@@ -277,10 +277,12 @@ var EditableField = module.exports.EditableField = React.createClass({
         this.setState({ loading : true }, ()=>{
             var value = this.state.value;
             var patchData = EditableField.generateNestedProperty(this.props.labelID, value);
-            ajaxLoad(this.props.endpoint || this.props.context['@id'], (r)=>{
+            var timestamp = Math.floor(Date.now ? Date.now() / 1000 : (new Date()).getTime() / 1000);
+            ajaxLoad((this.props.endpoint || this.props.context['@id']) + '?ts=' + timestamp, (r)=>{
+                console.log('EditableField Save Result:', r);
                 if (r.status === 'error'){
 
-                    // ToDo display errors
+                    // ToDo display (bigger?) errors
                     console.error("Error: ", r);
                     this.setState({ serverErrors : r.errors, serverErrorsMessage : r.description, loading : false }, errorCallback);
                     return;

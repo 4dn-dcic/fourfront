@@ -585,10 +585,23 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 	}
 
+	&.error-block.no-icon h5:before {
+		content: "\f06a";
+		font-family: FontAwesome;
+		margin-right: 6px;
+		color: #999;
+	}
+
 	div.more-details {
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		
+		&.error-message {
+			white-space: pre-line;
+			white-space: normal;
+			opacity: 0.5;
+		}
 	}
 
 	.icon-container {
