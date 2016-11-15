@@ -202,15 +202,14 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
                 if (typeof callback == 'function'){
                     callback(JSON.parse(xhr.responseText));
                 }
-            } else if (xhr.status == 400) {
-                (patchedConsole || console).error('There was an error 400');
-                if (typeof fallback == 'function'){
-                    fallback(JSON.parse(xhr.responseText));
-                }
             } else {
-                (patchedConsole || console).error('Something else other than 200 was returned: ',JSON.parse(xhr.responseText));
-                if (typeof fallback == 'function'){
-                    fallback(JSON.parse(xhr.responseText));
+                var response;
+                try {
+                    response = JSON.parse(xhr.responseText);
+                    (patchedConsole || console).error('ajaxLoad error: ', response);
+                    if (typeof fallback == 'function') fallback(response);
+                } catch (error) {
+                    (patchedConsole || console).error('Non-JSON error response:', xhr.responseText);
                 }
             }
         }

@@ -157,13 +157,15 @@ describe('Testing user.js', function() {
                 var saveButton = fieldValue.children[childElemIndicesByStyle.saveButton[fieldStyle]];
 
                 // Setup dummy server response (success)
+                var escapedID = context['@id'].replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                var pathRegex = new RegExp(escapedID + "(\\?ts=(\\d+))?");
                 server.respondWith(
                     "PATCH",
-                    context['@id'],
+                    pathRegex,
                     [
                         200, 
                         { "Content-Type" : "application/json" },
-                        '{ "status" : "success" }'
+                        JSON.stringify({ "status" : "success" })
                     ]
                 );
 
