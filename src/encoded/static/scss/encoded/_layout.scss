@@ -561,20 +561,6 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 	}
 
-	&.loading > .row {
-		opacity : 1;
-	}
-
-	&.loaded > .row {
-		opacity : 0;
-		transition: opacity 0s;
-	}
-
-	&.loaded.transitioned > .row {
-		opacity : 1;
-		transition: opacity .5s;
-	}
-
 	.row .icon-container {
 		max-width: 50px;
 	}
@@ -615,6 +601,28 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			padding-right: 0px;
 			padding-left: 5px;
 		}
+	}
+
+}
+
+.formatted-info-panel,
+.formatted-info-panel-list {
+
+	&.loading > li,
+	&.loading > .row {
+		opacity : 1;
+	}
+
+	&.loaded > li,
+	&.loaded > .row {
+		opacity : 0;
+		transition: opacity 0s;
+	}
+
+	&.loaded.transitioned > li,
+	&.loaded.transitioned > .row {
+		opacity : 1;
+		transition: opacity .5s;
 	}
 
 }

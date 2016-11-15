@@ -379,7 +379,7 @@ var ProfileWorkFields = React.createClass({
     },
 
     renderAwardsField : function(){
-        if (this.state.awards_list === null) return null;
+        //if (this.state.awards_list === null) return null;
         return (
             <div className="row field-entry awards">
                 <div className="col-sm-3 text-right text-left-xs">
@@ -388,9 +388,10 @@ var ProfileWorkFields = React.createClass({
                 <div className="col-sm-9 value">
                     <FormattedInfoBlock.List
                         details={this.state.awards_list}
-                        renderFunction={(detail) => FormattedInfoBlock.Award(detail, false, false, false) }
+                        renderItem={(detail) => FormattedInfoBlock.Award(detail, false, false, false) }
                         propertyName="awards"
                         fallbackMsg="No awards"
+                        loading={this.state.awards_list === null}
                     />
                 </div>
             </div>
@@ -428,7 +429,7 @@ var ProfileWorkFields = React.createClass({
                     </div>
                     <div className="col-sm-9 value">
                         <FormattedInfoBlock.List
-                            renderFunction={(detail) => FormattedInfoBlock.Lab(detail, false, false, false) }
+                            renderItem={(detail) => FormattedInfoBlock.Lab(detail, false, false, false) }
                             endpoints={user.submits_for}
                             propertyName="submits_for"
                             fallbackMsg="Not submitting for any organizations"
