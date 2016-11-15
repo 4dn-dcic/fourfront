@@ -197,6 +197,103 @@ def mboI(testapp, worthington_biochemical):
 
 
 @pytest.fixture
+def cell_culture(testapp):
+    '''
+    A minimal biosample_cell_culture item with only schema-required field
+    '''
+    return testapp.post_json('/biosample_cell_culture', {'culture_start_date': '2016-01-01'}).json['@graph'][0]
+
+
+@pytest.fixture
+def tier1_cell_culture(testapp, image):
+    '''
+    A biosample_cell_culture item for a tier 1 cell
+    '''
+    item = {
+        'culture_start_date': '2016-01-01',
+        'culture_duration': 2,
+        'culture_duration_units': 'days',
+        'passage_number': 1,
+        'morphology_image': image['@id']
+    }
+    return testapp.post_json('/biosample_cell_culture', item).json['@graph'][0]
+
+
+@pytest.fixture
+def tissue_biosample(testapp, lung_biosource):
+    item = {
+        'description': "Tissue Biosample",
+        'biosource': [lung_biosource['@id']],
+    }
+    return testapp.post_json('/biosample', item).json['@graph'][0]
+
+
+@pytest.fixture
+def tier1_biosample(testapp, tier1_biosource, tier1_cell_culture):
+    item = {
+        'description': "Tier1 Biosample",
+        'biosource': [tier1_biosource['@id']],
+        'cell_culture_details': tier1_cell_culture['@id'],
+    }
+    return testapp.post_json('/biosample', item).json['@graph'][0]
+
+
+@pytest.fixture
+def protocol(testapp):
+    item = {'description': 'A Protocol'}
+    return testapp.post_json('/protocol', item).json['@graph'][0]
+
+
+@pytest.fixture
+def tier1_biosource(testapp, protocol):
+    item = {
+        'description': 'Tier 1 cell line Biosource',
+        'biosource_type': 'immortalized cell line',
+        'cell_line': 'IMR-90',
+        'SOP_cell_line': protocol['@id']
+    }
+    return testapp.post_json('/biosource', item).json['@graph'][0]
+
+
+@pytest.fixture
+def GM12878_biosource(testapp):
+    item = {
+        "accession": "4DNSR000AAQ1",
+        "biosource_type": "immortalized cell line",
+        "cell_line": "GM12878",
+    }
+    return testapp.post_json('/biosource', item).json['@graph'][0]
+
+
+@pytest.fixture
+def F123_biosource(testapp):
+    item = {
+        "accession": "4DNSR000AAQ2",
+        "biosource_type": "stem cell",
+        "cell_line": "F123-CASTx129",
+    }
+    return testapp.post_json('/biosource', item).json['@graph'][0]
+
+
+@pytest.fixture
+def lung_biosource(testapp):
+    item = {
+        "biosource_type": "tissue",
+        "tissue": "lung"
+    }
+    return testapp.post_json('/biosource', item).json['@graph'][0]
+
+
+@pytest.fixture
+def whole_biosource(testapp, human_individual):
+    item = {
+        "biosource_type": "whole organisms",
+        "individual": human_individual['@id']
+    }
+    return testapp.post_json('/biosource', item).json['@graph'][0]
+
+
+@pytest.fixture
 def human_biosource(testapp, human_individual, worthington_biochemical):
     item = {
         "description": "GM12878 cells",
@@ -330,6 +427,15 @@ AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO
 @pytest.fixture
 def attachment():
     return {'download': 'red-dot.png', 'href': RED_DOT}
+
+
+@pytest.fixture
+def image(testapp, attachment):
+    item = {
+        'attachment': attachment,
+        'caption': 'Test image'
+    }
+    return testapp.post_json('/image', item).json['@graph'][0]
 
 
 @pytest.fixture

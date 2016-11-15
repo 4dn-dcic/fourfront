@@ -3,44 +3,6 @@ pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
 @pytest.fixture
-def GM12878_biosource(testapp):
-    item = {
-        "accession": "4DNSR000AAQ1",
-        "biosource_type": "immortalized cell line",
-        "cell_line": "GM12878",
-    }
-    return testapp.post_json('/biosource', item).json['@graph'][0]
-
-
-@pytest.fixture
-def F123_biosource(testapp):
-    item = {
-        "accession": "4DNSR000AAQ2",
-        "biosource_type": "stem cell",
-        "cell_line": "F123-CASTx129",
-    }
-    return testapp.post_json('/biosource', item).json['@graph'][0]
-
-
-@pytest.fixture
-def lung_biosource(testapp):
-    item = {
-        "biosource_type": "tissue",
-        "tissue": "lung"
-    }
-    return testapp.post_json('/biosource', item).json['@graph'][0]
-
-
-@pytest.fixture
-def whole_biosource(testapp, human_individual):
-    item = {
-        "biosource_type": "whole organisms",
-        "individual": human_individual['@id']
-    }
-    return testapp.post_json('/biosource', item).json['@graph'][0]
-
-
-@pytest.fixture
 def cell_lines(GM12878_biosource, F123_biosource):
     return [GM12878_biosource, F123_biosource]
 
