@@ -197,7 +197,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
                     return payload
 
         except Exception as e:
-            print('Invalid assertion: %s (%s)', (e, type(e).__name__))
+            print('Invalid JWT assertion : %s (%s)', (e, type(e).__name__))
             return None
 
         print("didn't get email or email is not verified")
@@ -206,9 +206,14 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
 
 def get_jwt(request):
     try:
-        return request.headers['Authorization'][7:]
+        # ensure this is a jwt token not basic auth:
+        auth_type = request.headers['Authorization'][:6]
+        if auth_type.strip().lower() == 'bearer':
+            return request.headers['Authorization'][7:]
     except (ValueError, TypeError, KeyError):
-        return request.cookies.get('jwtToken', None)
+        pass
+
+    return request.cookies.get('jwtToken', None)
 
 
 @view_config(route_name='login', request_method='POST',
