@@ -389,7 +389,7 @@ var ProfileWorkFields = React.createClass({
                 currentAwardsList.push(newAwards[i]);
             }
         }
-        if (this.state.awards_list.length < currentAwardsList.length){
+        if (!this.state.awards_list || this.state.awards_list.length < currentAwardsList.length){
             this.setState({'awards_list' : currentAwardsList});
         }
     },
