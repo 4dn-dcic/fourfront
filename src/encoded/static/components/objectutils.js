@@ -1,5 +1,7 @@
 'use strict';
 
+var cookie = require('react-cookie');
+
 var SingleTreatment = module.exports.SingleTreatment = function(treatment) {
     var treatmentText = '';
 
@@ -25,29 +27,6 @@ var isServerSide = module.exports.isServerSide = function(){
         return true;
     }
     return false;
-}
-
-var setJWTHeaders = function(xhr, headers = {}) {
-    if (typeof headers["Content-Type"] == 'undefined'){
-        headers["Content-Type"] = "application/json;charset=UTF-8";
-        headers.Accept = 'application/json';
-    }
-
-    var userInfo = localStorage.getItem('user_info') || null;
-    var idToken = userInfo ? JSON.parse(userInfo).id_token : null;
-
-    //Add req'd headers if not exist already
-    if(userInfo && typeof headers['Authorization'] == 'undefined'){
-        headers['Authorization'] = 'Bearer '+idToken;
-    }
-
-    // put everything in the header
-    var headerKeys = Object.keys(headers);
-    for (var i=0; i < headerKeys.length; i++){
-        xhr.setRequestHeader(headerKeys[i], headers[headerKeys[i]]);
-    }
-
-    return xhr;
 }
 
 /**
@@ -120,6 +99,97 @@ var patchedConsole = module.exports.console = (function(){
 })();
 
 
+
+var JWT = module.exports.JWT = {
+
+    COOKIE_ID : 'jwtToken',
+    
+    get : function(source = 'any'){
+
+        var idToken = null;
+
+        if (source === 'cookie' || source === 'any'){
+            idToken = cookie.load(JWT.COOKIE_ID) || null;
+        }
+
+        if (idToken === null && (source === 'localStorage' || source === 'any')){
+            if(typeof(Storage) !== 'undefined'){
+                if(localStorage && localStorage.user_info){
+                    idToken = JSON.parse(localStorage.getItem('user_info')).id_token;
+                }
+            }
+        }
+
+        return idToken;
+    },
+
+    save : function(idToken, destination = 'cookie'){
+        if (destination === 'cookie'){
+            cookie.save(JWT.COOKIE_ID, idToken, {
+                path : '/'
+            });
+            return true;
+        }
+    },
+
+    saveUserInfoLocalStorage : function(user_info){
+        if(typeof(Storage) == 'undefined') return false;
+        localStorage.setItem("user_info", JSON.stringify(user_info));
+        return true;
+    },
+
+    saveUserInfo : function(user_info){
+        // Delegate JWT token to cookie, keep extended user_info obj (w/ copy of token) in localStorage.
+        JWT.save(user_info.idToken || user_info.id_token, 'cookie');
+        JWT.saveUserInfoLocalStorage(user_info);
+    },
+
+    remove : function(source = 'all'){
+        if (source === 'any' || source === '*') source = 'all';
+
+        var removedCookie = false,
+            removedLocalStorage = false;
+
+        if (source === 'cookie' || source === 'all'){
+            cookie.remove(JWT.COOKIE_ID, { path : '/' });
+            removedCookie = true;
+        }
+        if (source === 'localStorage' || source === 'all'){
+            if(typeof(Storage) === 'undefined') return false;
+            localStorage.removeItem("user_info");
+            removedLocalStorage = true;
+        }
+        console.info('Removed JWT: ' + removedCookie + ' (cookie) ' + removedLocalStorage + ' (localStorage)');
+        return { 'removedCookie' : removedCookie, 'removedLocalStorage' : removedLocalStorage };
+    },
+
+    addToHeaders : function(headers = {}){
+        var idToken = JWT.get();
+        if(idToken && typeof headers.Authorization == 'undefined'){
+            headers.Authorization = 'Bearer ' + idToken;
+        }
+        return headers;
+    }
+
+};
+
+
+var setAjaxHeaders = function(xhr, headers = {}) {
+    if (typeof headers["Content-Type"] == 'undefined'){
+        headers["Content-Type"] = "application/json;charset=UTF-8";
+        headers.Accept = 'application/json';
+    }
+    // Add JWT if set
+    JWT.addToHeaders(headers);
+    // put everything in the header
+    var headerKeys = Object.keys(headers);
+    for (var i=0; i < headerKeys.length; i++){
+        xhr.setRequestHeader(headerKeys[i], headers[headerKeys[i]]);
+    }
+
+    return xhr;
+}
+
 var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET', fallback = null, data = null, headers = {}){
     if (typeof window == 'undefined') return null;
     var xhr = new XMLHttpRequest();
@@ -143,7 +213,7 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
         }
     };
     xhr.open(method, url, true);
-    xhr = setJWTHeaders(xhr, headers);
+    xhr = setAjaxHeaders(xhr, headers);
     if(data){
         xhr.send(data);
     }else{
@@ -160,7 +230,7 @@ var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = {
         };
         xhr.onerror = reject;
         xhr.open(method, url, true);
-        xhr = setJWTHeaders(xhr, headers);
+        xhr = setAjaxHeaders(xhr, headers);
         if(data){
             xhr.send(data);
         }else{
