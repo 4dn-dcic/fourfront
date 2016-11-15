@@ -11,6 +11,7 @@ from snovault import (
 from .base import (
     Item,
 )
+import string
 
 
 @collection(
@@ -29,6 +30,9 @@ class Vendor(Item):
 
     def _update(self, properties, sheets=None):
         # set name based on what is entered into title
-        properties['name'] = properties['title'].replace(' ', '-').lower()
+        exclude = set(string.punctuation)
+        title = properties['title']
+        title = ''.join(ch for ch in title if ch not in exclude)
+        properties['name'] = title.replace(' ', '-').lower()
 
         super(Vendor, self)._update(properties, sheets)
