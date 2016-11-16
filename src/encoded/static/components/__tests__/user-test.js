@@ -20,7 +20,7 @@ describe('Testing user.js', function() {
     beforeEach(function() {
         React = require('react');
         var { Provider, connect } = require('react-redux');
-        TestUtils = require('react/lib/ReactTestUtils');
+        TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
         User = require('../user').User;
         context = require('../testdata/submitter');

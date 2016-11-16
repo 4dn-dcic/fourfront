@@ -16,7 +16,7 @@ describe('Testing home.js', function() {
 
     beforeEach(function() {
         React = require('react');
-        TestUtils = require('react/lib/ReactTestUtils');
+        TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
         HomePage = require('../home');
         Wrapper = React.createClass({

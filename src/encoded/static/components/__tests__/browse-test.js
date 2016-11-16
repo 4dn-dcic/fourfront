@@ -21,7 +21,7 @@ describe('Testing browse.js for experiment set browser', function() {
     beforeEach(function() {
         React = require('react');
         var { Provider, connect } = require('react-redux');
-        TestUtils = require('react/lib/ReactTestUtils');
+        TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
         Browse = require('../browse').Browse;
         context = require('../testdata/browse/context');
