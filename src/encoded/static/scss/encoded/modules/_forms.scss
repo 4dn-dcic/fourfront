@@ -281,7 +281,7 @@ div.fieldset.editable-fields {
 		}
 
 		.edit-button {
-			color: #f8f8f8;
+			color: transparent;
 			&.right {
 				transform: translateY(2px);
 			}
@@ -297,7 +297,7 @@ div.fieldset.editable-fields {
 		}
 
 		&:hover .edit-button {
-			color : #bbb;
+			color : #aaa;
 			&.inline { background-color: rgba(255,255,255,0.5); }
 			&:hover {
 				color: #000;

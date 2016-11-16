@@ -262,9 +262,9 @@ var User = module.exports.User = React.createClass({
                                         <div className="col-sm-9 user-title-col">
                                             <h1 className="user-title">
                                                 <FieldSet context={user} parent={this} style="inline" inputSize="lg" absoluteBox={true}>
-                                                    <EditableField labelID="first_name" fallbackText="No first name set" placeholder="John" />
+                                                    <EditableField labelID="first_name" fallbackText="No first name set" placeholder="First name" />
                                                     {' '}
-                                                    <EditableField labelID="last_name" fallbackText="No last name set" placeholder="Smith" />
+                                                    <EditableField labelID="last_name" fallbackText="No last name set" placeholder="Last name" />
                                                 </FieldSet>
                                             </h1>
                                         </div>
