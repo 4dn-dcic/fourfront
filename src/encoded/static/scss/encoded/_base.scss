@@ -14,6 +14,8 @@ $mobile-font-factor: 1;
 $navbar-link-color : #888888;
 $navbar-link-active-color : #000000;
 
+$modal-backdrop-opacity : 0.8;
+
 // Pass value with CSS units and get just the value back
 @function strip-units($value) {
     @return $value / ($value * 0 + 1);

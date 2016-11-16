@@ -1,6 +1,12 @@
 // Custom Mixins
 // -----------------------------------------------
 
+// RADIAL GRADIENT BG (copied from Auth0 Modal BG)
+@mixin gradient-radial-modal-bg($inner-color: #40404b, $outer-color: #111118, $bg-color : rgba(34,34,40,0.94)) {
+  background: -webkit-radial-gradient($inner-color, $outer-color) $bg-color;
+  background: radial-gradient($inner-color, $outer-color) $bg-color;
+}
+
 // STICKY FOOTER
 // Compass' sticky footer with added top-border variable to allow use of a top border on your footer.
 // @include sticky-footer(54px, "#my-root", "#my-root-footer", "#my-footer")
