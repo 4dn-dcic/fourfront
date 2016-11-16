@@ -422,7 +422,7 @@ var App = React.createClass({
             if (request && this.requestCurrent) {
                 // Abort the current request, then remember we've aborted it so that we don't render
                 // the Network Request Error page.
-                // request.abort(); // commented out because code didn't actually do anything
+                if (request && typeof request.abort === 'function') request.abort();
                 this.requestAborted = true;
                 this.requestCurrent = false;
             }
@@ -449,7 +449,7 @@ var App = React.createClass({
         return true;
     },
 
-    navigate: function (href, options) {
+    navigate: function (href, options, callback) {
         // options.skipRequest only used by collection search form
         // options.replace only used handleSubmit, handlePopState, handlePersonaLogin
         options = options || {};
@@ -479,10 +479,12 @@ var App = React.createClass({
 
         var request = this.props.contextRequest;
 
+        console.log('navigate() > ',request);
+
         if (request && this.requestCurrent) {
             // Abort the current request, then remember we've aborted the request so that we
             // don't render the Network Request Error page.
-            // request.abort(); // commented out because code didn't actually do anything
+            if (request && typeof request.abort === 'function') request.abort();
             this.requestAborted = true;
             this.requestCurrent = false;
         }
@@ -539,6 +541,11 @@ var App = React.createClass({
                 window.history.pushState(null, '', href + fragment);
             }
             dispatch_dict.href = href + fragment;
+
+            if (typeof callback == 'function'){
+                callback(response);
+            }
+
             return response;
         })
         .then(this.receiveContextResponse);
@@ -689,7 +696,7 @@ var App = React.createClass({
                 } else {
                     title = portal.portal_title;
                 }
-            }else{
+            } else {
                 // Handle the case where context is not loaded correctly
                 content = <ErrorPage status={null}/>;
                 title = 'Error';

@@ -3,7 +3,7 @@
 require('./libs/react-patches');
 var React = require('react');
 var ReactDOM = require('react-dom')
-var ReactMount = require('react/lib/ReactMount');
+var ReactMount = require('react-dom/lib/ReactMount');
 ReactMount.allowFullPageRender = true;
 
 var App = require('./components');
