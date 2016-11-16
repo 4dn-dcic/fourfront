@@ -153,8 +153,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
         id_token = get_jwt(request)
         if not id_token:
             # can I thrown an 403 here?
-            if self.debug:
-                self._log('Missing assertion.', 'unauthenticated_userid', request)
+            print('Missing assertion.', 'unauthenticated_userid', request)
             return None
 
         user_info = self.get_token_info(id_token, request)
@@ -163,12 +162,6 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
 
         email = request._auth0_authenticated = user_info['email'].lower()
         return email
-
-    def remember(self, request, principal, **kw):
-        return []
-
-    def forget(self, request):
-        return []
 
 
     def get_token_info(self, token, request):
@@ -189,7 +182,6 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
                     return payload
 
             else: # we don't have the key, let auth0 do the work for us
-                # else this is an auth0 token, lets get user info
                 user_url = "https://{domain}/tokeninfo".format(domain='hms-dbmi.auth0.com')
                 resp  = requests.post(user_url, {'id_token':token})
                 payload = resp.json()
@@ -284,15 +276,6 @@ def session_properties(request):
     return properties
 
 
-def webuser_check(username, password, request):
-    # webusers have email address for username, thus, make sure we have an email address
-    if not '@' in username:
-        return None
-    if not User.check_password(username, password):
-        return None
-    return []
-
-
 def basic_auth_check(username, password, request):
     # We may get called before the context is found and the root set
     root = request.registry[ROOT]
@@ -359,13 +342,11 @@ def impersonate_user(request):
 def generate_user():
     """ Generate a random user name with 64 bits of entropy
         Used to generate access_key
-        remove @ to differentiate from web users, see webuser_check
     """
     # Take a random 5 char binary string (80 bits of
     # entropy) and encode it as upper cased base32 (8 chars)
     random_bytes = os.urandom(5)
     user = base64.b32encode(random_bytes).decode('ascii').rstrip('=').upper()
-    user = user.replace("@","")
     return user
 
 
