@@ -40,13 +40,14 @@ class Experiment(Item):
         suffnum = 1
         mapid = self.generate_mapid(experiment_type, suffnum)
         sop_coll = self.registry['collections']['SopMap']
-        while(True):
-            m = sop_coll.get(mapid)
-            if not m:
-                break
-            maps.append(m)
-            suffnum += 1
-            mapid = self.generate_mapid(experiment_type, suffnum)
+        if sop_coll is not None:
+            while(True):
+                m = sop_coll.get(mapid)
+                if not m:
+                    break
+                maps.append(m)
+                suffnum += 1
+                mapid = self.generate_mapid(experiment_type, suffnum)
 
         if len(maps) > 0:
             return maps[-1]
@@ -100,7 +101,8 @@ class Experiment(Item):
         # if the sop_map_at_submit field is not present populate it
         if 'sop_mapping' not in properties.keys():
             sopmap = self.find_current_sop_map(properties['experiment_type'])
-            properties['sop_mapping'] = str(sopmap.uuid)
+            if sopmap is not None:
+                properties['sop_mapping'] = str(sopmap.uuid)
             super(Experiment, self)._update(properties, sheets)
 
 

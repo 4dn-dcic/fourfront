@@ -37,12 +37,18 @@ def test_experiment_set_update_experiment_sets(testapp, experiment_set, experime
     assert expt.json['experiment_sets'][0] == experiment_set['@id']
 
 
+def test_experiment_update_hic_sop_map_added_when_missing(testapp, experiment, sop_map):
+    print(experiment)
+    #assert 'sop_mapping' in res.json['@graph'][0]
+    assert False
+
+
+def test_experiment_update_hic_sop_map_not_added_when_present(testapp, experiment_data, sop_map):
+    res = testapp.post_json('/experiment_hic', experiment_data)
+    assert 'sop_mapping' in res.json['@graph'][0]
+
+
 def test_calculated_experiment_summary(testapp, experiment, mboI):
     summary = 'micro-C on GM06990 with MboI'
     res = testapp.patch_json(experiment['@id'], {'digestion_enzyme': mboI['@id']}, status=200)
     assert res.json['@graph'][0]['experiment_summary'] == summary
-
-
-def test_experiment_hic_sop_map(testapp, experiment_data, sop_map):
-    res = testapp.post_json('/experiment_hic', experiment_data)
-    assert 'sop_mapping' in res.json['@graph'][0]

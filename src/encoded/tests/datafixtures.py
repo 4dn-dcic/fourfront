@@ -265,16 +265,16 @@ def sop_map(testapp, protocol):
         "notes": "This is just a dummy insert not linked to true SOP protocol",
         "description": "Fields with specified defaults in the SOP for in situ Hi-C experiments as per ??",
         "sop_protocol": protocol['@id'],
-        "fields_in_sop": [
+        "fields_with_default": [
             {"field_name": "digestion_enzyme", "field_value": "MboI"},
         ]
     }
     return testapp.post_json("/sop_map", item).json['@graph'][0]
 
 
-@pytest.fixture
-def experiment(testapp, experiment_data):
-    return testapp.post_json('/experiment_hic', experiment_data).json['@graph'][0]
+#@pytest.fixture
+#def experiment(testapp, experiment_data):
+#    return testapp.post_json('/experiment_hic', experiment_data).json['@graph'][0]
 
 
 @pytest.fixture
@@ -301,15 +301,8 @@ def experiment_project_review(testapp, lab, award, human_biosample):
 
 
 @pytest.fixture
-def base_experiment(testapp, lab, award, human_biosample):
-    item = {
-        'award': award['uuid'],
-        'lab': lab['uuid'],
-        'biosample': human_biosample['@id'],
-        'experiment_type': 'micro-C',
-        'status': 'in review by lab'
-    }
-    return testapp.post_json('/experiment_hic', item, status=201).json['@graph'][0]
+def base_experiment(testapp, experiment_data):
+    return testapp.post_json('/experiment_hic', experiment_data, status=201).json['@graph'][0]
 
 
 @pytest.fixture
