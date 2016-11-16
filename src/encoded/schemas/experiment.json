@@ -166,12 +166,27 @@
             "type": "string",
             "enum": ["Yes", "No"]
         },
+
         "sop_mapping": {
-            "title": "SOP map",
+            "title": "SOP mappping",
             "permission": "import-items",
-            "description": "The mapping of fields default values from SOP current at time of submission",
-            "type": "string",
-            "linkTo": "SopMap"
+            "description": "Whether there is an SOP map and if so which one for fields default values from SOP current at time of submission",
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "has_sop": {
+                    "title": "has SOP",
+                    "description": "does this item have an sop when it was submitted",
+                    "type": "string",
+                    "enum": ["Yes", "No"]
+                },
+                "sop_map": {
+                    "title": "SOP MAP",
+                    "description": "the SOP map that the item maps to",
+                    "type": "string",
+                    "linkTo": "SopMap"
+                }
+            }
         }
     }
 }

@@ -28,7 +28,7 @@
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
         "biosample_quantity": 2000000,
         "biosample_quantity_units": "cells",
-        "follows_sop": true,
+        "follows_sop": "Yes",
         "experiment_sets":["431106bc-8535-4448-903e-854af460b260"]
     },
     {

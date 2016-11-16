@@ -21,7 +21,7 @@ from .base import (
         'description': 'Listing of all types of experiments.',
     })
 class Experiment(Item):
-    """The main expeperiment class."""
+    """The main experiment class."""
 
     base_types = ['Experiment'] + Item.base_types
     embedded = ["protocol", "protocol_variation", "lab", "award", "biosample",
@@ -54,6 +54,18 @@ class Experiment(Item):
         return None
 
     def _update(self, properties, sheets=None):
+        # if the sop_mapping field is not present see if it should be
+        if 'sop_mapping' not in properties.keys():
+            sopmap = self.find_current_sop_map(properties['experiment_type'])
+            properties['sop_mapping'] = {}
+            if sopmap is not None:
+                sop_mapping = str(sopmap.uuid)
+                properties['sop_mapping']['sop_map'] = sop_mapping
+                properties['sop_mapping']['has_sop'] = "Yes"
+            else:
+                properties['sop_mapping']['has_sop'] = "No"
+            print(properties)
+
         # update self first to ensure 'experiment_relation' are stored in self.properties
         super(Experiment, self)._update(properties, sheets)
         DicRefRelation = {
@@ -97,13 +109,6 @@ class Experiment(Item):
                     # incase it is not in the list of files
                     target_exp_set.properties["experiments_in_set"].append(acc)
                     target_exp_set.update(target_exp_set.properties)
-
-        # if the sop_map_at_submit field is not present populate it
-        if 'sop_mapping' not in properties.keys():
-            sopmap = self.find_current_sop_map(properties['experiment_type'])
-            if sopmap is not None:
-                properties['sop_mapping'] = str(sopmap.uuid)
-            super(Experiment, self)._update(properties, sheets)
 
 
 @collection(
