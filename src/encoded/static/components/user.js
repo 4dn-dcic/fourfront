@@ -262,9 +262,9 @@ var User = module.exports.User = React.createClass({
                                         <div className="col-sm-9 user-title-col">
                                             <h1 className="user-title">
                                                 <FieldSet context={user} parent={this} style="inline" inputSize="lg" absoluteBox={true}>
-                                                    <EditableField labelID="first_name" fallbackText="No first name set" />
+                                                    <EditableField labelID="first_name" fallbackText="No first name set" placeholder="John" />
                                                     {' '}
-                                                    <EditableField labelID="last_name" fallbackText="No last name set" />
+                                                    <EditableField labelID="last_name" fallbackText="No last name set" placeholder="Smith" />
                                                 </FieldSet>
                                             </h1>
                                         </div>
@@ -309,15 +309,15 @@ var ProfileContactFields = React.createClass({
         return (
             <FieldSet context={user} parent={this.props.parent} className="profile-contact-fields">
                 
-                <EditableField label="Email" labelID="email" fallbackText="No email address" fieldType="email" disabled={true}>
+                <EditableField label="Email" labelID="email" placeholder="name@example.com" fallbackText="No email address" fieldType="email" disabled={true}>
                     { this.icon('envelope') }&nbsp; <a href={'mailto:' + user.email}>{ user.email }</a>
                 </EditableField>
 
-                <EditableField label="Phone" labelID="phone1" fallbackText="No phone number" fieldType="phone">
+                <EditableField label="Phone" labelID="phone1" placeholder="17775551234 x47" fallbackText="No phone number" fieldType="phone">
                     { this.icon('phone') }&nbsp; { user.phone1 }
                 </EditableField>
                 
-                <EditableField label="Fax" labelID="fax" fallbackText="No fax number" fieldType="phone">
+                <EditableField label="Fax" labelID="fax" placeholder="17775554321" fallbackText="No fax number" fieldType="phone">
                     { this.icon('fax') }&nbsp; { user.fax }
                 </EditableField>
                 

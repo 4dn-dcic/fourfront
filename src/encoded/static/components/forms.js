@@ -186,7 +186,8 @@ var EditableField = module.exports.EditableField = React.createClass({
         fieldType : React.PropTypes.string, // Type of field, used for rendering of input element & validation.
         style : React.PropTypes.string,     // Markup style, e.g. render row with label (default), minimal (just input field w/ buttons).
         inputSize : React.PropTypes.oneOf(['sm', 'md', 'lg']), // Size of Bootstrap input field to use. Defaults to sm.
-        children : React.PropTypes.any      // Rendered value of field, use custom formatting on a per-field basis. ToDo : create fallback.
+        children : React.PropTypes.any,     // Rendered value of field, use custom formatting on a per-field basis. ToDo : create fallback.
+        placeholder : React.PropTypes.string
     },
 
     getDefaultProps : function(){
@@ -559,14 +560,15 @@ var EditableField = module.exports.EditableField = React.createClass({
             value : this.state.value || '',
             onChange : this.handleChange,
             name : this.props.labelID,
-            autoFocus: true
+            autoFocus: true,
+            placeholder : this.props.placeholder
         }, commonProps);
 
         switch(this.props.fieldType){
 
             case 'phone': return (
                 <span className="input-wrapper">
-                    <input type="text" placeholder="17775559999 x1234" inputMode="tel" autoComplete="tel" pattern={EditableField.regex.phone} {...commonPropsTextInput} />
+                    <input type="text" inputMode="tel" autoComplete="tel" pattern={EditableField.regex.phone} {...commonPropsTextInput} />
                     { this.validationFeedbackMessage() }
                 </span>
             );

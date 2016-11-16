@@ -357,14 +357,15 @@ div.fieldset.editable-fields {
 					position: absolute;
 					z-index: 10;
 					width: 280px;
+					top: -2px;
 					/* left: 0; */
 					background: rgba(250,250,250,0.9);
-					box-shadow: 0 1px 10px -3px rgba(0,0,0,0.25);
+					/* box-shadow: 0 1px 10px -3px rgba(0,0,0,0.25); */
 					padding-bottom: 3px;
 					padding: 0 2px 2px 2px;
 					border-radius: 5px;
 					border: 1px solid #eee;
-					border-bottom-color: #ddd;
+					/* border-bottom-color: #ddd; */
 				}
 			}
 
