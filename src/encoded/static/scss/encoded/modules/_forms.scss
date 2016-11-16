@@ -17,12 +17,9 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 	font-family: inherit;
 	@include font-size(1);
 	font-weight: normal;
-	border-bottom: 2px solid $inputBorder;
 	@include transition(all 0.15s linear);
-		&:focus {
-			border-color: $inputFocusBorderColor;
-		}
-		&[disabled] { background-color: #ddd; }
+		
+	&[disabled] { background-color: #ddd; }
 
 	@media (min-width: $screen-sm-min) {
 		font-size: inherit;
@@ -145,4 +142,285 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 		left: 0;
 		cursor: pointer;
 	}
+}
+
+
+/**********************************************************
+		Editable Fields & FieldSets (e.g. in User.js)
+***********************************************************/
+
+.fieldset.editable-fields,
+.editable-fields-container {
+
+	&.editing {
+
+		.editable-field-entry:not(.editing) {
+			filter: blur(0.75px) grayscale(75%);
+			opacity: 0.75;
+			pointer-events: none;
+		}
+
+	}
+}
+
+
+	
+div.fieldset.editable-fields {
+
+	padding-bottom: 15px; 
+
+	@media screen and (min-width: $screen-md-min){
+		// Transition is too laggy on (some) mobile
+		transition: padding-bottom .5s linear;
+	}
+
+	&.editing {
+		padding-bottom: 0px;
+	}
+
+}
+
+.editable-field-entry,
+.field-entry {
+
+	label {
+		margin-bottom: 0;
+		font-weight: 500;
+	}
+
+	.value {
+		word-break : break-all;
+		padding-bottom: 10px;
+
+		.not-set {
+			color: #bbb; 
+		}
+
+	}
+
+	&.row {
+
+		> ul,
+		> div.value > ul {
+			margin: 0;
+			padding: 0;
+			padding-left: 20px;
+
+			> li {
+				list-style-position: outside;
+
+				> i.icon {
+					position: relative;
+					top: 1px;
+					color: #d2d2d2;
+				}
+			}
+
+		}
+		
+	}
+
+}
+
+
+.editable-field-entry {
+	opacity: 1;
+	min-height: 30px;
+
+	@media screen and (min-width: $screen-sm-min){
+		transition: filter .75s, opacity .5s, min-height .5s linear;
+	}
+
+	.value {
+
+		.edit-button,
+		.cancel-button,
+		.save-button,
+		.field-loading-icon {
+			padding: 0 6px;
+			line-height: 100%;
+			height: 100%;
+			vertical-align: middle;
+			&.right { display: block; }
+
+			> i.icon {
+				vertical-align: inherit;
+				height: inherit;
+				line-height: inherit;
+			}
+		}
+
+		.cancel-button,
+		.save-button {
+			padding-top: 9px;
+			font-size: 1.1em;
+			margin-bottom: -10px;
+			position: relative;
+			z-index: 4;
+
+			&:hover {
+				color: #000;
+			}
+		}
+
+		.cancel-button {
+			color : $state-danger-text;
+		}
+
+		.save-button {
+			color : $state-success-text;
+		}
+
+		.field-loading-icon {
+			color : #bbb;
+		}
+
+		&.editing .field-loading-icon {
+			padding-top: 9px;
+			margin-bottom: -10px;
+		}
+
+		.edit-button {
+			color: transparent;
+			&.right {
+				transform: translateY(2px);
+			}
+			&.inline {
+				position: absolute;
+				margin-top: -5px;
+				padding: 0;
+				height: 20px;
+				width: 20px;
+				text-align: center;
+				border-radius: 50%;
+			}
+		}
+
+		&:hover .edit-button {
+			color : #aaa;
+			&.inline { background-color: rgba(255,255,255,0.5); }
+			&:hover {
+				color: #000;
+			}
+		}
+
+	}
+
+	&.editing {
+
+		&:not(.inline){
+			min-height: 45px;
+		}
+
+		span.input-wrapper {
+			@media screen and (min-width: $screen-sm-min){
+				margin-bottom : -100px; // For min-height transition (prevent jumping).
+			}
+			margin-right: 75px; // Room for action icons/buttons.
+			display: block;
+			position: relative;
+			z-index: 2;
+			
+			input[type=text],
+			input[type=email],
+			input[type=tel] {
+				margin-top: 3px;
+				display: block;
+				margin-bottom: 0px;
+				width: 100%;
+				position: relative;
+				z-index: 3;
+			}
+
+			span.help-block {
+				font-size: .85em;
+				padding: 5px 3px 7px;
+				margin: 0;
+				background-color: #fff;
+				border-bottom: 1px solid #eee;
+				box-shadow: 0 10px 15px 0px rgba(255,255,255,0.75);
+				word-break: break-word;
+				transition: opacity .35s .15s;
+			}
+
+		}
+
+		&.inline {
+			display: inline-block;
+			position: relative;
+
+			&.block-style {
+				.value.ghost {
+					opacity: 0.5;
+				}
+				.value.editing {
+					position: absolute;
+					z-index: 10;
+					width: 280px;
+					top: -2px;
+					/* left: 0; */
+					background: rgba(250,250,250,0.9);
+					/* box-shadow: 0 1px 10px -3px rgba(0,0,0,0.25); */
+					padding-bottom: 3px;
+					padding: 0 2px 2px 2px;
+					border-radius: 5px;
+					border: 1px solid #eee;
+					/* border-bottom-color: #ddd; */
+				}
+			}
+
+			span.input-wrapper {
+				display: inline-block;
+				margin-bottom: 0px;
+				vertical-align: top;
+				span.help-block {
+					position: absolute;
+					width: 100%;
+				}
+			}
+
+			.save-button,
+			.field-loading-icon {
+				position: absolute;
+				right: 36px;
+			}
+			.cancel-button {
+				position: absolute;
+				right: 6px;
+			}
+
+			&.input-size-lg {
+				.save-button,
+				.cancel-button,
+				.field-loading-icon {
+					padding-top: 12px;
+					font-size: 1.25rem;
+				}
+				.field-loading-icon {
+					height: auto;
+					padding-top: 11px;
+				}
+			}
+
+		}
+
+	}
+
+	&.editing.has-error {
+		min-height: 80px;
+
+		span.help-block {
+			opacity : 1;
+		}
+	}
+
+	&.editing:not(.has-error) {
+
+		span.help-block {
+			opacity : 0;
+			position: absolute;
+			transition: opacity .35s, color .5s .5s !important;
+		}
+	}
+
 }

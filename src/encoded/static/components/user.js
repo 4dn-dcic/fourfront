@@ -5,18 +5,13 @@
 
 var React = require('react');
 var globals = require('./globals');
-var _ = require('underscore');
+var store = require('../store');
 var { Modal, Alert } = require('react-bootstrap');
 var { ItemStore } = require('./lib/store');
-var { ajaxLoad, DateUtility, console, isServerSide } = require('./objectutils');
-var { FormattedInfoBlock } = require('./experiment-set-view');
-// var navigation = require('./navigation');
-var Modal = require('react-bootstrap').Modal;
-var Alert = require('react-bootstrap').Alert;
-var ItemStore = require('./lib/store').ItemStore;
-var ajaxLoad = require('./objectutils').ajaxLoad;
+var { ajaxLoad, DateUtility, console, JWT } = require('./objectutils');
+var FormattedInfoBlock = require('./formatted-info-block');
+var { EditableField, FieldSet } = require('./forms');
 var jwt = require('jsonwebtoken');
-// var Breadcrumbs = navigation.Breadcrumbs;
 
 
 class AccessKeyStore extends ItemStore {
@@ -42,7 +37,8 @@ var AccessKeyTable = React.createClass({
             'lab' : React.PropTypes.string,
             'status' : React.PropTypes.string,
             'timezone' : React.PropTypes.string,
-            'job_title' : React.PropTypes.string
+            'job_title' : React.PropTypes.string,
+            'submits_for' : React.PropTypes.array
         })
     },
 
@@ -71,7 +67,7 @@ var AccessKeyTable = React.createClass({
             return (
                 <tr key={key.access_key_id}>
                     <td className="access-key-id">{ key.access_key_id }</td>
-                    <td>{ DateUtility.format(key.date_created, 'date-time-md', ' - ') }</td>
+                    <td>{ key.date_created ? DateUtility.format(key.date_created, 'date-time-md', ' - ') : 'N/A' }</td>
                     <td>{ key.description }</td>
                     <td className="access-key-buttons">
                         <a href="#" className="btn btn-xs btn-success" onClick={this.doAction.bind(this, 'resetSecret', key['@id'])}>Reset</a>
@@ -100,8 +96,6 @@ var AccessKeyTable = React.createClass({
     },
 
     render: function() {
-        console.log('AccessKeyTable: ', this);
-
         return (
             <div className="access-keys-table-container clearfix">
                 { this.state.access_keys.length ?
@@ -119,15 +113,13 @@ var AccessKeyTable = React.createClass({
         e.preventDefault();
         var item = {};
         if(this.context.session){
-            if(typeof(Storage) !== 'undefined'){
-                if(localStorage && localStorage.user_info){
-                    var idToken = JSON.parse(localStorage.getItem('user_info')).id_token;
-                    var decoded = jwt.decode(idToken);
-                    item['user'] = decoded.email_verified ? decoded.email : "";
-                }else{
-                    console.log("Access key aborted");
-                    return;
-                }
+            var idToken = JWT.get();
+            if (idToken){
+                var decoded = jwt.decode(idToken);
+                item['user'] = decoded.email_verified ? decoded.email : "";
+            } else {
+                console.warn("Access key aborted");
+                return;
             }
         }
         this.store.create('/access-keys/', item);
@@ -235,20 +227,15 @@ var User = module.exports.User = React.createClass({
         })
     },
 
-    getInitialState : function(){
-        return {
-            details_lab : null
-        };
-    },
-
     render: function() {
 
-        console.log('User', this);
-
         var user = this.props.context;
+
         var crumbs = [
             {id: 'Users'}
         ];
+
+        var ifCurrentlyEditingClass = this.state && this.state.currentlyEditing ? ' editing editable-fields-container' : '';
 
         return (
             <div className="user-profile-page">
@@ -258,36 +245,42 @@ var User = module.exports.User = React.createClass({
                     </div>
                 </header>
 
-                <div className="page-container data-display">
+                <div className={"page-container data-display" + ifCurrentlyEditingClass}>
 
                     <h1 className="page-title">Profile</h1>
 
                     <div className="row first-row row-eq-height-md">
 
-                        <div className="col-sm-9 col-md-7">
+                        <div className="col-sm-10 col-sm-offset-1 col-md-offset-0 col-md-6 col-lg-7">
 
                             <div className="panel user-info shadow-border">
-                                <div className="user-title-container">
+                                <div className="user-title-row-container">
                                     <div className="row title-row">
                                         <div className="col-sm-3 gravatar-container">
                                             { User.gravatar(user.email, 70) }
                                         </div>
-                                        <div className="col-sm-9">
-                                            <h1 className="user-title">{ user.title }</h1>
+                                        <div className="col-sm-9 user-title-col">
+                                            <h1 className="user-title">
+                                                <FieldSet context={user} parent={this} style="inline" inputSize="lg" absoluteBox={true}>
+                                                    <EditableField labelID="first_name" fallbackText="No first name set" placeholder="First name" />
+                                                    {' '}
+                                                    <EditableField labelID="last_name" fallbackText="No last name set" placeholder="Last name" />
+                                                </FieldSet>
+                                            </h1>
                                         </div>
                                     </div>
                                 </div>
-                                <ProfileContactFields user={user}/>
+                                <ProfileContactFields user={user} parent={this} />
                             </div>
 
                         </div>
-                        <div className="col-sm-9 col-md-5">
-                            <ProfileWorkFields user={user} containerClassName="panel user-work-info shadow-border" />
+                        <div className="col-sm-10 col-sm-offset-1 col-md-offset-0 col-md-6 col-lg-5">
+                            <ProfileWorkFields user={user} parent={this} />
                         </div>
 
                     </div>
-
-                    {user.access_keys ?
+                    
+                    {user.access_keys && user.submits_for && user.submits_for.length ?
                         <div className="access-keys-container">
                             <h3 className="text-300">Access Keys</h3>
                             <div className="data-display">
@@ -307,165 +300,158 @@ globals.content_views.register(User, 'User');
 
 var ProfileContactFields = React.createClass({
 
+    icon : function(iconName){
+        return <i className={"visible-lg-inline icon icon-fw icon-" + iconName }></i>;
+    },
+
     render: function(){
         var user = this.props.user;
         return (
-            <div>
-                <div className="row profile-field-entry email">
-                    <div className="col-sm-3 text-right text-left-xs">
-                        <label htmlFor="email">Email</label>
-                    </div>
-                    <div id="email" className="col-sm-9">
-                        { user.email ?
-                            <a href={'mailto:' + user.email}>{user.email}</a>
-                            :
-                            <span className="not-set">No email address</span>
-                        }
-                    </div>
-                </div>
-                <div className="row profile-field-entry phone">
-                    <div className="col-sm-3 text-right text-left-xs">
-                        <label htmlFor="phone">Phone</label>
-                    </div>
-                    <div id="phone" className="col-sm-9">
-                        { user.phone || <span className="not-set">No phone number</span> }
-                    </div>
-                </div>
-                <div className="row profile-field-entry fax">
-                    <div className="col-sm-3 text-right text-left-xs">
-                        <label htmlFor="fax">Fax</label>
-                    </div>
-                    <div id="fax" className="col-sm-9">
-                        { user.fax || <span className="not-set">No fax number</span> }
-                    </div>
-                </div>
-                <div className="row profile-field-entry skype">
-                    <div className="col-sm-3 text-right text-left-xs">
-                        <label htmlFor="skype">Skype</label>
-                    </div>
-                    <div id="skype" className="col-sm-9">
-                        { user.skype || <span className="not-set">No skype ID</span> }
-                    </div>
-                </div>
+            <FieldSet context={user} parent={this.props.parent} className="profile-contact-fields">
+                
+                <EditableField label="Email" labelID="email" placeholder="name@example.com" fallbackText="No email address" fieldType="email" disabled={true}>
+                    { this.icon('envelope') }&nbsp; <a href={'mailto:' + user.email}>{ user.email }</a>
+                </EditableField>
 
-            </div>
+                <EditableField label="Phone" labelID="phone1" placeholder="17775551234 x47" fallbackText="No phone number" fieldType="phone">
+                    { this.icon('phone') }&nbsp; { user.phone1 }
+                </EditableField>
+                
+                <EditableField label="Fax" labelID="fax" placeholder="17775554321" fallbackText="No fax number" fieldType="phone">
+                    { this.icon('fax') }&nbsp; { user.fax }
+                </EditableField>
+                
+                <EditableField label="Skype" labelID="skype" fallbackText="No skype ID" fieldType="username">
+                    { this.icon('skype') }&nbsp; { user.skype }
+                </EditableField>
+                
+            </FieldSet>
         );
     }
 
 });
 
-var EditableField = React.createClass({
-    render : function(){return null;}
-});
+
 
 var ProfileWorkFields = React.createClass({
 
     getDefaultProps : function(){
         return {
-            containerClassName : 'panel'
+            containerClassName : 'panel user-work-info shadow-border'
         };
     },
 
     getInitialState : function(){
         return {
-            details_lab : null,         // Use FormattedInfoBlock.ajaxPropertyDetails.call(this, args...) to set.
-            details_submits_for : null  // Use custom ajax func to set, b/c is an array.
+            details_lab : null,        // Use FormattedInfoBlock.ajaxPropertyDetails.call(this, args...) to set.
+            awards_list : null
         };
     },
 
     componentDidMount : function(){
         if (typeof this.props.user.lab == 'string' && !this.state.details_lab){
             // Fetch lab info & update into User instance state via the -for mixin-like-usage ajaxPropertyDetails func.
-            FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.user.lab, 'lab');
+            FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.user.lab, 'lab', (detail) => this.updateAwardsList([detail]) );
         }
-        if (Array.isArray(this.props.user.submits_for) && this.props.user.submits_for.length && !this.state.details_submits_for) {
-            var submitsForArray = [];
-            this.props.user.submits_for.forEach(function(orgID, i){
+    },
 
-                // Check if lab/org is same as state.details_lab, reuse it if so
-                // Probably doesn't execute since AJAX requests sent @ about same time (ToDo)
-                if (this.state.details_lab && this.state.details_lab['@id'] == orgID){
-                    submitsForArray[i] = this.state.details_lab;
-                    return;
+    /** 
+     * Get list of all awards (unique) from list of labs.
+     * ToDo : Migrate somewhere more static-cy.
+     * 
+     * @param {Object[]} labDetails - Array of lab objects with embedded award details.
+     * @return {Object[]} List of all unique awards in labs.
+     */
+    getAwardsList : function(labDetails){
+        // Awards are embedded within labs, so we get full details.
+        var awardsList = [];
+        for (var i = 0; i < labDetails.length; i++){
+            if (typeof labDetails[i].awards !== 'undefined' && Array.isArray(labDetails[i].awards)){
+                for (var j = 0; j < labDetails[i].awards.length; j++){
+                    if (awardsList.indexOf(labDetails[i].awards[j]) === -1) awardsList.push(labDetails[i].awards[j]);
                 }
-
-                // Load w. AJAX otherwise.
-                console.log('Obtaining submitsForArray[' + i + '] via AJAX.');
-                ajaxLoad(orgID + '?format=json', function(result){
-                    submitsForArray[i] = result;
-                    console.log('Obtained submitsForArray[' + i + '] via AJAX.');
-                    if (submitsForArray.length == this.props.user.submits_for.length){
-                        // All loaded
-                        this.setState({ details_submits_for : submitsForArray });
-                        console.log('Obtained details_submits_for via AJAX: ', submitsForArray);
-                    }
-                }.bind(this), 'GET');
-            }.bind(this));
+            }
         }
+        return awardsList;
     },
 
-    renderLabInfo : function(user = this.props.user){
-        if (typeof user.lab !== 'string') { // Probably no lab
-            return (
-                <span className="not-set">No Labs</span>
-            );
+    /**
+     * Update state.awards_list with award details from list of lab details.
+     * 
+     * @param {Object[]} labDetails - Array of lab objects with embedded award details.
+     */
+    updateAwardsList : function(labDetails){
+        var currentAwardsList = (this.state.awards_list || []).slice(0);
+        var currentAwardsListIDs = currentAwardsList.map((awd) => awd['@id']);
+        var newAwards = this.getAwardsList(labDetails);
+        for (var i = 0; i < newAwards.length; i++){
+            if (currentAwardsListIDs.indexOf(newAwards[i]['@id']) === -1){
+                currentAwardsList.push(newAwards[i]);
+            }
         }
-        return FormattedInfoBlock.Lab(this.state.details_lab, false, false);
-    },
-
-    renderSubmitsFor : function(user = this.props.user){
-        // No labs/orgs in user.submits_for
-        if (!Array.isArray(user.submits_for) || user.submits_for.length == 0){
-            return (
-                <span className="not-set">Not submitting for any organizations.</span>
-            );
+        if (!this.state.awards_list || this.state.awards_list.length < currentAwardsList.length){
+            this.setState({'awards_list' : currentAwardsList});
         }
-
-        // Labs/orgs in user.submits_for exist, but not loaded to state yet.
-        if (!this.state.details_submits_for){
-            return user.submits_for.map((orgID,i)=>
-                <li key={'submits_for-' + i} className="submit_for-item loading">
-                    <i className="icon icon-spin icon-circle-o-notch"></i>
-                </li>
-            );
-        }
-
-        // All loaded
-        return this.state.details_submits_for.map((org,i) =>
-            <li key={'submits_for-' + i} className="submit_for-item">{ FormattedInfoBlock.Lab(org, false, false, false) }</li>
-        );
     },
 
     render : function(){
         var user = this.props.user;
+        // THESE FIELDS ARE NOT EDITABLE.
+        // To be modified by admins, potentially w/ exception of 'Primary Lab' (e.g. select from submits_for list).
         return (
             <div className={this.props.containerClassName}>
                 <h3 className="text-300 block-title">
                     <i className="icon icon-users icon-fw"></i> Organizations
                 </h3>
-                <div className="row profile-field-entry lab">
+                <div className="row field-entry lab">
                     <div className="col-sm-3 text-right text-left-xs">
                         <label htmlFor="lab">Primary Lab</label>
                     </div>
-                    <div id="lab" className="col-sm-9">
-                        { this.renderLabInfo(user) }
+                    <div id="lab" className="col-sm-9 value">
+                        { typeof user.lab === 'string' ? 
+                            FormattedInfoBlock.Lab(this.state.details_lab, false, false)
+                            : 
+                            <span className="not-set">No Labs</span>
+                        }
                     </div>
                 </div>
-                <div className="row profile-field-entry job_title">
+                <div className="row field-entry job_title">
                     <div className="col-sm-3 text-right text-left-xs">
                         <label htmlFor="job_title">Role</label>
                     </div>
-                    <div id="job_title" className="col-sm-9">
+                    <div id="job_title" className="col-sm-9 value">
                         { user.job_title || <span className="not-set">No Job Title</span> }
                     </div>
                 </div>
-                <div className="row profile-field-entry submits_for">
+                <div className="row field-entry submits_for">
                     <div className="col-sm-3 text-right text-left-xs">
                         <label htmlFor="submits_for">Submit For</label>
                     </div>
-                    <ul id="submits_for" className="col-sm-9">
-                        { this.renderSubmitsFor() }
-                    </ul>
+                    <div className="col-sm-9 value">
+                        <FormattedInfoBlock.List
+                            renderItem={(detail) => FormattedInfoBlock.Lab(detail, false, false, false) }
+                            endpoints={user.submits_for}
+                            propertyName="submits_for"
+                            fallbackMsg="Not submitting for any organizations"
+                            ajaxCallback={this.updateAwardsList}
+                        />
+                    </div>
+                </div>
+                <div className="row field-entry awards">
+                    <div className="col-sm-3 text-right text-left-xs">
+                        <label htmlFor="awards">Awards</label>
+                    </div>
+                    <div className="col-sm-9 value">
+                        <FormattedInfoBlock.List
+                            details={this.state.awards_list}
+                            renderItem={(detail) => FormattedInfoBlock.Award(detail, false, false, false) }
+                            propertyName="awards"
+                            fallbackMsg="No awards"
+                            loading={this.state.awards_list === null && (
+                                user.lab || (user.submits_for && user.submits_for > 0)
+                            ) ? true : false}
+                        />
+                    </div>
                 </div>
             </div>
         );

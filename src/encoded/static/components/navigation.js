@@ -71,7 +71,7 @@ var GlobalSections = React.createClass({
                         <DropdownMenu label={action.id}>
                             {action.children.map(function(action){
                                 return(
-                                    <a href={action.url || ''} key={action.id} className="global-entry">
+                                    <a href={action.url || '#'} key={action.id} className="global-entry">
                                         {action.title}
                                     </a>
                                 );
@@ -151,7 +151,7 @@ var UserActions = React.createClass({
                 // link to registration page if logged out or account actions if logged in
                 if (!session) {
                     return(
-                        <a href={action.url || ''} key={action.id} className="global-entry">
+                        <a href={action.url || '#'} key={action.id} className="global-entry">
                             {action.title}
                         </a>
                     );
