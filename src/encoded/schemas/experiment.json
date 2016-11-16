@@ -170,7 +170,7 @@
             "title": "SOP map",
             "permission": "import-items",
             "description": "The mapping of fields default values from SOP current at time of submission",
-            "type": "object",
+            "type": "string",
             "linkTo": "SopMap"
         }
     }
