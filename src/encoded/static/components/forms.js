@@ -3,7 +3,7 @@
 var React = require('react');
 var _ = require('underscore');
 var store = require('../store');
-var { ajaxLoad, console, getNestedProperty } = require('./objectutils');
+var { ajaxLoad, console, getNestedProperty, isServerSide } = require('./objectutils');
 
 /**
  * FieldSet allows to group EditableFields together.
@@ -63,6 +63,7 @@ var FieldSet = module.exports.FieldSet = React.createClass({
                 if (!child.props.endpoint && this.props.endpoint) newProps.endpoint = this.props.endpoint;
                 if (this.props.inputSize) newProps.inputSize = this.props.inputSize; // Overwrite, since EditableField has default props.
                 if (this.props.style) newProps.style = this.props.style;
+                if (this.props.absoluteBox) newProps.absoluteBox = this.props.absoluteBox;
                 child = React.cloneElement(child, newProps);
             };
             return child;
@@ -207,8 +208,59 @@ var EditableField = module.exports.EditableField = React.createClass({
             'serverErrors' : [],          // Validation state sent from server.
             'serverErrorsMessage' : null,
             'loading' : false,            // True if in middle of save or fetch request.
-            'dispatching' : false
+            'dispatching' : false,
+            'leanTo' : null, //this.props.style === 'inline' && this.props.absoluteBox ? 'right' : null,
+            'leanOffset' : 0
         };
+    },
+
+    componentDidMount: function(){
+        if (this.props.style === 'inline' && this.props.absoluteBox && !isServerSide()){
+
+            this.debouncedLayoutResizeStateChange = _.debounce(() => {
+                if (this.refs.field && this.refs.field.offsetParent){
+                    var offsetRight = (this.refs.field.offsetParent.offsetWidth - this.refs.field.offsetLeft) - this.refs.field.offsetWidth;
+                    //var inputOffsetRight = (this.refs.field.offsetParent.offsetWidth - this.refs.field.nextElementSibling.offsetLeft) - this.refs.field.nextElementSibling.offsetWidth;
+                    this.setState({ 
+                        'leanTo' : 
+                            this.refs.field.offsetLeft > offsetRight ?
+                            'left' : 'right',
+                        'leanOffset' : 280 - (this.refs.field.offsetParent.offsetWidth - Math.min(this.refs.field.offsetLeft, offsetRight))
+                    });
+                }
+            }, 300, false);
+
+            window.addEventListener('resize', this.debouncedLayoutResizeStateChange);
+
+        }
+    },
+
+    componentWillUnmount : function(){
+        if (typeof this.debouncedLayoutResizeStateChange !== 'undefined'){
+            window.removeEventListener('resize', this.debouncedLayoutResizeStateChange);
+        }
+    },
+
+    componentDidUpdate : function(oldProps, oldState){
+        // If editing state but not onChange event (e.g. want to catch when change to editing state)
+        if (
+            typeof this.debouncedLayoutResizeStateChange !== 'undefined' &&
+            oldState.value === this.state.value && 
+            oldState.loading === this.state.loading &&
+            oldState.dispatching === this.state.dispatching &&
+            oldState.savedValue === this.state.savedValue
+        ){
+            if (this.justUpdatedLayout){
+                this.justUpdatedLayout = false;
+                return false;
+            }
+            if (this.props.parent.state && this.props.parent.state.currentlyEditing === this.props.labelID){
+                this.debouncedLayoutResizeStateChange();
+            } else {
+                this.setState({ 'leanTo' : null });
+            }
+            this.justUpdatedLayout = true;
+        }
     },
 
     componentWillReceiveProps : function(newProps){
@@ -391,16 +443,17 @@ var EditableField = module.exports.EditableField = React.createClass({
         }
     },
 
-    renderSaved : function(){
-        var renderedValue = this.props.children || this.state.savedValue;
+    renderSavedValue : function(){
+        var renderedValue = this.props.children || this.state.savedValue,
+            classes = ['value', 'saved'];
 
-        if (this.props.style === 'row'){
-            return (
-                <div className={"row editable-field-entry " + this.props.labelID}>
-                    <div className="col-sm-3 text-right text-left-xs">
-                        <label htmlFor={ this.props.labelID }>{ this.props.label }</label>
-                    </div>
-                    <div className="col-sm-9 value">
+        switch (this.props.style){
+
+            case 'row':
+            case 'minimal':
+                if (this.props.style === 'row') classes.push('col-sm-9');
+                return (
+                    <div className={classes.join(' ')}>
                         { this.renderActionIcon('edit') }
                         { this.isSet() ?
                             <span id={ this.props.labelID } className="set">{ renderedValue }</span>
@@ -408,27 +461,11 @@ var EditableField = module.exports.EditableField = React.createClass({
                             <span className="not-set">{ this.props.fallbackText || ('No ' + this.props.labelID) }</span> 
                         }
                     </div>
-                </div>
-            );
-        }
-        if (this.props.style === 'minimal'){
-            return (
-                <div className={"editable-field-entry " + this.props.labelID}>
-                    <div className="value">
-                        { this.renderActionIcon('edit') }
-                        { this.isSet() ?
-                            <span id={ this.props.labelID } className="set">{ renderedValue }</span>
-                            :
-                            <span className="not-set">{ this.props.fallbackText || ('No ' + this.props.labelID) }</span> 
-                        }
-                    </div>
-                </div>
-            );
-        }
-        if (this.props.style === 'inline'){
-            return (
-                <span className={"editable-field-entry inline " + this.props.labelID}>
-                    <span className="value">
+                );
+
+            case 'inline':
+                return (
+                    <span className={classes.join(' ')}>
                         { this.isSet() ?
                             <span id={ this.props.labelID } className="set">{ renderedValue }</span>
                             :
@@ -436,6 +473,33 @@ var EditableField = module.exports.EditableField = React.createClass({
                         }
                         { this.renderActionIcon('edit') }
                     </span>
+                );
+        }
+        return null;
+    },
+
+    renderSaved : function(){
+        if (this.props.style === 'row'){
+            return (
+                <div className={"row editable-field-entry " + this.props.labelID}>
+                    <div className="col-sm-3 text-right text-left-xs">
+                        <label htmlFor={ this.props.labelID }>{ this.props.label }</label>
+                    </div>
+                    { this.renderSavedValue() }
+                </div>
+            );
+        }
+        if (this.props.style === 'minimal'){
+            return (
+                <div className={"editable-field-entry " + this.props.labelID}>
+                    { this.renderSavedValue() }
+                </div>
+            );
+        }
+        if (this.props.style === 'inline'){
+            return (
+                <span className={"editable-field-entry inline " + this.props.labelID}>
+                    { this.renderSavedValue() }
                 </span>
             );
         }
@@ -563,9 +627,18 @@ var EditableField = module.exports.EditableField = React.createClass({
         }
 
         if (this.props.style == 'inline') {
+            var valStyle = {};
+            if (this.props.absoluteBox){
+                if (this.state.leanTo === null){
+                    valStyle.display = 'none';
+                } else {
+                    valStyle[this.state.leanTo === 'left' ? 'right' : 'left'] = (this.state.leanOffset > 0 ? (0-this.state.leanOffset) : 0) + 'px';
+                }
+            }
             return (
-                <span className={ outerBaseClass + this.props.labelID + ' inline' }>
-                    <span className="value editing clearfix">
+                <span ref={this.props.absoluteBox ? "field" : null} className={ outerBaseClass + this.props.labelID + ' inline' + (this.props.absoluteBox ? ' block-style' : '') }>
+                    { this.props.absoluteBox ? this.renderSavedValue() : null }
+                    <span className="value editing clearfix" style={valStyle}>
                         { this.inputField() }
                         { this.renderActionIcon('cancel') }
                         { this.renderActionIcon('save') }

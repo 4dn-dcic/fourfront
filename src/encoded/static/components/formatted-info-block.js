@@ -92,7 +92,7 @@ var FormattedInfoBlockList = React.createClass({
         if (!this.state['details_' + this.props.propertyName] && this.propEndpointsValid()){
             FormattedInfoBlockList.ajaxPropertyDetails.call(this, this.props.endpoints, this.props.propertyName, (results) => {
                 this.setState({ loading : false });
-                this.props.ajaxCallback(results);
+                if (typeof this.props.ajaxCallback === 'function') this.props.ajaxCallback(results);
             });
         }
         this.hasMounted = true;

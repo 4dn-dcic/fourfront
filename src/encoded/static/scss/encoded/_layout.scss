@@ -567,6 +567,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		/* white-space: nowrap; */
 		overflow: hidden;
 		text-overflow: ellipsis;
+		word-break: normal;
 
 		a {
 			/* display: block; */
