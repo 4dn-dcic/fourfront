@@ -5,18 +5,13 @@
 
 var React = require('react');
 var globals = require('./globals');
-var _ = require('underscore');
+var store = require('../store');
 var { Modal, Alert } = require('react-bootstrap');
 var { ItemStore } = require('./lib/store');
-var { ajaxLoad, DateUtility, console, isServerSide } = require('./objectutils');
-var { FormattedInfoBlock } = require('./experiment-set-view');
-// var navigation = require('./navigation');
-var Modal = require('react-bootstrap').Modal;
-var Alert = require('react-bootstrap').Alert;
-var ItemStore = require('./lib/store').ItemStore;
-var ajaxLoad = require('./objectutils').ajaxLoad;
+var { ajaxLoad, DateUtility, console, JWT } = require('./objectutils');
+var FormattedInfoBlock = require('./formatted-info-block');
+var { EditableField, FieldSet } = require('./forms');
 var jwt = require('jsonwebtoken');
-// var Breadcrumbs = navigation.Breadcrumbs;
 
 
 class AccessKeyStore extends ItemStore {
@@ -42,7 +37,8 @@ var AccessKeyTable = React.createClass({
             'lab' : React.PropTypes.string,
             'status' : React.PropTypes.string,
             'timezone' : React.PropTypes.string,
-            'job_title' : React.PropTypes.string
+            'job_title' : React.PropTypes.string,
+            'submits_for' : React.PropTypes.array
         })
     },
 
@@ -71,7 +67,7 @@ var AccessKeyTable = React.createClass({
             return (
                 <tr key={key.access_key_id}>
                     <td className="access-key-id">{ key.access_key_id }</td>
-                    <td>{ DateUtility.format(key.date_created, 'date-time-md', ' - ') }</td>
+                    <td>{ key.date_created ? DateUtility.format(key.date_created, 'date-time-md', ' - ') : 'N/A' }</td>
                     <td>{ key.description }</td>
                     <td className="access-key-buttons">
                         <a href="#" className="btn btn-xs btn-success" onClick={this.doAction.bind(this, 'resetSecret', key['@id'])}>Reset</a>
@@ -100,8 +96,6 @@ var AccessKeyTable = React.createClass({
     },
 
     render: function() {
-        console.log('AccessKeyTable: ', this);
-
         return (
             <div className="access-keys-table-container clearfix">
                 { this.state.access_keys.length ?
@@ -119,15 +113,13 @@ var AccessKeyTable = React.createClass({
         e.preventDefault();
         var item = {};
         if(this.context.session){
-            if(typeof(Storage) !== 'undefined'){
-                if(localStorage && localStorage.user_info){
-                    var idToken = JSON.parse(localStorage.getItem('user_info')).id_token;
-                    var decoded = jwt.decode(idToken);
-                    item['user'] = decoded.email_verified ? decoded.email : "";
-                }else{
-                    console.log("Access key aborted");
-                    return;
-                }
+            var idToken = JWT.get();
+            if (idToken){
+                var decoded = jwt.decode(idToken);
+                item['user'] = decoded.email_verified ? decoded.email : "";
+            } else {
+                console.warn("Access key aborted");
+                return;
             }
         }
         this.store.create('/access-keys/', item);
@@ -235,20 +227,15 @@ var User = module.exports.User = React.createClass({
         })
     },
 
-    getInitialState : function(){
-        return {
-            details_lab : null
-        };
-    },
-
     render: function() {
 
-        console.log('User', this);
-
         var user = this.props.context;
+
         var crumbs = [
             {id: 'Users'}
         ];
+
+        var ifCurrentlyEditingClass = this.state && this.state.currentlyEditing ? ' editing editable-fields-container' : '';
 
         return (
             <div className="user-profile-page">
@@ -258,36 +245,42 @@ var User = module.exports.User = React.createClass({
                     </div>
                 </header>
 
-                <div className="page-container data-display">
+                <div className={"page-container data-display" + ifCurrentlyEditingClass}>
 
                     <h1 className="page-title">Profile</h1>
 
                     <div className="row first-row row-eq-height-md">
 
-                        <div className="col-sm-9 col-md-7">
+                        <div className="col-sm-10 col-sm-offset-1 col-md-offset-0 col-md-6 col-lg-7">
 
                             <div className="panel user-info shadow-border">
-                                <div className="user-title-container">
+                                <div className="user-title-row-container">
                                     <div className="row title-row">
                                         <div className="col-sm-3 gravatar-container">
                                             { User.gravatar(user.email, 70) }
                                         </div>
-                                        <div className="col-sm-9">
-                                            <h1 className="user-title">{ user.title }</h1>
+                                        <div className="col-sm-9 user-title-col">
+                                            <h1 className="user-title">
+                                                <FieldSet context={user} parent={this} style="inline" inputSize="lg">
+                                                    <EditableField labelID="first_name" fallbackText="No first name set"/>
+                                                    {' '}
+                                                    <EditableField labelID="last_name" fallbackText="No last name set"/>
+                                                </FieldSet>
+                                            </h1>
                                         </div>
                                     </div>
                                 </div>
-                                <ProfileContactFields user={user}/>
+                                <ProfileContactFields user={user} parent={this} />
                             </div>
 
                         </div>
-                        <div className="col-sm-9 col-md-5">
-                            <ProfileWorkFields user={user} containerClassName="panel user-work-info shadow-border" />
+                        <div className="col-sm-10 col-sm-offset-1 col-md-offset-0 col-md-6 col-lg-5">
+                            <ProfileWorkFields user={user} containerClassName="panel user-work-info shadow-border" parent={this} />
                         </div>
 
                     </div>
-
-                    {user.access_keys ?
+                    
+                    {user.access_keys && user.submits_for && user.submits_for.length ?
                         <div className="access-keys-container">
                             <h3 className="text-300">Access Keys</h3>
                             <div className="data-display">
@@ -307,56 +300,38 @@ globals.content_views.register(User, 'User');
 
 var ProfileContactFields = React.createClass({
 
+    icon : function(iconName){
+        return <i className={"visible-lg-inline icon icon-fw icon-" + iconName }></i>;
+    },
+
     render: function(){
         var user = this.props.user;
         return (
-            <div>
-                <div className="row profile-field-entry email">
-                    <div className="col-sm-3 text-right text-left-xs">
-                        <label htmlFor="email">Email</label>
-                    </div>
-                    <div id="email" className="col-sm-9">
-                        { user.email ?
-                            <a href={'mailto:' + user.email}>{user.email}</a>
-                            :
-                            <span className="not-set">No email address</span>
-                        }
-                    </div>
-                </div>
-                <div className="row profile-field-entry phone">
-                    <div className="col-sm-3 text-right text-left-xs">
-                        <label htmlFor="phone">Phone</label>
-                    </div>
-                    <div id="phone" className="col-sm-9">
-                        { user.phone || <span className="not-set">No phone number</span> }
-                    </div>
-                </div>
-                <div className="row profile-field-entry fax">
-                    <div className="col-sm-3 text-right text-left-xs">
-                        <label htmlFor="fax">Fax</label>
-                    </div>
-                    <div id="fax" className="col-sm-9">
-                        { user.fax || <span className="not-set">No fax number</span> }
-                    </div>
-                </div>
-                <div className="row profile-field-entry skype">
-                    <div className="col-sm-3 text-right text-left-xs">
-                        <label htmlFor="skype">Skype</label>
-                    </div>
-                    <div id="skype" className="col-sm-9">
-                        { user.skype || <span className="not-set">No skype ID</span> }
-                    </div>
-                </div>
+            <FieldSet context={user} parent={this.props.parent} className="profile-contact-fields">
+                
+                <EditableField label="Email" labelID="email" fallbackText="No email address" fieldType="email" disabled={true}>
+                    { this.icon('envelope') }&nbsp; <a href={'mailto:' + user.email}>{ user.email }</a>
+                </EditableField>
 
-            </div>
+                <EditableField label="Phone" labelID="phone1" fallbackText="No phone number" fieldType="phone">
+                    { this.icon('phone') }&nbsp; { user.phone1 }
+                </EditableField>
+                
+                <EditableField label="Fax" labelID="fax" fallbackText="No fax number" fieldType="phone">
+                    { this.icon('fax') }&nbsp; { user.fax }
+                </EditableField>
+                
+                <EditableField label="Skype" labelID="skype" fallbackText="No skype ID" fieldType="username">
+                    { this.icon('skype') }&nbsp; { user.skype }
+                </EditableField>
+                
+            </FieldSet>
         );
     }
 
 });
 
-var EditableField = React.createClass({
-    render : function(){return null;}
-});
+
 
 var ProfileWorkFields = React.createClass({
 
@@ -443,27 +418,27 @@ var ProfileWorkFields = React.createClass({
                 <h3 className="text-300 block-title">
                     <i className="icon icon-users icon-fw"></i> Organizations
                 </h3>
-                <div className="row profile-field-entry lab">
+                <div className="row editable-field-entry lab">
                     <div className="col-sm-3 text-right text-left-xs">
                         <label htmlFor="lab">Primary Lab</label>
                     </div>
-                    <div id="lab" className="col-sm-9">
+                    <div id="lab" className="col-sm-9 value">
                         { this.renderLabInfo(user) }
                     </div>
                 </div>
-                <div className="row profile-field-entry job_title">
+                <div className="row editable-field-entry job_title">
                     <div className="col-sm-3 text-right text-left-xs">
                         <label htmlFor="job_title">Role</label>
                     </div>
-                    <div id="job_title" className="col-sm-9">
+                    <div id="job_title" className="col-sm-9 value">
                         { user.job_title || <span className="not-set">No Job Title</span> }
                     </div>
                 </div>
-                <div className="row profile-field-entry submits_for">
+                <div className="row editable-field-entry submits_for">
                     <div className="col-sm-3 text-right text-left-xs">
                         <label htmlFor="submits_for">Submit For</label>
                     </div>
-                    <ul id="submits_for" className="col-sm-9">
+                    <ul id="submits_for" className="col-sm-9 value">
                         { this.renderSubmitsFor() }
                     </ul>
                 </div>

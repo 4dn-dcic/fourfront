@@ -2,7 +2,7 @@
 Contains the static text used for homepage, help pages, and other misc. locations
 *********/
 
-module.exports = {
+var statics = {
 
     "homeDescription" : 
         `The 4D Nucleome Network aims to understand the principles behind the three-dimensional organization of the nucleus in
@@ -139,3 +139,11 @@ module.exports = {
         `The 4D Nucleome Data Coordination and Integration Center is supported by the U01 Grant CA200059 from the NIH Common Fund.`
 
 };
+
+// Clear out whitespace.
+Object.getOwnPropertyNames(statics).forEach(function(key){
+    // newlines & spaces -> single space | spaces around html linebreak incl. linebreak -> linebreak | spaces at start -> nothing
+    statics[key] = statics[key].replace(/[\r\n(\s+)]+/g," ").replace(/((\s+)<br>(\s+))/g, "<br>").replace(/(^\s+)/g,'');
+});
+
+module.exports = statics;

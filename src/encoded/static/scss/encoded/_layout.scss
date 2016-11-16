@@ -303,7 +303,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 @media screen and (min-width: $screen-md-min){
 	/* Nudge accession #, etc. closer to title on wide desktop views */
 	.exp-set-header-area {
-		margin-top: -27px;
+		margin-top: -17px;
 	}
 }
 
@@ -654,6 +654,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	*/
 }
 
+
 /**********************************************************
 		User Profile Page
 ***********************************************************/
@@ -667,30 +668,8 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 	margin-bottom: 0;
 
-	.row.profile-field-entry {
-		padding-bottom: 5px;
-
-		label, #email {
-			font-weight: 500;
-		}
-
-		.not-set {
-			color: #bbb; 
-		}
-	}
-
-	.row.profile-field-entry > ul {
-		margin: 0;
-
-	 	> li {
-			list-style-position: inside;
-
-			&.submit_for-item > i.icon {
-				position: relative;
-				top: 1px;
-				color: #d2d2d2;
-			}
-		}
+	#email {
+		font-weight: 500;
 	}
 
 	.formatted-info-panel {
@@ -726,24 +705,45 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 	&.transition { transform: rotateZ(-900deg) scale3d(0.1, 0.1, 0.1) translateX(-1200px); opacity: 0; left: -900px; }
 
-	.user-title-container {
+	.user-title-row-container {
 		margin-bottom: 20px;
 		border-bottom: 1px solid #eee;
+	}
+
+	.user-title-col {
+		padding-bottom: 17px;
 	}
 
 	.user-title {
 		margin-top: 0px;
 		margin-bottom: 0px;
-		padding-top: 2px;
-		padding-bottom: 17px;
 		font-weight: 300;
 		font-size: 2.6rem;
+
+		.editable-field-entry {
+			max-width: 50%; // Need to fit 2 inline editable fields on one row for users full name.
+			text-overflow: ellipsis;
+			.value {
+				word-break: break-word;
+				.edit-button {
+					font-size: 1rem;
+				}
+			}
+			&.editing{
+				max-width: 70%;
+			}
+		}
+
 	}
 
-	@media screen and (min-width: $screen-sm-min){ 
-		.user-title {
+	@media screen and (min-width: $screen-sm-min){
+
+		.user-title-col {
 			padding-top: 15px;
 			height: 85px;
+		}
+
+		.user-title {
 			white-space: nowrap;
 			overflow: hidden;
 			text-overflow: ellipsis;
@@ -751,6 +751,11 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	}
 
 	@media screen and (max-width: $screen-xs-max){
+
+		.user-title-col {
+			padding-top: 2px;
+		}
+
 		.user-title {
 			font-size: 2rem;
 			font-weight: 400;
@@ -776,6 +781,13 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		}
 	}
 
+}
+
+@media screen and (min-width: $screen-sm-min){
+	.editing .user-title .editable-field-entry.inline:not(.editing) {
+		display: inline-block;
+		max-width: 30%;
+	}
 }
 
 .panel.user-work-info {
