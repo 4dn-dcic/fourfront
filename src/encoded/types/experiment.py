@@ -65,9 +65,9 @@ class Experiment(Item):
             else:
                 properties['sop_mapping']['has_sop'] = "No"
             print(properties)
-
         # update self first to ensure 'experiment_relation' are stored in self.properties
         super(Experiment, self)._update(properties, sheets)
+
         DicRefRelation = {
             "controlled by": "control for",
             "derived from": "source for",
