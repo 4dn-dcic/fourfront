@@ -163,10 +163,16 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 	}
 }
 
+
+	
 div.fieldset.editable-fields {
 
 	padding-bottom: 15px; 
-	transition: padding-bottom .5s linear;
+
+	@media screen and (min-width: $screen-md-min){
+		// Transition is too laggy on (some) mobile
+		transition: padding-bottom .5s linear;
+	}
 
 	&.editing {
 		padding-bottom: 0px;
@@ -198,9 +204,10 @@ div.fieldset.editable-fields {
 		> div.value > ul {
 			margin: 0;
 			padding: 0;
+			padding-left: 20px;
 
 			> li {
-				list-style-position: inside;
+				list-style-position: outside;
 
 				> i.icon {
 					position: relative;
@@ -217,9 +224,12 @@ div.fieldset.editable-fields {
 
 
 .editable-field-entry {
-	transition: filter .75s, opacity .5s, min-height .5s linear;
 	opacity: 1;
 	min-height: 30px;
+
+	@media screen and (min-width: $screen-sm-min){
+		transition: filter .75s, opacity .5s, min-height .5s linear;
+	}
 
 	.value {
 
@@ -298,11 +308,14 @@ div.fieldset.editable-fields {
 
 	&.editing {
 
-		min-height: 45px;
+		&:not(.inline){
+			min-height: 45px;
+		}
 
-		span.input-wrapper { 
-			// This wrapper is present when a help-block exists below the input element.
-			margin-bottom : -100px; // For min-height transition (prevent jumping).
+		span.input-wrapper {
+			@media screen and (min-width: $screen-sm-min){
+				margin-bottom : -100px; // For min-height transition (prevent jumping).
+			}
 			margin-right: 75px; // Room for action icons/buttons.
 			display: block;
 			position: relative;
@@ -373,7 +386,7 @@ div.fieldset.editable-fields {
 	}
 
 	&.editing.has-error {
-		min-height: 105px;
+		min-height: 80px;
 
 		span.help-block {
 			opacity : 1;
@@ -384,6 +397,7 @@ div.fieldset.editable-fields {
 
 		span.help-block {
 			opacity : 0;
+			position: absolute;
 			transition: opacity .35s, color .5s .5s !important;
 		}
 	}

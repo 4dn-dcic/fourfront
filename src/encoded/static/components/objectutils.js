@@ -245,7 +245,9 @@ var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = {
         return xhr;
     });
     promise.xhr = xhr;
-    promise.abort = xhr.abort;
+    promise.abort = function(){
+        if (promise.xhr.readyState !== 4) promise.xhr.abort();
+    };
     return promise;
 }
 

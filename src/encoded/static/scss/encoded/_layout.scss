@@ -539,13 +539,8 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	}
 
 	&.no-icon {
-		padding-bottom : 4px;
+		padding : 0 0 4px;
 		margin-bottom: 0;
-
-		.details-col {
-			padding-left: 0;
-		}
-
 	}
 
 	> h6 {
@@ -744,7 +739,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		font-size: 2.6rem;
 
 		.editable-field-entry {
-			max-width: 50%; // Need to fit 2 inline editable fields on one row for users full name.
+			//max-width: 50%; // Need to fit 2 inline editable fields on one row for users full name.
 			text-overflow: ellipsis;
 			.value {
 				word-break: break-word;
@@ -753,7 +748,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 				}
 			}
 			&.editing{
-				max-width: 70%;
+				//max-width: 70%;
 			}
 		}
 
@@ -763,12 +758,13 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 		.user-title-col {
 			padding-top: 15px;
-			height: 85px;
+			min-height: 85px;
+			padding-bottom: 30px;
 		}
 
 		.user-title {
-			white-space: nowrap;
-			overflow: hidden;
+			/* white-space: nowrap; */
+			/* overflow: hidden; */
 			text-overflow: ellipsis;
 		}
 	}
@@ -809,7 +805,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 @media screen and (min-width: $screen-sm-min){
 	.editing .user-title .editable-field-entry.inline:not(.editing) {
 		display: inline-block;
-		max-width: 30%;
+		//max-width: 30%;
 	}
 }
 
