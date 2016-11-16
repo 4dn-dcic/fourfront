@@ -447,7 +447,9 @@ var ProfileWorkFields = React.createClass({
                             renderItem={(detail) => FormattedInfoBlock.Award(detail, false, false, false) }
                             propertyName="awards"
                             fallbackMsg="No awards"
-                            loading={this.state.awards_list === null}
+                            loading={this.state.awards_list === null && (
+                                user.lab || (user.submits_for && user.submits_for > 0)
+                            ) ? true : false}
                         />
                     </div>
                 </div>

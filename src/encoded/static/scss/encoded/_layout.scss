@@ -691,7 +691,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	.formatted-info-panel {
 
 		&:not(.no-details){
-			min-height: 41px;
+			/* min-height: 41px; */
 		}
 
 		/* When in list (maybe ToDo: li > .formatted-info-panel) ... */
