@@ -539,13 +539,8 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	}
 
 	&.no-icon {
-		padding-bottom : 4px;
+		padding : 0 0 4px;
 		margin-bottom: 0;
-
-		.details-col {
-			padding-left: 0;
-		}
-
 	}
 
 	> h6 {
@@ -561,20 +556,6 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 	}
 
-	&.loading > .row {
-		opacity : 1;
-	}
-
-	&.loaded > .row {
-		opacity : 0;
-		transition: opacity 0s;
-	}
-
-	&.loaded.transitioned > .row {
-		opacity : 1;
-		transition: opacity .5s;
-	}
-
 	.row .icon-container {
 		max-width: 50px;
 	}
@@ -586,6 +567,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		/* white-space: nowrap; */
 		overflow: hidden;
 		text-overflow: ellipsis;
+		word-break: normal;
 
 		a {
 			/* display: block; */
@@ -599,10 +581,23 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 	}
 
+	&.error-block.no-icon h5:before {
+		content: "\f06a";
+		font-family: FontAwesome;
+		margin-right: 6px;
+		color: #999;
+	}
+
 	div.more-details {
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		
+		&.error-message {
+			white-space: pre-line;
+			white-space: normal;
+			opacity: 0.5;
+		}
 	}
 
 	.icon-container {
@@ -615,6 +610,28 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			padding-right: 0px;
 			padding-left: 5px;
 		}
+	}
+
+}
+
+.formatted-info-panel,
+.formatted-info-panel-list {
+
+	&.loading > li,
+	&.loading > .row {
+		opacity : 1;
+	}
+
+	&.loaded > li,
+	&.loaded > .row {
+		opacity : 0;
+		transition: opacity 0s;
+	}
+
+	&.loaded.transitioned > li,
+	&.loaded.transitioned > .row {
+		opacity : 1;
+		transition: opacity .5s;
 	}
 
 }
@@ -675,19 +692,21 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	.formatted-info-panel {
 
 		&:not(.no-details){
-			min-height: 41px;
+			/* min-height: 41px; */
 		}
 
 		/* When in list (maybe ToDo: li > .formatted-info-panel) ... */
 		&.no-details.no-icon.no-label {
 			display: inline-block;
 			padding: 0;
-			vertical-align: text-bottom;
+			vertical-align: text-top;
+			max-width: 85%;
+			word-break: break-word;
 		}
 
 		.block-title,
 		.block-title a {
-			font-weight: 500;
+			font-weight: 600;
 		}
 	}
 
@@ -721,7 +740,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		font-size: 2.6rem;
 
 		.editable-field-entry {
-			max-width: 50%; // Need to fit 2 inline editable fields on one row for users full name.
+			//max-width: 50%; // Need to fit 2 inline editable fields on one row for users full name.
 			text-overflow: ellipsis;
 			.value {
 				word-break: break-word;
@@ -730,7 +749,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 				}
 			}
 			&.editing{
-				max-width: 70%;
+				//max-width: 70%;
 			}
 		}
 
@@ -740,12 +759,13 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 		.user-title-col {
 			padding-top: 15px;
-			height: 85px;
+			min-height: 85px;
+			padding-bottom: 30px;
 		}
 
 		.user-title {
-			white-space: nowrap;
-			overflow: hidden;
+			/* white-space: nowrap; */
+			/* overflow: hidden; */
 			text-overflow: ellipsis;
 		}
 	}
@@ -759,6 +779,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		.user-title {
 			font-size: 2rem;
 			font-weight: 400;
+			margin-right: 70px;
 		}
 	}
 
@@ -786,7 +807,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 @media screen and (min-width: $screen-sm-min){
 	.editing .user-title .editable-field-entry.inline:not(.editing) {
 		display: inline-block;
-		max-width: 30%;
+		//max-width: 30%;
 	}
 }
 

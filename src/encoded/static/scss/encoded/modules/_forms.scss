@@ -163,10 +163,16 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 	}
 }
 
+
+	
 div.fieldset.editable-fields {
 
 	padding-bottom: 15px; 
-	transition: padding-bottom .5s linear;
+
+	@media screen and (min-width: $screen-md-min){
+		// Transition is too laggy on (some) mobile
+		transition: padding-bottom .5s linear;
+	}
 
 	&.editing {
 		padding-bottom: 0px;
@@ -174,10 +180,8 @@ div.fieldset.editable-fields {
 
 }
 
-.editable-field-entry {
-	transition: filter .75s, opacity .5s, min-height .5s linear;
-	opacity: 1;
-	min-height: 30px;
+.editable-field-entry,
+.field-entry {
 
 	label {
 		margin-bottom: 0;
@@ -191,6 +195,43 @@ div.fieldset.editable-fields {
 		.not-set {
 			color: #bbb; 
 		}
+
+	}
+
+	&.row {
+
+		> ul,
+		> div.value > ul {
+			margin: 0;
+			padding: 0;
+			padding-left: 20px;
+
+			> li {
+				list-style-position: outside;
+
+				> i.icon {
+					position: relative;
+					top: 1px;
+					color: #d2d2d2;
+				}
+			}
+
+		}
+		
+	}
+
+}
+
+
+.editable-field-entry {
+	opacity: 1;
+	min-height: 30px;
+
+	@media screen and (min-width: $screen-sm-min){
+		transition: filter .75s, opacity .5s, min-height .5s linear;
+	}
+
+	.value {
 
 		.edit-button,
 		.cancel-button,
@@ -240,7 +281,7 @@ div.fieldset.editable-fields {
 		}
 
 		.edit-button {
-			color: #f8f8f8;
+			color: transparent;
 			&.right {
 				transform: translateY(2px);
 			}
@@ -256,7 +297,7 @@ div.fieldset.editable-fields {
 		}
 
 		&:hover .edit-button {
-			color : #bbb;
+			color : #aaa;
 			&.inline { background-color: rgba(255,255,255,0.5); }
 			&:hover {
 				color: #000;
@@ -267,11 +308,14 @@ div.fieldset.editable-fields {
 
 	&.editing {
 
-		min-height: 45px;
+		&:not(.inline){
+			min-height: 45px;
+		}
 
-		span.input-wrapper { 
-			// This wrapper is present when a help-block exists below the input element.
-			margin-bottom : -100px; // For min-height transition (prevent jumping).
+		span.input-wrapper {
+			@media screen and (min-width: $screen-sm-min){
+				margin-bottom : -100px; // For min-height transition (prevent jumping).
+			}
 			margin-right: 75px; // Room for action icons/buttons.
 			display: block;
 			position: relative;
@@ -303,6 +347,27 @@ div.fieldset.editable-fields {
 
 		&.inline {
 			display: inline-block;
+			position: relative;
+
+			&.block-style {
+				.value.ghost {
+					opacity: 0.5;
+				}
+				.value.editing {
+					position: absolute;
+					z-index: 10;
+					width: 280px;
+					top: -2px;
+					/* left: 0; */
+					background: rgba(250,250,250,0.9);
+					/* box-shadow: 0 1px 10px -3px rgba(0,0,0,0.25); */
+					padding-bottom: 3px;
+					padding: 0 2px 2px 2px;
+					border-radius: 5px;
+					border: 1px solid #eee;
+					/* border-bottom-color: #ddd; */
+				}
+			}
 
 			span.input-wrapper {
 				display: inline-block;
@@ -342,7 +407,7 @@ div.fieldset.editable-fields {
 	}
 
 	&.editing.has-error {
-		min-height: 105px;
+		min-height: 80px;
 
 		span.help-block {
 			opacity : 1;
@@ -353,22 +418,9 @@ div.fieldset.editable-fields {
 
 		span.help-block {
 			opacity : 0;
+			position: absolute;
 			transition: opacity .35s, color .5s .5s !important;
 		}
 	}
 
-}
-
-.row.editable-field-entry > ul {
-	margin: 0;
-
-	> li {
-		list-style-position: inside;
-
-		&.submit_for-item > i.icon {
-			position: relative;
-			top: 1px;
-			color: #d2d2d2;
-		}
-	}
 }

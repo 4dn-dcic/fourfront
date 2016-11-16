@@ -3,7 +3,7 @@
 var React = require('react');
 var _ = require('underscore');
 var store = require('../store');
-var { ajaxLoad, console, getNestedProperty } = require('./objectutils');
+var { ajaxLoad, console, getNestedProperty, isServerSide } = require('./objectutils');
 
 /**
  * FieldSet allows to group EditableFields together.
@@ -63,6 +63,7 @@ var FieldSet = module.exports.FieldSet = React.createClass({
                 if (!child.props.endpoint && this.props.endpoint) newProps.endpoint = this.props.endpoint;
                 if (this.props.inputSize) newProps.inputSize = this.props.inputSize; // Overwrite, since EditableField has default props.
                 if (this.props.style) newProps.style = this.props.style;
+                if (this.props.absoluteBox) newProps.absoluteBox = this.props.absoluteBox;
                 child = React.cloneElement(child, newProps);
             };
             return child;
@@ -185,7 +186,8 @@ var EditableField = module.exports.EditableField = React.createClass({
         fieldType : React.PropTypes.string, // Type of field, used for rendering of input element & validation.
         style : React.PropTypes.string,     // Markup style, e.g. render row with label (default), minimal (just input field w/ buttons).
         inputSize : React.PropTypes.oneOf(['sm', 'md', 'lg']), // Size of Bootstrap input field to use. Defaults to sm.
-        children : React.PropTypes.any      // Rendered value of field, use custom formatting on a per-field basis. ToDo : create fallback.
+        children : React.PropTypes.any,     // Rendered value of field, use custom formatting on a per-field basis. ToDo : create fallback.
+        placeholder : React.PropTypes.string
     },
 
     getDefaultProps : function(){
@@ -207,8 +209,59 @@ var EditableField = module.exports.EditableField = React.createClass({
             'serverErrors' : [],          // Validation state sent from server.
             'serverErrorsMessage' : null,
             'loading' : false,            // True if in middle of save or fetch request.
-            'dispatching' : false
+            'dispatching' : false,
+            'leanTo' : null, //this.props.style === 'inline' && this.props.absoluteBox ? 'right' : null,
+            'leanOffset' : 0
         };
+    },
+
+    componentDidMount: function(){
+        if (this.props.style === 'inline' && this.props.absoluteBox && !isServerSide()){
+
+            this.debouncedLayoutResizeStateChange = _.debounce(() => {
+                if (this.refs.field && this.refs.field.offsetParent){
+                    var offsetRight = (this.refs.field.offsetParent.offsetWidth - this.refs.field.offsetLeft) - this.refs.field.offsetWidth;
+                    //var inputOffsetRight = (this.refs.field.offsetParent.offsetWidth - this.refs.field.nextElementSibling.offsetLeft) - this.refs.field.nextElementSibling.offsetWidth;
+                    this.setState({ 
+                        'leanTo' : 
+                            this.refs.field.offsetLeft > offsetRight ?
+                            'left' : 'right',
+                        'leanOffset' : 280 - (this.refs.field.offsetParent.offsetWidth - Math.min(this.refs.field.offsetLeft, offsetRight))
+                    });
+                }
+            }, 300, false);
+
+            window.addEventListener('resize', this.debouncedLayoutResizeStateChange);
+
+        }
+    },
+
+    componentWillUnmount : function(){
+        if (typeof this.debouncedLayoutResizeStateChange !== 'undefined'){
+            window.removeEventListener('resize', this.debouncedLayoutResizeStateChange);
+        }
+    },
+
+    componentDidUpdate : function(oldProps, oldState){
+        // If editing state but not onChange event (e.g. want to catch when change to editing state)
+        if (
+            typeof this.debouncedLayoutResizeStateChange !== 'undefined' &&
+            oldState.value === this.state.value && 
+            oldState.loading === this.state.loading &&
+            oldState.dispatching === this.state.dispatching &&
+            oldState.savedValue === this.state.savedValue
+        ){
+            if (this.justUpdatedLayout){
+                this.justUpdatedLayout = false;
+                return false;
+            }
+            if (this.props.parent.state && this.props.parent.state.currentlyEditing === this.props.labelID){
+                this.debouncedLayoutResizeStateChange();
+            } else {
+                this.setState({ 'leanTo' : null });
+            }
+            this.justUpdatedLayout = true;
+        }
     },
 
     componentWillReceiveProps : function(newProps){
@@ -274,50 +327,57 @@ var EditableField = module.exports.EditableField = React.createClass({
 
     save : function(successCallback = null, errorCallback = null){
 
+        var errorFallback = function(r){
+            // ToDo display (bigger?) errors
+            console.error("Error: ", r);
+            this.setState({ serverErrors : r.errors, serverErrorsMessage : r.description, loading : false }, errorCallback);
+            return;
+        }.bind(this);
+
         this.setState({ loading : true }, ()=>{
             var value = this.state.value;
             var patchData = EditableField.generateNestedProperty(this.props.labelID, value);
-            ajaxLoad(this.props.endpoint || this.props.context['@id'], (r)=>{
-                if (r.status === 'error'){
+            var timestamp = Math.floor(Date.now ? Date.now() / 1000 : (new Date()).getTime() / 1000);
+            ajaxLoad((this.props.endpoint || this.props.context['@id']) + '?ts=' + timestamp, (r)=>{
+                console.log('EditableField Save Result:', r);
 
-                    // ToDo display errors
-                    console.error("Error: ", r);
-                    this.setState({ serverErrors : r.errors, serverErrorsMessage : r.description, loading : false }, errorCallback);
-                    return;
+                if (r.status !== 'success'){
+                    return errorFallback(r);
+                } 
 
-                } else if (r.status === 'success') {
-
-                    var updatedContext = _.clone(this.props.context);
-                    var inserted = EditableField.deepInsertObj(updatedContext, patchData);
-                    if (inserted){
-                        this.setState({ 'savedValue' : value, 'value' : value, 'dispatching' : true }, ()=> {
-                            var unsubscribe = store.subscribe(()=>{
-                                unsubscribe();
-                                setTimeout(()=>{
-                                    this.props.parent.setState({ currentlyEditing : null }, ()=> {
-                                        this.setState({ 'loading' : false, 'dispatching' : false });
-                                        if (typeof successCallback === 'function') successCallback(r);
-                                    });
-                                },0);
-                            });
-                            store.dispatch({
-                                type: { 'context': updatedContext }
-                            });
+                var updatedContext = _.clone(this.props.context);
+                var inserted = EditableField.deepInsertObj(updatedContext, patchData);
+                if (inserted){
+                    this.setState({ 'savedValue' : value, 'value' : value, 'dispatching' : true }, ()=> {
+                        var unsubscribe = store.subscribe(()=>{
+                            unsubscribe();
+                            setTimeout(()=>{
+                                this.props.parent.setState({ currentlyEditing : null }, ()=> {
+                                    this.setState({ 'loading' : false, 'dispatching' : false });
+                                    if (typeof successCallback === 'function') successCallback(r);
+                                });
+                            },0);
                         });
-                        
-                    } else {
-                        // Couldn't insert into current context, refetch from server :s.
-                        console.warn("Couldn't update current context, fetching from server.");
-                        this.context.navigate('', {'inPlace':true});
-                        // ToDo : ...navigate(inPlace)...
-                    }
+                        store.dispatch({
+                            type: { 'context': updatedContext }
+                        });
+                    });
+                    
+                } else {
+                    // Couldn't insert into current context, refetch from server :s.
+                    console.warn("Couldn't update current context, fetching from server.");
+                    this.context.navigate('', {'inPlace':true});
+                    // ToDo : ...navigate(inPlace)...
                 }
-            }, 'PATCH', null, JSON.stringify(patchData));
+
+            }, 'PATCH', errorFallback, JSON.stringify(patchData));
         });
     },
 
     handleChange : function(e){
-        var state = { value : e.target.value };
+        var state = {
+            'value' : e.target.value // ToDo: change to (e.target.value === '' ? null : e.target.value)  and enable to process it on backend.
+        };
         if (e.target.validity){
             if (typeof e.target.validity.valid == 'boolean') {
                 state.valid = e.target.validity.valid;
@@ -326,6 +386,13 @@ var EditableField = module.exports.EditableField = React.createClass({
         if (e.target.validationMessage){
             state.validationMessage = e.target.validationMessage;
         }
+
+        // Reset serverErrors if any
+        if (this.state.serverErrors && this.state.serverErrors.length > 0) {
+            state.serverErrors = [];
+            state.serverErrorsMessage = null;
+        }
+
         // ToDo : cross-browser validation check + set error state then use for styling, etc.
         this.setState(state);
     },
@@ -377,16 +444,17 @@ var EditableField = module.exports.EditableField = React.createClass({
         }
     },
 
-    renderSaved : function(){
-        var renderedValue = this.props.children || this.state.savedValue;
+    renderSavedValue : function(){
+        var renderedValue = this.props.children || this.state.savedValue,
+            classes = ['value', 'saved'];
 
-        if (this.props.style === 'row'){
-            return (
-                <div className={"row editable-field-entry " + this.props.labelID}>
-                    <div className="col-sm-3 text-right text-left-xs">
-                        <label htmlFor={ this.props.labelID }>{ this.props.label }</label>
-                    </div>
-                    <div className="col-sm-9 value">
+        switch (this.props.style){
+
+            case 'row':
+            case 'minimal':
+                if (this.props.style === 'row') classes.push('col-sm-9');
+                return (
+                    <div className={classes.join(' ')}>
                         { this.renderActionIcon('edit') }
                         { this.isSet() ?
                             <span id={ this.props.labelID } className="set">{ renderedValue }</span>
@@ -394,27 +462,11 @@ var EditableField = module.exports.EditableField = React.createClass({
                             <span className="not-set">{ this.props.fallbackText || ('No ' + this.props.labelID) }</span> 
                         }
                     </div>
-                </div>
-            );
-        }
-        if (this.props.style === 'minimal'){
-            return (
-                <div className={"editable-field-entry " + this.props.labelID}>
-                    <div className="value">
-                        { this.renderActionIcon('edit') }
-                        { this.isSet() ?
-                            <span id={ this.props.labelID } className="set">{ renderedValue }</span>
-                            :
-                            <span className="not-set">{ this.props.fallbackText || ('No ' + this.props.labelID) }</span> 
-                        }
-                    </div>
-                </div>
-            );
-        }
-        if (this.props.style === 'inline'){
-            return (
-                <span className={"editable-field-entry inline " + this.props.labelID}>
-                    <span className="value">
+                );
+
+            case 'inline':
+                return (
+                    <span className={classes.join(' ')}>
                         { this.isSet() ?
                             <span id={ this.props.labelID } className="set">{ renderedValue }</span>
                             :
@@ -422,6 +474,33 @@ var EditableField = module.exports.EditableField = React.createClass({
                         }
                         { this.renderActionIcon('edit') }
                     </span>
+                );
+        }
+        return null;
+    },
+
+    renderSaved : function(){
+        if (this.props.style === 'row'){
+            return (
+                <div className={"row editable-field-entry " + this.props.labelID}>
+                    <div className="col-sm-3 text-right text-left-xs">
+                        <label htmlFor={ this.props.labelID }>{ this.props.label }</label>
+                    </div>
+                    { this.renderSavedValue() }
+                </div>
+            );
+        }
+        if (this.props.style === 'minimal'){
+            return (
+                <div className={"editable-field-entry " + this.props.labelID}>
+                    { this.renderSavedValue() }
+                </div>
+            );
+        }
+        if (this.props.style === 'inline'){
+            return (
+                <span className={"editable-field-entry inline " + this.props.labelID}>
+                    { this.renderSavedValue() }
                 </span>
             );
         }
@@ -431,15 +510,30 @@ var EditableField = module.exports.EditableField = React.createClass({
     validationFeedbackMessage : function(){
         //if (this.isValid(true)) return null;
         // ^ Hide via CSS instead.
-        switch(this.props.fieldType){
 
-            case 'phone': return (
+        if (this.state.serverErrors && this.state.serverErrors.length > 0) {
+            return (
                 <span className="help-block">
-                    Only use digits &mdash; no dashes, spaces, or parantheses.
-                    Optionally may include leading '+' or extension.<br/>
-                    <b>e.g.:</b> <code>+######### x###</code>
+                    { this.state.serverErrorsMessage ? <b>{ this.state.serverErrorsMessage }</b> : null }
+                    { this.state.serverErrors.map((e, i)=> (
+                        <div key={'error-' + i}>
+                            { (this.state.serverErrors.length === 1 ? '' : (i + 1) + '. ') + e.description }
+                        </div>
+                    ) ) }
                 </span>
             );
+        }
+
+        switch(this.props.fieldType){
+
+            case 'phone': 
+                return (
+                    <span className="help-block">
+                        Only use digits &mdash; no dashes, spaces, or parantheses.
+                        Optionally may include leading '+' or extension.<br/>
+                        <b>e.g.:</b> <code>+######### x###</code>
+                    </span>
+                );
             case 'email': return (
                 <span className="help-block">
                     Please enter a valid email address.
@@ -466,14 +560,15 @@ var EditableField = module.exports.EditableField = React.createClass({
             value : this.state.value || '',
             onChange : this.handleChange,
             name : this.props.labelID,
-            autoFocus: true
+            autoFocus: true,
+            placeholder : this.props.placeholder
         }, commonProps);
 
         switch(this.props.fieldType){
 
             case 'phone': return (
                 <span className="input-wrapper">
-                    <input type="text" placeholder="17775559999 x1234" inputMode="tel" autoComplete="tel" pattern={EditableField.regex.phone} {...commonPropsTextInput} />
+                    <input type="text" inputMode="tel" autoComplete="tel" pattern={EditableField.regex.phone} {...commonPropsTextInput} />
                     { this.validationFeedbackMessage() }
                 </span>
             );
@@ -486,11 +581,13 @@ var EditableField = module.exports.EditableField = React.createClass({
             case 'username' : return (
                 <span className="input-wrapper">
                     <input type="text" inputMode="latin-name" autoComplete="username" {...commonPropsTextInput} />
+                    { this.validationFeedbackMessage() }
                 </span>
             );
             case 'text' : return (
                 <span className="input-wrapper">
                     <input type="text" inputMode="latin" {...commonPropsTextInput} />
+                    { this.validationFeedbackMessage() }
                 </span>
             );
         }
@@ -532,9 +629,18 @@ var EditableField = module.exports.EditableField = React.createClass({
         }
 
         if (this.props.style == 'inline') {
+            var valStyle = {};
+            if (this.props.absoluteBox){
+                if (this.state.leanTo === null){
+                    valStyle.display = 'none';
+                } else {
+                    valStyle[this.state.leanTo === 'left' ? 'right' : 'left'] = (this.state.leanOffset > 0 ? (0-this.state.leanOffset) : 0) + 'px';
+                }
+            }
             return (
-                <span className={ outerBaseClass + this.props.labelID + ' inline' }>
-                    <span className="value editing clearfix">
+                <span ref={this.props.absoluteBox ? "field" : null} className={ outerBaseClass + this.props.labelID + ' inline' + (this.props.absoluteBox ? ' block-style' : '') }>
+                    { this.props.absoluteBox ? this.renderSavedValue() : null }
+                    <span className="value editing clearfix" style={valStyle}>
                         { this.inputField() }
                         { this.renderActionIcon('cancel') }
                         { this.renderActionIcon('save') }

@@ -56,7 +56,7 @@ var patchedConsole = module.exports.console = (function(){
         this._enabled = true; // Default
         this._available = true;
 
-        if (!console || !console.log) { // Check for seldomly incompatible browsers
+        if (typeof console === 'undefined' || typeof console.log === 'undefined' || typeof console.log.bind === 'undefined') { // Check for seldomly incompatible browsers
             this._available = false;
         }
 
@@ -69,10 +69,10 @@ var patchedConsole = module.exports.console = (function(){
 
         this._patchMethods = function(){
             this._methods.forEach(function(methodName){
-                if (!(this._enabled && this._available)) {
+                if (!this._enabled || !this._available || typeof this._nativeConsole[methodName] === 'undefined') {
                     this[methodName] = function(){return false;};
                 } else {
-                    this[methodName] = this._nativeConsole[methodName];
+                    this[methodName] = this._nativeConsole[methodName].bind(this._nativeConsole);
                 }
             }.bind(this));
         }.bind(this);
@@ -202,15 +202,14 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
                 if (typeof callback == 'function'){
                     callback(JSON.parse(xhr.responseText));
                 }
-            } else if (xhr.status == 400) {
-                (patchedConsole || console).error('There was an error 400');
-                if (typeof fallback == 'function'){
-                    fallback();
-                }
             } else {
-                (patchedConsole || console).error('Something else other than 200 was returned: ',JSON.parse(xhr.responseText));
-                if (typeof fallback == 'function'){
-                    fallback();
+                var response;
+                try {
+                    response = JSON.parse(xhr.responseText);
+                    (patchedConsole || console).error('ajaxLoad error: ', response);
+                    if (typeof fallback == 'function') fallback(response);
+                } catch (error) {
+                    (patchedConsole || console).error('Non-JSON error response:', xhr.responseText);
                 }
             }
         }
@@ -227,8 +226,9 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
 }
 
 var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = {}, data = null){
-    return new Promise(function(resolve, reject) {
-        var xhr = new XMLHttpRequest();
+    var xhr;
+    var promise = new Promise(function(resolve, reject) {
+        xhr = new XMLHttpRequest();
         xhr.onload = function() {
             // response SHOULD be json
             resolve(JSON.parse(xhr.responseText));
@@ -244,6 +244,11 @@ var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = {
         }
         return xhr;
     });
+    promise.xhr = xhr;
+    promise.abort = function(){
+        if (promise.xhr.readyState !== 4) promise.xhr.abort();
+    };
+    return promise;
 }
 
 /**
