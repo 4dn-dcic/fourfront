@@ -56,7 +56,7 @@ var patchedConsole = module.exports.console = (function(){
         this._enabled = true; // Default
         this._available = true;
 
-        if (!console || !console.log) { // Check for seldomly incompatible browsers
+        if (typeof console === 'undefined' || typeof console.log === 'undefined' || typeof console.log.bind === 'undefined') { // Check for seldomly incompatible browsers
             this._available = false;
         }
 
@@ -69,10 +69,10 @@ var patchedConsole = module.exports.console = (function(){
 
         this._patchMethods = function(){
             this._methods.forEach(function(methodName){
-                if (!(this._enabled && this._available)) {
+                if (!this._enabled || !this._available || typeof this._nativeConsole[methodName] === 'undefined') {
                     this[methodName] = function(){return false;};
                 } else {
-                    this[methodName] = this._nativeConsole[methodName];
+                    this[methodName] = this._nativeConsole[methodName].bind(this._nativeConsole);
                 }
             }.bind(this));
         }.bind(this);
