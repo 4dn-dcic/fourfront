@@ -1,7 +1,8 @@
-.box {
+
+.facets-container {
     padding: 10px;
-    border: 1px #ccc solid;
-    border-radius: 3px;
+    //border: 1px #ccc solid;
+    //border-radius: 3px;
     overflow-x: auto;
 }
 
@@ -40,12 +41,18 @@
 }
 
 .clear-filters-control {
-    margin: 2px 10px 2px 10px;
+    margin: 2px 0;
     text-align: right;
     font-size: 0.9rem;
+    opacity: 1;
+    transition: opacity .25s;
     > a{
         color: #999999;
         text-decoration: none;
+    }
+    &.placeholder {
+        opacity : 0;
+        visibility: visible;
     }
 }
 
