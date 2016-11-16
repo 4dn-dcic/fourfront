@@ -130,14 +130,6 @@ var lookup_column = function (result, column) {
             return state;
         },
 
-        componentDidMount: function() {
-            this._isMounted = true;
-        },
-
-        componentWillUnmount: function() {
-            this._isMounted = false;
-        },
-
         componentWillReceiveProps: function (nextProps, nextContext) {
             var updateData = false;
             if (nextProps.context !== this.props.context) {
@@ -250,7 +242,7 @@ var lookup_column = function (result, column) {
             var context = props.context;
             var communicating;
             var request = this.state.allRequest;
-            if (request) request.abort();
+            if (request && typeof request.abort == 'function') request.abort();
             var self = this;
             if (context.all) {
                 communicating = true;
@@ -384,6 +376,7 @@ var lookup_column = function (result, column) {
                 communicating: this.fetchAll(this.props),
                 mounted: true,
             });
+            this._isMounted = true;
         },
 
         handleClickHeader: function (event) {
@@ -441,11 +434,12 @@ var lookup_column = function (result, column) {
         },
 
         componentWillUnmount: function () {
+            this._isMounted = false;
             if (typeof this.submitTimer != 'undefined') {
                 clearTimeout(this.submitTimer);
             }
             var request = this.state.allRequest;
-            if (request) request.abort();
+            if (request && typeof request.abort === 'function') request.abort();
         }
 
     });

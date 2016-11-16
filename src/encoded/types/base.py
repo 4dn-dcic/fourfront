@@ -28,7 +28,7 @@ ONLY_ADMIN_VIEW = [
     (Allow, 'group.read-only-admin', ['view']),
     (Allow, 'remoteuser.INDEXER', ['view']),
     (Allow, 'remoteuser.EMBED', ['view']),
-    (Deny, Everyone, ['view', 'edit']),
+    (Deny, Everyone, ['view', 'edit'])
 ]
 
 ALLOW_EVERYONE_VIEW = [
@@ -142,6 +142,10 @@ class Item(snovault.Item):
         # publication
         'published': ALLOW_CURRENT,
     }
+
+    def __init__(self, registry, models):
+        super().__init__(registry, models)
+        self.STATUS_ACL = self.__class__.STATUS_ACL
 
     @property
     def __name__(self):

@@ -23,7 +23,7 @@ describe('Testing about.js', function() {
 
     beforeAll(function() {
         React = require('react');
-        TestUtils = require('react/lib/ReactTestUtils');
+        TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
         App = require('../app');
         page = TestUtils.renderIntoDocument(

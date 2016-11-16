@@ -11,6 +11,8 @@ $tableHeadFootBackgroundColor: #000000;
 
 $mobile-font-factor: 1;
 
+$navbar-link-color : #888888;
+$navbar-link-active-color : #000000;
 
 // Pass value with CSS units and get just the value back
 @function strip-units($value) {

@@ -15,7 +15,7 @@ describe('Testing item.js', function() {
 
     beforeEach(function() {
         React = require('react');
-        TestUtils = require('react/lib/ReactTestUtils');
+        TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
         item = require('../item');
         Item = item.IPanel;

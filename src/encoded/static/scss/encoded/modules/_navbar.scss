@@ -18,9 +18,17 @@
     .nav > li > a {
         font-size: 1.4em;
         font-weight: 300;
+        color: $navbar-link-color; 
         &:focus,
         &:hover {
-            color: #000000;
+            color: $navbar-link-active-color; /* Set in _base.scss */
+            text-shadow: 0 0 0px ;
+            text-shadow: 0 0 0.25px rgba(0,0,0,1);
+
+            i.icon {
+                text-shadow: none;
+            }
+
         }
 
         /* Disabled sign-in link */
