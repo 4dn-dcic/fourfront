@@ -153,7 +153,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
         id_token = get_jwt(request)
         if not id_token:
             # can I thrown an 403 here?
-            print('Missing assertion.', 'unauthenticated_userid', request)
+            #print('Missing assertion.', 'unauthenticated_userid', request)
             return None
 
         user_info = self.get_token_info(id_token, request)
