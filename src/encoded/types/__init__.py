@@ -187,20 +187,6 @@ class AnalysisStep(Item):
     embedded = ['software_used', 'qa_stats_generated']
 
 
-# @collection(
-#    name='tasks',
-#     properties={
-#         'title': 'Tasks',
-#         'description': 'Listing of runs of analysis steps for 4DN analyses',
-#     })
-# class Task(Item):
-#     """The Task class that descrbes a run of an analysis step."""
-#
-#     item_type = 'task'
-#     schema = load_schema('encoded:schemas/task.json')
-#     embedded = ['analysis_step']
-
-
 @collection(
     name='workflows',
     properties={

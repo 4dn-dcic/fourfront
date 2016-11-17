@@ -1,4 +1,5 @@
 import pytest
+pytestmark = pytest.mark.working
 
 
 def test_audit_biosample_no_audit_if_no_cell_line(testapp, tissue_biosample):
