@@ -43,12 +43,9 @@ class Biosource(Item):
         }
         if 'cell_line' in properties:
             if properties['cell_line'] in name2info:
-                tier = 'Unclassified'
                 termid = None
                 info = name2info.get(properties['cell_line'])
                 if info is not None:
-                    tier = info[0]
-                    properties['cell_line_tier'] = tier
                     termid = info[1]
                     if termid is not None:
                         properties['cell_line_termid'] = termid
