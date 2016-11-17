@@ -172,7 +172,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
             );
         }.bind(this));
 
-        var checked = this.state.selectedFiles.size === files.length;
+        var checked = this.state.selectedFiles.size === files.length || (!this.state.open && this.state.checked);
         var disabled = files.length === emptyExps.length; // @Carl : Any thoughts? Unsure re: case if multiple files in experiment 
         var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < files.length;
 
@@ -198,7 +198,8 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                 </tr>
                 <tr className="expset-addinfo-row">
                     <td className={this.state.open ? "hidden-col-open" : "hidden-col-closed"} colSpan={Object.keys(this.props.columns).length + 2}>
-                        <Panel className="expset-panel" collapsible expanded={this.state.open}>
+                        { this.state.open ? 
+                        <Panel className="expset-panel" collapsible expanded={true/*this.state.open*/}>
                             <div className="expset-addinfo">
                                 { formattedAdditionalInfo }
                             </div>
@@ -217,6 +218,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                                 facets={this.props.facets /* Not req'd here as using pre-completed fileDetailContainer' */ }
                             />
                         </Panel>
+                        : null }
                     </td>
                 </tr>
             </tbody>

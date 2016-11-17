@@ -1,9 +1,12 @@
+'use strict';
+
 var React = require('react');
 var Table = require('react-bootstrap').Table;
 var Checkbox = require('react-bootstrap').Checkbox;
 var _ = require('underscore');
 var siftExperiments = require('./facetlist').siftExperiments;
 var FacetList = require('./facetlist').FacetList; // Only used for statics.
+var console = require('./objectutils').console;
 
 /**
  * To be used within Experiments Set View/Page, or
@@ -110,25 +113,13 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
     },
 
     getInitialState: function() {
+        var fileDetailContainer = this.getFileDetailContainer();
         return {
             checked: true,
-            selectedFiles: new Set()
+            selectedFiles: new Set(),
+            fileDetailContainer : fileDetailContainer,
+            counts : this.getCounts(false, fileDetailContainer)
         };
-    },
-
-    // Mutable non-state data, e.g. value caching.
-    fileDetailContainer : null,
-    counts : {
-        visibleExperiments : null,
-        visibleFiles : null,
-        totalExperiments : null,
-        totalFiles : null
-    },
-
-    componentWillMount : function(){
-        // Cache output for faster re-rendering (?)
-        this.fileDetailContainer = this.getFileDetailContainer();
-        this.updateCachedCounts(true);
     },
 
     componentWillReceiveProps : function(nextProps){
@@ -138,24 +129,29 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             nextProps.experimentArray !== this.props.experimentArray ||
             nextProps.expSetFilters !== this.props.expSetFilters
         ){
-            this.fileDetailContainer = this.getFileDetailContainer(nextProps);
-            this.updateCachedCounts(nextProps.experimentArray !== this.props.experimentArray);
+            var fileDetailContainer = this.getFileDetailContainer(nextProps);
+            this.setState({
+                fileDetailContainer : fileDetailContainer,
+                counts : this.getCounts(nextProps.experimentArray !== this.props.experimentArray, fileDetailContainer)
+            });
         }
     },
 
-    updateCachedCounts : function(updateTotals = false){
+    getCounts : function(includeTotals = false, fileDetailContainer = this.state.fileDetailContainer){
+        var counts = {};
         if (!this.props.keepCounts) return; // Prevent execution if not necessary (specify in props)
-        var visibleCounts = ExperimentsTable.visibleExperimentsCount(this.fileDetailContainer);
-        this.counts.visibleExperiments = visibleCounts.experiments;
-        this.counts.visibleFiles = visibleCounts.files;
-        if (updateTotals && this.props.experimentArray && Array.isArray(this.props.experimentArray)){
+        var visibleCounts = ExperimentsTable.visibleExperimentsCount(fileDetailContainer);
+        counts.visibleExperiments = visibleCounts.experiments;
+        counts.visibleFiles = visibleCounts.files;
+        if (includeTotals && this.props.experimentArray && Array.isArray(this.props.experimentArray)){
             // Only available if experimentArray is passed to props.
             var totalCounts = ExperimentsTable.totalExperimentsCount(this.props.experimentArray);
             if (totalCounts){
-                this.counts.totalExperiments = totalCounts.experiments;
-                this.counts.totalFiles = totalCounts.files;
+                counts.totalExperiments = totalCounts.experiments;
+                counts.totalFiles = totalCounts.files;
             }
         }
+        return counts;
     },
 
     handleFileUpdate: function (uuid, add=true){
@@ -206,25 +202,15 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         return getFileDetailContainer(props.experimentArray, passExperiments);
     },
 
-    render : function(){
-        var fileDetail = this.fileDetailContainer.fileDetail;
-        var emptyExps = this.fileDetailContainer.emptyExps;
-
-        var formattedColumnHeaders = this.props.columnHeaders.map(function(columnTitle, i){
-            return <th className="text-500" key={i}>{ columnTitle }</th>;
-        });
-
+    renderChildFileEntryRows : function(fileDetail = this.state.fileDetailContainer.fileDetail){
+        
         // Let parentController control 'checked' state if provided.
         // Fallback to own state otherwise.
-        var checked;
-        if (this.props.parentController) {
-            checked = this.props.parentController.state.checked;
-        } else {
-            checked = this.state.checked;
-        }
-
+        var checked = this.props.parentController && this.props.parentController.state ?
+            this.props.parentController.state.checked : this.state.checked;
+        
         var expsWithFileCounts = {};
-        var childFileEntryRows = Object.keys(fileDetail).map(function (file) {
+        return Object.keys(fileDetail).map(function (file) {
 
             // Check how many file entries have same exp. accession.
             // To allow to set rowSpan multiple where exp accession is same between files.
@@ -261,21 +247,22 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                     experimentAccessionEntrySpan={expsWithFileCounts[file].count}
                 />
             );
-        }.bind(this));
-
-        // sort to group experiments
-        childFileEntryRows.sort(function(a,b){
+        }.bind(this)).sort(function(a,b){
             return(a.key - b.key);
         });
+    },
 
+    render : function(){
         return (
             <Table className="expset-table" striped bordered condensed hover>
                 <thead>
                     <tr>
-                        { formattedColumnHeaders }
+                        { this.props.columnHeaders.map(function(columnTitle, i){
+                            return <th className="text-500" key={i}>{ columnTitle }</th>;
+                        }) }
                     </tr>
                 </thead>
-                { childFileEntryRows }
+                { this.renderChildFileEntryRows() }
             </Table>
         );
     }

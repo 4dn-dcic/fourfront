@@ -52,7 +52,7 @@
     }
     &.placeholder {
         opacity : 0;
-        visibility: visible;
+        visibility: visible !important;
     }
 }
 
