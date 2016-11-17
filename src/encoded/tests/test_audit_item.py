@@ -1,4 +1,5 @@
 import pytest
+pytestmark = pytest.mark.working
 
 
 def test_audit_item_schema_validation(testapp, organism):
@@ -61,7 +62,7 @@ def test_audit_item_schema_upgrade_validation_failure(testapp, organism):
 def test_audit_item_schema_permission(testapp, file, embed_testapp):
     # Redmine 2915
     patch = {
-        'file_format': '2bit',
+        'file_format': 'fastq',
         'status': 'deleted',
     }
     testapp.patch_json(file['@id'], patch)
