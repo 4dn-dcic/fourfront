@@ -256,8 +256,8 @@ def protocol(testapp):
 
 
 @pytest.fixture
-def sop_map(testapp, protocol):
-    item = {
+def sop_map_data(protocol):
+    return {
         "sop_name": "in situ Hi-C SOP map",
         "sop_version": 1,
         "associated_item_type": "ExperimentHiC",
@@ -269,12 +269,16 @@ def sop_map(testapp, protocol):
             {"field_name": "digestion_enzyme", "field_value": "MboI"},
         ]
     }
-    return testapp.post_json("/sop_map", item).json['@graph'][0]
 
 
-#@pytest.fixture
-#def experiment(testapp, experiment_data):
-#    return testapp.post_json('/experiment_hic', experiment_data).json['@graph'][0]
+@pytest.fixture
+def sop_map(testapp, sop_map_data):
+    return testapp.post_json("/sop_map", sop_map_data).json['@graph'][0]
+
+
+@pytest.fixture
+def experiment(testapp, experiment_data):
+    return testapp.post_json('/experiment_hic', experiment_data).json['@graph'][0]
 
 
 @pytest.fixture
@@ -289,20 +293,13 @@ def experiment_data(lab, award, human_biosample):
 
 
 @pytest.fixture
-def experiment_project_review(testapp, lab, award, human_biosample):
-    item = {
-        'lab': lab['@id'],
-        'award': award['@id'],
-        'biosample': human_biosample['@id'],
-        'experiment_type': 'micro-C',
-        'status': 'in review by project'
-    }
-    return testapp.post_json('/experiment_hic', item).json['@graph'][0]
+def experiment_project_review(testapp, experiment):
+    return testapp.patch_json(experiment['@id'], {'status': 'in review by project'}, status=200)
 
 
 @pytest.fixture
 def base_experiment(testapp, experiment_data):
-    return testapp.post_json('/experiment_hic', experiment_data, status=201).json['@graph'][0]
+    return testapp.post_json('/experiment_hic', experiment_data).json['@graph'][0]
 
 
 @pytest.fixture
