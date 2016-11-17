@@ -293,8 +293,15 @@ def experiment_data(lab, award, human_biosample):
 
 
 @pytest.fixture
-def experiment_project_review(testapp, experiment):
-    return testapp.patch_json(experiment['@id'], {'status': 'in review by project'}, status=200)
+def experiment_project_review(testapp, lab, award, human_biosample):
+    item = {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'biosample': human_biosample['@id'],
+        'experiment_type': 'micro-C',
+        'status': 'in review by project'
+    }
+    return testapp.post_json('/experiment_hic', item).json['@graph'][0]
 
 
 @pytest.fixture
