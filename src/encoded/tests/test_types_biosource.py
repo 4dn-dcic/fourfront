@@ -14,7 +14,7 @@ def biosources(cell_lines, lung_biosource, whole_biosource):
     return bs
 
 
-def test_biosource_update_termids(testapp, cell_lines):
+def test_biosource_update_termids(cell_lines):
     acc2termid = {'4DNSR000AAQ1': 'EFO_0002784', '4DNSR000AAQ2': None}
     for cell in cell_lines:
         if cell['accession'] in acc2termid:
@@ -24,7 +24,7 @@ def test_biosource_update_termids(testapp, cell_lines):
                 assert 'cell_line_termid' not in cell
 
 
-def test_calculated_biosource_name(testapp, biosources):
+def test_calculated_biosource_name(biosources):
     for biosource in biosources:
         biotype = biosource['biosource_type']
         name = biosource['biosource_name']

@@ -56,16 +56,20 @@ def audit_biosample_tier1_cell_lines_have_required_cell_culture_properties(value
     '''
     # check to see if any of the biosources (usually only 1) are Tier1 cell_lines
     if not any(bs.get('cell_line_tier') == 'Tier 1' for bs in value.get('biosource')):
+        print("returning because no cell_line_tier found")
         return
     if len(value['biosource']) != 1:
+        print("returning because multiple biosources found")
         # special case for multi-biosource
         return
     required = ['culture_duration', 'morphology_image']
     missing = []
     if 'cell_culture_details' not in value:
         missing.append('cell_culture_details')
+        print("Missing cell_culture_details")
     else:
         cell_cult_info = value['cell_culture_details']
+        print(cell_cult_info)
         if 'passage_number' in cell_cult_info:
             if cell_cult_info['passage_number'] >= 10:
                 # they need karyotype image so add to required
@@ -81,8 +85,8 @@ def audit_biosample_tier1_cell_lines_have_required_cell_culture_properties(value
                             ok = True
                     if not ok:
                         missing.extend(orred)
-                    else:
-                        missing.append(prop)
+                else:
+                    missing.append(prop)
 
     if missing:
         detail = 'In Biosample {}'.format(value['@id']) + \

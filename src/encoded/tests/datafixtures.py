@@ -197,29 +197,6 @@ def mboI(testapp, worthington_biochemical):
 
 
 @pytest.fixture
-def cell_culture(testapp):
-    '''
-    A minimal biosample_cell_culture item with only schema-required field
-    '''
-    return testapp.post_json('/biosample_cell_culture', {'culture_start_date': '2016-01-01'}).json['@graph'][0]
-
-
-@pytest.fixture
-def tier1_cell_culture(testapp, image):
-    '''
-    A biosample_cell_culture item for a tier 1 cell
-    '''
-    item = {
-        'culture_start_date': '2016-01-01',
-        'culture_duration': 2,
-        'culture_duration_units': 'days',
-        'passage_number': 1,
-        'morphology_image': image['@id']
-    }
-    return testapp.post_json('/biosample_cell_culture', item).json['@graph'][0]
-
-
-@pytest.fixture
 def tissue_biosample(testapp, lung_biosource):
     item = {
         'description': "Tissue Biosample",
@@ -232,18 +209,6 @@ def tissue_biosample(testapp, lung_biosource):
 def protocol(testapp):
     item = {'description': 'A Protocol'}
     return testapp.post_json('/protocol', item).json['@graph'][0]
-
-
-@pytest.fixture
-def tier1_biosource(testapp, protocol):
-    item = {
-        'description': 'Tier 1 cell line Biosource',
-        'biosource_type': 'immortalized cell line',
-        'cell_line': 'IMR-90',
-        'SOP_cell_line': protocol['@id'],
-        'cell_line_tier': 'Tier 1'
-    }
-    return testapp.post_json('/biosource', item).json['@graph'][0]
 
 
 @pytest.fixture
