@@ -131,8 +131,8 @@ def test_indexing_experiment_experiment_in_set(testapp, indexer_testapp, experim
     # we should index both experiment and experiement_set
     assert res.json['indexed'] == 2
     assert res.json['txn_count'] == 1
-    assert res.json['updated'] == [euuid, esetuuid]
-    #import pdb; pdb.set_trace()
+    assert euuid in res.json['updated']
+    assert esetuuid in res.json['updated']
     res = testapp.get('/search/?type=ExperimentSet')
     assert len(res.json['@graph'][0]['experiments_in_set']) == 1
 

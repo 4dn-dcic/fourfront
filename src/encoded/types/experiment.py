@@ -110,7 +110,6 @@ class Experiment(Item):
         registry = self.registry
         if 'experiment_sets' in properties.keys():
             for exp_set in properties['experiment_sets']:
-                #import pdb; pdb.set_trace()
                 target_exp_set = self.collection.get(exp_set)
                 # look at the experiments inside the set
                 if acc in target_exp_set.properties["experiments_in_set"]:
