@@ -25,7 +25,7 @@ var AuditMixin = audit.AuditMixin;
 
 var expSetColumnLookup={
     // all arrays will be handled by taking the first item
-    'biological replicates':{
+    'replicates':{
         'Accession': 'accession',
         'Exp Type':'experiment_type',
         'Exps': '',
@@ -39,7 +39,7 @@ var expSetColumnLookup={
 };
 
 var expSetAdditionalInfo={
-    'biological replicates':{
+    'replicates':{
         'Lab': 'lab.title',
         'Treatments':'biosample.treatments_summary',
         'Modifications':'biosample.modifications_summary'
@@ -56,7 +56,7 @@ var IndeterminateCheckbox = React.createClass({
                 disabled={this.props.disabled}
                 onChange={this.props.onChange}
                 type="checkbox"
-                ref={function(input) {if (input) {input.indeterminate = props.checked ? false : props.indeterminate;}}} 
+                ref={function(input) {if (input) {input.indeterminate = props.checked ? false : props.indeterminate;}}}
             />
         );
     }
@@ -96,7 +96,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
             this.fileDetailContainer = getFileDetailContainer(nextProps.experimentArray, nextProps.passExperiments);
         }
 
-        
+
     },
 
     componentWillReceiveProps: function(nextProps) {
@@ -106,7 +106,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                 selectedFiles: new Set()
             });
         }
-        
+
         // var newTargets = [];
         // for(var i=0; i<this.state.files.length; i++){
         //     if(nextProps.targetFiles.has(this.state.files[i].file_format)){
@@ -173,7 +173,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         }.bind(this));
 
         var checked = this.state.selectedFiles.size === files.length;
-        var disabled = files.length === emptyExps.length; // @Carl : Any thoughts? Unsure re: case if multiple files in experiment 
+        var disabled = files.length === emptyExps.length; // @Carl : Any thoughts? Unsure re: case if multiple files in experiment
         var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < files.length;
 
         return (
@@ -186,7 +186,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                     </td>
                     <td className="expset-table-cell">
                         <div className="control-cell">
-                            <IndeterminateCheckbox 
+                            <IndeterminateCheckbox
                                 checked={checked}
                                 indeterminate={indeterminate}
                                 disabled={disabled}
@@ -202,12 +202,12 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                             <div className="expset-addinfo">
                                 { formattedAdditionalInfo }
                             </div>
-                            <ExperimentsTable 
-                                columnHeaders={[ 
-                                    null, 
-                                    'Experiment Accession', 
+                            <ExperimentsTable
+                                columnHeaders={[
+                                    null,
+                                    'Experiment Accession',
                                     'Biosample Accession',
-                                    'File Accession', 
+                                    'File Accession',
                                     'File Type',
                                     'File Info'
                                 ]}
@@ -239,7 +239,7 @@ function typeSelected(href) {
     if(title){
         return title;
     }else{
-        return "biological replicates"; // default to biological replicates
+        return "replicates"; // default to replicates
     }
 }
 
@@ -404,8 +404,8 @@ var ColumnSorter = React.createClass({
 });
 
 var ResultTable = browse.ResultTable = React.createClass({
-    
-    propTypes : {       
+
+    propTypes : {
         // Props' type validation based on contents of this.props during render.
         searchBase      : React.PropTypes.string,
         context         : React.PropTypes.object.isRequired,
@@ -485,7 +485,7 @@ var ResultTable = browse.ResultTable = React.createClass({
             var intersection = new Set(experimentArray.filter(x => passExperiments.has(x)));
             var columns = {};
             var addInfo = {};
-            var firstExp = experimentArray[0]; // use only for biological replicates
+            var firstExp = experimentArray[0]; // use only for replicates
 
             // Experiment Set Row Columns
             for (var i=0; i<Object.keys(columnTemplate).length;i++) {
@@ -520,13 +520,13 @@ var ResultTable = browse.ResultTable = React.createClass({
                     keyVal = columns[this.state.sortColumn];
                 }
                 resultListings.push(
-                    <ExperimentSetRow 
-                        addInfo={addInfo} 
-                        columns={columns} 
-                        expSetFilters={this.props.expSetFilters} 
-                        targetFiles={this.props.targetFiles} 
-                        href={result['@id']} 
-                        experimentArray={experimentArray} 
+                    <ExperimentSetRow
+                        addInfo={addInfo}
+                        columns={columns}
+                        expSetFilters={this.props.expSetFilters}
+                        targetFiles={this.props.targetFiles}
+                        href={result['@id']}
+                        experimentArray={experimentArray}
                         passExperiments={intersection}
                         key={keyVal+result['@id']}
                         rowNumber={resultCount++}
@@ -549,7 +549,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                 if(!isNaN(a)){
                     return (a - b);
                 } else {
-                    //return(a.localeCompare(b)); 
+                    //return(a.localeCompare(b));
                     // Above doesn't assign consistently right values to letters/numbers, e.g. sometimes an int > a letter
                     // Not sure how important.
                     if (a < b) return -1;
@@ -577,23 +577,23 @@ var ResultTable = browse.ResultTable = React.createClass({
         //find ignored filters
         var ignoredFilters = FacetList.findIgnoredFilters(facets, expSetFilters);
         var passExperiments = siftExperiments(results, expSetFilters, ignoredFilters);
-        
+
         // Map view icons to svg icons
         var view2svg = {
             'table': 'table',
             'th': 'matrix'
         };
-        
+
         var columnTemplate = expSetColumnLookup[setType] ? expSetColumnLookup[setType] : expSetColumnLookup['other'];
         var additionalInfoTemplate = expSetAdditionalInfo[setType] ? expSetAdditionalInfo[setType] : expSetAdditionalInfo['other'];
 
         var resultHeaders = Object.keys(columnTemplate).map(function(key){
             return (
                 <th key={key}>
-                    <ColumnSorter 
-                        descend={this.state.sortReverse} 
-                        sortColumn={this.state.sortColumn} 
-                        sortByFxn={this.sortBy} 
+                    <ColumnSorter
+                        descend={this.state.sortReverse}
+                        sortColumn={this.state.sortColumn}
+                        sortByFxn={this.sortBy}
                         val={key}
                     />
                 </th>
@@ -619,9 +619,9 @@ var ResultTable = browse.ResultTable = React.createClass({
                             onFilter={this.onFilter}
                             ignoredFilters={ignoredFilters}
                         />
-                    </div> 
-                    : 
-                    null 
+                    </div>
+                    :
+                    null
                 }
                 <div className={"expset-result-table-fix col-sm-7 col-md-8 col-lg-9" + (this.state.overflowingRight ? " overflowing" : "")}>
                     <h5 className='browse-title'>Showing {formattedExperimentSetListings.length} of {this.totalResultCount()} experiment sets.</h5>
@@ -787,7 +787,7 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
 });
 
 var Browse = browse.Browse = React.createClass({
-    
+
     contextTypes: {
         location_href: React.PropTypes.string,
         navigate: React.PropTypes.func

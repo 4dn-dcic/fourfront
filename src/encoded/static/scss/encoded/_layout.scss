@@ -497,7 +497,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			background-color: #56889b;
 		}
 
-		&[data-set-type="biological replicates"]{
+		&[data-set-type="replicates"]{
 			background-color: #397855;
 		}
 
@@ -592,7 +592,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
-		
+
 		&.error-message {
 			white-space: pre-line;
 			white-space: normal;
@@ -605,7 +605,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		padding-top: 4px;
 		font-size: 20px;
 		margin-bottom: -10px;
-		
+
 		&.col-xs-2 {
 			padding-right: 0px;
 			padding-left: 5px;
@@ -662,7 +662,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 	/*
 	table tbody tr:first-child td {
-		
+
 		&:nth-child(1),
 		&:nth-child(2) {
 			border-bottom-color: #c0c0c0;
@@ -818,7 +818,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		padding-bottom: 15px;
 		border-bottom: 1px solid #eee;
 		padding-top: 0;
-		
+
 		> i.icon.icon-fw {
 			margin-right: 5px;
 			font-size: 1.5rem;
@@ -831,7 +831,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	padding-top: 15px;
 
 	> h3 {
-		
+
 		margin-bottom: 17px;
 		/*
 	    padding-bottom: 17px;
@@ -841,7 +841,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 	table.access-keys-table {
 		margin-bottom: 20px;
-		
+
 		tr {
 			/*
 			&:nth-child(2n-1) {
