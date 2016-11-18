@@ -229,16 +229,6 @@ def tissue_biosample(testapp, lung_biosource):
 
 
 @pytest.fixture
-def tier1_biosample(testapp, tier1_biosource, tier1_cell_culture):
-    item = {
-        'description': "Tier1 Biosample",
-        'biosource': [tier1_biosource['@id']],
-        'cell_culture_details': tier1_cell_culture['@id'],
-    }
-    return testapp.post_json('/biosample', item).json['@graph'][0]
-
-
-@pytest.fixture
 def protocol(testapp):
     item = {'description': 'A Protocol'}
     return testapp.post_json('/protocol', item).json['@graph'][0]
@@ -250,7 +240,8 @@ def tier1_biosource(testapp, protocol):
         'description': 'Tier 1 cell line Biosource',
         'biosource_type': 'immortalized cell line',
         'cell_line': 'IMR-90',
-        'SOP_cell_line': protocol['@id']
+        'SOP_cell_line': protocol['@id'],
+        'cell_line_tier': 'Tier 1'
     }
     return testapp.post_json('/biosource', item).json['@graph'][0]
 
