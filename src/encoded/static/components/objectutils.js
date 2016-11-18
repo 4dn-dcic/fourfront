@@ -29,6 +29,7 @@ var isServerSide = module.exports.isServerSide = function(){
     return false;
 }
 
+
 /**
  * Check if process.env.NODE_ENV is not on 'production'.
  *
@@ -55,7 +56,7 @@ var patchedConsole = module.exports.console = (function(){
         this._enabled = true; // Default
         this._available = true;
 
-        if (!console || !console.log) { // Check for seldomly incompatible browsers
+        if (typeof console === 'undefined' || typeof console.log === 'undefined' || typeof console.log.bind === 'undefined') { // Check for seldomly incompatible browsers
             this._available = false;
         }
 
@@ -68,10 +69,10 @@ var patchedConsole = module.exports.console = (function(){
 
         this._patchMethods = function(){
             this._methods.forEach(function(methodName){
-                if (!(this._enabled && this._available)) {
+                if (!this._enabled || !this._available || typeof this._nativeConsole[methodName] === 'undefined') {
                     this[methodName] = function(){return false;};
                 } else {
-                    this[methodName] = this._nativeConsole[methodName];
+                    this[methodName] = this._nativeConsole[methodName].bind(this._nativeConsole);
                 }
             }.bind(this));
         }.bind(this);
@@ -99,12 +100,12 @@ var patchedConsole = module.exports.console = (function(){
 })();
 
 
-
 var JWT = module.exports.JWT = {
 
     COOKIE_ID : 'jwtToken',
     
     get : function(source = 'any'){
+        if (source === 'all' || source === '*') source = 'any';
 
         var idToken = null;
 
@@ -181,6 +182,7 @@ var setAjaxHeaders = function(xhr, headers = {}) {
     }
     // Add JWT if set
     JWT.addToHeaders(headers);
+
     // put everything in the header
     var headerKeys = Object.keys(headers);
     for (var i=0; i < headerKeys.length; i++){
@@ -189,6 +191,7 @@ var setAjaxHeaders = function(xhr, headers = {}) {
 
     return xhr;
 }
+
 
 var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET', fallback = null, data = null, headers = {}){
     if (typeof window == 'undefined') return null;
@@ -199,21 +202,22 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
                 if (typeof callback == 'function'){
                     callback(JSON.parse(xhr.responseText));
                 }
-            } else if (xhr.status == 400) {
-                (patchedConsole || console).error('There was an error 400');
-                if (typeof fallback == 'function'){
-                    fallback();
-                }
             } else {
-                (patchedConsole || console).error('something else other than 200 was returned');
-                if (typeof fallback == 'function'){
-                    fallback();
+                var response;
+                try {
+                    response = JSON.parse(xhr.responseText);
+                    (patchedConsole || console).error('ajaxLoad error: ', response);
+                    if (typeof fallback == 'function') fallback(response);
+                } catch (error) {
+                    (patchedConsole || console).error('Non-JSON error response:', xhr.responseText);
                 }
             }
         }
     };
+
     xhr.open(method, url, true);
     xhr = setAjaxHeaders(xhr, headers);
+
     if(data){
         xhr.send(data);
     }else{
@@ -222,8 +226,9 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
 }
 
 var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = {}, data = null){
-    return new Promise(function(resolve, reject) {
-        var xhr = new XMLHttpRequest();
+    var xhr;
+    var promise = new Promise(function(resolve, reject) {
+        xhr = new XMLHttpRequest();
         xhr.onload = function() {
             // response SHOULD be json
             resolve(JSON.parse(xhr.responseText));
@@ -231,29 +236,56 @@ var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = {
         xhr.onerror = reject;
         xhr.open(method, url, true);
         xhr = setAjaxHeaders(xhr, headers);
+
         if(data){
             xhr.send(data);
         }else{
             xhr.send();
         }
+        return xhr;
     });
+    promise.xhr = xhr;
+    promise.abort = function(){
+        if (promise.xhr.readyState !== 4) promise.xhr.abort();
+    };
+    return promise;
 }
 
 /**
- * Format a timestamp to pretty output. Uses moment.js, which uses Date() object in underlying code.
- *
- * @param {string} timestamp - Timestamp as provided by server output. No timezone corrections currently.
- * @param {string} [outputFormat] - Defaults to "MMMM Do, YYYY" for, e.g. "October 31st, 2016".
- * @return {string} Prettified date/time output.
+ * Find property within an object using a propertyName in object dot notation.
+ * Recursively travels down object tree following dot-delimited property names.
+ * If any node is an array, will return array of results.
+ * 
+ * @param {Object} object - Item to traverse or find propertyName in.
+ * @param {string|string[]} propertyName - (Nested) property in object to retrieve, in dot notation or ordered array.
+ * @return {*} - Value corresponding to propertyName.
  */
-var parseDateTime = module.exports.parseDateTime = function(timestamp, outputFormat = "MMMM Do, YYYY"){
-    if (!Date) {
-        return timestamp; // Date object may or may not be available server-side.
-    } else {
-        var moment = require('moment'); // require allows to load code in conditionally, so lets do that until more funcs require moment.
-        return moment(timestamp).format(outputFormat);
-    }
+
+var getNestedProperty = module.exports.getNestedProperty = function(object, propertyName){
+
+    if (typeof propertyName === 'string') propertyName = propertyName.split('.'); 
+    if (!Array.isArray(propertyName)) throw new Error('Using improper propertyName in objectutils.getNestedProperty.');
+
+    return (function findNestedValue(currentNode, fieldHierarchyLevels, level = 0){
+        if (level == fieldHierarchyLevels.length) return currentNode;
+
+        if (Array.isArray(currentNode)){
+            var arrayVals = [];
+            for (var i = 0; i < currentNode.length; i++){
+                arrayVals.push( findNestedValue(currentNode[i], fieldHierarchyLevels, level) );
+            }
+            return arrayVals;
+        } else {
+            return findNestedValue(
+                currentNode[fieldHierarchyLevels[level]],
+                fieldHierarchyLevels,
+                ++level
+            );
+        }
+    })(object, propertyName);
+
 };
+
 
 var DateUtility = module.exports.DateUtility = (function(){
 
@@ -263,20 +295,9 @@ var DateUtility = module.exports.DateUtility = (function(){
     var moment = require('moment');
 
     // Class itself, if need to create non-static instance at some point.
-    var DateUtility = function(timestamp = null){
-        this._dateClassExists = DateUtility.dateClassExists();
-        this._timestamp = timestamp || null;
-        this._moment = timestamp && this._dateClassExists ? moment(timestamp) : null;
-
-        this.format = function(outputFormat){
-            return this._moment.format(outputFormat);
-        }
-    };
+    var DateUtility = function(timestamp = null){};
 
     // Static Class Methods
-
-    /** Check that Date class/object exists in execution environment. */
-    DateUtility.dateClassExists = function(){ return !!Date; };
 
     /**
      * Presets for date/time output formats for 4DN.
@@ -337,17 +358,23 @@ var DateUtility = module.exports.DateUtility = (function(){
      * @see DateUtility.preset
      *
      * @param {string} timestamp - Timestamp as provided by server output. No timezone corrections currently.
-     * @param {string} [formatType] - Preset format to use. Defaults to 'date-md', e.g. "October 31st, 2016".
+     * @param {string} [formatType] - Preset format to use. Ignored if customOutputFormat is provided. Defaults to 'date-md', e.g. "October 31st, 2016".
+     * @param {string} [dateTimeSeparator] - Separator between date & time if both are in preset formattype. Defaults to " ".
+     * @param {boolean} [localize] - Output in local timezone instead of UTC.
      * @param {string} [customOutputFormat] - Custom format to use in lieu of formatType.
      * @return {string} Prettified date/time output.
      */
-    DateUtility.format = function(timestamp, formatType = 'date-md', dateTimeSeparator = " ", customOutputFormat = null){
 
+    DateUtility.format = function(timestamp, formatType = 'date-md', dateTimeSeparator = " ", localize = false, customOutputFormat = null){
         var outputFormat;
         if (customOutputFormat) {
             outputFormat = customOutputFormat;
         } else {
             outputFormat = DateUtility.preset(formatType, dateTimeSeparator);
+        }
+        
+        if (localize){
+            return moment.utc(timestamp).local().format(outputFormat);
         }
 
         return moment.utc(timestamp).format(outputFormat);
@@ -355,6 +382,7 @@ var DateUtility = module.exports.DateUtility = (function(){
 
     return DateUtility;
 })();
+
 
 /**
  * Check width of text or text-like content if it were to fit on one line.

@@ -83,29 +83,30 @@ var Login = React.createClass({
             body: JSON.stringify({id_token: idToken})
         })
         .then(response => {
-            this.lock.hide();
             if (response.code || response.status) throw response;
             return response;
         })
         .then(response => {
             JWT.saveUserInfoLocalStorage(response);
             this.context.updateUserInfo();
-            this.context.navigate('', {'inPlace':true});
+            this.context.navigate('', {'inPlace':true}, this.lock.hide.bind(this.lock));
         }, error => {
             console.log("got an error: ", error.description);
             console.log(error);
             store.dispatch({
                 type: {'context':error}
             });
+            this.lock.hide.bind(this.lock);
         });
 
     },
 
     render: function () {
-        var toRender = this.context.session ?
-            <a href="" className="global-entry" onClick={this.logout}>Log out</a>
+        var toRender = (this.context.session ?
+            <a href="#" className="global-entry" onClick={this.logout}>Log out</a>
             :
-            <a id="loginbtn" href="" className="global-entry" onClick={this.showLock}>Log in</a>;
+            <a id="loginbtn" href="" className="global-entry" onClick={this.showLock}>Log in</a>
+        );
         return (
             <div>
                 {toRender}

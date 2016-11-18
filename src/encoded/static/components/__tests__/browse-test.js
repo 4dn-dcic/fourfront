@@ -21,7 +21,7 @@ describe('Testing browse.js for experiment set browser', function() {
     beforeEach(function() {
         React = require('react');
         var { Provider, connect } = require('react-redux');
-        TestUtils = require('react/lib/ReactTestUtils');
+        TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
         Browse = require('../browse').Browse;
         context = require('../testdata/browse/context');
@@ -66,6 +66,7 @@ describe('Testing browse.js for experiment set browser', function() {
         var expFilters = TestUtils.scryRenderedDOMComponentsWithClass(page, 'expterm');
         expect(expFilters.length).toEqual(12);
         TestUtils.Simulate.click(expFilters[0]);
+        jest.runAllTimers(); // Click handler has been wrapped in setTimeout (to incr. UI responsiveness) so must wait for it before proceeding.
         var selectedExpFilters = TestUtils.scryRenderedDOMComponentsWithClass(page, 'expterm-selected');
         expect(selectedExpFilters.length).toEqual(1);
     });

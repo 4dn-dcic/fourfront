@@ -2,8 +2,6 @@
     {
         "uuid": "131106bc-8535-4448-903e-854af460b212",
         "description": "cell culture for Hi-C",
-        "starting_amount": "2-5 million",
-        "starting_amount_units": "cells",
         "culture_start_date": "2016-01-01",
         "culture_duration": 2.5,
         "culture_duration_units": "minutes",
