@@ -46,7 +46,7 @@
             "description": "ENCODE accession for antibody used to pull down the labeled DNA",
             "type": "string",
             "comment": "Can we depend on encode having antibody or allow other string?",
-            "pattern": ["ENCAB.+"]
+            "pattern": "ENCAB.+"
         },
         "antibody_lot_id": {
             "title": "Antibody Lot ID",
@@ -64,7 +64,7 @@
             "title": "Cell Cycle Sorting Information",
             "description": "Details on cell sorting by FACS",
             "type": "string",
-            "linkTo": "experiment_cell_sorting"
+            "comment": "will linkTo ExperimentCellSorting"
         }
     },
     "facets": {
