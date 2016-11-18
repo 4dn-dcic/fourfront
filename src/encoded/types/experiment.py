@@ -6,6 +6,12 @@ from snovault import (
     collection,
     load_schema,
 )
+from snovault import (
+    AfterModified,
+    BeforeModified,
+)
+
+from snovault.util import simple_path_ids
 # from pyramid.security import Authenticated
 from .base import (
     Item
@@ -29,9 +35,11 @@ class Experiment(Item):
                 "biosample.treatments", "biosample.biosource.individual.organism"]
     name_key = 'accession'
 
+
     def _update(self, properties, sheets=None):
         # update self first to ensure 'experiment_relation' are stored in self.properties
         super(Experiment, self)._update(properties, sheets)
+
         DicRefRelation = {
             "controlled by": "control for",
             "derived from": "source for",
@@ -63,16 +71,24 @@ class Experiment(Item):
                         target_exp.update(target_exp.properties)
 
         # this part is for experiment_set
+        # get the request so we can tell ES to invalidate our associated Experiement Sets
+        from pyramid.threadlocal import get_current_request
+        request = get_current_request()
+        registry = self.registry
         if 'experiment_sets' in properties.keys():
             for exp_set in properties['experiment_sets']:
+                #import pdb; pdb.set_trace()
                 target_exp_set = self.collection.get(exp_set)
                 # look at the experiments inside the set
                 if acc in target_exp_set.properties["experiments_in_set"]:
-                    break
+                    continue
                 else:
                     # incase it is not in the list of files
+                    # notify tells ES to record transaction ID's from postgress for invalidation
+                    registry.notify(BeforeModified(target_exp_set, request))
                     target_exp_set.properties["experiments_in_set"].append(acc)
                     target_exp_set.update(target_exp_set.properties)
+                    registry.notify(AfterModified(target_exp_set, request))
 
 
 @collection(
@@ -94,6 +110,7 @@ class ExperimentSet(Item):
                 "experiments_in_set.biosample.treatments", "experiments_in_set.biosample.biosource.individual.organism",
                 "experiments_in_set.files", "experiments_in_set.filesets", "experiments_in_set.filesets.files_in_set", "experiments_in_set.digestion_enzyme"]
 
+
     def _update(self, properties, sheets=None):
         # update self first
         super(ExperimentSet, self)._update(properties, sheets)
@@ -108,7 +125,7 @@ class ExperimentSet(Item):
                 else:
                     # incase file already has the fileset_type
                     if esacc in target_exp.properties['experiment_sets']:
-                        break
+                        continue
                     else:
                         target_exp.properties['experiment_sets'].append(esacc)
                         target_exp.update(target_exp.properties)

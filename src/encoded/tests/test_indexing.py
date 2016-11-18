@@ -114,6 +114,51 @@ def test_indexing_simple(testapp, indexer_testapp):
     assert res.json['total'] == 2
 
 
+def test_indexing_experiment_experiment_in_set(testapp, indexer_testapp, experiment_set,
+                                                 experiment):
+    # the data fixtures load 9 objects, index them first so we are
+    # incrementally indexing from here on out
+    res = indexer_testapp.post_json('/index', {'record': True})
+    assert res.json['indexed'] == 9
+    assert 'txn_count' not in res.json
+
+    eset = {'experiment_sets': [experiment_set['@id']]}
+    res = testapp.patch_json(experiment['@id'], eset)
+
+    euuid = res.json['@graph'][0]['uuid']
+    esetuuid = experiment_set['uuid']
+    res = indexer_testapp.post_json('/index', {'record': True})
+    # we should index both experiment and experiement_set
+    assert res.json['indexed'] == 2
+    assert res.json['txn_count'] == 1
+    assert res.json['updated'] == [euuid, esetuuid]
+    #import pdb; pdb.set_trace()
+    res = testapp.get('/search/?type=ExperimentSet')
+    assert len(res.json['@graph'][0]['experiments_in_set']) == 1
+
+
+def test_indexing_experiment_in_set_experiment(testapp, indexer_testapp, experiment_set,
+                                                 experiment):
+    # the data fixtures load 9 objects, index them first so we are
+    # incrementally indexing from here on out
+    res = indexer_testapp.post_json('/index', {'record': True})
+    assert res.json['indexed'] == 9
+    assert 'txn_count' not in res.json
+
+    eset = {'experiments_in_set': [experiment['@id']]}
+    res = testapp.patch_json(experiment_set['@id'], eset)
+
+    esetuuid = res.json['@graph'][0]['uuid']
+    euuid = experiment['uuid']
+    res = indexer_testapp.post_json('/index', {'record': True})
+    # experiment is embeded in experiement_set so just index the parent
+    assert res.json['indexed'] == 1
+    assert res.json['txn_count'] == 1
+    assert res.json['updated'] == [esetuuid]
+    res = testapp.get(experiment['@id'])
+    assert res.json['experiment_sets'] == [experiment_set['@id'],]
+
+
 def test_listening(testapp, listening_conn):
     import time
     testapp.post_json('/testing-post-put-patch/', {'required': ''})
