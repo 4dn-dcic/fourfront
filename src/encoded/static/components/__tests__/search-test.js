@@ -59,8 +59,8 @@ describe('Testing item.js', function() {
         expect(titleLine.textContent).toEqual('Experiment search');
     });
 
-    it('facets properly (biosource = GM06990)', function() {
-        context = require('../testdata/expt_search_GM06990');
+    it('facets properly (biosource = GM12878)', function() {
+        context = require('../testdata/expt_search_GM12878');
         testSearch = TestUtils.renderIntoDocument(
             <Wrapper href='/search/?type=Experiment&biosample.biosource.individual.organism.name=mouse'>
                 <Search context={context} />
