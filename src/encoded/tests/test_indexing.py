@@ -149,7 +149,6 @@ def test_indexing_experiment_in_set_experiment(testapp, indexer_testapp, experim
     res = testapp.patch_json(experiment_set['@id'], eset)
 
     esetuuid = res.json['@graph'][0]['uuid']
-    euuid = experiment['uuid']
     res = indexer_testapp.post_json('/index', {'record': True})
     # experiment is embeded in experiement_set so just index the parent
     assert res.json['indexed'] == 1
