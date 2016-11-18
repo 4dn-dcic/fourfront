@@ -210,3 +210,32 @@ class ExperimentCaptureC(Experiment):
             de_name = de_props['name']
             sum_str += (' with ' + de_name)
         return sum_str
+
+
+@collection(
+    name='experiments-repliseq',
+    unique_key='accession',
+    properties={
+        'title': 'Experiments Repliseq',
+        'description': 'Listing of Repliseq Experiments',
+    })
+class ExperimentRepliseq(Experiment):
+    """The experiment class for Repliseq experiments."""
+    item_type = 'experiment_repliseq'
+    schema = load_schema('encoded:schemas/experiment_re.json')
+    embedded = Experiment.embedded + ["submitted_by"]
+
+    @calculated_property(schema={
+        "title": "Experiment summary",
+        "description": "Summary of the experiment, including type, enzyme and biosource.",
+        "type": "string",
+    })
+    def experiment_summary(self, request, experiment_type='Undefined', cell_cycle_stage=None, biosample=None):
+        sum_str = experiment_type
+        if biosample:
+            biosamp_props = request.embed(biosample, '@@object')
+            biosource = biosamp_props['biosource_summary']
+            sum_str += (' on ' + biosource)
+        if cell_cycle_stage:
+            sum_str += (' at ' +cell_cycle_stage)
+        return sum_str
