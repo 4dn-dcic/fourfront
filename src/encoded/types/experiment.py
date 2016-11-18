@@ -222,7 +222,7 @@ class ExperimentCaptureC(Experiment):
 class ExperimentRepliseq(Experiment):
     """The experiment class for Repliseq experiments."""
     item_type = 'experiment_repliseq'
-    schema = load_schema('encoded:schemas/experiment_re.json')
+    schema = load_schema('encoded:schemas/experiment_repliseq.json')
     embedded = Experiment.embedded + ["submitted_by"]
 
     @calculated_property(schema={
