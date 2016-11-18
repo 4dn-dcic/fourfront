@@ -197,12 +197,65 @@ def mboI(testapp, worthington_biochemical):
 
 
 @pytest.fixture
+def tissue_biosample(testapp, lung_biosource):
+    item = {
+        'description': "Tissue Biosample",
+        'biosource': [lung_biosource['@id']],
+    }
+    return testapp.post_json('/biosample', item).json['@graph'][0]
+
+
+@pytest.fixture
+def protocol(testapp):
+    item = {'description': 'A Protocol'}
+    return testapp.post_json('/protocol', item).json['@graph'][0]
+
+
+@pytest.fixture
+def GM12878_biosource(testapp):
+    item = {
+        "accession": "4DNSR000AAQ1",
+        "biosource_type": "immortalized cell line",
+        "cell_line": "GM12878",
+    }
+    return testapp.post_json('/biosource', item).json['@graph'][0]
+
+
+@pytest.fixture
+def F123_biosource(testapp):
+    item = {
+        "accession": "4DNSR000AAQ2",
+        "biosource_type": "stem cell",
+        "cell_line": "F123-CASTx129",
+    }
+    return testapp.post_json('/biosource', item).json['@graph'][0]
+
+
+@pytest.fixture
+def lung_biosource(testapp):
+    item = {
+        "biosource_type": "tissue",
+        "tissue": "lung"
+    }
+    return testapp.post_json('/biosource', item).json['@graph'][0]
+
+
+@pytest.fixture
+def whole_biosource(testapp, human_individual):
+    item = {
+        "biosource_type": "whole organisms",
+        "individual": human_individual['@id']
+    }
+    return testapp.post_json('/biosource', item).json['@graph'][0]
+
+
+@pytest.fixture
 def human_biosource(testapp, human_individual, worthington_biochemical):
     item = {
-        "description": "GM06990 cells",
+        "description": "GM12878 cells",
         "biosource_type": "immortalized cell line",
         "individual": human_individual['@id'],
-        "cell_line": "GM06990",
+        "cell_line": "GM12878",
         "biosource_vendor": worthington_biochemical['@id'],
         "status": "current"
     }
@@ -248,15 +301,48 @@ def experiment_set(testapp, lab, award):
 
 
 @pytest.fixture
-def experiment(testapp, lab, award, human_biosample):
+def protocol(testapp):
     item = {
+        'description': 'my super awesome protocol',
+    }
+    return testapp.post_json('/protocol', item).json['@graph'][0]
+
+
+@pytest.fixture
+def sop_map_data(protocol):
+    return {
+        "sop_name": "in situ Hi-C SOP map",
+        "sop_version": 1,
+        "associated_item_type": "ExperimentHiC",
+        "id_values": ["micro-C"],
+        "notes": "This is just a dummy insert not linked to true SOP protocol",
+        "description": "Fields with specified defaults in the SOP for in situ Hi-C experiments as per ??",
+        "sop_protocol": protocol['@id'],
+        "fields_with_default": [
+            {"field_name": "digestion_enzyme", "field_value": "MboI"},
+        ]
+    }
+
+
+@pytest.fixture
+def sop_map(testapp, sop_map_data):
+    return testapp.post_json("/sop_map", sop_map_data).json['@graph'][0]
+
+
+@pytest.fixture
+def experiment(testapp, experiment_data):
+    return testapp.post_json('/experiment_hic', experiment_data).json['@graph'][0]
+
+
+@pytest.fixture
+def experiment_data(lab, award, human_biosample):
+    return {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
         'experiment_type': 'micro-C',
         'status': 'in review by lab'
     }
-    return testapp.post_json('/experiment_hic', item).json['@graph'][0]
 
 
 @pytest.fixture
@@ -272,15 +358,8 @@ def experiment_project_review(testapp, lab, award, human_biosample):
 
 
 @pytest.fixture
-def base_experiment(testapp, lab, award, human_biosample):
-    item = {
-        'award': award['uuid'],
-        'lab': lab['uuid'],
-        'biosample': human_biosample['@id'],
-        'experiment_type': 'micro-C',
-        'status': 'in review by lab'
-    }
-    return testapp.post_json('/experiment_hic', item, status=201).json['@graph'][0]
+def base_experiment(testapp, experiment_data):
+    return testapp.post_json('/experiment_hic', experiment_data).json['@graph'][0]
 
 
 @pytest.fixture
@@ -330,6 +409,15 @@ AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO
 @pytest.fixture
 def attachment():
     return {'download': 'red-dot.png', 'href': RED_DOT}
+
+
+@pytest.fixture
+def image(testapp, attachment):
+    item = {
+        'attachment': attachment,
+        'caption': 'Test image'
+    }
+    return testapp.post_json('/image', item).json['@graph'][0]
 
 
 @pytest.fixture
@@ -442,7 +530,7 @@ def document(testapp, lab, award):
 @pytest.fixture
 def human_biosample(testapp, human_biosource):
     item = {
-        "description": "GM06990 prepared for Hi-C",
+        "description": "GM12878 prepared for Hi-C",
         "biosource": [human_biosource['@id'], ],
         "status": "in review by lab"
         # "biosample_protocols": ["131106bc-8535-4448-903e-854af460b212"],
@@ -455,7 +543,7 @@ def human_biosample(testapp, human_biosource):
 @pytest.fixture
 def biosample_1(testapp, human_biosource):
     item = {
-        'description': "GM06990 prepared for Hi-C",
+        'description': "GM12878 prepared for Hi-C",
         'biosource': [human_biosource['@id'], ],
     }
     return testapp.post_json('/biosample', item).json['@graph'][0]
@@ -464,7 +552,7 @@ def biosample_1(testapp, human_biosource):
 @pytest.fixture
 def biosample_2(testapp, human_biosource):
     item = {
-        'description': "GM06990 prepared for Hi-C",
+        'description': "GM12878 prepared for Hi-C",
         'biosource': [human_biosource['@id'], ],
     }
     return testapp.post_json('/biosample', item).json['@graph'][0]

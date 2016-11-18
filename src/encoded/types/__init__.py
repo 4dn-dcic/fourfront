@@ -108,46 +108,6 @@ class Enzyme(Item):
 
 
 @collection(
-    name='biosources',
-    unique_key='accession',
-    properties={
-        'title': 'Biosources',
-        'description': 'Cell lines and tissues used for biosamples',
-    })
-class Biosource(Item):
-    """Biosource class."""
-
-    item_type = 'biosource'
-    name_key = 'accession'
-    schema = load_schema('encoded:schemas/biosource.json')
-    embedded = ["individual", "individual.organism"]
-
-    @calculated_property(schema={
-        "title": "Biosource name",
-        "description": "Specific name of the biosource.",
-        "type": "string",
-    })
-    def biosource_name(self, request, biosource_type, individual=None, cell_line=None, tissue=None):
-        if biosource_type == "tissue":
-            if tissue:
-                return tissue
-        elif biosource_type == "immortalized cell line":
-            if cell_line:
-                return cell_line
-        elif biosource_type == "primary cell":
-            if cell_line:
-                return cell_line
-        elif biosource_type == "whole organisms":
-            if individual:
-                individual_props = request.embed(individual, '@@object')
-                organism = individual_props['organism']
-                organism_props = request.embed(organism, '@@object')
-                organism_name = organism_props['name']
-                return "whole " + organism_name
-        return biosource_type
-
-
-@collection(
     name='constructs',
     properties={
         'title': 'Constructs',
@@ -225,20 +185,6 @@ class AnalysisStep(Item):
     item_type = 'analysis_step'
     schema = load_schema('encoded:schemas/analysis_step.json')
     embedded = ['software_used', 'qa_stats_generated']
-
-
-# @collection(
-#    name='tasks',
-#     properties={
-#         'title': 'Tasks',
-#         'description': 'Listing of runs of analysis steps for 4DN analyses',
-#     })
-# class Task(Item):
-#     """The Task class that descrbes a run of an analysis step."""
-#
-#     item_type = 'task'
-#     schema = load_schema('encoded:schemas/task.json')
-#     embedded = ['analysis_step']
 
 
 @collection(

@@ -24,16 +24,17 @@ ORDER = [
     'publication_tracking',
     'document',
     'vendor',
+    'construct',
+    'modification',
     'protocol',
+    'sop_map',
     'biosample_cell_culture',
     'individual_human',
     'individual_mouse',
     'biosource',
     'enzyme',
-    'construct',
     'treatment_rnai',
     'treatment_chemical',
-    'modification',
     'biosample',
     'file_fastq',
     'file_fasta',
@@ -383,7 +384,7 @@ def pipeline_logger(item_type, phase):
 
         loaded = created + updated
         logger.info('Loaded %d of %d %s (phase %s). CREATED: %d, UPDATED: %d, SKIPPED: %d, ERRORS: %d' % (
-             loaded, count, item_type, phase, created, updated, skipped, errors))
+            loaded, count, item_type, phase, created, updated, skipped, errors))
 
     return component
 
