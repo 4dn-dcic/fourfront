@@ -1,9 +1,22 @@
 
 .facets-container {
-    padding: 10px;
-    //border: 1px #ccc solid;
+    padding: 0 10px 2px;
+    border: 1px #eee solid;
+    border-bottom: 1px solid #ddd;
     //border-radius: 3px;
     overflow-x: auto;
+
+    .facets-header {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+        .facets-title {
+            font-weight: 300;
+            margin: 0;
+            line-height: inherit;
+        }
+    }
+
 }
 
 @media screen and (max-width: $screen-sm-min) {
@@ -46,13 +59,15 @@
     font-size: 0.9rem;
     opacity: 1;
     transition: opacity .25s;
-    > a{
+    position: relative;
+    > a:not(.btn) {
         color: #999999;
         text-decoration: none;
     }
     &.placeholder {
         opacity : 0;
         visibility: visible !important;
+        z-index: -10;
     }
 }
 
@@ -62,76 +77,133 @@
     margin-top: 5px;
 }
 
-.facets h5 {
-    margin: 2px 0;
-}
-
 .facet {
-    margin-bottom: 7px;
     overflow: hidden;
-}
+    padding-top: 7px;
+    padding-bottom: 8px;
 
-.facet:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-    margin-bottom: 17px;
-}
-
-.facet-list { margin: 0; }
-
-.facet-list li {
-    margin-bottom: 1px;
-    position: relative;
-    @include font-size(0.9);
-    line-height: 1rem;
-
-    i {
-        line-height: 14px;
+    &.row {
+        // No inner columns, used for margin offset
+        padding-left : 10px;
+        padding-right : 10px;
+        padding-top: 9px;
+        &:last-child {
+            padding-bottom: 6px;
+        }
     }
 
-    > a {
-        border-radius: 3px;
-        padding: 4px 3px 1px 24px;
-        text-decoration: none;
-        display: block;
-        color: #888;
-        &:hover{
-            color: #000000;
-            background-color: #f1f7f9;
+    &:not(:last-child) {
+        border-bottom: 1px solid #f4f4f4;
+    }
+
+    &:last-child {
+        margin-bottom: 5px;
+        &.static {
+            margin-bottom: 0;
         }
-        &.selected {
-            text-decoration: none;
-            color: #f8f8f8;
-            background-color: #248bac;
+    }
+
+    h5.facet-title {
+        margin: 0 0 3px;
+        font-weight: 500;
+        font-size: 0.925em;
+        line-height: inherit;
+    }
+
+    &:not(.static) {
+        h5.facet-title {
+            margin : -2px 0 9px;
+            padding: 0 0 8px;
+            border-bottom: 1px solid #f8f8f8;
         }
-        &.selected:hover {
-            color: #fff;
-            .facet-item, .facet-count {
-                text-shadow: 0px 0px 0px #fff;
+    }
+
+    // Will have .facet-static-row if only one term -OR- .facet-list if multiple.
+    // Contents have same/similar classes (representing content) but must be styled differently.
+
+    .facet-static-row {
+
+        .facet-title,
+        .facet-item {
+            display: inline-block;
+            @include font-size(0.925);
+            width: 50%;
+        }
+
+        .facet-title {
+            padding-right: 10px;
+            margin: 0;
+            float: left;
+
+            &:after{
+                content : "";
             }
         }
 
-
+        .facet-item {
+            padding-left: 10px;
+            vertical-align: top;
+            float: right;
+            text-align: right;
+        }
     }
-}
 
-/* Capitalize facet terms belonging to certain 'safe-to-capitalize' facets */
-.facet {
+    .facet-list { 
+        margin: 0;
     
-    &[data-field="biosample.biosource.individual.organism.name"] .facet-list li > a,
-    &[data-field="experiments_in_set.biosample.biosource.individual.organism.name"] .facet-list li > a,
-    &[data-field="biosample.biosource.biosource_type"] .facet-list li > a,
-    &[data-field="experiments_in_set.biosample.biosource.biosource_type"] .facet-list li > a,
-    &[data-field="biosample.biosource_summary"] .facet-list li > a,
-    &[data-field="experiments_in_set.biosample.biosource_summary"] .facet-list li > a {
+        li {
+            margin-bottom: 1px;
+            position: relative;
+            @include font-size(0.875);
+            line-height: 1rem;
+
+            i {
+                line-height: 14px;
+            }
+
+            > a {
+                border-radius: 3px;
+                padding: 4px 3px 1px 24px;
+                text-decoration: none;
+                display: block;
+                color: #888;
+
+                i.icon.icon-circle-o-notch { opacity: 0.33; }
+
+                &:hover{
+                    color: #000000;
+                    background-color: #f1f7f9;
+                }
+                &.selected {
+                    text-decoration: none;
+                    color: #f8f8f8;
+                    background-color: #248bac;
+                }
+                &.selected:hover {
+                    color: #fff;
+                    .facet-item, .facet-count {
+                        text-shadow: 0px 0px 0px #fff;
+                    }
+                }
+
+            }
+
+            .facet-item {
+                display:inline-block;
+                overflow: hidden;
+                max-width: 150px;
+            }
+
+        }
+    }
+
+    /* .facet */
+    /* Capitalize facet terms belonging to certain 'safe-to-capitalize' facets */
+    &[data-field="experiments_in_set.biosample.biosource.individual.organism.name"] .term,
+    &[data-field="experiments_in_set.biosample.biosource.biosource_type"] .term,
+    &[data-field="experiments_in_set.biosample.biosource_summary"] .term {
         text-transform: capitalize;
     }
-} 
-
-.facet-item {
-    display:inline-block;
-    overflow: hidden;
-    max-width: 150px;
 }
 
 .facet-entry {
@@ -372,5 +444,5 @@ div.meta-status {
 }
 
 .facet-selector{
-    margin-left: -17px;
+    margin-left: -20px;
 }

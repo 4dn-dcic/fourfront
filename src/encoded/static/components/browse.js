@@ -421,7 +421,12 @@ var ResultTable = browse.ResultTable = React.createClass({
         return {
             sortColumn: null,
             sortReverse: false,
-            overflowingRight : false
+            overflowingRight : false,
+            facets : FacetList.adjustedFacets(this.props.context.facets),
+            ignoredFilters : FacetList.findIgnoredFilters(
+                FacetList.adjustedFacets(this.props.context.facets),
+                this.props.expSetFilters
+            )
         }
     },
 
@@ -436,6 +441,23 @@ var ResultTable = browse.ResultTable = React.createClass({
         this.setOverflowingRight();
         var debouncedSetOverflowRight = _.debounce(this.setOverflowingRight, 300);
         window.addEventListener('resize', debouncedSetOverflowRight);
+    },
+
+    componentWillReceiveProps : function(newProps){
+        var newState = {};
+        if (this.props.context.facets !== newProps.context.facets) {
+            console.log('ResultsTable props.context.facets updated (why?)');
+            newState.facets = FacetList.adjustedFacets(newProps.context.facets);
+        }
+        if (this.props.expSetFilters !== newProps.expSetFilters || newState.facets){
+            newState.ignoredFilters = FacetList.findIgnoredFilters(
+                FacetList.adjustedFacets(newProps.context.facets),
+                newProps.expSetFilters
+            );
+        }
+        if (Object.keys(newState).length > 0){
+            this.setState(newState);
+        }
     },
 
     setOverflowingRight : function(){
@@ -574,11 +596,9 @@ var ResultTable = browse.ResultTable = React.createClass({
         var searchBase = this.props.searchBase;
         var expSetFilters = this.props.expSetFilters;
         var sortColumn = this.state.sortColumn;
-        var facets = FacetList.adjustedFacets(this.props.context.facets);
 
-        //find ignored filters
-        var ignoredFilters = FacetList.findIgnoredFilters(facets, expSetFilters);
-        var passExperiments = siftExperiments(results, expSetFilters, ignoredFilters);
+
+        var passExperiments = siftExperiments(results, expSetFilters, this.state.ignoredFilters);
         
         // Map view icons to svg icons
         var view2svg = {
@@ -610,16 +630,16 @@ var ResultTable = browse.ResultTable = React.createClass({
 
         return (
             <div className="row">
-                { facets.length ?
+                { this.state.facets.length ?
                     <div className="col-sm-5 col-md-4 col-lg-3">
                         <FacetList
                             urlPath={this.props.context['@id']}
                             experimentSetListJSON={this.props.context['@graph']}
                             orientation="vertical"
                             expSetFilters={this.props.expSetFilters}
-                            facets={facets}
+                            facets={this.state.facets}
                             onFilter={this.onFilter}
-                            ignoredFilters={ignoredFilters}
+                            ignoredFilters={this.state.ignoredFilters}
                         />
                     </div> 
                     : 
