@@ -45,8 +45,6 @@
             "enum" : [
               "unspecified",
               "replicates",
-              "biological replicates",
-              "technical replicates",
               "analysis set",
               "publication"
             ]

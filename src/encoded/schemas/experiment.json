@@ -136,7 +136,17 @@
                 "title": "Flag",
                 "description": "A flag for this experiment with link to associated QC info.",
                 "type": "string",
-                "linkTo": "QualityMetricFlag"
+                "linkTo": "QualityMetricFlag",
+        "biological_replicate_number":{
+                "title": "Biological relicate number",
+                "description": "Biological replicate identifier for the experiment in an experiment set",
+                "type": "number"
+                },
+        "technical_replicate_number":{
+                "title": "Technical relicate number",
+                "description": "Technical replicate identifier for the experiment in a biological replicate group",
+                "type": "number"
+                }
             }
         }
     }

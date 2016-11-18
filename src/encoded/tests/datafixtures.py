@@ -241,7 +241,7 @@ def experiment_set(testapp, lab, award):
     item = {
         'lab': lab['@id'],
         'award': award['@id'],
-        'experimentset_type': 'biological replicates',
+        'experimentset_type': 'replicates',
         'status': 'in review by lab'
     }
     return testapp.post_json('/experiment_set', item).json['@graph'][0]
