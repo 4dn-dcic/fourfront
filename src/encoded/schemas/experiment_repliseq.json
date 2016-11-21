@@ -60,11 +60,11 @@
             "comment": "Link with a specific ontology",
             "enum": ["G1a", "G1b", "S1", "S2", "S3", "S4", "G2/M"]
         },
-        "cell_sorting_details": {
-            "title": "Cell Cycle Sorting Information",
-            "description": "Details on cell sorting by FACS",
+        "cell_sorting_protocol": {
+            "title": "Sorting Protocol",
+            "description": "Protocol with details on cell sorting by FACS",
             "type": "string",
-            "comment": "will linkTo ExperimentCellSorting"
+            "linkTo": "Protocol"
         }
     },
     "facets": {
