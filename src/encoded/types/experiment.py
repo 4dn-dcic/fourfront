@@ -10,8 +10,7 @@ from snovault import (
     AfterModified,
     BeforeModified,
 )
-
-from snovault.util import simple_path_ids
+# from snovault.util import simple_path_ids
 # from pyramid.security import Authenticated
 from .base import (
     Item
@@ -140,8 +139,8 @@ class ExperimentSet(Item):
                 "experiments_in_set.lab", "experiments_in_set.award", "experiments_in_set.biosample",
                 "experiments_in_set.biosample.biosource", "experiments_in_set.biosample.modifications",
                 "experiments_in_set.biosample.treatments", "experiments_in_set.biosample.biosource.individual.organism",
-                "experiments_in_set.files", "experiments_in_set.filesets", "experiments_in_set.filesets.files_in_set", "experiments_in_set.digestion_enzyme"]
-
+                "experiments_in_set.files", "experiments_in_set.filesets", "experiments_in_set.filesets.files_in_set",
+                "experiments_in_set.digestion_enzyme"]
 
     def _update(self, properties, sheets=None):
         # update self first
@@ -251,5 +250,5 @@ class ExperimentRepliseq(Experiment):
             biosource = biosamp_props['biosource_summary']
             sum_str += (' on ' + biosource)
         if cell_cycle_stage:
-            sum_str += (' at ' +cell_cycle_stage)
+            sum_str += (' at ' + cell_cycle_stage)
         return sum_str
