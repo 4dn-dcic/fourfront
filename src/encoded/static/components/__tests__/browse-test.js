@@ -63,11 +63,11 @@ describe('Testing browse.js for experiment set browser', function() {
     });
 
     it('filters correctly when filters are clicked', function() {
-        var expFilters = TestUtils.scryRenderedDOMComponentsWithClass(page, 'expterm');
+        var expFilters = TestUtils.scryRenderedDOMComponentsWithClass(page, 'term');
         expect(expFilters.length).toEqual(12);
         TestUtils.Simulate.click(expFilters[0]);
         jest.runAllTimers(); // Click handler has been wrapped in setTimeout (to incr. UI responsiveness) so must wait for it before proceeding.
-        var selectedExpFilters = TestUtils.scryRenderedDOMComponentsWithClass(page, 'expterm-selected');
+        var selectedExpFilters = TestUtils.scryRenderedDOMComponentsWithClass(page, 'term selected');
         expect(selectedExpFilters.length).toEqual(1);
     });
 

@@ -79,17 +79,13 @@
 
 .facet {
     overflow: hidden;
-    padding-top: 7px;
+    padding-top: 9px;
     padding-bottom: 8px;
 
     &.row {
-        // No inner columns, used for margin offset
+        // .row not for inner columns, used for margin offset
         padding-left : 10px;
         padding-right : 10px;
-        padding-top: 9px;
-        &:last-child {
-            padding-bottom: 6px;
-        }
     }
 
     &:not(:last-child) {
@@ -97,9 +93,9 @@
     }
 
     &:last-child {
-        margin-bottom: 5px;
+        margin-bottom: 0;
         &.static {
-            margin-bottom: 0;
+            margin-bottom: -2px;
         }
     }
 
@@ -108,6 +104,10 @@
         font-weight: 500;
         font-size: 0.925em;
         line-height: inherit;
+    }
+
+    &.static {
+        padding-bottom: 5px; // Extra 2px + account for margin-bottom: 5px in .facet-title/.facet-item
     }
 
     &:not(.static) {
@@ -127,13 +127,14 @@
         .facet-item {
             display: inline-block;
             @include font-size(0.925);
-            width: 50%;
+            margin-bottom: 5px;
         }
 
         .facet-title {
             padding-right: 10px;
-            margin: 0;
+            margin-top: 0;
             float: left;
+            min-width: 33%;
 
             &:after{
                 content : "";
@@ -145,6 +146,20 @@
             vertical-align: top;
             float: right;
             text-align: right;
+
+            span i.icon {
+                font-size: .5rem;
+                vertical-align: text-top;
+                line-height: 1.15rem;
+                opacity: 0.33;
+                width: 20px;
+            }
+
+            &.selected span i.icon {
+                opacity: 1;
+                color : #248bac;
+                font-size: 0.65rem;
+            }
         }
     }
 

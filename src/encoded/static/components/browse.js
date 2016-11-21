@@ -14,8 +14,7 @@ var ButtonToolbar = require('react-bootstrap').ButtonToolbar;
 var DropdownButton = require('react-bootstrap').DropdownButton;
 var MenuItem = require('react-bootstrap').MenuItem;
 var store = require('../store');
-var FacetList = require('./facetlist').FacetList;
-var siftExperiments = require('./facetlist').siftExperiments;
+var FacetList = require('./facetlist');
 var ExperimentsTable = require('./experiments-table').ExperimentsTable;
 var getFileDetailContainer = require('./experiments-table').getFileDetailContainer;
 var isServerSide = require('./objectutils').isServerSide;
@@ -598,7 +597,7 @@ var ResultTable = browse.ResultTable = React.createClass({
         var sortColumn = this.state.sortColumn;
 
 
-        var passExperiments = siftExperiments(results, expSetFilters, this.state.ignoredFilters);
+        var passExperiments = FacetList.siftExperiments(results, expSetFilters, this.state.ignoredFilters);
         
         // Map view icons to svg icons
         var view2svg = {

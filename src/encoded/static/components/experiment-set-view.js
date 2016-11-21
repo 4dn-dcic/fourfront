@@ -6,7 +6,7 @@ var Panel = require('react-bootstrap').Panel;
 var { ExperimentsTable, getFileDetailContainer } = require('./experiments-table');
 var _ = require('underscore');
 var { SubIPanel, DescriptorField, tipsFromSchema } = require('./item');
-var { FacetList, siftExperiments } = require('./facetlist');
+var FacetList = require('./facetlist');
 var { ajaxLoad, textContentWidth, gridContainerWidth, isServerSide, DateUtility, console } = require('./objectutils');
 var FormattedInfoBlock = require('./formatted-info-block');
 
@@ -99,7 +99,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
             if (this.props.facets && this.props.facets.length > 0) {
                 ignoredFilters = FacetList.findIgnoredFilters(this.props.facets, this.props.expSetFilters);
             }
-            passExperiments = siftExperiments(experimentArray, this.props.expSetFilters, ignoredFilters);
+            passExperiments = FacetList.siftExperiments(experimentArray, this.props.expSetFilters, ignoredFilters);
         }
         
         this.fileDetailContainer = getFileDetailContainer(experimentArray, passExperiments);

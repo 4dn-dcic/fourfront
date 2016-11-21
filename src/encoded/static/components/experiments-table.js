@@ -4,8 +4,7 @@ var React = require('react');
 var Table = require('react-bootstrap').Table;
 var Checkbox = require('react-bootstrap').Checkbox;
 var _ = require('underscore');
-var siftExperiments = require('./facetlist').siftExperiments;
-var FacetList = require('./facetlist').FacetList; // Only used for statics.
+var FacetList = require('./facetlist'); // Only used for statics.
 var console = require('./objectutils').console;
 
 /**
@@ -196,7 +195,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             if (props.facets && props.facets.length > 0) {
                 ignoredFilters = FacetList.findIgnoredFilters(props.facets, props.expSetFilters);
             }
-            passExperiments = siftExperiments(props.experimentArray, props.expSetFilters, ignoredFilters);
+            passExperiments = FacetList.siftExperiments(props.experimentArray, props.expSetFilters, ignoredFilters);
         }
         
         return getFileDetailContainer(props.experimentArray, passExperiments);
