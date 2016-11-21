@@ -438,23 +438,23 @@
         "accession": "ENCBS181AAA",
         "award": "ENCODE2",
         "biosample_term_id": "EFO:0002783",
-        "biosample_term_name": "GM06990",
+        "biosample_term_name": "GM12878",
         "biosample_type": "immortalized cell line",
         "description": "B-lymphocyte, lymphoblastoid, International HapMap Project, CEPH/Utah, treatment: Epstein-Barr Virus transformed",
         "donor": "ENCDO000HUM",
         "dbxrefs": [
-            "UCSC-ENCODE-cv:GM06990"
+            "UCSC-ENCODE-cv:GM12878"
         ],
         "lab": "john-stamatoyannopoulos",
         "organism": "human",
         "phase": "S4",
-        "product_id": "GM06990",
+        "product_id": "GM12878",
         "protocol_documents": [
             "ENCODE:Stam_15_protocols"
         ],
         "source": "coriell",
         "submitted_by": "blandit.orci@conubia.magna",
-        "url": "http://ccr.coriell.org/Sections/Search/Sample_Detail.aspx?Ref=GM06990&PgId=166",
+        "url": "http://ccr.coriell.org/Sections/Search/Sample_Detail.aspx?Ref=GM12878&PgId=166",
         "uuid": "9c246ad4-713a-48dc-ad65-d0400c26a140"
     },
     {
