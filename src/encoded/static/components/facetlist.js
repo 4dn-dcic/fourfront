@@ -221,22 +221,24 @@ var Facet = React.createClass({
     },
     
     getInitialState: function () {
-        this.isSelected = this.isStatic() ? 
-            Facet.ExpTerm.isSelected.bind(this, this.props.facet.terms[0].key) : () => false;
+        // Bind class instance to ExpTerm.isSelected to create this.isSelected if static (== 1 term in facet)
+        this.isSelected = this.isStatic() ?
+            Facet.ExpTerm.isSelected.bind(this, this.props.facet.terms[0].key)
+            :
+            () => false;
+
         return {
-            facetOpen: false
+            facetOpen: true // Potential ToDo: store list of open or closed facet field IDs in localstorage.
         };
     },
 
     isStatic: function(props = this.props){ return !!(props.facet.terms.length === 1); },
     isEmpty: function(props = this.props){ return !!(props.facet.terms.length === 0); },
 
-    /*
-    handleClick: function (e) {
+    handleExpandToggleClick: function (e) {
         e.preventDefault();
         this.setState({facetOpen: !this.state.facetOpen});
     },
-    */
 
     handleStaticClick: function(e) {
         e.preventDefault();
@@ -308,8 +310,21 @@ var Facet = React.createClass({
 
         // List of terms
         return (
-            <div className="facet row" hidden={false/*this.isEmpty()*/} data-field={standardizedFieldKey}>
-                <h5 className="facet-title">{ facet.title || facet.field }</h5>
+            <div
+                className={"facet row" + (this.state.facetOpen ? ' open' : ' closed')}
+                hidden={false/*this.isEmpty()*/}
+                data-field={standardizedFieldKey}
+            >
+                <h5 className="facet-title" onClick={this.handleExpandToggleClick} title="Show/hide facet terms">
+                    { facet.title || facet.field }
+                    <span className="right">
+                        <i className={
+                            "icon icon-fw " +
+                            (this.state.facetOpen ? "icon-angle-down" : "icon-angle-right")
+                        }></i>
+                    </span>
+                </h5>
+                { this.state.facetOpen ?
                 <div className="facet-list nav">
                     <div>
                         { facet.terms.map(function (term) {
@@ -317,6 +332,9 @@ var Facet = React.createClass({
                         }.bind(this))}
                     </div>
                 </div>
+                :
+                null
+                }
             </div>
         );
 
