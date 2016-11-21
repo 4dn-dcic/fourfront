@@ -12,7 +12,7 @@
   "author": "",
   "license": "MIT",
   "files": [],
-  "repository": "hms-dbmi/fourfront",
+  "repository": "4dn-dcic/fourfront",
   "jest": {
     "rootDir": "src/encoded/static",
     "setupFiles": [
