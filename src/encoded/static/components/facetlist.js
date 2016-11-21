@@ -263,23 +263,41 @@ var Facet = React.createClass({
             // Only one term
             return (
                 <div
-                    className={"facet static row" + (selected ? ' selected' : '')}
+                    className={
+                        "facet static row" +
+                        (selected ? ' selected' : '') +
+                        (this.state.filtering ? ' filtering' : '')
+                    }
                     style={{width: this.props.width}}
                     data-field={standardizedFieldKey}
                     title={
-                        'All ' + (this.props.experimentsOrSets === 'sets' ? 'experiment sets' : 'experiments') +
-                        ' have ' + facet.terms[0].key + ' as their ' + (facet.title || facet.field ).toLowerCase() + '; ' +
-                        (selected ? 'currently active as portal-wide filter.' : 'not currently active as portal-wide filter.')
+                        'All ' +
+                        (this.props.experimentsOrSets === 'sets' ? 'experiment sets' : 'experiments') +
+                        ' have ' +
+                        facet.terms[0].key +
+                        ' as their ' +
+                        (facet.title || facet.field ).toLowerCase() + '; ' +
+                        (selected ? 
+                            'currently active as portal-wide filter.' : 
+                            'not currently active as portal-wide filter.'
+                        )
                     }
                 >
                     <div className="facet-static-row clearfix">
                         <h5 className="facet-title">
                             { facet.title || facet.field }
                         </h5>
-                        <div className={"facet-item term" + (selected? ' selected' : '')}>
-                            <span>
+                        <div className={
+                            "facet-item term" +
+                            (selected? ' selected' : '') +
+                            (this.state.filtering ? ' filtering' : '')
+                        }>
+                            <span onClick={this.handleStaticClick}>
                                 <i className={
-                                    "icon icon-fw icon-circle"
+                                    "icon icon-fw " +
+                                    (this.state.filtering ? 'icon-spin icon-circle-o-notch' :
+                                        ( selected ? 'icon-times-circle' : 'icon-circle' )
+                                    )
                                 }></i>{ facet.terms[0].key }
                             </span>
                         </div>
@@ -807,7 +825,7 @@ var FacetList = module.exports = React.createClass({
                             <h4 className="facets-title">{ this.props.title }</h4>
                         </div>
                         <div className={"col-xs-6 clear-filters-control" + (clearButton ? '' : ' placeholder')}>
-                            <a href="#" onClick={this.clearFilters} className="btn btn-xs btn-primary">
+                            <a href="#" onClick={this.clearFilters} className="btn btn-xs btn-default rounded">
                                 <i className="icon icon-times"></i> Clear All
                             </a>
                         </div>

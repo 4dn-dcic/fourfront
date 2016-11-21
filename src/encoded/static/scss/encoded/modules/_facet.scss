@@ -102,8 +102,8 @@
     h5.facet-title {
         margin: 0 0 3px;
         font-weight: 500;
-        font-size: 0.925em;
         line-height: inherit;
+        @include font-size(0.925);
     }
 
     &.static {
@@ -126,7 +126,6 @@
         .facet-title,
         .facet-item {
             display: inline-block;
-            @include font-size(0.925);
             margin-bottom: 5px;
         }
 
@@ -146,20 +145,39 @@
             vertical-align: top;
             float: right;
             text-align: right;
+            @include font-size(0.925);
+            @include no-user-select();
 
-            span i.icon {
-                font-size: .5rem;
-                vertical-align: text-top;
-                line-height: 1.15rem;
-                opacity: 0.33;
-                width: 20px;
+            span {
+                cursor: pointer;
+                i.icon {
+                    font-size: .5rem;
+                    vertical-align: text-top;
+                    line-height: 1.15rem;
+                    opacity: 0.33;
+                    width: 20px;
+                }
+            }
+
+            span:hover {
+                text-shadow: 0 0 0;
+                i.icon { 
+                    opacity: 0.5;
+                }
             }
 
             &.selected span i.icon {
-                opacity: 1;
+                opacity: 1 !important;
                 color : #248bac;
-                font-size: 0.65rem;
+                font-size: 0.75rem;
             }
+
+            &.filtering span i.icon {
+                opacity: 0.33 !important;
+                color : #888 !important;
+                font-size: 0.75rem;
+            }
+
         }
     }
 

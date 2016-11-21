@@ -292,6 +292,12 @@ h1.page-title + .page-subtitle {
 	left : -9999px;
 }
 
+/** Bootstrap border-radius button class **/
+.btn-xs.rounded {
+	border-radius: 11px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
 
 
 
