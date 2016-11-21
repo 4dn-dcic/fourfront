@@ -6,6 +6,11 @@ from snovault import (
     collection,
     load_schema,
 )
+from snovault import (
+    AfterModified,
+    BeforeModified,
+)
+# from snovault.util import simple_path_ids
 # from pyramid.security import Authenticated
 from .base import (
     Item
@@ -98,16 +103,23 @@ class Experiment(Item):
                         target_exp.update(target_exp.properties)
 
         # this part is for experiment_set
+        # get the request so we can tell ES to invalidate our associated Experiement Sets
+        from pyramid.threadlocal import get_current_request
+        request = get_current_request()
+        registry = self.registry
         if 'experiment_sets' in properties.keys():
             for exp_set in properties['experiment_sets']:
                 target_exp_set = self.collection.get(exp_set)
                 # look at the experiments inside the set
                 if acc in target_exp_set.properties["experiments_in_set"]:
-                    break
+                    continue
                 else:
                     # incase it is not in the list of files
+                    # notify tells ES to record transaction ID's from postgress for invalidation
+                    registry.notify(BeforeModified(target_exp_set, request))
                     target_exp_set.properties["experiments_in_set"].append(acc)
                     target_exp_set.update(target_exp_set.properties)
+                    registry.notify(AfterModified(target_exp_set, request))
 
 
 @collection(
@@ -127,7 +139,8 @@ class ExperimentSet(Item):
                 "experiments_in_set.lab", "experiments_in_set.award", "experiments_in_set.biosample",
                 "experiments_in_set.biosample.biosource", "experiments_in_set.biosample.modifications",
                 "experiments_in_set.biosample.treatments", "experiments_in_set.biosample.biosource.individual.organism",
-                "experiments_in_set.files", "experiments_in_set.filesets", "experiments_in_set.filesets.files_in_set", "experiments_in_set.digestion_enzyme"]
+                "experiments_in_set.files", "experiments_in_set.filesets", "experiments_in_set.filesets.files_in_set",
+                "experiments_in_set.digestion_enzyme"]
 
     def _update(self, properties, sheets=None):
         # update self first
@@ -143,7 +156,7 @@ class ExperimentSet(Item):
                 else:
                     # incase file already has the fileset_type
                     if esacc in target_exp.properties['experiment_sets']:
-                        break
+                        continue
                     else:
                         target_exp.properties['experiment_sets'].append(esacc)
                         target_exp.update(target_exp.properties)
@@ -209,4 +222,33 @@ class ExperimentCaptureC(Experiment):
             de_props = request.embed(digestion_enzyme, '@@object')
             de_name = de_props['name']
             sum_str += (' with ' + de_name)
+        return sum_str
+
+
+@collection(
+    name='experiments-repliseq',
+    unique_key='accession',
+    properties={
+        'title': 'Experiments Repliseq',
+        'description': 'Listing of Repliseq Experiments',
+    })
+class ExperimentRepliseq(Experiment):
+    """The experiment class for Repliseq experiments."""
+    item_type = 'experiment_repliseq'
+    schema = load_schema('encoded:schemas/experiment_repliseq.json')
+    embedded = Experiment.embedded + ["submitted_by"]
+
+    @calculated_property(schema={
+        "title": "Experiment summary",
+        "description": "Summary of the experiment, including type, enzyme and biosource.",
+        "type": "string",
+    })
+    def experiment_summary(self, request, experiment_type='Undefined', cell_cycle_stage=None, biosample=None):
+        sum_str = experiment_type
+        if biosample:
+            biosamp_props = request.embed(biosample, '@@object')
+            biosource = biosamp_props['biosource_summary']
+            sum_str += (' on ' + biosource)
+        if cell_cycle_stage:
+            sum_str += (' at ' + cell_cycle_stage)
         return sum_str
