@@ -527,10 +527,13 @@ PHASE1_PIPELINES = {
         remove_keys('files_in_set'),
     ],
     'experiment_hic': [
-        remove_keys('experiment_relation', 'experiment_sets'),
+        remove_keys('experiment_relation', "custom_exp_sets", "replicate_exp_set"),
     ],
     'experiment_capture_c': [
-        remove_keys('experiment_relation', 'experiment_sets'),
+        remove_keys('experiment_relation', "custom_exp_sets", "replicate_exp_set"),
+    ],
+    'experiment_repliseq': [
+        remove_keys('experiment_relation', "custom_exp_sets", "replicate_exp_set"),
     ],
     'experiment_set': [
         remove_keys('experiments_in_set'),
@@ -568,10 +571,13 @@ PHASE2_PIPELINES = {
         skip_rows_missing_all_keys('files_in_set'),
     ],
     'experiment_hic': [
-        skip_rows_missing_all_keys('experiment_relation', 'experiment_sets'),
+        skip_rows_missing_all_keys('experiment_relation',  "custom_exp_sets", "replicate_exp_set"),
     ],
     'experiment_capture_c': [
-        skip_rows_missing_all_keys('experiment_relation', 'experiment_sets'),
+        skip_rows_missing_all_keys('experiment_relation',  "custom_exp_sets", "replicate_exp_set"),
+    ],
+    'experiment_repliseq': [
+        skip_rows_missing_all_keys('experiment_relation',  "custom_exp_sets", "replicate_exp_set"),
     ],
     'experiment_set': [
         skip_rows_missing_all_keys('experiments_in_set'),

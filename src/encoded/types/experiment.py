@@ -104,11 +104,12 @@ class Experiment(Item):
 
         # this part is for experiment_set
         # get the request so we can tell ES to invalidate our associated Experiement Sets
+        # first the custom sets which is an array
         from pyramid.threadlocal import get_current_request
         request = get_current_request()
         registry = self.registry
-        if 'experiment_sets' in properties.keys():
-            for exp_set in properties['experiment_sets']:
+        if 'custom_exp_sets' in properties.keys():
+            for exp_set in properties['custom_exp_sets']:
                 target_exp_set = self.collection.get(exp_set)
                 # look at the experiments inside the set
                 if acc in target_exp_set.properties["experiments_in_set"]:
@@ -120,6 +121,20 @@ class Experiment(Item):
                     target_exp_set.properties["experiments_in_set"].append(acc)
                     target_exp_set.update(target_exp_set.properties)
                     registry.notify(AfterModified(target_exp_set, request))
+        # second the replicate set which is a string
+        if 'replicate_exp_set' in properties.keys():
+            exp_set = properties['replicate_exp_set']
+            target_exp_set = self.collection.get(exp_set)
+            # look at the experiments inside the set
+            if acc in target_exp_set.properties["experiments_in_set"]:
+                pass
+            else:
+                # incase it is not in the list of files
+                # notify tells ES to record transaction ID's from postgress for invalidation
+                registry.notify(BeforeModified(target_exp_set, request))
+                target_exp_set.properties["experiments_in_set"].append(acc)
+                target_exp_set.update(target_exp_set.properties)
+                registry.notify(AfterModified(target_exp_set, request))
 
 
 @collection(
@@ -147,18 +162,23 @@ class ExperimentSet(Item):
         super(ExperimentSet, self)._update(properties, sheets)
         esacc = str(self.uuid)
         if "experiments_in_set" in properties.keys():
+            # update is based on the experiment type
+            # set_type refers to the correct field name in experiment
+            set_type = properties['experimentset_type']
+            type_dict = {"custom": "custom_exp_sets", "replicates": "replicate_exp_set"}
+            set_field = type_dict[set_type]
             for each_exp in properties["experiments_in_set"]:
                 target_exp = self.collection.get(each_exp)
                 # are there any experiment sets in the experiment
-                if 'experiment_sets' not in target_exp.properties.keys():
-                    target_exp.properties.update({'experiment_sets': [esacc, ]})
+                if set_field not in target_exp.properties.keys():
+                    target_exp.properties.update({set_field: [esacc, ]})
                     target_exp.update(target_exp.properties)
                 else:
                     # incase file already has the fileset_type
-                    if esacc in target_exp.properties['experiment_sets']:
+                    if esacc in target_exp.properties[set_field]:
                         continue
                     else:
-                        target_exp.properties['experiment_sets'].append(esacc)
+                        target_exp.properties[set_field].append(esacc)
                         target_exp.update(target_exp.properties)
 
 

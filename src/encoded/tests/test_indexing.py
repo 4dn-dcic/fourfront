@@ -7,6 +7,7 @@ elasticsearch running as subprocesses.
 import pytest
 pytestmark = [pytest.mark.working, pytest.mark.indexing]
 
+
 @pytest.fixture(scope='session')
 def app_settings(wsgi_server_host_port, elasticsearch_server, postgresql_server):
     from .conftest import _app_settings
@@ -114,19 +115,18 @@ def test_indexing_simple(testapp, indexer_testapp):
     assert res.json['total'] == 2
 
 
-def test_indexing_experiment_experiment_in_set(testapp, indexer_testapp, experiment_set,
-                                                 experiment):
+def test_indexing_experiment_experiment_in_set(testapp, indexer_testapp, experiment_set_custom, experiment):
     # the data fixtures load 9 objects, index them first so we are
     # incrementally indexing from here on out
     res = indexer_testapp.post_json('/index', {'record': True})
     assert res.json['indexed'] == 9
     assert 'txn_count' not in res.json
 
-    eset = {'experiment_sets': [experiment_set['@id']]}
+    eset = {'custom_exp_sets': [experiment_set_custom['@id'], ]}
     res = testapp.patch_json(experiment['@id'], eset)
 
     euuid = res.json['@graph'][0]['uuid']
-    esetuuid = experiment_set['uuid']
+    esetuuid = experiment_set_custom['uuid']
     res = indexer_testapp.post_json('/index', {'record': True})
     # we should index both experiment and experiement_set
     assert res.json['indexed'] == 2
@@ -137,8 +137,8 @@ def test_indexing_experiment_experiment_in_set(testapp, indexer_testapp, experim
     assert len(res.json['@graph'][0]['experiments_in_set']) == 1
 
 
-def test_indexing_experiment_in_set_experiment(testapp, indexer_testapp, experiment_set,
-                                                 experiment):
+def test_indexing_experiment_in_set_experiment(testapp, indexer_testapp, experiment_set_custom,
+                                               experiment):
     # the data fixtures load 9 objects, index them first so we are
     # incrementally indexing from here on out
     res = indexer_testapp.post_json('/index', {'record': True})
@@ -146,7 +146,7 @@ def test_indexing_experiment_in_set_experiment(testapp, indexer_testapp, experim
     assert 'txn_count' not in res.json
 
     eset = {'experiments_in_set': [experiment['@id']]}
-    res = testapp.patch_json(experiment_set['@id'], eset)
+    res = testapp.patch_json(experiment_set_custom['@id'], eset)
 
     esetuuid = res.json['@graph'][0]['uuid']
     res = indexer_testapp.post_json('/index', {'record': True})
@@ -155,7 +155,7 @@ def test_indexing_experiment_in_set_experiment(testapp, indexer_testapp, experim
     assert res.json['txn_count'] == 1
     assert res.json['updated'] == [esetuuid]
     res = testapp.get(experiment['@id'])
-    assert res.json['experiment_sets'] == [experiment_set['@id'],]
+    assert res.json['custom_exp_sets'] == [experiment_set_custom['@id'], ]
 
 
 def test_listening(testapp, listening_conn):

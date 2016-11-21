@@ -29,7 +29,9 @@
         "biosample_quantity": 2000000,
         "biosample_quantity_units": "cells",
         "follows_sop": "Yes",
-        "experiment_sets":["431106bc-8535-4448-903e-854af460b260"]
+        "replicate_exp_set":"431106bc-8535-4448-903e-854af460b260",
+        "bio_rep_no":1,
+        "tec_rep_no":1
     },
     {
         "accession":"4DNEX067APT1",
@@ -59,7 +61,9 @@
         "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEX067APU1"}],
         "submitted_by": "4dndcic@gmail.com",
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
-        "experiment_sets":["431106bc-8535-4448-903e-854af460b260"]
+        "replicate_exp_set":"431106bc-8535-4448-903e-854af460b260",
+        "bio_rep_no":1,
+        "tec_rep_no":2
     },
     {
         "accession":"4DNEX067APV1",
@@ -85,7 +89,7 @@
         "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEX067APU1"}],
         "submitted_by": "wrangler@wrangler.com",
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
-        "experiment_sets":["431106bc-8535-4448-903e-854af460b285"],
+        "custom_exp_sets":["431106bc-8535-4448-903e-854af460b285"],
         "biosample": "231111bc-8535-4448-903e-854af460b254"
     },
     {
@@ -116,7 +120,7 @@
         "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEX067APU1"}],
         "submitted_by": "4dndcic@gmail.com",
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
-        "experiment_sets":["431106bc-8535-4448-903e-854af460b285"]
+        "custom_exp_sets":["431106bc-8535-4448-903e-854af460b285"]
     },
     {
         "accession":"4DNEX067APZ1",
@@ -146,6 +150,6 @@
         "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEX067APU1"}],
         "submitted_by": "4dndcic@gmail.com",
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
-        "experiment_sets":["431106bc-8535-4448-903e-854af460b285"]
+        "custom_exp_sets":["431106bc-8535-4448-903e-854af460b285"]
     }
 ]

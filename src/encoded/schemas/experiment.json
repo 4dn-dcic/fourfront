@@ -137,14 +137,20 @@
                 "linkTo": "FileSet"
             }
         },
-        "experiment_sets": {
-            "title": "Experiment Sets",
-            "description": "Experiment Sets that are associated with this experiment.",
+        "replicate_exp_set": {
+            "title": "Experiment Set for Replicate Experiments",
+            "description": "One experiment set that covers all technical and biological replicates.",
+            "type": "string",
+            "linkTo": "ExperimentSet"
+        },
+        "custom_exp_sets": {
+            "title": "Custom Experiment Sets",
+            "description": "Custom Experiment Sets that are associated with this experiment.",
             "type": "array",
             "uniqueItems": true,
             "items": {
-                "title": "Experiment Set",
-                "description": "An experiment set that is associated wtih this experiment.",
+                "title": "Custom Experiment Set",
+                "description": "A custom experiment set that is associated wtih this experiment.",
                 "type": "string",
                 "linkTo": "ExperimentSet"
             }
@@ -157,18 +163,18 @@
                 "title": "Flag",
                 "description": "A flag for this experiment with link to associated QC info.",
                 "type": "string",
-                "linkTo": "QualityMetricFlag",
-        "biological_replicate_number":{
+                "linkTo": "QualityMetricFlag"
+                }
+        },
+        "bio_rep_no":{
                 "title": "Biological relicate number",
                 "description": "Biological replicate identifier for the experiment in an experiment set",
                 "type": "number"
-                },
-        "technical_replicate_number":{
+        },
+        "tec_rep_no":{
                 "title": "Technical relicate number",
                 "description": "Technical replicate identifier for the experiment in a biological replicate group",
                 "type": "number"
-                }
-            }
         },
         "follows_sop": {
             "title": "Follows SOP",

@@ -43,10 +43,8 @@
             "description": "The categorization of the set of experiments.",
             "type": "string",
             "enum" : [
-              "unspecified",
               "replicates",
-              "analysis set",
-              "publication"
+              "custom"
             ]
         },
         "description": {
