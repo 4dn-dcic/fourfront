@@ -197,8 +197,13 @@ h1.page-title + .page-subtitle {
 ***********************************************************/
 
 .column-margin-offset {
-	margin-left: -10px;
-	margin-right: -10px;
+	margin-left: ($grid-gutter-width / -2);
+	margin-right: -($grid-gutter-width / -2);
+}
+
+.column-padding {
+	padding-left: ($grid-gutter-width / 2);
+	padding-right : ($grid-gutter-width / 2);
 }
 
 .text-capitalize 	{ text-transform: capitalize; } // Same class as Bootstrap (in newer version of it?)
@@ -290,13 +295,6 @@ h1.page-title + .page-subtitle {
 .off-screen {
 	position : absolute;
 	left : -9999px;
-}
-
-/** Bootstrap border-radius button class **/
-.btn-xs.rounded {
-	border-radius: 11px;
-    padding-left: 10px;
-    padding-right: 10px;
 }
 
 

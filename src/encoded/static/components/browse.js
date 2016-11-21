@@ -494,6 +494,21 @@ var ResultTable = browse.ResultTable = React.createClass({
         return resultCount;
     },
 
+    formatColumnHeaders : function(columnTemplate){
+        return Object.keys(columnTemplate).map(function(key){
+            return (
+                <th key={key}>
+                    <ColumnSorter 
+                        descend={this.state.sortReverse} 
+                        sortColumn={this.state.sortColumn} 
+                        sortByFxn={this.sortBy} 
+                        val={key}
+                    />
+                </th>
+            );
+        }.bind(this));
+    },
+
     formatExperimentSetListings : function(passExperiments, columnTemplate, addInfoTemplate){
         var resultListings = [],
             resultCount = 0;
@@ -582,51 +597,53 @@ var ResultTable = browse.ResultTable = React.createClass({
             }.bind(this));
         }
 
+        if (resultCount === 0) return null;
         return resultListings;
     },
 
-    render: function() {
-        var results = this.props.context['@graph'];
+    renderTable : function(){
 
         // use first experiment set to grap type (all types are the same in any given graph)
-        var setType = results[0].experimentset_type;
-        var targetFiles = this.props.targetFiles;
-        var total = this.props.context['total'];
-        var searchBase = this.props.searchBase;
-        var expSetFilters = this.props.expSetFilters;
-        var sortColumn = this.state.sortColumn;
+        var setType = this.props.context['@graph'][0].experimentset_type;
 
-
-        var passExperiments = FacetList.siftExperiments(results, expSetFilters, this.state.ignoredFilters);
-        
-        // Map view icons to svg icons
-        var view2svg = {
-            'table': 'table',
-            'th': 'matrix'
-        };
-        
         var columnTemplate = expSetColumnLookup[setType] ? expSetColumnLookup[setType] : expSetColumnLookup['other'];
         var additionalInfoTemplate = expSetAdditionalInfo[setType] ? expSetAdditionalInfo[setType] : expSetAdditionalInfo['other'];
-
-        var resultHeaders = Object.keys(columnTemplate).map(function(key){
-            return (
-                <th key={key}>
-                    <ColumnSorter 
-                        descend={this.state.sortReverse} 
-                        sortColumn={this.state.sortColumn} 
-                        sortByFxn={this.sortBy} 
-                        val={key}
-                    />
-                </th>
-            );
-        }.bind(this));
-
         var formattedExperimentSetListings = this.formatExperimentSetListings(
-            passExperiments,
+            FacetList.siftExperiments(
+                this.props.context['@graph'],
+                this.props.expSetFilters,
+                this.state.ignoredFilters
+            ),
             columnTemplate,
             additionalInfoTemplate
         );
+        if (!formattedExperimentSetListings) return null;
 
+        return (
+            <div className={
+                "expset-result-table-fix col-sm-7 col-md-8 col-lg-9" +
+                (this.state.overflowingRight ? " overflowing" : "")
+            }>
+                <h5 className='browse-title'>
+                    Showing {formattedExperimentSetListings.length} of {this.totalResultCount()} experiment sets.
+                </h5>
+                <div className="expset-table-container" ref="expSetTableContainer">
+                    <Table className="expset-table table-tbody-striped" bordered condensed id="result-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th></th>
+                                { this.formatColumnHeaders(columnTemplate) }
+                            </tr>
+                        </thead>
+                        { formattedExperimentSetListings }
+                    </Table>
+                </div>
+            </div>
+        );
+    },
+
+    render: function() {
         return (
             <div className="row">
                 { this.state.facets.length ?
@@ -639,28 +656,13 @@ var ResultTable = browse.ResultTable = React.createClass({
                             facets={this.state.facets}
                             onFilter={this.onFilter}
                             ignoredFilters={this.state.ignoredFilters}
+                            className="shadow-border with-header-bg"
                         />
                     </div> 
                     : 
                     null 
                 }
-                <div className={"expset-result-table-fix col-sm-7 col-md-8 col-lg-9" + (this.state.overflowingRight ? " overflowing" : "")}>
-                    <h5 className='browse-title'>Showing {formattedExperimentSetListings.length} of {this.totalResultCount()} experiment sets.</h5>
-                    <div className="expset-table-container" ref="expSetTableContainer">
-                        { formattedExperimentSetListings.length > 0 ?
-                        <Table className="expset-table table-tbody-striped" bordered condensed id="result-table">
-                            <thead>
-                                <tr>
-                                    <th></th>
-                                    <th></th>
-                                    { resultHeaders }
-                                </tr>
-                            </thead>
-                            { formattedExperimentSetListings }
-                        </Table>
-                        : <div></div> }
-                    </div>
-                </div>
+                { this.renderTable() }
             </div>
         );
     },

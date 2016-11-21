@@ -1,19 +1,42 @@
 
 .facets-container {
-    padding: 0 10px 2px;
-    border: 1px #eee solid;
-    border-bottom: 1px solid #ddd;
+    padding-top: 0;
+    padding-bottom: 2px;
+    padding-left: ($grid-gutter-width / 2);
+    padding-right: ($grid-gutter-width / 2);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
     //border-radius: 3px;
-    overflow-x: auto;
 
     .facets-header {
-        padding-top: 10px;
-        padding-bottom: 10px;
+        padding-top: ($grid-gutter-width / 2);
+        padding-bottom: ($grid-gutter-width / 2);
         border-bottom: 1px solid #eee;
+        border-top-left-radius: inherit;
+        border-top-right-radius: inherit;
+        color: #111;
+        .facets-title-column {  top : -1px; }
         .facets-title {
             font-weight: 300;
             margin: 0;
             line-height: inherit;
+            color: inherit;
+            display: inline;
+        }
+    }
+
+    &.with-header-bg .facets-header {
+        background-color: #388a92;
+        border-top: inherit;
+        border-left: inherit;
+        border-right: inherit;
+        border-bottom: none;
+        color: #fff;
+
+        &.row {
+            margin-left: ($grid-gutter-width / -2) - 1;
+            margin-right: ($grid-gutter-width / -2) - 1;
+            margin-top: -1px;
         }
     }
 
@@ -169,13 +192,13 @@
             &.selected span i.icon {
                 opacity: 1 !important;
                 color : #248bac;
-                font-size: 0.75rem;
+                font-size: 0.825rem;
             }
 
             &.filtering span i.icon {
                 opacity: 0.33 !important;
                 color : #888 !important;
-                font-size: 0.75rem;
+                font-size: 0.825rem;
             }
 
         }

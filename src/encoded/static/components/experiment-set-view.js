@@ -231,6 +231,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                             facets={ this.props.facets }
                             experimentsOrSets="experiments"
                             expIncompleteFacets={ this.props.expIncompleteFacets }
+                            className="with-header-bg"
                         />
                     </div>
 
