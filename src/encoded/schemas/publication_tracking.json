@@ -108,7 +108,10 @@
                 "title": "Experiment Set",
                 "comment": "use accessions for identifiers.",
                 "type": "string",
-                "linkTo": "ExperimentSet"
+                "anyOf": [
+                    {"linkTo": "ExperimentSet"},
+                    {"linkTo": "ExperimentSetReplicate"}
+                ]
             }
         }
     }

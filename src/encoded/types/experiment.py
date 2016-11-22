@@ -6,15 +6,8 @@ from snovault import (
     collection,
     load_schema,
 )
-from snovault import (
-    AfterModified,
-    BeforeModified,
-)
-# from snovault.util import simple_path_ids
-# from pyramid.security import Authenticated
 from .base import (
     Item
-    # paths_filtered_by_status,
 )
 
 
@@ -100,65 +93,6 @@ class Experiment(Item):
                     else:
                         # make data for new experiemnt_relation
                         target_exp.properties['experiment_relation'].append(relationship_entry)
-                        target_exp.update(target_exp.properties)
-
-        # this part is for experiment_set
-        # get the request so we can tell ES to invalidate our associated Experiement Sets
-        from pyramid.threadlocal import get_current_request
-        request = get_current_request()
-        registry = self.registry
-        if 'experiment_sets' in properties.keys():
-            for exp_set in properties['experiment_sets']:
-                target_exp_set = self.collection.get(exp_set)
-                # look at the experiments inside the set
-                if acc in target_exp_set.properties["experiments_in_set"]:
-                    continue
-                else:
-                    # incase it is not in the list of files
-                    # notify tells ES to record transaction ID's from postgress for invalidation
-                    registry.notify(BeforeModified(target_exp_set, request))
-                    target_exp_set.properties["experiments_in_set"].append(acc)
-                    target_exp_set.update(target_exp_set.properties)
-                    registry.notify(AfterModified(target_exp_set, request))
-
-
-@collection(
-    name='experiment-sets',
-    unique_key='uuid',
-    properties={
-        'title': 'Experiment Sets',
-        'description': 'Listing Experiment Sets',
-    })
-class ExperimentSet(Item):
-    """The experiment class for Hi-C experiments."""
-
-    item_type = 'experiment_set'
-    schema = load_schema('encoded:schemas/experiment_set.json')
-    name_key = "uuid"
-    embedded = ["experiments_in_set", "experiments_in_set.protocol", "experiments_in_set.protocol_variation",
-                "experiments_in_set.lab", "experiments_in_set.award", "experiments_in_set.biosample",
-                "experiments_in_set.biosample.biosource", "experiments_in_set.biosample.modifications",
-                "experiments_in_set.biosample.treatments", "experiments_in_set.biosample.biosource.individual.organism",
-                "experiments_in_set.files", "experiments_in_set.filesets", "experiments_in_set.filesets.files_in_set",
-                "experiments_in_set.digestion_enzyme"]
-
-    def _update(self, properties, sheets=None):
-        # update self first
-        super(ExperimentSet, self)._update(properties, sheets)
-        esacc = str(self.uuid)
-        if "experiments_in_set" in properties.keys():
-            for each_exp in properties["experiments_in_set"]:
-                target_exp = self.collection.get(each_exp)
-                # are there any experiment sets in the experiment
-                if 'experiment_sets' not in target_exp.properties.keys():
-                    target_exp.properties.update({'experiment_sets': [esacc, ]})
-                    target_exp.update(target_exp.properties)
-                else:
-                    # incase file already has the fileset_type
-                    if esacc in target_exp.properties['experiment_sets']:
-                        continue
-                    else:
-                        target_exp.properties['experiment_sets'].append(esacc)
                         target_exp.update(target_exp.properties)
 
 
