@@ -12,6 +12,7 @@ from .base import (
     Item,
 )
 import string
+import re
 
 
 @collection(
@@ -33,6 +34,7 @@ class Vendor(Item):
         exclude = set(string.punctuation)
         title = properties['title']
         title = ''.join(ch for ch in title if ch not in exclude)
-        properties['name'] = title.replace(' ', '-').lower()
+        title = re.sub(r"\s+", '-', title)
+        properties['name'] = title.lower()
 
         super(Vendor, self)._update(properties, sheets)
