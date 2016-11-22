@@ -16,25 +16,6 @@ def test_experiment_update_experiment_relation(testapp, base_experiment, experim
     assert exp_res.json['experiment_relation'] == exp_relation
 
 
-def test_experiment_update_experiments_in_set(testapp, experiment_set, experiment):
-    replicate_exp_set = {'replicate_exp_set': experiment_set['@id']}
-    res = testapp.patch_json(experiment['@id'], replicate_exp_set)
-    assert res.json['@graph'][0]['replicate_exp_set'] == replicate_exp_set['replicate_exp_set']
-    # patching an experiement should also update the experiment_set with the experiment
-    exp_set = testapp.get(experiment_set['@id'])
-    assert exp_set.json['experiments_in_set'][0]['@id'] == experiment['@id']
-
-
-def test_experiment_set_update_experiment_sets(testapp, experiment_set_custom, experiment):
-    exp_sets_exp = {'experiments_in_set': [experiment['@id'], ]}
-    res = testapp.patch_json(experiment_set_custom['@id'], exp_sets_exp)
-
-    assert res.json['@graph'][0]['experiments_in_set'] == exp_sets_exp['experiments_in_set']
-    # patching an experiment should also update the experiment_set with the experiment
-    expt = testapp.get(experiment['@id'])
-    assert expt.json['custom_exp_sets'][0] == experiment_set_custom['@id']
-
-
 def test_experiment_update_hic_sop_mapping_added_on_submit(testapp, experiment_data, sop_map_data):
     res_sop = testapp.post_json('/sop_map', sop_map_data, status=201)
     res_exp = testapp.post_json('/experiment_hic', experiment_data)
