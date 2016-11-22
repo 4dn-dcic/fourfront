@@ -29,6 +29,7 @@
             "title": "Set of experiments",
             "description": "List of experiments to be associatedas a set.",
             "type": "array",
+            "exclude_from": "submit4dn",
             "default": [],
             "uniqueItems": true,
             "items": {
@@ -43,7 +44,6 @@
             "description": "The categorization of the set of experiments.",
             "type": "string",
             "enum" : [
-              "replicates",
               "custom"
             ]
         },
