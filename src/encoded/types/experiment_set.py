@@ -51,7 +51,7 @@ class ExperimentSetReplicate(Item):
     item_type = 'experiment_set_replicate'
     schema = load_schema('encoded:schemas/experiment_set_replicate.json')
     name_key = "accession"
-    embedded = ["replicate_exps",
+    embedded = ["replicate_exps.replicate_exp",
                 "experiments_in_set",
                 "experiments_in_set.protocol",
                 "experiments_in_set.protocol_variation",
