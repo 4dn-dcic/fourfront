@@ -2,7 +2,6 @@
 
 from snovault import (
     collection,
-    calculated_property,
     load_schema,
 )
 from .base import (
@@ -52,7 +51,8 @@ class ExperimentSetReplicate(Item):
     item_type = 'experiment_set_replicate'
     schema = load_schema('encoded:schemas/experiment_set_replicate.json')
     name_key = "accession"
-    embedded = ["experiments_in_set",
+    embedded = ["replicate_exps",
+                "experiments_in_set",
                 "experiments_in_set.protocol",
                 "experiments_in_set.protocol_variation",
                 "experiments_in_set.lab",

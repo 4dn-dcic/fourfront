@@ -58,12 +58,12 @@
                             "linkTo": "Experiment"
                     },
                     "bio_rep_no":{
-                            "title": "Biological relicate number",
+                            "title": "Biological replicate number",
                             "description": "Biological replicate identifier for the experiment in an experiment set",
                             "type": "number"
                     },
                     "tec_rep_no":{
-                            "title": "Technical relicate number",
+                            "title": "Technical replicate number",
                             "description": "Technical replicate identifier for the experiment in a biological replicate group",
                             "type": "number"
                     }
