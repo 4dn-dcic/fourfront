@@ -1,0 +1,141 @@
+{
+    "title": "Repliseq Experiment Variables",
+    "description": "Experimental variables for a Repliseq experiment.",
+    "id": "/profiles/experiment_repliseq.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["experiment_type", "award", "lab", "biosample"],
+    "identifyingProperties": ["uuid", "accession", "aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/accession" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/references" },
+        { "$ref": "mixins.json#/dbxrefs" },
+        { "$ref": "mixins.json#/documents" },
+        { "$ref": "mixins.json#/library"},
+        { "$ref": "mixins.json#/sop_mapping"},
+        { "$ref": "experiment.json#/properties" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "experiment_type": {
+            "enum": [
+            "repliseq"
+          ]
+        },
+        "dna_label": {
+            "title": "DNA label",
+            "description": "The tag or chemical used to label the newly replicated DNA - usually BrdU",
+            "type": "string",
+            "comment": "an enum/default of BrdU"
+        },
+        "labeling_time": {
+            "title": "Labeling time",
+            "description": "Time in minutes of labeling pulse",
+            "type": "number"
+        },
+        "antibody": {
+            "title": "Antibody",
+            "description": "ENCODE accession for antibody used to pull down the labeled DNA",
+            "type": "string",
+            "comment": "Can we depend on encode having antibody or allow other string?",
+            "pattern": "ENCAB.+"
+        },
+        "antibody_lot_id": {
+            "title": "Antibody Lot ID",
+            "description": "Identifier for the specific lot of antibody used",
+            "type": "string"
+        },
+        "cell_cycle_stage": {
+            "title": "Cell Cycle Stage",
+            "description": "After sorting stage that the cell fraction falls in",
+            "type": "string",
+            "comment": "Link with a specific ontology",
+            "enum": ["G1a", "G1b", "S1", "S2", "S3", "S4", "G2/M"]
+        },
+        "cell_sorting_protocol": {
+            "title": "Sorting Protocol",
+            "description": "Protocol with details on cell sorting by FACS",
+            "type": "string",
+            "linkTo": "Protocol"
+        }
+    },
+    "facets": {
+        "award.project": {
+            "title": "Project"
+        },
+        "biosample.biosource.individual.organism.name": {
+            "title": "Organism"
+        },
+        "biosample.biosource.biosource_type": {
+            "title": "Biosource type"
+        },
+        "biosample.biosource_summary": {
+            "title": "Biosource"
+        },
+        "digestion_enzyme.name": {
+            "title": "Enzyme"
+        },
+        "biosample.modifications_summary": {
+            "title": "Modifications"
+        },
+        "biosample.treatments_summary": {
+            "title": "Treatments"
+        },
+        "lab.title": {
+            "title": "Lab"
+        }
+    },
+    "columns": {
+        "award.project": {
+            "title": "Project"
+        },
+        "biosample.biosource.individual.organism.name": {
+            "title": "Organism"
+        },
+        "biosample.biosource.biosource_type": {
+            "title": "Biosource type"
+        },
+        "biosample.biosource_summary": {
+            "title": "Biosource"
+        },
+        "digestion_enzyme.name": {
+            "title": "Enzyme"
+        },
+        "biosample.modifications_summary": {
+            "title": "Modifications"
+        },
+        "biosample.modifications_summary_short": {
+            "title": "Modifications"
+        },
+        "biosample.treatments_summary": {
+            "title": "Treatments"
+        },
+        "lab.title": {
+            "title": "Lab"
+        },
+        "description":{
+            "title": "Description"
+        },
+        "accession":{
+            "title": "Accession"
+        },
+        "title":{
+            "title": "Title"
+        },
+        "name":{
+            "title": "Name"
+        },
+        "experiment_summary":{
+            "title": "Experiment summary"
+        }
+    }
+}

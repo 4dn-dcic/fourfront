@@ -156,6 +156,7 @@
         .facet-item {
             display: inline-block;
             margin-bottom: 5px;
+            width: 50%;
         }
 
         .facet-title {
@@ -170,7 +171,8 @@
         }
 
         .facet-item {
-            padding-left: 10px;
+            padding-left: 12px;
+            padding-left: 12.5px;
             vertical-align: top;
             float: right;
             text-align: right;
@@ -184,7 +186,8 @@
                     vertical-align: text-top;
                     line-height: 1.15rem;
                     opacity: 0.33;
-                    width: 20px;
+                    width: 25px;
+                    margin-left: -25px;
                 }
             }
 
@@ -207,6 +210,13 @@
                 font-size: 0.825rem;
             }
 
+        }
+    }
+
+    &.all-single-term {
+        .facet-item {
+            text-align: left;
+            width: 50%;
         }
     }
 
