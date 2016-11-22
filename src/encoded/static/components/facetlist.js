@@ -211,7 +211,8 @@ var Facet = React.createClass({
         ignoredFilters : React.PropTypes.object,
         changeFilters : React.PropTypes.func.isRequired,    // Executed on term click
         experimentsOrSets : React.PropTypes.string,         // Defaults to 'sets'
-        width : React.PropTypes.any
+        width : React.PropTypes.any,
+        extraClassname : React.PropTypes.string
     },
 
     getDefaultProps: function() {
@@ -267,8 +268,9 @@ var Facet = React.createClass({
                 <div
                     className={
                         "facet static row" +
-                        (selected ? ' selected' : '') +
-                        (this.state.filtering ? ' filtering' : '')
+                        ( selected ? ' selected' : '') +
+                        ( this.state.filtering ? ' filtering' : '') +
+                        ( this.props.extraClassname ? ' ' + this.props.extraClassname : '' )
                     }
                     style={{width: this.props.width}}
                     data-field={standardizedFieldKey}
@@ -634,11 +636,12 @@ var FacetList = module.exports = React.createClass({
         };
 
         if (initState.usingProvidedFacets) {
-            this.facets = this.props.facets;
+            this.facets = this.filterFacets(this.props.facets);
         } else {
             this.facets = this.props.expIncompleteFacets || []; // Try to get from Redux store via App props.
             if (this.facets && this.facets.length > 0) {
                 initState.facetsLoaded = true;
+                this.facets = this.filterFacets(this.facets);
             }
         }
 
@@ -698,7 +701,7 @@ var FacetList = module.exports = React.createClass({
         ){
 
             if (this.state.usingProvidedFacets === true && this.props.facets !== nextProps.facets){
-                this.facets = nextProps.facets;
+                this.facets = this.filterFacets(nextProps.facets);
                 console.timeLog('FacetList props.facets updated.');
             }
 
@@ -711,7 +714,7 @@ var FacetList = module.exports = React.createClass({
     loadFacets : function(callback = null){
         var facetType = (this.props.experimentsOrSets == 'sets' ? 'ExperimentSet' : 'Experiment');
         ajaxLoad('/facets?type=' + facetType + '&format=json', function(r){
-            this.facets = r;
+            this.facets = this.filterFacets(r);
             console.log('Loaded Facet List via AJAX.');
             if (typeof callback == 'function') callback();
             if (facetType == 'Experiment' && !this.props.expIncompleteFacets && typeof window !== 'undefined'){
@@ -724,6 +727,21 @@ var FacetList = module.exports = React.createClass({
                 });
             }
         }.bind(this));
+    },
+
+    filterFacets : function(facets = this.facets){
+        return facets.filter(facet =>
+            (
+                (facet.field.substring(0, 6) === 'audit.') || /* ignore all audit facets for the time being */
+                (facet.field === 'type') ||
+                (facet.field === 'experimentset_type') ||
+                (   /* permissions */
+                    !this.context.session && 
+                    this.context.hidePublicAudits && 
+                    facet.field.substring(0, 6) === 'audit.'
+                )
+            ) ? false : true 
+        )
     },
 
     clearFilters: function(e) {
@@ -781,20 +799,17 @@ var FacetList = module.exports = React.createClass({
         return queryString.parse(searchQuery);
     },
 
-    renderFacets : function(){
-        return this.facets
-        .filter(facet => facet.field.substring(0, 6) !== 'audit.') /* ignore all audit facets for the time being */
-        .filter(facet =>
-            (
-                (facet.field == 'type') ||
-                (facet.field == 'experimentset_type') ||
-                (   /* permissions */
-                    !this.context.session && 
-                    this.context.hidePublicAudits && 
-                    facet.field.substring(0, 6) === 'audit.'
-                )
-            ) ? false : true )
-        .map(facet =>
+    checkIfAllSingleTerm : function(){
+        for (var i = 0; i < this.facets.length; i++){
+            if (!Array.isArray(this.facets[i].terms)) throw new Error("Facets must have list of terms.");
+            if (this.facets[i].terms && this.facets[i].terms.length > 1) return false;
+        }
+        return true;
+    },
+
+    renderFacets : function(facets = this.facets){
+        var extClass = this.checkIfAllSingleTerm() ? ' all-single-term' : null;
+        return facets.map(facet =>
             <FacetList.Facet
                 experimentSetListJSON={ this.props.experimentSetListJSON || this.props.context['@graph'] || null }
                 expSetFilters={this.props.expSetFilters}
@@ -804,6 +819,7 @@ var FacetList = module.exports = React.createClass({
                 facet={facet}
                 width="inherit"
                 experimentsOrSets={this.props.experimentsOrSets}
+                extraClassname={extClass}
             />
         )
     },
