@@ -315,7 +315,7 @@ var Facet = React.createClass({
                 hidden={false/*this.isEmpty()*/}
                 data-field={standardizedFieldKey}
             >
-                <h5 className="facet-title" onClick={this.handleExpandToggleClick} title="Show/hide facet terms">
+                <h5 className="facet-title" onClick={this.handleExpandToggleClick} title="Hide or expand facet terms">
                     { facet.title || facet.field }
                     <span className="right">
                         <i className={
