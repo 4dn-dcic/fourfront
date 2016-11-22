@@ -64,7 +64,8 @@
   bottom: 0;
   left: 0;
   z-index: $zindex-modal-background;
-  background-color: $modal-backdrop-bg;
+  @include gradient-radial-modal-bg;
+  
   // Fade for backdrop
   &.fade { @include opacity(0); }
   &.in { @include opacity($modal-backdrop-opacity); }

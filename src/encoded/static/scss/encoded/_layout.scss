@@ -197,8 +197,13 @@ h1.page-title + .page-subtitle {
 ***********************************************************/
 
 .column-margin-offset {
-	margin-left: -10px;
-	margin-right: -10px;
+	margin-left: ($grid-gutter-width / -2);
+	margin-right: -($grid-gutter-width / -2);
+}
+
+.column-padding {
+	padding-left: ($grid-gutter-width / 2);
+	padding-right : ($grid-gutter-width / 2);
 }
 
 .text-capitalize 	{ text-transform: capitalize; } // Same class as Bootstrap (in newer version of it?)
@@ -291,7 +296,6 @@ h1.page-title + .page-subtitle {
 	position : absolute;
 	left : -9999px;
 }
-
 
 
 
@@ -1073,7 +1077,11 @@ h1, h2, h3, h4, h5, h6, td, th, span {
 	font-family: 'Work Sans', sans-serif;
 }
 
-h1, h2, h3, h4, h5, h6{
+h1, h2, h3, h4, h5, h6, th {
+	color: #111;
+}
+
+h1, h2, h3, h4, h5, h6 {
 	margin: 10px 0px 10px 0px;
 }
 

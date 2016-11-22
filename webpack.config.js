@@ -30,7 +30,7 @@ if (env === 'production') {
     // slightly slower but reduces invariant violations where
     // client-side render != server-side reason (*perhaps* allowing clientside JS to exec faster)
     // set 'beautify : true' to get nicer output (whitespace, linebreaks) for debugging.
-    plugins.push(new webpack.optimize.UglifyJsPlugin({compress: false, mangle: false}));
+    plugins.push(new webpack.optimize.UglifyJsPlugin({compress: false, mangle: false, minimize: false, sourceMap: true}));
     sourceMapType = 'source-map';
 }
 
@@ -116,8 +116,8 @@ module.exports = [
             preLoaders: preLoaders,
             loaders: loaders,
         },
-        devtool: sourceMapType,
+        devtool: null, // No way to debug/log serverside JS currently, so may as well speed up builds for now.
         plugins: plugins,
-        debug: true
+        debug: false // See devtool comment.
     }
 ];

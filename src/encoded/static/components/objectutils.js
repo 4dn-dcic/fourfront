@@ -1,6 +1,7 @@
 'use strict';
 
 var cookie = require('react-cookie');
+var moment = require('moment');
 
 var SingleTreatment = module.exports.SingleTreatment = function(treatment) {
     var treatmentText = '';
@@ -64,28 +65,48 @@ var patchedConsole = module.exports.console = (function(){
             this._enabled = false; // Be silent on production.
         }
 
-        this._methods = ['log', 'assert', 'dir', 'error', 'info', 'warn', 'clear', 'profile', 'profileEnd'];
+        this._nativeMethods = ['log', 'assert', 'dir', 'error', 'info', 'warn', 'clear', 'profile', 'profileEnd'];
         this._nativeConsole = console;
+        this._dummyFunc = function(){return false;};
+
+        this._setCustomMethods = function(){
+            if (this._enabled && this._available && typeof this._nativeConsole.log !== 'undefined'){
+                this.timeLog = function(){
+                    this._nativeConsole.log.apply(
+                        this._nativeConsole,
+                        ['%c(' + moment().format('h:mm:ss.SSS') + ') %c%s'].concat(
+                            'color: darkcyan',
+                            'color: black',
+                            Array.prototype.slice.apply(arguments)
+                        )
+                    )
+                }.bind(this);
+            } else {
+                this.timeLog = this._dummyFunc;
+            }
+        }.bind(this);
 
         this._patchMethods = function(){
-            this._methods.forEach(function(methodName){
+            this._nativeMethods.forEach(function(methodName){
                 if (!this._enabled || !this._available || typeof this._nativeConsole[methodName] === 'undefined') {
-                    this[methodName] = function(){return false;};
+                    this[methodName] = this._dummyFunc;
                 } else {
                     this[methodName] = this._nativeConsole[methodName].bind(this._nativeConsole);
                 }
             }.bind(this));
+            this._setCustomMethods();
+            return this;
         }.bind(this);
 
         // Ability to override, e.g. on production.
         this.on = function(){
             this._enabled = true;
-            this._patchMethods();
+            return this._patchMethods();
         }.bind(this);
 
         this.off = function(){
             this._enabled = false;
-            this._patchMethods();
+            return this._patchMethods();
         }.bind(this);
 
         this._patchMethods();
@@ -290,9 +311,6 @@ var getNestedProperty = module.exports.getNestedProperty = function(object, prop
 var DateUtility = module.exports.DateUtility = (function(){
 
     // ToDo : Handle locales (w/ moment)
-
-    // 'require' allows to load code in conditionally, so lets do that here until more funcs require moment.
-    var moment = require('moment');
 
     // Class itself, if need to create non-static instance at some point.
     var DateUtility = function(timestamp = null){};
