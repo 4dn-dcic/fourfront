@@ -25,6 +25,12 @@
         "accession": {
             "accessionType": "ES"
         },
+        "description": {
+            "title": "Description",
+            "description": "A description of why experiments are part of the set.",
+            "type": "string",
+            "default": ""
+        },
         "experimentset_type": {
             "title": "Experiment Set type",
             "description": "The categorization of the set of experiments.",
@@ -64,39 +70,47 @@
                 }
             }
         },
-        "description": {
-            "title": "Description",
-            "description": "A description of why experiments are part of the set.",
-            "type": "string",
-            "default": ""
+        "experiments_in_set": {
+            "title": "All experiments in set",
+            "description": "Calculated from replicate_exps.",
+            "type": "array",
+            "exclude_from": "submit4dn",
+            "default": [],
+            "uniqueItems": true,
+            "items": {
+                "title": "Experiment",
+                "comment": "use accessions for identifiers.",
+                "type": "string",
+                "linkTo": "Experiment"
+            }
         }
     },
     "facets": {
         "experimentset_type": {
             "title": "Experiment set type"
         },
-        "replicate_exps.replicate_exp.award.project": {
+        "experiments_in_set.award.project": {
             "title": "Project"
         },
-        "replicate_exps.replicate_exp.biosample.biosource.individual.organism.name": {
+        "experiments_in_set.biosample.biosource.individual.organism.name": {
             "title": "Organism"
         },
-        "replicate_exps.replicate_exp.biosample.biosource.biosource_type": {
+        "experiments_in_set.biosample.biosource.biosource_type": {
             "title": "Biosource type"
         },
-        "replicate_exps.replicate_exp.biosample.biosource_summary": {
+        "experiments_in_set.biosample.biosource_summary": {
             "title": "Biosource"
         },
-        "replicate_exps.replicate_exp.digestion_enzyme.name": {
+        "experiments_in_set.digestion_enzyme.name": {
             "title": "Enzyme"
         },
-        "replicate_exps.replicate_exp.biosample.modifications_summary": {
+        "experiments_in_set.biosample.modifications_summary": {
             "title": "Modifications"
         },
-        "replicate_exps.replicate_exp.biosample.treatments_summary": {
+        "experiments_in_set.biosample.treatments_summary": {
             "title": "Treatments"
         },
-        "replicate_exps.replicate_exp.lab.title": {
+        "experiments_in_set.lab.title": {
             "title": "Lab"
         }
     },
@@ -110,7 +124,7 @@
         "description": {
             "title": "Description"
         },
-        "replicate_exps.replicate_exp": {
+        "experiments_in_set": {
             "title": "Experiments"
         }
     }
