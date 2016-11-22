@@ -28,7 +28,7 @@ var TestWarning = module.exports = React.createClass({
         return (
             <div className="test-warning">
                 <div className="container">
-                    <p>
+                    <div>
                         The data displayed on this page is not official and only for testing purposes.
                         <a className="test-warning-close icon icon-times-circle-o" onClick={function(e){
                             e.preventDefault();
@@ -39,7 +39,7 @@ var TestWarning = module.exports = React.createClass({
                             }
                             this.hideTestWarning();
                         }.bind(this)}></a>
-                    </p>
+                    </div>
                 </div>
             </div>
         );

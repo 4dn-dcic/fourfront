@@ -312,6 +312,8 @@ div.fieldset.editable-fields {
 			min-height: 45px;
 		}
 
+		.edit-button { visibility: hidden; }
+
 		span.input-wrapper {
 			@media screen and (min-width: $screen-sm-min){
 				margin-bottom : -100px; // For min-height transition (prevent jumping).

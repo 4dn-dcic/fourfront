@@ -14,8 +14,7 @@ var ButtonToolbar = require('react-bootstrap').ButtonToolbar;
 var DropdownButton = require('react-bootstrap').DropdownButton;
 var MenuItem = require('react-bootstrap').MenuItem;
 var store = require('../store');
-var FacetList = require('./facetlist').FacetList;
-var siftExperiments = require('./facetlist').siftExperiments;
+var FacetList = require('./facetlist');
 var ExperimentsTable = require('./experiments-table').ExperimentsTable;
 var getFileDetailContainer = require('./experiments-table').getFileDetailContainer;
 var isServerSide = require('./objectutils').isServerSide;
@@ -172,8 +171,9 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
             );
         }.bind(this));
 
-        var checked = this.state.selectedFiles.size === files.length;
-        var disabled = files.length === emptyExps.length; // @Carl : Any thoughts? Unsure re: case if multiple files in experiment
+
+        var checked = this.state.selectedFiles.size === files.length || (!this.state.open && this.state.checked);
+        var disabled = files.length === emptyExps.length; // @Carl : Any thoughts? Unsure re: case if multiple files in experiment 
         var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < files.length;
 
         return (
@@ -198,7 +198,8 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                 </tr>
                 <tr className="expset-addinfo-row">
                     <td className={this.state.open ? "hidden-col-open" : "hidden-col-closed"} colSpan={Object.keys(this.props.columns).length + 2}>
-                        <Panel className="expset-panel" collapsible expanded={this.state.open}>
+                        { this.state.open ?
+                        <Panel className="expset-panel" collapsible expanded={true/*this.state.open*/}>
                             <div className="expset-addinfo">
                                 { formattedAdditionalInfo }
                             </div>
@@ -217,6 +218,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                                 facets={this.props.facets /* Not req'd here as using pre-completed fileDetailContainer' */ }
                             />
                         </Panel>
+                        : null }
                     </td>
                 </tr>
             </tbody>
@@ -419,7 +421,12 @@ var ResultTable = browse.ResultTable = React.createClass({
         return {
             sortColumn: null,
             sortReverse: false,
-            overflowingRight : false
+            overflowingRight : false,
+            facets : FacetList.adjustedFacets(this.props.context.facets),
+            ignoredFilters : FacetList.findIgnoredFilters(
+                FacetList.adjustedFacets(this.props.context.facets),
+                this.props.expSetFilters
+            )
         }
     },
 
@@ -434,6 +441,23 @@ var ResultTable = browse.ResultTable = React.createClass({
         this.setOverflowingRight();
         var debouncedSetOverflowRight = _.debounce(this.setOverflowingRight, 300);
         window.addEventListener('resize', debouncedSetOverflowRight);
+    },
+
+    componentWillReceiveProps : function(newProps){
+        var newState = {};
+        if (this.props.context.facets !== newProps.context.facets) {
+            console.log('ResultsTable props.context.facets updated (why?)');
+            newState.facets = FacetList.adjustedFacets(newProps.context.facets);
+        }
+        if (this.props.expSetFilters !== newProps.expSetFilters || newState.facets){
+            newState.ignoredFilters = FacetList.findIgnoredFilters(
+                FacetList.adjustedFacets(newProps.context.facets),
+                newProps.expSetFilters
+            );
+        }
+        if (Object.keys(newState).length > 0){
+            this.setState(newState);
+        }
     },
 
     setOverflowingRight : function(){
@@ -469,6 +493,21 @@ var ResultTable = browse.ResultTable = React.createClass({
             if (r.experiments_in_set == 0) resultCount--;
         });
         return resultCount;
+    },
+
+    formatColumnHeaders : function(columnTemplate){
+        return Object.keys(columnTemplate).map(function(key){
+            return (
+                <th key={key}>
+                    <ColumnSorter
+                        descend={this.state.sortReverse}
+                        sortColumn={this.state.sortColumn}
+                        sortByFxn={this.sortBy}
+                        val={key}
+                    />
+                </th>
+            );
+        }.bind(this));
     },
 
     formatExperimentSetListings : function(passExperiments, columnTemplate, addInfoTemplate){
@@ -559,87 +598,72 @@ var ResultTable = browse.ResultTable = React.createClass({
             }.bind(this));
         }
 
+        if (resultCount === 0) return null;
         return resultListings;
     },
 
-    render: function() {
-        var results = this.props.context['@graph'];
+    renderTable : function(){
 
         // use first experiment set to grap type (all types are the same in any given graph)
-        var setType = results[0].experimentset_type;
-        var targetFiles = this.props.targetFiles;
-        var total = this.props.context['total'];
-        var searchBase = this.props.searchBase;
-        var expSetFilters = this.props.expSetFilters;
-        var sortColumn = this.state.sortColumn;
-        var facets = FacetList.adjustedFacets(this.props.context.facets);
 
-        //find ignored filters
-        var ignoredFilters = FacetList.findIgnoredFilters(facets, expSetFilters);
-        var passExperiments = siftExperiments(results, expSetFilters, ignoredFilters);
-
-        // Map view icons to svg icons
-        var view2svg = {
-            'table': 'table',
-            'th': 'matrix'
-        };
-
+        var setType = this.props.context['@graph'][0].experimentset_type;
         var columnTemplate = expSetColumnLookup[setType] ? expSetColumnLookup[setType] : expSetColumnLookup['other'];
         var additionalInfoTemplate = expSetAdditionalInfo[setType] ? expSetAdditionalInfo[setType] : expSetAdditionalInfo['other'];
-
-        var resultHeaders = Object.keys(columnTemplate).map(function(key){
-            return (
-                <th key={key}>
-                    <ColumnSorter
-                        descend={this.state.sortReverse}
-                        sortColumn={this.state.sortColumn}
-                        sortByFxn={this.sortBy}
-                        val={key}
-                    />
-                </th>
-            );
-        }.bind(this));
-
         var formattedExperimentSetListings = this.formatExperimentSetListings(
-            passExperiments,
+            FacetList.siftExperiments(
+                this.props.context['@graph'],
+                this.props.expSetFilters,
+                this.state.ignoredFilters
+            ),
             columnTemplate,
             additionalInfoTemplate
         );
+        if (!formattedExperimentSetListings) return null;
 
         return (
+            <div className={
+                "expset-result-table-fix col-sm-7 col-md-8 col-lg-9" +
+                (this.state.overflowingRight ? " overflowing" : "")
+            }>
+                <h5 className='browse-title'>
+                    Showing {formattedExperimentSetListings.length} of {this.totalResultCount()} experiment sets.
+                </h5>
+                <div className="expset-table-container" ref="expSetTableContainer">
+                    <Table className="expset-table table-tbody-striped" bordered condensed id="result-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th></th>
+                                { this.formatColumnHeaders(columnTemplate) }
+                            </tr>
+                        </thead>
+                        { formattedExperimentSetListings }
+                    </Table>
+                </div>
+            </div>
+        );
+    },
+
+    render: function() {
+        return (
             <div className="row">
-                { facets.length ?
+                { this.state.facets.length ?
                     <div className="col-sm-5 col-md-4 col-lg-3">
                         <FacetList
                             urlPath={this.props.context['@id']}
                             experimentSetListJSON={this.props.context['@graph']}
                             orientation="vertical"
                             expSetFilters={this.props.expSetFilters}
-                            facets={facets}
+                            facets={this.state.facets}
                             onFilter={this.onFilter}
-                            ignoredFilters={ignoredFilters}
+                            ignoredFilters={this.state.ignoredFilters}
+                            className="shadow-border with-header-bg"
                         />
                     </div>
                     :
                     null
                 }
-                <div className={"expset-result-table-fix col-sm-7 col-md-8 col-lg-9" + (this.state.overflowingRight ? " overflowing" : "")}>
-                    <h5 className='browse-title'>Showing {formattedExperimentSetListings.length} of {this.totalResultCount()} experiment sets.</h5>
-                    <div className="expset-table-container" ref="expSetTableContainer">
-                        { formattedExperimentSetListings.length > 0 ?
-                        <Table className="expset-table table-tbody-striped" bordered condensed id="result-table">
-                            <thead>
-                                <tr>
-                                    <th></th>
-                                    <th></th>
-                                    { resultHeaders }
-                                </tr>
-                            </thead>
-                            { formattedExperimentSetListings }
-                        </Table>
-                        : <div></div> }
-                    </div>
-                </div>
+                { this.renderTable() }
             </div>
         );
     },
