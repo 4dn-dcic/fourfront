@@ -22,6 +22,7 @@ gulp.task('set-quick-uglified', [], function () {
 });
 
 var webpackOnBuild = function (done) {
+    var start = Date.now();
     return function (err, stats) {
         if (err) {
             throw new gutil.PluginError("webpack", err);
@@ -29,7 +30,8 @@ var webpackOnBuild = function (done) {
         gutil.log("[webpack]", stats.toString({
             colors: true
         }));
-        gutil.log("Build Completed"); // Gives (useful) time after each completed compile
+        var end = Date.now();
+        gutil.log("Build Completed, running for " + ((end - start)/1000)) + 's';
         if (done) { done(err); }
     };
 };

@@ -78,13 +78,13 @@
 
 .test-warning {
     position: relative;
-    padding: 5px 0 7px;
+    padding: 6px 0 5px;
     color: #fff;
-    background-color: $brand-danger;
-    @include background-image(linear-gradient(top, darken($brand-danger,20%) 0%,darken($brand-danger,10%) 5%,lighten($brand-danger,0%) 93%,lighten($brand-danger,40%) 95%));
-    background-image: -ms-linear-gradient(top, darken($brand-danger,20%) 0%,darken($brand-danger,10%) 5%,lighten($brand-danger,0%) 93%,lighten($brand-danger,40%) 95%);
+    background-color: #7e4544;
+    //@include background-image(linear-gradient(top, darken($brand-danger,20%) 0%,darken($brand-danger,10%) 5%,lighten($brand-danger,0%) 93%,lighten($brand-danger,40%) 95%));
+    //background-image: -ms-linear-gradient(top, darken($brand-danger,20%) 0%,darken($brand-danger,10%) 5%,lighten($brand-danger,0%) 93%,lighten($brand-danger,40%) 95%);
 
-    p {
+    p, div {
         margin: 0;
         width: 90%;
         @include font-size(0.85);
@@ -92,7 +92,6 @@
         @media screen and (min-width: $screen-md-min) {
             width: 100%;
             text-align: center;
-            @include font-size(1);
         }
     }
 }
@@ -108,7 +107,7 @@
     @include font-size(1.2);
     line-height: 23px !important;
     color: #fff;
-    vertical-align: top;
+    vertical-align: middle;
     cursor: pointer;
 
     &:hover {
