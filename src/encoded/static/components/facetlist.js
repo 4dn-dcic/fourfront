@@ -181,7 +181,7 @@ var ExpTerm = React.createClass({
                     <span className="facet-item">
                         { this.props.title || this.props.term.key }
                     </span>
-                    <span className="pull-right facet-count">{this.state.passExpsCount}</span>
+                    <span className="facet-count">{this.state.passExpsCount}</span>
                 </a>
             </li>
         );
@@ -628,6 +628,17 @@ var FacetList = module.exports = React.createClass({
         };
     },
 
+    /**
+     * Sets up list of facets to use for filtering in this.facets. 
+     * `this.facets` be migrated to `this.state.facets` at some point.
+     * - (1) Try to use facets passed in through props, if any.
+     * - (2) Try to get list of incomplete experiment-applicable facets from redux store (passed through props),
+     *       if has been loaded previously. Then fill up facets with terms and term-match counts on mount.
+     * - (3) If not set here in getInitialState, then get list of incomplete exp-applicable facets from back-end
+     *       on componentDidMount. Once fetched, fill up w/ terms and term-match counts and update state.
+     * 
+     * @return {Object} Initial state object.
+     */
     getInitialState : function(){
 
         var initState = {
@@ -638,7 +649,11 @@ var FacetList = module.exports = React.createClass({
         if (initState.usingProvidedFacets) {
             this.facets = this.filterFacets(this.props.facets);
         } else {
-            this.facets = this.props.expIncompleteFacets || []; // Try to get from Redux store via App props.
+            // Try to get from Redux store via App props.
+            // If exists, will fill them up w/ terms from current experiments before mount.
+            // Else, if doesn't exist (facetsLoaded remains false), will perform ajax fetch on mount
+            // to get list of applicable then fill up w/ terms.
+            this.facets = this.props.expIncompleteFacets || [];
             if (this.facets && this.facets.length > 0) {
                 initState.facetsLoaded = true;
                 this.facets = this.filterFacets(this.facets);
@@ -648,12 +663,22 @@ var FacetList = module.exports = React.createClass({
         return initState;
     },
 
+    /**
+     * If not using facets that were passed in through props and incomplete facets were obtained through redux store,
+     * fill them up w/ terms from experiments.
+     */
     componentWillMount : function(){
         if (this.state.usingProvidedFacets === false && this.state.facetsLoaded){
             FacetList.fillFacetTermsAndCountFromExps(this.facets, this.props.experimentSetListJSON);
         }
     },
 
+    /**
+     * If not using props passed in through props, and incomplete facets not available (yet) in redux store,
+     * AJAX them in, save to redux store, then fill up w/ terms. @see FacetList.getInitialState
+     * 
+     * Possible ToDo : Store copy of this.(state.)facets in redux store instead of reference.
+     */
     componentDidMount : function(){
 
         console.log(
@@ -673,12 +698,21 @@ var FacetList = module.exports = React.createClass({
         } // else if (this.state.usingProvidedFacets === false && this.state.facetsLoaded) : @see componentWillMount
     },
 
+    /**
+     * Because redux store seems to store a reference to facets,
+     * reset them to be incomplete on dismount so they can be reused.
+     */
     componentWillUnmount : function(){
         if (this.state.usingProvidedFacets === false) {
             FacetList.resetFacetTermsAndCounts(this.facets);
         }
     },
 
+    /**
+     * Since there's a good chunk of intensive (potentially UI-blocking) calculation,
+     * minimize updates to only when necessary, i.e. only when relevant-to-facetlist-changes props
+     * or state has changed. Child components' state changes (e.g. show/collapse facet) are not affected.
+     */
     shouldComponentUpdate : function(nextProps, nextState){
         if (
             this.state.usingProvidedFacets === false ||
