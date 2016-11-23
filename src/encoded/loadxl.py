@@ -44,6 +44,7 @@ ORDER = [
     'experiment_capture_c',
     'experiment_repliseq',
     'experiment_set',
+    'experiment_set_replicate',
     'software',
     'analysis_step',
     'workflow',
@@ -527,13 +528,13 @@ PHASE1_PIPELINES = {
         remove_keys('files_in_set'),
     ],
     'experiment_hic': [
-        remove_keys('experiment_relation', 'experiment_sets'),
+        remove_keys('experiment_relation'),
     ],
     'experiment_capture_c': [
-        remove_keys('experiment_relation', 'experiment_sets'),
+        remove_keys('experiment_relation'),
     ],
-    'experiment_set': [
-        remove_keys('experiments_in_set'),
+    'experiment_repliseq': [
+        remove_keys('experiment_relation'),
     ],
     'publication': [
         remove_keys('exp_sets_prod_in_pub', 'exp_sets_used_in_pub'),
@@ -568,13 +569,13 @@ PHASE2_PIPELINES = {
         skip_rows_missing_all_keys('files_in_set'),
     ],
     'experiment_hic': [
-        skip_rows_missing_all_keys('experiment_relation', 'experiment_sets'),
+        skip_rows_missing_all_keys('experiment_relation'),
     ],
     'experiment_capture_c': [
-        skip_rows_missing_all_keys('experiment_relation', 'experiment_sets'),
+        skip_rows_missing_all_keys('experiment_relation'),
     ],
-    'experiment_set': [
-        skip_rows_missing_all_keys('experiments_in_set'),
+    'experiment_repliseq': [
+        skip_rows_missing_all_keys('experiment_relation'),
     ],
     'publication': [
         skip_rows_missing_all_keys('exp_sets_prod_in_pub', 'exp_sets_used_in_pub'),

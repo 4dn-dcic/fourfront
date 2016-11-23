@@ -294,18 +294,21 @@ def experiment_set(testapp, lab, award):
     item = {
         'lab': lab['@id'],
         'award': award['@id'],
-        'experimentset_type': 'biological replicates',
+        'experimentset_type': 'replicates',
         'status': 'in review by lab'
     }
     return testapp.post_json('/experiment_set', item).json['@graph'][0]
 
 
 @pytest.fixture
-def protocol(testapp):
+def experiment_set_custom(testapp, lab, award):
     item = {
-        'description': 'my super awesome protocol',
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'experimentset_type': 'custom',
+        'status': 'in review by lab'
     }
-    return testapp.post_json('/protocol', item).json['@graph'][0]
+    return testapp.post_json('/experiment_set', item).json['@graph'][0]
 
 
 @pytest.fixture

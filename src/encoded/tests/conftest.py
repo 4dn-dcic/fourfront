@@ -5,6 +5,7 @@ http://pyramid.readthedocs.org/en/latest/narr/testing.html
 import pkg_resources
 import pytest
 from pytest import fixture
+from pyramid.testing import DummyRequest
 
 pytest_plugins = [
     'encoded.tests.datafixtures',
@@ -90,9 +91,6 @@ def threadlocals(request, dummy_request, registry):
     manager.push({'request': dummy_request, 'registry': registry})
     yield dummy_request
     manager.pop()
-
-
-from pyramid.testing import DummyRequest
 
 
 class MyDummyRequest(DummyRequest):

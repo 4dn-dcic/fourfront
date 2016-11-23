@@ -137,18 +137,6 @@
                 "linkTo": "FileSet"
             }
         },
-        "experiment_sets": {
-            "title": "Experiment Sets",
-            "description": "Experiment Sets that are associated with this experiment.",
-            "type": "array",
-            "uniqueItems": true,
-            "items": {
-                "title": "Experiment Set",
-                "description": "An experiment set that is associated wtih this experiment.",
-                "type": "string",
-                "linkTo": "ExperimentSet"
-            }
-        },
         "quality_metric_flags": {
             "title": "Quality Metric Flags",
             "description": "Flags and associated info for flagging experiments with possible issues",
@@ -158,7 +146,7 @@
                 "description": "A flag for this experiment with link to associated QC info.",
                 "type": "string",
                 "linkTo": "QualityMetricFlag"
-            }
+                }
         },
         "follows_sop": {
             "title": "Follows SOP",

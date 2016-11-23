@@ -84,7 +84,10 @@
                 "title": "Experiment Set",
                 "comment": "use accessions for identifiers.",
                 "type": "string",
-                "linkTo": "ExperimentSet"
+                "anyOf": [
+                    {"linkTo": "ExperimentSet"},
+                    {"linkTo": "ExperimentSetReplicate"}
+                ]
             }
         },
         "exp_sets_used_in_pub": {
@@ -96,7 +99,10 @@
                 "title": "Experiment Set",
                 "comment": "use accessions for identifiers.",
                 "type": "string",
-                "linkTo": "ExperimentSet"
+                "anyOf": [
+                    {"linkTo": "ExperimentSet"},
+                    {"linkTo": "ExperimentSetReplicate"}
+                ]
             }
         },
         "title": {
