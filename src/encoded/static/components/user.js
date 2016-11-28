@@ -67,7 +67,17 @@ var AccessKeyTable = React.createClass({
             return (
                 <tr key={key.access_key_id}>
                     <td className="access-key-id">{ key.access_key_id }</td>
-                    <td>{ key.date_created ? DateUtility.format(key.date_created, 'date-time-md', ' - ') : 'N/A' }</td>
+                    <td>
+                        { key.date_created ? 
+                            <DateUtility.LocalizedTime
+                                timestamp={key.date_created}
+                                formatType="date-time-md"
+                                dateTimeSeparator=" - "
+                            />
+                            :
+                            'N/A'
+                        }
+                    </td>
                     <td>{ key.description }</td>
                     <td className="access-key-buttons">
                         <a href="#" className="btn btn-xs btn-success" onClick={this.doAction.bind(this, 'resetSecret', key['@id'])}>Reset</a>

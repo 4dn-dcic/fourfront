@@ -311,7 +311,8 @@ var ExperimentSetHeader = React.createClass({
         if (!('date_created' in this.props.context)) return <span><i></i></span>;
         return (
             <span>
-                <i className="icon sbt-calendar"></i>&nbsp; Added { DateUtility.format(this.props.context.date_created, 'date-time-md', ' at ') }
+                <i className="icon sbt-calendar"></i>&nbsp; Added 
+                <DateUtility.LocalizedTime timestamp={this.props.context.date_created} formatType='date-time-md' dateTimeSeparator=" at " />
             </span>
         );
     },

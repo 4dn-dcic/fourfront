@@ -543,8 +543,11 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	}
 
 	&.no-icon {
-		padding : 0 0 4px;
+		padding : 0;
 		margin-bottom: 0;
+		&.loading {
+			min-height: 36.5px;
+		}
 	}
 
 	> h6 {
