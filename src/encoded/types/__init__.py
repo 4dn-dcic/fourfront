@@ -285,7 +285,7 @@ class Workflow(Item):
 
 
 @collection(
-    name='workflow_runs',
+    name='workflow-runs',
     properties={
         'title': 'Workflow Runs',
         'description': 'Listing of executions of 4DN analysis workflows',
@@ -299,7 +299,7 @@ class WorkflowRun(Item):
 
 
 @collection(
-    name='workflow_mappings',
+    name='workflow-mappings',
     properties={
         'title': 'Workflow Mappings',
         'description': 'Listing of all workflow mappings',
