@@ -61,6 +61,10 @@ var FieldSet = module.exports.FieldSet = React.createClass({
                 if (!child.props.context || _.isEmpty(child.props.context)) newProps.context = this.props.context;
                 if (!child.props.parent) newProps.parent = this.props.parent || this;
                 if (!child.props.endpoint && this.props.endpoint) newProps.endpoint = this.props.endpoint;
+                if (
+                    typeof child.props.disabled === 'undefined' &&
+                    typeof this.props.disabled === 'boolean'
+                ) newProps.disabled = this.props.disabled;
                 if (this.props.inputSize) newProps.inputSize = this.props.inputSize; // Overwrite, since EditableField has default props.
                 if (this.props.style) newProps.style = this.props.style;
                 if (this.props.absoluteBox) newProps.absoluteBox = this.props.absoluteBox;

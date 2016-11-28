@@ -67,7 +67,17 @@ var AccessKeyTable = React.createClass({
             return (
                 <tr key={key.access_key_id}>
                     <td className="access-key-id">{ key.access_key_id }</td>
-                    <td>{ key.date_created ? DateUtility.format(key.date_created, 'date-time-md', ' - ') : 'N/A' }</td>
+                    <td>
+                        { key.date_created ? 
+                            <DateUtility.LocalizedTime
+                                timestamp={key.date_created}
+                                formatType="date-time-md"
+                                dateTimeSeparator=" - "
+                            />
+                            :
+                            'N/A'
+                        }
+                    </td>
                     <td>{ key.description }</td>
                     <td className="access-key-buttons">
                         <a href="#" className="btn btn-xs btn-success" onClick={this.doAction.bind(this, 'resetSecret', key['@id'])}>Reset</a>
@@ -193,17 +203,20 @@ var AccessKeyTable = React.createClass({
 var User = module.exports.User = React.createClass({
 
     statics : {
-        buildGravatarURL : function(email, size=null){
+        buildGravatarURL : function(email, size=null, defaultImg='retro'){
             var md5 = require('js-md5');
+            if (defaultImg === 'kanye'){
+                defaultImg = 'https://media.giphy.com/media/PcFPiuGZVqK2I/giphy.gif';
+            }
             var url = 'https://www.gravatar.com/avatar/' + md5(email);
-            url += "?d=https://media.giphy.com/media/PcFPiuGZVqK2I/giphy.gif";
+            url += "?d=" + defaultImg;
             if (size) url += '&s=' + size;
             return url;
         },
-        gravatar : function(email, size=null, className=null){
+        gravatar : function(email, size=null, className=null, defaultImg='retro'){
             return (
                 <img
-                    src={ User.buildGravatarURL(email, size)}
+                    src={ User.buildGravatarURL(email, size, defaultImg)}
                     className={'gravatar ' + className}
                     title="Obtained via Gravatar"
                 />
@@ -227,6 +240,16 @@ var User = module.exports.User = React.createClass({
         })
     },
 
+    contextTypes : {
+        listActionsFor : React.PropTypes.func
+    },
+
+    mayEdit : function(){
+        return this.context.listActionsFor('context').filter(function(action){ 
+            return action.name && action.name === 'edit';
+        }).length > 0 ? true : false;
+    },
+
     render: function() {
 
         var user = this.props.context;
@@ -235,6 +258,7 @@ var User = module.exports.User = React.createClass({
             {id: 'Users'}
         ];
 
+        var mayEdit = this.mayEdit();
         var ifCurrentlyEditingClass = this.state && this.state.currentlyEditing ? ' editing editable-fields-container' : '';
 
         return (
@@ -262,15 +286,25 @@ var User = module.exports.User = React.createClass({
                                         <div className="col-sm-9 user-title-col">
                                             <h1 className="user-title">
                                                 <FieldSet context={user} parent={this} style="inline" inputSize="lg" absoluteBox={true}>
-                                                    <EditableField labelID="first_name" fallbackText="No first name set" placeholder="First name" />
+                                                    <EditableField
+                                                        labelID="first_name"
+                                                        fallbackText="No first name set"
+                                                        placeholder="First name"
+                                                        disabled={!mayEdit}
+                                                    />
                                                     {' '}
-                                                    <EditableField labelID="last_name" fallbackText="No last name set" placeholder="Last name" />
+                                                    <EditableField
+                                                        labelID="last_name"
+                                                        fallbackText="No last name set"
+                                                        placeholder="Last name"
+                                                        disabled={!mayEdit}
+                                                    />
                                                 </FieldSet>
                                             </h1>
                                         </div>
                                     </div>
                                 </div>
-                                <ProfileContactFields user={user} parent={this} />
+                                <ProfileContactFields user={user} parent={this} mayEdit={mayEdit} />
                             </div>
 
                         </div>
@@ -306,8 +340,9 @@ var ProfileContactFields = React.createClass({
 
     render: function(){
         var user = this.props.user;
+
         return (
-            <FieldSet context={user} parent={this.props.parent} className="profile-contact-fields">
+            <FieldSet context={user} parent={this.props.parent} className="profile-contact-fields" disabled={!this.props.mayEdit}>
                 
                 <EditableField label="Email" labelID="email" placeholder="name@example.com" fallbackText="No email address" fieldType="email" disabled={true}>
                     { this.icon('envelope') }&nbsp; <a href={'mailto:' + user.email}>{ user.email }</a>

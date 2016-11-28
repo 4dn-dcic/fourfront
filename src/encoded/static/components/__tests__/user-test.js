@@ -16,8 +16,8 @@ function mapStateToProps(store) {
 }
 
 describe('Testing user.js', function() {
-    var React, User, testItem, TestUtils, page, store, context, filters, _, Wrapper, sinon, getNestedProperty;
-    beforeEach(function() {
+    var React, User, user, testItem, TestUtils, page, store, context, filters, _, Wrapper, sinon, getNestedProperty;
+    beforeAll(function() {
         React = require('react');
         var { Provider, connect } = require('react-redux');
         TestUtils = require('react-dom/lib/ReactTestUtils');
@@ -32,15 +32,27 @@ describe('Testing user.js', function() {
         store.dispatch({
             type: dispatch_vals
         });
+
         Wrapper = React.createClass({
             childContextTypes: {
                 location_href: React.PropTypes.string,
-                navigate: React.PropTypes.func
+                navigate: React.PropTypes.func,
+                listActionsFor : React.PropTypes.func
             },
             getChildContext: function() {
                 return {
                     location_href: "http://localhost:8000/users/0abbd494-b852-433c-b360-93996f679dae/",
-                    navigate: function(){return;}
+                    navigate: function(){return;},
+                    listActionsFor: function(category){ 
+                        // 'Mocked' version
+                        if (category === 'context') {
+                            return [
+                                {
+                                    'name' : 'edit'
+                                }
+                            ];
+                        }
+                    }
                 };
             },
             render: function() {
@@ -57,9 +69,10 @@ describe('Testing user.js', function() {
         var UseUser = connect(mapStateToProps)(User);
         page = TestUtils.renderIntoDocument(
             <Wrapper>
-                <Provider store={store}><UseUser context={context}/></Provider>
+                <Provider store={store}><UseUser context={context} /></Provider>
             </Wrapper>
         );
+
     });
 
     it('has panels for user info and work info, with some profile fields', function() {
