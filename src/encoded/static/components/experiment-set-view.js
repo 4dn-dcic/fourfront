@@ -303,6 +303,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 });
 
 globals.panel_views.register(ExperimentSetView, 'ExperimentSet');
+globals.panel_views.register(ExperimentSetView, 'ExperimentSetReplicate');
 
 
 var ExperimentSetHeader = React.createClass({
