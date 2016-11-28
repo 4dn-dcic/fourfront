@@ -238,6 +238,7 @@
                 padding: 4px 3px 1px 24px;
                 text-decoration: none;
                 display: block;
+                position: relative;
                 color: #888;
 
                 i.icon.icon-circle-o-notch { opacity: 0.33; }
@@ -258,12 +259,18 @@
                     }
                 }
 
+                .facet-count {
+                    position: absolute;
+                    right: 0;
+                    padding-right: inherit;
+                }
+
             }
 
             .facet-item {
                 display:inline-block;
                 overflow: hidden;
-                max-width: 150px;
+                margin-right: 30px;
             }
 
         }
