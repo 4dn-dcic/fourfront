@@ -1,6 +1,6 @@
 {
     "title": "Individual",
-    "description": "DEL REF Base schema for individuals.",
+    "description": "Base schema for individuals.",
     "id": "/profiles/individual.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",

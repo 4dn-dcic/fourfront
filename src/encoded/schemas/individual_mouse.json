@@ -1,6 +1,6 @@
 {
     "title": "Mouse Individual",
-    "description": "DEL REF Schema for submitting a mouse individual.",
+    "description": "Schema for submitting a mouse individual.",
     "id": "/profiles/individual_mouse.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",

@@ -1,7 +1,7 @@
 {
-    "title": "Publication",
+    "title": "Publication Tracking",
     "description": "Schema for a publication page.",
-    "id": "/profiles/publication.json",
+    "id": "/profiles/publication_tracking.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "identifyingProperties": ["uuid"],

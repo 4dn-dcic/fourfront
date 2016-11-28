@@ -256,7 +256,7 @@ class File(Item):
 
 
 @collection(
-    name='file-fastq',
+    name='files-fastq',
     unique_key='accession',
     properties={
         'title': 'FASTQ Files',
@@ -270,7 +270,7 @@ class FileFastq(File):
 
 
 @collection(
-    name='file-fasta',
+    name='files-fasta',
     unique_key='accession',
     properties={
         'title': 'FASTA Files',
@@ -284,7 +284,7 @@ class FileFasta(File):
 
 
 @collection(
-    name='file-processed',
+    name='files-processed',
     unique_key='accession',
     properties={
         'title': 'Processed Files',

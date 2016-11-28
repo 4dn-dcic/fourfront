@@ -12,7 +12,7 @@ from .base import (
 
 
 @collection(
-    name='publication-tracking',
+    name='publication-trackings',
     unique_key='publication:PMID',
     properties={
         'title': 'Publication Tracking',

@@ -26,14 +26,14 @@ class SummaryStatistic(Item):
 
 
 @collection(
-    name='summary-statistics-hic',
+    name='summary-statistics-hi-c',
     properties={
         'title': 'Hi-C Summary Statistics',
         'description': 'Listing of Hi-C summary statistics',
     })
-class SummaryStatisticHic(SummaryStatistic):
+class SummaryStatisticHiC(SummaryStatistic):
     """the sub class of summary statistics for Hi-C experiments."""
 
-    item_type = 'summary-statistic-hic'
+    item_type = 'summary_statistic_hi_c'
     schema = load_schema('encoded:schemas/summary_statistic_hic.json')
     embedded = SummaryStatistic.embedded

@@ -10,7 +10,7 @@ from .base import (
 
 
 @collection(
-    name='sop_maps',
+    name='sop-maps',
     unique_key='sop_map:mapid',
     properties={
         'title': 'SOP and field mappings',
