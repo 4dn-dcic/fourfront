@@ -106,7 +106,7 @@ class Enzyme(Item):
 
 
 @collection(
-    name='genomic_regions',
+    name='genomic-regions',
     properties={
         'title': 'Genomic Regions',
         'description': 'Listing of genomic regions',
@@ -209,7 +209,7 @@ class Protocol(Item):
 
 
 @collection(
-    name='quality_metric_flags',
+    name='quality-metric-flags',
     properties={
         'title': 'Quality Metric Flags'
     })

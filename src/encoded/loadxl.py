@@ -40,7 +40,7 @@ ORDER = [
     'file_fasta',
     'file_processed',
     'file_set',
-    'experiment_hic',
+    'experiment_hi_c',
     'experiment_capture_c',
     'experiment_repliseq',
     'experiment_set',

@@ -35,5 +35,5 @@ class SummaryStatisticHiC(SummaryStatistic):
     """the sub class of summary statistics for Hi-C experiments."""
 
     item_type = 'summary_statistic_hi_c'
-    schema = load_schema('encoded:schemas/summary_statistic_hic.json')
+    schema = load_schema('encoded:schemas/summary_statistic_hi_c.json')
     embedded = SummaryStatistic.embedded
