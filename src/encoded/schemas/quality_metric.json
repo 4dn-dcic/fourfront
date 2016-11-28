@@ -6,14 +6,6 @@
     "required": ["step_run", "award", "lab"],
     "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases"],
-    "mixinProperties": [
-        { "$ref": "mixins.json#/schema_version" },
-        { "$ref": "mixins.json#/uuid" },
-        { "$ref": "mixins.json#/aliases" },
-        { "$ref": "mixins.json#/submitted" },
-        { "$ref": "mixins.json#/attribution" },       
-        { "$ref": "mixins.json#/status" }
-   ],
     "properties": {
         "schema_version": {
             "hidden comment": "Bump the default in the subclasses."

@@ -8,8 +8,6 @@
     "required": ["experiment_type", "biosample", "award", "lab"],
     "identifyingProperties": ["uuid", "accession" , "aliases"],
     "additionalProperties": false,
-    "mixinProperties": [
-    ],
     "dependencies": {
       "biosample_quantity": ["biosample_quantity_units"],
       "biosample_quantity_units": ["biosample_quantity"]

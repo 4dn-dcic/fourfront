@@ -34,16 +34,45 @@ def master_mixins():
         assert(mixins[key])
 
 
+def camel_case(name):
+    return ''.join(x for x in name.title() if not x == '_')
+
+
+def pluralize(name):
+    '''deal with few special cases explicitly'''
+    pass
+
+
 @pytest.mark.parametrize('schema', SCHEMA_FILES)
-def test_load_schema(schema, master_mixins):
+def test_load_schema(schema, master_mixins, registry):
+    from snovault import TYPES
+    from snovault import COLLECTIONS
+
+    abstract = [
+        'experiment.json',
+        'file.json',
+        'individual.json',
+        'quality_metric.json',
+        'treatment.json'
+    ]
+
     loaded_schema = load_schema('encoded:schemas/%s' % schema)
     assert(loaded_schema)
+
+    typename = schema.replace('.json', '')
+    collection_names = [typename, camel_case(typename), pluralize(typename)]
 
     #check the mixin properties for each schema
     if not schema == ('mixins.json'):
         verify_mixins(loaded_schema, master_mixins)
 
-    if schema not in ['namespaces.json', 'mixins.json']:
+    if schema not in abstract + ['namespaces.json', 'mixins.json']:
+        # check schema w/o json extension is in registry[TYPES]
+        assert typename in registry[TYPES].by_item_type
+
+        print(registry[COLLECTIONS])
+        assert False
+
         shared_properties = [
             'uuid',
             'schema_version',

@@ -6,17 +6,6 @@
     "type": "object",
     "identifyingProperties": ["uuid", "accession", "aliases"],
     "required": ["organism"],
-    "mixinProperties": [
-        { "$ref": "mixins.json#/schema_version" },
-        { "$ref": "mixins.json#/uuid" },
-        { "$ref": "mixins.json#/accession" },
-        { "$ref": "mixins.json#/status" },
-        { "$ref": "mixins.json#/aliases" },
-        { "$ref": "mixins.json#/attribution" },
-        { "$ref": "mixins.json#/submitted" },
-        { "$ref": "mixins.json#/documents" },
-        { "$ref": "mixins.json#/notes" }
-    ],
     "dependencies": {
       "age": [ "age_units"]
     },
