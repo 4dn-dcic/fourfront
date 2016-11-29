@@ -12,7 +12,7 @@ from .base import (
 
 
 @collection(
-    name='summary_statistics',
+    name='summary-statistics',
     properties={
         'title': 'Summary Statistics',
         'description': 'Listing of summary statistics',

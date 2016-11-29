@@ -1,6 +1,7 @@
 import pytest
 from pkg_resources import resource_listdir
 from snovault.schema_utils import load_schema
+import re
 
 pytestmark = [pytest.mark.working, pytest.mark.schema]
 
@@ -39,8 +40,14 @@ def camel_case(name):
 
 
 def pluralize(name):
-    '''deal with few special cases explicitly'''
-    pass
+    name = name.replace('_', '-')
+    # deal with a few special cases explicitly
+    specials = ['experiment', 'file', 'individual', 'treatment', 'quality-metric', 'summary-statistic']
+    for sp in specials:
+        if name.startswith(sp) and re.search('-(set|flag)', name) is None:
+            return name.replace(sp, sp + 's')
+    # otherwise just add 's'
+    return name + 's'
 
 
 @pytest.mark.parametrize('schema', SCHEMA_FILES)
@@ -60,39 +67,48 @@ def test_load_schema(schema, master_mixins, registry):
     assert(loaded_schema)
 
     typename = schema.replace('.json', '')
-    collection_names = [typename, camel_case(typename), pluralize(typename)]
+    collection_names = [camel_case(typename), pluralize(typename)]
 
     #check the mixin properties for each schema
     if not schema == ('mixins.json'):
         verify_mixins(loaded_schema, master_mixins)
 
-    if schema not in abstract + ['namespaces.json', 'mixins.json']:
-        # check schema w/o json extension is in registry[TYPES]
-        assert typename in registry[TYPES].by_item_type
+    if schema not in ['namespaces.json', 'mixins.json']:
+        # check for pluralized and camel cased in collection_names
+        val = None
+        for name in collection_names:
+            assert name in registry[COLLECTIONS]
+            if val is not None:
+                assert registry[COLLECTIONS][name] == val
+            else:
+                val = registry[COLLECTIONS][name]
 
-        print(registry[COLLECTIONS])
-        assert False
+        if schema not in abstract:
+            # check schema w/o json extension is in registry[TYPES]
+            assert typename in registry[TYPES].by_item_type
+            assert typename in registry[COLLECTIONS]
+            assert registry[COLLECTIONS][typename] == val
 
-        shared_properties = [
-            'uuid',
-            'schema_version',
-            'aliases',
-            'lab',
-            'award',
-            'date_created',
-            'submitted_by',
-            'status'
-        ]
-        no_alias_or_attribution = ['user.json', 'award.json', 'lab.json', 'organism.json']
-        for prop in shared_properties:
-            if schema == 'experiment.json':
-                # currently experiment is abstract and has no mixin properties
-                continue
-            if schema == 'access_key.json' and prop not in ['uuid', 'schema_version']:
-                continue
-            if schema in no_alias_or_attribution and prop in ['aliases', 'lab', 'award']:
-                continue
-            verify_property(loaded_schema, prop)
+            shared_properties = [
+                'uuid',
+                'schema_version',
+                'aliases',
+                'lab',
+                'award',
+                'date_created',
+                'submitted_by',
+                'status'
+            ]
+            no_alias_or_attribution = ['user.json', 'award.json', 'lab.json', 'organism.json']
+            for prop in shared_properties:
+                if schema == 'experiment.json':
+                    # currently experiment is abstract and has no mixin properties
+                    continue
+                if schema == 'access_key.json' and prop not in ['uuid', 'schema_version']:
+                    continue
+                if schema in no_alias_or_attribution and prop in ['aliases', 'lab', 'award']:
+                    continue
+                verify_property(loaded_schema, prop)
 
 
 def verify_property(loaded_schema, property):
