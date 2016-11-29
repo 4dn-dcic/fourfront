@@ -629,7 +629,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                     Showing {formattedExperimentSetListings.length} of {this.totalResultCount()} experiment sets.
                 </h5>
                 <div className="expset-table-container" ref="expSetTableContainer">
-                    <Table className="expset-table table-tbody-striped" bordered condensed id="result-table">
+                    <Table className="expset-table table-tbody-striped" condensed id="result-table">
                         <thead>
                             <tr>
                                 <th></th>

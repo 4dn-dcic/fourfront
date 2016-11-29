@@ -371,6 +371,20 @@ var DateUtility = module.exports.DateUtility = (function(){
         return null;
     };
 
+    DateUtility.display = function(momentObj, formatType = 'date-md', dateTimeSeparator = " ", localize = false, customOutputFormat = null){
+        var outputFormat;
+        if (customOutputFormat) {
+            outputFormat = customOutputFormat;
+        } else {
+            outputFormat = DateUtility.preset(formatType, dateTimeSeparator);
+        }
+        if (localize){
+            return momentObj.local().format(outputFormat);
+        }
+
+        return momentObj.format(outputFormat);
+    };
+
     /**
      * Format a timestamp to pretty output. Uses moment.js, which uses Date() object in underlying code.
      * @see DateUtility.preset
@@ -384,19 +398,76 @@ var DateUtility = module.exports.DateUtility = (function(){
      */
 
     DateUtility.format = function(timestamp, formatType = 'date-md', dateTimeSeparator = " ", localize = false, customOutputFormat = null){
-        var outputFormat;
-        if (customOutputFormat) {
-            outputFormat = customOutputFormat;
-        } else {
-            outputFormat = DateUtility.preset(formatType, dateTimeSeparator);
-        }
-        
-        if (localize){
-            return moment.utc(timestamp).local().format(outputFormat);
-        }
-
-        return moment.utc(timestamp).format(outputFormat);
+        return DateUtility.display(moment.utc(timestamp), formatType, dateTimeSeparator, localize, customOutputFormat);
     };
+
+    var React = require('react');
+
+    DateUtility.LocalizedTime = React.createClass({
+        
+        propTypes : {
+            momentDate : function(props, propName, componentName){
+                if (props[propName] && !moment.isMoment(props[propName])){
+                    return new Error("momentDate must be an instance of Moment.");
+                }
+            },
+            timestamp : React.PropTypes.string,
+            formatType : React.PropTypes.string,
+            dateTimeSeparator : React.PropTypes.string,
+            customOutputFormat : React.PropTypes.string,
+            fallback : React.PropTypes.string,
+            className : React.PropTypes.string
+        },
+
+        getDefaultProps: function(){
+            return {
+                momentDate : null,
+                timestamp : null,
+                formatType : 'date-md',
+                dateTimeSeparator : ' ',
+                customOutputFormat : null,
+                fallback : "N/A",
+                className : "localized-date-time"
+            }
+        },
+        getInitialState : function(){
+            return {
+                moment : this.props.momentDate ? this.props.momentDate :
+                    this.props.timestamp ? moment.utc(this.props.timestamp) : moment.utc(),
+                mounted : false
+            }
+        },
+        componentDidMount : function(){
+            this.setState({ mounted : true });
+        },
+        render : function(){
+            if (!this.state.mounted || isServerSide()) {
+                return (
+                    <span className={this.props.className + ' utc'}>{ 
+                        DateUtility.display(
+                            this.state.moment, 
+                            this.props.formatType,
+                            this.props.dateTimeSeparator,
+                            false,
+                            this.props.customOutputFormat
+                        )
+                    }</span>
+                );
+            } else {
+                return (
+                    <span className={this.props.className + ' local'}>{ 
+                        DateUtility.display(
+                            this.state.moment, 
+                            this.props.formatType,
+                            this.props.dateTimeSeparator,
+                            true,
+                            this.props.customOutputFormat
+                        )
+                    }</span>
+                );
+            }
+        }
+    });
 
     return DateUtility;
 })();
