@@ -117,27 +117,6 @@ class GenomicRegion(Item):
     item_type = 'genomic_region'
     schema = load_schema('encoded:schemas/genomic_region.json')
 
-    @calculated_property(schema={
-        "title": "Region",
-        "description": "Assembly:chromosome:start-end.",
-        "type": "string",
-    })
-    def region(self, request, genome_assembly, chromosome=None):
-            # if biosource_type == "tissue":
-            #     if tissue:
-            #         return tissue
-            # elif biosource_type == "immortalized cell line":
-            #     if cell_line:
-            #         return cell_line
-            # elif biosource_type == "whole organisms":
-            #     if individual:
-            #         individual_props = request.embed(individual, '@@object')
-            #         organism = individual_props['organism']
-            #         organism_props = request.embed(organism, '@@object')
-            #         organism_name = organism_props['name']
-            #         return "Whole " + organism_name
-            return None
-
 
 @collection(
     name='modifications',
