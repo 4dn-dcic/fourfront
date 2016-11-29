@@ -366,9 +366,8 @@ def base_experiment(testapp, experiment_data):
 
 
 @pytest.fixture
-def file(testapp, lab, award, experiment):
+def file(testapp, lab, award):
     item = {
-        'experiments': [experiment['@id'], ],
         'file_format': 'fastq',
         'md5sum': 'd41d8cd98f00b204e9800998ecf8427e',
         'lab': lab['@id'],
@@ -379,9 +378,8 @@ def file(testapp, lab, award, experiment):
 
 
 @pytest.fixture
-def file_fastq(testapp, lab, award, experiment):
+def file_fastq(testapp, lab, award):
     item = {
-        'experiments': [experiment['@id'], ],
         'file_format': 'fastq',
         'md5sum': 'd41d8cd9f00b204e9800998ecf8427e',
         'lab': lab['@id'],
@@ -392,9 +390,8 @@ def file_fastq(testapp, lab, award, experiment):
 
 
 @pytest.fixture
-def file_fasta(testapp, lab, award, experiment):
+def file_fasta(testapp, lab, award):
     item = {
-        'experiments': [experiment['@id'], ],
         'file_format': 'fasta',
         'md5sum': 'c41d8cd9f00b204e9800998ecf8427e',
         'lab': lab['@id'],
