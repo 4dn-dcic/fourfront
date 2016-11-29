@@ -12,7 +12,7 @@ from .base import (
 
 
 @collection(
-    name='summary_statistics',
+    name='summary-statistics',
     properties={
         'title': 'Summary Statistics',
         'description': 'Listing of summary statistics',
@@ -26,14 +26,14 @@ class SummaryStatistic(Item):
 
 
 @collection(
-    name='summary-statistics-hic',
+    name='summary-statistics-hi-c',
     properties={
         'title': 'Hi-C Summary Statistics',
         'description': 'Listing of Hi-C summary statistics',
     })
-class SummaryStatisticHic(SummaryStatistic):
+class SummaryStatisticHiC(SummaryStatistic):
     """the sub class of summary statistics for Hi-C experiments."""
 
-    item_type = 'summary-statistic-hic'
-    schema = load_schema('encoded:schemas/summary_statistic_hic.json')
+    item_type = 'summary_statistic_hi_c'
+    schema = load_schema('encoded:schemas/summary_statistic_hi_c.json')
     embedded = SummaryStatistic.embedded

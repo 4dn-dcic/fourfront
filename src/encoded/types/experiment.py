@@ -97,7 +97,7 @@ class Experiment(Item):
 
 
 @collection(
-    name='experiments-hic',
+    name='experiments-hi-c',
     unique_key='accession',
     properties={
         'title': 'Experiments Hi-C',
@@ -106,8 +106,8 @@ class Experiment(Item):
 class ExperimentHiC(Experiment):
     """The experiment class for Hi-C experiments."""
 
-    item_type = 'experiment_hic'
-    schema = load_schema('encoded:schemas/experiment_hic.json')
+    item_type = 'experiment_hi_c'
+    schema = load_schema('encoded:schemas/experiment_hi_c.json')
     embedded = Experiment.embedded + ["digestion_enzyme", "submitted_by"]
 
     @calculated_property(schema={
@@ -129,7 +129,7 @@ class ExperimentHiC(Experiment):
 
 
 @collection(
-    name='experiments-capture-hic',
+    name='experiments-capture-c',
     unique_key='accession',
     properties={
         'title': 'Experiments Capture Hi-C',

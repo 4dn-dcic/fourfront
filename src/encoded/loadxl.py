@@ -40,7 +40,7 @@ ORDER = [
     'file_fasta',
     'file_processed',
     'file_set',
-    'experiment_hic',
+    'experiment_hi_c',
     'experiment_capture_c',
     'experiment_repliseq',
     'experiment_set',
@@ -527,7 +527,7 @@ PHASE1_PIPELINES = {
     'file_set': [
         remove_keys('files_in_set'),
     ],
-    'experiment_hic': [
+    'experiment_hi_c': [
         remove_keys('experiment_relation'),
     ],
     'experiment_capture_c': [
@@ -568,7 +568,7 @@ PHASE2_PIPELINES = {
     'file_set': [
         skip_rows_missing_all_keys('files_in_set'),
     ],
-    'experiment_hic': [
+    'experiment_hi_c': [
         skip_rows_missing_all_keys('experiment_relation'),
     ],
     'experiment_capture_c': [

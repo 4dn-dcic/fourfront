@@ -334,7 +334,7 @@ def sop_map(testapp, sop_map_data):
 
 @pytest.fixture
 def experiment(testapp, experiment_data):
-    return testapp.post_json('/experiment_hic', experiment_data).json['@graph'][0]
+    return testapp.post_json('/experiment_hi_c', experiment_data).json['@graph'][0]
 
 
 @pytest.fixture
@@ -357,12 +357,12 @@ def experiment_project_review(testapp, lab, award, human_biosample):
         'experiment_type': 'micro-C',
         'status': 'in review by project'
     }
-    return testapp.post_json('/experiment_hic', item).json['@graph'][0]
+    return testapp.post_json('/experiment_hi_c', item).json['@graph'][0]
 
 
 @pytest.fixture
 def base_experiment(testapp, experiment_data):
-    return testapp.post_json('/experiment_hic', experiment_data).json['@graph'][0]
+    return testapp.post_json('/experiment_hi_c', experiment_data).json['@graph'][0]
 
 
 @pytest.fixture
