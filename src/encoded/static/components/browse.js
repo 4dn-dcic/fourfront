@@ -37,6 +37,13 @@ var expSetColumnLookup={
     'other':[]
 };
 
+// Re-use for now for older data (temp, probably).
+expSetColumnLookup.custom =
+expSetColumnLookup['technical replicates'] =
+expSetColumnLookup['analysis_set'] =
+expSetColumnLookup['biological replicates'] =
+expSetColumnLookup.replicates;
+
 var expSetAdditionalInfo={
     'replicates':{
         'Lab': 'lab.title',
