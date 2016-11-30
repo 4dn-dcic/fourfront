@@ -37,6 +37,10 @@ var expSetColumnLookup={
     'other':[]
 };
 
+expSetColumnLookup['biological replicates'] =
+expSetColumnLookup['custom'] =
+expSetColumnLookup.replicates;
+
 var expSetAdditionalInfo={
     'replicates':{
         'Lab': 'lab.title',
@@ -45,6 +49,10 @@ var expSetAdditionalInfo={
     },
     'other':[]
 };
+
+expSetAdditionalInfo['biological replicates'] =
+expSetAdditionalInfo['custom'] =
+expSetAdditionalInfo.replicates;
 
 var IndeterminateCheckbox = React.createClass({
     render: function(){
