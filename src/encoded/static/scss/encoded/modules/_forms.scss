@@ -335,7 +335,7 @@ div.fieldset.editable-fields {
 			}
 
 			span.help-block {
-				font-size: .85em;
+				font-size: .85rem;
 				padding: 5px 3px 7px;
 				margin: 0;
 				background-color: #fff;
@@ -350,6 +350,16 @@ div.fieldset.editable-fields {
 		&.inline {
 			display: inline-block;
 			position: relative;
+
+			span.input-wrapper {
+				display: inline-block;
+				margin-bottom: 0px;
+				vertical-align: top;
+				span.help-block {
+					position: absolute;
+					width: 100%;
+				}
+			}
 
 			&.block-style {
 				.value.ghost {
@@ -368,16 +378,15 @@ div.fieldset.editable-fields {
 					border-radius: 5px;
 					border: 1px solid #eee;
 					/* border-bottom-color: #ddd; */
-				}
-			}
 
-			span.input-wrapper {
-				display: inline-block;
-				margin-bottom: 0px;
-				vertical-align: top;
-				span.help-block {
-					position: absolute;
-					width: 100%;
+					span.input-wrapper span.help-block {
+						position: relative;
+						background: none;
+						border-bottom: none;
+						box-shadow: none;
+						padding: 8px 5px 6px;
+					}
+
 				}
 			}
 

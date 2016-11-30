@@ -1,13 +1,10 @@
 'use strict';
 var React = require('react');
-var collection = require('./collection');
 var globals = require('./globals');
-var audit = require('./audit');
 var Panel = require('react-bootstrap').Panel;
-var AuditIndicators = audit.AuditIndicators;
-var AuditDetail = audit.AuditDetail;
-var AuditMixin = audit.AuditMixin;
-var Table = collection.Table;
+var Table = require('./collection').Table;
+var { AuditIndicators, AuditDetail, AuditMixin } = require('./audit');
+var { ajaxPromise } = require('./objectutils');
 
 var Fallback = module.exports.Fallback = React.createClass({
     contextTypes: {
@@ -39,39 +36,14 @@ var Fallback = module.exports.Fallback = React.createClass({
 var Item = React.createClass({
     mixins: [AuditMixin],
     contextTypes: {
-        fetch: React.PropTypes.func,
-        contentTypeIsJSON: React.PropTypes.func
-    },
-
-    getInitialState: function(){
-        return{
-            schemas: null
-        };
-    },
-
-    componentDidMount: function(){
-        var request = this.context.fetch('/profiles/?format=json', {
-            headers: {'Accept': 'application/json',
-                'Content-Type': 'application/json'}
-        });
-        request.then(data => {
-            if(this.context.contentTypeIsJSON(data)){
-                this.setState({
-                    schemas: data
-                })
-            }else{
-                this.setState({
-                    schemas: {}
-                })
-            }
-        });
+        schemas: React.PropTypes.object
     },
 
     render: function() {
         var context = this.props.context;
         var itemClass = globals.itemClass(context, 'view-item');
         var IPanel = globals.panel_views.lookup(context);
-        var schemas = this.state.schemas ? this.state.schemas : {};
+        var schemas = this.context.schemas ? this.context.schemas : {};
         // Make string of alternate accessions
         return (
             <div className={itemClass}>

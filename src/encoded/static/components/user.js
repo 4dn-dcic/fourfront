@@ -285,7 +285,7 @@ var User = module.exports.User = React.createClass({
                                         </div>
                                         <div className="col-sm-9 user-title-col">
                                             <h1 className="user-title">
-                                                <FieldSet context={user} parent={this} style="inline" inputSize="lg" absoluteBox={true}>
+                                                <FieldSet context={user} parent={this} style="inline" inputSize="lg" absoluteBox={true} objectType="User">
                                                     <EditableField
                                                         labelID="first_name"
                                                         fallbackText="No first name set"
@@ -342,7 +342,7 @@ var ProfileContactFields = React.createClass({
         var user = this.props.user;
 
         return (
-            <FieldSet context={user} parent={this.props.parent} className="profile-contact-fields" disabled={!this.props.mayEdit}>
+            <FieldSet context={user} parent={this.props.parent} className="profile-contact-fields" disabled={!this.props.mayEdit} objectType="User">
                 
                 <EditableField label="Email" labelID="email" placeholder="name@example.com" fallbackText="No email address" fieldType="email" disabled={true}>
                     { this.icon('envelope') }&nbsp; <a href={'mailto:' + user.email}>{ user.email }</a>
