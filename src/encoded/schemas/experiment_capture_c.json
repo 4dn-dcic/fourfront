@@ -21,6 +21,7 @@
         { "$ref": "mixins.json#/library"},
         { "$ref": "mixins.json#/sop_mapping"},
         { "$ref": "experiment.json#/properties" },
+        { "$ref": "mixins.json#/sop_mapping" },
         { "$ref": "experiment_hi_c.json#/properties" }
     ],
     "dependencies": {
