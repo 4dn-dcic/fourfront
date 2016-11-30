@@ -223,6 +223,7 @@ var EditableField = module.exports.EditableField = React.createClass({
             'savedValue' : value || null,   // Changes only on sync w/ server.
             'validationPattern' : this.props.pattern || this.validationPattern(),
             'required' : this.props.required || this.isRequired(),
+            'valid' : null,                 // Must distinguish between true, false, and null.
             'serverErrors' : [],            // Validation state sent from server.
             'serverErrorsMessage' : null,
             'loading' : false,              // True if in middle of save or fetch request.
@@ -282,7 +283,9 @@ var EditableField = module.exports.EditableField = React.createClass({
     },
 
     componentWillReceiveProps : function(newProps, newContext){
-        var newState = {};
+        var newState = {},
+            stateChangeCallback = null;
+
         // Reset value/savedValue if props.context or props.labelID changes for some reason.
         if (
             !this.state.dispatching && (
@@ -297,9 +300,13 @@ var EditableField = module.exports.EditableField = React.createClass({
         if (newContext.schemas !== this.context.schemas || newProps.pattern !== this.props.pattern || newProps.required !== this.props.required){
             newState.validationPattern = newProps.pattern || this.validationPattern(newContext.schemas);
             newState.required = newProps.required || this.isRequired(newContext.schemas);
+            // Also, update state.valid if in editing mode
+            if (this.props.parent.state && this.props.parent.state.currentlyEditing && this.refs && this.refs.inputElement){
+                stateChangeCallback = this.handleChange;
+            }
         }
         // Apply state edits, if any
-        if (Object.keys(newState).length > 0) this.setState(newState);
+        if (Object.keys(newState).length > 0) this.setState(newState, stateChangeCallback);
     },
 
     isSet : function(){ return typeof this.props.context === 'object' && !_.isEmpty(this.props.context) && this.state.savedValue !== null && this.state.savedValue !== '' ; },
@@ -315,11 +322,12 @@ var EditableField = module.exports.EditableField = React.createClass({
         if (!this.props.parent.state || !this.props.parent.state.currentlyEditing) {
             throw new Error('No state was set on parent.');
         }
+        this.setState({ value : this.state.savedValue, valid : null, validationMessage : null });
         this.props.parent.setState({ currentlyEditing : null });
     },
 
     isValid : function(checkServer = false){
-        if (typeof this.state.valid === 'boolean' && !this.state.valid){
+        if (typeof this.state.valid === 'boolean' && this.state.valid === false){
             return false;
         };
         if (checkServer && this.state.serverErrors && this.state.serverErrors.length > 0) {
@@ -402,16 +410,17 @@ var EditableField = module.exports.EditableField = React.createClass({
 
     /** Update state.value on each keystroke/input and check validity. */
     handleChange : function(e){
+        var inputElement = e && e.target ? e.target : this.refs.inputElement;
         var state = {
-            'value' : e.target.value // ToDo: change to (e.target.value === '' ? null : e.target.value)  and enable to process it on backend.
+            'value' : inputElement.value // ToDo: change to (inputElement.value === '' ? null : inputElement.value)  and enable to process it on backend.
         };
-        if (e.target.validity){
-            if (typeof e.target.validity.valid == 'boolean') {
-                state.valid = e.target.validity.valid;
+        if (inputElement.validity){
+            if (typeof inputElement.validity.valid == 'boolean') {
+                state.valid = inputElement.validity.valid;
             }
         }
-        if (e.target.validationMessage){
-            state.validationMessage = e.target.validationMessage;
+        if (inputElement.validationMessage){
+            state.validationMessage = inputElement.validationMessage;
         }
 
         // Reset serverErrors if any
@@ -606,7 +615,7 @@ var EditableField = module.exports.EditableField = React.createClass({
         //if (this.isValid(true)) return null;
         // ^ Hide via CSS instead.
 
-        if (this.state.required && this.state.validationMessage){ 
+        if (this.state.required && this.state.valid === false && this.state.validationMessage){ 
             // Some validationMessages provided by browser don't give much info, so use it selectively (if at all).
             return (
                 <span className="help-block">
@@ -658,7 +667,8 @@ var EditableField = module.exports.EditableField = React.createClass({
         var commonProps = {
             'id' : this.props.labelID,
             'required' : this.state.required,
-            'disabled' : this.props.disabled || false
+            'disabled' : this.props.disabled || false,
+            'ref' : "inputElement"
         };
         var commonPropsTextInput = _.extend({
             'className' : 'form-control input-' + this.props.inputSize,

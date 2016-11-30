@@ -378,15 +378,16 @@ div.fieldset.editable-fields {
 					border-radius: 5px;
 					border: 1px solid #eee;
 					/* border-bottom-color: #ddd; */
-
-					span.input-wrapper span.help-block {
-						position: relative;
-						background: none;
-						border-bottom: none;
-						box-shadow: none;
-						padding: 8px 5px 6px;
-					}
-
+				}
+				span.input-wrapper span.help-block {
+					position: absolute;
+					background: none;
+					border-bottom: none;
+					box-shadow: none;
+					padding: 8px 5px 6px;
+				}
+				&.has-error span.input-wrapper span.help-block {
+					position: relative;
 				}
 			}
 
@@ -417,7 +418,8 @@ div.fieldset.editable-fields {
 
 	}
 
-	&.editing.has-error {
+	&.editing.row.has-error,
+	&.editing.inline.has-error:not(.block-style) {
 		min-height: 80px;
 
 		span.help-block {
