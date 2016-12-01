@@ -607,8 +607,42 @@ def load_all(testapp, filename, docsdir, test=False):
         pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=2)
         process(combine(source, pipeline))
 
+def generate_access_key(testapp, store_access_key=None, email='4dndcic@gmail.com'):
 
-def load_test_data(app):
+    # get admin user and generate access keys
+    if store_access_key:
+        admin = testapp.get('/users/%s' % (email)).follow().json
+        # don't create on eif we already have
+        for key in admin['access_keys']:
+            if key.get('description') == 'key for submit4dn':
+                print("key found not generating new one")
+                return
+
+        access_key_req = {
+            'user': admin['@id'],
+            'description':'key for submit4dn',
+        }
+        res = testapp.post_json('/access_key', access_key_req).json
+        # write to ~/keypairs.json
+        secret = res['secret_access_key']
+        key = res['access_key_id']
+        url = 'http://localhost:8000'
+        filedata ='''{
+    "default": {
+       "key":"%s",
+       "secret": "%s",
+       "server": "%s"
+     }
+}
+''' % (key, secret, url)
+
+        if store_access_key == 'local':
+            home_dir = os.path.expanduser('~')
+            with open(os.path.join(home_dir, 'keypairs.json'), 'w') as keypairs:
+                keypairs.write(filedata)
+
+
+def load_test_data(app, access_key_loc=None):
     """smth."""
     from webtest import TestApp
     environ = {
@@ -620,11 +654,11 @@ def load_test_data(app):
     from pkg_resources import resource_filename
     inserts = resource_filename('encoded', 'tests/data/inserts/')
     docsdir = [resource_filename('encoded', 'tests/data/documents/')]
-    # temp comment out below
     load_all(testapp, inserts, docsdir)
+    generate_access_key(testapp, access_key_loc)
 
 
-def load_prod_data(app):
+def load_prod_data(app, access_key_loc=None):
     """smth."""
     from webtest import TestApp
     environ = {
@@ -637,13 +671,4 @@ def load_prod_data(app):
     inserts = resource_filename('encoded', 'tests/data/prod-inserts/')
     docsdir = []
     load_all(testapp, inserts, docsdir)
-
-
-def create_user(db, email, name, pwd):
-    """create user if user not in database."""
-    if User.get_by_username(email) is None:
-        print('creating user ', email)
-        new_user = User(email=email, password=pwd, name=name)
-        db.add(new_user)
-    else:
-        print('user %s already exists, skipping' % (email))
+    generate_access_key(testapp, access_key_loc)
