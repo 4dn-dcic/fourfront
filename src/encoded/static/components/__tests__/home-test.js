@@ -54,7 +54,7 @@ describe('Testing home.js', function() {
         expect(banners.length).toEqual(1);
         expect(bannerEntries.length).toEqual(3);
         expect(bannerEntries[0].getAttribute('href')).toEqual('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all');
-        expect(bannerEntries[1].getAttribute('href')).toEqual('/browse/?type=ExperimentSetReplicate&experimentset_type=replicates&limit=all');
+        expect(bannerEntries[1].getAttribute('href')).toEqual('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all');
         expect(bannerEntries[2].getAttribute('href')).toEqual('/search/?type=Biosource');
     });
 
