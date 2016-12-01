@@ -334,7 +334,7 @@ def sop_map(testapp, sop_map_data):
 
 @pytest.fixture
 def experiment(testapp, experiment_data):
-    return testapp.post_json('/experiment_hic', experiment_data).json['@graph'][0]
+    return testapp.post_json('/experiment_hi_c', experiment_data).json['@graph'][0]
 
 
 @pytest.fixture
@@ -357,18 +357,17 @@ def experiment_project_review(testapp, lab, award, human_biosample):
         'experiment_type': 'micro-C',
         'status': 'in review by project'
     }
-    return testapp.post_json('/experiment_hic', item).json['@graph'][0]
+    return testapp.post_json('/experiment_hi_c', item).json['@graph'][0]
 
 
 @pytest.fixture
 def base_experiment(testapp, experiment_data):
-    return testapp.post_json('/experiment_hic', experiment_data).json['@graph'][0]
+    return testapp.post_json('/experiment_hi_c', experiment_data).json['@graph'][0]
 
 
 @pytest.fixture
-def file(testapp, lab, award, experiment):
+def file(testapp, lab, award):
     item = {
-        'experiments': [experiment['@id'], ],
         'file_format': 'fastq',
         'md5sum': 'd41d8cd98f00b204e9800998ecf8427e',
         'lab': lab['@id'],
@@ -379,9 +378,8 @@ def file(testapp, lab, award, experiment):
 
 
 @pytest.fixture
-def file_fastq(testapp, lab, award, experiment):
+def file_fastq(testapp, lab, award):
     item = {
-        'experiments': [experiment['@id'], ],
         'file_format': 'fastq',
         'md5sum': 'd41d8cd9f00b204e9800998ecf8427e',
         'lab': lab['@id'],
@@ -392,9 +390,8 @@ def file_fastq(testapp, lab, award, experiment):
 
 
 @pytest.fixture
-def file_fasta(testapp, lab, award, experiment):
+def file_fasta(testapp, lab, award):
     item = {
-        'experiments': [experiment['@id'], ],
         'file_format': 'fasta',
         'md5sum': 'c41d8cd9f00b204e9800998ecf8427e',
         'lab': lab['@id'],

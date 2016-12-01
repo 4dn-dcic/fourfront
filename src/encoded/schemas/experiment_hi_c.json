@@ -1,7 +1,7 @@
 {
     "title": "Hi-C Experiment Variables",
     "description": "Experimental variables specific for a Hi-C experiment.",
-    "id": "/profiles/experiment_hic.json",
+    "id": "/profiles/experiment_hi_c.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["experiment_type", "award", "lab", "biosample"],

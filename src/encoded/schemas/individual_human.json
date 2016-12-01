@@ -1,6 +1,6 @@
 {
     "title": "Human Individual",
-    "description": "DEL REF Schema for submitting a human individual.",
+    "description": "Schema for submitting a human individual.",
     "id": "/profiles/individual_human.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",

@@ -7,16 +7,6 @@
     "required": ["file_format", "award", "lab"],
     "identifyingProperties": ["uuid", "accession", "aliases"],
     "additionalProperties": false,
-    "mixinProperties": [
-        { "$ref": "mixins.json#/schema_version" },
-        { "$ref": "mixins.json#/uuid" },
-        { "$ref": "mixins.json#/submitted" },
-        { "$ref": "mixins.json#/aliases" },
-        { "$ref": "mixins.json#/attribution" },
-        { "$ref": "mixins.json#/notes" },
-        { "$ref": "mixins.json#/accession" },
-        { "$ref": "mixins.json#/dbxrefs"}
-    ],
     "properties": {
         "schema_version": {
             "default": "1"
@@ -114,17 +104,6 @@
             "comment": "File size is specified in bytes - presumably this can be a calculated property as well",
             "type": "integer"
         },
-        "experiments": {
-            "title": "Experiments",
-            "description": "The experiments that this file is associated with",
-            "type": "array",
-            "items": {
-                "title": "Experiment",
-                "description": "Associated experiment.",
-                "type": "string",
-                "linkTo": "Experiment"
-            }
-        },
         "related_files": {
             "title": "Related Files",
             "description": "Files related to this one",
@@ -153,18 +132,6 @@
                     }
                 }
             }
-        },
-        "filesets": {
-              "title": "File Sets",
-              "description": "File Set to which this file belongs to.",
-              "type": "array",
-              "uniqueItems": true,
-              "items": {
-                  "title": "File Set",
-                  "description": "A file set to be associated with this file.",
-                  "type": "string",
-                  "linkTo": "FileSet"
-              }
         },
         "quality_metric": {
             "title": "QC Metric",
