@@ -286,7 +286,7 @@ var Subview = React.createClass({
 //Return the properties dictionary from a schema for use as tooltips
 var tipsFromSchema = module.exports.tipsFromSchema = function(schemas, content){
     var tips = {};
-    if(content['@type']){
+    if(content['@type'] && typeof schemas === 'object' && schemas !== null){
         var type = content['@type'][0];
         if(schemas[type]){
             tips = schemas[type]['properties'];
