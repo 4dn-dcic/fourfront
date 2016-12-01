@@ -20,7 +20,6 @@ from .base import (
 class SummaryStatistic(Item):
     """Summary statistics class."""
 
-    base_types = ['SummaryStatistic'] + Item.base_types
     item_type = 'summary_statistic'
     schema = load_schema('encoded:schemas/summary_statistic.json')
 

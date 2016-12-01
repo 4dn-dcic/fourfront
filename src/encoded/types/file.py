@@ -91,7 +91,6 @@ class FileSet(Item):
     """Collection of files stored under fileset."""
 
     item_type = 'file_set'
-    base_types = ['FileSet'] + Item.base_types
     schema = load_schema('encoded:schemas/file_set.json')
     name_key = 'accession'
 
