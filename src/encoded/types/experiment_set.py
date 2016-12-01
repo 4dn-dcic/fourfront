@@ -68,6 +68,6 @@ class ExperimentSetReplicate(Item):
                 "experiments_in_set.digestion_enzyme"]
 
     def _update(self, properties, sheets=None):
-        super(ExperimentSetReplicate, self)._update(properties, sheets)
         all_experiments = [exp['replicate_exp'] for exp in properties['replicate_exps']]
         properties['experiments_in_set'] = all_experiments
+        super(ExperimentSetReplicate, self)._update(properties, sheets)
