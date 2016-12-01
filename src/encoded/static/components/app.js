@@ -21,7 +21,7 @@ var dispatch_dict = {}; //used to store value for simultaneous dispatch
 var portal = {
     portal_title: '4DN Data Portal',
     global_sections: [
-        {id: 'browse', sid:'sBrowse', title: 'Browse', url: '/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all'},
+        {id: 'browse', sid:'sBrowse', title: 'Browse', url: '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all'},
         {id: 'help', sid:'sHelp', title: 'Help', children: [
             {id: 'gettingstarted', title: 'Getting started', url: '/help'},
             {id: 'metadatastructure', title: 'Metadata structure', url: '/help#metadata-structure'},
