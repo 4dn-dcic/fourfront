@@ -90,6 +90,7 @@
                 {"format": "date"}
             ],
             "serverDefault": "now",
+            "exclude_from" : "submit4dn",
             "permission": "import_items"
         },
         "submitted_by": {
@@ -99,12 +100,14 @@
             "type": "string",
             "linkTo": "User",
             "serverDefault": "userid",
+            "exclude_from" : "submit4dn",
             "permission": "import_items"
         }
     },
     "modified": {
       "lastmodified": {
           "title": "Last modified",
+          "exclude_from" : "submit4dn",
           "comment": "list of modfication times and users that modified - do not submit!",
           "type": "array",
           "items": {
@@ -329,6 +332,7 @@
         "sop_mapping": {
             "title": "SOP mappping",
             "permission": "import-items",
+            "exclude_from" : "submit4dn",
             "description": "Whether there is an SOP map and if so which one for fields default values from SOP current at time of submission",
             "type": "object",
             "additionalProperties": false,

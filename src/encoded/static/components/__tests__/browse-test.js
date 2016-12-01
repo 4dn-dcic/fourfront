@@ -39,7 +39,7 @@ describe('Testing browse.js for experiment set browser', function() {
             },
             getChildContext: function() {
                 return {
-                    location_href: "http://localhost:8000/browse/?type=ExperimentSet&experimentset_type=biological+replicates",
+                    location_href: "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate",
                     navigate: function(){return;}
                 };
             },

@@ -9,8 +9,7 @@ from snovault import (
 )
 from snovault.schema_utils import schema_validator
 from .base import (
-    Item,
-    paths_filtered_by_status,
+    Item
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -19,7 +18,6 @@ from pyramid.httpexceptions import (
 )
 from pyramid.response import Response
 from pyramid.settings import asbool
-from pyramid.traversal import traverse
 from pyramid.view import view_config
 from urllib.parse import (
     parse_qs,
@@ -29,7 +27,6 @@ import boto
 import datetime
 import json
 import pytz
-import time
 
 
 def show_upload_credentials(request=None, context=None, status=None):
@@ -98,25 +95,6 @@ class FileSet(Item):
     schema = load_schema('encoded:schemas/file_set.json')
     name_key = 'accession'
 
-    def _update(self, properties, sheets=None):
-        # update self first
-        super(FileSet, self)._update(properties, sheets)
-        fsacc = str(self.uuid)
-        if 'files_in_set' in properties.keys():
-            for eachfile in properties["files_in_set"]:
-                target_file = self.collection.get(eachfile)
-                # is there any fileset in the file
-                if 'filesets' not in target_file.properties.keys():
-                    target_file.properties.update({'filesets': [fsacc, ]})
-                    target_file.update(target_file.properties)
-                else:
-                    # incase file already has the fileset_type
-                    if fsacc in target_file.properties['filesets']:
-                        break
-                    else:
-                        target_file.properties['filesets'].append(fsacc)
-                        target_file.update(target_file.properties)
-
 
 @abstract_collection(
     name='files',
@@ -173,17 +151,6 @@ class File(Item):
                         # make data for new related_files
                         target_fl.properties['related_files'].append(relationship_entry)
                         target_fl.update(target_fl.properties)
-        # this part is for fileset
-        if 'filesets' in properties.keys():
-            for fileset in properties['filesets']:
-                target_fileset = self.collection.get(fileset)
-                # look at the files inside the set
-                if acc in target_fileset.properties["files_in_set"]:
-                    break
-                else:
-                    # incase it is not in the list of files
-                    target_fileset.properties["files_in_set"].append(acc)
-                    target_fileset.update(target_fileset.properties)
 
     @property
     def __name__(self):
