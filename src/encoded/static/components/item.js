@@ -43,7 +43,6 @@ var Item = React.createClass({
         var context = this.props.context;
         var itemClass = globals.itemClass(context, 'view-item');
         var IPanel = globals.panel_views.lookup(context);
-        var schemas = this.context.schemas ? this.context.schemas : {};
         // Make string of alternate accessions
         return (
             <div className={itemClass}>
@@ -55,7 +54,7 @@ var Item = React.createClass({
                     </div>
                 </header>
                 <AuditDetail context={context} key="biosample-audit" />
-                <IPanel {...this.props} schemas={schemas}/>
+                <IPanel {...this.props} />
             </div>
         );
     }
@@ -72,7 +71,7 @@ globals.content_views.fallback = function () {
 
 var IPanel = module.exports.IPanel = React.createClass({
     render: function() {
-        var schemas = this.props.schemas;
+        var schemas = this.props.schemas || {};
         var context = this.props.context;
         //var itemClass = globals.itemClass(context, 'view-detail panel');
         var title = globals.listing_titles.lookup(context)({context: context});

@@ -707,6 +707,7 @@ var App = React.createClass({
                 content = (
                     <ContentView
                         context={context}
+                        schemas={this.state.schemas}
                         expSetFilters={this.props.expSetFilters}
                         expIncompleteFacets={this.props.expIncompleteFacets}
                     />

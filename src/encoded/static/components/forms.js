@@ -27,6 +27,7 @@ var FieldSet = module.exports.FieldSet = React.createClass({
                                             // to have it act as host of state.currentlyEditing. Use when there are other EditableFields
                                             // available on view/page which act on same props.context but not all within this FieldSet.
         className : React.PropTypes.string, // Additional className to prepend.
+        schemas : React.PropTypes.object    // Schemas to use for validation. If not provided, EditableField attempts to get from context
     },
 
     getDefaultProps : function(){
@@ -61,7 +62,8 @@ var FieldSet = module.exports.FieldSet = React.createClass({
                 if (!child.props.context || _.isEmpty(child.props.context)) newProps.context = this.props.context;
                 if (!child.props.parent) newProps.parent = this.props.parent || this;
                 if (!child.props.endpoint && this.props.endpoint) newProps.endpoint = this.props.endpoint;
-                if (!child.props.objectType && this.props.objectType) newProps.objectType = this.props.endpoint;
+                if (!child.props.objectType && this.props.objectType) newProps.objectType = this.props.objectType;
+                if (!child.props.schemas && this.props.schemas) newProps.schemas = this.props.schemas;
                 if (
                     typeof child.props.disabled === 'undefined' &&
                     typeof this.props.disabled === 'boolean'
@@ -199,6 +201,7 @@ var EditableField = module.exports.EditableField = React.createClass({
         pattern : React.PropTypes.any,      // Optional pattern to use in lieu of one derived from schema or default field pattern. 
                                             // If set to false, will skip (default or schema-based) validation.
         required : React.PropTypes.bool,    // Optionally set if field is required, overriding setting derived from schema (if any). Defaults to false.
+        schemas : React.PropTypes.object,   // Schemas to use for validation. If not provided, attempts to get from this.context
         debug : React.PropTypes.bool        // Verbose lifecycle log messages.
     },
 
@@ -297,9 +300,14 @@ var EditableField = module.exports.EditableField = React.createClass({
         }
         // Update state.validationPattern && state.isRequired if this.context.schemas becomes available 
         // (loaded via ajax by app.js) or from props if is provided.
-        if (newContext.schemas !== this.context.schemas || newProps.pattern !== this.props.pattern || newProps.required !== this.props.required){
-            newState.validationPattern = newProps.pattern || this.validationPattern(newContext.schemas);
-            newState.required = newProps.required || this.isRequired(newContext.schemas);
+        if (
+            newProps.schemas !== this.props.schemas ||
+            newContext.schemas !== this.context.schemas || 
+            newProps.pattern !== this.props.pattern || 
+            newProps.required !== this.props.required
+        ){
+            newState.validationPattern = newProps.pattern || this.validationPattern(newProps.schemas || newContext.schemas);
+            newState.required = newProps.required || this.isRequired(newProps.schemas || newContext.schemas);
             // Also, update state.valid if in editing mode
             if (this.props.parent.state && this.props.parent.state.currentlyEditing && this.refs && this.refs.inputElement){
                 stateChangeCallback = this.handleChange;
@@ -552,7 +560,7 @@ var EditableField = module.exports.EditableField = React.createClass({
     },
 
     /** Return the schema for the provided props.labelID and (props.objectType or props.context['@type'][0]) */
-    fieldSchema : function(schemas = this.context.schemas){
+    fieldSchema : function(schemas = this.props.schemas || this.context.schemas){
         // We do not handle nested, linked or embedded properties for now.
         if (!this.props.labelID || this.props.labelID.indexOf('.') > -1) return null;
         if (schemas === null) return null;
@@ -574,7 +582,7 @@ var EditableField = module.exports.EditableField = React.createClass({
      * 
      * @return {*} Pattern to input validate against.
      */
-    validationPattern : function(schemas = this.context.schemas){
+    validationPattern : function(schemas = this.props.schemas || this.context.schemas){
         
         function getPatternFromSchema(){
             // We do not handle nested, linked or embedded properties for now.
