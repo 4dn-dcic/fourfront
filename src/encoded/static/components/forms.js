@@ -26,7 +26,8 @@ var FieldSet = module.exports.FieldSet = React.createClass({
         parent : React.PropTypes.any,       // Pass a parent React component, i.e. supply 'this' from a parent's render method, 
                                             // to have it act as host of state.currentlyEditing. Use when there are other EditableFields
                                             // available on view/page which act on same props.context but not all within this FieldSet.
-        className : React.PropTypes.string  // Additional className to prepend.
+        className : React.PropTypes.string, // Additional className to prepend.
+        schemas : React.PropTypes.object    // Schemas to use for validation. If not provided, EditableField attempts to get from context
     },
 
     getDefaultProps : function(){
@@ -54,13 +55,15 @@ var FieldSet = module.exports.FieldSet = React.createClass({
     },
 
     adjustedChildren : function(){
-        // Add common props to children EditableField elements.
+        // Add shared props to children EditableField elements.
         return React.Children.map(this.props.children, (child)=>{
             if (child.type && child.type.displayName == 'EditableField'){
                 var newProps = {};
                 if (!child.props.context || _.isEmpty(child.props.context)) newProps.context = this.props.context;
                 if (!child.props.parent) newProps.parent = this.props.parent || this;
                 if (!child.props.endpoint && this.props.endpoint) newProps.endpoint = this.props.endpoint;
+                if (!child.props.objectType && this.props.objectType) newProps.objectType = this.props.objectType;
+                if (!child.props.schemas && this.props.schemas) newProps.schemas = this.props.schemas;
                 if (
                     typeof child.props.disabled === 'undefined' &&
                     typeof this.props.disabled === 'boolean'
@@ -68,6 +71,7 @@ var FieldSet = module.exports.FieldSet = React.createClass({
                 if (this.props.inputSize) newProps.inputSize = this.props.inputSize; // Overwrite, since EditableField has default props.
                 if (this.props.style) newProps.style = this.props.style;
                 if (this.props.absoluteBox) newProps.absoluteBox = this.props.absoluteBox;
+
                 child = React.cloneElement(child, newProps);
             };
             return child;
@@ -177,7 +181,8 @@ var EditableField = module.exports.EditableField = React.createClass({
     },
 
     contextTypes: {
-        navigate: React.PropTypes.func
+        navigate: React.PropTypes.func,
+        schemas : React.PropTypes.object    // @see app.js > App.loadSchemas
     },
 
     propTypes : {
@@ -191,7 +196,13 @@ var EditableField = module.exports.EditableField = React.createClass({
         style : React.PropTypes.string,     // Markup style, e.g. render row with label (default), minimal (just input field w/ buttons).
         inputSize : React.PropTypes.oneOf(['sm', 'md', 'lg']), // Size of Bootstrap input field to use. Defaults to sm.
         children : React.PropTypes.any,     // Rendered value of field, use custom formatting on a per-field basis. ToDo : create fallback.
-        placeholder : React.PropTypes.string
+        placeholder : React.PropTypes.string,
+        objectType: React.PropTypes.string, // Class name of object being edited, e.g. User, Biosource, AccessKey, etc. for schema-based validation.
+        pattern : React.PropTypes.any,      // Optional pattern to use in lieu of one derived from schema or default field pattern. 
+                                            // If set to false, will skip (default or schema-based) validation.
+        required : React.PropTypes.bool,    // Optionally set if field is required, overriding setting derived from schema (if any). Defaults to false.
+        schemas : React.PropTypes.object,   // Schemas to use for validation. If not provided, attempts to get from this.context
+        debug : React.PropTypes.bool        // Verbose lifecycle log messages.
     },
 
     getDefaultProps : function(){
@@ -201,21 +212,27 @@ var EditableField = module.exports.EditableField = React.createClass({
             fallbackText : 'Not set',
             style : 'row',
             inputSize : 'sm',
-            parent : null
+            parent : null,
+            pattern: null,
+            required: false,
+            debug: true
         };
     },
 
     getInitialState : function(){
         var value = getNestedProperty(this.props.context, this.props.labelID);
         return {
-            'value' : value || null,      // Changes on input field change
-            'savedValue' : value || null, // Changes only on sync w/ server.
-            'serverErrors' : [],          // Validation state sent from server.
+            'value' : value || null,        // Changes on input field change
+            'savedValue' : value || null,   // Changes only on sync w/ server.
+            'validationPattern' : this.props.pattern || this.validationPattern(),
+            'required' : this.props.required || this.isRequired(),
+            'valid' : null,                 // Must distinguish between true, false, and null.
+            'serverErrors' : [],            // Validation state sent from server.
             'serverErrorsMessage' : null,
-            'loading' : false,            // True if in middle of save or fetch request.
-            'dispatching' : false,
-            'leanTo' : null, //this.props.style === 'inline' && this.props.absoluteBox ? 'right' : null,
-            'leanOffset' : 0
+            'loading' : false,              // True if in middle of save or fetch request.
+            'dispatching' : false,          // True if dispatching to Redux store.
+            'leanTo' : null,                // Re: inline style
+            'leanOffset' : 0                // Re: inline style
         };
     },
 
@@ -247,7 +264,7 @@ var EditableField = module.exports.EditableField = React.createClass({
     },
 
     componentDidUpdate : function(oldProps, oldState){
-        // If editing state but not onChange event (e.g. want to catch when change to editing state)
+        // If state change but not onChange event -- e.g. change to/from editing state
         if (
             typeof this.debouncedLayoutResizeStateChange !== 'undefined' &&
             oldState.value === this.state.value && 
@@ -268,16 +285,36 @@ var EditableField = module.exports.EditableField = React.createClass({
         }
     },
 
-    componentWillReceiveProps : function(newProps){
+    componentWillReceiveProps : function(newProps, newContext){
+        var newState = {},
+            stateChangeCallback = null;
+
+        // Reset value/savedValue if props.context or props.labelID changes for some reason.
         if (
             !this.state.dispatching && (
                 (this.props.context !== newProps.context) ||
                 (this.props.labelID !== newProps.labelID)
             )
         ) {
-            var value = getNestedProperty(newProps.context, this.props.labelID);
-            this.setState({ 'value' : value || null, 'savedValue' : value || null });
+            newState.savedValue = newState.value = getNestedProperty(newProps.context, this.props.labelID) || null;
         }
+        // Update state.validationPattern && state.isRequired if this.context.schemas becomes available 
+        // (loaded via ajax by app.js) or from props if is provided.
+        if (
+            newProps.schemas !== this.props.schemas ||
+            newContext.schemas !== this.context.schemas || 
+            newProps.pattern !== this.props.pattern || 
+            newProps.required !== this.props.required
+        ){
+            newState.validationPattern = newProps.pattern || this.validationPattern(newProps.schemas || newContext.schemas);
+            newState.required = newProps.required || this.isRequired(newProps.schemas || newContext.schemas);
+            // Also, update state.valid if in editing mode
+            if (this.props.parent.state && this.props.parent.state.currentlyEditing && this.refs && this.refs.inputElement){
+                stateChangeCallback = this.handleChange;
+            }
+        }
+        // Apply state edits, if any
+        if (Object.keys(newState).length > 0) this.setState(newState, stateChangeCallback);
     },
 
     isSet : function(){ return typeof this.props.context === 'object' && !_.isEmpty(this.props.context) && this.state.savedValue !== null && this.state.savedValue !== '' ; },
@@ -293,11 +330,12 @@ var EditableField = module.exports.EditableField = React.createClass({
         if (!this.props.parent.state || !this.props.parent.state.currentlyEditing) {
             throw new Error('No state was set on parent.');
         }
+        this.setState({ value : this.state.savedValue, valid : null, validationMessage : null });
         this.props.parent.setState({ currentlyEditing : null });
     },
 
     isValid : function(checkServer = false){
-        if (typeof this.state.valid === 'boolean' && !this.state.valid){
+        if (typeof this.state.valid === 'boolean' && this.state.valid === false){
             return false;
         };
         if (checkServer && this.state.serverErrors && this.state.serverErrors.length > 0) {
@@ -378,17 +416,19 @@ var EditableField = module.exports.EditableField = React.createClass({
         });
     },
 
+    /** Update state.value on each keystroke/input and check validity. */
     handleChange : function(e){
+        var inputElement = e && e.target ? e.target : this.refs.inputElement;
         var state = {
-            'value' : e.target.value // ToDo: change to (e.target.value === '' ? null : e.target.value)  and enable to process it on backend.
+            'value' : inputElement.value // ToDo: change to (inputElement.value === '' ? null : inputElement.value)  and enable to process it on backend.
         };
-        if (e.target.validity){
-            if (typeof e.target.validity.valid == 'boolean') {
-                state.valid = e.target.validity.valid;
+        if (inputElement.validity){
+            if (typeof inputElement.validity.valid == 'boolean') {
+                state.valid = inputElement.validity.valid;
             }
         }
-        if (e.target.validationMessage){
-            state.validationMessage = e.target.validationMessage;
+        if (inputElement.validationMessage){
+            state.validationMessage = inputElement.validationMessage;
         }
 
         // Reset serverErrors if any
@@ -511,9 +551,86 @@ var EditableField = module.exports.EditableField = React.createClass({
 
     },
 
+    objectType : function(){
+        if (this.props.objectType) return this.props.objectType;        
+        if (this.props.context && this.props.context['@type'] && this.props.context['@type'].length > 0){
+            return this.props.context['@type'][0];
+        } 
+        return null;
+    },
+
+    /** Return the schema for the provided props.labelID and (props.objectType or props.context['@type'][0]) */
+    fieldSchema : function(schemas = this.props.schemas || this.context.schemas){
+        // We do not handle nested, linked or embedded properties for now.
+        if (!this.props.labelID || this.props.labelID.indexOf('.') > -1) return null;
+        if (schemas === null) return null;
+
+        // We don't know what type of schema to get w/o objecttype.
+        var objectType = this.objectType();
+        if (!objectType) return null;
+
+        return getNestedProperty(
+            schemas,
+            [objectType, 'properties', this.props.labelID]
+        ) || null;
+    },
+
+    /** 
+     * Get a validation pattern to check input against for text(-like) fields.
+     * Try to get from this.context.schemas based on object type (User, ExperimentHIC, etc.) and props.labelID.
+     * Defaults to generic per-fieldType validation pattern if available and pattern not set schemas, or null if not applicable.
+     * 
+     * @return {*} Pattern to input validate against.
+     */
+    validationPattern : function(schemas = this.props.schemas || this.context.schemas){
+        
+        function getPatternFromSchema(){
+            // We do not handle nested, linked or embedded properties for now.
+            if (!schemas || !this.props.labelID || this.props.labelID.indexOf('.') > -1) return null;
+
+            var fieldSchema = this.fieldSchema(schemas);
+
+            if (!fieldSchema || typeof fieldSchema.pattern === 'undefined') return null; // No pattern set.
+            if (this.props.debug) console.info('Obtained EditableField validationPattern from schema (' + [this.objectType(), 'properties', this.props.labelID].join('.') + ')');
+            return fieldSchema.pattern;
+        }
+
+        var schemaDerivedPattern = getPatternFromSchema.call(this);
+        if (schemaDerivedPattern) return schemaDerivedPattern;
+
+        // Fallback to generic pattern, if applicable for props.fieldType.
+        if (this.props.fieldType === 'phone') return EditableField.regex.phone;
+        if (this.props.fieldType === 'email') return EditableField.regex.email;
+        return null;
+    },
+
+    /** Check if field is required based on schemas. */
+    isRequired : function(schemas = this.context.schemas){
+        if (!schemas) return false;
+        var objectType = this.objectType();
+        if (!objectType) return false;
+        var objectSchema = schemas[objectType];
+        if (
+            objectSchema &&
+            typeof objectSchema.required !== 'undefined' &&
+            Array.isArray(objectSchema.required) && 
+            objectSchema.required.indexOf(this.props.labelID) > -1
+        ) return true;
+        return false;
+    },
+
     validationFeedbackMessage : function(){
         //if (this.isValid(true)) return null;
         // ^ Hide via CSS instead.
+
+        if (this.state.required && this.state.valid === false && this.state.validationMessage){ 
+            // Some validationMessages provided by browser don't give much info, so use it selectively (if at all).
+            return (
+                <span className="help-block">
+                    { this.state.validationMessage }
+                </span>
+            );
+        }
 
         if (this.state.serverErrors && this.state.serverErrors.length > 0) {
             return (
@@ -552,33 +669,36 @@ var EditableField = module.exports.EditableField = React.createClass({
         }
     },
 
+    /** Render an input field; for usage in this.renderEditing() */
     inputField : function(){
         // ToDo : Select boxes, radios, checkboxes, etc.
         var commonProps = {
-            id : this.props.labelID,
-            required : this.props.required || false,
-            disabled : this.props.disabled || false
+            'id' : this.props.labelID,
+            'required' : this.state.required,
+            'disabled' : this.props.disabled || false,
+            'ref' : "inputElement"
         };
         var commonPropsTextInput = _.extend({
-            className : 'form-control input-' + this.props.inputSize,
-            value : this.state.value || '',
-            onChange : this.handleChange,
-            name : this.props.labelID,
-            autoFocus: true,
-            placeholder : this.props.placeholder
+            'className' : 'form-control input-' + this.props.inputSize,
+            'value' : this.state.value || '',
+            'onChange' : this.handleChange,
+            'name' : this.props.labelID,
+            'autoFocus': true,
+            'placeholder' : this.props.placeholder,
+            'pattern' : this.state.validationPattern
         }, commonProps);
 
         switch(this.props.fieldType){
 
             case 'phone': return (
                 <span className="input-wrapper">
-                    <input type="text" inputMode="tel" autoComplete="tel" pattern={EditableField.regex.phone} {...commonPropsTextInput} />
+                    <input type="text" inputMode="tel" autoComplete="tel" {...commonPropsTextInput} />
                     { this.validationFeedbackMessage() }
                 </span>
             );
             case 'email': return (
                 <span className="input-wrapper">
-                    <input type="email" autoComplete="email" pattern={EditableField.regex.email} {...commonPropsTextInput} />
+                    <input type="email" autoComplete="email" {...commonPropsTextInput} />
                     { this.validationFeedbackMessage() }
                 </span>
             );
@@ -599,6 +719,7 @@ var EditableField = module.exports.EditableField = React.createClass({
         return <span>No edit field created yet.</span>;
     },
 
+    /** Render 'in edit state' view */
     renderEditing : function(){
         
         var outerBaseClass = "editable-field-entry editing has-feedback" + 

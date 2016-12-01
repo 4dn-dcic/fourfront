@@ -246,13 +246,15 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
     }
 }
 
-var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = {}, data = null){
+var ajaxPromise = module.exports.ajaxPromise = function(url, method = 'GET', headers = {}, data = null, debugResponse = false){
     var xhr;
     var promise = new Promise(function(resolve, reject) {
         xhr = new XMLHttpRequest();
         xhr.onload = function() {
             // response SHOULD be json
-            resolve(JSON.parse(xhr.responseText));
+            var response = JSON.parse(xhr.responseText);
+            if (debugResponse) console.info('Received data from ' + method + ' ' + url + ':', response);
+            resolve(response);
         };
         xhr.onerror = reject;
         xhr.open(method, url, true);
@@ -300,7 +302,7 @@ var getNestedProperty = module.exports.getNestedProperty = function(object, prop
             return findNestedValue(
                 currentNode[fieldHierarchyLevels[level]],
                 fieldHierarchyLevels,
-                ++level
+                level + 1
             );
         }
     })(object, propertyName);
