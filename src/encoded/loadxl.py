@@ -516,13 +516,13 @@ PHASE1_PIPELINES = {
         remove_keys('lab', 'submits_for'),
     ],
     'file_fastq': [
-        remove_keys('experiments', 'filesets'),
+        remove_keys('related_files'),
     ],
     'file_fasta': [
-        remove_keys('experiments', 'filesets'),
+        remove_keys('related_files'),
     ],
     'file_processed': [
-        remove_keys('experiments', 'filesets', "workflow_run"),
+        remove_keys('related_files', "workflow_run"),
     ],
     'file_set': [
         remove_keys('files_in_set'),
@@ -557,13 +557,13 @@ PHASE2_PIPELINES = {
         skip_rows_missing_all_keys('lab', 'submits_for'),
     ],
     'file_fastq': [
-        skip_rows_missing_all_keys('experiments', 'filesets'),
+        skip_rows_missing_all_keys('related_files'),
     ],
     'file_fasta': [
-        skip_rows_missing_all_keys('experiments', 'filesets'),
+        skip_rows_missing_all_keys('related_files'),
     ],
     'file_processed': [
-        skip_rows_missing_all_keys('experiments', 'filesets', "workflow_run"),
+        skip_rows_missing_all_keys('related_files', "workflow_run"),
     ],
     'file_set': [
         skip_rows_missing_all_keys('files_in_set'),
