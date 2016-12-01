@@ -312,7 +312,7 @@ var Term = browse.Term = React.createClass({
     },
 
     componentWillMount: function(){
-        var fullHref = generateTypeHref('?type=ExperimentSet&', this.props.facet['field'], this.props.term['key']);
+        var fullHref = generateTypeHref('?type=ExperimentSetReplicate&', this.props.facet['field'], this.props.term['key']);
         if(this.props.typeTitle === this.props.term['key'] && fullHref !== this.props.searchBase){
             if(typeof document !== 'undefined'){
                 this.context.navigate(fullHref);
@@ -326,7 +326,7 @@ var Term = browse.Term = React.createClass({
         var title = this.props.title || term;
         var field = this.props.facet['field'];
         var selected = term === this.props.typeTitle ? true : false;
-        var fullHref = generateTypeHref('?type=ExperimentSet&', field, term);
+        var fullHref = generateTypeHref('?type=ExperimentSetReplicate&', field, term);
         var href = fullHref;
         return (
             <div className="facet-entry-container" id={selected ? "selected" : null} key={term}>
@@ -840,11 +840,11 @@ var Browse = browse.Browse = React.createClass({
         var searchBase = url.parse(this.context.location_href).search || '';
 
         // browse is only for experiment sets
-        if(searchBase.indexOf('?type=ExperimentSet') === -1){
+        if(searchBase.indexOf('?type=ExperimentSetReplicate') === -1){
             return(
                 <div className="error-page">
                     <h4>
-                        <a href='/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all'>
+                        <a href='/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all'>
                             Only experiment sets may be browsed.
                         </a>
                     </h4>
