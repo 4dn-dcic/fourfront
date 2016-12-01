@@ -1,4 +1,4 @@
-"""Collection for the Biosample object."""
+"""Collection for the SopMap object."""
 from snovault import (
     collection,
     load_schema,

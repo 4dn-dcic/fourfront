@@ -30,6 +30,7 @@ def master_mixins():
         'attachments',
         'dbxrefs',
         'library',
+        'sop_mapping'
     ]
     for key in mixin_keys:
         assert(mixins[key])
@@ -69,7 +70,7 @@ def test_load_schema(schema, master_mixins, registry):
     typename = schema.replace('.json', '')
     collection_names = [camel_case(typename), pluralize(typename)]
 
-    #check the mixin properties for each schema
+    # check the mixin properties for each schema
     if not schema == ('mixins.json'):
         verify_mixins(loaded_schema, master_mixins)
 
@@ -99,7 +100,7 @@ def test_load_schema(schema, master_mixins, registry):
                 'submitted_by',
                 'status'
             ]
-            no_alias_or_attribution = ['user.json', 'award.json', 'lab.json', 'organism.json']
+            no_alias_or_attribution = ['user.json', 'award.json', 'lab.json', 'organism.json', 'ontology.json', 'ontology_term.json']
             for prop in shared_properties:
                 if schema == 'experiment.json':
                     # currently experiment is abstract and has no mixin properties
