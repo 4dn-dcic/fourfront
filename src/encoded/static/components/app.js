@@ -21,7 +21,7 @@ var dispatch_dict = {}; //used to store value for simultaneous dispatch
 var portal = {
     portal_title: '4DN Data Portal',
     global_sections: [
-        {id: 'browse', sid:'sBrowse', title: 'Browse', url: '/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all'},
+        {id: 'browse', sid:'sBrowse', title: 'Browse', url: '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all'},
         {id: 'help', sid:'sHelp', title: 'Help', children: [
             {id: 'gettingstarted', title: 'Getting started', url: '/help'},
             {id: 'metadatastructure', title: 'Metadata structure', url: '/help#metadata-structure'},
@@ -72,7 +72,8 @@ var App = React.createClass({
             content: undefined,
             //session: !!(JWT.get('cookie')), // ToDo : Make this work for faster app state change on page load
             session: false,
-            user_actions: []
+            user_actions: [],
+            schemas: null
         };
     },
 
@@ -89,7 +90,8 @@ var App = React.createClass({
         session: React.PropTypes.bool,
         navigate: React.PropTypes.func,
         contentTypeIsJSON: React.PropTypes.func,
-        updateUserInfo: React.PropTypes.func
+        updateUserInfo: React.PropTypes.func,
+        schemas: React.PropTypes.object
     },
 
     // Retrieve current React context
@@ -106,7 +108,8 @@ var App = React.createClass({
             session: this.state.session,
             navigate: this.navigate,
             contentTypeIsJSON: this.contentTypeIsJSON,
-            updateUserInfo: this.updateUserInfo
+            updateUserInfo: this.updateUserInfo,
+            schemas : this.state.schemas
         };
     },
 
@@ -153,6 +156,23 @@ var App = React.createClass({
             name = hash.slice(2);
         }
         return name;
+    },
+
+    loadSchemas : function(callback, forceFetch = false){
+        if (this.state.schemas !== null && !forceFetch){
+            // We've already loaded these successfully (hopefully)
+            if (typeof callback === 'function') callback(this.state.schemas);
+            return this.state.schemas;
+        }
+        ajaxPromise('/profiles/?format=json').then(data => {
+            if (this.contentTypeIsJSON(data)){
+                this.setState({
+                    schemas: data
+                }, () => {
+                    if (typeof callback === 'function') callback(data);
+                });
+            }
+        });
     },
 
     // When current dropdown changes; componentID is _rootNodeID of newly dropped-down component
@@ -231,6 +251,7 @@ var App = React.createClass({
         globals.bindEvent(window, 'keydown', this.handleKey);
 
         this.authenticateUser(this.updateUserInfo);
+        this.loadSchemas();
 
         var query_href;
         if(document.querySelector('link[rel="canonical"]')){
@@ -686,6 +707,7 @@ var App = React.createClass({
                 content = (
                     <ContentView
                         context={context}
+                        schemas={this.state.schemas}
                         expSetFilters={this.props.expSetFilters}
                         expIncompleteFacets={this.props.expIncompleteFacets}
                     />

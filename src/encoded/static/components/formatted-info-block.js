@@ -62,7 +62,8 @@ var FormattedInfoBlockList = React.createClass({
         renderItem : React.PropTypes.func,      // Function used to render child FormattedInfoBlocks
         ajaxCallback : React.PropTypes.func,    // Optional callback to invoke on recieving ajax'd data, taking results as a param.
         fallbackMsg : React.PropTypes.any,      // Fallback text or component(s) if endpoints not set.
-        loading : React.PropTypes.bool          // Override this.state.loading - only do so if providing details array prop.
+        loading : React.PropTypes.bool,         // Override this.state.loading - only do so if providing details array prop.
+        debug : React.PropTypes.bool            // Verbose lifecycle logging.
     },
 
     getDefaultProps : function(){
@@ -111,11 +112,11 @@ var FormattedInfoBlockList = React.createClass({
 
     componentDidUpdate : function(prevProps, prevState){
         if (prevState.loading === true && this.state.loading === false && !this.state.transitionDelayElapsed){
-            console.info('FormattedInfoBlock.List > updated this.props.loading');
+            if (this.props.debug) console.info('FormattedInfoBlock.List > updated this.props.loading');
             
             if (this.hasMounted && !isServerSide()){
                 setTimeout(()=>{
-                    console.info('FormattedInfoBlock.List > setting state.transitionDelayElapsed');
+                    if (this.props.debug) console.info('FormattedInfoBlock.List > setting state.transitionDelayElapsed');
                     this.setState({ transitionDelayElapsed : true });
                 }, 100);
             }
@@ -305,7 +306,8 @@ var FormattedInfoBlock = module.exports = React.createClass({
         detailContent : React.PropTypes.any,
         extraContainerClassName : React.PropTypes.string,
         extraDetailClassName : React.PropTypes.string,
-        loading : React.PropTypes.bool
+        loading : React.PropTypes.bool,
+        debug : React.PropTypes.bool    // Verbose log messages.
     },
 
     getDefaultProps : function(){
@@ -317,14 +319,15 @@ var FormattedInfoBlock = module.exports = React.createClass({
             extraContainerClassName : null,
             extraDetailClassName : null,
             loading : false,
-            children : null // Inner contents of <FormattedInfoBlock>...</FormattedInfoBlock>
+            children : null, // Inner contents of <FormattedInfoBlock>...</FormattedInfoBlock>
+            debug : false
         };
     },
 
     hasMounted : false,
 
     componentDidMount : function(){
-        console.info('FormattedInfoBlock > Mounted');
+        if (this.props.debug) console.info('FormattedInfoBlock > Mounted');
         this.hasMounted = true;
     },
 
@@ -336,11 +339,11 @@ var FormattedInfoBlock = module.exports = React.createClass({
 
     componentDidUpdate : function(prevProps, prevState){
         if (prevProps.loading === true && this.props.loading === false && !this.state.transitionDelayElapsed){
-            console.info('FormattedInfoBlock > updated this.props.loading');
+            if (this.props.debug) console.info('FormattedInfoBlock > updated this.props.loading');
             
             if (this.hasMounted && !isServerSide()){
                 setTimeout(()=>{
-                    console.info('FormattedInfoBlock > setting state.transitionDelayElapsed');
+                    if (this.props.debug) console.info('FormattedInfoBlock > setting state.transitionDelayElapsed');
                     this.setState({ transitionDelayElapsed : true });
                 }, 100);
             }

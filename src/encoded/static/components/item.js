@@ -1,13 +1,10 @@
 'use strict';
 var React = require('react');
-var collection = require('./collection');
 var globals = require('./globals');
-var audit = require('./audit');
 var Panel = require('react-bootstrap').Panel;
-var AuditIndicators = audit.AuditIndicators;
-var AuditDetail = audit.AuditDetail;
-var AuditMixin = audit.AuditMixin;
-var Table = collection.Table;
+var Table = require('./collection').Table;
+var { AuditIndicators, AuditDetail, AuditMixin } = require('./audit');
+var { ajaxPromise } = require('./objectutils');
 
 var Fallback = module.exports.Fallback = React.createClass({
     contextTypes: {
@@ -39,39 +36,13 @@ var Fallback = module.exports.Fallback = React.createClass({
 var Item = React.createClass({
     mixins: [AuditMixin],
     contextTypes: {
-        fetch: React.PropTypes.func,
-        contentTypeIsJSON: React.PropTypes.func
-    },
-
-    getInitialState: function(){
-        return{
-            schemas: null
-        };
-    },
-
-    componentDidMount: function(){
-        var request = this.context.fetch('/profiles/?format=json', {
-            headers: {'Accept': 'application/json',
-                'Content-Type': 'application/json'}
-        });
-        request.then(data => {
-            if(this.context.contentTypeIsJSON(data)){
-                this.setState({
-                    schemas: data
-                })
-            }else{
-                this.setState({
-                    schemas: {}
-                })
-            }
-        });
+        schemas: React.PropTypes.object
     },
 
     render: function() {
         var context = this.props.context;
         var itemClass = globals.itemClass(context, 'view-item');
         var IPanel = globals.panel_views.lookup(context);
-        var schemas = this.state.schemas ? this.state.schemas : {};
         // Make string of alternate accessions
         return (
             <div className={itemClass}>
@@ -83,7 +54,7 @@ var Item = React.createClass({
                     </div>
                 </header>
                 <AuditDetail context={context} key="biosample-audit" />
-                <IPanel {...this.props} schemas={schemas}/>
+                <IPanel {...this.props} />
             </div>
         );
     }
@@ -100,7 +71,7 @@ globals.content_views.fallback = function () {
 
 var IPanel = module.exports.IPanel = React.createClass({
     render: function() {
-        var schemas = this.props.schemas;
+        var schemas = this.props.schemas || {};
         var context = this.props.context;
         //var itemClass = globals.itemClass(context, 'view-detail panel');
         var title = globals.listing_titles.lookup(context)({context: context});
@@ -315,7 +286,7 @@ var Subview = React.createClass({
 //Return the properties dictionary from a schema for use as tooltips
 var tipsFromSchema = module.exports.tipsFromSchema = function(schemas, content){
     var tips = {};
-    if(content['@type']){
+    if(content['@type'] && typeof schemas === 'object' && schemas !== null){
         var type = content['@type'][0];
         if(schemas[type]){
             tips = schemas[type]['properties'];

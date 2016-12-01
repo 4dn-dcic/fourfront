@@ -237,6 +237,20 @@ var User = module.exports.User = React.createClass({
             'status' : React.PropTypes.string,
             'timezone' : React.PropTypes.string,
             'job_title' : React.PropTypes.string
+        }),
+        'schemas' : React.PropTypes.shape({
+            'User' : React.PropTypes.shape({
+                'required' : React.PropTypes.array,
+                'properties' : React.PropTypes.shape({
+                    'first_name' : React.PropTypes.object,
+                    'last_name' : React.PropTypes.object,
+                    'email' : React.PropTypes.object,
+                    'phone1' : React.PropTypes.object,
+                    'fax' : React.PropTypes.object,
+                    'skype' : React.PropTypes.object,
+                    // etc.
+                })
+            })
         })
     },
 
@@ -285,19 +299,26 @@ var User = module.exports.User = React.createClass({
                                         </div>
                                         <div className="col-sm-9 user-title-col">
                                             <h1 className="user-title">
-                                                <FieldSet context={user} parent={this} style="inline" inputSize="lg" absoluteBox={true}>
+                                                <FieldSet
+                                                    context={user}
+                                                    parent={this}
+                                                    style="inline"
+                                                    inputSize="lg"
+                                                    absoluteBox={true}
+                                                    objectType="User"
+                                                    schemas={this.props.schemas}
+                                                    disabled={!mayEdit}
+                                                >
                                                     <EditableField
                                                         labelID="first_name"
                                                         fallbackText="No first name set"
                                                         placeholder="First name"
-                                                        disabled={!mayEdit}
                                                     />
                                                     {' '}
                                                     <EditableField
                                                         labelID="last_name"
                                                         fallbackText="No last name set"
                                                         placeholder="Last name"
-                                                        disabled={!mayEdit}
                                                     />
                                                 </FieldSet>
                                             </h1>
@@ -342,7 +363,14 @@ var ProfileContactFields = React.createClass({
         var user = this.props.user;
 
         return (
-            <FieldSet context={user} parent={this.props.parent} className="profile-contact-fields" disabled={!this.props.mayEdit}>
+            <FieldSet 
+                context={user}
+                parent={this.props.parent}
+                className="profile-contact-fields"
+                disabled={!this.props.mayEdit}
+                objectType="User"
+                schemas={this.props.schemas}
+            >
                 
                 <EditableField label="Email" labelID="email" placeholder="name@example.com" fallbackText="No email address" fieldType="email" disabled={true}>
                     { this.icon('envelope') }&nbsp; <a href={'mailto:' + user.email}>{ user.email }</a>
