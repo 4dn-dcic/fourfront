@@ -24,7 +24,7 @@ var AuditMixin = audit.AuditMixin;
 
 var expSetColumnLookup={
     // all arrays will be handled by taking the first item
-    'replicates':{
+    'replicate':{
         'Accession': 'accession',
         'Exp Type':'experiment_type',
         'Exps': '',
@@ -42,10 +42,10 @@ expSetColumnLookup.custom =
 expSetColumnLookup['technical replicates'] =
 expSetColumnLookup['biological replicates'] =
 //expSetColumnLookup['analysis_set'] = // Relevant?
-expSetColumnLookup.replicates;
+expSetColumnLookup.replicate;
 
 var expSetAdditionalInfo={
-    'replicates':{
+    'replicate':{
         'Lab': 'lab.title',
         'Treatments':'biosample.treatments_summary',
         'Modifications':'biosample.modifications_summary'
