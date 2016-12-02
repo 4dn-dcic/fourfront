@@ -105,16 +105,18 @@ var ContextActions = React.createClass({
     },
 
     render: function() {
-        var actions = this.context.listActionsFor('context').map(function(action) {
-            return Navigation.buildMenuItem(_.extend(_.clone(action), { title : (<span><i className="icon icon-pencil"></i> {action.title}</span>) }));
-        });
-
         if (actions.length === 0) {
             // No actions
             return(<a href="#" className="invis"/>);
         }
 
-        return (<div className="custom-entry">{actions}</div>);
+        return (
+            <ul className="custom-entry">{ 
+                this.context.listActionsFor('context').map(function(action) {
+                    return Navigation.buildMenuItem(_.extend(_.clone(action), { title : <span><i className="icon icon-pencil"></i> {action.title}</span> }));
+                })
+            }</ul>
+        );
     }
 });
 
