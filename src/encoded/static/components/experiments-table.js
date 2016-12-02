@@ -193,7 +193,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
         if (!passExperiments && props.expSetFilters) {
             if (props.facets && props.facets.length > 0) {
-                ignoredFilters = FacetList.findIgnoredFilters(props.facets, props.expSetFilters);
+                ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(props.facets, props.expSetFilters);
             }
             passExperiments = FacetList.siftExperiments(props.experimentArray, props.expSetFilters, ignoredFilters);
         }

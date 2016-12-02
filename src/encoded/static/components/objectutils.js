@@ -309,6 +309,20 @@ var getNestedProperty = module.exports.getNestedProperty = function(object, prop
 
 };
 
+/**
+ * Flatten any level/depth of arrays (e.g. as might be returned from @see getNestedProperty
+ * if getting a property nested within array(s)) into a single one. Does not support
+ * objects or sets, just arrays.
+ * 
+ * @param {*[]} arr - An array containing other arrays to flatten.
+ * @return {*[]} - A shallow, flattened array.
+ */
+var flattenArrays = module.exports.flattenArrays = function(arr){
+    if (arr.length > 0 && Array.isArray(arr[0])){
+        return arr.reduce((a,b) => a.concat(flattenArrays(b)), []);
+    } else return arr;
+}
+
 
 var DateUtility = module.exports.DateUtility = (function(){
 

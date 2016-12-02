@@ -430,7 +430,7 @@ var ResultTable = browse.ResultTable = React.createClass({
             sortReverse: false,
             overflowingRight : false,
             facets : FacetList.adjustedFacets(this.props.context.facets),
-            ignoredFilters : FacetList.findIgnoredFilters(
+            ignoredFilters : FacetList.findIgnoredFiltersByMissingFacets(
                 FacetList.adjustedFacets(this.props.context.facets),
                 this.props.expSetFilters
             )
@@ -457,7 +457,7 @@ var ResultTable = browse.ResultTable = React.createClass({
             newState.facets = FacetList.adjustedFacets(newProps.context.facets);
         }
         if (this.props.expSetFilters !== newProps.expSetFilters || newState.facets){
-            newState.ignoredFilters = FacetList.findIgnoredFilters(
+            newState.ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(
                 FacetList.adjustedFacets(newProps.context.facets),
                 newProps.expSetFilters
             );
