@@ -57,7 +57,6 @@ class Award(Item):
 class BiosampleCellCulture(Item):
     """Cell culture details for Biosample."""
 
-    base_types = ['BiosampleCellCulture'] + Item.base_types
     item_type = 'biosample_cell_culture'
     schema = load_schema('encoded:schemas/biosample_cell_culture.json')
 
@@ -182,7 +181,6 @@ class Organism(Item):
 class Protocol(Item):
     """Protocol class."""
 
-    base_types = ['Protocol'] + Item.base_types
     item_type = 'protocol'
     schema = load_schema('encoded:schemas/protocol.json')
 
