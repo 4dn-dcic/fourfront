@@ -68,7 +68,7 @@ class Biosource(Item):
             if cell_line:
                 if cell_line_tier:
                     if cell_line_tier != 'Unclassified':
-                        return cell_line + '(' + cell_line_tier + ')'
+                        return cell_line + ' (' + cell_line_tier + ')'
                 return cell_line
         elif biosource_type == "whole organisms":
             if individual:
