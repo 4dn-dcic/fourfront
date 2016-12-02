@@ -391,10 +391,8 @@ var FacetList = module.exports = React.createClass({
                 var eliminated = false;
                 for(var k=0; k < filterKeys.length; k++){
                     var refinedFilterSet;
-                    //console.log('FILTERKEYS', ignored, filterKeys[k], filters);
                     if (ignored instanceof Set && ignored.has(filterKeys[k])) { // We ignore facet completely.
                         refinedFilterSet = new Set(); // Blank set
-                        //console.log('YAY IS SET');
                     } else if (typeof ignored === 'object' && ignored[filterKeys[k]] && ignored[filterKeys[k]].size > 0){
                         // remove the ignored filters by using the difference between sets
                         var difference = new Set([...filters[filterKeys[k]]].filter(x => !ignored[filterKeys[k]].has(x)));
@@ -569,7 +567,7 @@ var FacetList = module.exports = React.createClass({
                         return allTermValues.indexOf(experimentTermValue) === j;
                     })
                     .length < 2;
-                    
+
                 })
             );
         },

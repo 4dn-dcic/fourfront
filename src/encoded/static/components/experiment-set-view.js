@@ -99,9 +99,8 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                 ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(props.facets, props.expSetFilters);
             } else {
                 // Ignore filters if none in current experiment_set match it so that if coming from 
-                // another page w/ filters enabled and deselect own 'static'/single term, it isn't blank.
+                // another page w/ filters enabled (i.e. browse) and deselect own 'static'/single term, it isn't empty.
                 ignoredFilters = FacetList.findIgnoredFiltersByStaticTerms(experimentArray, props.expSetFilters);
-                console.log('ignoredFilters', ignoredFilters);
             }
             passExperiments = FacetList.siftExperiments(experimentArray, props.expSetFilters, ignoredFilters);
         }
