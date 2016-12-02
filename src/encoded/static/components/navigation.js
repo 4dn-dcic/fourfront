@@ -2,15 +2,40 @@
 var React = require('react');
 var url = require('url');
 var Login = require('./login');
-var {Navbars, Navbar, Nav, NavItem} = require('../libs/bootstrap/navbar');
-var {DropdownMenu} = require('../libs/bootstrap/dropdown-menu');
+var { Navbars, Navbar, Nav, NavItem, NavDropdown, MenuItem } = require('react-bootstrap');
 var _ = require('underscore');
 var TestWarning = require('./testwarning');
 var productionHost = require('./globals').productionHost;
 
 
 var Navigation = module.exports = React.createClass({
-    mixins: [Navbars],
+
+    statics : {
+
+        buildMenuItem : function(action){
+            return (
+                <MenuItem key={action.id} id={action.sid || action.id} href={action.url || '#'} className="global-entry">
+                    {action.title}
+                </MenuItem>
+            );
+        },
+
+        buildDropdownMenu : function(action){
+            if (action.children){
+                return (
+                    <NavDropdown key={action.id} id={action.sid || action.id} label={action.id} title={action.title}>
+                        {action.children.map(Navigation.buildMenuItem)}
+                    </NavDropdown>
+                );
+            } else {
+                return (
+                    <NavItem key={action.id} id={action.sid || action.id} href={action.url ? action.url : '#'}>
+                        {action.title}
+                    </NavItem>
+                );
+            }
+        }
+    },
 
     contextTypes: {
         location_href: React.PropTypes.string,
@@ -38,18 +63,22 @@ var Navigation = module.exports = React.createClass({
 
     render: function() {
         var portal = this.context.portal;
-        var img = <img src="/static/img/4dn_logo.svg" className="navbar-logo-image"/>;
         return (
             <div className={"navbar-container" + (this.state.testWarning ? " test-warning-visible" : "")}>
                 <div id="navbar" className="navbar navbar-fixed-top navbar-inverse">
                     <TestWarning visible={this.state.testWarning} setHidden={this.hideTestWarning} />
-                    <div className="container">
-                        <Navbar brand={img} brandlink="/" label="main" navClasses="navbar-main" navID="navbar-icon">
-                            <GlobalSections />
-                            <UserActions />
-                            {/* REMOVE SEARCH FOR NOW: <Search />*/}
-                        </Navbar>
-                    </div>
+                    <Navbar label="main" className="navbar-main" id="navbar-icon">
+                        <Navbar.Header>
+                            <Navbar.Brand>
+                                <NavItem href="/" style={{ display : 'block' }}>
+                                    <img src="/static/img/4dn_logo.svg" className="navbar-logo-image"/>
+                                </NavItem>
+                            </Navbar.Brand>
+                        </Navbar.Header>
+                        <GlobalSections />
+                        <UserActions pullRight />
+                        {/* REMOVE SEARCH FOR NOW: <Search />*/}
+                    </Navbar>
                 </div>
             </div>
         );
@@ -64,24 +93,7 @@ var GlobalSections = React.createClass({
         listActionsFor: React.PropTypes.func,
     },
     render: function() {
-        var actions = this.context.listActionsFor('global_sections').map(action => {
-            return (
-                <NavItem key={action.id} dropdownId={action.id} dropdownTitle={action.title} dropdownSId={action.sid} dropdownLink={action.url ? action.url : null}>
-                    {action.children ?
-                        <DropdownMenu label={action.id}>
-                            {action.children.map(function(action){
-                                return(
-                                    <a href={action.url || '#'} key={action.id} className="global-entry">
-                                        {action.title}
-                                    </a>
-                                );
-                            })}
-                        </DropdownMenu>
-                    : null}
-                </NavItem>
-            );
-        });
-        return <Nav>{actions}</Nav>;
+        return <Nav {...this.props}>{ this.context.listActionsFor('global_sections').map(Navigation.buildDropdownMenu) }</Nav>;
     }
 });
 
@@ -94,13 +106,7 @@ var ContextActions = React.createClass({
 
     render: function() {
         var actions = this.context.listActionsFor('context').map(function(action) {
-            return (
-                <div key={action.name} >
-                    <a href={action.href} className="global-entry">
-                        <i className="icon icon-pencil"></i> {action.title}
-                    </a>
-                </div>
-            );
+            return Navigation.buildMenuItem(_.extend(_.clone(action), { title : (<span><i className="icon icon-pencil"></i> {action.title}</span>) }));
         });
 
         if (actions.length === 0) {
@@ -144,33 +150,29 @@ var UserActions = React.createClass({
             </span>
         );
 
-        var actions = this.context.listActionsFor('user_section').map(function (action) {
-            if (action.id === "login"){
-                return(<Login key={action.id} />);
-            } else if (action.id === "accountactions"){
-                // link to registration page if logged out or account actions if logged in
-                if (!session) {
-                    return(
-                        <a href={action.url || '#'} key={action.id} className="global-entry">
-                            {action.title}
-                        </a>
-                    );
-                } else {
-                    return(<AccountActions key={action.id} />);
+        function actions(){
+            return this.context.listActionsFor('user_section').map(function (action) {
+                if (action.id === "login"){
+                    return(<Login key={action.id} />);
+                } else if (action.id === "accountactions"){
+                    // link to registration page if logged out or account actions if logged in
+                    if (!session) {
+                        return Navigation.buildMenuItem(action);
+                    } else {
+                        return(<AccountActions key={action.id} />);
+                    }
+                }else if (action.id === "contextactions") {
+                    return(<ContextActions key={action.id} />);
                 }
-            }else if (action.id === "contextactions") {
-                return(<ContextActions key={action.id} />);
-            }
-        });
+            });
+        }
 
         return (
-                <Nav right={true} acct={true}>
-                    <NavItem dropdownId="context" dropdownTitle={acctTitle}>
-                        <DropdownMenu label="context">
-                            {actions}
-                        </DropdownMenu>
-                    </NavItem>
-                </Nav>
+            <Nav className="navbar-acct" {...this.props}>
+                <NavDropdown id="context" label="context" title={acctTitle} >
+                    { actions.call(this) }
+                </NavDropdown>
+            </Nav>
         );
     }
 });
@@ -184,19 +186,15 @@ var AccountActions = React.createClass({
     render: function() {
         if (!this.context.session) {
             // Logged out, so no user menu at all
-            return(<a href="" className="invis"/>);
+            return null;
         }
         var actions = this.context.listActionsFor('user').map(function (action, idx) {
-            return (
-                <div key={action.id + idx} >
-                    <a href={action.href || ''} className="global-entry">
-                        {action.title}
-                    </a>
-                </div>
-            );
+            return Navigation.buildMenuItem(action);
         });
         return (
-            <div className="custom-entry">{actions}</div>
+            <li key="account-actions" className="custom-entry">
+                <ul>{actions}</ul>
+            </li>
         );
     }
 });
