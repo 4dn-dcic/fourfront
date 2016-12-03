@@ -17,6 +17,8 @@ ORDER = [
     'user',
     'award',
     'lab',
+    'ontology',
+    'ontology_term',
     'organism',
     'genomic_region',
     'target',
@@ -512,6 +514,9 @@ def get_pipeline(testapp, docsdir, test_only, item_type, phase=None, method=None
 # Additional pipeline sections for item types
 
 PHASE1_PIPELINES = {
+    'ontology_term': [
+        remove_keys('parents')
+    ],
     'user': [
         remove_keys('lab', 'submits_for'),
     ],
@@ -553,6 +558,9 @@ PHASE1_PIPELINES = {
 
 
 PHASE2_PIPELINES = {
+    'ontology_term': [
+        skip_rows_missing_all_keys('parents'),
+    ],
     'user': [
         skip_rows_missing_all_keys('lab', 'submits_for'),
     ],
