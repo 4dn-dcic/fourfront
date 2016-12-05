@@ -126,7 +126,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
 
     render: function() {
 
-        var fileDetailContainer = getFileDetailContainer(this.props.experimentArray, this.props.passExperiments)
+        var fileDetailContainer = getFileDetailContainer(this.props.experimentArray, this.props.passExperiments);
         var fileDetail = fileDetailContainer.fileDetail;
         var emptyExps = fileDetailContainer.emptyExps;
 
