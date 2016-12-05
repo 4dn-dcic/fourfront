@@ -3,7 +3,7 @@ var url = require('url');
 var queryString = require('query-string');
 var _ = require('underscore');
 var store = require('../store');
-var { ajaxLoad, getNestedProperty, console } = require('./objectutils');
+var { ajaxLoad, getNestedProperty, flattenArrays, console } = require('./objectutils');
 
 
 /**
@@ -154,11 +154,9 @@ var ExpTerm = React.createClass({
             () => {
                 this.props.changeFilters(
                     this.props.facet.field,
-                    this.props.term.key,
-                    ()=> {
-                        this.setState({ filtering : false })
-                    }
-                )
+                    this.props.term.key
+                );
+                this.setState({ filtering : false });
             }
         );
     },
@@ -392,15 +390,13 @@ var FacetList = module.exports = React.createClass({
             for(let experiment of passExperiments){
                 var eliminated = false;
                 for(var k=0; k < filterKeys.length; k++){
-                    var refinedFilterSet;
-                    if(ignored && ignored[filterKeys[k]] && ignored[filterKeys[k]].size > 0){
+                    var refinedFilterSet = null;
+                    if (ignored && typeof ignored === 'object' && ignored[filterKeys[k]] && ignored[filterKeys[k]].size > 0){
                         // remove the ignored filters by using the difference between sets
-                        var difference = new Set([...filters[filterKeys[k]]].filter(x => !ignored[filterKeys[k]].has(x)));
-                        refinedFilterSet = difference;
-                    }else{
-                        refinedFilterSet = filters[filterKeys[k]];
+                        refinedFilterSet = new Set([...filters[filterKeys[k]]].filter(x => !ignored[filterKeys[k]].has(x)));
                     }
-                    if(eliminated){
+                    if (refinedFilterSet === null) refinedFilterSet = filters[filterKeys[k]];
+                    if (eliminated){
                         break;
                     }
                     var valueProbe = experiment;
@@ -509,11 +505,10 @@ var FacetList = module.exports = React.createClass({
          * 
          * @return {Object} The filters which are ignored. Object looks like expSetFilters.
          */
-        findIgnoredFilters : function(facets, expSetFilters){
+        findIgnoredFiltersByMissingFacets : function(facets, expSetFilters){
             var ignoredFilters = {};
             for(var i=0; i < facets.length; i++){
                 var ignoredSet = new Set();
-                
                 if(expSetFilters[facets[i].field]){
                     for(let expFilter of expSetFilters[facets[i].field]){
                         var found = false;
@@ -535,6 +530,44 @@ var FacetList = module.exports = React.createClass({
             }
             if (Object.keys(ignoredFilters).length) console.log("Found Ignored Filters: ", ignoredFilters);
             return ignoredFilters;
+        },
+
+        /**
+         * Find filters which to ignore based on if all experiments in experimentArray which are being filtered
+         * have the same term for that selected filter. Geared towards usage by ExperimentSetView.
+         * 
+         * @param {Object[]} experimentArray - Experiments which are being filtered.
+         * @param {Object} expSetFilters - Object containing facet field name as key and set of terms to filter by as value.
+         * @param {string} [expsOrSets] - Whether are filtering experiments or sets, in order to standardize facet names.
+         */
+        findIgnoredFiltersByStaticTerms : function(experimentArray, expSetFilters, expsOrSets = 'experiments'){
+            var ignored = {};
+            Object.keys(expSetFilters).forEach((selectedFacet, i)=>{ // Get facets/filters w/ only 1 applicable term
+
+                // Unique terms in all experiments per filter
+                if (
+                    flattenArrays(
+                        // getNestedProperty returns array(s) if property is nested within array(s), so we needa flatten to get list of terms.
+                        experimentArray.map((experiment, j)=>{
+                            var termVal = getNestedProperty(
+                                experiment,
+                                ExpTerm.standardizeFieldKey(selectedFacet, expsOrSets, true)
+                            );
+                            if (Array.isArray(termVal)){ // Only include terms by which we're filtering
+                                return termVal.filter((term) => expSetFilters[selectedFacet].has(term));
+                            }
+                            return termVal;
+                        })
+                    ).filter((experimentTermValue, j, allTermValues)=>{ 
+                        // Reduce to unique term vals (indexOf returns first index, so if is repeat occurance, returns false)
+                        return allTermValues.indexOf(experimentTermValue) === j;
+                    }).length < 2
+                ) {
+                    ignored[selectedFacet] = expSetFilters[selectedFacet]; // Ignore all terms in filter.
+                }
+
+            });
+            return ignored;
         },
 
         /** 
@@ -692,7 +725,7 @@ var FacetList = module.exports = React.createClass({
             this.loadFacets(() => {
                 FacetList.fillFacetTermsAndCountFromExps(this.facets, this.props.experimentSetListJSON);
                 if (!this.props.ignoredFilters) {
-                    this.ignoredFilters = FacetList.findIgnoredFilters(this.facets, this.props.expSetFilters);
+                    this.ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(this.facets, this.props.expSetFilters);
                 } // else: @see getInitialState
             });
         } // else if (this.state.usingProvidedFacets === false && this.state.facetsLoaded) : @see componentWillMount
@@ -740,7 +773,7 @@ var FacetList = module.exports = React.createClass({
             }
 
             if (!this.props.ignoredFilters && (this.state.usingProvidedFacets === true || this.state.facetsLoaded)){
-                this.ignoredFilters = FacetList.findIgnoredFilters(this.facets, this.props.expSetFilters);
+                this.ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(this.facets, this.props.expSetFilters);
             } // else: See @componentDidMount > this.loadFacets() callback param
         }
     },
@@ -812,15 +845,10 @@ var FacetList = module.exports = React.createClass({
                 newObj = Object.assign({}, this.props.expSetFilters);
                 delete newObj[field];
             }
-
-            var unsubscribe = store.subscribe(()=>{
-                unsubscribe();
-                if (typeof callback === 'function') setTimeout(callback, 0);
-            });
-
             store.dispatch({
                 type : {'expSetFilters' : newObj}
             });
+            if (typeof callback === 'function') setTimeout(callback, 0);
 
         }.bind(this), 1);
     },
