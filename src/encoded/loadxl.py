@@ -646,7 +646,6 @@ def generate_access_key(testapp, store_access_key=None, email='4dndcic@gmail.com
 def store_keys(app, store_access_key, keys):
         if (not keys): return
 
-        import pdb; pdb.set_trace()
         # write to ~/keypairs.json
         if store_access_key == 'local':
             home_dir = os.path.expanduser('~')
@@ -672,7 +671,7 @@ def store_keys(app, store_access_key, keys):
             s3.put_object(Bucket=s3bucket,
                           Key='illnevertell',
                           Body=keys,
-                          SSECustomerKey=KEY,
+                          SSECustomerKey=secret,
                           SSECustomerAlgorithm='AES256')
 
 
