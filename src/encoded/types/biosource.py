@@ -57,7 +57,8 @@ class Biosource(Item):
         "description": "Specific name of the biosource.",
         "type": "string",
     })
-    def biosource_name(self, request, biosource_type, individual=None, cell_line=None, tissue=None):
+    def biosource_name(self, request, biosource_type, individual=None,
+                       cell_line=None, cell_line_tier=None, tissue=None):
         cell_line_types = ['immortalized cell line', 'primary cell', 'in vitro differentiated cells',
                            'induced pluripotent stem cell line', 'stem cell']
         if biosource_type == "tissue":
@@ -65,6 +66,9 @@ class Biosource(Item):
                 return tissue
         elif biosource_type in cell_line_types:
             if cell_line:
+                if cell_line_tier:
+                    if cell_line_tier != 'Unclassified':
+                        return cell_line + ' (' + cell_line_tier + ')'
                 return cell_line
         elif biosource_type == "whole organisms":
             if individual:
