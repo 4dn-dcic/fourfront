@@ -259,9 +259,11 @@ var App = React.createClass({
         }else{
             query_href = this.props.href;
         }
-        store.dispatch({
-            type: {'href':query_href}
-        });
+        if (this.props.href !== query_href){
+            store.dispatch({
+                type: {'href':query_href}
+            });
+        }
         if (this.historyEnabled) {
             var data = this.props.context;
             try {
@@ -389,6 +391,9 @@ var App = React.createClass({
         if (this.historyEnabled) {
             event.preventDefault();
             this.navigate(href);
+            if (this.refs && this.refs.navigation){
+                this.refs.navigation.closeMobileMenu();
+            }
         }
     },
 
@@ -653,6 +658,10 @@ var App = React.createClass({
             } else {
                 canonical = context.canonical_uri;
             }
+            console.log(href_url);
+            if (href_url.hash){
+                canonical += (href_url.hash || '');
+            }
         }
         // add static page routing
         var title;
@@ -757,7 +766,7 @@ var App = React.createClass({
                         <div id="application" className={appClass}>
                         <div className="loading-spinner"></div>
                             <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
-                                <Navigation />
+                                <Navigation href={ this.props.href } ref="navigation" clickHandler={this.handleClick} />
                                 <div id="content" className="container" key={key}>
                                     {content}
                                 </div>
@@ -775,11 +784,14 @@ var App = React.createClass({
     statics: {
         getRenderedProps: function (document) {
             // Ensure the initial render is exactly the same
-            store.dispatch({
-                type: {'href':document.querySelector('link[rel="canonical"]').getAttribute('href')}
-            });
-            var script_props = document.querySelectorAll('script[data-prop-name]');
+            var docHref = document.querySelector('link[rel="canonical"]').getAttribute('href');
+            if (store.getState().href !== docHref) { // Should be true (store (on front-end) seems blank @ this point)
+                store.dispatch({
+                    type: {'href':docHref}
+                });
+            }
             var props_dict = {};
+            var script_props = document.querySelectorAll('script[data-prop-name]');
             for (var i = 0; i < script_props.length; i++) {
                 var elem = script_props[i];
                 var elem_value = elem.text;

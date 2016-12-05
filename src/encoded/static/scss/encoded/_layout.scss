@@ -54,6 +54,13 @@
 	}
 }
 
+@media (max-width: $screen-xs-max) {
+	ul.navbar-nav {
+		margin-bottom: 10px !important;
+		margin-top: 10px;
+	}
+}
+
 h1.page-title {
 	/* Only set font-weight: 200 for h1,
 	   200 doesn't look as nice on smaller sizes. */

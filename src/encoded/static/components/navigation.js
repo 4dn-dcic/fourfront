@@ -12,24 +12,51 @@ var Navigation = module.exports = React.createClass({
 
     statics : {
 
-        buildMenuItem : function(action){
+        /** May be bound to access this.props.href (if available) as fallback */
+        getWindowUrl : function(mounted){
+            var href;
+            if (this && this.props && this.props.href) {
+                href = url.parse(this.props.href);
+            }
+            if (mounted && typeof window === 'object' && window && typeof window.location !== 'undefined'){
+                href = window.location;
+            }
+            if (!href) return null;
+            return (href.pathname || '/') + (href.search || '') + (href.hash || '');
+        },
+
+        /** Can be bound to access this.props.href for getWindowUrl (if available) */
+        buildMenuItem : function(action, mounted){
             return (
-                <MenuItem key={action.id} id={action.sid || action.id} href={action.url || '#'} className="global-entry">
+                <MenuItem
+                    key={action.id}
+                    id={action.sid || action.id}
+                    href={action.url || action.href || '#'}
+                    className="global-entry"
+                    active={
+                        (action.url && action.url === Navigation.getWindowUrl.call(this, mounted)) ||
+                        (action.href && action.href === Navigation.getWindowUrl.call(this, mounted))
+                    }
+                >
                     {action.title}
                 </MenuItem>
             );
         },
 
-        buildDropdownMenu : function(action){
+        /** Can be bound to access this.props.href for getWindowUrl (if available) */
+        buildDropdownMenu : function(action, mounted){
             if (action.children){
                 return (
                     <NavDropdown key={action.id} id={action.sid || action.id} label={action.id} title={action.title}>
-                        {action.children.map(Navigation.buildMenuItem)}
+                        {action.children.map((a) => Navigation.buildMenuItem(a, mounted) )}
                     </NavDropdown>
                 );
             } else {
                 return (
-                    <NavItem key={action.id} id={action.sid || action.id} href={action.url ? action.url : '#'}>
+                    <NavItem key={action.id} id={action.sid || action.id} href={action.url || action.href || '#'} active={
+                        (action.url && action.url === Navigation.getWindowUrl.call(this, mounted)) ||
+                        (action.href && action.href === Navigation.getWindowUrl.call(this, mounted))
+                    }>
                         {action.title}
                     </NavItem>
                 );
@@ -39,13 +66,24 @@ var Navigation = module.exports = React.createClass({
 
     contextTypes: {
         location_href: React.PropTypes.string,
-        portal: React.PropTypes.object
+        portal: React.PropTypes.object,
+        listActionsFor : React.PropTypes.func
     },
 
     getInitialState: function() {
         return {
-            testWarning: this.props.visible || !productionHost[url.parse(this.context.location_href).hostname] || false
+            testWarning: this.props.visible || !productionHost[url.parse(this.context.location_href).hostname] || false,
+            mounted : false,
+            dropdownOpen : false
         };
+    },
+
+    componentDidMount : function(){
+        this.setState({ mounted : true });
+    },
+
+    closeMobileMenu : function(){
+        if (this.state.dropdownOpen) this.setState({ dropdownOpen : false });
     },
 
     hideTestWarning: function(e) {
@@ -67,17 +105,22 @@ var Navigation = module.exports = React.createClass({
             <div className={"navbar-container" + (this.state.testWarning ? " test-warning-visible" : "")}>
                 <div id="navbar" className="navbar navbar-fixed-top navbar-inverse">
                     <TestWarning visible={this.state.testWarning} setHidden={this.hideTestWarning} />
-                    <Navbar label="main" className="navbar-main" id="navbar-icon">
+                    <Navbar label="main" className="navbar-main" id="navbar-icon" onToggle={(open)=>{
+                        this.setState({ dropdownOpen : open });
+                    }} expanded={this.state.dropdownOpen}>
                         <Navbar.Header>
                             <Navbar.Brand>
                                 <NavItem href="/" style={{ display : 'block' }}>
                                     <img src="/static/img/4dn_logo.svg" className="navbar-logo-image"/>
                                 </NavItem>
                             </Navbar.Brand>
+                            <Navbar.Toggle/>
                         </Navbar.Header>
-                        <GlobalSections />
-                        <UserActions pullRight />
-                        {/* REMOVE SEARCH FOR NOW: <Search />*/}
+                        <Navbar.Collapse>
+                            <Nav>{ this.context.listActionsFor('global_sections').map((a)=> Navigation.buildDropdownMenu.call(this, a, this.state.mounted) ) }</Nav>
+                            <UserActions mounted={this.state.mounted} />
+                            {/* REMOVE SEARCH FOR NOW: <Search /> */}
+                        </Navbar.Collapse>
                     </Navbar>
                 </div>
             </div>
@@ -85,40 +128,6 @@ var Navigation = module.exports = React.createClass({
     }
 });
 
-
-
-// Main navigation menus
-var GlobalSections = React.createClass({
-    contextTypes: {
-        listActionsFor: React.PropTypes.func,
-    },
-    render: function() {
-        return <Nav {...this.props}>{ this.context.listActionsFor('global_sections').map(Navigation.buildDropdownMenu) }</Nav>;
-    }
-});
-
-
-// Context actions: mainly for editing the current object
-var ContextActions = React.createClass({
-    contextTypes: {
-        listActionsFor: React.PropTypes.func
-    },
-
-    render: function() {
-        if (actions.length === 0) {
-            // No actions
-            return(<a href="#" className="invis"/>);
-        }
-
-        return (
-            <ul className="custom-entry">{ 
-                this.context.listActionsFor('context').map(function(action) {
-                    return Navigation.buildMenuItem(_.extend(_.clone(action), { title : <span><i className="icon icon-pencil"></i> {action.title}</span> }));
-                })
-            }</ul>
-        );
-    }
-});
 
 var Search = React.createClass({
     contextTypes: {
@@ -152,54 +161,43 @@ var UserActions = React.createClass({
             </span>
         );
 
-        function actions(){
-            return this.context.listActionsFor('user_section').map(function (action) {
-                if (action.id === "login"){
-                    return(<Login key={action.id} />);
-                } else if (action.id === "accountactions"){
-                    // link to registration page if logged out or account actions if logged in
-                    if (!session) {
-                        return Navigation.buildMenuItem(action);
-                    } else {
-                        return(<AccountActions key={action.id} />);
-                    }
-                }else if (action.id === "contextactions") {
-                    return(<ContextActions key={action.id} />);
+        var actions = [];
+        this.context.listActionsFor('user_section').forEach((action) => {
+            if (action.id === "login"){
+                actions.push(<Login key={action.id} />);
+            } else if (action.id === "accountactions"){
+                // link to registration page if logged out or account actions if logged in
+                if (!session) {
+                    actions.push(Navigation.buildMenuItem.call(this, action, this.props.mounted));
+                } else {
+                    // Account Actions
+                    actions = actions.concat(this.context.listActionsFor('user').map((action, idx) => {
+                        return Navigation.buildMenuItem.call(this, action, this.props.mounted);
+                    }));
                 }
-            });
-        }
+            } else if (action.id === "contextactions") {
+                // Context Actions
+                actions = actions.concat(this.context.listActionsFor('context').map((action) => {
+                    return Navigation.buildMenuItem.call(
+                        this,
+                        _.extend(_.clone(action), { title : <span><i className="icon icon-pencil"></i> {action.title}</span> }),
+                        this.props.mounted
+                    );
+                }));
+            }
+        });
 
         return (
-            <Nav className="navbar-acct" {...this.props}>
+            <Nav className="navbar-acct" pullRight>
                 <NavDropdown id="context" label="context" title={acctTitle} >
-                    { actions.call(this) }
+                    { actions }
                 </NavDropdown>
             </Nav>
         );
     }
 });
 
-var AccountActions = React.createClass({
-    contextTypes: {
-        listActionsFor: React.PropTypes.func,
-        session: React.PropTypes.bool
-    },
 
-    render: function() {
-        if (!this.context.session) {
-            // Logged out, so no user menu at all
-            return null;
-        }
-        var actions = this.context.listActionsFor('user').map(function (action, idx) {
-            return Navigation.buildMenuItem(action);
-        });
-        return (
-            <li key="account-actions" className="custom-entry">
-                <ul>{actions}</ul>
-            </li>
-        );
-    }
-});
 
 // Display breadcrumbs with contents given in 'crumbs' object.
 // Each crumb in the crumbs array: {
