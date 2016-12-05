@@ -263,6 +263,20 @@ class FileProcessed(File):
     embedded = File.embedded
 
 
+@collection(
+    name='files-reference',
+    unique_key='accession',
+    properties={
+        'title': 'Refenrence Files',
+        'description': 'Listing of Reference Files',
+    })
+class FileReference(File):
+    """Collection for individual reference files."""
+    item_type = 'file_reference'
+    schema = load_schema('encoded:schemas/file_reference.json')
+    embedded = File.embedded
+
+
 @view_config(name='upload', context=File, request_method='GET',
              permission='edit')
 def get_upload(context, request):
