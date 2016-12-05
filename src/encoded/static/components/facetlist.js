@@ -390,17 +390,13 @@ var FacetList = module.exports = React.createClass({
             for(let experiment of passExperiments){
                 var eliminated = false;
                 for(var k=0; k < filterKeys.length; k++){
-                    var refinedFilterSet;
-                    if (ignored !== null) {
-                        if (ignored instanceof Set && ignored.has(filterKeys[k])) { // We ignore facet completely.
-                            refinedFilterSet = new Set(); // Blank set
-                        } else if (typeof ignored === 'object' && ignored[filterKeys[k]] && ignored[filterKeys[k]].size > 0){
-                            // remove the ignored filters by using the difference between sets
-                            refinedFilterSet = new Set([...filters[filterKeys[k]]].filter(x => !ignored[filterKeys[k]].has(x)));
-                        }
+                    var refinedFilterSet = null;
+                    if (ignored && typeof ignored === 'object' && ignored[filterKeys[k]] && ignored[filterKeys[k]].size > 0){
+                        // remove the ignored filters by using the difference between sets
+                        refinedFilterSet = new Set([...filters[filterKeys[k]]].filter(x => !ignored[filterKeys[k]].has(x)));
                     }
-                    if (typeof refinedFilterSet === 'undefined') refinedFilterSet = filters[filterKeys[k]];
-                    if(eliminated){
+                    if (refinedFilterSet === null) refinedFilterSet = filters[filterKeys[k]];
+                    if (eliminated){
                         break;
                     }
                     var valueProbe = experiment;
@@ -545,12 +541,12 @@ var FacetList = module.exports = React.createClass({
          * @param {string} [expsOrSets] - Whether are filtering experiments or sets, in order to standardize facet names.
          */
         findIgnoredFiltersByStaticTerms : function(experimentArray, expSetFilters, expsOrSets = 'experiments'){
-            
-            return new Set(
-                Object.keys(expSetFilters).filter((selectedFacet, i)=>{ // Get facets/filters w/ only 1 applicable term
+            var ignored = {};
+            Object.keys(expSetFilters).forEach((selectedFacet, i)=>{ // Get facets/filters w/ only 1 applicable term
 
-                    // Filter facets by those whose term value is same in all experiments
-                    return flattenArrays(
+                // Unique terms in all experiments per filter
+                if (
+                    flattenArrays(
                         // getNestedProperty returns array(s) if property is nested within array(s), so we needa flatten to get list of terms.
                         experimentArray.map((experiment, j)=>{
                             var termVal = getNestedProperty(
@@ -565,11 +561,13 @@ var FacetList = module.exports = React.createClass({
                     ).filter((experimentTermValue, j, allTermValues)=>{ 
                         // Reduce to unique term vals (indexOf returns first index, so if is repeat occurance, returns false)
                         return allTermValues.indexOf(experimentTermValue) === j;
-                    })
-                    .length < 2;
+                    }).length < 2
+                ) {
+                    ignored[selectedFacet] = expSetFilters[selectedFacet]; // Ignore all terms in filter.
+                }
 
-                })
-            );
+            });
+            return ignored;
         },
 
         /**
