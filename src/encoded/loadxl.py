@@ -3,8 +3,10 @@ from past.builtins import basestring
 from .typedsheets import cast_row_values
 from functools import reduce
 import io
+import json
 import logging
 import os.path
+import boto3
 from pyramid.settings import asbool
 from snovault.storage import User
 
@@ -615,8 +617,66 @@ def load_all(testapp, filename, docsdir, test=False):
         pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=2)
         process(combine(source, pipeline))
 
+def generate_access_key(testapp, store_access_key=None, email='4dndcic@gmail.com'):
 
-def load_test_data(app):
+    # get admin user and generate access keys
+    if store_access_key:
+        # we probably don't have elasticsearch index updated yet
+        admin = testapp.get('/users/%s?datastore=database' % (email)).follow().json
+
+        # don't create one if we already have
+        for key in admin['access_keys']:
+            if key.get('description') == 'key for submit4dn':
+                print("key found not generating new one")
+                return
+
+        access_key_req = {
+            'user': admin['@id'],
+            'description':'key for submit4dn',
+        }
+        res = testapp.post_json('/access_key', access_key_req).json
+        akey     = { 'default':
+                    { 'key' : res['secret_access_key'],
+                      'secret' : res['access_key_id'],
+                      'server': 'http://localhost:8000',
+                    }
+                   }
+        return json.dumps(akey)
+
+def store_keys(app, store_access_key, keys):
+        if (not keys): return
+
+        import pdb; pdb.set_trace()
+        # write to ~/keypairs.json
+        if store_access_key == 'local':
+            home_dir = os.path.expanduser('~')
+            keypairs_filename = os.path.join(home_dir, 'keypairs.json')
+
+            print("Storing access keys to %s", keypairs_filename)
+            with open(keypairs_filename, 'w') as keypairs:
+                    # write to file for local
+                    keypairs.write(keys)
+
+        elif store_access_key == 's3':
+            s3bucket = app.registry.settings['system_bucket']
+            secret = os.environ.get('AWS_SECRET_KEY')
+            if not secret:
+                print("no secrets for s3 upload, you probably shouldn't be doing"
+                      "this from yourlocal machine")
+                print("halt and catch fire")
+                return
+
+            s3 = boto3.client('s3')
+
+            print("Uploading S3 object with SSE-C")
+            s3.put_object(Bucket=s3bucket,
+                          Key='illnevertell',
+                          Body=keys,
+                          SSECustomerKey=KEY,
+                          SSECustomerAlgorithm='AES256')
+
+
+def load_test_data(app, access_key_loc=None):
     """smth."""
     from webtest import TestApp
     environ = {
@@ -628,11 +688,12 @@ def load_test_data(app):
     from pkg_resources import resource_filename
     inserts = resource_filename('encoded', 'tests/data/inserts/')
     docsdir = [resource_filename('encoded', 'tests/data/documents/')]
-    # temp comment out below
     load_all(testapp, inserts, docsdir)
+    keys = generate_access_key(testapp, access_key_loc)
+    store_keys(app, access_key_loc, keys)
 
 
-def load_prod_data(app):
+def load_prod_data(app, access_key_loc=None):
     """smth."""
     from webtest import TestApp
     environ = {
@@ -645,13 +706,5 @@ def load_prod_data(app):
     inserts = resource_filename('encoded', 'tests/data/prod-inserts/')
     docsdir = []
     load_all(testapp, inserts, docsdir)
-
-
-def create_user(db, email, name, pwd):
-    """create user if user not in database."""
-    if User.get_by_username(email) is None:
-        print('creating user ', email)
-        new_user = User(email=email, password=pwd, name=name)
-        db.add(new_user)
-    else:
-        print('user %s already exists, skipping' % (email))
+    keys = generate_access_key(testapp, access_key_loc)
+    store_keys(app, access_key_loc, keys)
