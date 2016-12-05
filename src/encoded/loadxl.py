@@ -43,6 +43,7 @@ ORDER = [
     'file_fastq',
     'file_fasta',
     'file_processed',
+    'file_reference',
     'file_set',
     'experiment_hi_c',
     'experiment_capture_c',
@@ -531,6 +532,9 @@ PHASE1_PIPELINES = {
     'file_processed': [
         remove_keys('related_files', "workflow_run"),
     ],
+    'file_reference': [
+        remove_keys('related_files'),
+    ],
     'file_set': [
         remove_keys('files_in_set'),
     ],
@@ -574,6 +578,9 @@ PHASE2_PIPELINES = {
     ],
     'file_processed': [
         skip_rows_missing_all_keys('related_files', "workflow_run"),
+    ],
+    'file_reference': [
+        skip_rows_missing_all_keys('related_files'),
     ],
     'file_set': [
         skip_rows_missing_all_keys('files_in_set'),
