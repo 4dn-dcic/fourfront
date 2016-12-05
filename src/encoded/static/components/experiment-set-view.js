@@ -7,7 +7,7 @@ var { ExperimentsTable, getFileDetailContainer } = require('./experiments-table'
 var _ = require('underscore');
 var { SubIPanel, DescriptorField, tipsFromSchema } = require('./item');
 var FacetList = require('./facetlist');
-var { ajaxLoad, textContentWidth, gridContainerWidth, isServerSide, DateUtility, console } = require('./objectutils');
+var { ajaxLoad, textContentWidth, gridContainerWidth, isServerSide, DateUtility, console, getNestedProperty } = require('./objectutils');
 var FormattedInfoBlock = require('./formatted-info-block');
 
 /**
@@ -21,7 +21,6 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         context : React.PropTypes.object,
         expSetFilters : React.PropTypes.object,     // Set via app.js <ContentView...>
         expIncompleteFacets : React.PropTypes.array,
-        // facets = initially blank, but stored here to be shared between ExperimentsTable & FacetList; MUTABLE
         facets : React.PropTypes.array
     },
 
@@ -31,7 +30,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
     getDefaultProps : function(){
         return {
-            facets : null // MUTABLE ARRAY
+            facets : null
         };
     },
 
@@ -75,9 +74,9 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
             this.setState({
                 selectedFiles: new Set()
             });
-            this.updateFileDetailAndCachedCounts(false);
+            this.updateFileDetailAndCachedCounts(false, nextProps);
         } else if (this.props.context.experiments_in_set !== nextProps.context.experiments_in_set){
-            this.updateFileDetailAndCachedCounts(true);
+            this.updateFileDetailAndCachedCounts(true, nextProps);
         }
 
         /* For debugging
@@ -89,17 +88,21 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
     },
 
-    /** Same functionality as exists in ExperimentsTable */
-    updateFileDetailAndCachedCounts : function(updateTotals = false){
+    /** Same functionality as exists in ExperimentsTable, but with different method to get ignoredFilters */
+    updateFileDetailAndCachedCounts : function(updateTotals = false, props = this.props){
 
         // Set fileDetailContainer
-        var passExperiments = null, ignoredFilters = null, experimentArray = this.props.context.experiments_in_set;
+        var passExperiments = null, ignoredFilters = null, experimentArray = props.context.experiments_in_set;
 
-        if (!passExperiments && this.props.expSetFilters) {
-            if (this.props.facets && this.props.facets.length > 0) {
-                ignoredFilters = FacetList.findIgnoredFilters(this.props.facets, this.props.expSetFilters);
+        if (props.expSetFilters) {
+            if (props.facets && props.facets.length > 0) {
+                ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(props.facets, props.expSetFilters);
+            } else {
+                // Ignore filters if none in current experiment_set match it so that if coming from 
+                // another page w/ filters enabled (i.e. browse) and deselect own 'static'/single term, it isn't empty.
+                ignoredFilters = FacetList.findIgnoredFiltersByStaticTerms(experimentArray, props.expSetFilters);
             }
-            passExperiments = FacetList.siftExperiments(experimentArray, this.props.expSetFilters, ignoredFilters);
+            passExperiments = FacetList.siftExperiments(experimentArray, props.expSetFilters, ignoredFilters);
         }
         
         this.fileDetailContainer = getFileDetailContainer(experimentArray, passExperiments);
@@ -312,7 +315,7 @@ var ExperimentSetHeader = React.createClass({
         if (!('date_created' in this.props.context)) return <span><i></i></span>;
         return (
             <span>
-                <i className="icon sbt-calendar"></i>&nbsp; Added 
+                <i className="icon sbt-calendar"></i>&nbsp; Added{' '}
                 <DateUtility.LocalizedTime timestamp={this.props.context.date_created} formatType='date-time-md' dateTimeSeparator=" at " />
             </span>
         );
