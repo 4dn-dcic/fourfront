@@ -90,21 +90,6 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         };
     },
 
-    fileDetailContainer : null,
-
-    componentWillMount : function(){
-        // Cache to prevent re-executing on re-renders.
-        this.fileDetailContainer = getFileDetailContainer(this.props.experimentArray, this.props.passExperiments);
-    },
-
-    componentWillUpdate : function(nextProps, nextState){
-        if (nextProps.experimentArray !== this.props.experimentArray || nextProps.passExperiments !== this.props.passExperiments){
-            this.fileDetailContainer = getFileDetailContainer(nextProps.experimentArray, nextProps.passExperiments);
-        }
-
-
-    },
-
     componentWillReceiveProps: function(nextProps) {
 
         if(this.props.expSetFilters !== nextProps.expSetFilters){
@@ -141,8 +126,9 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
 
     render: function() {
 
-        var fileDetail = this.fileDetailContainer.fileDetail;
-        var emptyExps = this.fileDetailContainer.emptyExps;
+        var fileDetailContainer = getFileDetailContainer(this.props.experimentArray, this.props.passExperiments)
+        var fileDetail = fileDetailContainer.fileDetail;
+        var emptyExps = fileDetailContainer.emptyExps;
 
         var files = Object.keys(fileDetail);
         // unused for now... when format selection is added back in, adapt code below:
@@ -219,7 +205,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                                     'File Type',
                                     'File Info'
                                 ]}
-                                fileDetailContainer={this.fileDetailContainer}
+                                fileDetailContainer={fileDetailContainer}
                                 parentController={this}
                                 expSetFilters={this.props.expSetFilters}
                                 facets={this.props.facets /* Not req'd here as using pre-completed fileDetailContainer' */ }
