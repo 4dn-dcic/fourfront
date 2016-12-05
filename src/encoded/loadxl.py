@@ -698,4 +698,5 @@ def load_prod_data(app, access_key_loc=None):
     inserts = resource_filename('encoded', 'tests/data/prod-inserts/')
     docsdir = []
     load_all(testapp, inserts, docsdir)
-    generate_access_key(testapp, access_key_loc)
+    keys = generate_access_key(testapp, access_key_loc)
+    store_keys(app, access_key_loc, keys)
