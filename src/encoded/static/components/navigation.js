@@ -75,7 +75,7 @@ var Navigation = module.exports = React.createClass({
         return {
             testWarning: this.props.visible || !productionHost[url.parse(this.context.location_href).hostname] || false,
             mounted : false,
-            dropdownOpen : false,
+            mobileDropdownOpen : false,
             scrolledPastTop : false,
             navInitialized : false
         };
@@ -156,7 +156,7 @@ var Navigation = module.exports = React.createClass({
     },
 
     closeMobileMenu : function(){
-        if (this.state.dropdownOpen) this.setState({ dropdownOpen : false });
+        if (this.state.mobileDropdownOpen) this.setState({ mobileDropdownOpen : false });
     },
 
     hideTestWarning: function(e) {
@@ -189,8 +189,8 @@ var Navigation = module.exports = React.createClass({
                 <div id="top-nav" className="navbar-fixed-top">
                     <TestWarning visible={this.state.testWarning} setHidden={this.hideTestWarning} />
                     <Navbar fixedTop={false /* Instead we make the navbar container fixed */} label="main" className="navbar-main" id="navbar-icon" onToggle={(open)=>{
-                        this.setState({ dropdownOpen : open });
-                    }} expanded={this.state.dropdownOpen}>
+                        this.setState({ mobileDropdownOpen : open });
+                    }} expanded={this.state.mobileDropdownOpen}>
                         <Navbar.Header>
                             <Navbar.Brand>
                                 <NavItem href="/">
