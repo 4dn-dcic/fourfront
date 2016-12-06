@@ -26,6 +26,10 @@ $navbar-transition-length: .75s;
             height: $navbar-full-height;
 
             .navbar-container.nav-initialized & {
+                -webkit-backface-visibility: hidden;
+                -moz-backface-visibility: hidden;
+                backface-visibility: hidden;
+                transform: translate3d(0,0,0);
                 transition: height $navbar-transition-length, 
                     line-height $navbar-transition-length, 
                     box-shadow $navbar-transition-length, 
@@ -35,8 +39,8 @@ $navbar-transition-length: .75s;
             .navbar-container.scrolled-past-top & {
                 height: $navbar-small-height;
                 line-height: $navbar-small-height;
-                border-color: #c2c2c2;
-                box-shadow: 0 0 3px rgba(0,0,0,0.35);
+                border-color: #ccc;
+                box-shadow: 0 0 3px rgba(0,0,0,0.2);
             }
         }
 
@@ -80,16 +84,6 @@ $navbar-transition-length: .75s;
             height: inherit;
             text-decoration: none;
             position: relative;
-            transform: translate3d(0px,0,0);
-            /*
-            .navbar-container.nav-initialized & {
-                transition: transform $navbar-transition-length;
-            }
-
-            .navbar-container.scrolled-past-top & {
-                transform: translate3d(-15px,0,0);
-            }
-            */
             
             > .img-container {
                 height: inherit;
