@@ -324,6 +324,10 @@ $navbar-transition-length: .75s;
         &.active > a {
             background-color: #34959d;
         }
+        > a:hover {
+            background-color: #5d8a8e !important;
+            color: #fff;
+        }
         &>div>a {
             font-weight: 300;
         }
