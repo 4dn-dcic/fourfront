@@ -1,10 +1,4 @@
 branch-defaults:
-  FF-381:
-    environment: 4dn-web-dev
-  FF-401:
-    environment: 4dn-web-dev
-  FF-33_UserPageEditing:
-    environment: 4dn-alex
   aws_beanstalk:
     environment: 4dn-web-dev
     group_suffix: null
@@ -12,14 +6,10 @@ branch-defaults:
     environment: 4dn-web-dev
   production:
     environment: 4dnweb-prod
-environment-defaults:
-  4dn-web-dev:
-    branch: null
-    repository: null
 global:
   application_name: 4dn-web
   default_ec2_keyname: 4dn-encode
   default_platform: Python 3.4
   default_region: us-east-1
-  profile: eb-cli
+  profile: null
   sc: git
