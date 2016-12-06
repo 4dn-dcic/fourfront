@@ -39,7 +39,7 @@
 .browse-page-container,
 .static-page {
 	/* Consistent margin between top navbar & content among pages */
-	margin-top: 23px;
+	margin-top: 25px;
 
 }
 
@@ -48,17 +48,13 @@
 		HEADER & TOP AREAS (Navbar, Page Titles, etc.)
 ************************************************************/
 
-@media (min-width: $screen-md-min) {
-	.navbar-container.test-warning-visible {
-		margin-bottom: 37px;
-	}
-}
+/* top padding for small & large screens re: fixed nav */
+#content {
+    padding-top: 0px;
 
-@media (max-width: $screen-xs-max) {
-	ul.navbar-nav {
-		margin-bottom: 10px !important;
-		margin-top: 10px;
-	}
+    @media (min-width: $navbar-fixed-breakpoint) {
+        padding-top: 81px; /* Navbar (80px inner height) + its bottom border (1px) */
+    }
 }
 
 h1.page-title {

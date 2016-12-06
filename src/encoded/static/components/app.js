@@ -14,7 +14,7 @@ var store = require('../store');
 var browse = require('./browse');
 var origin = require('../libs/origin');
 var serialize = require('form-serialize');
-var { ajaxLoad, ajaxPromise, JWT, console } = require('./objectutils');
+var { ajaxLoad, ajaxPromise, JWT, console, responsiveGridState } = require('./objectutils');
 var jwt = require('jsonwebtoken');
 var dispatch_dict = {}; //used to store value for simultaneous dispatch
 
@@ -73,7 +73,9 @@ var App = React.createClass({
             //session: !!(JWT.get('cookie')), // ToDo : Make this work for faster app state change on page load
             session: false,
             user_actions: [],
-            schemas: null
+            schemas: null,
+            scrolledPastTop : false,
+            navInitialized : false
         };
     },
 
@@ -251,7 +253,7 @@ var App = React.createClass({
         globals.bindEvent(window, 'keydown', this.handleKey);
 
         this.authenticateUser(this.updateUserInfo);
-        this.loadSchemas();
+        this.loadSchemas(); // Load schemas into app.state, access them where needed via props (preferred, safer) or this.context.
 
         var query_href;
         if(document.querySelector('link[rel="canonical"]')){
@@ -282,7 +284,7 @@ var App = React.createClass({
         } else {
             window.onhashchange = this.onHashChange;
         }
-        window.onbeforeunload = this.handleBeforeUnload;
+        //window.onbeforeunload = this.handleBeforeUnload; // this.handleBeforeUnload is not defined
     },
 
     componentDidUpdate: function (prevProps, prevState) {
@@ -646,6 +648,7 @@ var App = React.createClass({
         });
 
         var appClass = 'done';
+
         if (this.props.slow) {
             appClass = 'communicating';
         }

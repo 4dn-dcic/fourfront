@@ -1,38 +1,192 @@
 /* NavBar */
 
-.navbar-inverse {
+$navbar-full-height : 80px;
+$navbar-small-height : 40px; /* Bootstrap navbar default */
+$navbar-transition-length: .75s;
+
+#top-nav {
     border: none;
     background: #ffffff;
-    border-bottom: 1px solid #f4f4f4;
     margin-bottom: 0;
 
-    .navbar-brand {
-        padding: 0px !important;
-        // margin-left: -50px !important;
-        color: $navbar-default-brand-color;
-        font-size: 1.7em;
-        font-weight: 300;
-        height: 70px !important;
+    > nav.navbar-main {
+        /* React-Bootstrap Navbar itself */
+        border-width: 0 0 1px;
+        border-radius: 0;
+        border-color: #eee;
+        box-sizing: content-box; /* Exclude bottom border from min-height */
+        min-height: $navbar-full-height; /* Mobile default */
+        line-height: $navbar-full-height;
+        box-shadow: 0 0 3px rgba(0,0,0,0);
+        transform: translate3d(0,0,0);
+
+        @media screen and (min-width: $navbar-fixed-breakpoint){
+            
+            min-height: $navbar-small-height;
+            height: $navbar-full-height;
+
+            .navbar-container.nav-initialized & {
+                transition: height $navbar-transition-length, 
+                    line-height $navbar-transition-length, 
+                    box-shadow $navbar-transition-length, 
+                    border-color $navbar-transition-length;
+            }
+
+            .navbar-container.scrolled-past-top & {
+                height: $navbar-small-height;
+                line-height: $navbar-small-height;
+                border-color: #c2c2c2;
+                box-shadow: 0 0 3px rgba(0,0,0,0.35);
+            }
+        }
+
+        > .container {
+            height: inherit;
+            line-height: inherit;
+            > .navbar-header {
+                margin-left: 0px;
+                margin-right: 0px;
+                height: inherit;
+                line-height: inherit;
+            }
+        }
     }
 
-    .nav > li > a {
-        font-size: 1.4em;
-        font-weight: 300;
-        color: $navbar-link-color; 
-        &:focus,
-        &:hover {
+    /* > nav.navbar-main > .container > .navbar-header > */
+    .navbar-brand {
+        padding: 0px !important;
+        display: block;
+        // margin-left: -50px !important;
+        color: $navbar-default-brand-color;
+        min-width: 270px;
+        height: inherit;
+        line-height: inherit;
+        max-height: $navbar-full-height;
+        margin-left: 0px;
+        white-space: nowrap;
+
+        /* Match browse page facets width */
+        @media screen and (min-width: $screen-md-min) and (max-width: $screen-md-max){
+            min-width: 300px;
+        }
+
+        @media screen and (min-width: $screen-sm-min) and (max-width: $screen-sm-max){
+            min-width: 290px;
+        }
+
+        > a {
+            display: block;
+            line-height: inherit;
+            height: inherit;
+            text-decoration: none;
+            position: relative;
+            transform: translate3d(0px,0,0);
+            /*
+            .navbar-container.nav-initialized & {
+                transition: transform $navbar-transition-length;
+            }
+
+            .navbar-container.scrolled-past-top & {
+                transform: translate3d(-15px,0,0);
+            }
+            */
+            
+            > .img-container {
+                height: inherit;
+                display: block;
+                font-size: 0rem;
+                float: left;
+                margin-right: 15px;
+                text-align: center;
+                > img, 
+                > .navbar-logo-img {
+                    vertical-align: middle;
+                    display: inline-block;
+                    height: 100%;
+                    padding-bottom: 10px;
+                    padding-top: 10px;
+                    .navbar-container.nav-initialized & {
+                        transition: padding $navbar-transition-length;
+                    }
+                    .navbar-container.scrolled-past-top & {
+                        padding-top: 6px;
+                        padding-bottom: 6px;
+                    }
+                }
+            }
+            > .navbar-title {
+                font-weight: 300;
+                color: #444;
+                margin-right: 15px;
+                font-size: 1.7rem;
+                display: inline-block;
+                transform: translate3d(0px,0,0);
+
+                .navbar-container.nav-initialized & {
+                    transition: font-size $navbar-transition-length, transform $navbar-transition-length;
+                }
+
+                .navbar-container.scrolled-past-top & {
+                    font-size: 1.25rem;
+                    transform: translate3d(-5px,0,0);
+                }
+            }
+            &:hover .navbar-title {
+                color: #000;
+                text-shadow: 0 0 0 #000;
+                &:after {
+                    content: "\f105";
+                    font-family: FontAwesome;
+                    margin-left: 12px;
+                    font-size: 1.25rem;
+                    line-height: inherit;
+                    vertical-align: bottom;
+                    color: $navbar-default-link-active-bg;
+                }
+            }
+        }
+    }
+
+    .nav > li { 
+        
+        > a {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: $navbar-link-color;
+
+            i.icon {
+                font-size: 1.15rem;
+            }
+        }
+        /*
+        &:not(:last-child) > a {
+            margin-right: 10px;
+        }
+        */
+
+        &.active > a {
             color: $navbar-link-active-color; /* Set in _base.scss */
-            text-shadow: 0 0 0px ;
-            text-shadow: 0 0 0.25px rgba(0,0,0,1);
+            //text-shadow: 0 0 0px $navbar-link-active-color;
+            background-color: $navbar-link-active-background-color;
 
             i.icon {
                 text-shadow: none;
             }
+        }
 
+        > a:focus,
+        > a:hover {
+            color: $navbar-link-hover-color; /* Set in _base.scss */
+            text-shadow: 0 0 0px $navbar-link-hover-color;
+            background-color: $navbar-default-link-active-bg;
+
+            i.icon {
+                text-shadow: none;
+            }
         }
 
         /* Disabled sign-in link */
-        &[disabled] {
+        > a[disabled] {
             color: $gray-light;
 
             &:focus,
@@ -42,22 +196,31 @@
                 cursor: default;
             }
         }
+
     }
 }
 
 .navbar-fixed-top {
-    position: static;
+    position: relative;
     top: 0;
 
-    @media (min-width: $screen-md-min) {
+    @media (min-width: $navbar-fixed-breakpoint) {
         position: fixed;
     }
 }
 
 
 .navbar-toggle {
-    margin-right: 0;
-    background-color: #ffffff;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    height: 40px;
+    line-height: 40px;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 8px;
+    padding-right: 8px;
+    font-size: 1.5rem;
+    border: none;
     .icon-bar{
         background-color: #999999 !important;
     }
@@ -123,6 +286,19 @@
     }
 }
 
+@media (min-width: $screen-md-min) {
+	.navbar-container.test-warning-visible {
+		margin-bottom: 37px;
+	}
+}
+
+@media (max-width: $screen-xs-max) {
+	ul.navbar-nav {
+		margin-bottom: 10px !important;
+		margin-top: 10px;
+	}
+}
+
 // this is a bit janky
 .custom-entry {
     margin-top: 4px;
@@ -186,13 +362,41 @@
 // Drop down styles when window is constrained
 .navbar-nav {
     font-family: 'Work Sans', sans-serif;
-    // margin: ($navbar-padding-vertical / 2);
-    margin: 20px;
-    > li > a {
-        padding-top:    10px;
-        padding-bottom: 10px;
-        line-height: $line-height-computed;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-top: 0;//($navbar-full-height - $navbar-small-height) / 2;
+    margin-bottom: 0;//($navbar-full-height - $navbar-small-height) / 2;
+    line-height: inherit;
+
+    @media screen and (max-width: $grid-float-breakpoint-max){
+        line-height: $navbar-small-height;
     }
+
+    > li { 
+        line-height: inherit;
+        > a {
+            line-height: inherit;
+            padding-top: 0px;
+            padding-bottom: 0px;
+        }
+    }
+/*
+    @media screen and (min-width: $navbar-fixed-breakpoint) {
+
+        .navbar-container.nav-initialized & > li > a {
+            transition: line-height $navbar-transition-length;
+        }
+
+        .navbar-container.scrolled-past-top & {
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+
+        .navbar-container.scrolled-past-top & > li > a {
+            line-height : $navbar-small-height - 20px;
+        }
+        
+    }*/
 
     @media (max-width: $grid-float-breakpoint-max) {
         // Dropdowns get custom display when collapsed
@@ -264,11 +468,6 @@
           color: #000000 !important;
         }
     }
-}
-
-.navbar-logo-image {
-    display: block;
-    margin: 11px auto auto;
 }
 
 .navbar-form{

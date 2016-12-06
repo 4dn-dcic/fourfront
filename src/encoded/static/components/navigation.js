@@ -4,6 +4,7 @@ var url = require('url');
 var Login = require('./login');
 var { Navbars, Navbar, Nav, NavItem, NavDropdown, MenuItem } = require('react-bootstrap');
 var _ = require('underscore');
+var { responsiveGridState, console } = require('./objectutils');
 var TestWarning = require('./testwarning');
 var productionHost = require('./globals').productionHost;
 
@@ -80,6 +81,76 @@ var Navigation = module.exports = React.createClass({
 
     componentDidMount : function(){
         this.setState({ mounted : true });
+        this.setupScrollHandler();
+    },
+
+    setupScrollHandler : function(){
+        if (!(typeof window !== 'undefined' && window && document && document.body && typeof document.body.scrollTop !== 'undefined')){
+            return null;
+        }
+
+        var lastScrollTop = 0;
+
+        // We add as property of class instance so we can remove event listener on unmount, for example.
+        this.throttledScrollHandler = _.throttle((e) => {
+            var stateChange = {};
+            if (!this.state.navInitialized){
+                stateChange.navInitialized = true;
+            }
+            
+            var scrollVector = document.body.scrollTop - lastScrollTop;
+            lastScrollTop = document.body.scrollTop;
+
+            if (
+                ['xs','sm'].indexOf(responsiveGridState()) === -1 && // Fixed nav takes effect at medium grid breakpoint or wider.
+                (
+                    (document.body.scrollTop > 20 && scrollVector > -1) ||
+                    (document.body.scrollTop > 320)
+                )
+            ){
+                if (!this.state.scrolledPastTop){
+                    stateChange.scrolledPastTop = true;
+                    this.setState(stateChange);
+                }
+            } else {
+                if (this.state.scrolledPastTop){
+                    stateChange.scrolledPastTop = false;
+                    this.setState(stateChange);
+                }
+            }
+        }, 100);
+
+        // Save logo/brand element's 'full width' before any height transitions.
+        // Ideally wait until logo/brand image has loaded before doing so.
+        var navBarBrandImg = document.getElementsByClassName('navbar-logo-image')[0];
+
+        function saveWidth(){
+            var navBarBrandImgContainer = navBarBrandImg.parentNode;
+            var navBarBrand = navBarBrandImgContainer.parentNode.parentNode;
+            navBarBrand.style.width = ''; // Clear any earlier width
+            if (['xs','sm'].indexOf(responsiveGridState()) !== -1) return; // If mobile / non-fixed nav width
+            //navBarBrandImgContainer.style.width = navBarBrandImgContainer.offsetWidth + 'px'; // Enable to fix width of logo to its large size.
+            navBarBrand.style.width = navBarBrand.offsetWidth + 'px';
+        };
+
+         this.throttledResizeHandler = _.throttle(saveWidth, 300);
+
+        navBarBrandImg.addEventListener('load', saveWidth);
+        // Execute anyway in case image is loaded, in addition to the 1 time on-img-load if any (some browsers do not support img load event; it's not part of W3 spec).
+        // Alternatively we can define width in stylesheet (e.g. 200px)
+        saveWidth();
+
+        window.addEventListener("scroll", this.throttledScrollHandler);
+        window.addEventListener("resize", this.throttledResizeHandler);
+        setTimeout(this.throttledScrollHandler, 100, null, { 'navInitialized' : true });
+    },
+
+    componentWillUnmount : function(){
+        // Unbind events | probably not needed but lets be safe & cleanup.
+        window.removeEventListener("resize", this.throttledResizeHandler);
+        window.removeEventListener("scroll", this.throttledScrollHandler);
+        delete this.throttledResizeHandler;
+        delete this.throttledScrollHandler;
     },
 
     closeMobileMenu : function(){
@@ -101,20 +172,33 @@ var Navigation = module.exports = React.createClass({
 
     render: function() {
         var portal = this.context.portal;
+
+        var navClass = "navbar-container";
+        if (this.state.testWarning) navClass += ' test-warning-visible';
+        if (this.state.navInitialized) navClass += ' nav-initialized';
+        if (this.state.scrolledPastTop) {
+            navClass += " scrolled-past-top";
+        } else {
+            navClass += " scrolled-at-top";
+        }
+
         return (
-            <div className={"navbar-container" + (this.state.testWarning ? " test-warning-visible" : "")}>
-                <div id="navbar" className="navbar navbar-fixed-top navbar-inverse">
+            <div className={navClass}>
+                <div id="top-nav" className="navbar-fixed-top">
                     <TestWarning visible={this.state.testWarning} setHidden={this.hideTestWarning} />
-                    <Navbar label="main" className="navbar-main" id="navbar-icon" onToggle={(open)=>{
+                    <Navbar fixedTop={false /* Instead we make the navbar container fixed */} label="main" className="navbar-main" id="navbar-icon" onToggle={(open)=>{
                         this.setState({ dropdownOpen : open });
                     }} expanded={this.state.dropdownOpen}>
                         <Navbar.Header>
                             <Navbar.Brand>
-                                <NavItem href="/" style={{ display : 'block' }}>
-                                    <img src="/static/img/4dn_logo.svg" className="navbar-logo-image"/>
+                                <NavItem href="/">
+                                    <span className="img-container"><img src="/static/img/4dn_icon.svg" className="navbar-logo-image"/></span>
+                                    <span className="navbar-title">Data Portal</span>
                                 </NavItem>
                             </Navbar.Brand>
-                            <Navbar.Toggle/>
+                            <Navbar.Toggle>
+                                <i className="icon icon-bars icon-fw"></i>
+                            </Navbar.Toggle>
                         </Navbar.Header>
                         <Navbar.Collapse>
                             <Nav>{ this.context.listActionsFor('global_sections').map((a)=> Navigation.buildDropdownMenu.call(this, a, this.state.mounted) ) }</Nav>
