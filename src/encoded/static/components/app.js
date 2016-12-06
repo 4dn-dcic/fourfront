@@ -73,9 +73,7 @@ var App = React.createClass({
             //session: !!(JWT.get('cookie')), // ToDo : Make this work for faster app state change on page load
             session: false,
             user_actions: [],
-            schemas: null,
-            scrolledPastTop : false,
-            navInitialized : false
+            schemas: null
         };
     },
 
@@ -648,7 +646,6 @@ var App = React.createClass({
         });
 
         var appClass = 'done';
-
         if (this.props.slow) {
             appClass = 'communicating';
         }
@@ -660,10 +657,6 @@ var App = React.createClass({
                 canonical = (href_url.protocol || '') + '//' + href_url.host + context.canonical_uri;
             } else {
                 canonical = context.canonical_uri;
-            }
-            console.log(href_url);
-            if (href_url.hash){
-                canonical += (href_url.hash || '');
             }
         }
         // add static page routing
@@ -769,7 +762,7 @@ var App = React.createClass({
                         <div id="application" className={appClass}>
                         <div className="loading-spinner"></div>
                             <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
-                                <Navigation href={ this.props.href } ref="navigation" clickHandler={this.handleClick} />
+                                <Navigation href={ this.props.href } ref="navigation" />
                                 <div id="content" className="container" key={key}>
                                     {content}
                                 </div>

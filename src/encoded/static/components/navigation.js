@@ -75,7 +75,9 @@ var Navigation = module.exports = React.createClass({
         return {
             testWarning: this.props.visible || !productionHost[url.parse(this.context.location_href).hostname] || false,
             mounted : false,
-            dropdownOpen : false
+            dropdownOpen : false,
+            scrolledPastTop : false,
+            navInitialized : false
         };
     },
 
