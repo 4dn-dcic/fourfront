@@ -10147,6 +10147,7 @@
         }
     ],
     "title": "GITAR",
+    "name": "gitar",
     "workflow_steps": [
         {
             "step": "d3b03a23-49e5-4c33-afab-9ec90d65faf3",
@@ -10228,6 +10229,7 @@
         }
     ],
     "title": "FastQC",
+    "name": "fastqc",
     "workflow_steps": [
         {
             "step": "f7b8cd87-49e5-4c33-afab-9ec90d65faf3",

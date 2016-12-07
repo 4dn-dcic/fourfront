@@ -4,7 +4,7 @@
     "id": "/profiles/workflow.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["title", "workflow_type"],
+    "required": ["title", "name", "workflow_type"],
     "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases", "accession"],
     "mixinProperties": [
@@ -30,6 +30,11 @@
             "description": "The preferred viewable name of the workflow.",
             "type": "string"
         },
+        "name": {
+            "title": "Name",
+            "description": "The name of the workflow used by either SBG or Tibanna.",
+            "type": "string"
+        },
         "description": {
             "title": "Description",
             "description": "A short text description of the workflow.",
@@ -42,6 +47,7 @@
                 "Hi-C data analysis",
                 "Image processing",
                 "Visualization processing",
+                "Data QC",
                 "Other"
             ]
         },

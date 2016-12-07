@@ -2,6 +2,7 @@
 var React = require('react');
 var store = require('../store');
 var JWT = require('./objectutils').JWT;
+var { MenuItem } = require('react-bootstrap');
 
 // Component that contains auth0 functions
 var Login = React.createClass({
@@ -42,12 +43,10 @@ var Login = React.createClass({
     },
 
 	showLock: function(e) {
-        e.preventDefault();
 		this.lock.show();
 	},
 
     logout: function (e) {
-        e.preventDefault();
         JWT.remove();
         console.log('Logging out');
         if (!this.context.session) return;
@@ -102,16 +101,26 @@ var Login = React.createClass({
     },
 
     render: function () {
-        var toRender = (this.context.session ?
+        if (this.props.invisible) return null;
+        if (this.context.session){
+            return (
+                <MenuItem id="logoutbtn" onSelect={this.logout} className="global-entry">
+                    Log Out
+                </MenuItem>
+            );    
+        }
+        return (
+            <MenuItem id="loginbtn" onSelect={this.showLock} className="global-entry">
+                Log In
+            </MenuItem>
+        );
+        /* For old nav
+        return (this.context.session ?
             <a href="#" className="global-entry" onClick={this.logout}>Log out</a>
             :
             <a id="loginbtn" href="" className="global-entry" onClick={this.showLock}>Log in</a>
         );
-        return (
-            <div>
-                {toRender}
-            </div>
-           );
-       },
+        */
+    },
 });
 module.exports = Login;

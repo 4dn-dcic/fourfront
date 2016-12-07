@@ -14,7 +14,7 @@ var store = require('../store');
 var browse = require('./browse');
 var origin = require('../libs/origin');
 var serialize = require('form-serialize');
-var { ajaxLoad, ajaxPromise, JWT, console } = require('./objectutils');
+var { ajaxLoad, ajaxPromise, JWT, console, responsiveGridState } = require('./objectutils');
 var jwt = require('jsonwebtoken');
 var dispatch_dict = {}; //used to store value for simultaneous dispatch
 
@@ -251,7 +251,7 @@ var App = React.createClass({
         globals.bindEvent(window, 'keydown', this.handleKey);
 
         this.authenticateUser(this.updateUserInfo);
-        this.loadSchemas();
+        this.loadSchemas(); // Load schemas into app.state, access them where needed via props (preferred, safer) or this.context.
 
         var query_href;
         if(document.querySelector('link[rel="canonical"]')){
@@ -259,9 +259,11 @@ var App = React.createClass({
         }else{
             query_href = this.props.href;
         }
-        store.dispatch({
-            type: {'href':query_href}
-        });
+        if (this.props.href !== query_href){
+            store.dispatch({
+                type: {'href':query_href}
+            });
+        }
         if (this.historyEnabled) {
             var data = this.props.context;
             try {
@@ -280,7 +282,7 @@ var App = React.createClass({
         } else {
             window.onhashchange = this.onHashChange;
         }
-        window.onbeforeunload = this.handleBeforeUnload;
+        //window.onbeforeunload = this.handleBeforeUnload; // this.handleBeforeUnload is not defined
     },
 
     componentDidUpdate: function (prevProps, prevState) {
@@ -389,6 +391,9 @@ var App = React.createClass({
         if (this.historyEnabled) {
             event.preventDefault();
             this.navigate(href);
+            if (this.refs && this.refs.navigation){
+                this.refs.navigation.closeMobileMenu();
+            }
         }
     },
 
@@ -757,7 +762,7 @@ var App = React.createClass({
                         <div id="application" className={appClass}>
                         <div className="loading-spinner"></div>
                             <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
-                                <Navigation />
+                                <Navigation href={ this.props.href } ref="navigation" />
                                 <div id="content" className="container" key={key}>
                                     {content}
                                 </div>
@@ -775,11 +780,14 @@ var App = React.createClass({
     statics: {
         getRenderedProps: function (document) {
             // Ensure the initial render is exactly the same
-            store.dispatch({
-                type: {'href':document.querySelector('link[rel="canonical"]').getAttribute('href')}
-            });
-            var script_props = document.querySelectorAll('script[data-prop-name]');
+            var docHref = document.querySelector('link[rel="canonical"]').getAttribute('href');
+            if (store.getState().href !== docHref) { // Should be true (store (on front-end) seems blank @ this point)
+                store.dispatch({
+                    type: {'href':docHref}
+                });
+            }
             var props_dict = {};
+            var script_props = document.querySelectorAll('script[data-prop-name]');
             for (var i = 0; i < script_props.length; i++) {
                 var elem = script_props[i];
                 var elem_value = elem.text;
