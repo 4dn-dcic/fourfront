@@ -47,8 +47,12 @@ def tier1_cell_culture(testapp, image, lab, award):
 
 
 @pytest.fixture
-def biosample_data(tier1_biosource):
-    return {'description': "Tier 1 Biosample", 'biosource': [tier1_biosource['@id']]}
+def biosample_data(tier1_biosource, lab, award):
+    return {'description': "Tier 1 Biosample",
+            'biosource': [tier1_biosource['@id']],
+            'lab': lab['@id'],
+            'award': award['@id']
+            }
 
 
 @pytest.fixture

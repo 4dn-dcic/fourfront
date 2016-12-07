@@ -331,10 +331,12 @@ def experiment_set_custom(testapp, lab, award):
 
 
 @pytest.fixture
-def sop_map_data(protocol):
+def sop_map_data(protocol, lab, award):
     return {
         "sop_name": "in situ Hi-C SOP map",
         "sop_version": 1,
+        'lab': lab['@id'],
+        'award': award['@id'],
         "associated_item_type": "ExperimentHiC",
         "id_values": ["micro-C"],
         "notes": "This is just a dummy insert not linked to true SOP protocol",
@@ -520,22 +522,26 @@ def publication_tracking(testapp, lab, award):
 
 
 @pytest.fixture
-def software(testapp):
+def software(testapp, lab, award):
     # TODO: ASK_ANDY do we want software_type to be an array?
     item = {
         "name": "FastQC",
         "software_type": ["indexer", ],
-        "version": "1"
+        "version": "1",
+        'lab': lab['@id'],
+        'award': award['@id']
     }
     return testapp.post_json('/software', item).json['@graph'][0]
 
 
 @pytest.fixture
-def analysis_step(testapp, software):
+def analysis_step(testapp, software, lab, award):
     item = {
         'name': 'fastqc',
         "software_used": software['@id'],
-        "version": "1"
+        "version": "1",
+        'lab': lab['@id'],
+        'award': award['@id']
     }
     return testapp.post_json('/analysis_step', item).json['@graph'][0]
 
@@ -606,22 +612,26 @@ def donor_2(testapp, lab, award):
 
 
 @pytest.fixture
-def software_bam(testapp):
+def software_bam(testapp, lab, award):
     # TODO: ASK_ANDY do we want software_type to be an array?
     item = {
         "name": "Aligner",
         "software_type": ["indexer", ],
-        "version": "1"
+        "version": "1",
+        'lab': lab['@id'],
+        'award': award['@id']
     }
     return testapp.post_json('/software', item).json['@graph'][0]
 
 
 @pytest.fixture
-def analysis_step_bam(testapp, software_bam):
+def analysis_step_bam(testapp, software_bam, lab, award):
     item = {
         'name': 'bamqc',
         'software_used': software_bam['@id'],
-        "version": "1"
+        "version": "1",
+        'lab': lab['@id'],
+        'award': award['@id'],
     }
     return testapp.post_json('/analysis_step', item).json['@graph'][0]
 
@@ -639,12 +649,14 @@ def workflow_bam(testapp, lab, award):
 
 
 @pytest.fixture
-def workflow_mapping(testapp, workflow_bam):
+def workflow_mapping(testapp, workflow_bam, lab, award):
     item = {
         "name": "test mapping",
         "workflow_name": "test workflow name",
         "workflow": workflow_bam['@id'],
         "data_input_type": "experiment",
+        'lab': lab['@id'],
+        'award': award['@id'],
         "workflow_parameters": [
             {"parameter": "bowtie_index", "value": "some value"}
         ],
@@ -689,12 +701,10 @@ def target_w_desc(testapp, lab, award):
 
 
 @pytest.fixture
-def targets(target_w_desc, target_w_region, target_w_genes, lab, award):
+def targets(target_w_desc, target_w_region, target_w_genes):
     return {'target_w_desc': target_w_desc,
             'target_w_region': target_w_region,
-            'target_w_genes': target_w_genes,
-            'award': award['@id'],
-            'lab': lab['@id']
+            'target_w_genes': target_w_genes
             }
 
 
