@@ -106,8 +106,8 @@ var Navigation = module.exports = React.createClass({
             if (
                 ['xs','sm'].indexOf(responsiveGridState()) === -1 && // Fixed nav takes effect at medium grid breakpoint or wider.
                 (
-                    (document.body.scrollTop > 20 && scrollVector > -1) ||
-                    (document.body.scrollTop > 320)
+                    (document.body.scrollTop > 20 && scrollVector >= 0) ||
+                    (document.body.scrollTop > 80)
                 )
             ){
                 if (!this.state.scrolledPastTop){

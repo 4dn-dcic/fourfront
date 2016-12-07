@@ -39,7 +39,7 @@ $navbar-transition-length: .75s;
             .navbar-container.scrolled-past-top & {
                 height: $navbar-small-height;
                 line-height: $navbar-small-height;
-                border-color: #ccc;
+                border-color: #d4d4d4;
                 box-shadow: 0 0 3px rgba(0,0,0,0.2);
             }
         }
