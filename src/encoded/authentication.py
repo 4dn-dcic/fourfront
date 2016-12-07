@@ -260,7 +260,7 @@ def me(request):
             break
     else:
         return { 'uuid' : None }
-    
+
     namespace, userid = principal.split('.', 1)
 
     # return { "uuid" : userid } # Uncomment and delete below code to just grab UUID.
