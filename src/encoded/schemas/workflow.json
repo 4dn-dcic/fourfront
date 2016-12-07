@@ -30,6 +30,11 @@
             "description": "The preferred viewable name of the workflow.",
             "type": "string"
         },
+        "name": {
+            "title": "Name",
+            "description": "The name of the workflow used by either SBG or Tibanna.",
+            "type": "string"
+        },
         "description": {
             "title": "Description",
             "description": "A short text description of the workflow.",
@@ -42,6 +47,7 @@
                 "Hi-C data analysis",
                 "Image processing",
                 "Visualization processing",
+                "Data QC",
                 "Other"
             ]
         },
