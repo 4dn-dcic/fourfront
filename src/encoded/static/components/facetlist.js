@@ -570,7 +570,7 @@ var FacetList = module.exports = React.createClass({
             return ignored;
         },
 
-        /** 
+        /**
          * Compare two arrays of experiments to check if contain same experiments, by their ID.
          * @return {boolean} True if equal.
          */
