@@ -3,6 +3,8 @@
         "name": "gitar-v0-2_mm9",
         "description": "example workflow mapping table",
         "workflow_name": "gaurav/4dn/gitar-v0-2",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
         "workflow": "c7a60edf-49e5-4c33-afab-9ec90d65faf3",
         "data_input_type": "experiment",
         "workflow_parameters": [

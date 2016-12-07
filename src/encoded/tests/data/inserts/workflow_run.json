@@ -1,6 +1,8 @@
 [
 {
     "uuid": "f1a60edf-49e5-4c33-afab-9ec90d65fab2",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab",
     "output_files": [
         {
             "workflow_argument_name": "split_bam1",
@@ -93,6 +95,8 @@
     "workflow": "c7a60edf-49e5-4c33-afab-9ec90d65faf3"
 },{
     "uuid": "d8a60edf-49e5-4c33-afab-9ec90d65fae4",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab",
     "output_files": [
         {
             "workflow_argument_name": "report_zip",
