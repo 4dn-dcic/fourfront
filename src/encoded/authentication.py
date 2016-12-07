@@ -35,8 +35,6 @@ from snovault import COLLECTIONS
 from snovault.validation import ValidationFailure
 from snovault.calculated import calculate_properties
 from snovault.validators import no_validate_item_content_post
-from snovault.resource_views import item_view_object
-from .types.user import user_page_view
 
 CRYPT_CONTEXT = __name__ + ':crypt_context'
 
@@ -256,20 +254,20 @@ def logout(request):
 
 @view_config(route_name='me', request_method='GET', permission=NO_PERMISSION_REQUIRED)
 def me(request):
-    '''Grab user id of currently logged in user'''
+    '''Alias /users/<uuid-of-current-user>'''
     for principal in request.effective_principals:
         if principal.startswith('userid.'):
             break
     else:
-        return {}
+        return { 'uuid' : None }
     
     namespace, userid = principal.split('.', 1)
 
     # return { "uuid" : userid } # Uncomment and delete below code to just grab UUID.
 
     request.response.status_code = 307 # Prevent from creating 301 redirects which are then cached permanently by browser
-    user = request.registry[COLLECTIONS]['user'][userid]
-    return user_page_view(user, request, True)
+    properties = request.embed('/users/' + userid, as_user=userid)
+    return properties
 
 @view_config(route_name='session-properties', request_method='GET',
              permission=NO_PERMISSION_REQUIRED)

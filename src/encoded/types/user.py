@@ -105,10 +105,10 @@ class User(Item):
         return [obj for obj in objects if obj['status'] not in ('deleted', 'replaced')]
 
 
-@view_config(context=User, permission='system.Authenticated', request_method='GET', name='page')
-def user_page_view(context, request, bypassPermission = False):
+@view_config(context=User, permission='view', request_method='GET', name='page')
+def user_page_view(context, request):
     """smth."""
-    if request.has_permission('view_details') or bypassPermission:
+    if request.has_permission('view_details'):
         properties = item_view_object(context, request)
     else:
         item_path = request.resource_path(context)
