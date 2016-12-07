@@ -4,6 +4,7 @@
     "id": "/profiles/publication.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
+    "required": ["award", "lab"],
     "required": ["ID"],
     "identifyingProperties": ["uuid", "ID"],
     "additionalProperties": false,

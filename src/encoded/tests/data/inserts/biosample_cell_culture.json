@@ -6,6 +6,9 @@
         "culture_duration": 2.5,
         "culture_duration_units": "minutes",
         "passage_number": 5,
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
         "synchronization_stage": "S-phase"
+
     }
 ]
