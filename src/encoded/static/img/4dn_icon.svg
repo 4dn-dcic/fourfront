@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="57"
+   height="57"
+   viewBox="0 0 57 57"
+   version="1.1"
+   id="svg2"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="4dn_logo.svg">
+  <metadata
+     id="metadata23">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>Logo</dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1201"
+     inkscape:window-height="711"
+     id="namedview21"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:zoom="1.4845361"
+     inkscape:cx="97"
+     inkscape:cy="28.5"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="Logo" />
+  <!-- Generator: Sketch 39.1 (31720) - http://www.bohemiancoding.com/sketch -->
+  <title
+     id="title4">Logo</title>
+  <desc
+     id="desc6">Created with Sketch.</desc>
+  <defs
+     id="defs8">
+    <linearGradient
+       x1="0.14695313"
+       y1="28.3575"
+       x2="57.716953"
+       y2="28.3575"
+       id="linearGradient-1"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         stop-color="#238BAE"
+         offset="0%"
+         id="stop11" />
+      <stop
+         stop-color="#84A943"
+         offset="100%"
+         id="stop13" />
+    </linearGradient>
+  </defs>
+  <g
+     id="Symbols"
+     style="fill:none;fill-rule:evenodd;stroke:none;stroke-width:1">
+    <g
+       id="Logo">
+      <circle
+         id="Oval"
+         cx="28.5"
+         cy="28.5"
+         r="28.5"
+         style="fill:url(#linearGradient-1)" />
+      <polygon
+         id="N"
+         points="48.664062,37 51.59375,37 51.59375,20.089844 48.207031,20.089844 48.207031,31.105469 48.113281,31.105469 40.214844,20.089844 37.261719,20.089844 37.261719,37 40.648438,37 40.648438,25.925781 40.753906,25.925781 "
+         style="fill:#ffffff" />
+      <path
+         d="m 18.352,32.28 -2.568,0 0,3.72 -3,0 0,-3.72 -7.896,0 0,-1.752 6.936,-10.368 3.96,0 0,9.72 2.568,0 0,2.4 z m -10.272,-2.4 4.704,0 0,-4.848 0.072,-2.592 -0.048,0 c -0.352002,0.816004 -0.831997,1.687995 -1.44,2.616 L 8.08,29.88 Z m 25.056,-7.656 c 1.360007,1.376007 2.04,3.327987 2.04,5.856 0,2.528013 -0.679993,4.479993 -2.04,5.856 C 31.775993,35.312007 29.856012,36 27.376,36 l -6.12,0 0,-15.84 6.12,0 c 2.480012,0 4.399993,0.687993 5.76,2.064 l 0,0 z m -2.532,9.78 c 0.760004,-0.904005 1.14,-2.211991 1.14,-3.924 0,-1.712009 -0.379996,-3.019995 -1.14,-3.924 C 29.843996,23.251995 28.712007,22.8 27.208,22.8 l -2.64,0 0,10.56 2.64,0 c 1.504007,0 2.635996,-0.451996 3.396,-1.356 l 0,0 z"
+         id="4D"
+         inkscape:connector-curvature="0"
+         style="fill:#ffffff" />
+    </g>
+  </g>
+</svg>

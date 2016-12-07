@@ -673,6 +673,7 @@ def store_keys(app, store_access_key, keys):
                 return
 
             s3 = boto3.client('s3')
+            secret = secret[:32]
 
             print("Uploading S3 object with SSE-C")
             s3.put_object(Bucket=s3bucket,

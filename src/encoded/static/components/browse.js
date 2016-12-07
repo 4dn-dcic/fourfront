@@ -650,7 +650,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                             facets={this.state.facets}
                             onFilter={this.onFilter}
                             ignoredFilters={this.state.ignoredFilters}
-                            className="shadow-border with-header-bg"
+                            className="with-header-bg"
                         />
                     </div>
                     :
