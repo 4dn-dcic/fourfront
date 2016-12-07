@@ -55,6 +55,7 @@ def includeme(config):
     # basic login route
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')
+    config.add_route('me', '/me')
     config.add_route('impersonate-user', '/impersonate-user')
     config.add_route('session-properties', '/session-properties')
     config.scan(__name__)
@@ -251,6 +252,22 @@ def logout(request):
 
     return {}
 
+@view_config(route_name='me', request_method='GET', permission=NO_PERMISSION_REQUIRED)
+def me(request):
+    '''Alias /users/<uuid-of-current-user>'''
+    for principal in request.effective_principals:
+        if principal.startswith('userid.'):
+            break
+    else:
+        return { 'uuid' : None }
+
+    namespace, userid = principal.split('.', 1)
+
+    # return { "uuid" : userid } # Uncomment and delete below code to just grab UUID.
+
+    request.response.status_code = 307 # Prevent from creating 301 redirects which are then cached permanently by browser
+    properties = request.embed('/users/' + userid, as_user=userid)
+    return properties
 
 @view_config(route_name='session-properties', request_method='GET',
              permission=NO_PERMISSION_REQUIRED)
