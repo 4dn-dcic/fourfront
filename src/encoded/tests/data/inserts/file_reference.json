@@ -8,5 +8,26 @@
     "notes": "sample dcic notes",
     "accession": "4DNFHFYGN09A",
     "lab": "4dn-dcic-lab"
-}
+},
+{
+
+    "uuid": "c4002377-49e5-4c33-afab-9ec90d65fae9",
+    "status": "uploaded",
+    "submitted_by": "4dndcic@gmail.com",
+    "file_format": "bwaIndex",
+    "notes": "reference genome index for hg38, for bwa",
+    "filename": "hg38.bwaIndex.tgz",
+    "lab": "4dn-dcic-lab",
+    "award": "1U01CA200059-01"
+ },
+ {
+    "uuid": "d4002377-49e5-4c33-afab-9ec90d65fae9",
+    "status": "uploaded",
+    "submitted_by": "4dndcic@gmail.com",
+    "file_format": "bwaIndex",
+    "notes": "reference genome index for mm10, for bwa",
+    "filename": "mm10.bwaIndex.tgz",
+    "lab": "4dn-dcic-lab",
+    "award": "1U01CA200059-01"
+ }
 ]
