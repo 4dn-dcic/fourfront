@@ -10229,15 +10229,47 @@
         }
     ],
     "title": "FastQC",
-    "name": "fastqc",
+    "name": "fastqc-0-11-4-1",
+    "workflow_type": "Data QC",
+    "workflow_diagram": "",
+    "description": "FastQC quality control step for fastq files",
     "workflow_steps": [
         {
             "step": "f7b8cd87-49e5-4c33-afab-9ec90d65faf3",
             "step_name": "FastQC"
         }
-    ],
-    "workflow_type": "Other",
+    ]
+},
+{
+    "uuid": "181b777a-2db7-4593-ae7f-6170a5d69ff7",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab",
+    "title": "ValidateFiles",
+    "name": "validate",
+    "workflow_type": "Data QC",
     "workflow_diagram": "",
-    "description": "FastQC quality control step for fastq files"
+    "description": "ValidateFiles quality control step for fastq files"
+},
+{
+    "uuid": "d3f25cd3-e726-4b3c-a022-48f844474b41",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab",
+    "title": "md5",
+    "name": "md5",
+    "workflow_type": "Data QC",
+    "workflow_diagram": "",
+    "description": "md5 on uncompressed file"
+},
+{
+
+    "uuid": "02d636b9-d82d-4da9-950c-2ca994a0943e",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab",
+    "title": "Hi-C processing part A",
+    "name": "hi-c-processing-parta",
+    "workflow_type": "Hi-C data analysis",
+    "workflow_diagram": "",
+    "description": "Creating a bam and pairs files from a pair of fastq files"
 }
+
 ]
