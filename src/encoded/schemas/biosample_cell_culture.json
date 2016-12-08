@@ -4,7 +4,7 @@
     "id": "/profiles/biosample_cell_culture.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["culture_start_date"],
+    "required": ["culture_start_date", "award", "lab"],
     "identifyingProperties": ["uuid", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [

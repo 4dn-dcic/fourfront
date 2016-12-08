@@ -8,6 +8,8 @@
         "target_sequence": "ATGCATGC",
         "rnai_constructs": ["131106bc-8535-4448-903e-854af460b211"],
         "rnai_vendor": "b31106bc-8535-4448-903e-854af460b21d",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
         "url": "https://www.cyclingnews.com"
     },
     {
@@ -19,6 +21,8 @@
         "target_sequence": "ATGCATGC",
         "rnai_constructs": ["131106bc-8535-4448-903e-854af460b211"],
         "rnai_vendor": "b31106bc-8535-4448-903e-854af460b21d",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
         "url": "https://www.velonews.com"
     },
     {
@@ -30,6 +34,8 @@
         "target_sequence": "ATGCATGC",
         "rnai_constructs": ["131106bc-8535-4448-903e-854af460b211"],
         "rnai_vendor": "b31106bc-8535-4448-903e-854af460b21d",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
         "url": "https://www.cyclingnews.com"
     }
 ]

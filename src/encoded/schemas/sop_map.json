@@ -4,7 +4,7 @@
     "id": "/profiles/sop_map.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["associated_item_type"],
+    "required": ["associated_item_type", "award", "lab"],
     "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases", "mapid"],
     "mixinProperties": [
