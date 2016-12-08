@@ -1,0 +1,30 @@
+[
+{
+    "title": "FastQC", 
+    "name": "fastqc-0-11-4-1",
+    "workflow_type": "Data QC", 
+    "workflow_diagram": "", 
+    "description": "FastQC quality control step for fastq files"
+},
+{
+    "title": "ValidateFiles", 
+    "name": "validate",
+    "workflow_type": "Data QC", 
+    "workflow_diagram": "", 
+    "description": "ValidateFiles quality control step for fastq files"
+},
+{
+    "title": "md5",
+    "name": "md5",
+    "workflow_type": "Data QC", 
+    "workflow_diagram": "", 
+    "description": "md5 on uncompressed file"
+},
+{
+    "title": "Hi-C processing part A",
+    "name": "hi-c-processing-parta",
+    "workflow_type": "Hi-C data analysis", 
+    "workflow_diagram": "", 
+    "description": "Creating a bam and pairs files from a pair of fastq files"
+}
+}
