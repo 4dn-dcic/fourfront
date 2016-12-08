@@ -19,6 +19,7 @@
     },
 
 {
+        "uuid": "99d795fb-d3f5-4537-8169-4cf337bb15c8",
         "name": "hi-c-processing-parta--mm10",
         "description": "workflow mapping table for Hi-C processing part A, mm10",
         "workflow_name": "hi-c-processing-parta",
@@ -36,6 +37,7 @@
         ]
 },
 {
+        "uuid": "2ce39e44-381d-4569-a8b0-30a04f6bf5d9",
         "name": "hi-c-processing-parta--hg38",
         "description": "workflow mapping table for Hi-C processing part A, hg38",
         "workflow_name": "hi-c-processing-parta",
