@@ -1,5 +1,6 @@
 [
     {
+        "uuid": "99d795fb-d3f5-4537-8169-4cf337bb83hc",
         "name": "gitar-v0-2_mm9",
         "description": "example workflow mapping table",
         "workflow_name": "gaurav/4dn/gitar-v0-2",
