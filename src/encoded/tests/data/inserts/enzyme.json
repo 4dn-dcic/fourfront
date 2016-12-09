@@ -6,6 +6,8 @@
         "recognition_sequence": "AAGCTT",
         "site_length": 6,
         "cut_position": 1,
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
         "url": "https://www.neb.com/products/r0104-hindiii"
     },
     {
@@ -13,6 +15,8 @@
         "enzyme_source": "thermofisher-scientific",
         "description": "used for DNase HiC",
         "catalog_number":"EN052",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
         "url": "https://www.thermofisher.com/order/catalog/product/EN0525"
     },
     {
@@ -22,6 +26,8 @@
         "recognition_sequence": "GATC",
         "site_length": 4,
         "cut_position": 0,
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
         "url": "https://www.neb.com/products/r0147-mboi"
     },
     {
@@ -29,6 +35,8 @@
         "enzyme_source": "worthington-biochemical",
         "description": "used for Micro-C",
         "catalog_number":"LS004798",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
         "url": "http://www.worthington-biochem.com/nfcp/default.html"
     },
     {
@@ -38,11 +46,15 @@
         "recognition_sequence": "GATC",
         "site_length": 4,
         "cut_position": 0,
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
         "url": "https://www.neb.com/products/r0543-dpnii"
     },
     {
         "name": "NcoI_MspI_BspHI",
         "enzyme_source": "new-england-biolabs",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
         "description": "Mixed Enzymes"
     },
     {
@@ -52,6 +64,8 @@
         "recognition_sequence": "CCATGG",
         "site_length": 6,
         "cut_position": 1,
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
         "url": "https://www.neb.com/products/r0193-ncoi"
     },
     {
@@ -61,6 +75,8 @@
         "recognition_sequence": "CCGG",
         "site_length": 4,
         "cut_position": 1,
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
         "url": "https://www.neb.com/products/r0106-mspi"
     }
 ]

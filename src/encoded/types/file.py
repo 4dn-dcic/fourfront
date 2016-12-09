@@ -275,6 +275,7 @@ class FileReference(File):
     item_type = 'file_reference'
     schema = load_schema('encoded:schemas/file_reference.json')
     embedded = File.embedded
+    name_key = 'accession'
 
 
 @view_config(name='upload', context=File, request_method='GET',

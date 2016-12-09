@@ -8,6 +8,8 @@
         "concentration_units": "units",
         "duration": 24,
         "duration_units": "hour",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
         "temperature": 37
     },
     {
@@ -19,6 +21,8 @@
         "concentration_units": "mg/mL",
         "duration": 1,
         "duration_units": "minute",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
         "temperature": 20
     }
 ]

@@ -3,8 +3,8 @@ pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
 @pytest.fixture
-def vendor_data():
-    return { "title": "WorTHington Biochemical" }
+def vendor_data(lab, award):
+    return {"title": "WorTHington Biochemical", 'lab': lab['@id'], 'award': award['@id']}
 
 
 def test_vendor_update_name_no_caps(testapp, vendor_data):

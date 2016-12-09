@@ -158,12 +158,14 @@
              "exclude_from": "submit4dn",
              "type": "string",
              "linkTo": "Lab",
-             "linkSubmitsFor": true
+             "linkSubmitsFor": true,
+            "default":""
         },
         "award": {
             "title": "Grant",
             "description": "Grant associated with the submission.",
             "exclude_from": "submit4dn",
+            "default": "",
             "type": "string",
             "linkTo": "Award"
         }
