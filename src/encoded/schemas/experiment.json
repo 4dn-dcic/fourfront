@@ -12,9 +12,6 @@
       "biosample_quantity_units": ["biosample_quantity"]
     },
     "properties": {
-        "schema_version": {
-            "internal_comment": "Bump the default in the subclasses."
-        },
         "status": {
             "title": "Status",
             "type": "string",

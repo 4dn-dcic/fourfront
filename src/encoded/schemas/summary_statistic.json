@@ -15,9 +15,6 @@
         { "$ref": "mixins.json#/status" }
    ],
     "properties": {
-        "schema_version": {
-            "internal_comment": "Bump the default in the subclasses."
-        },
         "description": {
             "title": "Description",
             "description": "A short description of the summary statistic",

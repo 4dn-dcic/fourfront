@@ -8,9 +8,6 @@
     "identifyingProperties": ["uuid","aliases"],
     "additionalProperties": false,
     "properties": {
-        "schema_version": {
-            "internal_comment": "Bump the default in the subclasses."
-        },
         "description": {
             "title": "Description",
             "description": "A brief plain text description of the treatment.",
