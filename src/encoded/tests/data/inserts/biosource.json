@@ -7,6 +7,7 @@
         "cell_line": "GM12878",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
     },
     {
@@ -17,6 +18,7 @@
         "cell_line": "GM12878",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
     },
     {
@@ -27,6 +29,7 @@
         "cell_line": "H1-hESC",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
     },
     {
@@ -37,6 +40,7 @@
         "cell_line": "U2OS",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e",
         "modifications": ["431106bc-8535-4448-903e-854af460b265"]
     },
@@ -47,6 +51,7 @@
         "individual":"4DNIN000AAQ1",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
     },
     {
@@ -56,6 +61,7 @@
         "individual":"4DNIN000AAQ1",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
     },
     {
@@ -65,6 +71,7 @@
         "individual":"4DNIN000AAQ1",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "tissue": "brain"
     },
     {
@@ -74,6 +81,7 @@
         "individual":"4DNIN000AAQ1",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
     },
     {
@@ -83,6 +91,7 @@
         "individual":"4DNIN000AAQ1",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
     }
 ]

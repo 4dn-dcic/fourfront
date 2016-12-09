@@ -5,6 +5,7 @@
         "uuid": "d1115d5e-40aa-43bc-b81c-32c70c9afb55",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "aliases": ["dcic:test_targ1"]
     },
     {
@@ -14,6 +15,7 @@
         "uuid": "d1115d5e-40aa-43bc-b81c-32c70c9afb44",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "aliases": ["dcic:test_targ2"]
     },
     {
@@ -22,6 +24,7 @@
         "uuid": "d1115d5e-40aa-43bc-b81c-32c70c9afb33",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "aliases": ["dcic:test_targ3"]
     }
 ]
