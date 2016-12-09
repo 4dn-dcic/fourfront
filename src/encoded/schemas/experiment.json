@@ -135,6 +135,7 @@
             "title": "Quality Metric Flags",
             "description": "Flags and associated info for flagging experiments with possible issues",
             "type": "array",
+            "exclude_from": "submit4dn",
             "items": {
                 "title": "Flag",
                 "description": "A flag for this experiment with link to associated QC info.",

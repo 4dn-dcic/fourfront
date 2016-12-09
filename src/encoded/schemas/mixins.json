@@ -5,6 +5,7 @@
             "title": "Schema Version",
             "internal_comment":  "Do not submit, value is assigned by the server. The version of the JSON schema that the server uses to validate the object. Schema version indicates generation of schema used to save version to to enable upgrade steps to work. Individual schemas should set the default.",
             "type": "string",
+            "exclude_from": "submit4dn",
             "pattern": "^\\d+(\\.\\d+)*$",
             "requestMethod": []
         }
@@ -14,6 +15,7 @@
             "title": "UUID",
             "type": "string",
             "format": "uuid",
+            "exclude_from": "submit4dn",
             "serverDefault": "uuid4",
             "permission": "import_items",
             "requestMethod": "POST"
@@ -175,7 +177,7 @@
             "title": "Notes",
             "description": "DCIC internal notes.",
             "type": "string",
-
+            "exclude_from": "submit4dn",
             "elasticsearch_mapping_index_type": {
                 "title": "Field mapping index type",
                 "description": "Defines one of three types of indexing available",
