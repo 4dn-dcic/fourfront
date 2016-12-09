@@ -10,6 +10,7 @@
         "duration_units": "hour",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "temperature": 37
     },
     {
@@ -23,6 +24,7 @@
         "duration_units": "minute",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "temperature": 20
     }
 ]

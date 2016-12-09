@@ -21,6 +21,7 @@
         "modifications": ["431106bc-8535-4448-903e-854af460b265"],
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "treatments": ["586b362f-4eb6-4a9c-8173-3ab267307e3b"]
     },
     {
@@ -31,6 +32,7 @@
         "modifications": ["431106bc-8535-4448-903e-854af460b276"],
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "treatments": ["686b362f-4eb6-4a9c-8173-3ab267307a8d"]
     },
     {
@@ -41,6 +43,7 @@
         "modifications": ["431106bc-8535-4448-903e-854af460b254"],
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "treatments": ["486b362f-4eb6-4a9c-8173-3ab267307e4b"]
     }
 ]

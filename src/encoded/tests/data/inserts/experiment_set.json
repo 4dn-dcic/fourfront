@@ -3,6 +3,7 @@
         "uuid": "431106bc-8535-4448-903e-854af460b285",
         "description": "Custom experiment set",
         "experimentset_type": "custom",
+        "submitted_by": "wrangler@wrangler.com",
         "experiments_in_set": ["4DNEX067APV1", "4DNEX067APY1", "4DNEX067APZ1"],
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01"

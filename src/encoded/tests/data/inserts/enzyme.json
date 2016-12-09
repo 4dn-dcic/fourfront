@@ -8,6 +8,7 @@
         "cut_position": 1,
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "url": "https://www.neb.com/products/r0104-hindiii"
     },
     {
@@ -17,6 +18,7 @@
         "catalog_number":"EN052",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "url": "https://www.thermofisher.com/order/catalog/product/EN0525"
     },
     {
@@ -28,6 +30,7 @@
         "cut_position": 0,
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "url": "https://www.neb.com/products/r0147-mboi"
     },
     {
@@ -37,6 +40,7 @@
         "catalog_number":"LS004798",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "url": "http://www.worthington-biochem.com/nfcp/default.html"
     },
     {
@@ -48,6 +52,7 @@
         "cut_position": 0,
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "url": "https://www.neb.com/products/r0543-dpnii"
     },
     {
@@ -55,6 +60,7 @@
         "enzyme_source": "new-england-biolabs",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "description": "Mixed Enzymes"
     },
     {
@@ -66,6 +72,7 @@
         "cut_position": 1,
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "url": "https://www.neb.com/products/r0193-ncoi"
     },
     {
@@ -77,6 +84,7 @@
         "cut_position": 1,
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "url": "https://www.neb.com/products/r0106-mspi"
     }
 ]
