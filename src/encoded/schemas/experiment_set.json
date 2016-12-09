@@ -4,7 +4,7 @@
     "id": "/profiles/experiment_set.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [ "award", "lab"],
+    "required": [ "award", "lab", "description"],
     "identifyingProperties": ["uuid", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -20,7 +20,7 @@
     ],
     "properties": {
         "schema_version": {
-            "hidden comment": "Bump the default in the subclasses."
+            "default": "1"
         },
         "accession": {
             "accessionType": "ES"
@@ -34,7 +34,6 @@
             "uniqueItems": true,
             "items": {
                 "title": "Experiment",
-                "comment": "use accessions for identifiers.",
                 "type": "string",
                 "linkTo": "Experiment"
             }

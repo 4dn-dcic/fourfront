@@ -47,8 +47,8 @@
           },
           "individual": {
               "title": "Individual",
-              "description": "Information on donor or individual mouse or other organism.",
-              "comment": "For human biosamples, see human_individual.json for available identifiers.",
+              "description": "Source of the biological material, donor.",
+              "comment": "See Individual sheets for existing items",
               "type": "string",
               "linkTo": "Individual"
           },
@@ -111,8 +111,7 @@
           "tissue": {
               "title": "Tissue name",
               "description": "Anatomy (UBERON) Ontology term for the tissue used.",
-              "type":  "string",
-              "comment": "enforce UBERON ontology term for a tissue type?"
+              "type":  "string"
           },
           "biosource_vendor": {
                 "title": "Biosource Vendor",

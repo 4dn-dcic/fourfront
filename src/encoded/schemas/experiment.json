@@ -1,7 +1,6 @@
 {
     "title": "Experiment",
     "description": "Schema for submitting metadata for an assay.",
-    "comment": "Experiment is the main organizing object for metadata on a single assay, its associated protocols, files and subsequent analyses.",
     "id": "/profiles/experiment.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
@@ -14,7 +13,7 @@
     },
     "properties": {
         "schema_version": {
-            "default": "1"
+            "internal_comment": "Bump the default in the subclasses."
         },
         "status": {
             "title": "Status",
@@ -43,7 +42,7 @@
         "experiment_type": {
             "type": "string",
             "description": "A controlled term specifying the type of experiment.",
-            "comment":"required ontology term that is entered in each specific experiment_*"
+            "internal_comment":"should be ontology term?"
         },
         "protocol": {
             "title": "Reference Protocol",

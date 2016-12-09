@@ -107,7 +107,7 @@
         "documentation_url": {
             "title": "About URL",
             "description": "An external resource to addiitonal information about the software.",
-            "comment": "Use of this is discouraged as documentation should be included in github repo (source_url) or binary_url",
+            "internal_comment": "Use of this is discouraged as documentation should be included in github repo (source_url) or binary_url",
             "type": "string",
             "format": "uri"
         },

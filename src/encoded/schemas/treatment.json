@@ -9,7 +9,7 @@
     "additionalProperties": false,
     "properties": {
         "schema_version": {
-            "default": "1"
+            "internal_comment": "Bump the default in the subclasses."
         },
         "description": {
             "title": "Description",

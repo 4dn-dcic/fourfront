@@ -16,7 +16,6 @@
         "organism": {
             "title": "Organism",
             "description": "Organism of the individual.",
-            "comment": "Do not submit, value is assigned by the object.",
             "type": "string",
             "linkTo": "Organism"
         },

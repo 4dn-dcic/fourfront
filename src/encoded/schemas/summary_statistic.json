@@ -16,7 +16,7 @@
    ],
     "properties": {
         "schema_version": {
-            "hidden comment": "Bump the default in the subclasses."
+            "internal_comment": "Bump the default in the subclasses."
         },
         "description": {
             "title": "Description",

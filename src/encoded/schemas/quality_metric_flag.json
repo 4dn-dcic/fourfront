@@ -17,13 +17,13 @@
    ],
     "properties": {
         "schema_version": {
-            "hidden comment": "Bump the default in the subclasses."
+            "default": "1"
         },
         "flag": {
             "title": "Flag",
             "description": "A flag that may indicate an issue with an experiment",
             "type": "string",
-            "comment": "Can be associated with a specific quality metric that generates the flag",
+            "internal_comment": "Can be associated with a specific quality metric that generates the flag",
             "enum": [
                 "FASTQC WARNING",
                 "ALIGNMENT WARNING",

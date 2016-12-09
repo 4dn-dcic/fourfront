@@ -35,7 +35,7 @@
         "biosource": {
           "title": "Biosources",
           "description": "The cell lines or tissue types used in the experiment",
-          "comment": "See biosource.json for available identifiers?",
+          "comment": "See Biosource sheet for existing items",
           "type": "array",
           "default":[],
           "uniqueItems": true,
@@ -49,12 +49,12 @@
         "biosample_protocols": {
             "title": "Biosample Protocols",
             "description": "Information about biosample preparation protocols.",
+            "comment": "eg. cell culture protocol info",
             "type": "array",
             "items": {
                 "title": "Protocols",
                 "description": "Specific information for specific types of protocols",
                 "type": "string",
-                "comment": "eg. can have cell culture protocol info",
                 "linkTo": "Protocol"
             }
         },
@@ -67,6 +67,7 @@
         "modifications": {
             "title": "Stable genomic modifications",
             "description": "Expression or targeting vectors stably transfected to generate Crispr'ed or other genomic modification",
+            "comment": "See Modifications sheet for exisiting items",
             "type": "array",
             "default": [],
             "uniqueItems": true,
@@ -80,6 +81,7 @@
         "treatments": {
             "title": "Treatments",
             "type": "array",
+            "comment": "See Treatment sheets for exisiting items",
             "default": [],
             "uniqueItems": true,
             "items": {
@@ -101,7 +103,6 @@
                         "type": "string",
                         "description": "A controlled term specifying the relationship between biosamples.",
                         "title": "Relationship Type",
-                        "comment": "if you want the relationship to be updated on the other end, modify biosample.py",
                         "enum": [
                             "derived from",
                             "parent of"
