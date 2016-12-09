@@ -38,6 +38,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'treatments',
         'modifications'
     ]
+    name_key = 'accession'
 
     @calculated_property(schema={
         "title": "Modifications summary",
