@@ -215,6 +215,7 @@ var EditableField = module.exports.EditableField = React.createClass({
             parent : null,
             pattern: null,
             required: false,
+            schemas: null,
             debug: true
         };
     },

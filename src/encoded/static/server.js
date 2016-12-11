@@ -15,8 +15,8 @@ require('./libs/react-patches');
 var argv = process.argv.slice(2);
 var debug = (argv[0] === '--debug');
 
-var app = require('./libs/react-middleware').build(require('./components'));
-var http_stream = require('subprocess-middleware').HTTPStream({app: app, captureConsole: !debug});
+var appRendererFxn = require('./libs/react-middleware').build(require('./components'));
+var http_stream = require('subprocess-middleware').HTTPStream({app: appRendererFxn, captureConsole: !debug});
 http_stream.pipe(process.stdout);
 if (debug) {
     var value = argv[1] || '{}';

@@ -27,6 +27,26 @@ var render = function (Component, body, res) {
         'href':res.getHeader('X-Request-URL') || context['@id'],
         'inline':inline
     };
+
+    // Grab JWT token if available to inform session
+    var jwtToken = res.getHeader('X-Request-JWT'); // Only returned if successfully authenticated
+    var sessionMayBeSet = false;
+    var userInfo = null;
+    var alerts = null;
+    if (jwtToken && jwtToken.length > 0 && jwtToken !== "null" && jwtToken !== "expired"){
+        sessionMayBeSet = true;
+        userInfo = JSON.parse(res.getHeader('X-User-Info'));
+        res.removeHeader('X-User-Info');
+        res.removeHeader('X-Request-JWT');
+    } else if (
+        (disp_dict.context.code === 403 || res.statusCode === 403) && 
+        (jwtToken === 'expired' || disp_dict.context.detail === "Bad or expired token.")
+    ) { 
+        sessionMayBeSet = false;
+        alerts = [{"title" : "Logged Out", "message" : "You have been logged out due to an expired session."}];
+    }
+    // End JWT token grabbing
+
     store.dispatch({
         type: disp_dict
     });
@@ -34,7 +54,7 @@ var render = function (Component, body, res) {
     var UseComponent;
     try {
         UseComponent = connect(mapStateToProps)(Component);
-        markup = ReactDOMServer.renderToString(<Provider store={store}><UseComponent /></Provider>);
+        markup = ReactDOMServer.renderToString(<Provider store={store}><UseComponent sessionMayBeSet={sessionMayBeSet} userInfo={userInfo} alerts={alerts} /></Provider>);
 
     } catch (err) {
         var context = {

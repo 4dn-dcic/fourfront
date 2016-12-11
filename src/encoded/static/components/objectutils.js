@@ -2,6 +2,7 @@
 
 var cookie = require('react-cookie');
 var moment = require('moment');
+var _ = require('underscore');
 
 var SingleTreatment = module.exports.SingleTreatment = function(treatment) {
     var treatmentText = '';
@@ -124,25 +125,68 @@ var patchedConsole = module.exports.console = (function(){
 var JWT = module.exports.JWT = {
 
     COOKIE_ID : 'jwtToken',
+    dummyStore : {}, // Fake localStore for use by serverside.
     
-    get : function(source = 'any'){
+    get : function(source = 'cookie'){
         if (source === 'all' || source === '*') source = 'any';
 
         var idToken = null;
 
         if (source === 'cookie' || source === 'any'){
-            idToken = cookie.load(JWT.COOKIE_ID) || null;
-        }
-
-        if (idToken === null && (source === 'localStorage' || source === 'any')){
-            if(typeof(Storage) !== 'undefined'){
-                if(localStorage && localStorage.user_info){
-                    idToken = JSON.parse(localStorage.getItem('user_info')).id_token;
-                }
+            if (isServerSide()){
+                idToken = null;
+            } else {
+                idToken = cookie.load(JWT.COOKIE_ID) || null;
             }
         }
 
+        if (idToken === null && (source === 'localStorage' || source === 'any' || isServerSide())){
+            var userInfo = JWT.getUserInfo();
+            if (userInfo && userInfo.id_token) idToken = userInfo.id_token;
+        }
+
         return idToken;
+    },
+
+    getUserInfo : function(){
+        var storeExists = true;
+        if(typeof(Storage) === 'undefined' || typeof localStorage === 'undefined' || !localStorage) storeExists = false;
+        if (storeExists){
+            try {
+                return JSON.parse(localStorage.getItem('user_info'));
+            } catch (e){
+                console.error(e);
+                return null;
+            }
+        } else {
+            try {
+                return JSON.parse(JWT.dummyStore.user_info);
+            } catch (e){
+                console.error(e);
+                return null;
+            }
+        }
+    },
+
+    getUserDetails : function(){
+        var userInfo = JWT.getUserInfo();
+        if (userInfo && userInfo.details) {
+            var userDetails = userInfo.details;
+            if (userDetails === 'null') userDetails = null;
+            return userDetails;
+        }
+        return null;
+    },
+
+    saveUserDetails : function(details){
+        var userInfo = JWT.getUserInfo();
+        if (userInfo) {
+            userInfo.details = details;
+            JWT.saveUserInfoLocalStorage(userInfo);
+            return true;
+        } else {
+            return null;
+        }
     },
 
     save : function(idToken, destination = 'cookie'){
@@ -155,8 +199,13 @@ var JWT = module.exports.JWT = {
     },
 
     saveUserInfoLocalStorage : function(user_info){
-        if(typeof(Storage) == 'undefined') return false;
-        localStorage.setItem("user_info", JSON.stringify(user_info));
+        var storeExists = true;
+        if(typeof(Storage) == 'undefined' || typeof localStorage === 'undefined') storeExists = false;
+        if (storeExists){
+            localStorage.setItem("user_info", JSON.stringify(user_info));
+        } else {
+            JWT.dummyStore.user_info = JSON.stringify(user_info);
+        }
         return true;
     },
 
@@ -173,21 +222,26 @@ var JWT = module.exports.JWT = {
             removedLocalStorage = false;
 
         if (source === 'cookie' || source === 'all'){
-            cookie.remove(JWT.COOKIE_ID, { path : '/' });
-            removedCookie = true;
+            var savedIdToken = cookie.load(JWT.COOKIE_ID) || null;
+            if (savedIdToken) {
+                cookie.remove(JWT.COOKIE_ID, { path : '/' });
+                removedCookie = true;
+            }
         }
         if (source === 'localStorage' || source === 'all'){
             if(typeof(Storage) === 'undefined') return false;
-            localStorage.removeItem("user_info");
-            removedLocalStorage = true;
+            if (localStorage.user_info){
+                localStorage.removeItem("user_info");
+                removedLocalStorage = true;
+            }
         }
         console.info('Removed JWT: ' + removedCookie + ' (cookie) ' + removedLocalStorage + ' (localStorage)');
         return { 'removedCookie' : removedCookie, 'removedLocalStorage' : removedLocalStorage };
     },
 
     addToHeaders : function(headers = {}){
-        var idToken = JWT.get();
-        if(idToken && typeof headers.Authorization == 'undefined'){
+        var idToken = JWT.get('cookie');
+        if(idToken && typeof headers.Authorization === 'undefined'){
             headers.Authorization = 'Bearer ' + idToken;
         }
         return headers;
@@ -195,12 +249,17 @@ var JWT = module.exports.JWT = {
 
 };
 
+if (!isServerSide()) window.JWT = JWT;
+
 
 var setAjaxHeaders = function(xhr, headers = {}) {
-    if (typeof headers["Content-Type"] == 'undefined'){
-        headers["Content-Type"] = "application/json;charset=UTF-8";
-        headers.Accept = 'application/json';
-    }
+    // Defaults
+    headers = _.extend({
+        "Content-Type" : "application/json;charset=UTF-8",
+        "Accept" : "application/json",
+        "X-Requested-With" : "XMLHttpRequest" // Allows some server-side libs (incl. pyramid) to identify using `request.is_xhr`.
+    }, headers);
+
     // Add JWT if set
     JWT.addToHeaders(headers);
 
@@ -246,7 +305,7 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
     }
 }
 
-var ajaxPromise = module.exports.ajaxPromise = function(url, method = 'GET', headers = {}, data = null, debugResponse = false){
+var ajaxPromise = module.exports.ajaxPromise = function(url, method = 'GET', headers = {}, data = null, cache = true, debugResponse = false){
     var xhr;
     var promise = new Promise(function(resolve, reject) {
         xhr = new XMLHttpRequest();
@@ -257,6 +316,9 @@ var ajaxPromise = module.exports.ajaxPromise = function(url, method = 'GET', hea
             resolve(response);
         };
         xhr.onerror = reject;
+        if (cache === false && url.indexOf('format=json') > -1){
+            url += '&ts=' + parseInt(Date.now());
+        }
         xhr.open(method, url, true);
         xhr = setAjaxHeaders(xhr, headers);
 

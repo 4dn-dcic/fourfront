@@ -376,23 +376,30 @@ var ColumnSorter = React.createClass({
         this.props.sortByFxn(this.props.val, reverse);
     },
 
+    getDefaultProps : function(){
+        return {
+            descend : false
+        };
+    },
+
+    iconStyle : function(style = 'descend'){
+        if (style === 'descend'){
+            return <i className="icon icon-sort-desc" style={{ transform: 'translateY(-1px)' }}></i>;
+        } else if (style === 'ascend'){
+            return <i className="icon icon-sort-asc" style={{ transform: 'translateY(2px)' }}></i>;
+        }
+    },
+
+    icon : function(){
+        var style = !this.props.descend && this.props.sortColumn === this.props.val ? 'ascend' : 'descend';
+        var linkClass = this.props.sortColumn === this.props.val ? 'expset-column-sort-used' : 'expset-column-sort';
+        return <a href="#" className={linkClass} onClick={this.sortClickFxn}>{ this.iconStyle(style) }</a>;
+    },
+
     render: function(){
-        // Make arrow black if selected; flip if sorting in ascending order
-        var iconUsed = this.props.sortColumn === this.props.val ?
-            <a className="expset-column-sort-used" href="#" onClick={this.sortClickFxn}>
-                { this.props.descend ?
-                    <i className="icon sbt-descend" style={{ transform: 'translateY(2px)' }}></i>
-                    :
-                    <i className="icon sbt-ascend" style={{ transform: 'translateY(2px)' }}></i>
-                }
-            </a>
-            :
-            <a className="expset-column-sort" href="" onClick={this.sortClickFxn}>
-                <i className="icon sbt-descend" style={{ transform: 'translateY(2px)' }}></i>
-            </a>;
         return(
             <span>
-                <span>{this.props.val} </span> {iconUsed}
+                <span>{this.props.val}</span>&nbsp;&nbsp;{ this.icon() }
             </span>
         );
     }
@@ -415,10 +422,14 @@ var ResultTable = browse.ResultTable = React.createClass({
             sortColumn: null,
             sortReverse: false,
             overflowingRight : false,
-            facets : FacetList.adjustedFacets(this.props.context.facets),
-            ignoredFilters : FacetList.findIgnoredFiltersByMissingFacets(
-                FacetList.adjustedFacets(this.props.context.facets),
-                this.props.expSetFilters
+            // We need to get the below outta state once graph-ql is in; temporarily stored in state for performance.
+            siftedExperiments : FacetList.siftExperiments(
+                this.props.context['@graph'],
+                this.props.expSetFilters,
+                FacetList.findIgnoredFiltersByMissingFacets(
+                    FacetList.adjustedFacets(this.props.context.facets),
+                    this.props.expSetFilters
+                )
             )
         }
     },
@@ -438,16 +449,18 @@ var ResultTable = browse.ResultTable = React.createClass({
 
     componentWillReceiveProps : function(newProps){
         var newState = {};
-        if (this.props.context.facets !== newProps.context.facets) {
-            console.log('ResultsTable props.context.facets updated (why?)');
-            newState.facets = FacetList.adjustedFacets(newProps.context.facets);
+
+        if (this.props.expSetFilters !== newProps.expSetFilters || this.props.context !== newProps.context){
+            newState.siftedExperiments = FacetList.siftExperiments(
+                newProps.context['@graph'],
+                newProps.expSetFilters,
+                FacetList.findIgnoredFiltersByMissingFacets(
+                    FacetList.adjustedFacets(newProps.context.facets),
+                    newProps.expSetFilters
+                )
+            )
         }
-        if (this.props.expSetFilters !== newProps.expSetFilters || newState.facets){
-            newState.ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(
-                FacetList.adjustedFacets(newProps.context.facets),
-                newProps.expSetFilters
-            );
-        }
+
         if (Object.keys(newState).length > 0){
             this.setState(newState);
         }
@@ -503,9 +516,26 @@ var ResultTable = browse.ResultTable = React.createClass({
         }.bind(this));
     },
 
-    formatExperimentSetListings : function(passExperiments, columnTemplate, addInfoTemplate){
+    getTemplate : function(type){ 
+        var setType = this.props.context['@graph'][0].experimentset_type;
+        if (type === 'column'){
+            return expSetColumnLookup[setType] ? expSetColumnLookup[setType] : expSetColumnLookup['other'];
+        } else if (type === 'additional-info'){
+            return expSetAdditionalInfo[setType] ? expSetAdditionalInfo[setType] : expSetAdditionalInfo['other'];
+        }
+    },
+
+    formatExperimentSetListings : function(passExperiments, facets = null){
+        // use first experiment set to grap type (all types are the same in any given graph)
+        var columnTemplate = this.getTemplate('column');
+        var addInfoTemplate = this.getTemplate('additional-info');
+
         var resultListings = [],
             resultCount = 0;
+
+        if (facets === null){
+            facets = FacetList.adjustedFacets(this.props.context.facets);
+        }
 
         this.props.context['@graph'].map(function (result) {
             var experimentArray = result.experiments_in_set;
@@ -562,7 +592,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                         passExperiments={intersection}
                         key={keyVal+result['@id']}
                         rowNumber={resultCount++}
-                        facets={this.props.facets}
+                        facets={facets}
                     />
                 );
             }
@@ -597,20 +627,8 @@ var ResultTable = browse.ResultTable = React.createClass({
 
     renderTable : function(){
 
-        // use first experiment set to grap type (all types are the same in any given graph)
+        var formattedExperimentSetListings = this.formatExperimentSetListings(this.state.siftedExperiments);
 
-        var setType = this.props.context['@graph'][0].experimentset_type;
-        var columnTemplate = expSetColumnLookup[setType] ? expSetColumnLookup[setType] : expSetColumnLookup['other'];
-        var additionalInfoTemplate = expSetAdditionalInfo[setType] ? expSetAdditionalInfo[setType] : expSetAdditionalInfo['other'];
-        var formattedExperimentSetListings = this.formatExperimentSetListings(
-            FacetList.siftExperiments(
-                this.props.context['@graph'],
-                this.props.expSetFilters,
-                this.state.ignoredFilters
-            ),
-            columnTemplate,
-            additionalInfoTemplate
-        );
         if (!formattedExperimentSetListings) return null;
 
         return (
@@ -618,38 +636,43 @@ var ResultTable = browse.ResultTable = React.createClass({
                 "expset-result-table-fix col-sm-7 col-md-8 col-lg-9" +
                 (this.state.overflowingRight ? " overflowing" : "")
             }>
+
                 <h5 className='browse-title'>
                     Showing {formattedExperimentSetListings.length} of {this.totalResultCount()} experiment sets.
                 </h5>
+
                 <div className="expset-table-container" ref="expSetTableContainer">
-                    <Table className="expset-table table-tbody-striped" condensed id="result-table">
+                    <Table className="expset-table expsets-table table-tbody-striped" condensed id="result-table">
                         <thead>
                             <tr>
                                 <th></th>
                                 <th></th>
-                                { this.formatColumnHeaders(columnTemplate) }
+                                { this.formatColumnHeaders(this.getTemplate('column')) }
                             </tr>
                         </thead>
                         { formattedExperimentSetListings }
                     </Table>
                 </div>
+
             </div>
         );
     },
 
     render: function() {
+        var facets = FacetList.adjustedFacets(this.props.context.facets);
+        var ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(facets, this.props.expSetFilters);
         return (
             <div className="row">
-                { this.state.facets.length ?
+                { facets.length > 0 ?
                     <div className="col-sm-5 col-md-4 col-lg-3">
                         <FacetList
                             urlPath={this.props.context['@id']}
                             experimentSetListJSON={this.props.context['@graph']}
                             orientation="vertical"
                             expSetFilters={this.props.expSetFilters}
-                            facets={this.state.facets}
+                            facets={facets}
                             onFilter={this.onFilter}
-                            ignoredFilters={this.state.ignoredFilters}
+                            ignoredFilters={ignoredFilters}
                             className="with-header-bg"
                         />
                     </div>
