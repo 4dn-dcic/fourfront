@@ -4,7 +4,7 @@
     "id": "/profiles/genomic_region.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["genome_assembly"],
+    "required": ["genome_assembly", "award", "lab"],
     "identifyingProperties": ["uuid","aliases"],
     "additionalProperties": false,
     "mixinProperties": [

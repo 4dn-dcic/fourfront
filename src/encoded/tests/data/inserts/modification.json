@@ -7,6 +7,9 @@
         "modified_regions": ["d1115d5e-40aa-43bc-b81c-32c70c9afb01"],
         "url": "https://www.cyclingnews.com",
         "created_by": "b31106bc-8535-4448-903e-854af460b21f",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "target_of_mod": "d1115d5e-40aa-43bc-b81c-32c70c9afb55"
     },
     {
@@ -16,12 +19,18 @@
         "constructs": ["131106bc-8535-4448-903e-854af460b211"],
         "modified_regions": ["d1115d5e-40aa-43bc-b81c-32c70c9afb01", "d2215d5e-40aa-43bc-b81c-32c70c9afb01"],
         "url": "https://www.cyclingnews.com",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "target_of_mod": "d1115d5e-40aa-43bc-b81c-32c70c9afb55"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b276",
         "description": "Gonna cut your gene!",
         "modification_type": "Other",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "constructs": ["131106bc-8535-4448-903e-854af460b211"],
         "url": "https://www.cyclingnews.com"
     }

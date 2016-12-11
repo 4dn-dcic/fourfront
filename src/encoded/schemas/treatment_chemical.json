@@ -4,7 +4,7 @@
     "id": "/profiles/treatment_chemical.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["chemical"],
+    "required": ["chemical", "lab", "award"],
     "identifyingProperties": ["uuid","aliases"],
     "additionalProperties": false,
     "mixinProperties": [

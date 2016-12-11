@@ -156,6 +156,7 @@
              "description": "Lab associated with the submission.",
             "comment": "See lab.json for list of available identifiers.",
             "type": "string",
+            "default":"",
             "linkTo": "Lab",
             "linkSubmitsFor": true
         },
@@ -163,6 +164,7 @@
             "title": "Grant",
             "description": "Grant associated with the submission.",
             "comment": "See award.json for list of available identifiers.",
+            "default": "",
             "type": "string",
             "linkTo": "Award"
         }

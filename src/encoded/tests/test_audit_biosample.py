@@ -3,27 +3,34 @@ pytestmark = pytest.mark.working
 
 
 @pytest.fixture
-def tier1_biosource(testapp, protocol):
+def tier1_biosource(testapp, protocol, lab, award):
     item = {
         'description': 'Tier 1 cell line Biosource',
         'biosource_type': 'immortalized cell line',
         'cell_line': 'IMR-90',
         'SOP_cell_line': protocol['@id'],
-        'cell_line_tier': 'Tier 1'
+        'cell_line_tier': 'Tier 1',
+        'award': award['@id'],
+        'lab': lab['@id']
     }
     return testapp.post_json('/biosource', item).json['@graph'][0]
 
 
 @pytest.fixture
-def cell_culture(testapp):
+def cell_culture(testapp, lab, award):
     '''
     A minimal biosample_cell_culture item with only schema-required field
     '''
-    return testapp.post_json('/biosample_cell_culture', {'culture_start_date': '2016-01-01'}).json['@graph'][0]
+    return testapp.post_json('/biosample_cell_culture',
+                             {'culture_start_date': '2016-01-01',
+                              'award': award['@id'],
+                              'lab': lab['@id']
+                              }
+                             ).json['@graph'][0]
 
 
 @pytest.fixture
-def tier1_cell_culture(testapp, image):
+def tier1_cell_culture(testapp, image, lab, award):
     '''
     A biosample_cell_culture item for a tier 1 cell
     '''
@@ -32,14 +39,20 @@ def tier1_cell_culture(testapp, image):
         'culture_duration': 2,
         'culture_duration_units': 'days',
         'passage_number': 1,
-        'morphology_image': image['@id']
+        'morphology_image': image['@id'],
+        'award': award['@id'],
+        'lab': lab['@id']
     }
     return testapp.post_json('/biosample_cell_culture', item).json['@graph'][0]
 
 
 @pytest.fixture
-def biosample_data(tier1_biosource):
-    return {'description': "Tier 1 Biosample", 'biosource': [tier1_biosource['@id']]}
+def biosample_data(tier1_biosource, lab, award):
+    return {'description': "Tier 1 Biosample",
+            'biosource': [tier1_biosource['@id']],
+            'lab': lab['@id'],
+            'award': award['@id']
+            }
 
 
 @pytest.fixture
