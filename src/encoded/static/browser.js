@@ -35,11 +35,15 @@ if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER) dom
 
     var props = App.getRenderedPropValues(document, ['user_details', 'alerts']);
     if (props.user_details && typeof props.user_details.email === 'string'){
-        // We have userDetails from server-side; keep client-side in sync (in case updated via/by back-end)
+        // We have userDetails from server-side; keep client-side in sync (in case updated via/by back-end / dif client at some point)
         JWT.saveUserDetails(props.user_details);
+        // Re: other session data - JWT token (stored as cookie) will match session as was used to auth server-side. 
+        // user_actions will be left over in localStorage from initial login request (doesn't expire)
     } else {
-        // Unset otherwise
-        JWT.saveUserDetails(null);
+        // Unset all user info otherwise (assume not signed in)
+        // Deletes JWT token as well (stored as cookie - initially sent to server to auth server-side render)
+        // but only as fallback as this is done beforehand via Set-Cookie response header
+        JWT.remove();
     }
 
     store.dispatch({

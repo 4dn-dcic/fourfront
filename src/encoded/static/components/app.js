@@ -60,25 +60,29 @@ class Timeout {
 }
 
 
-// App is the root component, mounted on document.body.
-// It lives for the entire duration the page is loaded.
-// App maintains state for the
+/**
+ * App is the root component, mounted on document.body.
+ * It lives for the entire duration the page is loaded.
+ */
 var App = React.createClass({
     SLOW_REQUEST_TIME: 250,
     historyEnabled: !!(typeof window != 'undefined' && window.history && window.history.pushState),
 
-    propTypes: { 
-        // Both 'userInfo' & 'sessionMayBeSet' are provided by server-side ONLY. 
-        // UserInfo data intends to match contents of clientside localStorage and jwtToken cookie.
-        "userInfo" : React.PropTypes.shape({        // Object containing basic user info. Same data as obtained through /login endpoint.
-            "id_token" : React.PropTypes.string,
-            "details" : React.PropTypes.shape({
-                "first_name" : React.PropTypes.string,
-                "email" : React.PropTypes.string
-            }),
-            "user_actions" : React.PropTypes.array
-        }),
-        "sessionMayBeSet" : React.PropTypes.any     // Whether Auth0 session exists or not.
+    /**
+     *  Session-related props 'sessionMayBeSet' & 'alerts' are meant to provided by server-side only, then scraped and re-provided
+     *  by client-side render in browser.js via @see App.getRendersPropValues(documentElement, [propNamesToGet]) to match server-side render.
+     *  Similarly as to how is done for the redux store.
+     */
+    propTypes: {
+        "sessionMayBeSet" : React.PropTypes.any,    // Whether Auth0 session exists or not.
+        "alerts" : React.PropTypes.array            // Initial alerts (if any) passed to Alerts component to display
+    },
+
+    getDefaultProps : function(){
+        return {
+            'sessionMayBeSet' : null,
+            'alerts' : null
+        }
     },
 
     getInitialState: function() {
@@ -86,29 +90,20 @@ var App = React.createClass({
         var session = false;
         var user_actions = [];
 
-        if (typeof this.props.sessionMayBeSet !== 'undefined'){ // Only provided from server
+        if (this.props.sessionMayBeSet !== null){ // Only provided from server
             if (this.props.sessionMayBeSet === false) session = false;
-            else if (this.props.sessionMayBeSet === true) session = true;
+            if (this.props.sessionMayBeSet === true) session = true;
             else session = false; // Else is null
         } else {
-            // Only available client-side. May be unset by server (Set-Cookie headers). 
-            // Should/will always match props.sessionMayBeSet from react-middleware.js 
-            // -> If send request w/o cookie, will definitely be no session server-side.
-            // -> If cookie exists but expired/invalid, is deleted before client-side render by response (un-)Set-Cookie header.
-            session = !!(JWT.get('cookie')); 
+            session = !!(JWT.get('cookie')); // Same cookie sent to server-side to authenticate, so it must match.
         }
 
-        // Higher chance for localStorage / userInfo to be out of sync from server-provided props.userInfo.
-        // user_info.details is kept in sync in browser.js, user_actions is not.
+        // user_info.details is kept in sync to client-side via browser.js, user_info.user_actions is not.
         // Don't use user_actions unless session is also true.
-        if (typeof this.props.userInfo !== 'undefined' && this.props.userInfo !== null){ // Only provided from server
-            JWT.saveUserInfoLocalStorage(this.props.userInfo); // Uses dummyStore on server-side. Does not get passed to client-side.
-            if (this.props.userInfo.user_actions) user_actions = this.props.userInfo.user_actions;
-        } else {
-            var userInfo = JWT.getUserInfo(); 
-            if (userInfo){
-                user_actions = userInfo.user_actions;
-            }
+        // user_actions is only set client-side upon login (it cannot expire unless logout).
+        var user_info = JWT.getUserInfo(); 
+        if (user_info && typeof user_info.user_actions !== 'undefined' && Array.isArray(user_info.user_actions)){
+            user_actions = user_info.user_actions;
         }
 
        console.log("App Initial State: ", session, user_actions);
@@ -266,7 +261,7 @@ var App = React.createClass({
     authenticateUser : function(callback = null){
         // check existing user_info in local storage and authenticate
         var idToken = JWT.get();
-        if(idToken){ // if JWT present, try to authenticate
+        if(idToken && (!this.state.session || !this.state.user_actions)){ // if JWT present, and session not yet set (from back-end), try to authenticate
             this.fetch('/login', {
                 method: 'POST',
                 headers: {
@@ -284,7 +279,8 @@ var App = React.createClass({
                 JWT.saveUserInfo(response);
                 this.updateUserInfo(callback);
             }, error => {
-                //error, clear localStorage and session
+                // error, clear JWT token from cookie & user_info from localStorage (via JWT.remove()) 
+                // and unset state.session & state.user_actions (via this.updateUserInfo())
                 JWT.remove();
                 this.updateUserInfo(callback);
             });
@@ -646,7 +642,7 @@ var App = React.createClass({
                         // Wait until request(s) complete before setting notification (callback is called later in promise chain)
                         var oldCallback = callback;
                         callback = function(response){
-                            Alerts.queue({'title' : "Logged Out", 'message' : "You have been logged out due to an expired session."});
+                            Alerts.queue(Alerts.LoggedOut);
                             if (typeof oldCallback === 'function') oldCallback(response);
                         }.bind(this);
                         throw new Error('HTTPForbidden');   // Cancel out of this request's promise chain
@@ -693,7 +689,7 @@ var App = React.createClass({
                     console.error('Error in App.navigate():', err);
                     throw err; // Bubble it up.
                 } else {
-                    console.warn("Logged Out");
+                    console.info("Logged Out");
                 }
             });
             console.info('Navigating > ', request);
@@ -879,12 +875,7 @@ var App = React.createClass({
                         __html: '\n\n' + jsonScriptEscape(JSON.stringify(this.props.context)) + '\n\n'
                     }}></script>
                     <script data-prop-name="user_details" type="application/ld+json" dangerouslySetInnerHTML={{
-                        __html: jsonScriptEscape(JSON.stringify(
-                            isServerSide() ? 
-                                this.props.userInfo && this.props.userInfo.details ? this.props.userInfo.details : null
-                                :
-                                JWT.getUserDetails() /* Kept up-to-date in browser.js */
-                        ))
+                        __html: jsonScriptEscape(JSON.stringify(JWT.getUserDetails())) /* Kept up-to-date in browser.js */
                     }}></script>
                     <script data-prop-name="alerts" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: jsonScriptEscape(JSON.stringify(this.props.alerts))

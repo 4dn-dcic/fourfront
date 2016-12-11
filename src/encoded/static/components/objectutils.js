@@ -125,7 +125,7 @@ var patchedConsole = module.exports.console = (function(){
 var JWT = module.exports.JWT = {
 
     COOKIE_ID : 'jwtToken',
-    dummyStore : {}, // Fake localStore for use by serverside.
+    dummyStorage : {}, // Fake localStorage for use by serverside and tests.
     
     get : function(source = 'cookie'){
         if (source === 'all' || source === '*') source = 'any';
@@ -148,23 +148,21 @@ var JWT = module.exports.JWT = {
         return idToken;
     },
 
+    storeExists : function(){
+        if (typeof(Storage) === 'undefined' || typeof localStorage === 'undefined' || !localStorage) return false;
+        return true;
+    },
+
     getUserInfo : function(){
-        var storeExists = true;
-        if(typeof(Storage) === 'undefined' || typeof localStorage === 'undefined' || !localStorage) storeExists = false;
-        if (storeExists){
-            try {
+        try {
+            if (JWT.storeExists()){
                 return JSON.parse(localStorage.getItem('user_info'));
-            } catch (e){
-                console.error(e);
-                return null;
+            } else {
+                return JSON.parse(JWT.dummyStorage.user_info);
             }
-        } else {
-            try {
-                return JSON.parse(JWT.dummyStore.user_info);
-            } catch (e){
-                console.error(e);
-                return null;
-            }
+        } catch (e) {
+            //console.error(e);
+            return null;
         }
     },
 
@@ -180,7 +178,7 @@ var JWT = module.exports.JWT = {
 
     saveUserDetails : function(details){
         var userInfo = JWT.getUserInfo();
-        if (userInfo) {
+        if (typeof userInfo !== 'undefined' && userInfo) {
             userInfo.details = details;
             JWT.saveUserInfoLocalStorage(userInfo);
             return true;
@@ -199,12 +197,10 @@ var JWT = module.exports.JWT = {
     },
 
     saveUserInfoLocalStorage : function(user_info){
-        var storeExists = true;
-        if(typeof(Storage) == 'undefined' || typeof localStorage === 'undefined') storeExists = false;
-        if (storeExists){
+        if (JWT.storeExists()){
             localStorage.setItem("user_info", JSON.stringify(user_info));
         } else {
-            JWT.dummyStore.user_info = JSON.stringify(user_info);
+            JWT.dummyStorage.user_info = JSON.stringify(user_info);
         }
         return true;
     },
@@ -229,8 +225,10 @@ var JWT = module.exports.JWT = {
             }
         }
         if (source === 'localStorage' || source === 'all'){
-            if(typeof(Storage) === 'undefined') return false;
-            if (localStorage.user_info){
+            if(!JWT.storeExists()) {
+                delete dummyStorage.user_info;
+                removedLocalStorage = true;
+            } else if (localStorage.user_info){
                 localStorage.removeItem("user_info");
                 removedLocalStorage = true;
             }
@@ -255,7 +253,7 @@ if (!isServerSide()) window.JWT = JWT;
 var setAjaxHeaders = function(xhr, headers = {}) {
     // Defaults
     headers = _.extend({
-        "Content-Type" : "application/json;charset=UTF-8",
+        "Content-Type" : "application/json; charset=UTF-8",
         "Accept" : "application/json",
         "X-Requested-With" : "XMLHttpRequest" // Allows some server-side libs (incl. pyramid) to identify using `request.is_xhr`.
     }, headers);

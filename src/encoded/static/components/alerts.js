@@ -1,7 +1,7 @@
 'use strict';
 
 var React = require('react');
-var { Alert, Collapse } = require('react-bootstrap');
+var { Alert, Fade } = require('react-bootstrap');
 var _ = require('underscore');
 
 var Alerts = module.exports = React.createClass({
@@ -16,30 +16,48 @@ var Alerts = module.exports = React.createClass({
                 return;
             }
             Alerts.instance.queue.call(Alert.instance, alert); 
-        }
+        },
+        // Common alert definitions
+        LoggedOut : {"title" : "Logged Out", "message" : "You have been logged out due to an expired session."}
     },
 
-    getInitialState : function(){ return { 
-        'alerts' : typeof this.props.initialAlerts !== 'undefined' && Array.isArray(this.props.initialAlerts) ? this.props.initialAlerts : [],
-        'isMounted' : false,
-        'closing' : false
-    }; },
+    getInitialState : function(){ 
+        var alerts = [];
+        if (
+            !Alerts.instance && // Only grab first time mounted/created.
+            typeof this.props.initialAlerts !== 'undefined' && Array.isArray(this.props.initialAlerts)
+        ){
+            alerts = this.props.initialAlerts;
+        }
+        return { 
+            'alerts' : alerts,
+            'isMounted' : false,
+            'dismissing' : []
+        }; 
+    },
 
-    componentDidMount : function(){
-        var stateObj;
+    componentWillMount : function(){
+        var stateObj = {};
+
         // Only one of these meant to be created in app, so can import and queue to from anywhere w/o refs.
-        if (typeof Alerts.instance !== 'undefined' && Alerts.instance && typeof Alerts.instance.state !== 'undefined') {
-            stateObj = Alerts.instance.state || {};
-        } else stateObj = {};
-
+        if (Alerts.instance && Array.isArray(Alerts.instance.state.alerts) && Alerts.instance.state.alerts.length > 0){
+            stateObj.alerts = this.state.alerts.concat(Alerts.instance.state.alerts);
+        }
         Alerts.instance = this;
         
-        var stateObj = { 'isMounted' : true };
         if (Alerts.preMountQueue.length > 0) { 
-            stateObj.alerts = this.state.alerts.concat(Alerts.preMountQueue);
+            stateObj.alerts = stateObj.alerts.concat(Alerts.preMountQueue);
             Alerts.preMountQueue = [];
         }
         this.setState(stateObj);
+    },
+
+    componentDidMount : function(){
+        this.setState({ 'isMounted' : true });
+    },
+
+    componentWillUnmount: function(){
+        this.setState({ 'isMounted' : false });
     },
 
     queue : function(alert){
@@ -52,32 +70,43 @@ var Alerts = module.exports = React.createClass({
         setTimeout(() => this.setState({ 'alerts' : alerts }), 0);
     },
 
-    dismissed : [],
-
     render : function(){
         if (this.state.alerts.length === 0) return null;
         
         function dismiss(index){
             var alerts = _.clone(this.state.alerts);
-            this.dismissed.push(alerts.splice(index, 1));
-            this.setState({ 'closing' : true });
-            setTimeout(()=>{
-                this.dismissed.shift();
-                this.setState({ 'alerts' : alerts, 'closing' : false });
-            }, 250);
+            var currentAlert = alerts.splice(index, 1)[0];
+            var dismissing = _.clone(this.state.dismissing);
+            if (_.findIndex(dismissing, currentAlert) === -1) dismissing.push(currentAlert);
+            this.setState({ 'dismissing' : dismissing }, ()=>{ console.log(this.state); });
         };
+
+        function finishDismiss(index){
+            var alerts = _.clone(this.state.alerts);
+            var currentAlert = alerts.splice(index, 1)[0];
+            this.setState({ 'alerts' : alerts, 'dismissing' : _.without(this.state.dismissing, currentAlert) });
+        }
+
         // ToDo: Transition
         return (
             <div className="alerts">
             { 
                 this.state.alerts.map(function(alert,i){
                     return (
-                        <Collapse key={'alert-' + i} timeout={250} in={ this.dismissed.filter((a)=> a.title === alert.title ).length < 1 }>
-                            <Alert bsStyle={alert.style || 'danger'} onDismiss={dismiss.bind(this, i)}>
-                                <h4>{ alert.title }</h4>
-                                <p>{ alert.message }</p>
-                            </Alert>
-                        </Collapse>
+                        <Fade 
+                            key={'alert-' + i}
+                            timeout={500}
+                            in={ _.findIndex(this.state.dismissing, alert) === -1 }
+                            onExited={finishDismiss.bind(this, i)}
+                            unmountOnExit={true}
+                        >
+                            <div>
+                                <Alert bsStyle={alert.style || 'danger'} onDismiss={dismiss.bind(this, i)}>
+                                    <h4>{ alert.title }</h4>
+                                    <p>{ alert.message }</p>
+                                </Alert>
+                            </div>
+                        </Fade>
                     );
                 }.bind(this))
             }
