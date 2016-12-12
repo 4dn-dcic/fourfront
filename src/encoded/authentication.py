@@ -223,6 +223,9 @@ def get_jwt(request):
         if auth_type.strip().lower() == 'bearer':
             token = request.headers['Authorization'][7:]
     except (ValueError, TypeError, KeyError):
+        pass
+        
+    if not token:
         token = request.cookies.get('jwtToken')
 
     return token

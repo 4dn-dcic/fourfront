@@ -94,16 +94,17 @@ def security_tween_factory(handler, registry):
 
             if not request.auth0_expired:
                 login = request.authenticated_userid
-                authtype, email = login.split('.', 1)
-                if (authtype == 'auth0' and request.content_type != 'application/json'):
-                    # If successfully authenticated by Auth0, add JWT token and basic user details to response headers for server-side React to consume.
-                    # Do not add if returning JSON, as will bypass server-side React which will be unable to unset/delete them before sending response.
-                    response = handler(request)
-                    response.headers['X-Request-JWT'] = request.cookies.get('jwtToken','')
-                    response.headers['X-User-Info'] = json.dumps(request.user_info)
-                elif authtype != 'auth0' and request.content_type != 'application/json':
-                    response = handler(request)
-                    response.headers['X-Request-JWT'] = "null"
+                if login:
+                    authtype, email = login.split('.', 1)
+                    if (authtype == 'auth0' and request.content_type != 'application/json'):
+                        # If successfully authenticated by Auth0, add JWT token and basic user details to response headers for server-side React to consume.
+                        # Do not add if returning JSON, as will bypass server-side React which will be unable to unset/delete them before sending response.
+                        response = handler(request)
+                        response.headers['X-Request-JWT'] = request.cookies.get('jwtToken','')
+                        response.headers['X-User-Info'] = json.dumps(request.user_info)
+                    elif authtype != 'auth0' and request.content_type != 'application/json':
+                        response = handler(request)
+                        response.headers['X-Request-JWT'] = "null"
 
             elif request.auth0_expired:
                 # Inform libs/react-middleware.js of expired token to set logout state in front-end in response to
