@@ -611,44 +611,49 @@ var App = React.createClass({
 
             var promise = request.then((response)=>{
                 // Check/handle server-provided error code/message(s).
-
-                var jwtHeader = null;
-                try {
-                    jwtHeader = request.xhr.getResponseHeader('X-Request-JWT');
-                } catch(e) {
-                    // Some browsers may not support getResponseHeader. Fallback to 403 response detail which only
-                    // replaces unauth'd response if request Content-Type = application/json
-                    console.error(e);
-                }
                 
-                if (response.code === 403 && (
-                        (response.status == 'error' && response.detail == "Bad or expired token.") ||
+                if (response.code === 403){
+
+                    var jwtHeader = null;
+                    try {
+                        jwtHeader = request.xhr.getResponseHeader('X-Request-JWT');
+                    } catch(e) {
+                        // Some browsers may not support getResponseHeader. Fallback to 403 response detail which only
+                        // replaces unauth'd response if request Content-Type = application/json
+                        console.error(e);
+                    }
+
+                    if ( // Bad or expired JWT
+                        (response.detail === "Bad or expired token.") ||
                         (jwtHeader === 'expired')
-                    )
-                ){
-                    // Bad or expired JWT
-                    JWT.remove();
-                    this.updateUserInfo();
-                    if (repeatIfError) {
-                        setTimeout(function(){
-                            if (href.indexOf('/users/') !== -1){ // ToDo: Create&store list of private pages other than /users/<...>
-                                // Redirect to home if on a 'private' page (e.g. user profile).
-                                if (setupRequest.call(this, '/')) doRequest.call(this, false);
-                            } else {
-                                // Otherwise redo request after clearing expired JWT, max once.
-                                doRequest.call(this, false);
-                            }
-                        }.bind(this), 0);
+                    ){
+                        JWT.remove();
+                        this.updateUserInfo();
+                        
                         // Wait until request(s) complete before setting notification (callback is called later in promise chain)
                         var oldCallback = callback;
                         callback = function(response){
                             Alerts.queue(Alerts.LoggedOut);
                             if (typeof oldCallback === 'function') oldCallback(response);
                         }.bind(this);
+
+                    }
+
+                    if (repeatIfError) {
+                        setTimeout(function(){
+                            if (href.indexOf('/users/') !== -1){ // ToDo: Create&store list of private pages other than /users/<...>
+                                // Redirect to home if on a 'private' page (e.g. user profile).
+                                if (setupRequest.call(this, '/')) doRequest.call(this, false);
+                            } else {
+                                // Otherwise redo request after any other error handling (unset JWT, etc.).
+                                doRequest.call(this, false);
+                            }
+                        }.bind(this), 0);
                         throw new Error('HTTPForbidden');   // Cancel out of this request's promise chain
                     } else {
-                        console.error("Token-related error -",response); // Log error & continue down promise chain.
+                        console.error("Authentication-related error -", response); // Log error & continue down promise chain.
                     }
+
                 }
                 return response;
             })
