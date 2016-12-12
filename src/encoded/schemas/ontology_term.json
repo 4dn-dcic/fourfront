@@ -48,18 +48,20 @@
             "description": "The definition for the ontology term.",
             "type": "string",
             "permission": "import-items",
-            "comment": "DO NOT SUBMIT! calculate from term info"
+            "exclude_from": "submit4dn",
+            "internal_comment": "calculated from term info"
         },
         "exact_synonyms": {
             "title": "Synonyms",
             "description": "Synonyms for the ontology term.",
+            "exclude_from": "submit4dn",
+            "internal_comment": "Calculated from term info - cannot be used as ID",
             "type": "array",
             "items" : {
                 "title": "Synonym",
                 "description": "An ontology term synonym.",
                 "type":  "string",
-                "permission": "import-items",
-                "comment": "DO NOT SUBMIT! calculate from term info - cannot be used as ID"
+                "permission": "import-items"
             }
         },
         "term_url": {
@@ -68,7 +70,8 @@
             "type": "string",
             "format": "uri",
             "permission": "import-items",
-            "comment": "DO NOT SUBMIT - calculate"
+            "exclude_from": "submit4dn",
+            "internal_comment": "Calculated"
         },
         "namespace": {
             "title": "Term namespace",
@@ -89,7 +92,7 @@
                         "description": "the relationship to the child",
                         "type": "string",
                         "enum": ["part of", "is a", "derives from"],
-                        "comment": "Use string for now but consider using a formal relationship ontology?"
+                        "internal_comment": "Use string for now but consider using a formal relationship ontology?"
                     },
                     "parent": {
                         "title": "Parent",

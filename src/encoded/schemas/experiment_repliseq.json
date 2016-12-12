@@ -35,7 +35,8 @@
             "title": "DNA label",
             "description": "The tag or chemical used to label the newly replicated DNA - usually BrdU",
             "type": "string",
-            "comment": "an enum/default of BrdU"
+            "comment": "e.g. BrdU",
+            "internal_comment": "an enum/default of BrdU"
         },
         "labeling_time": {
             "title": "Labeling time",
@@ -46,7 +47,7 @@
             "title": "Antibody",
             "description": "ENCODE accession for antibody used to pull down the labeled DNA",
             "type": "string",
-            "comment": "Can we depend on encode having antibody or allow other string?",
+            "internal_comment": "Can we depend on encode having antibody or allow other string?",
             "pattern": "ENCAB.+"
         },
         "antibody_lot_id": {
@@ -58,7 +59,7 @@
             "title": "Cell Cycle Stage",
             "description": "After sorting stage that the cell fraction falls in",
             "type": "string",
-            "comment": "Link with a specific ontology",
+            "internal_comment": "Link with a specific ontology",
             "enum": ["G1a", "G1b", "S1", "S2", "S3", "S4", "G2/M"]
         },
         "cell_sorting_protocol": {

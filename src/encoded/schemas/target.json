@@ -34,8 +34,7 @@
             "items": {
                 "title": "Gene",
                 "description": "Gene symbol for targeted gene",
-                "comment": "will want to have validation against authority gene name databases",
-                "comment": "and link to the external resource",
+                "internal_comment": "will want to have validation against authority gene name databases, and link to the external resource",
                 "type": "string"
             }
         },

@@ -24,10 +24,7 @@
             "description": "Pubmed ID for the published publication.",
             "type": "string",
             "uniqueKey":  "publication:PMID",
-            "pattern": "^PMID:[0-9]*",
-            "comment": "If a PMID is supplied then it is assumed the paper has been published",
-            "comment": "and that relevant data can be retrieved from pubmed and other fields",
-            "comment": "will be automatically populated via calculated properties"
+            "pattern": "^PMID:[0-9]*"
         },
         "status": {
             "title": "Status",
@@ -104,10 +101,10 @@
             "title": "Experiment sets that are part of this publication",
             "description": "List of experiment sets to be associated with the publication.",
             "type": "array",
+            "comment": "use accessions for identifiers.",
             "uniqueItems": true,
             "items": {
                 "title": "Experiment Set",
-                "comment": "use accessions for identifiers.",
                 "type": "string",
                 "anyOf": [
                     {"linkTo": "ExperimentSet"},
