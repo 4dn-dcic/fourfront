@@ -259,8 +259,6 @@ var UserActions = React.createClass({
             var userDetails = JWT.getUserDetails();
             if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) {
                 acctTitle = userDetails.first_name;
-            } else if (!userDetails){
-                acctTitle = <i className="icon icon-spin icon-circle-o-notch"></i>;
             }
         }
         
