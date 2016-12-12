@@ -6,6 +6,7 @@
         "url": "http://www.worthington-biochem.com",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "uuid": "b31106bc-8535-4448-903e-854af460b21d"
     },
     {
@@ -15,6 +16,7 @@
         "url": "https://www.neb.com",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "uuid": "b31106bc-8535-4448-903e-854af460b21e"
     },
     {
@@ -23,6 +25,7 @@
         "description": "previously also Fermentas",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "url": "https://www.thermofisher.com/us/en/home/brands/thermo-scientific.html#/legacy=www.fermentas.com",
         "uuid": "b31106bc-8535-4448-903e-854af460b21f"
     }

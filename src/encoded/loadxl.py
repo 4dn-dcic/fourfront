@@ -643,8 +643,8 @@ def generate_access_key(testapp, store_access_key=None, email='4dndcic@gmail.com
         }
         res = testapp.post_json('/access_key', access_key_req).json
         akey     = { 'default':
-                    { 'key' : res['secret_access_key'],
-                      'secret' : res['access_key_id'],
+                    { 'secret' : res['secret_access_key'],
+                      'key' : res['access_key_id'],
                       'server': 'http://localhost:8000',
                     }
                    }

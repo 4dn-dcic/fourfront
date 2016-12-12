@@ -7,6 +7,7 @@
         "award": "1U01CA200059-01",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "uuid": "52e85c70-fe2d-11e3-9191-0800200c9a66",
         "exp_sets_prod_in_pub":["431106bc-8535-4448-903e-854af460b260"]
     },
@@ -18,6 +19,7 @@
         "award": "1U01CA200059-01",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "uuid": "52e85c70-fe2d-11e3-9191-0800200c9a67"
     },
     {
@@ -28,6 +30,7 @@
         "award": "1U01CA200059-01",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "uuid": "52e85c70-fe2d-11e3-9191-0800200c9a68"
     }
 ]
