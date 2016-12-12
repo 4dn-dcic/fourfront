@@ -48,7 +48,7 @@
           "individual": {
               "title": "Individual",
               "description": "Source of the biological material, donor.",
-              "comment": "See Individual sheets for existing items",
+              "comment": "See Individual sheet or collection for existing items",
               "type": "string",
               "linkTo": "Individual"
           },

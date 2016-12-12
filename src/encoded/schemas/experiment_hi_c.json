@@ -64,7 +64,7 @@
         "digestion_enzyme": {
             "title": "Digestion Enzyme",
             "description": "The enzyme used for digestion of the DNA.",
-            "comment": "See Enzymes sheet for existing items.",
+            "comment": "See Enzymes sheet or collection for existing items.",
             "type": "string",
             "linkTo": "Enzyme"
         },
@@ -103,6 +103,12 @@
             "title": "Ligation Volume (ml)",
             "description": "Volume of ligation step in milliliters",
             "type": "number"
+        },
+        "biotin_removed": {
+            "title": "Biotin Removal Step",
+            "description": "The optional biotin removal step was performed",
+            "type": "string",
+            "enum": ["Yes", "No"]
         }
     },
     "facets": {

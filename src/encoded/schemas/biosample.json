@@ -35,7 +35,7 @@
         "biosource": {
           "title": "Biosources",
           "description": "The cell lines or tissue types used in the experiment",
-          "comment": "See Biosource sheet for existing items",
+          "comment": "See Biosource sheet or collection for existing items",
           "type": "array",
           "default":[],
           "uniqueItems": true,
@@ -67,7 +67,7 @@
         "modifications": {
             "title": "Stable genomic modifications",
             "description": "Expression or targeting vectors stably transfected to generate Crispr'ed or other genomic modification",
-            "comment": "See Modifications sheet for exisiting items",
+            "comment": "See Modifications sheet or collection for existing items",
             "type": "array",
             "default": [],
             "uniqueItems": true,
@@ -81,7 +81,7 @@
         "treatments": {
             "title": "Treatments",
             "type": "array",
-            "comment": "See Treatment sheets for exisiting items",
+            "comment": "See Treatment sheet or collection for exisiting items",
             "default": [],
             "uniqueItems": true,
             "items": {

@@ -195,7 +195,7 @@
       "documents": {
           "title": "Documents",
           "description": "Documents that provide additional information (not data file).",
-          "comment": "See Documents sheet for existing items.",
+          "comment": "See Documents sheet or collection for existing items.",
           "type": "array",
           "default": [],
           "uniqueItems": true,
