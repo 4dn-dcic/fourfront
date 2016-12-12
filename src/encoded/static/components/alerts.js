@@ -46,7 +46,7 @@ var Alerts = module.exports = React.createClass({
         Alerts.instance = this;
         
         if (Alerts.preMountQueue.length > 0) { 
-            stateObj.alerts = stateObj.alerts.concat(Alerts.preMountQueue);
+            stateObj.alerts = (stateObj.alerts || this.state.alerts).concat(Alerts.preMountQueue);
             Alerts.preMountQueue = [];
         }
         this.setState(stateObj);
@@ -78,7 +78,7 @@ var Alerts = module.exports = React.createClass({
             var currentAlert = alerts.splice(index, 1)[0];
             var dismissing = _.clone(this.state.dismissing);
             if (_.findIndex(dismissing, currentAlert) === -1) dismissing.push(currentAlert);
-            this.setState({ 'dismissing' : dismissing }, ()=>{ console.log(this.state); });
+            this.setState({ 'dismissing' : dismissing });
         };
 
         function finishDismiss(index){
@@ -87,7 +87,6 @@ var Alerts = module.exports = React.createClass({
             this.setState({ 'alerts' : alerts, 'dismissing' : _.without(this.state.dismissing, currentAlert) });
         }
 
-        // ToDo: Transition
         return (
             <div className="alerts">
             { 
