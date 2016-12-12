@@ -99,6 +99,7 @@ def security_tween_factory(handler, registry):
                 response.headers['X-Request-JWT'] = request.cookies.get('jwtToken','')
                 response.headers['X-User-Info'] = json.dumps(request.user_info)
             elif authtype != 'auth0' and request.content_type != 'application/json':
+                response = handler(request)
                 response.headers['X-Request-JWT'] = "null"
 
         elif hasattr(request, 'auth0_expired') and request.auth0_expired:
