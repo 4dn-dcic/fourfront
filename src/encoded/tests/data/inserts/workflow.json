@@ -10167,8 +10167,9 @@
     "description": "GITAR Hi-C data processing pipeline"
 },
 {
+    "accession": "4DNWFAW5VTA5",
     "cwl_pointer": "https://igor.sbgenomics.com/raw/4dn-dcic/dev/fastqc-0-11-4/0",
-    "uuid": "5692315e-49e5-4c33-afab-9ec90d65faf3",
+    "uuid": "2324ad76-ff37-4157-8bcc-3ce72b7dace9",
     "award": "1U01CA200059-01",
     "lab": "4dn-dcic-lab",
     "arguments": [
@@ -10241,6 +10242,7 @@
     ]
 },
 {
+    "accession": "4DNWF6DUSPTF",
     "uuid": "181b777a-2db7-4593-ae7f-6170a5d69ff7",
     "award": "1U01CA200059-01",
     "lab": "4dn-dcic-lab",
@@ -10251,6 +10253,7 @@
     "description": "ValidateFiles quality control step for fastq files"
 },
 {
+    "accession": "4DNWFG6JOL4D",
     "uuid": "d3f25cd3-e726-4b3c-a022-48f844474b41",
     "award": "1U01CA200059-01",
     "lab": "4dn-dcic-lab",
@@ -10261,7 +10264,7 @@
     "description": "md5 on uncompressed file"
 },
 {
-
+    "accession": "4DNWFSOZLMGE",
     "uuid": "02d636b9-d82d-4da9-950c-2ca994a0943e",
     "award": "1U01CA200059-01",
     "lab": "4dn-dcic-lab",
