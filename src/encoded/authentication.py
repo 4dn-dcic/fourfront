@@ -224,7 +224,7 @@ def get_jwt(request):
             token = request.headers['Authorization'][7:]
     except (ValueError, TypeError, KeyError):
         pass
-        
+
     if not token:
         token = request.cookies.get('jwtToken')
 
@@ -240,7 +240,7 @@ def login(request):
         user_info = request.user_info
         if not user_info:
             raise LoginDenied()
-    else: 
+    else:
         raise LoginDenied()
 
     return user_info
