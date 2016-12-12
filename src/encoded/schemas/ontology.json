@@ -32,7 +32,7 @@
             "description": "An external link to information about the ontology.",
             "type": "string",
             "format": "uri",
-            "comment": "may not be the same url used to generate term specific url - see base_url"
+            "internal_comment": "may not be the same url used to generate term specific url - see base_url"
         },
         "download_url": {
             "title": "Download URL",
@@ -45,7 +45,7 @@
             "description": "The base URL to which a term identifier can be added to construct a url to a term.",
             "type": "string",
             "format": "uri",
-            "comment": "may not be the same as home url - this to get specific terms"
+            "internal_comment": "may not be the same as home url - this to get specific terms"
         },
         "ontology_prefix": {
             "title": "Ontology Prefix",
@@ -60,10 +60,10 @@
         "branches": {
             "title": "Branches",
             "description": "Branches that contain relevant subsets of terms",
+            "internal_comment": "A branch within the ontology",
             "type": "array",
             "items": {
                 "title": "Branch",
-                "comment": "A branch within the ontology",
                 "type": "string"
             }
         }

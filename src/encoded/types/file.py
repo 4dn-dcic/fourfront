@@ -233,6 +233,7 @@ class FileFastq(File):
     item_type = 'file_fastq'
     schema = load_schema('encoded:schemas/file_fastq.json')
     embedded = File.embedded
+    name_key = 'accession'
 
 
 @collection(
@@ -247,6 +248,7 @@ class FileFasta(File):
     item_type = 'file_fasta'
     schema = load_schema('encoded:schemas/file_fasta.json')
     embedded = File.embedded
+    name_key = 'accession'
 
 
 @collection(
@@ -261,6 +263,7 @@ class FileProcessed(File):
     item_type = 'file_processed'
     schema = load_schema('encoded:schemas/file_processed.json')
     embedded = File.embedded
+    name_key = 'accession'
 
 
 @collection(
