@@ -80,48 +80,53 @@ def fix_request_method_tween_factory(handler, registry):
 def security_tween_factory(handler, registry):
 
     def security_tween(request):
-        login = request.authenticated_userid
+        login = None
         expected_user = request.headers.get('X-If-Match-User')
         if expected_user is not None:
+            login = request.authenticated_userid
             if login != 'mailto.' + expected_user:
                 detail = 'X-If-Match-User does not match'
                 raise HTTPPreconditionFailed(detail)
 
         # Check if user logged in via Auth0 and set headers accordingly to inform React 
         # server-side/client-side render & App.prototype.navigate() request response handling
-        if login:
+        if hasattr(request, 'auth0_expired'):
 
-            authtype, email = login.split('.', 1)
-            if (authtype == 'auth0' and request.content_type != 'application/json'):
-                # If successfully authenticated by Auth0, add JWT token and basic user details to response headers for server-side React to consume.
-                # Do not add if returning JSON, as will bypass server-side React which will be unable to unset/delete them before sending response.
-                response = handler(request)
-                response.headers['X-Request-JWT'] = request.cookies.get('jwtToken','')
-                response.headers['X-User-Info'] = json.dumps(request.user_info)
-            elif authtype != 'auth0' and request.content_type != 'application/json':
-                response = handler(request)
-                response.headers['X-Request-JWT'] = "null"
+            if not request.auth0_expired:
+                login = request.authenticated_userid
+                authtype, email = login.split('.', 1)
+                if (authtype == 'auth0' and request.content_type != 'application/json'):
+                    # If successfully authenticated by Auth0, add JWT token and basic user details to response headers for server-side React to consume.
+                    # Do not add if returning JSON, as will bypass server-side React which will be unable to unset/delete them before sending response.
+                    response = handler(request)
+                    response.headers['X-Request-JWT'] = request.cookies.get('jwtToken','')
+                    response.headers['X-User-Info'] = json.dumps(request.user_info)
+                elif authtype != 'auth0' and request.content_type != 'application/json':
+                    response = handler(request)
+                    response.headers['X-Request-JWT'] = "null"
 
-        elif hasattr(request, 'auth0_expired') and request.auth0_expired:
-            # Inform libs/react-middleware.js of expired token to set logout state in front-end in response to
-            # either doc request or xhr request & set appropriate alerts
-            if request.is_xhr or request.content_type == 'application/json':
-                # Do not change HTTPForbidden error detail ("Bad or expired token.") below unless want bad things to happen on the front-end 
-                # (or find/replace in /src/encoded/static accordingly, incl browser.js & components/app.js).
-                # Could also remove this raise HTTPForbidden when all browsers consistently support XMLHttpRequest.getResponseHeaders() (a living standard)
-                # to ID an expired token using X-Request-JWT header set below.
-                raise HTTPForbidden("Bad or expired token.")
-            response = handler(request)
-            response.headers['X-Request-JWT'] = "expired"
-            # Especially for initial document requests by browser, unset jwtToken cookie so initial client-side
-            # React render has App(instance).state.session = false (synced w/ server-side)
-            response.set_cookie(name='jwtToken', value=None, max_age=0,path='/')
-            response.status_code = 403
+            elif request.auth0_expired:
+                # Inform libs/react-middleware.js of expired token to set logout state in front-end in response to
+                # either doc request or xhr request & set appropriate alerts
+                if request.is_xhr or request.content_type == 'application/json':
+                    # Do not change HTTPForbidden error detail ("Bad or expired token.") below unless want bad things to happen on the front-end 
+                    # (or find/replace in /src/encoded/static accordingly, incl browser.js & components/app.js).
+                    # Could also remove this raise HTTPForbidden when all browsers consistently support XMLHttpRequest.getResponseHeaders() (a living standard)
+                    # to ID an expired token using X-Request-JWT header set below.
+                    raise HTTPForbidden("Bad or expired token.")
+                response = handler(request)
+                response.headers['X-Request-JWT'] = "expired"
+                # Especially for initial document requests by browser, unset jwtToken cookie so initial client-side
+                # React render has App(instance).state.session = false (synced w/ server-side)
+                response.set_cookie(name='jwtToken', value=None, max_age=0,path='/')
+                response.status_code = 403
 
         # Older stuff (pre-Auth0)
         elif request.authorization is not None or asbool(request.headers.get('X-Auth-Challenge', False)):
-            # wget may only send credentials following a challenge response.
-            raise HTTPForbidden(title="No Access")
+            login = request.authenticated_userid
+            if not login:
+                # wget may only send credentials following a challenge response.
+                raise HTTPForbidden(title="No Access")
 
 
         if request.method in ('GET', 'HEAD'):

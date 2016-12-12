@@ -200,6 +200,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
                     resp  = requests.post(user_url, {'id_token':token})
                     payload = resp.json()
                     if 'email' in payload and payload.get('email_verified') is True:
+                        request.set_property(lambda r: False, 'auth0_expired')
                         return payload
                 except ValueError as e:
                     print("Bad or expired token: " + token)
