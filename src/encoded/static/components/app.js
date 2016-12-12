@@ -654,6 +654,8 @@ var App = React.createClass({
                         console.error("Authentication-related error -", response); // Log error & continue down promise chain.
                     }
 
+                } else { // Not a 403 error
+                    this.updateUserInfo(); // May have been logged out in different browser window so keep state.session up-to-date
                 }
                 return response;
             })
