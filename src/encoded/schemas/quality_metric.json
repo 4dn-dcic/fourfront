@@ -7,9 +7,6 @@
     "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases"],
     "properties": {
-        "schema_version": {
-            "hidden comment": "Bump the default in the subclasses."
-        },
         "attachment": {
             "title": "QC metric document metadata",
             "type": "object",
@@ -22,7 +19,7 @@
                     "type": "string"
                 },
                 "href": {
-                    "comment": "Internal webapp URL for document file",
+                    "internal_comment": "Internal webapp URL for document file",
                     "type": "string"
                 },
                 "type": {

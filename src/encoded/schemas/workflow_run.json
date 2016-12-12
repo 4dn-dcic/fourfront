@@ -48,8 +48,6 @@
                     },
                     "value": {
                         "title": "Input file",
-                        "comment": "for both this and the output file you are linking to a file object but you have titled the field 'Input file ID'?",
-                        "comment": "just want to be sure you aren't trying to add a specific 7bg or some other id here - if so another property will need to be added, if not change title back to Input File I think",
                         "description": "a specified input file",
                         "type": "string",
                         "linkTo": "File"
@@ -98,7 +96,6 @@
                     "value": {
                         "title": "Value",
                         "description": "a specified value for the specified parameter as used in a task",
-                        "comment": "can we specify either number or string?",
                         "type": "string"
                     },
                     "software_parameter": {

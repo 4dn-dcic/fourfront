@@ -100,7 +100,7 @@
         "fields_with_options": {
             "title": "SOP fields that can have more than one possible value",
             "description": "The data fields that have more than one possible acceptable value in SOP",
-            "comment": "example - for in situ Hi-C can use either MboI or DpnII for digestion",
+            "internal_comment": "example - for in situ Hi-C can use either MboI or DpnII for digestion",
             "type": "array",
             "items": {
                 "title": "Field Info",

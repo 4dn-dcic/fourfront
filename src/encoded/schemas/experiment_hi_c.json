@@ -44,6 +44,7 @@
             "title": "Crosslinking Method",
             "description": "Term used for the method for crosslinking chromatin",
             "type": "string",
+            "internal_comment": "We might need to change the structure to accomodate user additions",
             "enum": [
                 "none",
                 "1% Formaldehyde",
@@ -63,7 +64,7 @@
         "digestion_enzyme": {
             "title": "Digestion Enzyme",
             "description": "The enzyme used for digestion of the DNA.",
-            "comment": "See enzyme.json for available identifiers.",
+            "comment": "See Enzymes sheet or collection for existing items.",
             "type": "string",
             "linkTo": "Enzyme"
         },
@@ -86,7 +87,7 @@
             "title": "Tagging Method",
             "description": "Information on the biotinylated base used or other tagging info",
             "type": "string",
-            "comment": "should this be a controlled CV?"
+            "internal_comment": "should this be a controlled CV?"
         },
         "ligation_time": {
             "title": "Ligation Time (min)",
@@ -102,6 +103,12 @@
             "title": "Ligation Volume (ml)",
             "description": "Volume of ligation step in milliliters",
             "type": "number"
+        },
+        "biotin_removed": {
+            "title": "Biotin Removal Step",
+            "description": "The optional biotin removal step was performed",
+            "type": "string",
+            "enum": ["Yes", "No"]
         }
     },
     "facets": {

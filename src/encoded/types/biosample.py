@@ -38,6 +38,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'treatments',
         'modifications'
     ]
+    name_key = 'accession'
 
     @calculated_property(schema={
         "title": "Modifications summary",
@@ -101,25 +102,6 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
             else:
                 return 'None'
         return 'None'
-
-    # @calculated_property(schema={
-    #     "title": "SOP map",
-    #     "description": "The mapping of fields default values from SOP",
-    #     "type": "object",
-    #     "linkTo": "SopMap"
-    # })
-    # def sop_mapping(self, request, biosource=None):
-    #     pass
-        # sop_maps = {"GM06990": "aafb608a-1c08-11e4-8c21-0800200c9a66"}
-        # if biosource is not None:
-        #     for i in range(len(biosource)):
-        #         bios_props = request.embed(biosource[i], '@@object')
-        #         if 'cell_line' in bios_props:
-        #             cell_line = bios_props['cell_line']
-        #             if cell_line in sop_maps:
-        #                 uuid = sop_maps[cell_line]
-        #                 return request.embed('/sop_maps/' + uuid + '/', '@@object')
-        # return None
 
     def _update(self, properties, sheets=None):
         # update self first to ensure 'biosample_relation' are stored in self.properties
