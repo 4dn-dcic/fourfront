@@ -233,8 +233,11 @@ def get_jwt(request):
 def login(request):
     '''check the auth0 assertion and remember the user'''
 
-    user_info = request.user_info
-    if not user_info:
+    if hasattr(request, 'user_info'):
+        user_info = request.user_info
+        if not user_info:
+            raise LoginDenied()
+    else: 
         raise LoginDenied()
 
     return user_info
