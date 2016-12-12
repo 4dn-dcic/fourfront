@@ -165,7 +165,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
 
         # Allow us to access basic user credentials from request obj after authenticating & saving request....authenticated above
         def getUserInfo(request):
-            userid = request.authenticated_userid.split('.', 1)[1]
+            userid = request._auth0_authenticated
             user_props = request.embed('/session-properties', as_user=userid)
             user_props.update({
                 "details" : request.registry[COLLECTIONS]['user'][userid].properties,
@@ -207,7 +207,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
                     request.set_property(lambda r: True, 'auth0_expired') # Allow us to return 403 code &or unset cookie in renderers.py
                     return None
 
-        except ValueError as e:
+        except (ValueError, jwt.exceptions.DecodeError) as e:
             print('Invalid JWT assertion : %s (%s)', (e, type(e).__name__))
             return None
 
