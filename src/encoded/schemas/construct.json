@@ -46,8 +46,7 @@
           "tags": {
               "title": "Tags",
               "description": "String describing tags the construct contains.",
-              "type":  "string",
-              "comment": "Do we want to allow more than 1 (array) and/or CV"
+              "type":  "string"
           },
           "designed_to_target": {
               "title": "Designed to Target",

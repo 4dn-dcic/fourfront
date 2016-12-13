@@ -109,6 +109,7 @@ class ExperimentHiC(Experiment):
     item_type = 'experiment_hi_c'
     schema = load_schema('encoded:schemas/experiment_hi_c.json')
     embedded = Experiment.embedded + ["digestion_enzyme", "submitted_by"]
+    name_key = 'accession'
 
     @calculated_property(schema={
         "title": "Experiment summary",
@@ -140,6 +141,7 @@ class ExperimentCaptureC(Experiment):
     item_type = 'experiment_capture_c'
     schema = load_schema('encoded:schemas/experiment_capture_c.json')
     embedded = Experiment.embedded + ["digestion_enzyme", "submitted_by"]
+    name_key = 'accession'
 
     @calculated_property(schema={
         "title": "Experiment summary",
@@ -171,6 +173,7 @@ class ExperimentRepliseq(Experiment):
     item_type = 'experiment_repliseq'
     schema = load_schema('encoded:schemas/experiment_repliseq.json')
     embedded = Experiment.embedded + ["submitted_by"]
+    name_key = 'accession'
 
     @calculated_property(schema={
         "title": "Experiment summary",
