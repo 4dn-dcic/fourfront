@@ -213,26 +213,24 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
             // Check how many file entries have same exp. accession.
             // To allow to set rowSpan multiple where exp accession is same between files.
-            if (!expsWithFileCounts[file]) {
-                var skip = false;
+            if (typeof expsWithFileCounts[file] === 'undefined') {
                 console.log(fileDetail[file]);
                 // Allow only 1 file to have incremented count (for incr. rowspan)
-                Object.keys(expsWithFileCounts).forEach(function(file2){
-                    if (expsWithFileCounts[file2].exp == fileDetail[file]['@id']) { 
-                        skip = true;
-                        return;
-                    }
-                });
+                //Object.keys(expsWithFileCounts).forEach(function(file2){
+                //    if (expsWithFileCounts[file2].exp == fileDetail[file]['@id']) { 
+                //        skip = true;
+                //        return;
+                //    }
+                //});
                 expsWithFileCounts[file] = { 
                     'exp' : fileDetail[file]['@id'],
-                    'count' : 0,
-                    'skip' : skip
+                    'count' : 0
                 };
 
             }
             Object.keys(fileDetail).forEach(function(file2){
-                if (expsWithFileCounts[file].exp == fileDetail[file2]['@id']) { 
-                    if (!expsWithFileCounts[file].skip) expsWithFileCounts[file].count++;
+                if (expsWithFileCounts[file].exp === fileDetail[file2]['@id']) { 
+                    expsWithFileCounts[file].count++;
                 }
             });
             console.log(expsWithFileCounts[file]);
@@ -268,6 +266,10 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
     }
 
 });
+
+//var TableBody = React.createClass({
+    
+//});
 
 /**
  * Returns an object containing fileDetail and emptyExps.
