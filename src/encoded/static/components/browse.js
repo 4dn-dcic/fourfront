@@ -164,9 +164,8 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
             );
         }.bind(this));
 
-
-        var checked = this.state.selectedFiles.size === files.length || (!this.state.open && this.state.checked);
         var disabled = files.length === emptyExps.length; // @Carl : Any thoughts? Unsure re: case if multiple files in experiment 
+        var checked = this.state.selectedFiles.size === files.length || (!this.state.open && this.state.checked && !disabled);
         var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < files.length;
 
         return (

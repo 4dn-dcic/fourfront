@@ -215,6 +215,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             // To allow to set rowSpan multiple where exp accession is same between files.
             if (!expsWithFileCounts[file]) {
                 var skip = false;
+                console.log(fileDetail[file]);
                 // Allow only 1 file to have incremented count (for incr. rowspan)
                 Object.keys(expsWithFileCounts).forEach(function(file2){
                     if (expsWithFileCounts[file2].exp == fileDetail[file]['@id']) { 
@@ -234,7 +235,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                     if (!expsWithFileCounts[file].skip) expsWithFileCounts[file].count++;
                 }
             });
-
+            console.log(expsWithFileCounts[file]);
             return (
                 <FileEntry 
                     expSetFilters={this.props.expSetFilters || null} 
@@ -514,7 +515,10 @@ var FileEntry = React.createClass({
         // to fill fileInfo according to type of file or experiment type.
         var fileOne = fileInfo.fileOne;
         var fileTwo = fileInfo.fileTwo;
-        var fileID  = fileInfo.fileID; 
+        var fileID  = fileInfo.fileID;
+
+        console.log("FILEINFO", fileInfo);
+
         var experimentAccessionCell = null;
 
         // Will need to separate out <tbody> before rowSpan will work correctly
