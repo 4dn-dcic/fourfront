@@ -9,21 +9,24 @@ var Alerts = module.exports = React.createClass({
     statics : {
         instance : null,
         preMountQueue : [],
-        queue : function(alert){
+        preMountDeQueue: [],
+        queue : function(alert, callback){
             if (typeof Alerts.instance === 'undefined' || !Alerts.instance) {
                 console.error('No Alerts component exists anywhere yet.');
                 Alerts.preMountQueue.push(alert);
+                if (typeof callback === 'function') callback();
                 return;
             }
-            Alerts.instance.queue.call(Alert.instance, alert); 
+            Alerts.instance.queue.call(Alert.instance, alert, callback); 
         },
-        deQueue : function(alert){
+        deQueue : function(alert, callback){
             if (typeof Alerts.instance === 'undefined' || !Alerts.instance) {
                 console.error('No Alerts component exists anywhere yet.');
                 Alerts.preMountQueue = _.without(Alerts.preMountQueue, alert);
+                if (typeof callback === 'function') callback();
                 return;
             }
-            Alerts.instance.deQueue.call(Alert.instance, alert); 
+            Alerts.instance.deQueue.call(Alert.instance, alert, callback); 
         },
         // Common alert definitions
         LoggedOut : {"title" : "Logged Out", "message" : "You have been logged out due to an expired session."}
@@ -53,9 +56,10 @@ var Alerts = module.exports = React.createClass({
         }
         Alerts.instance = this;
         
-        if (Alerts.preMountQueue.length > 0) { 
-            stateObj.alerts = (stateObj.alerts || this.state.alerts).concat(Alerts.preMountQueue);
+        if (Alerts.preMountQueue.length > 0 || Alerts.preMountDeQueue.length > 0) { 
+            stateObj.alerts = _.difference((stateObj.alerts || this.state.alerts).concat(Alerts.preMountQueue), Alerts.preMountDeQueue);
             Alerts.preMountQueue = [];
+            Alerts.preMountDeQueue = [];
         }
         this.setState(stateObj);
     },
@@ -68,20 +72,32 @@ var Alerts = module.exports = React.createClass({
         this.setState({ 'isMounted' : false });
     },
 
-    queue : function(alert){
+    queue : function(alert, callback){
         if (typeof this.state.isMounted !== 'boolean' || !this.state.isMounted) {
             Alerts.preMountQueue.push(alert);
+            if (typeof callback === 'function') callback();
             return;
         }
         var alerts = _.clone(this.state.alerts);
         alerts.push(alert);
-        setTimeout(() => this.setState({ 'alerts' : alerts }), 0);
+        setTimeout(() => this.setState({ 'alerts' : alerts }, typeof callback === 'function' ? callback() : null), 0);
     },
 
-    deQueue : function(alert){
-        var alerts = _.without(this.state.alerts, alert);
-        if (!_.isEqual(alerts, this.state.alerts)){
-            setTimeout(() => this.setState({ 'alerts' : alerts }), 0);
+    deQueue : function(alert, callback){
+        if (typeof this.state.isMounted !== 'boolean' || !this.state.isMounted) {
+            //Alerts.preMountQueue = _.without(Alerts.preMountQueue, alert);
+            Alerts.preMountDeQueue.push(alert);
+            if (typeof callback === 'function') callback();
+            return;
+        }
+        var alertIndex = _.findIndex(this.state.alerts, alert);
+        if (alertIndex > -1){
+            var alerts = _.clone(this.state.alerts);
+            alerts.splice(alertIndex, 1);
+            console.log(alerts, this.state.alerts, alert);
+            this.setState({ 'alerts' : alerts }, typeof callback === 'function' ? callback() : null);
+        } else {
+            if (typeof callback === 'function') callback();
         }
     },
 
