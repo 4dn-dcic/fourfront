@@ -126,6 +126,32 @@
                 "complete",
                 "error"
             ]
+        },
+        "run_details": {
+            "title": "run_details",
+            "description": "Details of the workflow run",
+            "type": "array",
+            "items": {
+                "title": "Parameter",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "field_name": {
+                        "title": "Workflow detail field name",
+                        "description": "the name of the field for a workflow run detail",
+                        "type": "string"
+                    },
+                    "values": {
+                        "title": "Values",
+                        "description": "a specified value for the specified run detail",
+                        "type": "array",
+                        "items": {
+                            "title": "array_items",
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     }
 }
