@@ -4,7 +4,8 @@ var url = require('url');
 var Login = require('./login');
 var { Navbars, Navbar, Nav, NavItem, NavDropdown, MenuItem } = require('react-bootstrap');
 var _ = require('underscore');
-var { responsiveGridState, console } = require('./objectutils');
+var store = require('../store');
+var { responsiveGridState, JWT, console } = require('./objectutils');
 var TestWarning = require('./testwarning');
 var productionHost = require('./globals').productionHost;
 
@@ -27,7 +28,7 @@ var Navigation = module.exports = React.createClass({
         },
 
         /** Can be bound to access this.props.href for getWindowUrl (if available) */
-        buildMenuItem : function(action, mounted){
+        buildMenuItem : function(action, mounted, extraProps){
             return (
                 <MenuItem
                     key={action.id}
@@ -38,6 +39,7 @@ var Navigation = module.exports = React.createClass({
                         (action.url && action.url === Navigation.getWindowUrl.call(this, mounted)) ||
                         (action.href && action.href === Navigation.getWindowUrl.call(this, mounted))
                     }
+                    {...extraProps}
                 >
                     {action.title}
                 </MenuItem>
@@ -65,15 +67,19 @@ var Navigation = module.exports = React.createClass({
         }
     },
 
+    propTypes : {
+        href : React.PropTypes.string,
+        session : React.PropTypes.bool
+    },
+
     contextTypes: {
-        location_href: React.PropTypes.string,
         portal: React.PropTypes.object,
         listActionsFor : React.PropTypes.func
     },
 
     getInitialState: function() {
         return {
-            testWarning: this.props.visible || !productionHost[url.parse(this.context.location_href).hostname] || false,
+            testWarning: this.props.visible || !productionHost[url.parse(this.props.href).hostname] || false,
             mounted : false,
             mobileDropdownOpen : false,
             scrolledPastTop : false,
@@ -159,6 +165,11 @@ var Navigation = module.exports = React.createClass({
         if (this.state.mobileDropdownOpen) this.setState({ mobileDropdownOpen : false });
     },
 
+    closeDropdowns : function(){
+        if (!this.state.mounted) return;
+        //this.
+    },
+
     hideTestWarning: function(e) {
         // Remove the warning banner because the user clicked the close icon
         this.setState({testWarning: false});
@@ -204,8 +215,8 @@ var Navigation = module.exports = React.createClass({
                         </Navbar.Header>
                         <Navbar.Collapse>
                             <Nav>{ this.context.listActionsFor('global_sections').map((a)=> Navigation.buildDropdownMenu.call(this, a, this.state.mounted) ) }</Nav>
-                            <UserActions mounted={this.state.mounted} />
-                            {/* REMOVE SEARCH FOR NOW: <Search /> */}
+                            <UserActions mounted={this.state.mounted} closeMobileMenu={this.closeMobileMenu} session={this.props.session} />
+                            {/* REMOVE SEARCH FOR NOW: <Search href={this.props.href} /> */}
                         </Navbar.Collapse>
                     </Navbar>
                 </div>
@@ -216,12 +227,9 @@ var Navigation = module.exports = React.createClass({
 
 
 var Search = React.createClass({
-    contextTypes: {
-        location_href: React.PropTypes.string
-    },
 
     render: function() {
-        var id = url.parse(this.context.location_href, true);
+        var id = url.parse(this.props.href, true);
         var searchTerm = id.query['searchTerm'] || '';
         return (
             <form className="navbar-form navbar-right" action="/search/">
@@ -234,23 +242,36 @@ var Search = React.createClass({
 
 
 var UserActions = React.createClass({
-    contextTypes: {
-        listActionsFor: React.PropTypes.func,
+
+    propTypes : {
         session: React.PropTypes.bool
     },
 
+    contextTypes: {
+        listActionsFor: React.PropTypes.func
+    },
+
     render: function() {
-        var session = this.context.session;
-        var acctTitle = (
+        var session = this.props.session;
+        var acctTitle = "Account";
+
+        if (session){
+            var userDetails = JWT.getUserDetails();
+            if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) {
+                acctTitle = userDetails.first_name;
+            }
+        }
+        
+        acctTitle = (
             <span>
-                <i title={session ? "Signed In" : null} className={"icon icon-user" + (session ? "" : "-o")}></i>&nbsp; Account
+                <i title={session ? "Signed In" : null} className={"icon icon-user" + (session ? "" : "-o")}></i>&nbsp; { acctTitle }
             </span>
         );
 
         var actions = [];
         this.context.listActionsFor('user_section').forEach((action) => {
             if (action.id === "login"){
-                actions.push(<Login key={action.id} />);
+                actions.push(<Login key={action.id} navCloseMobileMenu={this.props.closeMobileMenu} />);
             } else if (action.id === "accountactions"){
                 // link to registration page if logged out or account actions if logged in
                 if (!session) {
@@ -258,7 +279,7 @@ var UserActions = React.createClass({
                 } else {
                     // Account Actions
                     actions = actions.concat(this.context.listActionsFor('user').map((action, idx) => {
-                        return Navigation.buildMenuItem.call(this, action, this.props.mounted);
+                        return Navigation.buildMenuItem.call(this, action, this.props.mounted, {"data-no-cache" : true});
                     }));
                 }
             } else if (action.id === "contextactions") {

@@ -7,6 +7,8 @@ var fs = require('fs');
 var inline = fs.readFileSync(__dirname + '/../build/inline.js').toString();
 var store = require('../store');
 var { Provider, connect } = require('react-redux');
+var { JWT } = require('../components/objectutils');
+var Alerts = require('../components/alerts');
 
 function mapStateToProps(store) {
    return {
@@ -27,6 +29,30 @@ var render = function (Component, body, res) {
         'href':res.getHeader('X-Request-URL') || context['@id'],
         'inline':inline
     };
+
+    // Grab JWT token if available to inform session
+    var jwtToken = res.getHeader('X-Request-JWT'); // Only returned if successfully authenticated
+    var sessionMayBeSet = false;
+    var userInfo = null;
+    var alerts = null;
+    if (jwtToken && jwtToken.length > 0 && jwtToken !== "null" && jwtToken !== "expired"){
+        sessionMayBeSet = true;
+        userInfo = JSON.parse(res.getHeader('X-User-Info'));
+        if (userInfo){
+            JWT.saveUserInfoLocalStorage(userInfo); // Uses 'dummyStorage' plain object on server-side
+        }
+        res.removeHeader('X-User-Info');
+        res.removeHeader('X-Request-JWT');
+    } else if (
+        /* (disp_dict.context.code === 403 || res.statusCode === 403) && */ 
+        // Sometimes a different statusCode is returned (e.g. 404 if no search/browse result)
+        (jwtToken === 'expired' || disp_dict.context.detail === "Bad or expired token.")
+    ){
+        sessionMayBeSet = false;
+        alerts = [Alerts.LoggedOut];
+    }
+    // End JWT token grabbing
+
     store.dispatch({
         type: disp_dict
     });
@@ -34,7 +60,7 @@ var render = function (Component, body, res) {
     var UseComponent;
     try {
         UseComponent = connect(mapStateToProps)(Component);
-        markup = ReactDOMServer.renderToString(<Provider store={store}><UseComponent /></Provider>);
+        markup = ReactDOMServer.renderToString(<Provider store={store}><UseComponent sessionMayBeSet={sessionMayBeSet} alerts={alerts} /></Provider>);
 
     } catch (err) {
         var context = {
