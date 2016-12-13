@@ -258,6 +258,7 @@ class Workflow(Item):
     """The Workflow class that describes a workflow and steps in it."""
 
     item_type = 'workflow'
+    name_key = 'name'
     schema = load_schema('encoded:schemas/workflow.json')
 
 
