@@ -115,7 +115,7 @@
         "run_status": {
             "title": "Status",
             "type": "string",
-            "default": "waiting",
+            "default": "started",
             "enum" : [
                 "started",
                 "input_file_transferring",
