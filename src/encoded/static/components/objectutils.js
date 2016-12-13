@@ -344,7 +344,7 @@ var ajaxPromise = module.exports.ajaxPromise = function(url, method = 'GET', hea
  * @return {*} - Value corresponding to propertyName.
  */
 
-var getNestedProperty = module.exports.getNestedProperty = function(object, propertyName){
+var getNestedProperty = module.exports.getNestedProperty = function(object, propertyName, suppressNotFoundError = false){
 
     if (typeof propertyName === 'string') propertyName = propertyName.split('.'); 
     if (!Array.isArray(propertyName)) throw new Error('Using improper propertyName in objectutils.getNestedProperty.');
@@ -359,6 +359,10 @@ var getNestedProperty = module.exports.getNestedProperty = function(object, prop
             }
             return arrayVals;
         } else {
+            if (typeof object === 'undefined' || !object) {
+                if (!suppressNotFoundError) throw new Error('Field ' + _.clone(fieldHierarchyLevels).splice(0, level + 1).join('.') + ' not found on object.');
+                return;
+            }
             return findNestedValue(
                 currentNode[fieldHierarchyLevels[level]],
                 fieldHierarchyLevels,

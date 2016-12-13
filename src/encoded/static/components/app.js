@@ -628,7 +628,6 @@ var App = React.createClass({
                         (jwtHeader === 'expired')
                     ){
                         JWT.remove();
-                        this.updateUserInfo();
                         
                         // Wait until request(s) complete before setting notification (callback is called later in promise chain)
                         var oldCallback = callback;
@@ -636,8 +635,11 @@ var App = React.createClass({
                             Alerts.queue(Alerts.LoggedOut);
                             if (typeof oldCallback === 'function') oldCallback(response);
                         }.bind(this);
-
                     }
+
+                    // Update state.session after (possibly) removing expired JWT.
+                    // Also, may have been logged out in different browser window so keep state.session up-to-date BEFORE a re-request
+                    this.updateUserInfo();
 
                     if (repeatIfError) {
                         setTimeout(function(){
@@ -655,7 +657,8 @@ var App = React.createClass({
                     }
 
                 } else { // Not a 403 error
-                    this.updateUserInfo(); // May have been logged out in different browser window so keep state.session up-to-date
+                    // May have been logged out in different browser window so keep state.session up-to-date
+                    this.updateUserInfo();
                 }
                 return response;
             })

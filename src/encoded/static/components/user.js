@@ -217,7 +217,7 @@ var User = module.exports.User = React.createClass({
             return (
                 <img
                     src={ User.buildGravatarURL(email, size, defaultImg)}
-                    className={'gravatar ' + className}
+                    className={'gravatar' + (className ? ' ' + className : '')}
                     title="Obtained via Gravatar"
                 />
             );
