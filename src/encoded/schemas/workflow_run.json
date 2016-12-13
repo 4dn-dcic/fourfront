@@ -127,6 +127,14 @@
                 "error"
             ]
         },
+        "run_platform": {
+            "title": "Run Platform",
+            "type": "string",
+            "enum": [
+                "SBG",
+                "Tibanna"
+            ]
+        },
         "run_details": {
             "title": "Run Details",
             "description": "Details of the workflow run",
