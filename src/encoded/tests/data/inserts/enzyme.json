@@ -9,7 +9,8 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
-        "url": "https://www.neb.com/products/r0104-hindiii"
+        "url": "https://www.neb.com/products/r0104-hindiii",
+        "uuid": "4d44d12c-b37c-478b-9bc7-d843cba4bb91"
     },
     {
         "name": "DNaseI",
@@ -19,7 +20,8 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
-        "url": "https://www.thermofisher.com/order/catalog/product/EN0525"
+        "url": "https://www.thermofisher.com/order/catalog/product/EN0525",
+        "uuid": "e646edb2-d4d5-405b-aab1-03e4754b0705"
     },
     {
         "name": "MboI",
@@ -31,7 +33,8 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
-        "url": "https://www.neb.com/products/r0147-mboi"
+        "url": "https://www.neb.com/products/r0147-mboi",
+        "uuid": "37750c1c-fce5-4ec5-baa7-ce7858f898ae"
     },
     {
         "name": "MNase",
@@ -41,7 +44,8 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
-        "url": "http://www.worthington-biochem.com/nfcp/default.html"
+        "url": "http://www.worthington-biochem.com/nfcp/default.html",
+        "uuid": "f3362e4a-32db-4e3c-b865-66d1716e0f94"
     },
     {
         "name": "DpnII",
@@ -53,7 +57,8 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
-        "url": "https://www.neb.com/products/r0543-dpnii"
+        "url": "https://www.neb.com/products/r0543-dpnii",
+        "uuid": "557d7469-d1f6-4200-8ed4-c40374383dd3"
     },
     {
         "name": "NcoI_MspI_BspHI",
@@ -61,7 +66,8 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
-        "description": "Mixed Enzymes"
+        "description": "Mixed Enzymes",
+        "uuid": "6b88eb35-92e7-46fd-87b8-a779cec40c31"
     },
     {
         "name": "NcoI",
@@ -73,7 +79,8 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
-        "url": "https://www.neb.com/products/r0193-ncoi"
+        "url": "https://www.neb.com/products/r0193-ncoi",
+        "uuid": "aa5ecd3d-69bf-478c-acbc-82f88b785f7c"
     },
     {
         "name": "MspI",
@@ -85,6 +92,7 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
-        "url": "https://www.neb.com/products/r0106-mspi"
+        "url": "https://www.neb.com/products/r0106-mspi",
+        "uuid": "1ff66969-52bc-4226-a056-53b9b0541fe2"
     }
 ]
