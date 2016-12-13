@@ -96,6 +96,7 @@
                         "comment": "same workflow argument can be passed to multiple steps",
                         "description": "argument mapping between workflow and steps",
                         "type": "array",
+                        "subobject": true,
                         "items": {
                             "title" : "Argument Mapping",
                             "type": "object",
@@ -136,6 +137,7 @@
             "comment": "Soo, once we have an actual example I think you may be right and can eliminate this - I guess the reasons to keep this might be 1) there are steps that are not described in the arguments property explicitly but are still part of the workflow proper? 2) we want to add a workflow produced by someone else who doesn't use CWL or some other control language but just a bunch of wrapper scripts",
             "description": "The analysis steps that comprise the workflow with info on who are their parents.",
             "type": "array",
+            "subobject": true,
             "items": {
                 "description": "A step in the workflow and whose its parent are.",
                 "title": "Step Info",

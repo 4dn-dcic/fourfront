@@ -29,14 +29,17 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
     schema = load_schema('encoded:schemas/biosample.json')
     #name_key = 'accession'
     embedded = [
-        'biosource',
+        'biosource.uuid',
         'biosource.individual',
         'biosource.individual.organism',
+        'biosource.individual.organism.name',
         'biosource.biosource_vendor',
         'references',
         'biosample_protocols',
         'treatments',
-        'modifications'
+        'modifications',
+        'modifications.modified_regions',
+        'cell_culture_details'
     ]
 
     @calculated_property(schema={

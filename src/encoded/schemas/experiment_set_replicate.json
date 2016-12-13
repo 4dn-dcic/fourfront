@@ -46,6 +46,7 @@
             "default": [],
             "exclude_from": "submit4dn",
             "uniqueItems": true,
+            "subobject": true,
             "items": {
                 "title": "Replicate experiment",
                 "type": "object",

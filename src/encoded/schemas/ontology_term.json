@@ -79,6 +79,7 @@
             "title": "Parent terms",
             "description": "Ontology terms that are direct parents of this term",
             "type": "array",
+            "subobject": true,
             "items": {
                 "title": "Parent Term",
                 "type": "object",

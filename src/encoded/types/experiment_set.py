@@ -22,7 +22,9 @@ class ExperimentSet(Item):
     item_type = 'experiment_set'
     schema = load_schema('encoded:schemas/experiment_set.json')
     name_key = "accession"
-    embedded = ["experiments_in_set",
+    embedded = ["award",
+                "lab",
+                "experiments_in_set",
                 "experiments_in_set.protocol",
                 "experiments_in_set.protocol_variation",
                 "experiments_in_set.lab",
@@ -65,7 +67,8 @@ class ExperimentSetReplicate(Item):
                 "experiments_in_set.files",
                 "experiments_in_set.filesets",
                 "experiments_in_set.filesets.files_in_set",
-                "experiments_in_set.digestion_enzyme"]
+                "experiments_in_set.digestion_enzyme",
+                "replicate_exps.replicate_exp"]
 
     def _update(self, properties, sheets=None):
         all_experiments = [exp['replicate_exp'] for exp in properties['replicate_exps']]
