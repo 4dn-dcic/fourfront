@@ -17,6 +17,14 @@ var Alerts = module.exports = React.createClass({
             }
             Alerts.instance.queue.call(Alert.instance, alert); 
         },
+        deQueue : function(alert){
+            if (typeof Alerts.instance === 'undefined' || !Alerts.instance) {
+                console.error('No Alerts component exists anywhere yet.');
+                Alerts.preMountQueue = _.without(Alerts.preMountQueue, alert);
+                return;
+            }
+            Alerts.instance.deQueue.call(Alert.instance, alert); 
+        },
         // Common alert definitions
         LoggedOut : {"title" : "Logged Out", "message" : "You have been logged out due to an expired session."}
     },
@@ -68,6 +76,13 @@ var Alerts = module.exports = React.createClass({
         var alerts = _.clone(this.state.alerts);
         alerts.push(alert);
         setTimeout(() => this.setState({ 'alerts' : alerts }), 0);
+    },
+
+    deQueue : function(alert){
+        var alerts = _.without(this.state.alerts, alert);
+        if (!_.isEqual(alerts, this.state.alerts)){
+            setTimeout(() => this.setState({ 'alerts' : alerts }), 0);
+        }
     },
 
     render : function(){

@@ -3,6 +3,7 @@ var React = require('react');
 var store = require('../store');
 var JWT = require('./objectutils').JWT;
 var { MenuItem } = require('react-bootstrap');
+var Alerts = require('./alerts');
 
 // Component that contains auth0 functions
 var Login = React.createClass({
@@ -84,6 +85,7 @@ var Login = React.createClass({
         .then(response => {
             JWT.saveUserInfoLocalStorage(response);
             this.context.updateUserInfo();
+            Alerts.deQueue(Alerts.LoggedOut);
             this.context.navigate('', {'inPlace':true}, this.lock.hide.bind(this.lock));
         }, error => {
             console.log("got an error: ", error.description);
