@@ -4,7 +4,7 @@ Contains the static text used for homepage, help pages, and other misc. location
 
 var statics = {
 
-    "homeDescription" : 
+    "description" : 
         `The 4D Nucleome Network aims to understand the principles behind the three-dimensional organization of the nucleus in
         space and time (the 4th dimension) and the role nuclear organization plays in gene expression and cellular function.
         The Network will utilize existing omics and imaging technologies as well as develop new ones to generate data and create
@@ -25,7 +25,7 @@ var statics = {
         testing purposes. 
         Please refer to the original publications and GEO accessions if you use these data.`,
 
-    "homeLinks" : 
+    "links" : 
         `<a href=\"http://www.4dnucleome.org/\">Main Portal</a><br>
         <a href=\"http://dcic.4dnucleome.org/\">DCIC</a><br>
         <a href=\"https://commonfund.nih.gov/4Dnucleome/index\">Common Fund</a><br>
@@ -80,7 +80,7 @@ var statics = {
         Please contact us if you would like to directly interact with the REST API instead of the excel workbooks for data 
         submission and we can guide you.`,
 
-    "aboutDCIC" : 
+    "dcic" : 
         `The 4DN data portal is developed and managed by the <a href=\"http://dcic.4dnucleome.org/\">4D Nucleome Data Coordination and Integration Center</a>. 
         DCIC staff responsible for the data portal include:<br>
         <br>
@@ -128,14 +128,14 @@ var statics = {
         <p>Please address all questions and comments to <a href=\"mailto:burak_alver@hms.harvard.edu\">Burak Alver</a>.</p>,
     */
 
-    "aboutAcknowledgement" : 
+    "acknowledgements" : 
         `The software and metadata infrastructure for the 4DN Data Portal are based on work by the 
         <a href=\"https://www.encodeproject.org/help/contacts/\">ENCODE DCC team at Stanford University</a> led by
         J. Michael Cherry, Ben Hitz, and Cricket Sloan. 
         We gratefully acknowledge the work they have shared <a href=\"https://github.com/ENCODE-DCC\">open source</a>
         as well as the guidance they have provided for our implementation.`,
 
-    "aboutFunding" : 
+    "funding" : 
         `The 4D Nucleome Data Coordination and Integration Center is supported by the U01 Grant CA200059 from the NIH Common Fund.`
 
 };

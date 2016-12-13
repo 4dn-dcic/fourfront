@@ -9,11 +9,11 @@ thead, tfoot {
 }
 
 table>thead>tr>th {
-    background-color: #eee !important;
-    border-top: none !important;
-    border-bottom: 1px solid #ddd !important;
-    border-left: 1px solid #ddd !important;
-    padding: 5px 3px 5px !important;
+    background-color: #eee;
+    border-top: none;
+    border-bottom: 1px solid #ddd;
+    border-left: 1px solid #ddd;
+    padding: 5px 3px 5px;
     font-weight: bold; /* In case 600 not available for font */
     font-weight: 600;
     white-space: nowrap;

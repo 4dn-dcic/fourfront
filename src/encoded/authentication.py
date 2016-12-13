@@ -162,6 +162,21 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
             return None
 
         email = request._auth0_authenticated = user_info['email'].lower()
+
+        # Allow us to access basic user credentials from request obj after authenticating & saving request....authenticated above
+        def getUserInfo(request):
+            userid = request._auth0_authenticated
+            user_props = request.embed('/session-properties', as_user=userid)
+            user_details = request.embed('/me', as_user=userid)
+            includedDetailFields = ['email', 'first_name','last_name','groups','timezone','status', 'lab', 'submits_for']
+            user_props.update({
+                # Only include certain fields from profile
+                "details" : { p:v for p,v in user_details.items() if p in includedDetailFields},
+                "id_token" : id_token
+            })
+            return user_props
+
+        request.set_property(getUserInfo, "user_info", True)
         return email
 
 
@@ -183,13 +198,19 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
                     return payload
 
             else: # we don't have the key, let auth0 do the work for us
-                user_url = "https://{domain}/tokeninfo".format(domain='hms-dbmi.auth0.com')
-                resp  = requests.post(user_url, {'id_token':token})
-                payload = resp.json()
-                if 'email' in payload and payload.get('email_verified') is True:
-                    return payload
+                try:
+                    user_url = "https://{domain}/tokeninfo".format(domain='hms-dbmi.auth0.com')
+                    resp  = requests.post(user_url, {'id_token':token})
+                    payload = resp.json()
+                    if 'email' in payload and payload.get('email_verified') is True:
+                        request.set_property(lambda r: False, 'auth0_expired')
+                        return payload
+                except ValueError as e:
+                    print("Bad or expired token: " + token)
+                    request.set_property(lambda r: True, 'auth0_expired') # Allow us to return 403 code &or unset cookie in renderers.py
+                    return None
 
-        except Exception as e:
+        except (ValueError, jwt.exceptions.DecodeError) as e:
             print('Invalid JWT assertion : %s (%s)', (e, type(e).__name__))
             return None
 
@@ -198,15 +219,19 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
 
 
 def get_jwt(request):
+    token = None
     try:
         # ensure this is a jwt token not basic auth:
         auth_type = request.headers['Authorization'][:6]
         if auth_type.strip().lower() == 'bearer':
-            return request.headers['Authorization'][7:]
+            token = request.headers['Authorization'][7:]
     except (ValueError, TypeError, KeyError):
         pass
 
-    return request.cookies.get('jwtToken', None)
+    if not token:
+        token = request.cookies.get('jwtToken')
+
+    return token
 
 
 @view_config(route_name='login', request_method='POST',
@@ -214,24 +239,14 @@ def get_jwt(request):
 def login(request):
     '''check the auth0 assertion and remember the user'''
 
-    login = request.authenticated_userid
-    if login is None:
-        namespace = userid = None
+    if hasattr(request, 'user_info'):
+        user_info = request.user_info
+        if not user_info:
+            raise LoginDenied()
     else:
-        namespace, userid = login.split('.', 1)
-
-    if namespace != 'auth0':
-        #request.session.invalidate()
-        #request.response.headerlist.extend(forget(request))
         raise LoginDenied()
 
-    #request.session.invalidate()
-    #request.response.headerlist.extend(remember(request, 'mailto.' + userid))
-
-    properties = request.embed('/session-properties', as_user=userid)
-    properties['id_token'] = get_jwt(request)
-
-    return properties
+    return user_info
 
 
 @view_config(route_name='logout',
@@ -259,7 +274,7 @@ def me(request):
         if principal.startswith('userid.'):
             break
     else:
-        return { 'uuid' : None }
+        raise HTTPForbidden(title="Not logged in.")
 
     namespace, userid = principal.split('.', 1)
 

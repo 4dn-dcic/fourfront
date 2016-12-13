@@ -3,6 +3,7 @@ var React = require('react');
 var store = require('../store');
 var JWT = require('./objectutils').JWT;
 var { MenuItem } = require('react-bootstrap');
+var Alerts = require('./alerts');
 
 // Component that contains auth0 functions
 var Login = React.createClass({
@@ -42,23 +43,23 @@ var Login = React.createClass({
         this.lock.on("authenticated", this.handleAuth0Login);
     },
 
-	showLock: function(e) {
+	showLock: function(eventKey, e) {
 		this.lock.show();
 	},
 
-    logout: function (e) {
+    logout: function (eventKey, e) {
         JWT.remove();
         console.log('Logging out');
         if (!this.context.session) return;
+        if (typeof this.props.navCloseMobileMenu === 'function') this.props.navCloseMobileMenu();
 
-        this.context.fetch('/logout?redirect=false', {
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
-        })
+        this.context.fetch('/logout?redirect=false')
         .then(data => {
             if(typeof document !== 'undefined'){
+
+                // Dummy click event to close dropdown menu, bypasses document.body.onClick handler (app.js -> App.prototype.handeClick)
+                document.dispatchEvent(new MouseEvent('click'));
+
                 // TODO: should logout redirect to home?
                 this.context.updateUserInfo();
                 this.context.navigate('', {'inPlace':true});
@@ -74,11 +75,7 @@ var Login = React.createClass({
 
         this.context.fetch('/login', {
             method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer '+idToken
-            },
+            headers: { 'Authorization': 'Bearer '+idToken },
             body: JSON.stringify({id_token: idToken})
         })
         .then(response => {
@@ -88,6 +85,7 @@ var Login = React.createClass({
         .then(response => {
             JWT.saveUserInfoLocalStorage(response);
             this.context.updateUserInfo();
+            Alerts.deQueue(Alerts.LoggedOut);
             this.context.navigate('', {'inPlace':true}, this.lock.hide.bind(this.lock));
         }, error => {
             console.log("got an error: ", error.description);

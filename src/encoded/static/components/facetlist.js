@@ -749,9 +749,9 @@ var FacetList = module.exports = React.createClass({
     shouldComponentUpdate : function(nextProps, nextState){
         if (
             this.state.usingProvidedFacets === false ||
-            this.props.ignoredFilters !== nextProps.ignoredFilters ||
             this.props.expSetFilters !== nextProps.expSetFilters ||
-            this.props.facets !== nextProps.facets
+            !_.isEqual(nextProps.facets, this.props.facets) ||
+            !_.isEqual(nextProps.ignoredFilters, this.props.ignoredFilters)
         ){
             console.log('%cWill','color: green', 'update FacetList');
             return true;
@@ -762,9 +762,9 @@ var FacetList = module.exports = React.createClass({
 
     componentWillReceiveProps : function(nextProps){
         if (
-            this.props.ignoredFilters !== nextProps.ignoredFilters ||
             this.props.expSetFilters !== nextProps.expSetFilters ||
-            this.props.facets !== nextProps.facets
+            !_.isEqual(nextProps.facets, this.props.facets) ||
+            !_.isEqual(nextProps.ignoredFilters, this.props.ignoredFilters)
         ){
 
             if (this.state.usingProvidedFacets === true && this.props.facets !== nextProps.facets){
