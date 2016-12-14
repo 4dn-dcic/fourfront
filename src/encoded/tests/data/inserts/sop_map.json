@@ -1,6 +1,6 @@
 [
     {
-        "uuid": "aafb608a-1c08-11e4-8c21-0800200c9a66",
+        "uuid": "39373842-12e9-4bbb-8f70-270ec1a859ea",
         "sop_name": "in situ Hi-C SOP map",
         "sop_version": 1,
         "associated_item_type": "ExperimentHiC",
@@ -9,6 +9,8 @@
         "description": "Fields with specified defaults in the SOP for in situ Hi-C experiments as per ??",
         "sop_protocol": "131106bc-8535-4448-903e-854af460b244",
         "necessary_fields": ["enzyme_lot_number"],
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
         "fields_with_default": [
             {"field_name": "digestion_time", "field_value": "120"},
             {"field_name": "digestion_temperature", "field_value": "37"},

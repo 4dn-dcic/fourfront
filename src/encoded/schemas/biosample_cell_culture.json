@@ -4,7 +4,7 @@
     "id": "/profiles/biosample_cell_culture.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["culture_start_date"],
+    "required": ["culture_start_date", "award", "lab"],
     "identifyingProperties": ["uuid", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -50,7 +50,6 @@
         "culture_duration_units":{
             "title":"",
             "description":"",
-            "comment":"",
             "type":"string",
             "enum": [
                 "minutes",
@@ -92,7 +91,7 @@
         "karyotype_image": {
             "title": "Karyotype",
             "description": "Image of the karyotype of potentially genomically unstable lines",
-            "comment":"Please supply a karyotype image if the passage number is 10 or more, or sequencing data for karyotype information data is not available.",
+            "comment":"If passage number is more then 10, please supply a karyotype image, or karyotype information from sequencing data.",
             "type": "string",
             "linkTo": "Image"
         },

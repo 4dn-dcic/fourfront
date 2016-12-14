@@ -4,7 +4,7 @@
     "id": "/profiles/enzyme.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [ "name", "enzyme_source"],
+    "required": [ "name", "enzyme_source", "award", "lab"],
     "identifyingProperties": ["uuid","aliases","name"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -64,13 +64,13 @@
           "title": "Site Length",
           "description": "The length of the enzyme recognition sequence.",
           "type": "integer",
-          "comment": "this can be calculated if a recognition sequence is provided but can be set even without recognition sequence"
+          "internal_comment": "this can be calculated if a recognition sequence is provided but can be set even without recognition sequence"
         },
         "cut_position": {
           "title": "Cut position",
           "description": "The position in the provided recognition sequence at which the enzyme cuts AFTER - relative to base 1 of site.",
           "type": "integer",
-          "comment": "has a dependency on either cut_sequence or site_length"
+          "internal_comment": "has a dependency on either cut_sequence or site_length"
         },
         "url": {
             "title": "URL",

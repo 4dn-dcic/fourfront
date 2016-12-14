@@ -3,6 +3,9 @@
         "description": "A target of consequence",
         "targeted_genes": ["PARK2", "FMR1"],
         "uuid": "d1115d5e-40aa-43bc-b81c-32c70c9afb55",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "aliases": ["dcic:test_targ1"]
     },
     {
@@ -10,12 +13,18 @@
         "targeted_genes": ["PARK2", "FMR1"],
         "targeted_region": "d1115d5e-40aa-43bc-b81c-32c70c9afb01",
         "uuid": "d1115d5e-40aa-43bc-b81c-32c70c9afb44",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "aliases": ["dcic:test_targ2"]
     },
     {
         "description": "A target of no regard",
         "targeted_region": "d1115d5e-40aa-43bc-b81c-32c70c9afb01",
         "uuid": "d1115d5e-40aa-43bc-b81c-32c70c9afb33",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "aliases": ["dcic:test_targ3"]
     }
 ]

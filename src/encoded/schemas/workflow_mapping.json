@@ -4,6 +4,7 @@
     "id": "/profiles/workflow_mapping.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
+        "required": ["award", "lab"],
     "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases"],
     "mixinProperties": [

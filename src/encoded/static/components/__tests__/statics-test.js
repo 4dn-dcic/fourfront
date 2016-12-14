@@ -22,10 +22,10 @@ describe('Testing statics.js (to increase coverage)', function() {
 
     it('Has the required keys & values', function() {
         
-        expect('homeDescription' in Statics).toBe(true);
-        expect(Statics.homeDescription.length).toBeGreaterThan(0);
-        expect('homeLinks' in Statics).toBe(true);
-        expect(Statics.homeLinks.length).toBeGreaterThan(0);
+        expect('description' in Statics).toBe(true);
+        expect(Statics.description.length).toBeGreaterThan(0);
+        expect('links' in Statics).toBe(true);
+        expect(Statics.links.length).toBeGreaterThan(0);
         expect('gettingStarted' in Statics).toBe(true);
         expect(Statics.gettingStarted.length).toBeGreaterThan(0);
         expect('metadataStructure1' in Statics).toBe(true);
@@ -34,12 +34,12 @@ describe('Testing statics.js (to increase coverage)', function() {
         expect(Statics.metadataStructure2.length).toBeGreaterThan(0);
         expect('submissionXLS' in Statics).toBe(true);
         expect(Statics.submissionXLS.length).toBeGreaterThan(0);
-        expect('aboutDCIC' in Statics).toBe(true);
-        expect(Statics.aboutDCIC.length).toBeGreaterThan(0);
-        expect('aboutAcknowledgement' in Statics).toBe(true);
-        expect(Statics.aboutAcknowledgement.length).toBeGreaterThan(0);
-        expect('aboutFunding' in Statics).toBe(true);
-        expect(Statics.aboutFunding.length).toBeGreaterThan(0);
+        expect('dcic' in Statics).toBe(true);
+        expect(Statics.dcic.length).toBeGreaterThan(0);
+        expect('acknowledgements' in Statics).toBe(true);
+        expect(Statics.acknowledgements.length).toBeGreaterThan(0);
+        expect('funding' in Statics).toBe(true);
+        expect(Statics.funding.length).toBeGreaterThan(0);
 
     });
 

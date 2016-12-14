@@ -4,7 +4,7 @@
     "id": "/profiles/construct.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["name", "construct_type"],
+    "required": ["name", "construct_type", "award", "lab"],
     "identifyingProperties": ["uuid","aliases","name"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -46,8 +46,7 @@
           "tags": {
               "title": "Tags",
               "description": "String describing tags the construct contains.",
-              "type":  "string",
-              "comment": "Do we want to allow more than 1 (array) and/or CV"
+              "type":  "string"
           },
           "designed_to_target": {
               "title": "Designed to Target",
