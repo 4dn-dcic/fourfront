@@ -246,7 +246,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                             {...this.props} 
                         />
 
-                        <div className="exp-table-container">
+                        <div className="exp-table-section">
                             <h3>
                                 <span>Experiments</span>
                                 <span className="exp-number small right">
@@ -255,20 +255,25 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                                     <span className="hidden-xs"> Experiments</span>
                                 </span>
                             </h3>
-                            <ExperimentsTable 
-                                ref="experimentsTable"
-                                columnHeaders={[ 
-                                    null, 
-                                    'Experiment Accession', 
-                                    'Biosample Accession',
-                                    'File Accession', 
-                                    'File Type',
-                                    'File Info'
-                                ]}
-                                parentController={this}
-                                fileDetailContainer={this.fileDetailContainer}
-                                keepCounts={false}
-                            />
+                            <div className="exp-table-container">
+                                <ExperimentsTable 
+                                    ref="experimentsTable"
+                                    columnHeaders={[
+                                        'Biosample Accession',
+                                        'Experiment Accession', 
+                                        'File Accession', 
+                                        'File Type',
+                                        'File Info'
+                                    ]}
+                                    parentController={this}
+                                    experimentSetType={this.props.context.experimentset_type}
+                                    fileDetailContainer={this.fileDetailContainer}
+                                    expSetFilters={this.props.expSetFilters}
+                                    facets={ this.props.facets }
+                                    experimentArray={this.props.context.experiments_in_set}
+                                    keepCounts={false}
+                                />
+                            </div>
                         </div>
 
                     </div>

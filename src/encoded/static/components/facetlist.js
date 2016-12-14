@@ -895,7 +895,7 @@ var FacetList = module.exports = React.createClass({
             (!this.facets.length && this.props.mode != 'picker') ||
             (!this.facets[0].terms && this.props.mode != 'picker')
         ) {
-            if (!this.state.facetsLoaded) {
+            if (!this.state.facetsLoaded && !this.state.usingProvidedFacets) {
                 return (
                     <div className="text-center" style={{ padding : "162px 0", fontSize : '26px', color : "#aaa" }}>
                         <i className="icon icon-spin icon-circle-o-notch"></i>

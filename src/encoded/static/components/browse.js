@@ -142,7 +142,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         var formattedColumns = Object.keys(this.props.columns).map(function (key){
             if(key==="Accession"){
                 return(
-                    <td key={key+this.props.href} className="expset-table-cell">
+                    <td key={key+this.props.href} className="expset-table-cell mono-text">
                         <a className="expset-entry" href={this.props.href}>
                             {this.props.columns[key]}
                         </a>
@@ -197,7 +197,6 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                             </div>
                             <ExperimentsTable
                                 columnHeaders={[
-                                    null,
                                     'Experiment Accession',
                                     'Biosample Accession',
                                     'File Accession',
@@ -205,6 +204,8 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                                     'File Info'
                                 ]}
                                 fileDetailContainer={fileDetailContainer}
+                                experimentArray={this.props.experimentArray}
+                                experimentSetType={this.props.experimentSetType}
                                 parentController={this}
                                 expSetFilters={this.props.expSetFilters}
                                 facets={this.props.facets /* Not req'd here as using pre-completed fileDetailContainer' */ }
@@ -585,6 +586,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                         addInfo={addInfo}
                         columns={columns}
                         expSetFilters={this.props.expSetFilters}
+                        experimentSetType={result.experimentset_type}
                         targetFiles={this.props.targetFiles}
                         href={result['@id']}
                         experimentArray={experimentArray}
@@ -641,7 +643,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                 </h5>
 
                 <div className="expset-table-container" ref="expSetTableContainer">
-                    <Table className="expset-table expsets-table table-tbody-striped" condensed id="result-table">
+                    <Table className="expset-table expsets-table" condensed id="result-table">
                         <thead>
                             <tr>
                                 <th></th>

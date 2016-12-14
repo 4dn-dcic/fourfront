@@ -22,6 +22,23 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
     statics : {
 
+        /* List of headers which are created/controlled by component (not customizable), by experimentset_type */
+        builtInHeaders : function(expSetType = 'replicate'){
+            switch (expSetType){
+                case 'replicate' : 
+                    return [
+                        'Biosample Accession',
+                        'Experiment Accession',
+                        'File Accession'
+                    ];
+                default: 
+                    return [
+                        'Experiment Accession'
+                    ];
+            }
+            
+        },
+
         totalExperimentsCount : function(experimentArray = null){
             if (!experimentArray) return null;
             var experimentsCount = 0;
@@ -74,7 +91,26 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 'files' : fileSet.size,
                 'emptyExperiments' : fileDetailContainer.emptyExps.length
             };
-        }
+        },
+
+        renderBlockLabel : function(title, subtitle = null, inline = false){
+
+            function subtitleElement(){
+                if (!subtitle) return null;
+                return React.createElement(
+                    inline ? 'span' : 'div',
+                    { className : "ext" },
+                    subtitle
+                );
+            }
+
+            return (
+                <div className="label-ext-info">
+                    <span className="label-title">{ title }</span>
+                    { subtitleElement() }
+                </div>
+            );
+        },
 
     },
 
@@ -100,10 +136,9 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
     getDefaultProps : function(){
         return {
             keepCounts : false,
-            columnHeaders : [ 
-                null, 
-                'Experiment Accession', 
+            columnHeaders : [
                 'Biosample Accession',
+                'Experiment Accession', 
                 'File Accession', 
                 'File Type',
                 'File Info'
@@ -134,6 +169,12 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 counts : this.getCounts(nextProps.experimentArray !== this.props.experimentArray, fileDetailContainer)
             });
         }
+    },
+
+    customizableColumnHeaders : function(){
+        return this.props.columnHeaders.filter((c) => { 
+            return ExperimentsTable.builtInHeaders(this.props.experimentSetType).indexOf(c) === -1;
+        });
     },
 
     getCounts : function(includeTotals = false, fileDetailContainer = this.state.fileDetailContainer){
@@ -201,75 +242,174 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         return getFileDetailContainer(props.experimentArray, passExperiments);
     },
 
-    renderChildFileEntryRows : function(fileDetail = this.state.fileDetailContainer.fileDetail){
-        
-        // Let parentController control 'checked' state if provided.
-        // Fallback to own state otherwise.
-        var checked = this.props.parentController && this.props.parentController.state ?
-            this.props.parentController.state.checked : this.state.checked;
-        
-        var expsWithFileCounts = {};
-        return Object.keys(fileDetail).map(function (file) {
+    renderReplicates : function(){
 
-            // Check how many file entries have same exp. accession.
-            // To allow to set rowSpan multiple where exp accession is same between files.
-            if (typeof expsWithFileCounts[file] === 'undefined') {
-                console.log(fileDetail[file]);
-                // Allow only 1 file to have incremented count (for incr. rowspan)
-                //Object.keys(expsWithFileCounts).forEach(function(file2){
-                //    if (expsWithFileCounts[file2].exp == fileDetail[file]['@id']) { 
-                //        skip = true;
-                //        return;
-                //    }
-                //});
-                expsWithFileCounts[file] = { 
-                    'exp' : fileDetail[file]['@id'],
-                    'count' : 0
-                };
-
-            }
-            Object.keys(fileDetail).forEach(function(file2){
-                if (expsWithFileCounts[file].exp === fileDetail[file2]['@id']) { 
-                    expsWithFileCounts[file].count++;
-                }
-            });
-            console.log(expsWithFileCounts[file]);
+        var renderFileBlock = function(file,i){
+            var checked = this.state.checked;
+            if (this.props.parentController && this.props.parentController.state) checked = this.props.parentController.state.checked;
             return (
-                <FileEntry 
-                    expSetFilters={this.props.expSetFilters || null} 
-                    info={fileDetail[file]} 
-                    key={fileDetail[file]['uuid'] + file} 
-                    parentChecked={checked} 
+                <FileEntryBlock
+                    key={file['@id']}
+                    parentChecked={checked}
+                    file={file}
+                    columnHeaders={ this.customizableColumnHeaders() }
                     handleFileUpdate={this.handleFileUpdate}
-                    columnHeaders={this.props.columnHeaders}
-                    experimentAccessionEntrySpan={expsWithFileCounts[file].count}
+                    className={null}
+                    replicateNum={i + 1}
                 />
             );
-        }.bind(this)).sort(function(a,b){
-            return(a.key - b.key);
-        });
+        }.bind(this);
+
+        var oddExpRow = false; // Alternate throughout all experiments (vs only within biosample), for striping
+
+        var renderExperimentBlock = function(exp,i){
+            oddExpRow = !oddExpRow;
+            return (
+                <div className={"s-block experiment " + (oddExpRow ? 'odd' : 'even')} key={exp['@id']}>
+                    <div className="name mono-text col-experiment">
+                        { ExperimentsTable.renderBlockLabel('Experiment', 'Tech Replicate ' + (i+1)) }
+                        <a href={ exp['@id'] || '#' }>{ exp.accession }</a>
+                    </div>
+                    <div className="files">
+                        { Array.isArray(exp.files) ? exp.files.map(renderFileBlock) :
+                            <div className="s-block file">
+                                <div className="name col-file"><em>No Files</em></div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            );
+        }.bind(this);
+
+        function renderBiosamples(){
+            return _.values(    // Creates [[expWBioSample1-1, expWBioSample1-2], [expWBioSample2-1, expWBioSample2-2], ...]
+                _.groupBy(      // Creates { 'biosample@id1' : [expWBioSample1-1, expWBioSample1-2, ...], 'biosample@id2' : [expWBioSample2-1, expWBioSample1-2, ...], ... }
+                    this.props.experimentArray,
+                    function(e){ return e.biosample['@id']; }
+                )
+            ).map(function(b,i){
+                // Each 'b' (biosample) is an array of experiments w/ that biosample. b[0].biosample would thus have full data of biosample.
+                return (
+                    <div className="s-block biosample" key={b[0].biosample['@id']}>
+                        <div className="name mono-text col-biosample">
+                            { ExperimentsTable.renderBlockLabel('Biosample', 'Bio Replicate ' + (i+1)) }
+                            <a href={ b[0].biosample['@id'] || '#' }>{ b[0].biosample.accession }</a>
+                        </div>
+                        <div className="experiments">
+                            { b.map(renderExperimentBlock) }
+                        </div>
+                    </div>
+                );
+            });
+        };
+
+        return <div className="biosamples">{ renderBiosamples.call(this) }</div>;
     },
 
     render : function(){
+        console.log(this.props.experimentArray);
         return (
-            <Table className="expset-table" striped bordered condensed hover>
-                <thead>
-                    <tr>
-                        { this.props.columnHeaders.map(function(columnTitle, i){
-                            return <th className="text-500" key={i}>{ columnTitle }</th>;
-                        }) }
-                    </tr>
-                </thead>
-                { this.renderChildFileEntryRows() }
-            </Table>
+            <div className="expset-experiments">
+                <div className="headers">
+                    <div className="heading-block col-biosample">Biosample Accession</div>
+                    <div className="heading-block col-experiment">Experiment Accession</div>
+                    <div className="heading-block col-file">File Accession</div>
+                    { this.customizableColumnHeaders().map(function(columnTitle, i){
+                        return <div className="heading-block col-file-detail" key={i}>{ columnTitle }</div>;
+                    }) }
+                </div>
+                <div className="body">
+                    { this.renderReplicates() }
+                </div>
+            </div>
         );
     }
 
 });
 
-//var TableBody = React.createClass({
+var FileEntryBlock  = React.createClass({
+
+    getInitialState: function() {
+        return {
+            checked: this.props.parentChecked
+        };
+    },
+
+    // initial checkbox setting if parent is checked
+    componentWillMount: function(){
+        if(
+            this.props.file &&
+            this.props.file['@id'] &&
+            this.state.checked &&
+            typeof this.props.handleFileUpdate === 'function'
+        ){
+            this.props.handleFileUpdate(this.props.file.uuid, true);
+        }
+    },
+
+    componentWillReceiveProps: function(nextProps) {
+        if(this.props.parentChecked !== nextProps.parentChecked){
+            this.setState({
+                checked: nextProps.parentChecked
+            });
+        }
+    },
+
+    handleCheck: function() {
+        this.setState({
+            checked: !this.state.checked
+        });
+    },
     
-//});
+    fillFileRow : function (file){
+        var row = [];
+        var cols = this.props.columnHeaders;
+        var className = (this.props.className || '') + " col-file-detail item detail-col-";
+        for (var i = 0; i < cols.length; i++){
+
+            if (!file['@id']) { 
+                row.push(<div key={"file-detail-empty-" + i} className={className + i}></div>);
+                continue;
+            }
+
+            if (cols[i] == 'File Type'){
+                row.push(<div key="file-type" className={className + i}>{file.file_format}</div>);
+                continue;
+            }
+
+            if (cols[i] == 'File Info'){
+                if (typeof file.paired_end !== 'undefined') {
+                    row.push(<div key="file-info" className={className + i}>Paired end {file.paired_end}</div>);
+                } else if (file.file_format === 'fastq' || file.file_format === 'fasta') {
+                    row.push(<div key="file-info" className={className + i}>Unpaired</div>);
+                } else {
+                    row.push(<div key="file-info" className={className + i}></div>);
+                }
+                continue;
+            }
+        }
+        return row;
+    },
+
+    render : function(){
+        return (
+            <div className="s-block file">
+                <div className="name mono-text col-file">
+                    { ExperimentsTable.renderBlockLabel(
+                        'File',
+                        this.props.replicateNum ? 'Seq Replicate ' + this.props.replicateNum : null,
+                        true
+                    ) }
+                    <a href={this.props.file['@id'] || '#'}>
+                        { this.props.file.accession || this.props.file.uuid || this.props.file['@id'] }
+                    </a>
+                </div>
+                { this.fillFileRow(this.props.file) }
+            </div>
+        );
+    }
+
+});
 
 /**
  * Returns an object containing fileDetail and emptyExps.
@@ -552,7 +692,7 @@ var FileEntry = React.createClass({
                     }
                     { experimentAccessionCell }
                     <td rowSpan="2" className="expset-exp-cell">
-                        <a href={info.biosample_id || ''}>
+                        <a href={info.biosample_id || '#'}>
                             {info.biosample}
                         </a>
                     </td>

@@ -230,6 +230,11 @@ h1.page-title + .page-subtitle {
 .left { float: left; }
 .right { float: right; }
 
+.mono-text,
+.accession {
+	font-family: consolas, monospace;
+}
+
 @media screen and (max-width: $screen-xs-max){
 
 	.text-left-xs {
@@ -659,9 +664,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	outline: none;
 }
 
-.exp-table-container {
-	overflow-x: auto;
-	display: block;
+.exp-table-section {
 
 	h3 {
 		font-weight: 300;
@@ -673,6 +676,11 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			padding-top: 5px;
 		}
 
+	}
+
+	.exp-table-container {
+		overflow-x: auto;
+		display: block;
 	}
 
 	/*
@@ -1140,6 +1148,244 @@ p, input {
 	}
 }
 
+// Column Widths
+$expset-col-biosample : 125px;
+$expset-col-experiment : 125px;
+$expset-col-file : 125px;
+$expset-col-file-detail : 125px;
+$expset-full-width : $expset-col-biosample + $expset-col-experiment + $expset-col-file + ($expset-col-file-detail * 2);
+
+.expset-experiments {
+
+	.headers { display: none; /* Mobile */ }
+
+	@media screen and (min-width: $screen-md-min){
+
+		min-width: $expset-full-width;
+
+		text-align: right;
+
+		.col-biosample 		{ width: $expset-col-biosample; }
+		.col-experiment 	{ width: $expset-col-experiment; }
+		.col-file 			{ width: $expset-col-file; }
+		.col-file-detail 	{ width: $expset-col-file-detail; }
+
+		.headers {
+			display: block;
+			> .heading-block {
+				text-align: center;
+				display: inline-block;
+				padding: 12px 8px;
+			}
+		}
+	}
+
+	.col-file-detail:not(.heading-block) {
+		text-align: center;
+	}
+
+	> .body {
+		font-size: 0.9rem; /* Same as table */
+		border-top: 2px solid #333;
+		border-bottom: 2px solid #333;
+
+		.s-block {
+			display: block;
+			position: relative;
+
+			> .name {
+				@media screen and (min-width: $screen-md-min){
+					display: inline-block;
+				}
+				padding: 6px 12px;
+				text-align: center;
+				line-height: 20px;
+				&.mono-text {
+					font-size: 0.85rem;
+				}
+			}
+
+			> .name:after,
+			> .name > .label-ext-info {
+				position: absolute;
+				font-family: 'Work Sans', sans-serif;
+				left: 0;
+				top: 0;
+				font-size: 0.625rem;
+				font-size: 0.4875rem;
+				text-transform: uppercase;
+				text-align: left;
+			}
+
+			.label-ext-info {
+				text-align: left;
+				line-height: 7px;
+				
+				> .ext {
+					font-weight: 400;
+					opacity: 0.1;
+				}
+
+				> span.ext:before {
+					content: "- ";
+				}
+			}
+
+		}
+
+		@media screen and (min-width: $screen-md-min){
+			.s-block > .name:after,
+			.s-block > .name > .label-ext-info {
+				opacity: 0;
+				font-weight: 600;
+				transform: scale3d(1,1,1) translate3d(0%,12%,0);
+				transition: opacity .4s, transform .4s;
+			}
+			.s-block > .name > .label-ext-info > .ext {
+				opacity: 0;
+				transform: translate3d(0,0,0);
+				transition: opacity .6s, transform .4s;
+			}
+			.s-block > .name > .label-ext-info > div.ext {
+				transform: translate3d(0,-7px,0);
+			}
+			.s-block > .name > .label-ext-info > span.ext {
+				display: inline-block;
+				transform: translate3d(0px,0,0);
+			}
+			.s-block:hover .s-block > .name:after,
+			.s-block:hover .s-block > .name > .label-ext-info {
+				opacity: 0.2;
+			}
+			.s-block:hover > .name:after,
+			.s-block:hover > .name > .label-ext-info {
+				opacity: 1 !important;
+				color: #000;
+				transform: scale3d(1.15,1.15,1) translate3d(7%,18%,0);
+			}
+			.s-block:hover > .name > .label-ext-info > .ext {
+				opacity: 0.33;
+			}
+			.s-block:hover > .name > .label-ext-info > div.ext
+			.s-block:hover .s-block > .name > .label-ext-info > div.ext {
+				transform: translate3d(0px,0px,0);
+			}
+			.s-block:hover > .name > .label-ext-info > span.ext
+			.s-block:hover .s-block > .name > .label-ext-info > span.ext {
+				transform: translate3d(3px,0,0);
+			}
+			.s-block:hover > .name:hover > .label-ext-info > .ext {
+				opacity: 1;
+			}
+
+		}
+
+		.s-block > .item {
+			padding: 6px 8px;
+			display: inline-block;
+			text-align: center;
+		}
+
+		> .biosamples {
+			@media screen and (min-width: $screen-md-min){
+				display: inline-block;
+			}
+			> .s-block.biosample {
+
+				//display: inline-block;
+
+				&:not(:last-child){
+					border-bottom: 2px solid #333;
+				}
+
+				&:nth-child(2n-1){
+					@include gradient-horizontal(rgba(255, 255, 255, 0), #f7f9f8, 0%, 12%);
+				}
+
+				&:nth-child(2n-2){
+					@include gradient-horizontal(rgba(255, 255, 255, 0), #f8f9f7, 0%, 12%);
+				}
+
+				> .name {
+					text-align: center;
+					font-weight: 500;
+					//position: relative;
+					&:after {
+						//top: -15px;
+					}
+				}
+
+				> .experiments {
+					@media screen and (min-width: $screen-md-min){
+						display: inline-block;
+					}
+					vertical-align: middle;
+
+					> .s-block.experiment {
+						padding: 0;
+						text-align: left;
+
+						&:not(:last-child){
+							border-bottom: 1px solid #888;
+							border-color: rgba(0,0,0,0.5);
+						}
+
+						&.odd {
+							@include gradient-horizontal(rgba(245, 235, 235, 0), rgba(245, 235, 235, 0.4), 0%, 30%);
+							transition: background-image .5s;
+							&:hover {
+								//@include gradient-horizontal(rgba(255, 200, 210, 0), rgba(255, 240, 240, 0.7), 0%, 10%);
+							}
+						}
+
+						&.even {
+							//background-color: rgba(255, 220, 200, 0.5);
+							@include gradient-horizontal(rgba(255, 250, 250, 0), rgba(255, 250, 250, 0.4), 0%, 30%);
+							transition: background-image .5s;
+							&:hover {
+								//@include gradient-horizontal(rgba(255, 210, 200, 0), rgba(255, 250, 220, 0.7), 0%, 10%);
+							}
+						}
+
+						> .name {
+							font-weight: 500;
+							line-height: 50px;
+						}
+
+
+						> .files {
+							@media screen and (min-width: $screen-md-min){
+								display: inline-block;
+							}
+							vertical-align: middle;
+
+							> .s-block.file {
+
+								&:not(:last-child){
+									border-bottom: 1px solid #ccc;
+									border-color: rgba(0,0,0,0.2);
+								}
+
+								&:nth-child(2n-1){
+									//@include gradient-horizontal(rgba(255, 200, 210, 0), rgba(255, 255, 255, 0.1), 0%, 100%);
+								}
+
+								&:nth-child(2n-2){
+									//@include gradient-horizontal(rgba(255, 210, 200, 0), rgba(0, 0, 0, 0.025), 0%, 100%);
+								}
+
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+/** ExpSet Tables **/
+
 .expset-table-container {
 
 	.expset-panel {
@@ -1204,6 +1450,14 @@ p, input {
 	} 
 	
 	> tbody {
+
+		&:nth-child(odd) > tr.expset-table-row {
+			background-color: #f9f9f9;
+		}
+		&:nth-child(even) > tr.expset-table-row {
+			background-color: #ffffff;
+		}
+
 		> tr > td {
 			border: 1px solid $expset-table-border-color;
 			border-left-color : #f4f4f4;
