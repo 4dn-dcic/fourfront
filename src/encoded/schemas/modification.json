@@ -4,7 +4,7 @@
     "id": "/profiles/modification.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["description", "modification_type"],
+    "required": ["description", "modification_type", "lab", "award"],
     "identifyingProperties": ["uuid","aliases"],
     "additionalProperties": false,
     "mixinProperties": [

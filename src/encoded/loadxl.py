@@ -54,7 +54,8 @@ ORDER = [
     'analysis_step',
     'workflow',
     'workflow_mapping',
-    'workflow_run'
+    'workflow_run',
+    'workflow_run_sbg'
 ]
 
 IS_ATTACHMENT = [
@@ -624,7 +625,8 @@ def load_all(testapp, filename, docsdir, test=False):
         pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=2)
         process(combine(source, pipeline))
 
-def generate_access_key(testapp, store_access_key=None, email='4dndcic@gmail.com'):
+def generate_access_key(testapp, store_access_key=None,
+                        server='http://localhost:8000',  email='4dndcic@gmail.com'):
 
     # get admin user and generate access keys
     if store_access_key:
@@ -642,10 +644,13 @@ def generate_access_key(testapp, store_access_key=None, email='4dndcic@gmail.com
             'description':'key for submit4dn',
         }
         res = testapp.post_json('/access_key', access_key_req).json
+        if store_access_key == 'local':
+            # for local storing we always connecting to local server
+            server = 'http://localhost:8000'
         akey     = { 'default':
-                    { 'key' : res['secret_access_key'],
-                      'secret' : res['access_key_id'],
-                      'server': 'http://localhost:8000',
+                    { 'secret' : res['secret_access_key'],
+                      'key' : res['access_key_id'],
+                      'server': server,
                     }
                    }
         return json.dumps(akey)
@@ -696,7 +701,8 @@ def load_test_data(app, access_key_loc=None):
     inserts = resource_filename('encoded', 'tests/data/inserts/')
     docsdir = [resource_filename('encoded', 'tests/data/documents/')]
     load_all(testapp, inserts, docsdir)
-    keys = generate_access_key(testapp, access_key_loc)
+    keys = generate_access_key(testapp, access_key_loc,
+                               server="https://testportal.4dnucleome.org")
     store_keys(app, access_key_loc, keys)
 
 
@@ -713,5 +719,6 @@ def load_prod_data(app, access_key_loc=None):
     inserts = resource_filename('encoded', 'tests/data/prod-inserts/')
     docsdir = []
     load_all(testapp, inserts, docsdir)
-    keys = generate_access_key(testapp, access_key_loc)
+    keys = generate_access_key(testapp, access_key_loc,
+                               server="https://data.4dnucleome.org")
     store_keys(app, access_key_loc, keys)

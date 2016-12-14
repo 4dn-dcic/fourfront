@@ -20,6 +20,7 @@ def includeme(config):
 
 @collection(
     name='analysis-steps',
+    unique_key='analysis_step:name',
     properties={
         'title': 'AnalysisSteps',
         'description': 'Listing of analysis steps for 4DN analyses',
@@ -28,6 +29,7 @@ class AnalysisStep(Item):
     """The AnalysisStep class that descrbes a step in a workflow."""
 
     item_type = 'analysis_step'
+    name_key = 'name'
     schema = load_schema('encoded:schemas/analysis_step.json')
     embedded = ['software_used', 'qa_stats_generated']
 

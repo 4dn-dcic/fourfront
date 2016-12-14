@@ -4,7 +4,7 @@
     "id": "/profiles/experiment_set_replicate.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [ "award", "lab"],
+    "required": [ "award", "lab", "description"],
     "identifyingProperties": ["uuid", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -20,7 +20,7 @@
     ],
     "properties": {
         "schema_version": {
-            "hidden comment": "Bump the default in the subclasses."
+            "default": "1"
         },
         "accession": {
             "accessionType": "ES"
@@ -37,7 +37,7 @@
             "type": "string",
             "default" : "replicate",
             "exclude_from" : "submit4dn",
-            "hidden_comment" : "have a default value and doesn't need to be submitted"
+            "internal_comment" : "have a default value and doesn't need to be submitted"
         },
         "replicate_exps": {
             "title": "Set of replicate experiments",
@@ -54,7 +54,6 @@
                 "properties": {
                     "replicate_exp":{
                             "title": "Experiment",
-                            "comment": "use accessions for identifiers.",
                             "type": "string",
                             "linkTo": "Experiment"
                     },
@@ -80,7 +79,6 @@
             "uniqueItems": true,
             "items": {
                 "title": "Experiment",
-                "comment": "use accessions for identifiers.",
                 "type": "string",
                 "linkTo": "Experiment"
             }

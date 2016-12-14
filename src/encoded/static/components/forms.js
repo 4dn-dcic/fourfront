@@ -215,24 +215,31 @@ var EditableField = module.exports.EditableField = React.createClass({
             parent : null,
             pattern: null,
             required: false,
+            schemas: null,
             debug: true
         };
     },
 
     getInitialState : function(){
-        var value = getNestedProperty(this.props.context, this.props.labelID);
+        var initialValue = null;
+        try {
+            initialValue = getNestedProperty(this.props.context, this.props.labelID); // Returns undefined if doesn't exist in context
+        } catch (e){
+            console.error(e);
+        }
         return {
-            'value' : value || null,        // Changes on input field change
-            'savedValue' : value || null,   // Changes only on sync w/ server.
+            'value' : initialValue || null,         // Changes on input field change
+            'savedValue' : initialValue || null,    // Changes only on sync w/ server.
+            'valueExistsOnObj' : typeof initialValue !== 'undefined', // If undefined then field doesn't exist on props.context
             'validationPattern' : this.props.pattern || this.validationPattern(),
             'required' : this.props.required || this.isRequired(),
-            'valid' : null,                 // Must distinguish between true, false, and null.
-            'serverErrors' : [],            // Validation state sent from server.
+            'valid' : null,                         // Must distinguish between true, false, and null.
+            'serverErrors' : [],                    // Validation state sent from server.
             'serverErrorsMessage' : null,
-            'loading' : false,              // True if in middle of save or fetch request.
-            'dispatching' : false,          // True if dispatching to Redux store.
-            'leanTo' : null,                // Re: inline style
-            'leanOffset' : 0                // Re: inline style
+            'loading' : false,                      // True if in middle of save or fetch request.
+            'dispatching' : false,                  // True if dispatching to Redux store.
+            'leanTo' : null,                        // Re: inline style
+            'leanOffset' : 0                        // Re: inline style
         };
     },
 
@@ -296,7 +303,9 @@ var EditableField = module.exports.EditableField = React.createClass({
                 (this.props.labelID !== newProps.labelID)
             )
         ) {
-            newState.savedValue = newState.value = getNestedProperty(newProps.context, this.props.labelID) || null;
+            var newVal = getNestedProperty(newProps.context, this.props.labelID, true);
+            newState.savedValue = newState.value = newVal || null;
+            newState.valueExistsOnObj = typeof newVal !== 'undefined';
         }
         // Update state.validationPattern && state.isRequired if this.context.schemas becomes available 
         // (loaded via ajax by app.js) or from props if is provided.
@@ -317,7 +326,15 @@ var EditableField = module.exports.EditableField = React.createClass({
         if (Object.keys(newState).length > 0) this.setState(newState, stateChangeCallback);
     },
 
-    isSet : function(){ return typeof this.props.context === 'object' && !_.isEmpty(this.props.context) && this.state.savedValue !== null && this.state.savedValue !== '' ; },
+    isSet : function(){ 
+        return (
+            typeof this.props.context === 'object' &&
+            !_.isEmpty(this.props.context) &&
+            typeof this.state.savedValue !== 'undefined' &&
+            this.state.savedValue !== null &&
+            this.state.savedValue !== ''
+        ); 
+    },
 
     enterEditState : function(e){
         e.preventDefault();
@@ -571,7 +588,8 @@ var EditableField = module.exports.EditableField = React.createClass({
 
         return getNestedProperty(
             schemas,
-            [objectType, 'properties', this.props.labelID]
+            [objectType, 'properties', this.props.labelID],
+            true
         ) || null;
     },
 
@@ -777,6 +795,10 @@ var EditableField = module.exports.EditableField = React.createClass({
     },
 
     render : function(){
+        if (this.props.disabled && !this.state.valueExistsOnObj && !this.props.forceVisible) {
+            // Field is empty (not returned in object) & not allowed to be edited, so assume end-user doesn't have permission to view. 
+            return null;
+        }
         if (this.props.parent && this.props.parent.state && this.props.parent.state.currentlyEditing === this.props.labelID) {
             return this.renderEditing();
         } else {

@@ -19,18 +19,43 @@ describe('Testing about.js', function() {
     
     // Setup required variables/dependencies before running tests.
     
-    var React, About, testItem, TestUtils, page, data, _, banners, Wrapper, App;
+    var React, ReactDOM, About, testItem, TestUtils, page, data, _, banners, Wrapper, App, statics, app, sinon, server;
 
     beforeAll(function() {
         React = require('react');
+        ReactDOM = require('react-dom');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
         App = require('../app');
+        statics = require('../../data/statics'); // Maybe keep version of statics.js and put into /testdata/
+
+        sinon = require('sinon');
+        server = sinon.fakeServer.create();
+        
+        server.respondWith(
+            "GET",
+            '/profiles/?format=json',
+            [
+                200, 
+                { "Content-Type" : "application/json" },
+                '<html></html>' // Don't actually need content JSON here for test.
+            ]
+        );
+
         page = TestUtils.renderIntoDocument(
-            <App href="http://data.4dnucleome.org/about/" context={{}} />
+            <App href="http://data.4dnucleome.org/about" context={{ 
+                'content' : statics,
+                '@type' : ['AboutPage', 'StaticPage', 'Portal'],
+                '@context' : '/about',
+                '@id' : '/about',
+                'title' : 'Home'
+            }} />
         );
     });
 
+    afterAll(function(){
+        server.restore();
+    });
 
     // Check that has functional navBar with links
     it('Has global navigation bar & links', function() {
@@ -123,10 +148,10 @@ describe('Testing about.js', function() {
     it("Has Burak and Nils' names", function() {
         var contentParagraphs = TestUtils.scryRenderedDOMComponentsWithClass(page, "fourDN-content");
         expect(contentParagraphs.length).toBeGreaterThan(1); // At least 1 paragraph.
-        
+
         var fullContentParagraphsText = contentParagraphs.map(function(v){ return v.innerHTML; }).join('\n');
-        expect(fullContentParagraphsText.search('Burak Alver')).toBeGreaterThan(-1); // .search returns index, or -1.
-        expect(fullContentParagraphsText.search('Nils Gehlenborg')).toBeGreaterThan(-1);
+        expect(fullContentParagraphsText.search('Burak')).toBeGreaterThan(-1); // .search returns index, or -1.
+        expect(fullContentParagraphsText.search('Gehlenborg')).toBeGreaterThan(-1);
         
     });
 

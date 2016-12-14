@@ -42,7 +42,7 @@
             "title": "Biotinylated RNA base",
             "description": "The biotinylated base used to tag the in vitro transcribed capture RNA",
             "type": "string",
-            "comment": "should this be a controlled CV with enum?"
+            "internal_comment": "should this be a controlled CV with enum?"
         },
         "targeted_regions": {
             "title": "Targeted Regions",

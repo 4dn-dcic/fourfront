@@ -4,6 +4,7 @@
     "id": "/profiles/individual_mouse.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
+    "required": ["award", "lab"],
     "identifyingProperties": ["uuid", "accession", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -22,6 +23,9 @@
       "age": [ "age_units"]
     },
     "properties": {
+        "schema_version": {
+            "default": "1"
+        },
         "mouse_life_stage": {
             "title": "Mouse Life stage",
             "type": "string",
@@ -33,6 +37,7 @@
         },
         "organism": {
             "default": "3413218c-3d86-498b-a0a2-9a406638e786",
+            "exclude_from": "submit4dn",
             "linkEnum": ["3413218c-3d86-498b-a0a2-9a406638e786"]
         },
         "mouse_strain":{

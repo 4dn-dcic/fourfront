@@ -4,13 +4,10 @@
     "id": "/profiles/treatment.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["description"],
+    "required": ["description", "lab", "award"],
     "identifyingProperties": ["uuid","aliases"],
     "additionalProperties": false,
     "properties": {
-        "schema_version": {
-            "default": "1"
-        },
         "description": {
             "title": "Description",
             "description": "A brief plain text description of the treatment.",

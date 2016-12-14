@@ -4,7 +4,7 @@
     "id": "/profiles/workflow_run.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["workflow"],
+    "required": ["workflow", "award", "lab"],
     "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases"],
     "mixinProperties": [
@@ -49,8 +49,6 @@
                     },
                     "value": {
                         "title": "Input file",
-                        "comment": "for both this and the output file you are linking to a file object but you have titled the field 'Input file ID'?",
-                        "comment": "just want to be sure you aren't trying to add a specific 7bg or some other id here - if so another property will need to be added, if not change title back to Input File I think",
                         "description": "a specified input file",
                         "type": "string",
                         "linkTo": "File"
@@ -100,7 +98,6 @@
                     "value": {
                         "title": "Value",
                         "description": "a specified value for the specified parameter as used in a task",
-                        "comment": "can we specify either number or string?",
                         "type": "string"
                     },
                     "software_parameter": {
@@ -120,16 +117,22 @@
         "run_status": {
             "title": "Status",
             "type": "string",
-            "default": "waiting",
+            "default": "started",
             "enum" : [
                 "started",
-                "input_file_transferring",
-                "ready_to_run",
                 "running",
                 "output_files_transferring",
                 "output_file_transfer_finished",
                 "complete",
                 "error"
+            ]
+        },
+        "run_platform": {
+            "title": "Run Platform",
+            "type": "string",
+            "enum": [
+                "SBG",
+                "Tibanna"
             ]
         }
     }
