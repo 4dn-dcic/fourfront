@@ -68,6 +68,7 @@
     "status": {
         "status": {
             "title": "Status",
+            "exclude_from": "submit4dn",
             "type": "string",
             "default": "in review by lab",
             "permission": "import_items",
