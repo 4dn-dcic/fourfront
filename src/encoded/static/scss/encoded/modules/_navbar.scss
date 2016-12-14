@@ -78,6 +78,11 @@ $navbar-transition-length: .75s;
             min-width: 290px;
         }
 
+        @media screen and (max-width: $screen-xs-max){
+            min-width: 225px;
+            max-width: 240px;
+        }
+
         > a {
             display: block;
             line-height: inherit;
@@ -215,6 +220,11 @@ $navbar-transition-length: .75s;
     padding-right: 8px;
     font-size: 1.5rem;
     border: none;
+
+    @media screen and (max-width: 400px){
+        margin-right: 0px;
+    }
+
     .icon-bar{
         background-color: #999999 !important;
     }
