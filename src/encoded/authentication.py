@@ -195,23 +195,21 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
                 payload = jwt.decode(token, b64decode(auth0_secret, '-_'),
                                      audience=auth0_client, leeway=30)
                 if 'email' in payload and payload.get('email_verified') is True:
+                    request.set_property(lambda r: False, 'auth0_expired')
                     return payload
 
             else: # we don't have the key, let auth0 do the work for us
-                try:
-                    user_url = "https://{domain}/tokeninfo".format(domain='hms-dbmi.auth0.com')
-                    resp  = requests.post(user_url, {'id_token':token})
-                    payload = resp.json()
-                    if 'email' in payload and payload.get('email_verified') is True:
-                        request.set_property(lambda r: False, 'auth0_expired')
-                        return payload
-                except ValueError as e:
-                    print("Bad or expired token: " + token)
-                    request.set_property(lambda r: True, 'auth0_expired') # Allow us to return 403 code &or unset cookie in renderers.py
-                    return None
+                user_url = "https://{domain}/tokeninfo".format(domain='hms-dbmi.auth0.com')
+                resp  = requests.post(user_url, {'id_token':token})
+                payload = resp.json()
+                if 'email' in payload and payload.get('email_verified') is True:
+                    request.set_property(lambda r: False, 'auth0_expired')
+                    return payload
 
-        except (ValueError, jwt.exceptions.DecodeError) as e:
+        except (ValueError, jwt.exceptions.InvalidTokenError, jwt.exceptions.InvalidKeyError) as e:
+            # Catch errors from decoding JWT
             print('Invalid JWT assertion : %s (%s)', (e, type(e).__name__))
+            request.set_property(lambda r: True, 'auth0_expired') # Allow us to return 403 code &or unset cookie in renderers.py
             return None
 
         print("didn't get email or email is not verified")

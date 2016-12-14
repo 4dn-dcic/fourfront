@@ -54,7 +54,8 @@ ORDER = [
     'analysis_step',
     'workflow',
     'workflow_mapping',
-    'workflow_run'
+    'workflow_run',
+    'workflow_run_sbg'
 ]
 
 IS_ATTACHMENT = [

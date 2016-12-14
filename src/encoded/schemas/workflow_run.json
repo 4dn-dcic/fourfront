@@ -115,16 +115,22 @@
         "run_status": {
             "title": "Status",
             "type": "string",
-            "default": "waiting",
+            "default": "started",
             "enum" : [
                 "started",
-                "input_file_transferring",
-                "ready_to_run",
                 "running",
                 "output_files_transferring",
                 "output_file_transfer_finished",
                 "complete",
                 "error"
+            ]
+        },
+        "run_platform": {
+            "title": "Run Platform",
+            "type": "string",
+            "enum": [
+                "SBG",
+                "Tibanna"
             ]
         }
     }
