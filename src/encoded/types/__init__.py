@@ -20,6 +20,7 @@ def includeme(config):
 
 @collection(
     name='analysis-steps',
+    unique_key='analysis_step:name',
     properties={
         'title': 'AnalysisSteps',
         'description': 'Listing of analysis steps for 4DN analyses',
@@ -28,6 +29,7 @@ class AnalysisStep(Item):
     """The AnalysisStep class that descrbes a step in a workflow."""
 
     item_type = 'analysis_step'
+    name_key = 'name'
     schema = load_schema('encoded:schemas/analysis_step.json')
     embedded = ['software_used', 'qa_stats_generated']
 
@@ -247,43 +249,3 @@ class Target(Item):
             return description
         return "no target"
 
-
-@collection(
-    name='workflows',
-    properties={
-        'title': 'Workflows',
-        'description': 'Listing of 4DN analysis workflows',
-    })
-class Workflow(Item):
-    """The Workflow class that describes a workflow and steps in it."""
-
-    item_type = 'workflow'
-    schema = load_schema('encoded:schemas/workflow.json')
-    embedded = ['workflow_steps.step', 'workflow_steps']
-
-
-@collection(
-    name='workflow-runs',
-    properties={
-        'title': 'Workflow Runs',
-        'description': 'Listing of executions of 4DN analysis workflows',
-    })
-class WorkflowRun(Item):
-    """The WorkflowRun class that describes execution of a workflow."""
-
-    item_type = 'workflow_run'
-    schema = load_schema('encoded:schemas/workflow_run.json')
-    embedded = ['workflow']
-
-
-@collection(
-    name='workflow-mappings',
-    properties={
-        'title': 'Workflow Mappings',
-        'description': 'Listing of all workflow mappings',
-    })
-class WorkflowMapping(Item):
-    """The WorkflowRun class that describes execution of a workflow and tasks in it."""
-
-    item_type = 'workflow_mapping'
-    schema = load_schema('encoded:schemas/workflow_mapping.json')
