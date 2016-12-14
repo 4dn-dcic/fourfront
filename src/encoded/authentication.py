@@ -206,11 +206,13 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
                         request.set_property(lambda r: False, 'auth0_expired')
                         return payload
                 except ValueError as e:
+                    # Catch error specific to user (not own/site) token
                     print("Bad or expired token: " + token)
                     request.set_property(lambda r: True, 'auth0_expired') # Allow us to return 403 code &or unset cookie in renderers.py
                     return None
 
-        except (ValueError, jwt.exceptions.DecodeError) as e:
+        except (ValueError, jwt.exceptions.InvalidTokenError, jwt.exceptions.InvalidKeyError) as e:
+            # Catch errors from jwt.decode
             print('Invalid JWT assertion : %s (%s)', (e, type(e).__name__))
             return None
 
