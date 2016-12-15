@@ -93,7 +93,15 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             };
         },
 
-        renderBlockLabel : function(title, subtitle = null, inline = false){
+        renderBlockLabel : function(title, subtitle = null, inline = false, className = null){
+
+            function titleElement(){
+                return React.createElement(
+                    inline ? 'span' : 'div',
+                    { className : "label-title" },
+                    title
+                );
+            }
 
             function subtitleElement(){
                 if (!subtitle) return null;
@@ -105,8 +113,8 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             }
 
             return (
-                <div className="label-ext-info">
-                    <span className="label-title">{ title }</span>
+                <div className={"label-ext-info" + (className ? ' ' + className : '') }>
+                    { titleElement() }
                     { subtitleElement() }
                 </div>
             );
@@ -244,7 +252,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
     renderReplicates : function(){
 
-        var renderFileBlock = function(file,i){
+        var renderFileBlock = function(file, i, filesArr){
             var checked = this.state.checked;
             if (this.props.parentController && this.props.parentController.state) checked = this.props.parentController.state.checked;
             return (
@@ -256,6 +264,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                     handleFileUpdate={this.handleFileUpdate}
                     className={null}
                     replicateNum={i + 1}
+                    isSingleItem={filesArr.length < 2 ? true : false}
                 />
             );
         }.bind(this);
@@ -272,9 +281,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                     </div>
                     <div className="files">
                         { Array.isArray(exp.files) ? exp.files.map(renderFileBlock) :
-                            <div className="s-block file">
-                                <div className="name col-file"><em>No Files</em></div>
-                            </div>
+                            <FileEntryBlock file={null} columnHeaders={ this.customizableColumnHeaders() } />
                         }
                     </div>
                 </div>
@@ -361,13 +368,13 @@ var FileEntryBlock  = React.createClass({
         });
     },
     
-    fillFileRow : function (file){
+    filledFileRow : function (file = this.props.file){
         var row = [];
         var cols = this.props.columnHeaders;
         var className = (this.props.className || '') + " col-file-detail item detail-col-";
         for (var i = 0; i < cols.length; i++){
 
-            if (!file['@id']) { 
+            if (!file || !file['@id']) { 
                 row.push(<div key={"file-detail-empty-" + i} className={className + i}></div>);
                 continue;
             }
@@ -391,20 +398,40 @@ var FileEntryBlock  = React.createClass({
         return row;
     },
 
+    renderName : function(){
+
+        function titleString(){
+            if (!this.props.file) return 'No Files';
+            return this.props.file.accession || this.props.file.uuid || this.props.file['@id'];
+        }
+
+        function title(){
+            if (!this.props.file) return <span className="name-title">{ titleString.call(this) }</span>;
+            return (
+                <a className="name-title" href={ this.props.file['@id'] || '#' }>
+                    { titleString.call(this) }
+                </a>
+            );
+        }
+
+        return (
+            <div className={"name col-file" + (this.props.file && this.props.file.accession ? ' mono-text' : '')}>
+                { this.props.file ? ExperimentsTable.renderBlockLabel(
+                    'File',
+                    this.props.replicateNum ? 'Seq Replicate ' + this.props.replicateNum : null,
+                    false,
+                    'col-file'
+                ) : null }
+                { title.call(this) }
+            </div>
+        );
+    },
+
     render : function(){
         return (
-            <div className="s-block file">
-                <div className="name mono-text col-file">
-                    { ExperimentsTable.renderBlockLabel(
-                        'File',
-                        this.props.replicateNum ? 'Seq Replicate ' + this.props.replicateNum : null,
-                        true
-                    ) }
-                    <a href={this.props.file['@id'] || '#'}>
-                        { this.props.file.accession || this.props.file.uuid || this.props.file['@id'] }
-                    </a>
-                </div>
-                { this.fillFileRow(this.props.file) }
+            <div className={"s-block file hide-name-on-block-hover" + (this.props.isSingleItem ? ' single-item' : '') }>
+                { this.renderName() }
+                { this.filledFileRow() }
             </div>
         );
     }

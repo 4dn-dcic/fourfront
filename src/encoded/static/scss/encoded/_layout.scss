@@ -1196,6 +1196,7 @@ $expset-full-width : $expset-col-biosample + $expset-col-experiment + $expset-co
 			> .name {
 				@media screen and (min-width: $screen-md-min){
 					display: inline-block;
+					vertical-align: middle;
 				}
 				padding: 6px 12px;
 				text-align: center;
@@ -1210,7 +1211,7 @@ $expset-full-width : $expset-col-biosample + $expset-col-experiment + $expset-co
 				position: absolute;
 				font-family: 'Work Sans', sans-serif;
 				left: 0;
-				top: 0;
+				top: 0%;
 				font-size: 0.625rem;
 				font-size: 0.4875rem;
 				text-transform: uppercase;
@@ -1227,7 +1228,7 @@ $expset-full-width : $expset-col-biosample + $expset-col-experiment + $expset-co
 				}
 
 				> span.ext:before {
-					content: "- ";
+					//content: "- ";
 				}
 			}
 
@@ -1239,12 +1240,13 @@ $expset-full-width : $expset-col-biosample + $expset-col-experiment + $expset-co
 				opacity: 0;
 				font-weight: 600;
 				transform: scale3d(1,1,1) translate3d(0%,12%,0);
-				transition: opacity .4s, transform .4s;
+				transition: opacity .4s, transform .4s, top .4s, margin-top .4s;
+				pointer-events: none;
 			}
 			.s-block > .name > .label-ext-info > .ext {
 				opacity: 0;
 				transform: translate3d(0,0,0);
-				transition: opacity .6s, transform .4s;
+				transition: opacity .4s, transform .4s;
 			}
 			.s-block > .name > .label-ext-info > div.ext {
 				transform: translate3d(0,-7px,0);
@@ -1253,29 +1255,51 @@ $expset-full-width : $expset-col-biosample + $expset-col-experiment + $expset-co
 				display: inline-block;
 				transform: translate3d(0px,0,0);
 			}
-			.s-block:hover .s-block > .name:after,
-			.s-block:hover .s-block > .name > .label-ext-info {
+			
+			.s-block.hide-name-on-block-hover > .name > .name-title {
+				opacity: 1;
+				transition: opacity .4s;
+			}
+			.s-block.hide-name-on-block-hover:not(.single-item):hover > .name:not(:hover) > .name-title {
+				opacity: 0;
+			}
+
+			.s-block:hover > div > .s-block > .name:after,
+			.s-block:hover > div > .s-block > .name > .label-ext-info {
 				opacity: 0.2;
 			}
-			.s-block:hover > .name:after,
 			.s-block:hover > .name > .label-ext-info {
 				opacity: 1 !important;
 				color: #000;
 				transform: scale3d(1.15,1.15,1) translate3d(7%,18%,0);
 			}
-			.s-block:hover > .name > .label-ext-info > .ext {
-				opacity: 0.33;
+			.s-block.hide-name-on-block-hover:hover > .name:not(:hover) > .label-ext-info {
+				top: 50%;
+    			margin-top: -12px;
 			}
-			.s-block:hover > .name > .label-ext-info > div.ext
+			.s-block:hover > .name > .label-ext-info > .ext {
+				opacity: 0.75;
+			}
+			
+			.s-block:hover > .name > .label-ext-info > div.ext,
 			.s-block:hover .s-block > .name > .label-ext-info > div.ext {
 				transform: translate3d(0px,0px,0);
 			}
-			.s-block:hover > .name > .label-ext-info > span.ext
+			.s-block:hover > .name > .label-ext-info > span.ext,
 			.s-block:hover .s-block > .name > .label-ext-info > span.ext {
 				transform: translate3d(3px,0,0);
 			}
+			.s-block > .name > .label-ext-info > .label-title {
+				transition: opacity .25s, margin-top .25s;
+			}
+			.s-block:hover > .name:hover > .label-ext-info > div.label-title {
+				opacity: 0;
+				margin-top: -6px;
+			}
 			.s-block:hover > .name:hover > .label-ext-info > .ext {
 				opacity: 1;
+				/* transform: scale3d(1.125, 1.125, 1) translate3d(6%, 0, 0) !important; */
+				font-weight: 600;
 			}
 
 		}
@@ -1364,6 +1388,10 @@ $expset-full-width : $expset-col-biosample + $expset-col-experiment + $expset-co
 								&:not(:last-child){
 									border-bottom: 1px solid #ccc;
 									border-color: rgba(0,0,0,0.2);
+								}
+
+								&.single-item {
+									line-height: 50px;
 								}
 
 								&:nth-child(2n-1){
