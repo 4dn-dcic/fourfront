@@ -70,7 +70,30 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             };
         },
 
-        visibleExperimentsCount : function(fileDetailContainer){
+        visibleExperimentsCount : function(experimentArray){
+            if (!Array.isArray(experimentArray)) return null;
+            var fileKeys = Object.keys(fileDetailContainer.fileDetail);
+            var experiments = new Set();
+            var fileSet = new Set(fileKeys);
+
+            for (var i = 0; i < fileKeys.length; i++){
+                if (!experiments.has(fileDetailContainer.fileDetail[fileKeys[i]]['@id'])){
+                    experiments.add(fileDetailContainer.fileDetail[fileKeys[i]]['@id']);
+                }
+                if (fileDetailContainer.fileDetail[fileKeys[i]].related && fileDetailContainer.fileDetail[fileKeys[i]].related.file){
+                    if (!fileSet.has(fileDetailContainer.fileDetail[fileKeys[i]].related.file)){
+                        fileSet.add(fileDetailContainer.fileDetail[fileKeys[i]].related.file);
+                    }
+                }
+            }
+            return {
+                'experiments' : experiments.size,
+                'files' : fileSet.size,
+                'emptyExperiments' : fileDetailContainer.emptyExps.length
+            };
+        },
+
+        visibleExperimentsCountDeprecated : function(fileDetailContainer){
             if (!fileDetailContainer) return null;
             var fileKeys = Object.keys(fileDetailContainer.fileDetail);
             var experiments = new Set();
@@ -155,12 +178,10 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
     },
 
     getInitialState: function() {
-        var fileDetailContainer = this.getFileDetailContainer();
         return {
             checked: true,
             selectedFiles: new Set(),
-            fileDetailContainer : fileDetailContainer,
-            counts : this.getCounts(false, fileDetailContainer)
+            //counts : this.getCounts(false, fileDetailContainer)
         };
     },
 
@@ -188,7 +209,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
     getCounts : function(includeTotals = false, fileDetailContainer = this.state.fileDetailContainer){
         var counts = {};
         if (!this.props.keepCounts) return; // Prevent execution if not necessary (specify in props)
-        var visibleCounts = ExperimentsTable.visibleExperimentsCount(fileDetailContainer);
+        var visibleCounts = ExperimentsTable.visibleExperimentsCountDeprecated(fileDetailContainer);
         counts.visibleExperiments = visibleCounts.experiments;
         counts.visibleFiles = visibleCounts.files;
         if (includeTotals && this.props.experimentArray && Array.isArray(this.props.experimentArray)){
@@ -250,6 +271,22 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         return getFileDetailContainer(props.experimentArray, passExperiments);
     },
 
+    /**
+     * Here we render nested divs for a 'table' of experiments with shared elements spanning multiple rows,
+     * e.g. an experiment block's height is the combined height of its containing file rows, biosample height
+     * is combined height of its containing experiment rows (experiments that share that biosample).
+     *  ___________________________________________________
+     * |                         File   File Detail Columns|
+     * |             Experiment ___________________________|
+     * |                         File   File Detail Columns|
+     * | Biosample  _______________________________________|
+     * |                         File   File Detail Columns|
+     * |             Experiment ___________________________|
+     * |                         File   File Detail Columns|
+     * |___________________________________________________|
+     * 
+     * Much of styling/layouting is defined in CSS.
+     */
     renderReplicates : function(){
 
         var renderFileBlock = function(file, i, filesArr){
@@ -274,10 +311,10 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         var renderExperimentBlock = function(exp,i){
             oddExpRow = !oddExpRow;
             return (
-                <div className={"s-block experiment " + (oddExpRow ? 'odd' : 'even')} key={exp['@id']}>
-                    <div className="name mono-text col-experiment">
-                        { ExperimentsTable.renderBlockLabel('Experiment', 'Tech Replicate ' + (i+1)) }
-                        <a href={ exp['@id'] || '#' }>{ exp.accession }</a>
+                <div className={"s-block experiment hide-name-on-block-hover " + (oddExpRow ? 'odd' : 'even')} key={exp['@id']}>
+                    <div className="name col-experiment">
+                        { ExperimentsTable.renderBlockLabel('Experiment', 'Tech Replicate ' + exp.tec_rep_no) }
+                        <a href={ exp['@id'] || '#' } className="name-title mono-text">{ exp.accession }</a>
                     </div>
                     <div className="files">
                         { Array.isArray(exp.files) ? exp.files.map(renderFileBlock) :
@@ -288,33 +325,80 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             );
         }.bind(this);
 
-        function renderBiosamples(){
-            return _.values(    // Creates [[expWBioSample1-1, expWBioSample1-2], [expWBioSample2-1, expWBioSample2-2], ...]
-                _.groupBy(      // Creates { 'biosample@id1' : [expWBioSample1-1, expWBioSample1-2, ...], 'biosample@id2' : [expWBioSample2-1, expWBioSample1-2, ...], ... }
-                    this.props.experimentArray,
-                    function(e){ return e.biosample['@id']; }
-                )
-            ).map(function(b,i){
-                // Each 'b' (biosample) is an array of experiments w/ that biosample. b[0].biosample would thus have full data of biosample.
-                return (
-                    <div className="s-block biosample" key={b[0].biosample['@id']}>
-                        <div className="name mono-text col-biosample">
-                            { ExperimentsTable.renderBlockLabel('Biosample', 'Bio Replicate ' + (i+1)) }
-                            <a href={ b[0].biosample['@id'] || '#' }>{ b[0].biosample.accession }</a>
-                        </div>
-                        <div className="experiments">
-                            { b.map(renderExperimentBlock) }
-                        </div>
+        var renderBiosampleBlock = function(expsWithBiosample,i){
+            return (
+                <div className="s-block biosample hide-name-on-block-hover" key={expsWithBiosample[0].biosample['@id']}>
+                    <div className="name col-biosample" style={ expsWithBiosample.length > 3 ? { "position" : "relative" } : null }>
+                        { ExperimentsTable.renderBlockLabel('Biosample', 'Bio Replicate ' + expsWithBiosample[0].biosample.bio_rep_no) }
+                        <a href={ expsWithBiosample[0].biosample['@id'] || '#' } className="name-title mono-text">{ expsWithBiosample[0].biosample.accession }</a>
                     </div>
-                );
-            });
+                    <div className="experiments">
+                        { expsWithBiosample.map(renderExperimentBlock) }
+                    </div>
+                </div>
+            );
+        }.bind(this);
+
+        function groupExperimentsByBiosample(experiments){
+            return _(experiments).chain()
+                .groupBy(function(exp){
+                    return exp.biosample.bio_rep_no;
+                })          // Creates { '1' : [expObjWBiosample1-1, expObjWBiosample1-2, ...], '2' : [expObjWBiosample2-1, expObjWBiosample2-2, ...], ... }
+                .pairs()    // Creates [['1', [expObjWBiosample1-1, expObjWBiosample1-2]], ['2', [expObjWBiosample2-1, expObjWBiosample2-2]], ...]
+                .sortBy(function(expSet){ return parseInt(expSet[0]); })
+                .map(function(expSet){ return _.sortBy(expSet[1], 'tec_rep_no'); }) // Creates [[expObjWBiosample1-1, expObjWBiosample1-2], [expObjWBiosample2-1, expObjWBiosample2-2], ...]
+                .value();
         };
 
-        return <div className="biosamples">{ renderBiosamples.call(this) }</div>;
+        function combineWithReplicateNumbers(experimentsWithReplicateNums, fullExperimentData){
+            if (!Array.isArray(experimentsWithReplicateNums)) return false;
+            return _(experimentsWithReplicateNums).chain()
+                .map(function(r){ 
+                    return {
+                        'tec_rep_no' : r.tec_rep_no || null,
+                        'bio_rep_no' : r.bio_rep_no || null,
+                        '@id' : r.replicate_exp['@id']
+                    };
+                })
+                .zip(fullExperimentData) // On ExpSet view at least, replicate_exps and experiments_in_set are provided in same order, so can avoid nested loop.
+                .map(function(r){
+                    r[1].biosample.bio_rep_no = r[0].bio_rep_no; // Copy over bio_rep_no to biosample to ensure sorting.
+                    return _.extend(r[0], r[1]);
+                })
+                /*
+                .map((r) => {
+                    // Looped findWhere takes about 3x longer for 72 exps than zipping in and extending on experimentArray, 
+                    // so try to avoid unless arrays are NOT aligned.
+                    return _.extend(r, _.findWhere(fullExperimentData, { '@id' : r['@id'] }));
+                })
+                */
+                .value()
+        }
+
+        /* Measure sorting/aligning performance */
+        /*
+        var startTime = Date.now();
+        var sortedExps = groupExperimentsByBiosample(combineWithReplicateNumbers(this.props.replicateExpsArray, this.props.experimentArray));
+        var duration = Date.now() - startTime;
+        console.log(sortedExps, duration);
+        */
+
+        return (
+            <div className="biosamples">
+                { 
+                    groupExperimentsByBiosample(
+                        combineWithReplicateNumbers(
+                            this.props.replicateExpsArray,
+                            this.props.experimentArray
+                        )
+                    ).map(renderBiosampleBlock) 
+                }
+            </div>
+        );
     },
 
     render : function(){
-        console.log(this.props.experimentArray);
+        // TODO: Instead of renderReplicates, use render method dependent on props.experimentSetType to handle all types.
         return (
             <div className="expset-experiments">
                 <div className="headers">
@@ -408,7 +492,7 @@ var FileEntryBlock  = React.createClass({
         function title(){
             if (!this.props.file) return <span className="name-title">{ titleString.call(this) }</span>;
             return (
-                <a className="name-title" href={ this.props.file['@id'] || '#' }>
+                <a className="name-title mono-text" href={ this.props.file['@id'] || '#' }>
                     { titleString.call(this) }
                 </a>
             );
@@ -452,7 +536,7 @@ var getFileDetailContainer = module.exports.getFileDetailContainer = function(ex
     var emptyExps = [];
 
     for (var i=0; i<experimentArray.length; i++){
-        if(passedExperiments == null || passedExperiments.has(experimentArray[i])){
+        if(typeof passedExperiments === 'undefined' || passedExperiments == null || passedExperiments.has(experimentArray[i])){
             var tempFiles = [];
             var biosample_accession = experimentArray[i].biosample ? experimentArray[i].biosample.accession : null;
             var biosample_id = biosample_accession ? experimentArray[i].biosample['@id'] : null;

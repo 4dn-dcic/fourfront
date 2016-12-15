@@ -204,7 +204,8 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                                     'File Info'
                                 ]}
                                 fileDetailContainer={fileDetailContainer}
-                                experimentArray={this.props.experimentArray}
+                                experimentArray={[...this.props.passExperiments] /* Convert set to array */}
+                                replicateExpsArray={this.props.replicateExpsArray}
                                 experimentSetType={this.props.experimentSetType}
                                 parentController={this}
                                 expSetFilters={this.props.expSetFilters}
@@ -590,6 +591,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                         targetFiles={this.props.targetFiles}
                         href={result['@id']}
                         experimentArray={experimentArray}
+                        replicateExpsArray={result.replicate_exps}
                         passExperiments={intersection}
                         key={keyVal+result['@id']}
                         rowNumber={resultCount++}

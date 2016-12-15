@@ -36,10 +36,11 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
     getInitialState : function(){
         return {
-            selectedFiles: new Set(),
-            checked : true,
-            details_award : null,
-            details_lab : null
+            'selectedFiles': new Set(),
+            'checked' : true,
+            'details_award' : null,
+            'details_lab' : null,
+            'passExperiments' : this.getPassedExperiments(this.props.context.experiments_in_set, this.props.expSetFilters)
         };
     },
 
@@ -59,7 +60,6 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
             this.tips = tipsFromSchema(this.props.schemas, this.props.context);
         }
 
-        this.updateFileDetailAndCachedCounts(true); // Sets this.counts and this.fileDetailContainer -- in lieu of having ExperimentsTable handle it.
         this.setLinkedDetails(false);
     },
 
@@ -70,44 +70,40 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
     componentWillReceiveProps: function(nextProps) {
         
         // Make sure state is updated upon filtering
-        if(this.props.expSetFilters !== nextProps.expSetFilters){
+        if(this.props.expSetFilters !== nextProps.expSetFilters || this.props.context.experiments_in_set !== nextProps.context.experiments_in_set){
             this.setState({
-                selectedFiles: new Set()
+                selectedFiles: new Set(),
+                passExperiments : this.getPassedExperiments()
             });
-            this.updateFileDetailAndCachedCounts(false, nextProps);
-        } else if (this.props.context.experiments_in_set !== nextProps.context.experiments_in_set){
-            this.updateFileDetailAndCachedCounts(true, nextProps);
         }
+    },
 
-        /* For debugging
-        if (!isServerSide()){
-            window.table = this.refs.experimentsTable;
-            window.view = this;
+    getPassedExperiments : function(allExperiments, filters = null, getIgnoredFiltersMethod = 'single-term'){
+        if (typeof filters !== 'object' || !filters || Object.keys(filters).length === 0) return allExperiments;
+        var ignoredFilters = null;
+        if (getIgnoredFiltersMethod === 'missing-facets') {
+            ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(props.facets, filters);
+        } else if (getIgnoredFiltersMethod === 'single-term') {
+            // Ignore filters if none in current experiment_set match it so that if coming from 
+            // another page w/ filters enabled (i.e. browse) and deselect own 'static'/single term, it isn't empty.
+            ignoredFilters = FacetList.findIgnoredFiltersByStaticTerms(allExperiments, filters);
         }
-        */
-
+        return [...FacetList.siftExperiments(allExperiments, filters, ignoredFilters)]; // Convert to array
     },
 
     /** Same functionality as exists in ExperimentsTable, but with different method to get ignoredFilters */
     updateFileDetailAndCachedCounts : function(updateTotals = false, props = this.props){
 
         // Set fileDetailContainer
-        var passExperiments = null, ignoredFilters = null, experimentArray = props.context.experiments_in_set;
+        var experimentArray = props.context.experiments_in_set,
+            passExperiments = this.getPassedExperiments(experimentArray, props.expSetFilters);
 
-        if (props.expSetFilters) {
-            if (props.facets && props.facets.length > 0) {
-                ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(props.facets, props.expSetFilters);
-            } else {
-                // Ignore filters if none in current experiment_set match it so that if coming from 
-                // another page w/ filters enabled (i.e. browse) and deselect own 'static'/single term, it isn't empty.
-                ignoredFilters = FacetList.findIgnoredFiltersByStaticTerms(experimentArray, props.expSetFilters);
-            }
-            passExperiments = FacetList.siftExperiments(experimentArray, props.expSetFilters, ignoredFilters);
-        }
+        console.log(passExperiments);
         
+        /*
         this.fileDetailContainer = getFileDetailContainer(experimentArray, passExperiments);
 
-        var visibleCounts = ExperimentsTable.visibleExperimentsCount(this.fileDetailContainer);
+        var visibleCounts = ExperimentsTable.visibleExperimentsCountDeprecated(this.fileDetailContainer);
         this.counts.visibleExperiments = visibleCounts.experiments;
         this.counts.visibleFiles = visibleCounts.files;
         if (updateTotals && experimentArray && Array.isArray(experimentArray)){
@@ -117,6 +113,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                 this.counts.totalFiles = totalCounts.files;
             }
         }
+        */
     },
 
     /**
@@ -251,7 +248,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                                 <span>Experiments</span>
                                 <span className="exp-number small right">
                                     <span className="hidden-xs">Showing </span>
-                                    { this.counts.visibleExperiments } of { this.counts.totalExperiments }
+                                    { this.state.passExperiments.length } of { this.props.context.experiments_in_set.length }
                                     <span className="hidden-xs"> Experiments</span>
                                 </span>
                             </h3>
@@ -267,10 +264,10 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                                     ]}
                                     parentController={this}
                                     experimentSetType={this.props.context.experimentset_type}
-                                    fileDetailContainer={this.fileDetailContainer}
                                     expSetFilters={this.props.expSetFilters}
                                     facets={ this.props.facets }
                                     experimentArray={this.props.context.experiments_in_set}
+                                    replicateExpsArray={this.props.context.replicate_exps}
                                     keepCounts={false}
                                 />
                             </div>

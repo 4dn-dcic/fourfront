@@ -65,6 +65,7 @@ class ExperimentSetReplicate(Item):
                 "experiments_in_set.files",
                 "experiments_in_set.filesets",
                 "experiments_in_set.filesets.files_in_set",
+                "replicate_exps.bio_rep_no",
                 "experiments_in_set.digestion_enzyme"]
 
     def _update(self, properties, sheets=None):
