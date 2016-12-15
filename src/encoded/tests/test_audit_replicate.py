@@ -12,12 +12,13 @@ def rep_set_data(lab, award):
 
 
 @pytest.fixture
-def experiment_data(lab, award, human_biosample):
+def experiment_data(lab, award, human_biosample, mboI):
     return {
         'lab': lab['@id'],
         'award': award['@id'],
         'biosample': human_biosample['@id'],
         'experiment_type': 'micro-C',
+        'digestion_enzyme': mboI['@id']
     }
 
 
@@ -109,3 +110,8 @@ def test_audit_replicate_set_warning_if_out_of_sequence(testapp, out_of_sequence
     assert any(error['category'] == 'missing replicate' for error in errors)
     assert any('biological replicate numbers are not in sequence' in error['detail'] for error in errors)
     assert any('technical replicate numbers for bioreplicate number' in error['detail'] for error in errors)
+
+
+def test_audit_replicate_set_consistency_check(testapp, out_of_sequence_experiment_replicate_set):
+    res = testapp.get(out_of_sequence_experiment_replicate_set['@id'] + '/@@audit-self')
+    assert False
