@@ -19,8 +19,9 @@
         { "$ref": "mixins.json#/dbxrefs" },
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/library"},
+        { "$ref": "mixins.json#/sop_mapping"},
         { "$ref": "experiment.json#/properties" },
-        { "$ref": "experiment_hic.json#/properties" }
+        { "$ref": "experiment_hi_c.json#/properties" }
     ],
     "dependencies": {
       "crosslinking_temperature": ["crosslinking_method", "crosslinking_time"],
@@ -41,7 +42,7 @@
             "title": "Biotinylated RNA base",
             "description": "The biotinylated base used to tag the in vitro transcribed capture RNA",
             "type": "string",
-            "comment": "should this be a controlled CV with enum?"
+            "internal_comment": "should this be a controlled CV with enum?"
         },
         "targeted_regions": {
             "title": "Targeted Regions",

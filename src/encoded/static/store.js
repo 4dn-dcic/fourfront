@@ -1,5 +1,6 @@
 var { createStore, combineReducers } = require('redux');
 var _ = require('underscore');
+var { JWT, isServerSide } = require('./components/objectutils');
 
 // Create a redux store to manage state for the whole application
 
@@ -14,8 +15,19 @@ var href = function(state='', action) {
 
 var context = function(state={}, action){
     if (action.type && _.contains(Object.keys(action.type), 'context')){
-        var val = action.type.context ? action.type.context : state;
-        return val
+        var context = action.type.context ? action.type.context : state;
+        if (!isServerSide() && context && context['@type'].indexOf('User') > -1){ 
+            // If context type is user, and is of current user, update localStorage user_info appropriately.
+            // E.g. in case of user editing their own profile, or just keep localStorage up-to-date w/ any other changes
+            var userInfo = JWT.getUserInfo();
+            if (userInfo && userInfo.details && userInfo.details.email === context.email){
+                _.each(userInfo.details, function(val, key){
+                    if (context[key] && context[key] !== userInfo.details[key]) userInfo.details[key] = context[key];
+                });
+            }
+            JWT.saveUserInfoLocalStorage(userInfo);
+        }
+        return context
     }else{
         return state
     }

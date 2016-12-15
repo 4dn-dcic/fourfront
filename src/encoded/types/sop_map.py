@@ -1,4 +1,4 @@
-"""Collection for the Biosample object."""
+"""Collection for the SopMap object."""
 from snovault import (
     collection,
     load_schema,
@@ -10,7 +10,7 @@ from .base import (
 
 
 @collection(
-    name='sop_maps',
+    name='sop-maps',
     unique_key='sop_map:mapid',
     properties={
         'title': 'SOP and field mappings',

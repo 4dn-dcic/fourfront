@@ -7,20 +7,7 @@
     "required": ["file_format", "award", "lab"],
     "identifyingProperties": ["uuid", "accession", "aliases"],
     "additionalProperties": false,
-    "mixinProperties": [
-        { "$ref": "mixins.json#/schema_version" },
-        { "$ref": "mixins.json#/uuid" },
-        { "$ref": "mixins.json#/submitted" },
-        { "$ref": "mixins.json#/aliases" },
-        { "$ref": "mixins.json#/attribution" },
-        { "$ref": "mixins.json#/notes" },
-        { "$ref": "mixins.json#/accession" },
-        { "$ref": "mixins.json#/dbxrefs"}
-    ],
     "properties": {
-        "schema_version": {
-            "default": "1"
-        },
         "accession": {
             "accessionType": "FI"
         },
@@ -28,6 +15,7 @@
             "title": "File name",
             "description": "The local file name used at time of submission.",
             "type": "string",
+            "exclude_from": "submit4dn",
             "comment": "what ends up being displayed? - accession perhaps"
         },
         "file_format": {
@@ -100,6 +88,7 @@
             "description": "The md5sum of the file being transferred.",
             "comment": "This can vary for files of same content gzipped at different times",
             "type": "string",
+            "exclude_from": "submit4dn",
             "format": "hex"
         },
         "content_md5sum": {
@@ -107,23 +96,14 @@
             "description": "The MD5sum of the uncompressed file.",
             "comment": "This is only relavant for gzipped files.",
             "type": "string",
+            "exclude_from": "submit4dn",
             "format": "hex"
         },
         "file_size": {
             "title": "File size",
+            "exclude_from": "submit4dn",
             "comment": "File size is specified in bytes - presumably this can be a calculated property as well",
             "type": "integer"
-        },
-        "experiments": {
-            "title": "Experiments",
-            "description": "The experiments that this file is associated with",
-            "type": "array",
-            "items": {
-                "title": "Experiment",
-                "description": "Associated experiment.",
-                "type": "string",
-                "linkTo": "Experiment"
-            }
         },
         "related_files": {
             "title": "Related Files",
@@ -154,26 +134,16 @@
                 }
             }
         },
-        "filesets": {
-              "title": "File Sets",
-              "description": "File Set to which this file belongs to.",
-              "type": "array",
-              "uniqueItems": true,
-              "items": {
-                  "title": "File Set",
-                  "description": "A file set to be associated with this file.",
-                  "type": "string",
-                  "linkTo": "FileSet"
-              }
-        },
         "quality_metric": {
             "title": "QC Metric",
             "description": "A particular QC metric associated with this flag.",
             "type": "string",
+            "exclude_from": "submit4dn",
             "linkTo": "QualityMetric"
         },
         "restricted": {
             "title": "Restricted file",
+            "exclude_from": "submit4dn",
             "description": "A flag to indicate whether this file is subject to restricted access",
             "type": "boolean"
         },

@@ -3,8 +3,9 @@
     "schema_version": {
         "schema_version": {
             "title": "Schema Version",
-            "comment":  "Do not submit, value is assigned by the server. The version of the JSON schema that the server uses to validate the object. Schema version indicates generation of schema used to save version to to enable upgrade steps to work. Individual schemas should set the default.",
+            "internal_comment":  "Do not submit, value is assigned by the server. The version of the JSON schema that the server uses to validate the object. Schema version indicates generation of schema used to save version to to enable upgrade steps to work. Individual schemas should set the default.",
             "type": "string",
+            "exclude_from": "submit4dn",
             "pattern": "^\\d+(\\.\\d+)*$",
             "requestMethod": []
         }
@@ -14,6 +15,7 @@
             "title": "UUID",
             "type": "string",
             "format": "uuid",
+            "exclude_from": "submit4dn",
             "serverDefault": "uuid4",
             "permission": "import_items",
             "requestMethod": "POST"
@@ -23,7 +25,8 @@
         "accession": {
             "title": "Accession",
             "description": "A unique identifier to be used to reference the object.",
-            "comment": "Only admins are allowed to set or update this value.",
+            "internal_comment": "Only admins are allowed to set or update this value.",
+            "exclude_from": "submit4dn",
             "type": "string",
             "format": "accession",
             "permission": "import_items",
@@ -33,11 +36,12 @@
             "title": "Alternate accessions",
             "description": "Accessions previously assigned to objects that have been merged with this object.",
             "type": "array",
+            "internal_comment":"Only admins are allowed to set or update this value.",
+            "exclude_from": "submit4dn",
             "default": [],
             "items": {
                 "title": "Alternate Accession",
                 "description": "An accession previously assigned to an object that has been merged with this object.",
-                "comment":"Only admins are allowed to set or update this value.",
                 "type": "string",
                 "permission": "import_items",
                 "format": "accession"
@@ -49,13 +53,13 @@
             "title": "Lab aliases",
             "description": "Lab specific identifiers to reference an object.",
             "type": "array",
+            "comment": "Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).",
             "default": [],
             "uniqueItems": true,
             "items": {
                 "uniqueKey": "alias",
                 "title": "Lab alias",
                 "description": "A lab specific identifier to reference an object.",
-                "comment": "Current convention is colon separated lab name and lab identifier. (e.g. john-doe:42).",
                 "type":  "string",
                 "pattern": "^\\S+:\\S+"
             }
@@ -64,6 +68,7 @@
     "status": {
         "status": {
             "title": "Status",
+            "exclude_from": "submit4dn",
             "type": "string",
             "default": "in review by lab",
             "permission": "import_items",
@@ -83,29 +88,31 @@
         "date_created": {
             "rdfs:subPropertyOf": "dc:created",
             "title": "Date created",
-            "comment": "Do not submit, value is assigned by the server. The date the object is created.",
+            "exclude_from": "submit4dn",
             "type": "string",
             "anyOf": [
                 {"format": "date-time"},
                 {"format": "date"}
             ],
             "serverDefault": "now",
+            "exclude_from" : "submit4dn",
             "permission": "import_items"
         },
         "submitted_by": {
             "rdfs:subPropertyOf": "dc:creator",
             "title": "Submitted by",
-            "comment": "Do not submit, value is assigned by the server. The user that created the object.",
+            "exclude_from": "submit4dn",
             "type": "string",
             "linkTo": "User",
             "serverDefault": "userid",
+            "exclude_from" : "submit4dn",
             "permission": "import_items"
         }
     },
     "modified": {
       "lastmodified": {
           "title": "Last modified",
-          "comment": "list of modfication times and users that modified - do not submit!",
+          "exclude_from" : "submit4dn",
           "type": "array",
           "items": {
               "date_modified": {
@@ -151,15 +158,17 @@
         "lab": {
             "title": "Lab",
              "description": "Lab associated with the submission.",
-            "comment": "See lab.json for list of available identifiers.",
-            "type": "string",
-            "linkTo": "Lab",
-            "linkSubmitsFor": true
+             "exclude_from": "submit4dn",
+             "type": "string",
+             "linkTo": "Lab",
+             "linkSubmitsFor": true,
+            "default":""
         },
         "award": {
             "title": "Grant",
             "description": "Grant associated with the submission.",
-            "comment": "See award.json for list of available identifiers.",
+            "exclude_from": "submit4dn",
+            "default": "",
             "type": "string",
             "linkTo": "Award"
         }
@@ -169,7 +178,7 @@
             "title": "Notes",
             "description": "DCIC internal notes.",
             "type": "string",
-
+            "exclude_from": "submit4dn",
             "elasticsearch_mapping_index_type": {
                 "title": "Field mapping index type",
                 "description": "Defines one of three types of indexing available",
@@ -187,6 +196,7 @@
       "documents": {
           "title": "Documents",
           "description": "Documents that provide additional information (not data file).",
+          "comment": "See Documents sheet or collection for existing items.",
           "type": "array",
           "default": [],
           "uniqueItems": true,
@@ -194,7 +204,6 @@
               "title": "Document",
               "description": "A document that provides additional information (not data file).",
               "type": "string",
-              "comment": "See document.json for available identifiers.",
               "linkTo": "Document"
           }
       }
@@ -212,7 +221,7 @@
                     "type": "string"
                 },
                 "href": {
-                    "comment": "Internal webapp URL for document file",
+                    "internal_comment": "Internal webapp URL for document file",
                     "type": "string"
                 },
                 "type": {
@@ -271,6 +280,7 @@
             "@type": "@id",
             "rdfs:subPropertyOf": "rdfs:seeAlso",
             "title": "External identifiers",
+            "comment": "Enter as a database name:identifier eg. HGNC:PARK2",
             "description": "Unique identifiers from external resources.",
             "type": "array",
             "default": [],
@@ -278,7 +288,6 @@
             "items": {
                 "title": "External identifier",
                 "description": "A unique identifier from external resource.",
-                "comment": "Enter as a database name:identifier eg. HGNC:PARK2",
                 "type":  "string"
             }
         }
@@ -329,6 +338,7 @@
         "sop_mapping": {
             "title": "SOP mappping",
             "permission": "import-items",
+            "exclude_from" : "submit4dn",
             "description": "Whether there is an SOP map and if so which one for fields default values from SOP current at time of submission",
             "type": "object",
             "additionalProperties": false,

@@ -2,6 +2,7 @@
 
 var cookie = require('react-cookie');
 var moment = require('moment');
+var _ = require('underscore');
 
 var SingleTreatment = module.exports.SingleTreatment = function(treatment) {
     var treatmentText = '';
@@ -124,25 +125,66 @@ var patchedConsole = module.exports.console = (function(){
 var JWT = module.exports.JWT = {
 
     COOKIE_ID : 'jwtToken',
+    dummyStorage : {}, // Fake localStorage for use by serverside and tests.
     
-    get : function(source = 'any'){
+    get : function(source = 'cookie'){
         if (source === 'all' || source === '*') source = 'any';
 
         var idToken = null;
 
         if (source === 'cookie' || source === 'any'){
-            idToken = cookie.load(JWT.COOKIE_ID) || null;
-        }
-
-        if (idToken === null && (source === 'localStorage' || source === 'any')){
-            if(typeof(Storage) !== 'undefined'){
-                if(localStorage && localStorage.user_info){
-                    idToken = JSON.parse(localStorage.getItem('user_info')).id_token;
-                }
+            if (isServerSide()){
+                idToken = null;
+            } else {
+                idToken = cookie.load(JWT.COOKIE_ID) || null;
             }
         }
 
+        if (idToken === null && (source === 'localStorage' || source === 'any' || isServerSide())){
+            var userInfo = JWT.getUserInfo();
+            if (userInfo && userInfo.id_token) idToken = userInfo.id_token;
+        }
+
         return idToken;
+    },
+
+    storeExists : function(){
+        if (typeof(Storage) === 'undefined' || typeof localStorage === 'undefined' || !localStorage) return false;
+        return true;
+    },
+
+    getUserInfo : function(){
+        try {
+            if (JWT.storeExists()){
+                return JSON.parse(localStorage.getItem('user_info'));
+            } else {
+                return JSON.parse(JWT.dummyStorage.user_info);
+            }
+        } catch (e) {
+            //console.error(e);
+            return null;
+        }
+    },
+
+    getUserDetails : function(){
+        var userInfo = JWT.getUserInfo();
+        if (userInfo && userInfo.details) {
+            var userDetails = userInfo.details;
+            if (userDetails === 'null') userDetails = null;
+            return userDetails;
+        }
+        return null;
+    },
+
+    saveUserDetails : function(details){
+        var userInfo = JWT.getUserInfo();
+        if (typeof userInfo !== 'undefined' && userInfo) {
+            userInfo.details = details;
+            JWT.saveUserInfoLocalStorage(userInfo);
+            return true;
+        } else {
+            return null;
+        }
     },
 
     save : function(idToken, destination = 'cookie'){
@@ -155,8 +197,11 @@ var JWT = module.exports.JWT = {
     },
 
     saveUserInfoLocalStorage : function(user_info){
-        if(typeof(Storage) == 'undefined') return false;
-        localStorage.setItem("user_info", JSON.stringify(user_info));
+        if (JWT.storeExists()){
+            localStorage.setItem("user_info", JSON.stringify(user_info));
+        } else {
+            JWT.dummyStorage.user_info = JSON.stringify(user_info);
+        }
         return true;
     },
 
@@ -173,21 +218,28 @@ var JWT = module.exports.JWT = {
             removedLocalStorage = false;
 
         if (source === 'cookie' || source === 'all'){
-            cookie.remove(JWT.COOKIE_ID, { path : '/' });
-            removedCookie = true;
+            var savedIdToken = cookie.load(JWT.COOKIE_ID) || null;
+            if (savedIdToken) {
+                cookie.remove(JWT.COOKIE_ID, { path : '/' });
+                removedCookie = true;
+            }
         }
         if (source === 'localStorage' || source === 'all'){
-            if(typeof(Storage) === 'undefined') return false;
-            localStorage.removeItem("user_info");
-            removedLocalStorage = true;
+            if(!JWT.storeExists()) {
+                delete dummyStorage.user_info;
+                removedLocalStorage = true;
+            } else if (localStorage.user_info){
+                localStorage.removeItem("user_info");
+                removedLocalStorage = true;
+            }
         }
         console.info('Removed JWT: ' + removedCookie + ' (cookie) ' + removedLocalStorage + ' (localStorage)');
         return { 'removedCookie' : removedCookie, 'removedLocalStorage' : removedLocalStorage };
     },
 
     addToHeaders : function(headers = {}){
-        var idToken = JWT.get();
-        if(idToken && typeof headers.Authorization == 'undefined'){
+        var idToken = JWT.get('cookie');
+        if(idToken && typeof headers.Authorization === 'undefined'){
             headers.Authorization = 'Bearer ' + idToken;
         }
         return headers;
@@ -195,12 +247,17 @@ var JWT = module.exports.JWT = {
 
 };
 
+if (!isServerSide()) window.JWT = JWT;
+
 
 var setAjaxHeaders = function(xhr, headers = {}) {
-    if (typeof headers["Content-Type"] == 'undefined'){
-        headers["Content-Type"] = "application/json;charset=UTF-8";
-        headers.Accept = 'application/json';
-    }
+    // Defaults
+    headers = _.extend({
+        "Content-Type" : "application/json; charset=UTF-8",
+        "Accept" : "application/json",
+        "X-Requested-With" : "XMLHttpRequest" // Allows some server-side libs (incl. pyramid) to identify using `request.is_xhr`.
+    }, headers);
+
     // Add JWT if set
     JWT.addToHeaders(headers);
 
@@ -246,15 +303,20 @@ var ajaxLoad = module.exports.ajaxLoad = function(url, callback, method = 'GET',
     }
 }
 
-var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = {}, data = null){
+var ajaxPromise = module.exports.ajaxPromise = function(url, method = 'GET', headers = {}, data = null, cache = true, debugResponse = false){
     var xhr;
     var promise = new Promise(function(resolve, reject) {
         xhr = new XMLHttpRequest();
         xhr.onload = function() {
             // response SHOULD be json
-            resolve(JSON.parse(xhr.responseText));
+            var response = JSON.parse(xhr.responseText);
+            if (debugResponse) console.info('Received data from ' + method + ' ' + url + ':', response);
+            resolve(response);
         };
         xhr.onerror = reject;
+        if (cache === false && url.indexOf('format=json') > -1){
+            url += '&ts=' + parseInt(Date.now());
+        }
         xhr.open(method, url, true);
         xhr = setAjaxHeaders(xhr, headers);
 
@@ -282,7 +344,7 @@ var ajaxPromise = module.exports.ajaxPromise = function(url, method, headers = {
  * @return {*} - Value corresponding to propertyName.
  */
 
-var getNestedProperty = module.exports.getNestedProperty = function(object, propertyName){
+var getNestedProperty = module.exports.getNestedProperty = function(object, propertyName, suppressNotFoundError = false){
 
     if (typeof propertyName === 'string') propertyName = propertyName.split('.'); 
     if (!Array.isArray(propertyName)) throw new Error('Using improper propertyName in objectutils.getNestedProperty.');
@@ -297,15 +359,33 @@ var getNestedProperty = module.exports.getNestedProperty = function(object, prop
             }
             return arrayVals;
         } else {
+            if (typeof object === 'undefined' || !object) {
+                if (!suppressNotFoundError) throw new Error('Field ' + _.clone(fieldHierarchyLevels).splice(0, level + 1).join('.') + ' not found on object.');
+                return;
+            }
             return findNestedValue(
                 currentNode[fieldHierarchyLevels[level]],
                 fieldHierarchyLevels,
-                ++level
+                level + 1
             );
         }
     })(object, propertyName);
 
 };
+
+/**
+ * Flatten any level/depth of arrays (e.g. as might be returned from @see getNestedProperty
+ * if getting a property nested within array(s)) into a single one. Does not support
+ * objects or sets, just arrays.
+ * 
+ * @param {*[]} arr - An array containing other arrays to flatten.
+ * @return {*[]} - A shallow, flattened array.
+ */
+var flattenArrays = module.exports.flattenArrays = function(arr){
+    if (arr.length > 0 && Array.isArray(arr[0])){
+        return arr.reduce((a,b) => a.concat(flattenArrays(b)), []);
+    } else return arr;
+}
 
 
 var DateUtility = module.exports.DateUtility = (function(){

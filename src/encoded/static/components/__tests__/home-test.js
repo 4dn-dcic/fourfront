@@ -12,13 +12,14 @@ jest.dontMock('react');
 jest.dontMock('underscore');
 
 describe('Testing home.js', function() {
-    var React, HomePage, testItem, TestUtils, page, data, _, banners, Wrapper;
+    var React, HomePage, testItem, TestUtils, page, data, _, banners, Wrapper, statics;
 
     beforeEach(function() {
         React = require('react');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
         HomePage = require('../home');
+        statics = require('../../data/statics'); // Maybe keep version of statics.js and put into /testdata/
         Wrapper = React.createClass({
             childContextTypes: {
                 fetch: React.PropTypes.func
@@ -43,7 +44,7 @@ describe('Testing home.js', function() {
         });
         page = TestUtils.renderIntoDocument(
             <Wrapper>
-                <HomePage />
+                <HomePage context={{ 'content' : statics }} />
             </Wrapper>
         );
     });
@@ -53,8 +54,8 @@ describe('Testing home.js', function() {
         var bannerEntries = TestUtils.scryRenderedDOMComponentsWithClass(page, 'banner-entry');
         expect(banners.length).toEqual(1);
         expect(bannerEntries.length).toEqual(3);
-        expect(bannerEntries[0].getAttribute('href')).toEqual('/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all');
-        expect(bannerEntries[1].getAttribute('href')).toEqual('/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all');
+        expect(bannerEntries[0].getAttribute('href')).toEqual('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all');
+        expect(bannerEntries[1].getAttribute('href')).toEqual('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all');
         expect(bannerEntries[2].getAttribute('href')).toEqual('/search/?type=Biosource');
     });
 

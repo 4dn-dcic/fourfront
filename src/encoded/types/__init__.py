@@ -19,31 +19,19 @@ def includeme(config):
 
 
 @collection(
-    name='protocols',
+    name='analysis-steps',
+    unique_key='analysis_step:name',
     properties={
-        'title': 'Protocols',
-        'description': 'Listing of protocols',
+        'title': 'AnalysisSteps',
+        'description': 'Listing of analysis steps for 4DN analyses',
     })
-class Protocol(Item):
-    """Protocol class."""
+class AnalysisStep(Item):
+    """The AnalysisStep class that descrbes a step in a workflow."""
 
-    base_types = ['Protocol'] + Item.base_types
-    item_type = 'protocol'
-    schema = load_schema('encoded:schemas/protocol.json')
-
-
-@collection(
-    name='biosample-cell-culture',
-    properties={
-        'title': 'Biosample Cell Culture Information',
-        'description': 'Listing Biosample Cell Culture Information',
-    })
-class BiosampleCellCulture(Item):
-    """Cell culture details for Biosample."""
-
-    base_types = ['BiosampleCellCulture'] + Item.base_types
-    item_type = 'biosample_cell_culture'
-    schema = load_schema('encoded:schemas/biosample_cell_culture.json')
+    item_type = 'analysis_step'
+    name_key = 'name'
+    schema = load_schema('encoded:schemas/analysis_step.json')
+    embedded = ['software_used', 'qa_stats_generated']
 
 
 @collection(
@@ -63,18 +51,29 @@ class Award(Item):
 
 
 @collection(
-    name='organisms',
-    unique_key='organism:name',
+    name='biosample-cell-cultures',
     properties={
-        'title': 'Organisms',
-        'description': 'Listing of all registered organisms',
+        'title': 'Biosample Cell Culture Information',
+        'description': 'Listing Biosample Cell Culture Information',
     })
-class Organism(Item):
-    """Organism class."""
+class BiosampleCellCulture(Item):
+    """Cell culture details for Biosample."""
 
-    item_type = 'organism'
-    schema = load_schema('encoded:schemas/organism.json')
-    name_key = 'name'
+    item_type = 'biosample_cell_culture'
+    schema = load_schema('encoded:schemas/biosample_cell_culture.json')
+
+
+@collection(
+    name='constructs',
+    properties={
+        'title': 'Constructs',
+        'description': 'Listing of Constructs',
+    })
+class Construct(Item):
+    """Construct class."""
+
+    item_type = 'construct'
+    schema = load_schema('encoded:schemas/construct.json')
 
 
 @collection(
@@ -108,16 +107,16 @@ class Enzyme(Item):
 
 
 @collection(
-    name='constructs',
+    name='genomic-regions',
     properties={
-        'title': 'Constructs',
-        'description': 'Listing of Constructs',
+        'title': 'Genomic Regions',
+        'description': 'Listing of genomic regions',
     })
-class Construct(Item):
-    """Construct class."""
+class GenomicRegion(Item):
+    """The GenomicRegion class that describes a region of a genome."""
 
-    item_type = 'construct'
-    schema = load_schema('encoded:schemas/construct.json')
+    item_type = 'genomic_region'
+    schema = load_schema('encoded:schemas/genomic_region.json')
 
 
 @collection(
@@ -161,7 +160,35 @@ class Modification(Item):
 
 
 @collection(
-    name='quality_metric_flags',
+    name='organisms',
+    unique_key='organism:name',
+    properties={
+        'title': 'Organisms',
+        'description': 'Listing of all registered organisms',
+    })
+class Organism(Item):
+    """Organism class."""
+
+    item_type = 'organism'
+    schema = load_schema('encoded:schemas/organism.json')
+    name_key = 'name'
+
+
+@collection(
+    name='protocols',
+    properties={
+        'title': 'Protocols',
+        'description': 'Listing of protocols',
+    })
+class Protocol(Item):
+    """Protocol class."""
+
+    item_type = 'protocol'
+    schema = load_schema('encoded:schemas/protocol.json')
+
+
+@collection(
+    name='quality-metric-flags',
     properties={
         'title': 'Quality Metric Flags'
     })
@@ -171,60 +198,6 @@ class QualityMetricFlag(Item):
     item_type = 'quality_metric_flag'
     schema = load_schema('encoded:schemas/quality_metric_flag.json')
     embedded = ['quality_metrics']
-
-
-@collection(
-    name='analysis_steps',
-    properties={
-        'title': 'AnalysisSteps',
-        'description': 'Listing of analysis steps for 4DN analyses',
-    })
-class AnalysisStep(Item):
-    """The AnalysisStep class that descrbes a step in a workflow."""
-
-    item_type = 'analysis_step'
-    schema = load_schema('encoded:schemas/analysis_step.json')
-    embedded = ['software_used', 'qa_stats_generated']
-
-
-@collection(
-    name='workflows',
-    properties={
-        'title': 'Workflows',
-        'description': 'Listing of 4DN analysis workflows',
-    })
-class Workflow(Item):
-    """The Workflow class that describes a workflow and steps in it."""
-
-    item_type = 'workflow'
-    schema = load_schema('encoded:schemas/workflow.json')
-
-
-@collection(
-    name='workflow_runs',
-    properties={
-        'title': 'Workflow Runs',
-        'description': 'Listing of executions of 4DN analysis workflows',
-    })
-class WorkflowRun(Item):
-    """The WorkflowRun class that describes execution of a workflow."""
-
-    item_type = 'workflow_run'
-    schema = load_schema('encoded:schemas/workflow_run.json')
-    embedded = ['workflow']
-
-
-@collection(
-    name='workflow_mappings',
-    properties={
-        'title': 'Workflow Mappings',
-        'description': 'Listing of all workflow mappings',
-    })
-class WorkflowMapping(Item):
-    """The WorkflowRun class that describes execution of a workflow and tasks in it."""
-
-    item_type = 'workflow_mapping'
-    schema = load_schema('encoded:schemas/workflow_mapping.json')
 
 
 @collection(
@@ -275,37 +248,3 @@ class Target(Item):
         elif description:
             return description
         return "no target"
-
-
-@collection(
-    name='genomic_regions',
-    properties={
-        'title': 'Genomic Regions',
-        'description': 'Listing of genomic regions',
-    })
-class GenomicRegion(Item):
-    """The GenomicRegion class that describes a region of a genome."""
-
-    item_type = 'genomic_region'
-    schema = load_schema('encoded:schemas/genomic_region.json')
-
-    @calculated_property(schema={
-        "title": "Region",
-        "description": "Assembly:chromosome:start-end.",
-        "type": "string",
-    })
-    def region(self, request, genome_assembly, chromosome=None):
-            # if biosource_type == "tissue":
-            #     if tissue:
-            #         return tissue
-            # elif biosource_type == "immortalized cell line":
-            #     if cell_line:
-            #         return cell_line
-            # elif biosource_type == "whole organisms":
-            #     if individual:
-            #         individual_props = request.embed(individual, '@@object')
-            #         organism = individual_props['organism']
-            #         organism_props = request.embed(organism, '@@object')
-            #         organism_name = organism_props['name']
-            #         return "Whole " + organism_name
-            return None

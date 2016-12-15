@@ -3,8 +3,10 @@ from past.builtins import basestring
 from .typedsheets import cast_row_values
 from functools import reduce
 import io
+import json
 import logging
 import os.path
+import boto3
 from pyramid.settings import asbool
 from snovault.storage import User
 
@@ -17,6 +19,8 @@ ORDER = [
     'user',
     'award',
     'lab',
+    'ontology',
+    'ontology_term',
     'organism',
     'genomic_region',
     'target',
@@ -39,8 +43,9 @@ ORDER = [
     'file_fastq',
     'file_fasta',
     'file_processed',
+    'file_reference',
     'file_set',
-    'experiment_hic',
+    'experiment_hi_c',
     'experiment_capture_c',
     'experiment_repliseq',
     'experiment_set',
@@ -49,7 +54,8 @@ ORDER = [
     'analysis_step',
     'workflow',
     'workflow_mapping',
-    'workflow_run'
+    'workflow_run',
+    'workflow_run_sbg'
 ]
 
 IS_ATTACHMENT = [
@@ -512,22 +518,28 @@ def get_pipeline(testapp, docsdir, test_only, item_type, phase=None, method=None
 # Additional pipeline sections for item types
 
 PHASE1_PIPELINES = {
+    'ontology_term': [
+        remove_keys('parents')
+    ],
     'user': [
         remove_keys('lab', 'submits_for'),
     ],
     'file_fastq': [
-        remove_keys('experiments', 'filesets'),
+        remove_keys('related_files'),
     ],
     'file_fasta': [
-        remove_keys('experiments', 'filesets'),
+        remove_keys('related_files'),
     ],
     'file_processed': [
-        remove_keys('experiments', 'filesets', "workflow_run"),
+        remove_keys('related_files', "workflow_run"),
+    ],
+    'file_reference': [
+        remove_keys('related_files'),
     ],
     'file_set': [
         remove_keys('files_in_set'),
     ],
-    'experiment_hic': [
+    'experiment_hi_c': [
         remove_keys('experiment_relation'),
     ],
     'experiment_capture_c': [
@@ -553,22 +565,28 @@ PHASE1_PIPELINES = {
 
 
 PHASE2_PIPELINES = {
+    'ontology_term': [
+        skip_rows_missing_all_keys('parents'),
+    ],
     'user': [
         skip_rows_missing_all_keys('lab', 'submits_for'),
     ],
     'file_fastq': [
-        skip_rows_missing_all_keys('experiments', 'filesets'),
+        skip_rows_missing_all_keys('related_files'),
     ],
     'file_fasta': [
-        skip_rows_missing_all_keys('experiments', 'filesets'),
+        skip_rows_missing_all_keys('related_files'),
     ],
     'file_processed': [
-        skip_rows_missing_all_keys('experiments', 'filesets', "workflow_run"),
+        skip_rows_missing_all_keys('related_files', "workflow_run"),
+    ],
+    'file_reference': [
+        skip_rows_missing_all_keys('related_files'),
     ],
     'file_set': [
         skip_rows_missing_all_keys('files_in_set'),
     ],
-    'experiment_hic': [
+    'experiment_hi_c': [
         skip_rows_missing_all_keys('experiment_relation'),
     ],
     'experiment_capture_c': [
@@ -607,8 +625,70 @@ def load_all(testapp, filename, docsdir, test=False):
         pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=2)
         process(combine(source, pipeline))
 
+def generate_access_key(testapp, store_access_key=None,
+                        server='http://localhost:8000',  email='4dndcic@gmail.com'):
 
-def load_test_data(app):
+    # get admin user and generate access keys
+    if store_access_key:
+        # we probably don't have elasticsearch index updated yet
+        admin = testapp.get('/users/%s?datastore=database' % (email)).follow().json
+
+        # don't create one if we already have
+        for key in admin['access_keys']:
+            if key.get('description') == 'key for submit4dn':
+                print("key found not generating new one")
+                return
+
+        access_key_req = {
+            'user': admin['@id'],
+            'description':'key for submit4dn',
+        }
+        res = testapp.post_json('/access_key', access_key_req).json
+        if store_access_key == 'local':
+            # for local storing we always connecting to local server
+            server = 'http://localhost:8000'
+        akey     = { 'default':
+                    { 'secret' : res['secret_access_key'],
+                      'key' : res['access_key_id'],
+                      'server': server,
+                    }
+                   }
+        return json.dumps(akey)
+
+def store_keys(app, store_access_key, keys):
+        if (not keys): return
+
+        # write to ~/keypairs.json
+        if store_access_key == 'local':
+            home_dir = os.path.expanduser('~')
+            keypairs_filename = os.path.join(home_dir, 'keypairs.json')
+
+            print("Storing access keys to %s", keypairs_filename)
+            with open(keypairs_filename, 'w') as keypairs:
+                    # write to file for local
+                    keypairs.write(keys)
+
+        elif store_access_key == 's3':
+            s3bucket = app.registry.settings['system_bucket']
+            secret = os.environ.get('AWS_SECRET_KEY')
+            if not secret:
+                print("no secrets for s3 upload, you probably shouldn't be doing"
+                      "this from yourlocal machine")
+                print("halt and catch fire")
+                return
+
+            s3 = boto3.client('s3')
+            secret = secret[:32]
+
+            print("Uploading S3 object with SSE-C")
+            s3.put_object(Bucket=s3bucket,
+                          Key='illnevertell',
+                          Body=keys,
+                          SSECustomerKey=secret,
+                          SSECustomerAlgorithm='AES256')
+
+
+def load_test_data(app, access_key_loc=None):
     """smth."""
     from webtest import TestApp
     environ = {
@@ -620,11 +700,13 @@ def load_test_data(app):
     from pkg_resources import resource_filename
     inserts = resource_filename('encoded', 'tests/data/inserts/')
     docsdir = [resource_filename('encoded', 'tests/data/documents/')]
-    # temp comment out below
     load_all(testapp, inserts, docsdir)
+    keys = generate_access_key(testapp, access_key_loc,
+                               server="https://testportal.4dnucleome.org")
+    store_keys(app, access_key_loc, keys)
 
 
-def load_prod_data(app):
+def load_prod_data(app, access_key_loc=None):
     """smth."""
     from webtest import TestApp
     environ = {
@@ -637,13 +719,6 @@ def load_prod_data(app):
     inserts = resource_filename('encoded', 'tests/data/prod-inserts/')
     docsdir = []
     load_all(testapp, inserts, docsdir)
-
-
-def create_user(db, email, name, pwd):
-    """create user if user not in database."""
-    if User.get_by_username(email) is None:
-        print('creating user ', email)
-        new_user = User(email=email, password=pwd, name=name)
-        db.add(new_user)
-    else:
-        print('user %s already exists, skipping' % (email))
+    keys = generate_access_key(testapp, access_key_loc,
+                               server="https://data.4dnucleome.org")
+    store_keys(app, access_key_loc, keys)

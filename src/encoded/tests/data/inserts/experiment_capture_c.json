@@ -16,7 +16,6 @@
         "notes": "sample dcic notes",
         "lab": "4dn-dcic-lab",
         "aliases": ["labsample:alias25"],
-        "files": [],
         "description": "Capture Test",
         "ligation_temperature": 37,
         "crosslinking_temperature": 37,
@@ -31,7 +30,7 @@
         "targeted_regions": [
             {
                 "target": "d1115d5e-40aa-43bc-b81c-32c70c9afb44",
-                "oligo_file": "46e82a90-49e5-4c33-afab-9ec90d65faf4"
+                "oligo_file": "4DNFI067APA1"
             }
         ]
     },
@@ -52,7 +51,6 @@
         "notes": "sample dcic notes",
         "lab": "4dn-dcic-lab",
         "aliases": ["labsample:alias22"],
-        "files": [],
         "description": "Test Drive",
         "ligation_temperature": 37,
         "crosslinking_temperature": 37,
@@ -68,11 +66,11 @@
         "targeted_regions": [
             {
                 "target": "d1115d5e-40aa-43bc-b81c-32c70c9afb44",
-                "oligo_file": "46e82a90-49e5-4c33-afab-9ec90d65faf4"
+                "oligo_file": "4DNFI067APB1"
             },
             {
                 "target": "d1115d5e-40aa-43bc-b81c-32c70c9afb33",
-                "oligo_file": "46e82a90-49e5-4c33-afab-9ec90d65faf4"
+                "oligo_file": "4DNFI067APB1"
             }
         ]
     }

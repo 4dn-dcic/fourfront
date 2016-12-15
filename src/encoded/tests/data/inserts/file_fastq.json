@@ -7,8 +7,55 @@
         "lab": "4dn-dcic-lab",
         "award": "1U01CA200059-01",
         "file_format":"fastq",
-        "experiments":["4DNEX067APT1", "4DNEX067APU1", "4DNEX067APV1", "4DNEX067APY1", "4DNEX067APZ1"],
-        "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faf3",
+        "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa0",
+        "status": "uploaded",
+        "filename": "test_file1"
+    },
+    {
+        "accession":"4DNFI067APT1",
+        "notes": "sample dcic notes",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "file_format":"fastq",
+        "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa1",
+        "status": "uploaded",
+        "filename": "test_file1"
+    },
+    {
+        "accession":"4DNFI067APV1",
+        "notes": "sample dcic notes",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "file_format":"fastq",
+        "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa2",
+        "status": "uploaded",
+        "filename": "test_file1"
+    },
+    {
+        "accession":"4DNFI067APY1",
+        "notes": "sample dcic notes",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "file_format":"fastq",
+        "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa3",
+        "status": "uploaded",
+        "filename": "test_file1"
+    },
+    {
+        "accession":"4DNFI067APZ1",
+        "notes": "sample dcic notes",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "4dndcic@gmail.com",
+        "lab": "4dn-dcic-lab",
+        "award": "1U01CA200059-01",
+        "file_format":"fastq",
+        "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa4",
         "status": "uploaded",
         "filename": "test_file1"
     },
@@ -19,8 +66,7 @@
         "submitted_by": "wrangler@wrangler.com",
         "award": "1U01CA200059-01",
         "file_format":"fastq",
-        "experiments":["4DNEX067APT1"],
-        "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faf5",
+        "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa5",
         "status": "released",
         "filename": "test_file2"
     },
@@ -31,24 +77,9 @@
         "submitted_by": "wrangler@wrangler.com",
         "award": "1U01CA200059-01",
         "file_format":"fastq",
-        "experiments":["4DNEX067APT1"],
-        "uuid": "46e82a90-49e5-4c33-afab-9ec90d65fad2",
+        "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa6",
         "status": "upload failed",
         "filename": "test_file3"
-    },
-    {
-        "accession":"4DNFI067APU2",
-        "notes": "sample dcic notes",
-        "lab": "4dn-dcic-lab",
-        "submitted_by": "4dndcic@gmail.com",
-        "lab": "4dn-dcic-lab",
-        "award": "1U01CA200059-01",
-        "file_format":"fastq",
-        "experiments":["4DNEX067APT1", "4DNEX067APU1", "4DNEX067APV1", "4DNEX067APY1", "4DNEX067APZ1"],
-        "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faf4",
-        "filesets":["4DNFS40D5WL1"],
-        "status": "uploaded",
-        "filename": "test_file4"
     }
 ]
 

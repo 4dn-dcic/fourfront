@@ -39,7 +39,20 @@
 .browse-page-container,
 .static-page {
 	/* Consistent margin between top navbar & content among pages */
-	margin-top: 23px;
+	margin-top: 25px;
+}
+
+/* top padding for small & large screens re: fixed nav */
+#content {
+    padding-top: 0px;
+
+    @media (min-width: $navbar-fixed-breakpoint) {
+        padding-top: 81px; /* Navbar (80px inner height) + its bottom border (1px) */
+    }
+	
+	> .alerts {
+		margin-top: 20px;
+	}
 
 }
 
@@ -47,12 +60,6 @@
 /***********************************************************
 		HEADER & TOP AREAS (Navbar, Page Titles, etc.)
 ************************************************************/
-
-@media (min-width: $screen-md-min) {
-	.navbar-container.test-warning-visible {
-		margin-bottom: 37px;
-	}
-}
 
 h1.page-title {
 	/* Only set font-weight: 200 for h1,
@@ -76,6 +83,7 @@ h1.page-title {
 
 h1.page-title + .page-subtitle {
 	margin-top: -5px; /* Assumes h1.page-title to have margin-bottom: 10px */
+	margin-bottom: 15px;
 }
 
 .page-subtitle {
@@ -1138,9 +1146,9 @@ p, input {
 		margin: 0px;
 		border: none;
 
-		>div>.panel-body{
+		> div > .panel-body{
 			padding-right: 0px;
-			padding-left: 40px;
+			padding-left: 30px;
 		}
 	}
 
@@ -1171,34 +1179,66 @@ p, input {
 	position: relative;
 }
 
-.expset-table {
-	border: none !important;
-	> thead > tr > th {
-		border: 1px solid $expset-table-border-color;
-	}
-	> thead > tr > :first-child,
-	> tbody > tr > :first-child {
-		border-left: none;
-	}
-	> thead > tr > :last-child,
-	> tbody > tr > :last-child {
-		border-right: none;
-	}
-	> tbody > tr > td {
-		border: 1px solid $expset-table-border-color;
-		border-left-color : #f4f4f4;
-		border-right-color: #f4f4f4;
-		border-top: none !important;
-		max-width: 160px;
+.expset-table,
+.expsets-table {
 
-		&.dropdown-button-cell {
-			padding : 0 !important;
-			width : 30px;
-			height: 30px;
-			min-width: 26px;
+	border: none !important;
+
+	> thead,
+	> tbody {
+		> tr > :first-child {
+			border-left: none;
+		}
+		> tr > :last-child {
+			border-right: none;
+		}
+	}
+
+	> thead {
+
+		> tr > th {
+			border: none;
+			padding: 8px;
 		}
 
+	} 
+	
+	> tbody {
+		> tr > td {
+			border: 1px solid $expset-table-border-color;
+			border-left-color : #f4f4f4;
+			border-right-color: #f4f4f4;
+			border-top: none !important;
+			max-width: 160px;
+
+			&.dropdown-button-cell {
+				padding : 0 !important;
+				width : 30px;
+				height: 30px;
+				min-width: 26px;
+			}
+
+		}
 	}
+
+}
+
+/* Only for table of Experiment Sets */
+.expsets-table {
+
+	> thead {
+		> tr > th {
+			height: 46px;
+			background-color: transparent;
+			font-weight: 500;
+			font-size: 0.875rem;
+		}
+	}
+
+	.expset-table-cell {
+		padding: 7px 5px;
+	}
+
 }
 
 .expset-table > tbody.expset-section.open > tr.expset-table-row > td {

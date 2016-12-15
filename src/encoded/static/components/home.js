@@ -3,9 +3,9 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var _ = require('underscore');
 var announcements_data = require('../data/announcements_data');
-var statics = require('../data/statics');
 var Panel = require('react-bootstrap').Panel;
 var store = require('../store');
+var globals = require('./globals');
 
 /* ****************
 New homepage
@@ -128,9 +128,20 @@ var ContentItem = React.createClass({
 });
 
 var HomePage = module.exports = React.createClass({
+
+    propTypes: {
+        "context" : React.PropTypes.shape({
+            "content" : React.PropTypes.shape({
+                "description" : React.PropTypes.string,
+                "links" : React.PropTypes.string
+            }).isRequired
+        }).isRequired
+    },
+
     render: function() {
-        var experiment4DNBanner = <BannerEntry session={this.props.session} text='experiments' defaultFilter="4DN" destination="/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all" fetchLoc='/search/?type=Experiment&award.project=4DN&format=json'/>;
-        var experimentExtBanner = <BannerEntry session={this.props.session} text='experiments' defaultFilter="External" destination="/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all" fetchLoc='/search/?type=Experiment&award.project=External&format=json'/>;
+        var c = this.props.context.content; // Content
+        var experiment4DNBanner = <BannerEntry session={this.props.session} text='experiments' defaultFilter="4DN" destination="/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all" fetchLoc='/search/?type=Experiment&award.project=4DN&format=json'/>;
+        var experimentExtBanner = <BannerEntry session={this.props.session} text='experiments' defaultFilter="External" destination="/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all" fetchLoc='/search/?type=Experiment&award.project=External&format=json'/>;
         var biosourceBanner = <BannerEntry session={this.props.session} text='cell types' destination='/search/?type=Biosource' fetchLoc='/search/?type=Biosource&format=json'/>;
         var announcements = announcements_data.map(function(announce) {
             return (
@@ -150,11 +161,11 @@ var HomePage = module.exports = React.createClass({
                 <div className="row">
                     <div className="col-md-9 col-xs-12">
                         <h3 className="fourDN-header">Welcome!</h3>
-                        <p className="fourDN-content text-justify" dangerouslySetInnerHTML={{__html: statics.homeDescription}}></p>
+                        <p className="fourDN-content text-justify" dangerouslySetInnerHTML={{__html: c.description}}></p>
                     </div>
                     <div className="col-md-3 col-xs-12">
                         <h3 className="fourDN-header">4DN Links</h3>
-                        <p className="fourDN-content"dangerouslySetInnerHTML={{__html: statics.homeLinks}}></p>
+                        <p className="fourDN-content"dangerouslySetInnerHTML={{__html: c.links}}></p>
                     </div>
                 </div>
                 <div className="row">
@@ -167,3 +178,5 @@ var HomePage = module.exports = React.createClass({
         );
     }
 });
+
+globals.content_views.register(HomePage, 'HomePage');

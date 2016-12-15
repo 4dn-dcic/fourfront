@@ -40,7 +40,6 @@
         "file_classification": {
             "title": "General Classification",
             "description": "General classification group for the File (raw, processed, ancillary (eg. index files))",
-            "comment": "This will control how, when and where a file can be displayed - on pages (eg. ancillary files like index files will show up in workflow_run but not experiment)",
             "type": "string",
             "enum": [
                 "raw file"
@@ -56,7 +55,7 @@
             "title": "Sequencer",
             "description": "Instrument used for sequencing",
             "type": "string",
-            "comment": "should this be a controlled CV with enum?"
+            "internal_comment": "should this be a controlled CV with enum, or another object?"
         },
         "paired_end": {
             "title": "Paired End Identifier",

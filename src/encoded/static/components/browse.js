@@ -24,7 +24,7 @@ var AuditMixin = audit.AuditMixin;
 
 var expSetColumnLookup={
     // all arrays will be handled by taking the first item
-    'replicates':{
+    'replicate':{
         'Accession': 'accession',
         'Exp Type':'experiment_type',
         'Exps': '',
@@ -37,8 +37,15 @@ var expSetColumnLookup={
     'other':[]
 };
 
+// Re-use for now for older data (temp, probably).
+expSetColumnLookup.custom =
+expSetColumnLookup['technical replicates'] =
+expSetColumnLookup['biological replicates'] =
+//expSetColumnLookup['analysis_set'] = // Relevant?
+expSetColumnLookup.replicate;
+
 var expSetAdditionalInfo={
-    'replicates':{
+    'replicate':{
         'Lab': 'lab.title',
         'Treatments':'biosample.treatments_summary',
         'Modifications':'biosample.modifications_summary'
@@ -83,21 +90,6 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         };
     },
 
-    fileDetailContainer : null,
-
-    componentWillMount : function(){
-        // Cache to prevent re-executing on re-renders.
-        this.fileDetailContainer = getFileDetailContainer(this.props.experimentArray, this.props.passExperiments);
-    },
-
-    componentWillUpdate : function(nextProps, nextState){
-        if (nextProps.experimentArray !== this.props.experimentArray || nextProps.passExperiments !== this.props.passExperiments){
-            this.fileDetailContainer = getFileDetailContainer(nextProps.experimentArray, nextProps.passExperiments);
-        }
-
-
-    },
-
     componentWillReceiveProps: function(nextProps) {
 
         if(this.props.expSetFilters !== nextProps.expSetFilters){
@@ -134,8 +126,9 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
 
     render: function() {
 
-        var fileDetail = this.fileDetailContainer.fileDetail;
-        var emptyExps = this.fileDetailContainer.emptyExps;
+        var fileDetailContainer = getFileDetailContainer(this.props.experimentArray, this.props.passExperiments);
+        var fileDetail = fileDetailContainer.fileDetail;
+        var emptyExps = fileDetailContainer.emptyExps;
 
         var files = Object.keys(fileDetail);
         // unused for now... when format selection is added back in, adapt code below:
@@ -212,7 +205,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                                     'File Type',
                                     'File Info'
                                 ]}
-                                fileDetailContainer={this.fileDetailContainer}
+                                fileDetailContainer={fileDetailContainer}
                                 parentController={this}
                                 expSetFilters={this.props.expSetFilters}
                                 facets={this.props.facets /* Not req'd here as using pre-completed fileDetailContainer' */ }
@@ -305,7 +298,7 @@ var Term = browse.Term = React.createClass({
     },
 
     componentWillMount: function(){
-        var fullHref = generateTypeHref('?type=ExperimentSet&', this.props.facet['field'], this.props.term['key']);
+        var fullHref = generateTypeHref('?type=ExperimentSetReplicate&', this.props.facet['field'], this.props.term['key']);
         if(this.props.typeTitle === this.props.term['key'] && fullHref !== this.props.searchBase){
             if(typeof document !== 'undefined'){
                 this.context.navigate(fullHref);
@@ -319,7 +312,7 @@ var Term = browse.Term = React.createClass({
         var title = this.props.title || term;
         var field = this.props.facet['field'];
         var selected = term === this.props.typeTitle ? true : false;
-        var fullHref = generateTypeHref('?type=ExperimentSet&', field, term);
+        var fullHref = generateTypeHref('?type=ExperimentSetReplicate&', field, term);
         var href = fullHref;
         return (
             <div className="facet-entry-container" id={selected ? "selected" : null} key={term}>
@@ -383,23 +376,30 @@ var ColumnSorter = React.createClass({
         this.props.sortByFxn(this.props.val, reverse);
     },
 
+    getDefaultProps : function(){
+        return {
+            descend : false
+        };
+    },
+
+    iconStyle : function(style = 'descend'){
+        if (style === 'descend'){
+            return <i className="icon icon-sort-desc" style={{ transform: 'translateY(-1px)' }}></i>;
+        } else if (style === 'ascend'){
+            return <i className="icon icon-sort-asc" style={{ transform: 'translateY(2px)' }}></i>;
+        }
+    },
+
+    icon : function(){
+        var style = !this.props.descend && this.props.sortColumn === this.props.val ? 'ascend' : 'descend';
+        var linkClass = this.props.sortColumn === this.props.val ? 'expset-column-sort-used' : 'expset-column-sort';
+        return <a href="#" className={linkClass} onClick={this.sortClickFxn}>{ this.iconStyle(style) }</a>;
+    },
+
     render: function(){
-        // Make arrow black if selected; flip if sorting in ascending order
-        var iconUsed = this.props.sortColumn === this.props.val ?
-            <a className="expset-column-sort-used" href="#" onClick={this.sortClickFxn}>
-                { this.props.descend ?
-                    <i className="icon sbt-descend" style={{ transform: 'translateY(2px)' }}></i>
-                    :
-                    <i className="icon sbt-ascend" style={{ transform: 'translateY(2px)' }}></i>
-                }
-            </a>
-            :
-            <a className="expset-column-sort" href="" onClick={this.sortClickFxn}>
-                <i className="icon sbt-descend" style={{ transform: 'translateY(2px)' }}></i>
-            </a>;
         return(
             <span>
-                <span>{this.props.val} </span> {iconUsed}
+                <span>{this.props.val}</span>&nbsp;&nbsp;{ this.icon() }
             </span>
         );
     }
@@ -422,10 +422,14 @@ var ResultTable = browse.ResultTable = React.createClass({
             sortColumn: null,
             sortReverse: false,
             overflowingRight : false,
-            facets : FacetList.adjustedFacets(this.props.context.facets),
-            ignoredFilters : FacetList.findIgnoredFilters(
-                FacetList.adjustedFacets(this.props.context.facets),
-                this.props.expSetFilters
+            // We need to get the below outta state once graph-ql is in; temporarily stored in state for performance.
+            siftedExperiments : FacetList.siftExperiments(
+                this.props.context['@graph'],
+                this.props.expSetFilters,
+                FacetList.findIgnoredFiltersByMissingFacets(
+                    FacetList.adjustedFacets(this.props.context.facets),
+                    this.props.expSetFilters
+                )
             )
         }
     },
@@ -445,16 +449,18 @@ var ResultTable = browse.ResultTable = React.createClass({
 
     componentWillReceiveProps : function(newProps){
         var newState = {};
-        if (this.props.context.facets !== newProps.context.facets) {
-            console.log('ResultsTable props.context.facets updated (why?)');
-            newState.facets = FacetList.adjustedFacets(newProps.context.facets);
+
+        if (this.props.expSetFilters !== newProps.expSetFilters || this.props.context !== newProps.context){
+            newState.siftedExperiments = FacetList.siftExperiments(
+                newProps.context['@graph'],
+                newProps.expSetFilters,
+                FacetList.findIgnoredFiltersByMissingFacets(
+                    FacetList.adjustedFacets(newProps.context.facets),
+                    newProps.expSetFilters
+                )
+            )
         }
-        if (this.props.expSetFilters !== newProps.expSetFilters || newState.facets){
-            newState.ignoredFilters = FacetList.findIgnoredFilters(
-                FacetList.adjustedFacets(newProps.context.facets),
-                newProps.expSetFilters
-            );
-        }
+
         if (Object.keys(newState).length > 0){
             this.setState(newState);
         }
@@ -510,9 +516,26 @@ var ResultTable = browse.ResultTable = React.createClass({
         }.bind(this));
     },
 
-    formatExperimentSetListings : function(passExperiments, columnTemplate, addInfoTemplate){
+    getTemplate : function(type){ 
+        var setType = this.props.context['@graph'][0].experimentset_type;
+        if (type === 'column'){
+            return expSetColumnLookup[setType] ? expSetColumnLookup[setType] : expSetColumnLookup['other'];
+        } else if (type === 'additional-info'){
+            return expSetAdditionalInfo[setType] ? expSetAdditionalInfo[setType] : expSetAdditionalInfo['other'];
+        }
+    },
+
+    formatExperimentSetListings : function(passExperiments, facets = null){
+        // use first experiment set to grap type (all types are the same in any given graph)
+        var columnTemplate = this.getTemplate('column');
+        var addInfoTemplate = this.getTemplate('additional-info');
+
         var resultListings = [],
             resultCount = 0;
+
+        if (facets === null){
+            facets = FacetList.adjustedFacets(this.props.context.facets);
+        }
 
         this.props.context['@graph'].map(function (result) {
             var experimentArray = result.experiments_in_set;
@@ -569,7 +592,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                         passExperiments={intersection}
                         key={keyVal+result['@id']}
                         rowNumber={resultCount++}
-                        facets={this.props.facets}
+                        facets={facets}
                     />
                 );
             }
@@ -604,20 +627,8 @@ var ResultTable = browse.ResultTable = React.createClass({
 
     renderTable : function(){
 
-        // use first experiment set to grap type (all types are the same in any given graph)
+        var formattedExperimentSetListings = this.formatExperimentSetListings(this.state.siftedExperiments);
 
-        var setType = this.props.context['@graph'][0].experimentset_type;
-        var columnTemplate = expSetColumnLookup[setType] ? expSetColumnLookup[setType] : expSetColumnLookup['other'];
-        var additionalInfoTemplate = expSetAdditionalInfo[setType] ? expSetAdditionalInfo[setType] : expSetAdditionalInfo['other'];
-        var formattedExperimentSetListings = this.formatExperimentSetListings(
-            FacetList.siftExperiments(
-                this.props.context['@graph'],
-                this.props.expSetFilters,
-                this.state.ignoredFilters
-            ),
-            columnTemplate,
-            additionalInfoTemplate
-        );
         if (!formattedExperimentSetListings) return null;
 
         return (
@@ -625,39 +636,44 @@ var ResultTable = browse.ResultTable = React.createClass({
                 "expset-result-table-fix col-sm-7 col-md-8 col-lg-9" +
                 (this.state.overflowingRight ? " overflowing" : "")
             }>
+
                 <h5 className='browse-title'>
                     Showing {formattedExperimentSetListings.length} of {this.totalResultCount()} experiment sets.
                 </h5>
+
                 <div className="expset-table-container" ref="expSetTableContainer">
-                    <Table className="expset-table table-tbody-striped" condensed id="result-table">
+                    <Table className="expset-table expsets-table table-tbody-striped" condensed id="result-table">
                         <thead>
                             <tr>
                                 <th></th>
                                 <th></th>
-                                { this.formatColumnHeaders(columnTemplate) }
+                                { this.formatColumnHeaders(this.getTemplate('column')) }
                             </tr>
                         </thead>
                         { formattedExperimentSetListings }
                     </Table>
                 </div>
+
             </div>
         );
     },
 
     render: function() {
+        var facets = FacetList.adjustedFacets(this.props.context.facets);
+        var ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(facets, this.props.expSetFilters);
         return (
             <div className="row">
-                { this.state.facets.length ?
+                { facets.length > 0 ?
                     <div className="col-sm-5 col-md-4 col-lg-3">
                         <FacetList
                             urlPath={this.props.context['@id']}
                             experimentSetListJSON={this.props.context['@graph']}
                             orientation="vertical"
                             expSetFilters={this.props.expSetFilters}
-                            facets={this.state.facets}
+                            facets={facets}
                             onFilter={this.onFilter}
-                            ignoredFilters={this.state.ignoredFilters}
-                            className="shadow-border with-header-bg"
+                            ignoredFilters={ignoredFilters}
+                            className="with-header-bg"
                         />
                     </div>
                     :
@@ -833,11 +849,11 @@ var Browse = browse.Browse = React.createClass({
         var searchBase = url.parse(this.context.location_href).search || '';
 
         // browse is only for experiment sets
-        if(searchBase.indexOf('?type=ExperimentSet') === -1){
+        if(searchBase.indexOf('?type=ExperimentSetReplicate') === -1){
             return(
                 <div className="error-page">
                     <h4>
-                        <a href='/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all'>
+                        <a href='/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all'>
                             Only experiment sets may be browsed.
                         </a>
                     </h4>

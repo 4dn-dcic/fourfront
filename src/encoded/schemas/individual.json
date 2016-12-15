@@ -1,22 +1,11 @@
 {
     "title": "Individual",
-    "description": "DEL REF Base schema for individuals.",
+    "description": "Base schema for individuals.",
     "id": "/profiles/individual.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "identifyingProperties": ["uuid", "accession", "aliases"],
     "required": ["organism"],
-    "mixinProperties": [
-        { "$ref": "mixins.json#/schema_version" },
-        { "$ref": "mixins.json#/uuid" },
-        { "$ref": "mixins.json#/accession" },
-        { "$ref": "mixins.json#/status" },
-        { "$ref": "mixins.json#/aliases" },
-        { "$ref": "mixins.json#/attribution" },
-        { "$ref": "mixins.json#/submitted" },
-        { "$ref": "mixins.json#/documents" },
-        { "$ref": "mixins.json#/notes" }
-    ],
     "dependencies": {
       "age": [ "age_units"]
     },
@@ -27,7 +16,6 @@
         "organism": {
             "title": "Organism",
             "description": "Organism of the individual.",
-            "comment": "Do not submit, value is assigned by the object.",
             "type": "string",
             "linkTo": "Organism"
         },

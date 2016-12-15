@@ -14,25 +14,27 @@ var store = require('../store');
 var browse = require('./browse');
 var origin = require('../libs/origin');
 var serialize = require('form-serialize');
-var { ajaxLoad, ajaxPromise, JWT, console } = require('./objectutils');
+var { ajaxLoad, ajaxPromise, JWT, console, responsiveGridState, isServerSide } = require('./objectutils');
+var Alerts = require('./alerts');
 var jwt = require('jsonwebtoken');
+
 var dispatch_dict = {}; //used to store value for simultaneous dispatch
 
 var portal = {
     portal_title: '4DN Data Portal',
     global_sections: [
-        {id: 'browse', sid:'sBrowse', title: 'Browse', url: '/browse/?type=ExperimentSet&experimentset_type=biological+replicates&limit=all'},
+        {id: 'browse', sid:'sBrowse', title: 'Browse', url: '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all'},
         {id: 'help', sid:'sHelp', title: 'Help', children: [
             {id: 'gettingstarted', title: 'Getting started', url: '/help'},
             {id: 'metadatastructure', title: 'Metadata structure', url: '/help#metadata-structure'},
             {id: 'datasubmission', title: 'Data submission', url: '/help#data-submission'},
             {id: 'restapi', title: 'REST API', url: '/help#rest-api'},
-            {id: 'about', title: 'About', url: '/about/'}
+            {id: 'about', title: 'About', url: '/about'}
         ]}
     ],
     user_section: [
             {id: 'login', title: 'Log in', url: '/'},
-            {id: 'accountactions', title: 'Register', url: '/help/'}
+            {id: 'accountactions', title: 'Register', url: '/help'}
             // Remove context actions for now{id: 'contextactions', title: 'Actions', url: '/'}
     ]
 };
@@ -58,21 +60,62 @@ class Timeout {
 }
 
 
-// App is the root component, mounted on document.body.
-// It lives for the entire duration the page is loaded.
-// App maintains state for the
+/**
+ * App is the root component, mounted on document.body.
+ * It lives for the entire duration the page is loaded.
+ */
 var App = React.createClass({
     SLOW_REQUEST_TIME: 250,
     historyEnabled: !!(typeof window != 'undefined' && window.history && window.history.pushState),
 
-    getInitialState: function() {
+    /**
+     *  Session-related props 'sessionMayBeSet' & 'alerts' are meant to provided by server-side only, then scraped and re-provided
+     *  by client-side render in browser.js via @see App.getRendersPropValues(documentElement, [propNamesToGet]) to match server-side render.
+     *  Similarly as to how is done for the redux store.
+     */
+    propTypes: {
+        "sessionMayBeSet" : React.PropTypes.any,    // Whether Auth0 session exists or not.
+        "alerts" : React.PropTypes.array            // Initial alerts (if any) passed to Alerts component to display
+    },
+
+    getDefaultProps : function(){
         return {
-            errors: [],
-            dropdownComponent: undefined,
-            content: undefined,
-            //session: !!(JWT.get('cookie')), // ToDo : Make this work for faster app state change on page load
-            session: false,
-            user_actions: []
+            'sessionMayBeSet' : null,
+            'alerts' : null
+        }
+    },
+
+    getInitialState: function() {
+        // Todo: Migrate session & user_actions to redux store?
+        var session = false;
+        var user_actions = [];
+
+        if (this.props.sessionMayBeSet !== null){ // Only provided from server
+            if (this.props.sessionMayBeSet === false) session = false;
+            if (this.props.sessionMayBeSet === true) session = true;
+            else session = false; // Else is null
+        } else {
+            session = !!(JWT.get('cookie')); // Same cookie sent to server-side to authenticate, so it must match.
+        }
+
+        // user_info.details is kept in sync to client-side via browser.js, user_info.user_actions is not.
+        // Don't use user_actions unless session is also true.
+        // user_actions is only set client-side upon login (it cannot expire unless logout).
+        var user_info = JWT.getUserInfo(); 
+        if (user_info && typeof user_info.user_actions !== 'undefined' && Array.isArray(user_info.user_actions)){
+            user_actions = user_info.user_actions;
+        }
+
+       console.log("App Initial State: ", session, user_actions);
+
+        return {
+            'errors': [],
+            'dropdownComponent': undefined,
+            'content': undefined,
+            'session': session,
+            'user_actions': user_actions,
+            'schemas': null,
+            'alerts' : []
         };
     },
 
@@ -89,7 +132,8 @@ var App = React.createClass({
         session: React.PropTypes.bool,
         navigate: React.PropTypes.func,
         contentTypeIsJSON: React.PropTypes.func,
-        updateUserInfo: React.PropTypes.func
+        updateUserInfo: React.PropTypes.func,
+        schemas: React.PropTypes.object
     },
 
     // Retrieve current React context
@@ -106,7 +150,8 @@ var App = React.createClass({
             session: this.state.session,
             navigate: this.navigate,
             contentTypeIsJSON: this.contentTypeIsJSON,
-            updateUserInfo: this.updateUserInfo
+            updateUserInfo: this.updateUserInfo,
+            schemas : this.state.schemas
         };
     },
 
@@ -155,6 +200,23 @@ var App = React.createClass({
         return name;
     },
 
+    loadSchemas : function(callback, forceFetch = false){
+        if (this.state.schemas !== null && !forceFetch){
+            // We've already loaded these successfully (hopefully)
+            if (typeof callback === 'function') callback(this.state.schemas);
+            return this.state.schemas;
+        }
+        ajaxPromise('/profiles/?format=json').then(data => {
+            if (this.contentTypeIsJSON(data)){
+                this.setState({
+                    schemas: data
+                }, () => {
+                    if (typeof callback === 'function') callback(data);
+                });
+            }
+        });
+    },
+
     // When current dropdown changes; componentID is _rootNodeID of newly dropped-down component
     handleDropdownChange: function(componentID) {
         // Use React _rootNodeID to uniquely identify a dropdown menu;
@@ -199,7 +261,7 @@ var App = React.createClass({
     authenticateUser : function(callback = null){
         // check existing user_info in local storage and authenticate
         var idToken = JWT.get();
-        if(idToken){ // if JWT present, try to authenticate
+        if(idToken && (!this.state.session || !this.state.user_actions)){ // if JWT present, and session not yet set (from back-end), try to authenticate
             this.fetch('/login', {
                 method: 'POST',
                 headers: {
@@ -215,11 +277,12 @@ var App = React.createClass({
             })
             .then(response => {
                 JWT.saveUserInfo(response);
-                if (typeof callback === 'function') callback(response);
+                this.updateUserInfo(callback);
             }, error => {
-                //error, clear localStorage and session
+                // error, clear JWT token from cookie & user_info from localStorage (via JWT.remove()) 
+                // and unset state.session & state.user_actions (via this.updateUserInfo())
                 JWT.remove();
-                if (typeof callback === 'function') callback(error);
+                this.updateUserInfo(callback);
             });
             return idToken;
         }
@@ -230,7 +293,8 @@ var App = React.createClass({
     componentDidMount: function() {
         globals.bindEvent(window, 'keydown', this.handleKey);
 
-        this.authenticateUser(this.updateUserInfo);
+        this.authenticateUser();
+        this.loadSchemas(); // Load schemas into app.state, access them where needed via props (preferred, safer) or this.context.
 
         var query_href;
         if(document.querySelector('link[rel="canonical"]')){
@@ -238,9 +302,11 @@ var App = React.createClass({
         }else{
             query_href = this.props.href;
         }
-        store.dispatch({
-            type: {'href':query_href}
-        });
+        if (this.props.href !== query_href){
+            store.dispatch({
+                type: {'href':query_href}
+            });
+        }
         if (this.historyEnabled) {
             var data = this.props.context;
             try {
@@ -259,7 +325,7 @@ var App = React.createClass({
         } else {
             window.onhashchange = this.onHashChange;
         }
-        window.onbeforeunload = this.handleBeforeUnload;
+        //window.onbeforeunload = this.handleBeforeUnload; // this.handleBeforeUnload is not defined
     },
 
     componentDidUpdate: function (prevProps, prevState) {
@@ -291,7 +357,7 @@ var App = React.createClass({
             url = url.slice(0, url_hash);
         }
         var data = options.body ? options.body : null;
-        var request = ajaxPromise(url, http_method, headers, data);
+        var request = ajaxPromise(url, http_method, headers, data, options.cache === false ? false : true);
         request.xhr_begin = 1 * new Date();
         request.then(response => {
             request.xhr_end = 1 * new Date();
@@ -299,19 +365,24 @@ var App = React.createClass({
         return request;
     },
 
-    updateUserInfo: function(){
+    updateUserInfo: function(callback = null){
         // get user actions (a function of log in) from local storage
         var userActions = [];
         var session = false;
-        if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
-            if(localStorage && localStorage.user_info){
-                var userInfo = JSON.parse(localStorage.getItem('user_info'));
-                userActions = userInfo.user_actions;
-                session = true;
-            }
+        var userInfo = JWT.getUserInfo(); 
+        if (userInfo){
+            userActions = userInfo.user_actions;
+            session = true;
         }
-        if (!_.isEqual(userActions, this.state.user_actions) || !_.isEqual(session, this.state.session)){
-            this.setState({user_actions:userActions, session:session});
+        
+        var stateChange = {};
+        if (!_.isEqual(userActions, this.state.user_actions)) stateChange.user_actions = userActions;
+        if (session != this.state.session) stateChange.session = session;
+
+        if (Object.keys(stateChange).length > 0){
+            this.setState(stateChange, typeof callback === 'function' ? callback.bind(this, session, userInfo) : null);
+        } else {
+            if (typeof callback === 'function') callback(session, userInfo);
         }
     },
 
@@ -363,11 +434,18 @@ var App = React.createClass({
         // Skip @@download links
         if (href.indexOf('/@@download') != -1) return;
 
+        // Don't cache requests to user profile.
+        var navOpts = {};
+        if (target.getAttribute('data-no-cache')) navOpts.cache = false;
+
         // With HTML5 history supported, local navigation is passed
         // through the navigate method.
         if (this.historyEnabled) {
             event.preventDefault();
-            this.navigate(href);
+            this.navigate(href, navOpts);
+            if (this.refs && this.refs.navigation){
+                this.refs.navigation.closeMobileMenu();
+            }
         }
     },
 
@@ -449,111 +527,192 @@ var App = React.createClass({
         return true;
     },
 
-    navigate: function (href, options, callback) {
+    navigate: function (href, options = {}, callback = null) {
         // options.skipRequest only used by collection search form
         // options.replace only used handleSubmit, handlePopState, handlePersonaLogin
-        options = options || {};
-        href = url.resolve(this.props.href, href);
-        if (!this.confirmNavigation(href, options)) {
-            return;
-        }
-        // Strip url fragment.
-        var fragment = '';
-        var href_hash_pos = href.indexOf('#');
-        if (href_hash_pos > -1) {
-            fragment = href.slice(href_hash_pos);
-            href = href.slice(0, href_hash_pos);
-        }
-        if (!this.historyEnabled) {
-            if (options.replace) {
-                window.location.replace(href + fragment);
-            } else {
-                var old_path = ('' + window.location).split('#')[0];
-                window.location.assign(href + fragment);
-                if (old_path == href) {
-                    window.location.reload();
-                }
+        
+        var fragment;
+
+        function setupRequest(targetHref){
+            targetHref = url.resolve(this.props.href, targetHref);
+            if (!this.confirmNavigation(targetHref, options)) {
+                return false;
             }
-            return;
-        }
-
-        var request = this.props.contextRequest;
-
-        console.log('navigate() > ',request);
-
-        if (request && this.requestCurrent) {
-            // Abort the current request, then remember we've aborted the request so that we
-            // don't render the Network Request Error page.
-            if (request && typeof request.abort === 'function') request.abort();
-            this.requestAborted = true;
-            this.requestCurrent = false;
-        }
-
-        if (options.skipRequest) {
-            if (options.replace) {
-                window.history.replaceState(window.state, '', href + fragment);
-            } else {
-                window.history.pushState(window.state, '', href + fragment);
+            // Strip url fragment.
+            fragment = '';
+            var href_hash_pos = targetHref.indexOf('#');
+            if (href_hash_pos > -1) {
+                fragment = targetHref.slice(href_hash_pos);
+                targetHref = targetHref.slice(0, href_hash_pos);
             }
-            store.dispatch({
-                type: {'href':href + fragment}
-            });
-            return;
+            href = targetHref;
+            return true;
         }
-        var userInfo = localStorage.getItem('user_info') || null;
-        var idToken = userInfo ? JSON.parse(userInfo).id_token : null;
-        var reqHeaders = {headers: {'Accept': 'application/json'}};
-        if(userInfo && this.state.session){
-            reqHeaders.headers['Authorization'] = 'Bearer '+idToken;
-        }
-        var reqHref = href.slice(-1) === '/' ? href + '/?format=json' : href + '&format=json';
-        request = this.fetch(reqHref, reqHeaders);
-        this.requestCurrent = true; // Remember we have an outstanding GET request
-        var timeout = new Timeout(this.SLOW_REQUEST_TIME);
-        Promise.race([request, timeout.promise]).then(v => {
-            if (v instanceof Timeout) {
-                console.log('TIMEOUT!!!');
-                // TODO: implement some other type of slow?
-                // store.dispatch({
-                //     type: {'slow':true}
-                // });
 
-            } else {
-                // Request has returned data
-                this.requestCurrent = false;
-            }
-        });
-        var promise = request.then(response => {
-            this.requestCurrent = false;
-            // navigate normally to URL of unexpected non-JSON response so back button works.
-            if (!this.contentTypeIsJSON(response)) {
+        function doRequest(repeatIfError = false){
+
+            if (!this.historyEnabled) {
                 if (options.replace) {
                     window.location.replace(href + fragment);
                 } else {
                     var old_path = ('' + window.location).split('#')[0];
                     window.location.assign(href + fragment);
-                    return;
+                    if (old_path == href) {
+                        window.location.reload();
+                    }
                 }
-            }
-            if (options.replace) {
-                window.history.replaceState(null, '', href + fragment);
-            } else {
-                window.history.pushState(null, '', href + fragment);
-            }
-            dispatch_dict.href = href + fragment;
-
-            if (typeof callback == 'function'){
-                callback(response);
+                return false;
             }
 
-            return response;
-        })
-        .then(this.receiveContextResponse);
-        if (!options.replace) {
-            promise = promise.then(this.scrollTo);
+            if (this.props.contextRequest && this.requestCurrent && repeatIfError === true) {
+                // Abort the current request, then remember we've aborted the request so that we
+                // don't render the Network Request Error page.
+                if (this.props.contextRequest && typeof this.props.contextRequest.abort === 'function') this.props.contextRequest.abort();
+                this.requestAborted = true;
+                this.requestCurrent = false;
+            }
+
+            if (options.skipRequest) {
+                if (options.replace) {
+                    window.history.replaceState(window.state, '', href + fragment);
+                } else {
+                    window.history.pushState(window.state, '', href + fragment);
+                }
+                store.dispatch({
+                    type: {'href':href + fragment}
+                });
+                return null;
+            }
+
+            var request = this.fetch(
+                href.match(/\?./) ? href + '&format=json' : href + '?format=json',  // URL
+                {
+                    'headers': {}, // Filled in by ajaxPromise
+                    'cache' : options.cache === false ? false : true
+                }
+            );
+
+            this.requestCurrent = true; // Remember we have an outstanding GET request
+            var timeout = new Timeout(this.SLOW_REQUEST_TIME);
+
+            Promise.race([request, timeout.promise]).then(v => {
+                if (v instanceof Timeout) {
+                    console.log('TIMEOUT!!!');
+                    // TODO: implement some other type of slow? A: YES
+                    // store.dispatch({
+                    //     type: {'slow':true}
+                    // });
+
+                } else {
+                    // Request has returned data
+                    this.requestCurrent = false;
+                }
+            });
+
+            var promise = request.then((response)=>{
+                // Check/handle server-provided error code/message(s).
+                
+                if (response.code === 403){
+
+                    var jwtHeader = null;
+                    try {
+                        jwtHeader = request.xhr.getResponseHeader('X-Request-JWT');
+                    } catch(e) {
+                        // Some browsers may not support getResponseHeader. Fallback to 403 response detail which only
+                        // replaces unauth'd response if request Content-Type = application/json
+                        console.error(e);
+                    }
+
+                    if ( // Bad or expired JWT
+                        (response.detail === "Bad or expired token.") ||
+                        (jwtHeader === 'expired')
+                    ){
+                        JWT.remove();
+                        
+                        // Wait until request(s) complete before setting notification (callback is called later in promise chain)
+                        var oldCallback = callback;
+                        callback = function(response){
+                            Alerts.queue(Alerts.LoggedOut);
+                            if (typeof oldCallback === 'function') oldCallback(response);
+                        }.bind(this);
+                    }
+
+                    // Update state.session after (possibly) removing expired JWT.
+                    // Also, may have been logged out in different browser window so keep state.session up-to-date BEFORE a re-request
+                    this.updateUserInfo();
+
+                    if (repeatIfError) {
+                        setTimeout(function(){
+                            if (href.indexOf('/users/') !== -1){ // ToDo: Create&store list of private pages other than /users/<...>
+                                // Redirect to home if on a 'private' page (e.g. user profile).
+                                if (setupRequest.call(this, '/')) doRequest.call(this, false);
+                            } else {
+                                // Otherwise redo request after any other error handling (unset JWT, etc.).
+                                doRequest.call(this, false);
+                            }
+                        }.bind(this), 0);
+                        throw new Error('HTTPForbidden');   // Cancel out of this request's promise chain
+                    } else {
+                        console.error("Authentication-related error -", response); // Log error & continue down promise chain.
+                    }
+
+                } else { // Not a 403 error
+                    // May have been logged out in different browser window so keep state.session up-to-date
+                    this.updateUserInfo();
+                }
+                return response;
+            })
+            .then(response => {
+                this.requestCurrent = false;
+                // navigate normally to URL of unexpected non-JSON response so back button works.
+                if (!this.contentTypeIsJSON(response)) {
+                    if (options.replace) {
+                        window.location.replace(href + fragment);
+                    } else {
+                        var old_path = ('' + window.location).split('#')[0];
+                        window.location.assign(href + fragment);
+                        return;
+                    }
+                }
+                if (options.replace) {
+                    window.history.replaceState(null, '', href + fragment);
+                } else {
+                    window.history.pushState(null, '', href + fragment);
+                }
+                dispatch_dict.href = href + fragment;
+
+                return response;
+            })
+            .then(this.receiveContextResponse)
+            .then(response => {
+                if (typeof callback == 'function'){
+                    callback(response);
+                }
+            });
+
+            if (!options.replace) {
+                promise = promise.then(this.scrollTo);
+            }
+
+            promise.catch((err)=>{
+                if (err.message !== 'HTTPForbidden'){
+                    console.error('Error in App.navigate():', err);
+                    throw err; // Bubble it up.
+                } else {
+                    console.info("Logged Out");
+                }
+            });
+            console.info('Navigating > ', request);
+            dispatch_dict.contextRequest = request;
+            return request;
         }
-        dispatch_dict.contextRequest = request;
-        return request;
+
+        if (setupRequest.call(this, href)){
+            return doRequest.call(this, true);
+        } else {
+            return null; // Was handled by setupRequest (returns false)
+        }
+
     },
 
     receiveContextResponse: function (data) {
@@ -581,6 +740,7 @@ var App = React.createClass({
             type: dispatch_dict
         });
         dispatch_dict={};
+        return data;
     },
 
     contentTypeIsJSON: function(content) {
@@ -657,7 +817,7 @@ var App = React.createClass({
                 status = 'not_found';
             }
         }else if(context.code && context.code == 403){
-            if(context.title && (context.title == 'Login failure' || context.title == 'no access')){
+            if(context.title && (context.title == 'Login failure' || context.title == 'No Access')){
                 status = 'invalid_login';
             }else if(context.title && context.title == 'Forbidden'){
                 status = 'forbidden';
@@ -671,23 +831,16 @@ var App = React.createClass({
         }else if(status){
             content = <ErrorPage currRoute={currRoute[currRoute.length-1]} status={status}/>;
             title = 'Error';
-        }else if (currRoute[currRoute.length-1] === 'home' || (currRoute[currRoute.length-1] === href_url.host)){
-            content = <HomePage session={this.state.session}/>;
-            title = portal.portal_title;
-        }else if (currRoute[currRoute.length-1] === 'help'){
-            content = <HelpPage />;
-            title = 'Help - ' + portal.portal_title;
-        }else if (currRoute[currRoute.length-1] === 'about'){
-            content = <AboutPage />;
-            title = 'About - ' + portal.portal_title;
         }else if (context) {
             var ContentView = globals.content_views.lookup(context, current_action);
             if (ContentView){
                 content = (
                     <ContentView
                         context={context}
+                        schemas={this.state.schemas}
                         expSetFilters={this.props.expSetFilters}
                         expIncompleteFacets={this.props.expIncompleteFacets}
+                        session={this.state.session}
                     />
                 );
                 title = context.title || context.name || context.accession || context['@id'];
@@ -731,13 +884,20 @@ var App = React.createClass({
                     <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: '\n\n' + jsonScriptEscape(JSON.stringify(this.props.context)) + '\n\n'
                     }}></script>
+                    <script data-prop-name="user_details" type="application/ld+json" dangerouslySetInnerHTML={{
+                        __html: jsonScriptEscape(JSON.stringify(JWT.getUserDetails())) /* Kept up-to-date in browser.js */
+                    }}></script>
+                    <script data-prop-name="alerts" type="application/ld+json" dangerouslySetInnerHTML={{
+                        __html: jsonScriptEscape(JSON.stringify(this.props.alerts))
+                    }}></script>
                     <div id="slot-application">
                         <div id="application" className={appClass}>
-                        <div className="loading-spinner"></div>
+                            <div className="loading-spinner"></div>
                             <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
-                                <Navigation />
+                                <Navigation href={ this.props.href } session={this.state.session} ref="navigation" />
                                 <div id="content" className="container" key={key}>
-                                    {content}
+                                    <Alerts initialAlerts={this.props.alerts} />
+                                    { content }
                                 </div>
                                 {errors}
                                 <div id="layout-footer"></div>
@@ -751,24 +911,33 @@ var App = React.createClass({
     },
 
     statics: {
-        getRenderedProps: function (document) {
-            // Ensure the initial render is exactly the same
-            store.dispatch({
-                type: {'href':document.querySelector('link[rel="canonical"]').getAttribute('href')}
-            });
-            var script_props = document.querySelectorAll('script[data-prop-name]');
-            var props_dict = {};
+        getRenderedPropValues : function(document, filter = null){
+            var returnObj = {};
+            var script_props;
+            if (typeof filter === 'string') script_props = document.querySelectorAll('script[data-prop-name="' + filter + '"]');
+            else script_props = document.querySelectorAll('script[data-prop-name]');
             for (var i = 0; i < script_props.length; i++) {
                 var elem = script_props[i];
+                var prop_name = elem.getAttribute('data-prop-name');
+                if (filter && Array.isArray(filter)){
+                    if (filter.indexOf(prop_name) === -1) continue;
+                }
                 var elem_value = elem.text;
                 var elem_type = elem.getAttribute('type') || '';
                 if (elem_type == 'application/json' || elem_type.slice(-5) == '+json') {
                     elem_value = JSON.parse(elem_value);
                 }
-                props_dict[ elem.getAttribute('data-prop-name')] = elem_value;
+                //if (elem.getAttribute('data-prop-name') === 'user_details' && !filter){
+                    // pass; don't include as is not a redux prop
+                //} else {
+                    returnObj[prop_name] = elem_value;
+                //}
             }
-            store.dispatch({
-                type: props_dict
+            return returnObj;
+        },
+        getRenderedProps: function (document, filters = null) {
+            return _.extend(App.getRenderedPropValues(document, filters), {
+                'href' : document.querySelector('link[rel="canonical"]').getAttribute('href') // Ensure the initial render is exactly the same
             });
         }
     }

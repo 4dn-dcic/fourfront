@@ -1,9 +1,9 @@
 {
     "description": "Schema for reporting the specific calculation of an quality metrics",
-    "id": "/profiles/fastqc_quality_metric.json",
+    "id": "/profiles/quality_metric_fastqc.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [],
+    "required": ["award", "lab"],
     "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases"],
     "mixinProperties": [
