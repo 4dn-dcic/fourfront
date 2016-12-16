@@ -165,9 +165,8 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
 
         # Allow us to access basic user credentials from request obj after authenticating & saving request....authenticated above
         def getUserInfo(request):
-            userid = request._auth0_authenticated
-            user_props = request.embed('/session-properties', as_user=userid)
-            user_details = request.embed('/me', as_user=userid)
+            user_props = request.embed('/session-properties', as_user=email)
+            user_details = request.embed('/me', as_user=email)
             includedDetailFields = ['email', 'first_name','last_name','groups','timezone','status', 'lab', 'submits_for']
             user_props.update({
                 # Only include certain fields from profile

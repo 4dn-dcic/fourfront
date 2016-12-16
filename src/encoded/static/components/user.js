@@ -335,14 +335,14 @@ var User = module.exports.User = React.createClass({
 
                     </div>
                     
-                    {user.access_keys && user.submits_for && user.submits_for.length ?
+                    { typeof user.access_keys !== 'undefined' && typeof user.submits_for !== 'undefined' ?
                         <div className="access-keys-container">
                             <h3 className="text-300">Access Keys</h3>
                             <div className="data-display">
                                 <AccessKeyTable user={user} access_keys={user.access_keys} />
                             </div>
                         </div>
-                    : ''}
+                    : '' }
 
                 </div>
             </div>
