@@ -306,6 +306,22 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             );
         }.bind(this);
 
+        var renderFilePairBlock = function(filePair, i){
+            return (
+                <div className="s-block file-pairs hide-name-on-block-hover " key={i}>
+                    <div className="name col-file-pair">
+                        { ExperimentsTable.renderBlockLabel('File Pair') }
+                        <span className="name-title">File Pair</span>
+                    </div>
+                    <div className="files s-block-list">
+                        { Array.isArray(filePair) ? filePair.map(renderFileBlock) :
+                            <FileEntryBlock file={null} columnHeaders={ this.customizableColumnHeaders() } />
+                        }
+                    </div>
+                </div>
+            );
+        }.bind(this);
+
         var oddExpRow = false; // Alternate throughout all experiments (vs only within biosample), for striping
 
         var renderExperimentBlock = function(exp,i){
@@ -316,9 +332,10 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                         { ExperimentsTable.renderBlockLabel('Experiment', 'Tech Replicate ' + exp.tec_rep_no) }
                         <a href={ exp['@id'] || '#' } className="name-title mono-text">{ exp.accession }</a>
                     </div>
-                    <div className="files">
-                        { Array.isArray(exp.files) ? exp.files.map(renderFileBlock) :
-                            <FileEntryBlock file={null} columnHeaders={ this.customizableColumnHeaders() } />
+                    <div className="files s-block-list">
+                        { Array.isArray(exp.file_pairs) ? exp.file_pairs.map(renderFilePairBlock) :
+                                Array.isArray(exp.files) ? exp.files.map(renderFileBlock) :
+                                    <FileEntryBlock file={null} columnHeaders={ this.customizableColumnHeaders() } />
                         }
                     </div>
                 </div>
@@ -332,7 +349,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                         { ExperimentsTable.renderBlockLabel('Biosample', 'Bio Replicate ' + expsWithBiosample[0].biosample.bio_rep_no) }
                         <a href={ expsWithBiosample[0].biosample['@id'] || '#' } className="name-title mono-text">{ expsWithBiosample[0].biosample.accession }</a>
                     </div>
-                    <div className="experiments">
+                    <div className="experiments s-block-list">
                         { expsWithBiosample.map(renderExperimentBlock) }
                     </div>
                 </div>
@@ -352,24 +369,39 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 .value();
         };
 
-        function groupFilesByPairs(experiments){
-            return _(experiments).chain()
-                .each(function(exp, i){
-                    exp.file_pairs = _.reduce(exp.files, function(pairsObj, file, files){
-                        // Group via { 'file_paired_end_1_ID' : [file_paired_end_1, file_paired_end_2,...] }
-                        if (file.paired_end === 1){
-                            pairsObj[file['@id']] = { '1' : file };
-                        } else if (file.paired_end === 2){
-                            var relatedFiles = file.related_files.forEach(function(related){
-                                //if (_.isObject(pairsObj[related.file]) && pairsObj[related.file]['1']) 
-                            });
-                            
-                        }
-                        return pairsObj;
-                    }, {}); 
-                    return exp;
+        function groupFilesByPairs(files_in_experiment){
+            // Add 'file_pairs' property containing array of arrays of paired files to each experiment.
+            return _(files_in_experiment).chain()
+                .sortBy('paired_end') // Bring files w/ paired_end == 1 to top of list.
+                .reduce(function(pairsObj, file, files){
+                    // Group via { 'file_paired_end_1_ID' : { '1' : file_paired_end_1, '2' : file_paired_end_2,...} }
+                    if (parseInt(file.paired_end) === 1){
+                        pairsObj[file['@id']] = { '1' : file };
+                    } else {
+                        _.each(file.related_files, function(related){
+                            if (pairsObj[related.file] && pairsObj[related.file]['1']) {
+                                pairsObj[related.file][file.paired_end + ''] = file;
+                            }
+                        });
+                    }
+                    return pairsObj;
+                }, {})
+                .values()
+                .map(function(filePairObj){
+                    return _(filePairObj).chain()
+                        .pairs()
+                        .sortBy (function(fp){ return fp[0]; })
+                        .map    (function(fp){ return fp[1]; })
+                        .value();
                 })
                 .value();
+        }
+
+        function groupFilesByPairsForEachExperiment(experiments){
+            experiments.forEach(function(exp){ 
+                exp.file_pairs = groupFilesByPairs(exp.files);
+            });
+            return experiments;
         }
 
         function combineWithReplicateNumbers(experimentsWithReplicateNums, fullExperimentData){
@@ -394,7 +426,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         ///*
         var startTime = Date.now();
         var sortedExps = groupExperimentsByBiosample(
-            groupFilesByPairs(
+            groupFilesByPairsForEachExperiment(
                 combineWithReplicateNumbers(this.props.replicateExpsArray, this.props.experimentArray)
             )
         );
@@ -403,15 +435,19 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         //*/
 
         return (
-            <div className="biosamples">
-                { 
-                    groupExperimentsByBiosample(
-                        combineWithReplicateNumbers(
-                            this.props.replicateExpsArray,
-                            this.props.experimentArray
-                        )
-                    ).map(renderBiosampleBlock) 
-                }
+            <div className="body clearfix">
+                <div className="biosamples s-block-list">
+                    {
+                        groupExperimentsByBiosample(
+                            groupFilesByPairsForEachExperiment(
+                                combineWithReplicateNumbers(
+                                    this.props.replicateExpsArray,
+                                    this.props.experimentArray
+                                )
+                            )
+                        ).map(renderBiosampleBlock) 
+                    }
+                </div>
             </div>
         );
     },
@@ -428,9 +464,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                         return <div className="heading-block col-file-detail" key={i}>{ columnTitle }</div>;
                     }) }
                 </div>
-                <div className="body clearfix">
-                    { this.renderReplicates() }
-                </div>
+                { this.renderReplicates() }
             </div>
         );
     }
@@ -530,7 +564,7 @@ var FileEntryBlock  = React.createClass({
             if (type === 'paired-end') {
                 return ExperimentsTable.renderBlockLabel(
                     'File',
-                    this.props.sequenceNum ? 'Seq Replicate ' + this.props.sequenceNum : null,
+                    this.props.file.paired_end ? 'Paired End ' + this.props.file.paired_end : null,
                     false,
                     'col-file'
                 );

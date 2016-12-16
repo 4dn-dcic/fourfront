@@ -1189,6 +1189,13 @@ $expset-full-width : $expset-col-biosample + $expset-col-experiment + $expset-co
 		border-bottom: 2px solid #333;
 		transform: translate3d(0,0,0);
 
+		.s-block-list {
+			@media screen and (min-width: $screen-md-min){
+				display: inline-block;
+				vertical-align: middle;
+			}
+		}
+
 		.s-block {
 			display: block;
 			position: relative;
@@ -1315,9 +1322,10 @@ $expset-full-width : $expset-col-biosample + $expset-col-experiment + $expset-co
 			text-align: center;
 		}
 
-		> .biosamples {
+		> .biosamples.s-block-list {
 			@media screen and (min-width: $screen-md-min){
 				float: right;
+				display: block;
 			}
 			> .s-block.biosample {
 
@@ -1343,10 +1351,6 @@ $expset-full-width : $expset-col-biosample + $expset-col-experiment + $expset-co
 				}
 
 				> .experiments {
-					@media screen and (min-width: $screen-md-min){
-						display: inline-block;
-					}
-					vertical-align: middle;
 
 					> .s-block.experiment {
 						padding: 0;
@@ -1380,11 +1384,7 @@ $expset-full-width : $expset-col-biosample + $expset-col-experiment + $expset-co
 						}
 
 
-						> .files {
-							@media screen and (min-width: $screen-md-min){
-								display: inline-block;
-							}
-							vertical-align: middle;
+						.files {
 
 							> .s-block.file {
 
