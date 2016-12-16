@@ -2,6 +2,7 @@ from snovault import (
     AuditFailure,
     audit_checker,
 )
+from collections import defaultdict
 
 
 @audit_checker(
@@ -100,7 +101,7 @@ def audit_replicate_sets_consistency_check(value, system):
     the experiments present in a replicate set must be consistent
     with regard to their shared fields in biosample and experiment
     '''
-    genrl_fields2ignore = [
+    fields2ignore = [
         '@id',
         '@type',
         'accession',
@@ -119,25 +120,33 @@ def audit_replicate_sets_consistency_check(value, system):
         'status',
         'submitted_by',
         'uuid',
-    ]
-
-    expt_fields2ignore = [
+        'bio_rep_no',
         'experiment_relation',
         'files',
         'filesets',
         'average_fragment_size',
         'fragment_size_range',
-        'experiment_summary'
-    ]
-
-    bs_fields2ignore = [
+        'experiment_summary',
         'biosample_relation',
         'biosource_summary',
         'modifications_summary',
         'modifications_summary_short',
         'treatments_summary'
     ]
-    # print(system)
+
+    def merge_items(merged, mergee):
+        for k, v in mergee.items():
+            merged[k].append(v)
+        return merged
+
+    def find_conflicts(field, value):
+        if field not in fields2ignore:
+            stringified = [str(x) for x in values]
+            if len(set(stringified)) != 1:
+                print("Field: ", field, "\nValues: ", set(stringified))
+            else:
+                print("We're Good!")
+
     reps = value.get('replicate_exps', None)
     if reps is not None:
         repcnt = len(reps)
@@ -150,25 +159,24 @@ def audit_replicate_sets_consistency_check(value, system):
                 those that share the same biosample should have the same bio_rep_no
             '''
             # first merge all the experiments of the replicate
-            from collections import defaultdict
             merged_expts = defaultdict(list)
             for i, rep in enumerate(reps):
-                bio_rep_no = rep['bio_rep_no']
                 expt = value['replicate_exps'][i]['replicate_exp']
-                for k, v in expt.items():
-                    merged_expts[k].append(v)
-
+                expt['bio_rep_no'] = rep['bio_rep_no']
+                merged_expts = merge_items(merged_expts, expt)
             # print(merged_expts)
-            fields2ignore = genrl_fields2ignore + expt_fields2ignore
+
             for field, values in merged_expts.items():
-                if field not in fields2ignore:
-                    stringified = [str(x) for x in values]
                     if field == 'biosample':
                         # check for biosample concurrence
-                        pass
+                        merged_biosamples = defaultdict(list)
+                        for biosample in values:
+                            merged_biosamples = merge_items(merged_biosamples, biosample)
+                            for bfield, bvalues in merged_biosamples.items():
+                                if field == 'cell_culture_details':
+                                    pass
+                                else:
+                                    find_conflicts(bfield, bvalues)
                     else:
+                        find_conflicts(field, values)
                         # we've got different values so warn
-                        if len(set(stringified)) != 1:
-                            print("Field: ", field, "\nValues: ", set(stringified))
-                        else:
-                            print("We're Good!")
