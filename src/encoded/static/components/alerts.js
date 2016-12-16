@@ -56,16 +56,18 @@ var Alerts = module.exports = React.createClass({
         }
         Alerts.instance = this;
         
-        if (Alerts.preMountQueue.length > 0 || Alerts.preMountDeQueue.length > 0) { 
-            stateObj.alerts = _.difference((stateObj.alerts || this.state.alerts).concat(Alerts.preMountQueue), Alerts.preMountDeQueue);
-            Alerts.preMountQueue = [];
-            Alerts.preMountDeQueue = [];
-        }
         this.setState(stateObj);
     },
 
     componentDidMount : function(){
-        this.setState({ 'isMounted' : true });
+        var stateObj = { 'isMounted' : true };
+        
+        if (Alerts.preMountQueue.length > 0 || Alerts.preMountDeQueue.length > 0) { 
+            stateObj.alerts = _.difference(this.state.alerts.concat(Alerts.preMountQueue), Alerts.preMountDeQueue);
+            Alerts.preMountQueue = [];
+            Alerts.preMountDeQueue = [];
+        }
+        this.setState(stateObj);
     },
 
     componentWillUnmount: function(){
