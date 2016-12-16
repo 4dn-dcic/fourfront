@@ -188,7 +188,8 @@
     "notes": "sample dcic notes", 
     "accession": "4DNFFL631LOS", 
     "lab": "4dn-dcic-lab", 
-    "filename": "s3://4dn-tool-evaluation-files/GM12878_SRR1658581_1pc_1_R1_fastqc.zip"
+    "filename": "s3://4dn-tool-evaluation-files/GM12878_SRR1658581_1pc_1_R1_fastqc.zip",
+    "workflow_run": "d8a60edf-49e5-4c33-afab-9ec90d65fae4"
 }
 ]
 
