@@ -56,13 +56,11 @@ if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER) dom
     var app;
     
     try {
-        var app = ReactDOM.render(<Provider store={store}><UseApp alerts={props.alerts} /></Provider>, document);
+        app = ReactDOM.render(<Provider store={store}><UseApp alerts={props.alerts} /></Provider>, document);
     } catch (e) {
-        console.error("INVARIANT ERROR"); // To debug
-        console.error(e);
-        var ReactDOMServer = require('react-dom/server');
+        console.error("INVARIANT ERROR", e); // To debug
         // So we can get printout and compare diff of renders.
-        app = ReactDOMServer.renderToString(<Provider store={store}><UseApp alerts={props.alerts} /></Provider>);
+        app = require('react-dom/server').renderToString(<Provider store={store}><UseApp alerts={props.alerts} /></Provider>);
     }
 
     // Set <html> class depending on browser features

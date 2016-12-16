@@ -168,8 +168,8 @@ def normalize_cookie_tween_factory(handler, registry):
             return handler(request)
 
         session = request.session
-        if session or session._cookie_name not in request.cookies:
-            return handler(request)
+        #if session or session._cookie_name not in request.cookies:
+        #    return handler(request)
 
         response = handler(request)
         existing = response.headers.getall('Set-Cookie')
@@ -306,7 +306,7 @@ page_or_json = SubprocessTween(
     should_transform=should_transform,
     after_transform=after_transform,
     reload_process=reload_process,
-    args=['node', resource_filename(__name__, 'static/build/renderer.js')],
+    args=['node', resource_filename(__name__, 'static/server.js')],
     env=node_env,
 )
 
