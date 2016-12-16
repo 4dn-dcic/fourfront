@@ -10,18 +10,6 @@ var { Provider, connect } = require('react-redux');
 var { JWT } = require('../components/objectutils');
 var Alerts = require('../components/alerts');
 
-function mapStateToProps(store) {
-   return {
-       href: store.href,
-       context: store.context,
-       inline: store.inline,
-       contextRequest: store.contextRequest,
-       slow: store.slow,
-       expSetFilters: store.expSetFilters,
-       expIncompleteFacets : store.expIncompleteFacets
-   };
-}
-
 var render = function (Component, body, res) {
     //var start = process.hrtime();
     var disp_dict = {
@@ -34,7 +22,6 @@ var render = function (Component, body, res) {
     var jwtToken = res.getHeader('X-Request-JWT'); // Only returned if successfully authenticated
     var sessionMayBeSet = false;
     var userInfo = null;
-    var alerts = null;
     if (jwtToken && jwtToken.length > 0 && jwtToken !== "null" && jwtToken !== "expired"){
         sessionMayBeSet = true;
         userInfo = JSON.parse(res.getHeader('X-User-Info'));
@@ -49,7 +36,7 @@ var render = function (Component, body, res) {
         (jwtToken === 'expired' || disp_dict.context.detail === "Bad or expired token.")
     ){
         sessionMayBeSet = false;
-        alerts = [Alerts.LoggedOut];
+        disp_dict.alerts = [Alerts.LoggedOut];
     }
     // End JWT token grabbing
 
@@ -59,8 +46,8 @@ var render = function (Component, body, res) {
     var markup;
     var UseComponent;
     try {
-        UseComponent = connect(mapStateToProps)(Component);
-        markup = ReactDOMServer.renderToString(<Provider store={store}><UseComponent sessionMayBeSet={sessionMayBeSet} alerts={alerts} /></Provider>);
+        UseComponent = connect(store.mapStateToProps)(Component);
+        markup = ReactDOMServer.renderToString(<Provider store={store}><UseComponent sessionMayBeSet={sessionMayBeSet} /></Provider>);
 
     } catch (err) {
         var context = {
@@ -80,7 +67,7 @@ var render = function (Component, body, res) {
         });
         // To debug in browser, pause on caught exceptions:
         res.statusCode = 500;
-        UseComponent = connect(mapStateToProps)(Component);
+        UseComponent = connect(store.mapStateToProps)(Component);
         markup = ReactDOMServer.renderToString(<Provider store={store}><UseComponent /></Provider>);
     }
     res.setHeader('Content-Type', 'text/html; charset=utf-8');

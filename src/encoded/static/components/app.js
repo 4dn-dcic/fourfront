@@ -69,19 +69,17 @@ var App = React.createClass({
     historyEnabled: !!(typeof window != 'undefined' && window.history && window.history.pushState),
 
     /**
-     *  Session-related props 'sessionMayBeSet' & 'alerts' are meant to provided by server-side only, then scraped and re-provided
+     *  Session-related props 'sessionMayBeSet' is meant to provided by server-side only, then scraped and re-provided
      *  by client-side render in browser.js via @see App.getRendersPropValues(documentElement, [propNamesToGet]) to match server-side render.
      *  Similarly as to how is done for the redux store.
      */
     propTypes: {
         "sessionMayBeSet" : React.PropTypes.any,    // Whether Auth0 session exists or not.
-        "alerts" : React.PropTypes.array            // Initial alerts (if any) passed to Alerts component to display
     },
 
     getDefaultProps : function(){
         return {
-            'sessionMayBeSet' : null,
-            'alerts' : null
+            'sessionMayBeSet' : null
         }
     },
 
@@ -114,8 +112,7 @@ var App = React.createClass({
             'content': undefined,
             'session': session,
             'user_actions': user_actions,
-            'schemas': null,
-            'alerts' : []
+            'schemas': null
         };
     },
 
@@ -896,7 +893,7 @@ var App = React.createClass({
                             <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
                                 <Navigation href={ this.props.href } session={this.state.session} ref="navigation" />
                                 <div id="content" className="container" key={key}>
-                                    <Alerts initialAlerts={this.props.alerts} />
+                                    <Alerts alerts={this.props.alerts} />
                                     { content }
                                 </div>
                                 {errors}
