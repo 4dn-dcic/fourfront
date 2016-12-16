@@ -300,7 +300,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                     columnHeaders={ this.customizableColumnHeaders() }
                     handleFileUpdate={this.handleFileUpdate}
                     className={null}
-                    replicateNum={i + 1}
+                    sequenceNum={i + 1}
                     isSingleItem={filesArr.length < 2 ? true : false}
                 />
             );
@@ -345,10 +345,32 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                     return exp.biosample.bio_rep_no;
                 })          // Creates { '1' : [expObjWBiosample1-1, expObjWBiosample1-2, ...], '2' : [expObjWBiosample2-1, expObjWBiosample2-2, ...], ... }
                 .pairs()    // Creates [['1', [expObjWBiosample1-1, expObjWBiosample1-2]], ['2', [expObjWBiosample2-1, expObjWBiosample2-2]], ...]
-                .sortBy(function(expSet){ return parseInt(expSet[0]); })
-                .map(function(expSet){ return _.sortBy(expSet[1], 'tec_rep_no'); }) // Creates [[expObjWBiosample1-1, expObjWBiosample1-2], [expObjWBiosample2-1, expObjWBiosample2-2], ...]
+                .sortBy(function(expSet){ return parseInt(expSet[0]); }) // Sort outer list (biosamples) by bio_rep_no
+                .map(function(expSet){ // Creates [[expObjWBiosample1-1, expObjWBiosample1-2], [expObjWBiosample2-1, expObjWBiosample2-2], ...]
+                    return _.sortBy(expSet[1], 'tec_rep_no'); // Sort inner list (experiments) by tec_rep_no
+                })
                 .value();
         };
+
+        function groupFilesByPairs(experiments){
+            return _(experiments).chain()
+                .each(function(exp, i){
+                    exp.file_pairs = _.reduce(exp.files, function(pairsObj, file, files){
+                        // Group via { 'file_paired_end_1_ID' : [file_paired_end_1, file_paired_end_2,...] }
+                        if (file.paired_end === 1){
+                            pairsObj[file['@id']] = { '1' : file };
+                        } else if (file.paired_end === 2){
+                            var relatedFiles = file.related_files.forEach(function(related){
+                                //if (_.isObject(pairsObj[related.file]) && pairsObj[related.file]['1']) 
+                            });
+                            
+                        }
+                        return pairsObj;
+                    }, {}); 
+                    return exp;
+                })
+                .value();
+        }
 
         function combineWithReplicateNumbers(experimentsWithReplicateNums, fullExperimentData){
             if (!Array.isArray(experimentsWithReplicateNums)) return false;
@@ -360,28 +382,25 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                         '@id' : r.replicate_exp['@id']
                     };
                 })
-                .zip(fullExperimentData) // On ExpSet view at least, replicate_exps and experiments_in_set are provided in same order, so can avoid nested loop.
+                .zip(fullExperimentData) // 'replicate_exps' and 'experiments_in_set' are delivered in same order from backend, so can .zip (linear) vs .map -> .findWhere  (nested loop).
                 .map(function(r){
                     r[1].biosample.bio_rep_no = r[0].bio_rep_no; // Copy over bio_rep_no to biosample to ensure sorting.
                     return _.extend(r[0], r[1]);
                 })
-                /*
-                .map((r) => {
-                    // Looped findWhere takes about 3x longer for 72 exps than zipping in and extending on experimentArray, 
-                    // so try to avoid unless arrays are NOT aligned.
-                    return _.extend(r, _.findWhere(fullExperimentData, { '@id' : r['@id'] }));
-                })
-                */
                 .value()
         }
 
         /* Measure sorting/aligning performance */
-        /*
+        ///*
         var startTime = Date.now();
-        var sortedExps = groupExperimentsByBiosample(combineWithReplicateNumbers(this.props.replicateExpsArray, this.props.experimentArray));
+        var sortedExps = groupExperimentsByBiosample(
+            groupFilesByPairs(
+                combineWithReplicateNumbers(this.props.replicateExpsArray, this.props.experimentArray)
+            )
+        );
         var duration = Date.now() - startTime;
         console.log(sortedExps, duration);
-        */
+        //*/
 
         return (
             <div className="biosamples">
@@ -409,7 +428,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                         return <div className="heading-block col-file-detail" key={i}>{ columnTitle }</div>;
                     }) }
                 </div>
-                <div className="body">
+                <div className="body clearfix">
                     { this.renderReplicates() }
                 </div>
             </div>
@@ -498,14 +517,29 @@ var FileEntryBlock  = React.createClass({
             );
         }
 
-        return (
-            <div className={"name col-file" + (this.props.file && this.props.file.accession ? ' mono-text' : '')}>
-                { this.props.file ? ExperimentsTable.renderBlockLabel(
+        function label(type){
+            if (!this.props.file) return null;
+            if (type === 'sequence-replicate') {
+                return ExperimentsTable.renderBlockLabel(
                     'File',
-                    this.props.replicateNum ? 'Seq Replicate ' + this.props.replicateNum : null,
+                    this.props.sequenceNum ? 'Seq Replicate ' + this.props.sequenceNum : null,
                     false,
                     'col-file'
-                ) : null }
+                );
+            }
+            if (type === 'paired-end') {
+                return ExperimentsTable.renderBlockLabel(
+                    'File',
+                    this.props.sequenceNum ? 'Seq Replicate ' + this.props.sequenceNum : null,
+                    false,
+                    'col-file'
+                );
+            }
+        }
+
+        return (
+            <div className={"name col-file" + (this.props.file && this.props.file.accession ? ' mono-text' : '')}>
+                { label.call(this, 'paired-end') }
                 { title.call(this) }
             </div>
         );

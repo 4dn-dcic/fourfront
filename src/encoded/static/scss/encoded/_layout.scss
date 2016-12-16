@@ -1163,8 +1163,6 @@ $expset-full-width : $expset-col-biosample + $expset-col-experiment + $expset-co
 
 		min-width: $expset-full-width;
 
-		text-align: right;
-
 		.col-biosample 		{ width: $expset-col-biosample; }
 		.col-experiment 	{ width: $expset-col-experiment; }
 		.col-file 			{ width: $expset-col-file; }
@@ -1172,6 +1170,7 @@ $expset-full-width : $expset-col-biosample + $expset-col-experiment + $expset-co
 
 		.headers {
 			display: block;
+			text-align: right;
 			> .heading-block {
 				text-align: center;
 				display: inline-block;
@@ -1318,7 +1317,7 @@ $expset-full-width : $expset-col-biosample + $expset-col-experiment + $expset-co
 
 		> .biosamples {
 			@media screen and (min-width: $screen-md-min){
-				display: inline-block;
+				float: right;
 			}
 			> .s-block.biosample {
 
