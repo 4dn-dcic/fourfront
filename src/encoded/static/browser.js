@@ -12,28 +12,13 @@ var store = require('./store');
 var { Provider, connect } = require('react-redux');
 var { JWT } = require('./components/objectutils');
 
-// ToDo: Maybe have this in 'globals' or something so no need to add in lots of places if adding new field?
-var reduxStoreFields = [
-    'href', 'context', 'inline',        // Server--Client syndication stuff (not empty, important to get)
-    'contextRequest', 'slow',           // Current nav request(s) (empty, no XHR requests initiated server-side))
-    'expSetFilters', 'expIncompleteFacets' // Filter stuff (empty, unless start storing server-side or in cookies (& passing back))
-];
-
-function mapStateToProps(store) {
-    var props = {};
-    for (var i = 0; i < reduxStoreFields.length; i++){
-        props[reduxStoreFields[i]] = store[reduxStoreFields[i]];
-    }
-    return props;
-}
-
 // Treat domready function as the entry point to the application.
 // Inside this function, kick-off all initialization, everything up to this
 // point should be definitions.
 if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER) domready(function ready() {
     console.log('Browser: ready');
 
-    var props = App.getRenderedPropValues(document, ['user_details', 'alerts']);
+    var props = App.getRenderedPropValues(document, ['user_details']);
     if (props.user_details && typeof props.user_details.email === 'string'){
         // We have userDetails from server-side; keep client-side in sync (in case updated via/by back-end / dif client at some point)
         JWT.saveUserDetails(props.user_details);
@@ -48,19 +33,19 @@ if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER) dom
 
     store.dispatch({
         // Update Redux store from Redux store props that've been rendered into <script data-prop-name={ propName }> elems server-side
-        type: App.getRenderedProps(document, reduxStoreFields)
+        type: App.getRenderedProps(document, Object.keys(store.reducers))
     });
 
     var server_stats = require('querystring').parse(window.stats_cookie);
-    var UseApp = connect(mapStateToProps)(App);
+    var UseApp = connect(store.mapStateToProps)(App);
     var app;
     
     try {
-        app = ReactDOM.render(<Provider store={store}><UseApp alerts={props.alerts} /></Provider>, document);
+        app = ReactDOM.render(<Provider store={store}><UseApp /></Provider>, document);
     } catch (e) {
         console.error("INVARIANT ERROR", e); // To debug
         // So we can get printout and compare diff of renders.
-        app = require('react-dom/server').renderToString(<Provider store={store}><UseApp alerts={props.alerts} /></Provider>);
+        app = require('react-dom/server').renderToString(<Provider store={store}><UseApp /></Provider>);
     }
 
     // Set <html> class depending on browser features
