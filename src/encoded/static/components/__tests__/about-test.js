@@ -43,7 +43,7 @@ describe('Testing about.js', function() {
         );
 
         page = TestUtils.renderIntoDocument(
-            <App href="http://data.4dnucleome.org/about" context={{ 
+            <App href="http://data.4dnucleome.org/about" alerts={[]} context={{ 
                 'content' : statics,
                 '@type' : ['AboutPage', 'StaticPage', 'Portal'],
                 '@context' : '/about',
