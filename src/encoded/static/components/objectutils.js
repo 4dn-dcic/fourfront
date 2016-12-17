@@ -183,7 +183,9 @@ var JWT = module.exports.JWT = {
             JWT.saveUserInfoLocalStorage(userInfo);
             return true;
         } else {
-            return null;
+            //userInfo = { 'details' : details };
+            //JWT.saveUserInfoLocalStorage(userInfo);
+            return false;
         }
     },
 
@@ -564,15 +566,17 @@ var DateUtility = module.exports.DateUtility = (function(){
 var textContentWidth = module.exports.textContentWidth = function(
     textContent,
     containerElementType = 'div',
-    containerClassName = '',
-    widthForHeightCheck = null
+    containerClassName = null,
+    widthForHeightCheck = null,
+    style = null
 ){
     if (isServerSide()){
         return null;
     };
     var contElem = document.createElement(containerElementType);
-    contElem.className = "off-screen " + containerClassName;
+    contElem.className = "off-screen " + (containerClassName || '');
     contElem.innerHTML = textContent;
+    if (style) contElem.style = style;
     contElem.style.whiteSpace = "nowrap";
     document.body.appendChild(contElem);
     var textLineWidth = contElem.clientWidth;

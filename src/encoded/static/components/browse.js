@@ -5,22 +5,13 @@ var url = require('url');
 var _ = require('underscore');
 var globals = require('./globals');
 var browse = module.exports;
-var audit = require('./audit');
-var Panel = require('react-bootstrap').Panel;
-var Button = require('react-bootstrap').Button;
-var Checkbox = require('react-bootstrap').Checkbox;
-var Table = require('react-bootstrap').Table;
-var ButtonToolbar = require('react-bootstrap').ButtonToolbar;
-var DropdownButton = require('react-bootstrap').DropdownButton;
-var MenuItem = require('react-bootstrap').MenuItem;
+var { MenuItem, DropdownButton, ButtonToolbar, Table, Checkbox, Button, Panel } = require('react-bootstrap');
 var store = require('../store');
 var FacetList = require('./facetlist');
-var ExperimentsTable = require('./experiments-table').ExperimentsTable;
-var getFileDetailContainer = require('./experiments-table').getFileDetailContainer;
-var isServerSide = require('./objectutils').isServerSide;
-var AuditIndicators = audit.AuditIndicators;
-var AuditDetail = audit.AuditDetail;
-var AuditMixin = audit.AuditMixin;
+var { ExperimentsTable, getFileDetailContainer } = require('./experiments-table');
+var { isServerSide } = require('./objectutils');
+var { AuditIndicators, AuditDetail, AuditMixin } = require('./audit');
+var { FlexibleDescriptionBox } = require('./experiment-common');
 
 var expSetColumnLookup={
     // all arrays will be handled by taking the first item
@@ -48,7 +39,7 @@ var expSetAdditionalInfo={
     'replicate':{
         'Lab': 'lab.title',
         'Treatments':'biosample.treatments_summary',
-        'Modifications':'biosample.modifications_summary'
+        'Modifications':'biosample.modifications_summary',
     },
     'other':[]
 };
@@ -126,11 +117,12 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
 
     render: function() {
 
-        var fileDetailContainer = getFileDetailContainer(this.props.experimentArray, this.props.passExperiments);
-        var fileDetail = fileDetailContainer.fileDetail;
-        var emptyExps = fileDetailContainer.emptyExps;
+        // Combine file pairs and unpaired files into one array. [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
+        // Length will be file_pairs.length + unpaired_files.length, e.g. files other than first file in a pair are not counted.
+        var files = ExperimentsTable.funcs.listAllFilePairs(this.props.experimentArray).concat(
+            ExperimentsTable.funcs.listAllUnpairedFiles(this.props.experimentArray)
+        ); // (can always _.flatten() this or map out first file per pair, e.g. for targetFiles below)
 
-        var files = Object.keys(fileDetail);
         // unused for now... when format selection is added back in, adapt code below:
         // var filteredFiles = [];
         // for(var i=0; i<files.length; i++){
@@ -139,32 +131,70 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         //     }
         // }
 
-        var formattedColumns = Object.keys(this.props.columns).map(function (key){
-            if(key==="Accession"){
-                return(
-                    <td key={key+this.props.href} className="expset-table-cell mono-text">
-                        <a className="expset-entry" href={this.props.href}>
-                            {this.props.columns[key]}
-                        </a>
-                    </td>
-                );
-            }else{
-                return(
-                    <td key={key+this.props.href} className="expset-table-cell">{this.props.columns[key]}</td>
-                );
-            }
-        }.bind(this));
 
-        var formattedAdditionalInfo = Object.keys(this.props.addInfo).map(function (key){
-            return(
-                <div key={key}>
-                    <span className="expset-addinfo-key">{key}:</span>
-                    <span className="expset-addinfo-val">{this.props.addInfo[key]}</span>
+        function formattedColumns(){
+            return Object.keys(this.props.columns).map((key)=>{
+                if(key === "Accession"){
+                    return (
+                        <td key={key+this.props.href} className="expset-table-cell mono-text">
+                            <a className="expset-entry" href={this.props.href}>
+                                {this.props.columns[key]}
+                            </a>
+                        </td>
+                    );
+                } else {
+                    return(
+                        <td key={key+this.props.href} className="expset-table-cell">{this.props.columns[key]}</td>
+                    );
+                }
+            });
+        }
+
+        function formattedAdditionaInformation(){
+            return (
+                <div className="expset-addinfo">
+                    <div className="row">
+                        <div className="col-sm-6 addinfo-description-section">
+                            <label className="text-500 description-label">Description</label>
+                            <FlexibleDescriptionBox
+                                description={ this.props.description }
+                                fitTo="self"
+                                textClassName="text-medium"
+                                dimensions={null}
+                            />
+                        </div>
+                        <div className="col-sm-6 addinfo-properties-section">
+                        { Object.keys(this.props.addInfo).map((key)=>
+                            <div key={key}>
+                                <span className="expset-addinfo-key">{key}:</span>
+                                <span className="expset-addinfo-val">{this.props.addInfo[key]}</span>
+                            </div>
+                        ) }
+                        </div>
+                    </div>
                 </div>
             );
-        }.bind(this));
+        };
 
-        var disabled = files.length === emptyExps.length; // @Carl : Any thoughts? Unsure re: case if multiple files in experiment 
+        function experimentsTable(){
+            return (
+                <ExperimentsTable
+                    columnHeaders={[
+                        { className: 'file-detail', title : 'File Type'},
+                        { className: 'file-detail', title : 'File Info'}
+                    ]}
+                    experimentArray={[...this.props.passExperiments] /* Convert set to array */}
+                    replicateExpsArray={this.props.replicateExpsArray}
+                    experimentSetType={this.props.experimentSetType}
+                    parentController={this}
+                    expSetFilters={this.props.expSetFilters}
+                    facets={this.props.facets}
+                />
+            );
+        }
+
+
+        var disabled = files.length === 0;
         var checked = this.state.selectedFiles.size === files.length || (!this.state.open && this.state.checked && !disabled);
         var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < files.length;
 
@@ -186,35 +216,16 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                             />
                         </div>
                     </td>
-                    { formattedColumns }
+                    { formattedColumns.call(this) }
                 </tr>
+                { this.state.open ?
                 <tr className="expset-addinfo-row">
-                    <td className={this.state.open ? "hidden-col-open" : "hidden-col-closed"} colSpan={Object.keys(this.props.columns).length + 2}>
-                        { this.state.open ?
-                        <Panel className="expset-panel" collapsible expanded={true/*this.state.open*/}>
-                            <div className="expset-addinfo">
-                                { formattedAdditionalInfo }
-                            </div>
-                            <ExperimentsTable
-                                columnHeaders={[
-                                    'Experiment Accession',
-                                    'Biosample Accession',
-                                    'File Accession',
-                                    'File Type',
-                                    'File Info'
-                                ]}
-                                fileDetailContainer={fileDetailContainer}
-                                experimentArray={[...this.props.passExperiments] /* Convert set to array */}
-                                replicateExpsArray={this.props.replicateExpsArray}
-                                experimentSetType={this.props.experimentSetType}
-                                parentController={this}
-                                expSetFilters={this.props.expSetFilters}
-                                facets={this.props.facets /* Not req'd here as using pre-completed fileDetailContainer' */ }
-                            />
-                        </Panel>
-                        : null }
+                    <td className={"expsets-table-hidden " + (this.state.open ? "hidden-col-open" : "hidden-col-closed")} colSpan={Object.keys(this.props.columns).length + 2}>
+                        { formattedAdditionaInformation.call(this) }
+                        { experimentsTable.call(this) }
                     </td>
                 </tr>
+                : null }
             </tbody>
         );
     }
@@ -414,6 +425,7 @@ var ResultTable = browse.ResultTable = React.createClass({
         context         : React.PropTypes.object.isRequired,
         expSetFilters   : React.PropTypes.object,
         fileFormats     : React.PropTypes.array,
+        fileStats       : React.PropTypes.object,
         targetFiles     : React.PropTypes.instanceOf(Set),
         onChange        : React.PropTypes.func
     },
@@ -424,13 +436,12 @@ var ResultTable = browse.ResultTable = React.createClass({
             sortReverse: false,
             overflowingRight : false,
             // We need to get the below outta state once graph-ql is in; temporarily stored in state for performance.
-            siftedExperiments : FacetList.siftExperiments(
+            passedExperiments : ExperimentsTable.getPassedExperiments(
                 this.props.context['@graph'],
                 this.props.expSetFilters,
-                FacetList.findIgnoredFiltersByMissingFacets(
-                    FacetList.adjustedFacets(this.props.context.facets),
-                    this.props.expSetFilters
-                )
+                'missing-facets',
+                this.props.context.facets,
+                true
             )
         }
     },
@@ -452,14 +463,13 @@ var ResultTable = browse.ResultTable = React.createClass({
         var newState = {};
 
         if (this.props.expSetFilters !== newProps.expSetFilters || this.props.context !== newProps.context){
-            newState.siftedExperiments = FacetList.siftExperiments(
+            newState.passedExperiments = ExperimentsTable.getPassedExperiments(
                 newProps.context['@graph'],
                 newProps.expSetFilters,
-                FacetList.findIgnoredFiltersByMissingFacets(
-                    FacetList.adjustedFacets(newProps.context.facets),
-                    newProps.expSetFilters
-                )
-            )
+                'missing-facets',
+                newProps.context.facets,
+                true
+            );
         }
 
         if (Object.keys(newState).length > 0){
@@ -585,6 +595,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                 resultListings.push(
                     <ExperimentSetRow
                         addInfo={addInfo}
+                        description={result.description}
                         columns={columns}
                         expSetFilters={this.props.expSetFilters}
                         experimentSetType={result.experimentset_type}
@@ -596,6 +607,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                         key={keyVal+result['@id']}
                         rowNumber={resultCount++}
                         facets={facets}
+                        fileStats={this.props.fileStats}
                     />
                 );
             }
@@ -629,9 +641,7 @@ var ResultTable = browse.ResultTable = React.createClass({
     },
 
     renderTable : function(){
-
-        var formattedExperimentSetListings = this.formatExperimentSetListings(this.state.siftedExperiments);
-
+        var formattedExperimentSetListings = this.formatExperimentSetListings(this.state.passedExperiments);
         if (!formattedExperimentSetListings) return null;
 
         return (
@@ -745,7 +755,7 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
     },
 
     componentDidUpdate: function(nextProps, nextState){
-        if(nextProps.expSetFilters !== this.props.expSetFilters || nextProps.context !== this.props.context){
+        if (nextProps.expSetFilters !== this.props.expSetFilters || nextProps.context !== this.props.context){
             // reset file filters when changing set type
             var currStats = findFiles(this.props.fileFormats);
             if(this.state.fileStats.formats !== currStats.formats){
@@ -821,7 +831,7 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
                     </div>
                 </div>*/}
 
-                <ResultTable {...this.props} targetFiles={targetFiles}/>
+                <ResultTable {...this.props} targetFiles={targetFiles} fileStats={this.state.fileStats} />
 
             </div>
 
