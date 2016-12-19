@@ -65,6 +65,7 @@
             "title": "Workflow arguments",
             "description": "arguments of the workflow.",
             "type": "array",
+            "subobject": true,
             "items": {
                 "title": "argument",
                 "description": "An argument of the workflow.",
@@ -77,7 +78,7 @@
                         "type": "string"
                     },
                     "argument_type":{
-                        "titie": "Workflow argument type",
+                        "title": "Workflow argument type",
                         "description": "type of the argument",
                         "type": "string",
                         "enum" : [

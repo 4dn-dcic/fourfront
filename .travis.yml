@@ -9,7 +9,7 @@ cache:
 addons:
   apt:
     sources:
-    - elasticsearch-1.7
+    - elasticsearch
     packages:
     - bsdtar
     - elasticsearch

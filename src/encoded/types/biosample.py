@@ -31,7 +31,6 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
     embedded = [
         'biosource.uuid',
         'biosource.individual',
-        'biosource.individual.organism',
         'biosource.individual.organism.name',
         'biosource.biosource_vendor',
         'references',

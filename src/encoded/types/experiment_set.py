@@ -1,5 +1,8 @@
 """Abstract collection for experiment and integration of all experiment types."""
 
+from pyramid.view import (
+    view_config,
+)
 from snovault import (
     collection,
     load_schema,
@@ -7,7 +10,9 @@ from snovault import (
 from .base import (
     Item
 )
-
+from snovault.resource_views import item_view_object
+from snovault.resource_views import item_view_embedded
+from snovault.calculated import calculate_properties
 
 @collection(
     name='experiment-sets',
@@ -74,3 +79,9 @@ class ExperimentSetReplicate(Item):
         all_experiments = [exp['replicate_exp'] for exp in properties['replicate_exps']]
         properties['experiments_in_set'] = all_experiments
         super(ExperimentSetReplicate, self)._update(properties, sheets)
+
+# make it so any item page defaults to using the object, not embedded, view
+@view_config(context=ExperimentSetReplicate, permission='view', request_method='GET', name='page')
+def item_page_view(context, request):
+    """Return the frame=object view rather than embedded view by default."""
+    return item_view_embedded(context, request)
