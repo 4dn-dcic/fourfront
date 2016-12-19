@@ -177,6 +177,22 @@ def valid_replicate_set(testapp, rep_set_data, bs_f_experiments):
     return testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
 
 
+@pytest.fixture
+def invalid_replicate_sets(testapp, rep_set_data, experiment_data, biosample_data, biosample_cell_culture_data):
+    rep_set_data['description'] = 'Repset with consistent experiments'
+    replicates = []
+    for i, exp in enumerate(bs_f_experiments):
+        if i == 3:
+            bio = i - 1
+            tec = 2
+        else:
+            bio = i
+            tec = 1
+        replicates.append({'replicate_exp': exp['@id'], 'bio_rep_no': bio, 'tec_rep_no': tec})
+    rep_set_data['replicate_exps'] = replicates
+    return testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
+
+
 def test_audit_replicate_set_no_audit_if_no_replicates(testapp, empty_replicate_set):
     res = testapp.get(empty_replicate_set['@id'] + '/@@audit-self')
     errors = res.json['audit']
@@ -211,5 +227,5 @@ def test_audit_replicate_set_no_warning_if_in_sequence(testapp, valid_replicate_
 
 def test_audit_replicate_set_consistency_check(testapp, valid_replicate_set):
     res = testapp.get(valid_replicate_set['@id'] + '/@@audit-self')
-    print(res)
-    assert False
+    errors = res.json['audit']
+    assert not any(errors)
