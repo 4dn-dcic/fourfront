@@ -27,6 +27,7 @@ import boto
 import datetime
 import json
 import pytz
+from netaddr.core import AddrFormatError
 
 
 def show_upload_credentials(request=None, context=None, status=None):
@@ -377,13 +378,17 @@ def download(context, request):
 
     proxy = asbool(request.params.get('proxy')) or 'Origin' in request.headers
 
-    use_download_proxy = request.client_addr not in request.registry['aws_ipset']
+    try:
+        use_download_proxy = request.client_addr not in request.registry['aws_ipset']
+    except TypeError:
+        # this fails in testing due to testapp not having ip
+        use_download_proxy = False
 
     external = context.propsheets.get('external', {})
     if not external:
         profile_name = request.registry.settings.get('file_upload_profile_name')
         sheets['external'] = external_creds(bucket, key, name, profile_name)
-    if external.get('service') == 's3':
+    elif external.get('service') == 's3':
         conn = boto.connect_s3()
         location = conn.generate_url(
             36*60*60, request.method, external['bucket'], external['key'],
