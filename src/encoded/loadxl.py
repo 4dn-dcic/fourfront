@@ -52,6 +52,7 @@ ORDER = [
     'experiment_set_replicate',
     'software',
     'analysis_step',
+    'argument',
     'workflow',
     'workflow_mapping',
     'workflow_run',

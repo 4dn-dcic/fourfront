@@ -63,3 +63,16 @@ class WorkflowMapping(Item):
 
     item_type = 'workflow_mapping'
     schema = load_schema('encoded:schemas/workflow_mapping.json')
+
+
+@collection(
+    name='arguments',
+    properties={
+        'title': 'Workflow Arguments',
+        'description': 'Listing of all arguments that can be part of a workflow',
+    })
+class Argument(Item):
+    """The Argument class that describes arguments to a workflow or analysis step."""
+
+    item_type = 'argument'
+    schema = load_schema('encoded:schemas/argument.json')
