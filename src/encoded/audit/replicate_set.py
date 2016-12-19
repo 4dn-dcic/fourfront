@@ -45,15 +45,14 @@ def audit_replicate_sets_have_replicate_experiments(value, system):
         def is_coherent(seq):
             if (len(seq) < 2):
                 return True
-            return seq == range(seq[0], seq[-1] + 1)
+            return seq == list(range(seq[0], seq[-1] + 1))
 
         details = []
         # check biorep numbers
-        if not is_coherent(bio_nos):
+        if not is_coherent(list(set(bio_nos))):
             details.append('In ReplicateSet {}'.format(value['@id']) +
                            ' - biological replicate numbers are not in sequence ' +
-                           '{}'.format(set(bio_nos)))
-            # yield AuditFailure('missing replicate', detail, level='WARNING')
+                           '{}'.format(bio_nos))
 
         # check tecrep numbers of each biorep
         bio_no = -1
@@ -89,11 +88,12 @@ def audit_replicate_sets_have_replicate_experiments(value, system):
 @audit_checker(
     'experiment_set_replicate',
     frame=[
-        'experiment',
         'replicate_exps',
         'replicate_exps.replicate_exp',
+        'replicate_exps.replicate_exp.files.files',
         'replicate_exps.replicate_exp.replicate_exp',
-        'replicate_exps.replicate_exp.biosample.biosample'
+        'replicate_exps.replicate_exp.biosample.biosample',
+        'replicate_exps.replicate_exp.biosample.cell_culture_details.cell_culture_details'
     ]
 )
 def audit_replicate_sets_consistency_check(value, system):
@@ -131,7 +131,15 @@ def audit_replicate_sets_consistency_check(value, system):
         'biosource_summary',
         'modifications_summary',
         'modifications_summary_short',
-        'treatments_summary'
+        'treatments_summary',
+        'karyotype_image',
+        'morphology_image',
+        'passage_number',
+        'protocol_additional',
+        'culture_start_date',
+        'culture_harvest_date',
+        'culture_duration',
+        'culture_duration_units'
     ]
 
     def merge_items(merged, mergee):
@@ -139,13 +147,36 @@ def audit_replicate_sets_consistency_check(value, system):
             merged[k].append(v)
         return merged
 
+    def stringify(l):
+        try:
+            return [str(x['@id']) for x in l]
+        except:
+            try:
+                r = []
+                for x in l:
+                    x.sort
+                    s = ''.join(stringify(x))
+                    r.append(s)
+                return r
+            except:
+                return [str(x) for x in l]
+
     def find_conflicts(field, value):
+        conflicts = []
         if field not in fields2ignore:
-            stringified = [str(x) for x in values]
+            stringified = stringify(value)
             if len(set(stringified)) != 1:
-                print("Field: ", field, "\nValues: ", set(stringified))
-            else:
-                print("We're Good!")
+                conflicts.append(field)
+        return conflicts
+
+    '''
+        add to detail array the conflicting fields and values for the particular experiment
+        they can occur on the cell_culture_detail, biosample or experiment level
+        ? can we ensure that info is reported in a consistent manner with enough detail here?
+        may need to pass id info for experiment, biosample here depending on level
+    '''
+    def find_conflict_details(conflict, values, collection):
+        pass
 
     reps = value.get('replicate_exps', None)
     if reps is not None:
@@ -161,22 +192,32 @@ def audit_replicate_sets_consistency_check(value, system):
             # first merge all the experiments of the replicate
             merged_expts = defaultdict(list)
             for i, rep in enumerate(reps):
+                # if i == 3:
+                    # print(rep)
                 expt = value['replicate_exps'][i]['replicate_exp']
                 expt['bio_rep_no'] = rep['bio_rep_no']
                 merged_expts = merge_items(merged_expts, expt)
             # print(merged_expts)
 
+            details = []
             for field, values in merged_expts.items():
-                    if field == 'biosample':
-                        # check for biosample concurrence
-                        merged_biosamples = defaultdict(list)
-                        for biosample in values:
-                            merged_biosamples = merge_items(merged_biosamples, biosample)
-                            for bfield, bvalues in merged_biosamples.items():
-                                if field == 'cell_culture_details':
-                                    pass
-                                else:
-                                    find_conflicts(bfield, bvalues)
-                    else:
-                        find_conflicts(field, values)
-                        # we've got different values so warn
+                if field == 'biosample':
+                    merged_biosamples = defaultdict(list)
+                    # check for biosample concurrence
+                    for biosample in values:
+                        merged_biosamples = merge_items(merged_biosamples, biosample)
+                    for bfield, bvalues in merged_biosamples.items():
+                        if bfield == 'cell_culture_details':
+                            merged_cc_details = defaultdict(list)
+                            for cc in bvalues:
+                                merged_cc_details = merge_items(merged_cc_details, cc)
+                            for cfield, cvalues in merged_cc_details.items():
+                                conflicts = find_conflicts(cfield, cvalues)
+                                details.append(find_conflict_detail(conflicts, cvalues, 'cell_culture_details'))
+                        else:
+                            conflicts = find_conflicts(bfield, bvalues)
+                            details.append(find_conflict_details(conflicts, bvalues, 'biosamples'))
+                else:
+                    conflicts = find_conflicts(field, values)
+                    details.append(find_conflict_details(conflicts, values, 'experiments'))
+                    # we've got different values so warn
