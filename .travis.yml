@@ -13,7 +13,7 @@ addons:
     packages:
     - bsdtar
     - elasticsearch
-    - gcc-c++
+    - build-essential
     - make
     - graphviz
 env:
