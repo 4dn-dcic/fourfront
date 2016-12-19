@@ -161,22 +161,28 @@ def audit_replicate_sets_consistency_check(value, system):
             except:
                 return [str(x) for x in l]
 
-    def find_conflicts(field, value):
-        conflicts = []
+    def find_conflict(field, value):
         if field not in fields2ignore:
             stringified = stringify(value)
             if len(set(stringified)) != 1:
-                conflicts.append(field)
-        return conflicts
+                return field
+        return None
 
     '''
         add to detail array the conflicting fields and values for the particular experiment
         they can occur on the cell_culture_detail, biosample or experiment level
-        ? can we ensure that info is reported in a consistent manner with enough detail here?
-        may need to pass id info for experiment, biosample here depending on level
     '''
-    def find_conflict_details(conflict, values, collection):
-        pass
+    def get_conflict_detail(conflict, values, collection):
+        from collections import Counter
+        v_strings = stringify(values)
+        cnts = dict(Counter(v_strings))
+        if collection == 'cell_culture_details':
+            sstart = 'Cell Culture Detail field '
+        elif collection == 'biosamples':
+            sstart = 'Biosample field '
+        else:
+            sstart = 'Experiment field '
+        return sstart + conflict + ' has conflicting values ' + str(cnts)
 
     reps = value.get('replicate_exps', None)
     if reps is not None:
@@ -186,8 +192,6 @@ def audit_replicate_sets_consistency_check(value, system):
                 all experiments in a replicate set should share the
                 same experimental details except for biosample, description
                 and raw files
-
-                those that share the same biosample should have the same bio_rep_no
             '''
             # first merge all the experiments of the replicate
             merged_expts = defaultdict(list)
@@ -212,12 +216,20 @@ def audit_replicate_sets_consistency_check(value, system):
                             for cc in bvalues:
                                 merged_cc_details = merge_items(merged_cc_details, cc)
                             for cfield, cvalues in merged_cc_details.items():
-                                conflicts = find_conflicts(cfield, cvalues)
-                                details.append(find_conflict_detail(conflicts, cvalues, 'cell_culture_details'))
+                                conflict = find_conflict(cfield, cvalues)
+                                if conflict is not None:
+                                    details.append(get_conflict_detail(conflict, cvalues, 'cell_culture_details'))
                         else:
-                            conflicts = find_conflicts(bfield, bvalues)
-                            details.append(find_conflict_details(conflicts, bvalues, 'biosamples'))
+                            conflict = find_conflict(bfield, bvalues)
+                            if conflict is not None:
+                                details.append(get_conflict_detail(conflict, bvalues, 'biosamples'))
                 else:
-                    conflicts = find_conflicts(field, values)
-                    details.append(find_conflict_details(conflicts, values, 'experiments'))
-                    # we've got different values so warn
+                    conflict = find_conflict(field, values)
+                    if conflict is not None:
+                        details.append(get_conflict_detail(conflict, values, 'experiments'))
+
+            if details:
+                detail = '\n'.join(details)
+                yield AuditFailure('inconsistent replicate data', detail, level='ERROR')
+
+            return

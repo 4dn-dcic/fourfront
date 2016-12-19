@@ -178,19 +178,45 @@ def valid_replicate_set(testapp, rep_set_data, bs_f_experiments):
 
 
 @pytest.fixture
-def invalid_replicate_sets(testapp, rep_set_data, experiment_data, biosample_data, biosample_cell_culture_data):
-    rep_set_data['description'] = 'Repset with consistent experiments'
-    replicates = []
-    for i, exp in enumerate(bs_f_experiments):
-        if i == 3:
-            bio = i - 1
-            tec = 2
-        else:
-            bio = i
-            tec = 1
-        replicates.append({'replicate_exp': exp['@id'], 'bio_rep_no': bio, 'tec_rep_no': tec})
-    rep_set_data['replicate_exps'] = replicates
-    return testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0]
+def invalid_replicate_sets(testapp, rep_set_data, experiment_data, fastq_files,
+                           biosample_data, F123_biosource, biosample_cell_culture_data):
+    # set up biosamples and biosample cell culture details for use in experiments
+    b_c_c = []
+    biosample = []
+    experiment = []
+    for i in range(4):
+        experiment_data['description'] = 'experiment_' + str(i)
+        experiment_data['files'] = [fastq_files[i]['@id']]
+        experiment_data['tagging_method'] = 'tag_0'
+        if i < 2:
+            # change the experiment tagging method string leaving everything else same
+            experiment_data['tagging_method'] = 'tag_' + str(i)
+            biosample_cell_culture_data['differentiation_state'] = 'state' + str(i)
+            b_c_c.append(testapp.post_json('/biosample_cell_culture', biosample_cell_culture_data).json['@graph'][0])
+            if i == 0:  # we only need to make one biosample in the first 2 iterations
+                biosample_data['cell_culture_details'] = b_c_c[0]['@id']
+                biosample.append(testapp.post_json('/biosample', biosample_data).json['@graph'][0])
+            experiment_data['biosample'] = biosample[0]['@id']
+        elif i == 2:  # make a new biosample with different biosource
+            biosample_data['biosource'] = [F123_biosource['@id']]
+            biosample_data['cell_culture_details'] = b_c_c[0]['@id']
+            biosample.append(testapp.post_json('/biosample', biosample_data).json['@graph'][0])
+            experiment_data['biosample'] = biosample[1]['@id']
+        else:  # make third biosample with different cell_culture_details
+            biosample_data['cell_culture_details'] = b_c_c[1]['@id']
+            biosample.append(testapp.post_json('/biosample', biosample_data).json['@graph'][0])
+            experiment_data['biosample'] = biosample[2]['@id']
+        experiment.append(testapp.post_json('/experiment_hi_c', experiment_data).json['@graph'][0])
+
+    rep_sets = []
+    for i in range(1, 4):
+        replicates = []
+        rep_set_data['description'] = 'rep set ' + str(i)
+        replicates.append({'replicate_exp': experiment[0]['@id'], 'bio_rep_no': 1, 'tec_rep_no': 1})
+        replicates.append({'replicate_exp': experiment[i]['@id'], 'bio_rep_no': 2, 'tec_rep_no': 1})
+        rep_set_data['replicate_exps'] = replicates
+        rep_sets.append(testapp.post_json('/experiment_set_replicate', rep_set_data).json['@graph'][0])
+    return rep_sets
 
 
 def test_audit_replicate_set_no_audit_if_no_replicates(testapp, empty_replicate_set):
@@ -229,3 +255,17 @@ def test_audit_replicate_set_consistency_check(testapp, valid_replicate_set):
     res = testapp.get(valid_replicate_set['@id'] + '/@@audit-self')
     errors = res.json['audit']
     assert not any(errors)
+
+
+def test_audit_replicate_set_inconsistency_checks(testapp, invalid_replicate_sets):
+    for i, rep in enumerate(invalid_replicate_sets):
+        res = testapp.get(rep['@id'] + '/@@audit-self')
+        errors = res.json['audit']
+        print(errors)
+        assert any(error['category'] == 'inconsistent replicate data' for error in errors)
+        if i == 0:
+            assert any('Experiment field' in error['detail'] for error in errors)
+        elif i == 1:
+            assert any('Biosample field' in error['detail'] for error in errors)
+        else:
+            assert any('Cell Culture Detail field' in error['detail'] for error in errors)
