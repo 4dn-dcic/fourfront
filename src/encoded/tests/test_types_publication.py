@@ -11,11 +11,11 @@ def test_update_publication_PMID(testapp, publication_PMID):
     assert publication_PMID['url'] == 'https://www.ncbi.nlm.nih.gov/pubmed/26673895'
 
 
-def test_update_publication_doi_pubmed(testapp, publication_doi_pubmed):
-    assert publication_doi_pubmed['title'][:50] == 'FlyBase: establishing a Gene Group resource for Dr'
-    assert publication_doi_pubmed['abstract'][:50] == 'Many publications describe sets of genes or gene p'
-    assert publication_doi_pubmed['authors'] == 'Attrill H, Falls K, Goodman JL, Millburn GH, Antonazzo G, Rey AJ, Marygold SJ, FlyBase Consortium'
-    assert publication_doi_pubmed['url'] == 'https://www.ncbi.nlm.nih.gov/pubmed/26467478'
+# def test_update_publication_doi_pubmed(testapp, publication_doi_pubmed):
+#     assert publication_doi_pubmed['title'][:50] == 'FlyBase: establishing a Gene Group resource for Dr'
+#     assert publication_doi_pubmed['abstract'][:50] == 'Many publications describe sets of genes or gene p'
+#     assert publication_doi_pubmed['authors'] == 'Attrill H, Falls K, Goodman JL, Millburn GH, Antonazzo G, Rey AJ, Marygold SJ, FlyBase Consortium'
+#     assert publication_doi_pubmed['url'] == 'https://www.ncbi.nlm.nih.gov/pubmed/26467478'
 
 
 def test_update_publication_doi_biorxiv(testapp, publication_doi_biorxiv):
