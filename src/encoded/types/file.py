@@ -121,6 +121,13 @@ class File(Item):
     def _update(self, properties, sheets=None):
         if not properties:
             return
+
+        # ensure we always have s3 links setup
+        sheets = {} if sheets is None else sheets.copy()
+        uuid = properties.get('uuid', False)
+        if not sheets.get('external', False) and uuid:
+            sheets['external'] = self.build_external_creds(self.registry, uuid, properties)
+
         # update self first to ensure 'related_files' are stored in self.properties
         super(File, self)._update(properties, sheets)
         DicRefRelation = {
@@ -209,25 +216,31 @@ class File(Item):
         else:
             return file_format + ' ' + file_format_type
 
+
+    @classmethod
+    def build_external_creds(cls, registry, uuid, properties):
+        bucket = registry.settings['file_upload_bucket']
+        mapping = cls.schema['file_format_file_extension']
+        file_extension = mapping[properties['file_format']]
+        key = '{uuid}/{accession}{file_extension}'.format(
+            file_extension=file_extension, uuid=uuid,
+            accession=properties.get('accession'))
+
+        # remove the path from the file name and only take first 32 chars
+        fname = properties.get('filename')
+        name = None
+        if fname:
+            name = fname.split('/')[-1][:32]
+
+        profile_name = registry.settings.get('file_upload_profile_name')
+        return external_creds(bucket, key, name, profile_name)
+
+
     @classmethod
     def create(cls, registry, uuid, properties, sheets=None):
         if properties.get('status') == 'uploading':
             sheets = {} if sheets is None else sheets.copy()
-
-            bucket = registry.settings['file_upload_bucket']
-            mapping = cls.schema['file_format_file_extension']
-            file_extension = mapping[properties['file_format']]
-            key = '{uuid}/{accession}{file_extension}'.format(
-                file_extension=file_extension, uuid=uuid, **properties)
-
-            # remove the path from the file name and only take first 32 chars
-            fname = properties.get('filename')
-            name = None
-            if fname:
-                name = fname.split('/')[-1][:32]
-
-            profile_name = registry.settings.get('file_upload_profile_name')
-            sheets['external'] = external_creds(bucket, key, name, profile_name)
+            sheets['external'] = cls.build_external_creds(registry, uuid, properties) 
         return super(File, cls).create(registry, uuid, properties, sheets)
 
 
