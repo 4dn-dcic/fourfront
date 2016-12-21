@@ -27,6 +27,23 @@ def fastq(award, experiment, lab):
     }
 
 
+@pytest.fixture
+def fastq_uploading(fastq):
+    fastq['status'] = 'uploading'
+    return fastq
+
+
+def test_files_get_s3_with_no_filename_posted(testapp, fastq_uploading):
+    fastq_uploading.pop('filename')
+    res = testapp.post_json('/file_fastq', fastq_uploading, status=201)
+    resobj = res.json['@graph'][0]
+
+    # 307 is redirect to s3 using auto generated download url
+    fastq_res = testapp.get('{href}'
+                            .format(**res.json['@graph'][0]),
+                            status=307)
+
+
 def test_file_post_fastq(testapp, fastq):
     testapp.post_json('/file_fastq', fastq, status=201)
 

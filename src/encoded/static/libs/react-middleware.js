@@ -18,6 +18,9 @@ var render = function (Component, body, res) {
         'inline':inline
     };
 
+    // Subprocess-middleware re-uses process on prod. Might have left-over data from prev request. 
+    // JWT 'localStorage' uses 'dummyStorage' plain object on server-side
+    JWT.remove('localStorage'); 
     // Grab JWT token if available to inform session
     var jwtToken = res.getHeader('X-Request-JWT'); // Only returned if successfully authenticated
     var sessionMayBeSet = false;
@@ -26,7 +29,7 @@ var render = function (Component, body, res) {
         sessionMayBeSet = true;
         userInfo = JSON.parse(res.getHeader('X-User-Info'));
         if (userInfo){
-            JWT.saveUserInfoLocalStorage(userInfo); // Uses 'dummyStorage' plain object on server-side
+            JWT.saveUserInfoLocalStorage(userInfo);
         }
         //res.removeHeader('X-User-Info');
         //res.removeHeader('X-Request-JWT');

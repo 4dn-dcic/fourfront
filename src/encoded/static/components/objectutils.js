@@ -224,9 +224,9 @@ var JWT = module.exports.JWT = {
                 removedCookie = true;
             }
         }
-        if (source === 'localStorage' || source === 'all'){
+        if (source.toLowerCase() === 'localstorage' || source === 'all'){
             if(!JWT.storeExists()) {
-                delete dummyStorage.user_info;
+                delete JWT.dummyStorage.user_info;
                 removedLocalStorage = true;
             } else if (localStorage.user_info){
                 localStorage.removeItem("user_info");

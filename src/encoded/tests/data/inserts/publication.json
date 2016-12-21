@@ -12,17 +12,6 @@
         "exp_sets_prod_in_pub":["431106bc-8535-4448-903e-854af460b260"]
     },
     {
-        "ID": "doi:10.1093/cercor/bhs015",
-        "status": "current",
-        "published_by": "External",
-        "categories": ["integrative analysis"],
-        "award": "1U01CA200059-01",
-        "award": "1U01CA200059-01",
-        "lab": "4dn-dcic-lab",
-        "submitted_by": "wrangler@wrangler.com",
-        "uuid": "52e85c70-fe2d-11e3-9191-0800200c9a67"
-    },
-    {
         "ID": "doi:10.1101/083410",
         "status": "current",
         "published_by": "External",
