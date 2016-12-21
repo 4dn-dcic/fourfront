@@ -16,7 +16,7 @@
             "description": "The local file name used at time of submission.",
             "type": "string",
             "exclude_from": "submit4dn",
-            "comment": "what ends up being displayed? - accession perhaps"
+            "comment": "ultimately uploaded filename will be uuid/accession, but filename with no directory will be store in metadata as passed in"
         },
         "file_format": {
             "title": "File format",

@@ -27,6 +27,7 @@ import boto
 import datetime
 import json
 import pytz
+from netaddr.core import AddrFormatError
 
 
 def show_upload_credentials(request=None, context=None, status=None):
@@ -35,28 +36,35 @@ def show_upload_credentials(request=None, context=None, status=None):
     return request.has_permission('edit', context)
 
 
-def external_creds(bucket, key, name, profile_name=None):
-    policy = {
-        'Version': '2012-10-17',
-        'Statement': [
-            {
-                'Effect': 'Allow',
-                'Action': 's3:PutObject',
-                'Resource': 'arn:aws:s3:::{bucket}/{key}'.format(bucket=bucket, key=key),
-            }
-        ]
-    }
-    boto.set_stream_logger('boto')
-    conn = boto.connect_sts(profile_name=profile_name)
-    token = conn.get_federation_token(name, policy=json.dumps(policy))
-    # 'access_key' 'secret_key' 'expiration' 'session_token'
-    credentials = token.credentials.to_dict()
-    credentials.update({
-        'upload_url': 's3://{bucket}/{key}'.format(bucket=bucket, key=key),
-        'federated_user_arn': token.federated_user_arn,
-        'federated_user_id': token.federated_user_id,
-        'request_id': token.request_id,
-    })
+def external_creds(bucket, key, name=None, profile_name=None):
+    '''
+    if name is None, we want the link to s3 but no need to generate
+    an access token.  This is useful for linking metadata to files that
+    already exist on s3.
+    '''
+    credentials = {}
+    if name is not None:
+        policy = {
+            'Version': '2012-10-17',
+            'Statement': [
+                {
+                    'Effect': 'Allow',
+                    'Action': 's3:PutObject',
+                    'Resource': 'arn:aws:s3:::{bucket}/{key}'.format(bucket=bucket, key=key),
+                }
+            ]
+        }
+        boto.set_stream_logger('boto')
+        conn = boto.connect_sts(profile_name=profile_name)
+        token = conn.get_federation_token(name, policy=json.dumps(policy))
+        # 'access_key' 'secret_key' 'expiration' 'session_token'
+        credentials = token.credentials.to_dict()
+        credentials.update({
+            'upload_url': 's3://{bucket}/{key}'.format(bucket=bucket, key=key),
+            'federated_user_arn': token.federated_user_arn,
+            'federated_user_id': token.federated_user_id,
+            'request_id': token.request_id,
+        })
     return {
         'service': 's3',
         'bucket': bucket,
@@ -214,10 +222,12 @@ class File(Item):
 
             # remove the path from the file name and only take first 32 chars
             fname = properties.get('filename')
+            name = None
             if fname:
                 name = fname.split('/')[-1][:32]
-                profile_name = registry.settings.get('file_upload_profile_name')
-                sheets['external'] = external_creds(bucket, key, name, profile_name)
+
+            profile_name = registry.settings.get('file_upload_profile_name')
+            sheets['external'] = external_creds(bucket, key, name, profile_name)
         return super(File, cls).create(registry, uuid, properties, sheets)
 
 
@@ -326,11 +336,13 @@ def post_upload(context, request):
         raise ValueError(external.get('service'))
 
     # remove the path from the file name and only take first 32 chars
-    name = properties.get('filename').split('/')[-1][:32]
+    name = None
+    if properties.get('filename'):
+        name = properties.get('filename').split('/')[-1][:32]
     profile_name = request.registry.settings.get('file_upload_profile_name')
     creds = external_creds(bucket, key, name, profile_name)
     # in case we haven't uploaded a file before
-    context.propsheets['external'] = external_creds(bucket, key, name, profile_name)
+    context.propsheets['external'] = creds
 
     new_properties = None
     if properties['status'] == 'upload failed':
@@ -366,10 +378,17 @@ def download(context, request):
 
     proxy = asbool(request.params.get('proxy')) or 'Origin' in request.headers
 
-    use_download_proxy = request.client_addr not in request.registry['aws_ipset']
+    try:
+        use_download_proxy = request.client_addr not in request.registry['aws_ipset']
+    except TypeError:
+        # this fails in testing due to testapp not having ip
+        use_download_proxy = False
 
     external = context.propsheets.get('external', {})
-    if external.get('service') == 's3':
+    if not external:
+        profile_name = request.registry.settings.get('file_upload_profile_name')
+        sheets['external'] = external_creds(bucket, key, name, profile_name)
+    elif external.get('service') == 's3':
         conn = boto.connect_s3()
         location = conn.generate_url(
             36*60*60, request.method, external['bucket'], external['key'],
