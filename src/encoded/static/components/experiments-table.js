@@ -33,7 +33,9 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                     ];
                 default: 
                     return [
+                        { className: 'biosample', title: 'Biosample Accession' },
                         { className: 'experiment', title: 'Experiment Accession'},
+                        { className: 'file', title: 'File Accession' },
                     ];
             }
             
@@ -237,9 +239,9 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                     adjustedChildren : function(){
                         if (React.Children.count(this.props.children) > 1) return this.props.children;
                         return React.Children.map(this.props.children, function(c){
-                            if (c.props.className.indexOf('name-title') === -1){
+                            if (c && c.props && typeof c.props.className === 'string' && c.props.className.indexOf('name-title') === -1){
                                 return React.cloneElement(c, { className : c.props.className + ' name-title' }, c.props.children);
-                            } 
+                            }
                             return c;
                         });
                     },
@@ -446,6 +448,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
             adjustedChildren : function(){
                 return React.Children.map(this.props.children, (c) => {
+                    if (c === null) return null;
                     var addedProps = {};
                     if (!c.props.columnClass && this.props.columnClass) addedProps.columnClass = this.props.columnClass;
                     if (!c.props.colWidthStyles && this.props.colWidthStyles) addedProps.colWidthStyles = this.props.colWidthStyles;
@@ -504,20 +507,6 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         }),
 
         funcs : {
-
-            /**
-             *  Composed Functions (use these in render methods)
-             */
-
-            experimentsSortedAndGroupedByBiosample : function(experiments, replicateExperimentsList){
-                // Order of execution is inverse of order of arguments list, e.g. performs
-                // groupExperimentsByBiosample(groupFilesByPairsForEachExperiment(combineWithReplicateNumbers(replExps,exps)))
-                return _.compose(
-                    ExperimentsTable.funcs.groupExperimentsByBiosample,
-                    ExperimentsTable.funcs.groupFilesByPairsForEachExperiment,
-                    ExperimentsTable.funcs.combineWithReplicateNumbers
-                )(replicateExperimentsList, experiments);
-            },
 
             listEmptyExperiments : function(experiments){
                 return _.filter(experiments, function(exp){
@@ -658,7 +647,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             },
 
             groupFilesByPairsForEachExperiment: function(experiments){
-                experiments.forEach(function(exp){
+                return experiments.map(function(exp){
                     if (Array.isArray(exp.files)){
                         exp.file_pairs = ExperimentsTable.funcs.groupFilesByPairs(exp.files);
                     } else if (
@@ -673,11 +662,25 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                             )
                         );
                     }
+                    return exp;
                 });
-                return experiments;
             },
 
-            groupExperimentsByBiosample : function(experiments){
+            flattenFileSetsToFilesIfNoFilesOnExperiment : function(experiment){
+                if (Array.isArray(experiment.files)) return experiment;
+                if (!Array.isArray(experiment.filesets) || experiment.filesets.length === 0 || !Array.isArray(experiment.filesets[0].files_in_set)) return experiment;
+                experiment.files = _.flatten(
+                    _.pluck(experiment.filesets, 'files_in_set'),
+                    true
+                );
+                return experiment;
+            },
+
+            flattenFileSetsToFilesIfNoFilesForEachExperiment : function(experiments){
+                return experiments.map(ExperimentsTable.funcs.flattenFileSetsToFilesIfNoFilesOnExperiment);
+            },
+
+            groupExperimentsByBiosampleRepNo : function(experiments){
                 return _(experiments).chain()
                     .groupBy(function(exp){
                         return exp.biosample.bio_rep_no;
@@ -687,6 +690,17 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                     .map(function(expSet){ // Creates [[expObjWBiosample1-1, expObjWBiosample1-2], [expObjWBiosample2-1, expObjWBiosample2-2], ...]
                         return _.sortBy(expSet[1], 'tec_rep_no'); // Sort inner list (experiments) by tec_rep_no
                     })
+                    .value();
+            },
+
+            groupExperimentsByBiosample : function(experiments){
+                return _(experiments).chain()
+                    .groupBy(function(exp){
+                        return exp.biosample['@id'];
+                    })
+                    .pairs()
+                    .sortBy(function(expSet){ return expSet[0]; }) // Sort outer list (biosamples) by biosample id
+                    .map(function(expSet){ return expSet[1]; }) // Creates [[expObjWBiosample1-1, expObjWBiosample1-2], [expObjWBiosample2-1, expObjWBiosample2-2], ...]
                     .value();
             }
 
@@ -717,35 +731,39 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         return {
             keepCounts : false,
             columnHeaders : [
-                { className: 'experiment', title : 'Experiment Accession'},
                 { className: 'biosample', title : 'Biosample Accession'},
-                { className: 'file-pair', title: 'File Pair', visibleTitle : <i className="icon icon-download"></i> },
-                { className: 'file-detail', title : 'File Type'},
+                { className: 'experiment', title : 'Experiment Accession'},
                 { className: 'file-detail', title : 'File Info'}
             ]
         };
     },
 
-    origColumnWidths : null, // Immutable cache
-
+    cache : null,
+    
     getInitialState: function() {
+        this.cache = {
+            origColumnWidths : null,
+            staticColumnHeaders : null,
+            customColumnHeaders : null
+        };
         return {
             checked: true,
-            selectedFiles: new Set(),
-            columnWidths : null // set on componentDidMount via updateColumnWidths
+            selectedFiles: this.props.parentController && this.props.parentController.state ? null : new Set(),
+            columnWidths : null, // set on componentDidMount via updateColumnWidths
+            mounted : false
         };
     },
 
     updateColumnWidths : function(){
         // Scale/expand width of columns to fit available width, if any.
         var origColumnWidths;
-        if (!this.origColumnWidths){
+        if (!this.cache.origColumnWidths){
             origColumnWidths = _.map(this.refs.header.children, function(c){
                 return c.offsetWidth;
             });
-            this.origColumnWidths = origColumnWidths;
+            this.cache.origColumnWidths = origColumnWidths;
         } else {
-            origColumnWidths = this.origColumnWidths;
+            origColumnWidths = this.cache.origColumnWidths;
         }
 
         var availableWidth = this.refs.header.offsetWidth,
@@ -776,6 +794,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             window.addEventListener('resize', this.throttledResizeHandler);
             this.updateColumnWidths();
         }
+        this.setState({ 'mounted' : true });
     },
 
     componentWillUnmount : function(){
@@ -800,19 +819,44 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
     },
     /* Built-in headers for props.experimentSetType, extended by any matching title from props.columnHeaders */
     staticColumnHeaders : function(){
-        return ExperimentsTable.builtInHeaders(this.props.experimentSetType).map((staticCol) => {
+        if (this.cache.staticColumnHeaders) return this.cache.staticColumnHeaders;
+        this.cache.staticColumnHeaders = ExperimentsTable.builtInHeaders(this.props.experimentSetType).map((staticCol) => {
             return _.extend(_.clone(staticCol), _.findWhere(this.props.columnHeaders, { title : staticCol.title }) || {});
         });
+        return this.cache.staticColumnHeaders;
     },
     /* Any non built-in (for experimentSetType) headers from props.columnHeaders */
     customColumnHeaders : function(){
-        return this.props.columnHeaders.filter((col) => {
+        if (this.cache.customColumnHeaders) return this.cache.customColumnHeaders;
+        this.cache.customColumnHeaders = this.props.columnHeaders.filter((col) => {
             return  !_.contains(_.pluck(ExperimentsTable.builtInHeaders(this.props.experimentSetType), 'title'), col.title);
         });
+        return this.cache.customColumnHeaders;
     },
 
     columnHeaders : function(){
         return this.staticColumnHeaders().concat(this.customColumnHeaders());
+    },
+
+    colWidthStyles : function(){
+
+        var colWidthStyles = {
+            'experiment' : null,
+            'biosample' : null,
+            'file-pair' : null,
+            'file' : null,
+            'file-detail' : null
+        }
+
+        if (Array.isArray(this.state.columnWidths)){
+            Object.keys(colWidthStyles).forEach((cn) => {
+                colWidthStyles[cn] = {
+                    width : this.state.columnWidths[_.findIndex(this.columnHeaders(), { 'className' : cn })]
+                }
+            });
+        }
+
+        return colWidthStyles;
     },
 
     getCounts : function(includeTotals = false, fileDetailContainer = this.state.fileDetailContainer){
@@ -880,6 +924,139 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         return getFileDetailContainer(props.experimentArray, passExperiments);
     },
 
+    renderExperimentBlock : function(exp,i){
+        if (typeof this.cache.oddExpRow === 'undefined'){
+            this.cache.oddExpRow = false;
+        }
+        this.cache.oddExpRow = !this.cache.oddExpRow;
+
+        var fileChecked = this.state.checked;
+        if (this.props.parentController && this.props.parentController.state) fileChecked = this.props.parentController.state.checked;
+        var contentsClassName = Array.isArray(exp.file_pairs) ? 'file-pairs' : 'files';
+
+        return (
+            <ExperimentsTable.StackedBlock 
+                key={exp['@id']}
+                hideNameOnHover={true}
+                columnClass="experiment"
+                label={{ 
+                    title : 'Experiment',
+                    subtitle : (
+                        exp.tec_rep_no ? 'Tech Replicate ' + exp.tec_rep_no : 
+                            exp.experiment_type ? exp.experiment_type : null
+                    ),
+                    subtitleVisible: true
+                }}
+                stripe={this.cache.oddExpRow}
+                id={(exp.bio_rep_no && exp.tec_rep_no) ? 'exp-' + exp.bio_rep_no + '-' + exp.tec_rep_no : exp.accession || exp['@id']}
+            >
+                <ExperimentsTable.StackedBlock.Name relativePosition={ExperimentsTable.funcs.fileCount(exp) > 6}>
+                    <a href={ exp['@id'] || '#' } className="name-title mono-text">{ exp.accession }</a>
+                </ExperimentsTable.StackedBlock.Name>
+                <ExperimentsTable.StackedBlock.List 
+                    className={contentsClassName} 
+                    title={contentsClassName === 'file-pairs' ? 'File Pairs' : 'Files'}
+                >
+                    { contentsClassName === 'file-pairs' ? /* File Pairs Exist */
+                        exp.file_pairs.map((filePair,i) =>
+                            <FilePairBlock
+                                key={i}
+                                parentChecked={fileChecked}
+                                files={filePair}
+                                columnHeaders={this.customColumnHeaders()}
+                                handleFileUpdate={this.handleFileUpdate}
+                                label={ exp.file_pairs.length > 1 ?
+                                    { title : "Pair " + (i + 1) } : { title : "Pair" } 
+                                }
+                            />
+                        )
+                        : /* No File Pairs, but files may exist */
+                        <ExperimentsTable.StackedBlock
+                            key={exp['@id']}
+                            hideNameOnHover={false}
+                            columnClass="file-pair"
+                        >
+                            { _.pluck(this.columnHeaders(), 'title').indexOf('File Pair') > -1 ?
+                                <ExperimentsTable.StackedBlock.Name/>
+                            : null }
+                            <ExperimentsTable.StackedBlock.List title="Files" className="files">
+                                { Array.isArray(exp.files) ?
+                                    exp.files.map((file,i) =>
+                                        <FileEntryBlock
+                                            key={file['@id']}
+                                            parentChecked={fileChecked}
+                                            file={file}
+                                            columnHeaders={this.customColumnHeaders()}
+                                            handleFileUpdate={this.handleFileUpdate}
+                                            hideNameOnHover={true}
+                                            sequenceNum={i + 1}
+                                            isSingleItem={exp.files.length < 2 ? true : false}
+                                        />
+                                    )
+                                    : /* No Files Exist */
+                                    <FileEntryBlock
+                                        file={null}
+                                        columnHeaders={this.customColumnHeaders()}
+                                    />
+                                }
+                            </ExperimentsTable.StackedBlock.List>
+                        </ExperimentsTable.StackedBlock>
+                    }
+                </ExperimentsTable.StackedBlock.List>
+            </ExperimentsTable.StackedBlock>
+        );
+    },
+
+    renderBiosampleStackedBlockOfExperiments : function(expsWithBiosample,i){
+        return (
+            <ExperimentsTable.StackedBlock
+                columnClass="biosample"
+                hideNameOnHover={true}
+                key={expsWithBiosample[0].biosample['@id']}
+                id={'bio-' + (expsWithBiosample[0].biosample.bio_rep_no || i + 1)}
+                label={{
+                    title : 'Biosample',
+                    subtitle : expsWithBiosample[0].biosample.bio_rep_no ? 
+                        'Bio Replicate ' + expsWithBiosample[0].biosample.bio_rep_no
+                        :
+                        expsWithBiosample[0].biosample.biosource_summary,
+                    subtitleVisible : true
+                }}
+            >
+                <ExperimentsTable.StackedBlock.Name
+                    relativePosition={
+                        expsWithBiosample.length > 3 || ExperimentsTable.funcs.fileCountFromExperiments(expsWithBiosample) > 6
+                    }
+                >
+                    <a href={ expsWithBiosample[0].biosample['@id'] || '#' } className="name-title mono-text">
+                        { expsWithBiosample[0].biosample.accession }
+                    </a>
+                </ExperimentsTable.StackedBlock.Name>
+                <ExperimentsTable.StackedBlock.List
+                    className="experiments"
+                    title="Experiments"
+                    children={expsWithBiosample.map(this.renderExperimentBlock)}
+                    showMoreExtTitle={
+                        expsWithBiosample.length > 5 ?
+                            'with ' + (
+                                _.all(expsWithBiosample.slice(3), function(exp){ 
+                                    return exp.file_pairs !== 'undefined' 
+                                }) ? /* Do we have filepairs for all exps? */
+                                    _.flatten(_.pluck(expsWithBiosample.slice(3), 'file_pairs'), true).length +
+                                    ' File Pairs'
+                                    :
+                                    ExperimentsTable.funcs.fileCountFromExperiments(expsWithBiosample.slice(3)) + 
+                                    ' Files'
+                            )
+                            :
+                            null
+                    }
+                />
+                
+            </ExperimentsTable.StackedBlock>
+        );
+    },
+
     /**
      * Here we render nested divs for a 'table' of experiments with shared elements spanning multiple rows,
      * e.g. an experiment block's height is the combined height of its containing file rows, biosample height
@@ -896,193 +1073,60 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
      * 
      * Much of styling/layouting is defined in CSS.
      */
-    renderReplicates : function(){
-
-        /* Common variables */
-        var oddExpRow = false; // Alternate throughout all experiments (vs only within biosample), for striping
-        var staticColumnHeaders = this.staticColumnHeaders();
-        var filePairColumnVisible = _.findWhere(staticColumnHeaders, { title : 'File Pair' }).visible !== false;
-        var customColumnHeaders = this.customColumnHeaders(); // (Optional/custom) columns passed in thru props.columnHeaders, minus common/built-in ones.
-        
-        var colWidthStyles = {
-            'experiment' : null,
-            'biosample' : null,
-            'file-pair' : null,
-            'file' : null,
-            'file-detail' : null
-        }
-
-        if (Array.isArray(this.state.columnWidths)){
-            Object.keys(colWidthStyles).forEach((cn) => {
-                colWidthStyles[cn] = {
-                    width : this.state.columnWidths[_.findIndex(staticColumnHeaders.concat(customColumnHeaders), { 'className' : cn })]
-                }
-            });
-        }
-
-        var renderExperimentBlock = function(exp,i){
-            oddExpRow = !oddExpRow;
-
-            var fileChecked = this.state.checked;
-            if (this.props.parentController && this.props.parentController.state) fileChecked = this.props.parentController.state.checked;
-            var contentsClassName = Array.isArray(exp.file_pairs) ? 'file-pairs' : 'files';
-
-            return (
-                <ExperimentsTable.StackedBlock 
-                    key={exp['@id']}
-                    hideNameOnHover={true}
-                    columnClass="experiment"
-                    label={{ title : 'Experiment', subtitle : 'Tech Replicate ' + exp.tec_rep_no, subtitleVisible: true}}
-                    stripe={oddExpRow}
-                    id={'exp-' + exp.bio_rep_no + '-' + exp.tec_rep_no}
-                >
-                    <ExperimentsTable.StackedBlock.Name relativePosition={ExperimentsTable.funcs.fileCount(exp) > 6}>
-                        <a href={ exp['@id'] || '#' } className="name-title mono-text">{ exp.accession }</a>
-                    </ExperimentsTable.StackedBlock.Name>
-                    <ExperimentsTable.StackedBlock.List 
-                        className={contentsClassName} 
-                        title={contentsClassName === 'file-pairs' ? 'File Pairs' : 'Files'}
-                    >
-                        { contentsClassName === 'file-pairs' ? /* File Pairs Exist */
-                            exp.file_pairs.map((filePair,i) =>
-                                <FilePairBlock
-                                    key={i}
-                                    parentChecked={fileChecked}
-                                    files={filePair}
-                                    columnHeaders={customColumnHeaders}
-                                    handleFileUpdate={this.handleFileUpdate}
-                                    colVisible={filePairColumnVisible}
-                                    label={exp.file_pairs.length > 1 ? { 
-                                        title : "Pair " + (i + 1),
-                                        subtitle: null
-                                    } : null }
-                                />
-                            )
-                            : /* No File Pairs, but files may exist */
-                            <ExperimentsTable.StackedBlock
-                                key={exp['@id']}
-                                hideNameOnHover={false}
-                                columnClass="file-pair"
-                            >
-                                <ExperimentsTable.StackedBlock.Name visible={filePairColumnVisible}>
-                                    <Checkbox disabled={true} className="exp-table-checkbox" />
-                                </ExperimentsTable.StackedBlock.Name>
-                                <ExperimentsTable.StackedBlock.List title="Files" className="files">
-                                { Array.isArray(exp.files) ?
-                                    exp.files.map((file,i) =>
-                                        <FileEntryBlock
-                                            key={file['@id']}
-                                            parentChecked={fileChecked}
-                                            file={file}
-                                            columnHeaders={customColumnHeaders}
-                                            handleFileUpdate={this.handleFileUpdate}
-                                            className={null}
-                                            sequenceNum={i + 1}
-                                            isSingleItem={exp.files.length < 2 ? true : false}
-                                            colWidthStyles={colWidthStyles}
-                                        />
-                                    )
-                                    : /* No Files Exist */
-                                    <FileEntryBlock
-                                        file={null}
-                                        columnHeaders={customColumnHeaders}
-                                        colWidthStyles={colWidthStyles}
-                                    /> }
-                                </ExperimentsTable.StackedBlock.List>
-                            </ExperimentsTable.StackedBlock>
-                        }
-                    </ExperimentsTable.StackedBlock.List>
-                </ExperimentsTable.StackedBlock>
-            );
-        }.bind(this);
-
-        var renderBiosampleBlock = function(expsWithBiosample,i){
-            return (
-                <ExperimentsTable.StackedBlock
-                    columnClass="biosample"
-                    hideNameOnHover={true}
-                    key={expsWithBiosample[0].biosample['@id']}
-                    id={'bio-' + expsWithBiosample[0].biosample.bio_rep_no}
-                    label={{
-                        title : 'Biosample',
-                        subtitle : 'Bio Replicate ' + expsWithBiosample[0].biosample.bio_rep_no,
-                        subtitleVisible : true
-                    }}
-                >
-                    <ExperimentsTable.StackedBlock.Name
-                        relativePosition={
-                            expsWithBiosample.length > 3 || ExperimentsTable.funcs.fileCountFromExperiments(expsWithBiosample) > 6
-                        }
-                    >
-                        <a href={ expsWithBiosample[0].biosample['@id'] || '#' } className="name-title mono-text">
-                            { expsWithBiosample[0].biosample.accession }
-                        </a>
-                    </ExperimentsTable.StackedBlock.Name>
-                    <ExperimentsTable.StackedBlock.List
-                        className="experiments"
-                        title="Experiments"
-                        children={expsWithBiosample.map(renderExperimentBlock)}
-                        showMoreExtTitle={
-                            expsWithBiosample.length > 5 ?
-                                'with ' + (
-                                    _.all(expsWithBiosample.slice(3), function(exp){ 
-                                        return exp.file_pairs !== 'undefined' 
-                                    }) ? /* Do we have filepairs for all exps? */
-                                        _.flatten(_.pluck(expsWithBiosample.slice(3), 'file_pairs'), true).length +
-                                        ' File Pairs'
-                                        :
-                                        ExperimentsTable.funcs.fileCountFromExperiments(expsWithBiosample.slice(3)) + 
-                                        ' Files'
-                                )
-                                :
-                                null
-                        }
-                    />
-                    
-                </ExperimentsTable.StackedBlock>
-            );
-        }.bind(this);
-
-
-        /* Measure sorting/aligning performance */
-        /*
-        var startTime = Date.now();
-        var sortedExps = ExperimentsTable.funcs.experimentsSortedAndGroupedByBiosample(this.props.experimentArray, this.props.replicateExpsArray);
-        var duration = Date.now() - startTime;
-        console.log(sortedExps, duration);
-
-        startTime = Date.now();
-        var unpairedFiles = ExperimentsTable.funcs.listAllFilePairs(this.props.experimentArray);
-        duration = Date.now() - startTime;
-        console.log(unpairedFiles, duration);
-        */
-        var experimentsGroupedByBiosample = ExperimentsTable.funcs.experimentsSortedAndGroupedByBiosample(
-            this.props.experimentArray,
-            this.props.replicateExpsArray
-        );
+    renderRootStackedBlockListOfBiosamplesWithExperiments : function(experimentsGroupedByBiosample){
         return (
-            <div className="body clearfix">
-                <ExperimentsTable.StackedBlock.List
-                    className="biosamples" 
-                    title="Biosamples"
-                    children={experimentsGroupedByBiosample.map(renderBiosampleBlock)}
-                    rootList={true}
-                    expTable={this}
-                    currentlyCollapsing={this.state.collapsing}
-                    colWidthStyles={colWidthStyles}
-                    showMoreExtTitle={
-                        experimentsGroupedByBiosample.length > 5 ?
-                            'with ' + _.flatten(experimentsGroupedByBiosample.slice(3), true).length + ' Experiments'
-                            :
-                            null
-                    }
-                />
-            </div>
+            <ExperimentsTable.StackedBlock.List
+                className="biosamples"
+                title="Biosamples"
+                children={experimentsGroupedByBiosample.map(this.renderBiosampleStackedBlockOfExperiments)}
+                rootList={true}
+                expTable={this}
+                currentlyCollapsing={this.state.collapsing}
+                colWidthStyles={this.colWidthStyles()}
+                showMoreExtTitle={
+                    experimentsGroupedByBiosample.length > 5 ?
+                        'with ' + _.flatten(experimentsGroupedByBiosample.slice(3), true).length + ' Experiments'
+                        :
+                        null
+                }
+            />
         );
     },
 
+    renderers : {
+
+        replicate : function(){
+
+            var experimentsGroupedByBiosample = _.compose(
+                this.renderRootStackedBlockListOfBiosamplesWithExperiments,
+                ExperimentsTable.funcs.groupExperimentsByBiosampleRepNo,
+                ExperimentsTable.funcs.groupFilesByPairsForEachExperiment,
+                ExperimentsTable.funcs.combineWithReplicateNumbers
+            );
+            
+            return (
+                <div className="body clearfix">
+                    { experimentsGroupedByBiosample(this.props.replicateExpsArray, this.props.experimentArray) }
+                </div>
+            );
+        },
+
+        default : function(){
+            var experimentsGroupedByBiosample = _.compose(
+                this.renderRootStackedBlockListOfBiosamplesWithExperiments,
+                ExperimentsTable.funcs.groupExperimentsByBiosample,
+                ExperimentsTable.funcs.flattenFileSetsToFilesIfNoFilesForEachExperiment
+            );
+
+            return (
+                <div className="body clearfix">
+                    { experimentsGroupedByBiosample(this.props.experimentArray) }
+                </div>
+            );
+        }
+    },
+
     render : function(){
-        // TODO: Instead of renderReplicates, use render method dependent on props.experimentSetType to handle all types.
 
         var renderHeader = function(h, i, arr){
             if (h.visible === false) return null;
@@ -1099,11 +1143,12 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         }.bind(this);
 
         return (
-            <div className="expset-experiments">
+            <div className={"expset-experiments" + (this.state.mounted ? ' mounted' : '')}>
                 <div className="headers" ref="header">
                     { this.columnHeaders().map(renderHeader) }
                 </div>
-                { this.renderReplicates() }
+                { this.props.experimentSetType && typeof this.renderers[this.props.experimentSetType] === 'function' ? 
+                    this.renderers[this.props.experimentSetType].call(this) : this.renderers.default.call(this) }
             </div>
         );
     }
@@ -1161,6 +1206,7 @@ var FilePairBlock = React.createClass({
                 className={null}
                 isSingleItem={this.props.files.length < 2 ? true : false}
                 pairParent={this}
+                type="paired-end"
                 colWidthStyles={this.props.colWidthStyles}
             />
         );
@@ -1286,6 +1332,21 @@ var FileEntryBlock  = React.createClass({
         return row;
     },
 
+    renderCheckBox : function(){
+        if (!this.props.file) return null; // No file to select.
+        if (this.props.pairParent) return null; // Part of pair -- FilePairBlock has own checkbox.
+        return (
+            <Checkbox
+                validationState='warning'
+                checked={this.state.checked}
+                name="file-checkbox"
+                id={this.state.checked + "~" + true + "~" + this.props.file.file_format + "~" + this.props.file.uuid}
+                className='exp-table-checkbox'
+                onChange={this.handleCheck}
+            />
+        );
+    },
+
     renderName : function(){
 
         function titleString(){
@@ -1302,17 +1363,23 @@ var FileEntryBlock  = React.createClass({
             );
         }
 
-        function label(type){
+        function label(){
             if (!this.props.file) return null;
-            if (type === 'sequence-replicate') {
+            if (this.props.label) {
+                return ExperimentsTable.StackedBlock.Name.renderBlockLabel(
+                    this.props.label.title || null,
+                    this.props.label.subtitle || null,
+                    false,
+                    'col-file'
+                );
+            } else if (this.props.type === 'sequence-replicate') {
                 return ExperimentsTable.StackedBlock.Name.renderBlockLabel(
                     'File',
                     this.props.sequenceNum ? 'Seq Replicate ' + this.props.sequenceNum : null,
                     false,
                     'col-file'
                 );
-            }
-            if (type === 'paired-end') {
+            } else if (this.props.type === 'paired-end') {
                 return ExperimentsTable.StackedBlock.Name.renderBlockLabel(
                     'File',
                     this.props.file.paired_end ? 'Paired End ' + this.props.file.paired_end : null,
@@ -1320,6 +1387,28 @@ var FileEntryBlock  = React.createClass({
                     'col-file'
                 );
             }
+            
+            if (Array.isArray(this.props.columnHeaders)) {
+                var headerTitles = _.pluck(this.props.columnHeaders, 'title');
+                if (
+                    (this.props.file.file_type || this.props.file.file_format) &&
+                    _.intersection(headerTitles,['File Type', 'File Format']).length === 0
+                ){
+                    return ExperimentsTable.StackedBlock.Name.renderBlockLabel(
+                        'File', this.props.file.file_type || this.props.file.file_format, false, 'col-file'
+                    );
+                } 
+                if (
+                    this.props.file.instrument &&
+                    _.intersection(headerTitles,['Instrument', 'File Instrument']).length === 0
+                ){
+                    return ExperimentsTable.StackedBlock.Name.renderBlockLabel(
+                        'File', this.props.file.instrument, false, 'col-file'
+                    );
+                }
+            }
+            
+            return ExperimentsTable.StackedBlock.Name.renderBlockLabel('File', null, false, 'col-file');
         }
 
         return (
@@ -1327,15 +1416,19 @@ var FileEntryBlock  = React.createClass({
                 className={"name col-file" + (this.props.file && this.props.file.accession ? ' mono-text' : '')}
                 style={this.props.colWidthStyles ? this.props.colWidthStyles.file : null}
             >
-                { label.call(this, 'paired-end') }
+                { label.call(this) }
+                { this.renderCheckBox() }
                 { title.call(this) }
             </div>
         );
     },
 
     render : function(){
+        var sBlockClassName = "s-block file";
+        if (this.props.type || this.props.hideNameOnHover) sBlockClassName += ' hide-name-on-block-hover';
+        if (this.props.isSingleItem) sBlockClassName += ' single-item';
         return (
-            <div className={"s-block file hide-name-on-block-hover" + (this.props.isSingleItem ? ' single-item' : '') }>
+            <div className={sBlockClassName}>
                 { this.renderName() }
                 { this.filledFileRow() }
             </div>
