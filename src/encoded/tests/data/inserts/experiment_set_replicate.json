@@ -14,7 +14,7 @@
     {
         "uuid": "431106bc-8535-4448-903e-854af460b261",
         "submitted_by": "wrangler@wrangler.com",
-        "description": "Sample replicate experiment set which is an experiment set of experiments testing user interface and other aspects of the 4DN Portal, including but not limited to a long text description (this) in order to test fit, resizing, and related with a long block of text that would likely vary from very short -- e.g. a few words -- to multiple paragraphs. Figured this description would be more descriptive than Lorem Ipsum text yet still has the potential to be quite long as it keeps rambling on. Normally this would be more of an interesting read.",
+        "description": "Test replicate experiment set which is an experiment set of experiments testing user interface and other aspects of the 4DN Portal, including but not limited to a long text description (this) in order to test fit, resizing, and related with a long block of text that would likely vary from very short -- e.g. a few words -- to multiple paragraphs. Figured this description would be more descriptive than Lorem Ipsum text yet still has the potential to be quite long as it keeps rambling on. Normally this would be more of an interesting read.",
         "experimentset_type": "replicate",
         "replicate_exps": [
            {"replicate_exp": "4DNEX067APU1", "bio_rep_no": 1, "tec_rep_no":1},

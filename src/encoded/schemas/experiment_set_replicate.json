@@ -49,6 +49,7 @@
             "items": {
                 "title": "Replicate experiment",
                 "type": "object",
+                "required": ["replicate_exp", "bio_rep_no", "tec_rep_no"],
                 "additionalProperties": false,
                 "properties": {
                     "replicate_exp":{

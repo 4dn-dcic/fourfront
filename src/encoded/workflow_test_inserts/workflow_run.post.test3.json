@@ -1,5 +1,5 @@
 {
- "uuid": "d3f25cd3-e726-4b3c-bc73-48f84447yyyc",
+ "uuid": "d3f25cd3-e726-4b3c-bc73-48f84447888c",
  "workflow": "d3f25cd3-e726-4b3c-a022-48f844474b41",
  "title": "FastQC run Dec 12 2016",
  "award": "1U01CA200059-01",
@@ -10,8 +10,6 @@
        "value": "46e82a90-49e5-4c33-afab-9ec90d65cca1"
     }  
  ],
- "parameters": [],
- "output_files": [],
  "run_platform": "SBG",
  "sbg_task_id": "alrycbaw38rycba38ci"
 }

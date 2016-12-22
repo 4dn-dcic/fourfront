@@ -28,6 +28,7 @@ function reloadIfBadUserInfo(removeJWTIfNoUserDetails = false){
         console.error(e);
         return false;
     }
+
     if (props.user_details && typeof props.user_details.email === 'string'){
         // We have userDetails from server-side; keep client-side in sync (in case updated via/by back-end / dif client at some point)
         var savedDetails = JWT.saveUserDetails(props.user_details);

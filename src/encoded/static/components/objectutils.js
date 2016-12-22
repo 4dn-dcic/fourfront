@@ -230,7 +230,7 @@ var JWT = module.exports.JWT = {
                 removedCookie = true;
             }
         }
-        if (source === 'localStorage' || source === 'all'){
+        if (source.toLowerCase() === 'localstorage' || source === 'all'){
             if(!JWT.storeExists()) {
                 delete JWT.dummyStorage.user_info;
                 removedLocalStorage = true;
