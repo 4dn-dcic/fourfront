@@ -872,6 +872,9 @@ var App = React.createClass({
                     <script async src='//www.google-analytics.com/analytics.js'></script>
                     <link href="https://fonts.googleapis.com/css?family=Work+Sans:200,300,400,500,600,700" rel="stylesheet" />
                     <link href="https://fonts.googleapis.com/css?family=Yrsa" rel="stylesheet" />
+                    <script data-prop-name="user_details" type="application/ld+json" dangerouslySetInnerHTML={{
+                        __html: jsonScriptEscape(JSON.stringify(JWT.getUserDetails())) /* Kept up-to-date in browser.js */
+                    }}></script>
                     <script data-prop-name="inline" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
                     <link rel="stylesheet" href="/static/css/style.css" />
                     <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
@@ -880,9 +883,6 @@ var App = React.createClass({
                 <body onClick={this.handleClick} onSubmit={this.handleSubmit}>
                     <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: '\n\n' + jsonScriptEscape(JSON.stringify(this.props.context)) + '\n\n'
-                    }}></script>
-                    <script data-prop-name="user_details" type="application/ld+json" dangerouslySetInnerHTML={{
-                        __html: jsonScriptEscape(JSON.stringify(JWT.getUserDetails())) /* Kept up-to-date in browser.js */
                     }}></script>
                     <script data-prop-name="alerts" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: jsonScriptEscape(JSON.stringify(this.props.alerts))

@@ -19,16 +19,17 @@ var render = function (Component, body, res) {
     };
 
     // Grab JWT token if available to inform session
+    JWT.remove();
     var jwtToken = res.getHeader('X-Request-JWT'); // Only returned if successfully authenticated
     var sessionMayBeSet = false;
     var userInfo = null;
-    if (jwtToken && jwtToken.length > 0 && jwtToken !== "null" && jwtToken !== "expired"){
+    if (JWT.maybeValid(jwtToken)){
         sessionMayBeSet = true;
         userInfo = JSON.parse(res.getHeader('X-User-Info'));
         if (userInfo){
             JWT.saveUserInfoLocalStorage(userInfo); // Uses 'dummyStorage' plain object on server-side
         }
-        //res.removeHeader('X-User-Info');
+        res.removeHeader('X-User-Info');
         //res.removeHeader('X-Request-JWT');
     } else if (
         /* (disp_dict.context.code === 403 || res.statusCode === 403) && */ 

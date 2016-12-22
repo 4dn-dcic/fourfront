@@ -153,6 +153,10 @@ var JWT = module.exports.JWT = {
         return true;
     },
 
+    maybeValid : function(jwtToken){
+        return (jwtToken && jwtToken.length > 0 && jwtToken !== "null" && jwtToken !== "expired") ? true : false;
+    },
+
     getUserInfo : function(){
         try {
             if (JWT.storeExists()){
@@ -228,7 +232,7 @@ var JWT = module.exports.JWT = {
         }
         if (source === 'localStorage' || source === 'all'){
             if(!JWT.storeExists()) {
-                delete dummyStorage.user_info;
+                delete JWT.dummyStorage.user_info;
                 removedLocalStorage = true;
             } else if (localStorage.user_info){
                 localStorage.removeItem("user_info");
