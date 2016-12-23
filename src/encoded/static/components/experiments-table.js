@@ -474,7 +474,6 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                         addedProps.parentIDList.add(this.props.id);
                         addedProps.parentID = this.props.id;
                     }
-                    //console.log('s-block type ||', this.props.id, this.childIDList, this.props.parentIDList);
                     if (Object.keys(addedProps).length > 0){
                         return React.cloneElement(c, addedProps, c.props.children);
                     } else return c;
@@ -713,13 +712,11 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         experimentArray : React.PropTypes.array,
         passExperiments : React.PropTypes.instanceOf(Set),
         expSetFilters : React.PropTypes.object,
-        // If include completed 'fileDetailContainer', e.g. as from Browse, then
-        // 'passExperiments', 'expSetFilters', and 'facets' are not needed.
-        fileDetailContainer : React.PropTypes.object,
+        selectedFiles : React.PropTypes.instanceOf(Set),
         parentController : function(props, propName, componentName){
             // Custom validation
             if (props[propName] && 
-                (typeof props[propName].state.checked != 'boolean' || !(props[propName].state.selectedFiles instanceof Set))
+                (!(props[propName].state.selectedFiles instanceof Set))
             ){
                 return new Error('parentController must be a React Component passed in as "this", with "selectedFiles" (Set) and "checked" (bool) in its state.');
             } 
@@ -746,12 +743,17 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             staticColumnHeaders : null,
             customColumnHeaders : null
         };
-        return {
+        var initialState = {
             checked: true,
-            selectedFiles: this.props.parentController && this.props.parentController.state ? null : new Set(),
             columnWidths : null, // set on componentDidMount via updateColumnWidths
             mounted : false
         };
+        if (!(
+            this.props.parentController && 
+            this.props.parentController.state && 
+            this.props.parentController.state.selectedFiles
+        )) initialState.selectedFiles = new Set();
+        return initialState;
     },
 
     updateColumnWidths : function(){
@@ -803,20 +805,6 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         }
     },
 
-    componentWillReceiveProps : function(nextProps){
-        if (
-            nextProps.fileDetailContainer !== this.props.fileDetailContainer ||
-            nextProps.passExperiments !== this.props.passExperiments ||
-            nextProps.experimentArray !== this.props.experimentArray ||
-            nextProps.expSetFilters !== this.props.expSetFilters
-        ){
-            var fileDetailContainer = this.getFileDetailContainer(nextProps);
-            this.setState({
-                fileDetailContainer : fileDetailContainer,
-                counts : this.getCounts(nextProps.experimentArray !== this.props.experimentArray, fileDetailContainer)
-            });
-        }
-    },
     /* Built-in headers for props.experimentSetType, extended by any matching title from props.columnHeaders */
     staticColumnHeaders : function(){
         if (this.cache.staticColumnHeaders) return this.cache.staticColumnHeaders;
@@ -825,6 +813,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         });
         return this.cache.staticColumnHeaders;
     },
+
     /* Any non built-in (for experimentSetType) headers from props.columnHeaders */
     customColumnHeaders : function(){
         if (this.cache.customColumnHeaders) return this.cache.customColumnHeaders;
@@ -834,6 +823,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         return this.cache.customColumnHeaders;
     },
 
+    /* Combined top row of headers */
     columnHeaders : function(){
         return this.staticColumnHeaders().concat(this.customColumnHeaders());
     },
@@ -859,69 +849,41 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         return colWidthStyles;
     },
 
-    getCounts : function(includeTotals = false, fileDetailContainer = this.state.fileDetailContainer){
-        var counts = {};
-        if (!this.props.keepCounts) return; // Prevent execution if not necessary (specify in props)
-        var visibleCounts = ExperimentsTable.visibleExperimentsCountDeprecated(fileDetailContainer);
-        counts.visibleExperiments = visibleCounts.experiments;
-        counts.visibleFiles = visibleCounts.files;
-        if (includeTotals && this.props.experimentArray && Array.isArray(this.props.experimentArray)){
-            // Only available if experimentArray is passed to props.
-            var totalCounts = ExperimentsTable.totalExperimentsCount(this.props.experimentArray);
-            if (totalCounts){
-                counts.totalExperiments = totalCounts.experiments;
-                counts.totalFiles = totalCounts.files;
-            }
+    selectedFiles : function(){
+        //if (this.props.selectedFiles) {
+        //    return this.props.selectedFiles;
+        if (this.props.parentController && this.props.parentController.state.selectedFiles){ 
+            return this.props.parentController.state.selectedFiles
+        } else if (this.state.selectedFiles){
+            return this.state.selectedFiles;
         }
-        return counts;
+        return null;
     },
 
     handleFileUpdate: function (uuid, add=true){
         
-        var newSet = this.props.parentController ? this.props.parentController.state.selectedFiles : this.state.selectedFiles;
-        
+        var selectedFiles = this.selectedFiles(); 
+        if (!selectedFiles) return null;
+
         if(add){
-            if(!newSet.has(uuid)){
-                newSet.add(uuid);
+            if(!selectedFiles.has(uuid)){
+                selectedFiles.add(uuid);
             }
-        } else if (newSet.has(uuid)) {
-            newSet.delete(uuid);
+        } else if (selectedFiles.has(uuid)) {
+            selectedFiles.delete(uuid);
         }
 
         if (!this.props.parentController){
             // Set state on self if no parent controller
             this.setState({
-                selectedFiles: newSet
+                'selectedFiles': selectedFiles
             });
         } else {
             this.props.parentController.setState({
-                selectedFiles: newSet
+                'selectedFiles': selectedFiles
             });
         }
         
-    },
-
-    getFileDetailContainer : function(props = this.props){
-        // Re-use if passed in by a parent as a prop, 
-        // otherwise generate from experimentArray & passExperiments props.
-
-        if (props.fileDetailContainer) {
-            // If filtering of results is done in parent component.
-            return props.fileDetailContainer; 
-        }
-
-        var passExperiments = props.passExperiments,
-            ignoredFilters = null;
-
-
-        if (!passExperiments && props.expSetFilters) {
-            if (props.facets && props.facets.length > 0) {
-                ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(props.facets, props.expSetFilters);
-            }
-            passExperiments = FacetList.siftExperiments(props.experimentArray, props.expSetFilters, ignoredFilters);
-        }
-        
-        return getFileDetailContainer(props.experimentArray, passExperiments);
     },
 
     renderExperimentBlock : function(exp,i){
@@ -929,9 +891,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             this.cache.oddExpRow = false;
         }
         this.cache.oddExpRow = !this.cache.oddExpRow;
-
-        var fileChecked = this.state.checked;
-        if (this.props.parentController && this.props.parentController.state) fileChecked = this.props.parentController.state.checked;
+        
         var contentsClassName = Array.isArray(exp.file_pairs) ? 'file-pairs' : 'files';
 
         return (
@@ -961,7 +921,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                         exp.file_pairs.map((filePair,i) =>
                             <FilePairBlock
                                 key={i}
-                                parentChecked={fileChecked}
+                                selectedFiles={this.selectedFiles()}
                                 files={filePair}
                                 columnHeaders={this.customColumnHeaders()}
                                 handleFileUpdate={this.handleFileUpdate}
@@ -984,12 +944,11 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                                     exp.files.map((file,i) =>
                                         <FileEntryBlock
                                             key={file['@id']}
-                                            parentChecked={fileChecked}
                                             file={file}
                                             columnHeaders={this.customColumnHeaders()}
                                             handleFileUpdate={this.handleFileUpdate}
+                                            selectedFiles={this.selectedFiles()}
                                             hideNameOnHover={true}
-                                            sequenceNum={i + 1}
                                             isSingleItem={exp.files.length < 2 ? true : false}
                                         />
                                     )
@@ -1158,13 +1117,8 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 var FilePairBlock = React.createClass({
 
     propTypes : {
-
-    },
-
-    getInitialState: function() {
-        return {
-            checked: this.props.parentChecked
-        };
+        selectedFiles : React.PropTypes.instanceOf(Set),
+        handleFileUpdate : React.PropTypes.func
     },
 
     updateFileChecked : function(add=true){
@@ -1177,32 +1131,21 @@ var FilePairBlock = React.createClass({
         }
     },
 
-    // initial checkbox setting if parent is checked
-    componentWillMount: function(){
-        if (this.state.checked) this.updateFileChecked(true);
-    },
-
-    componentWillReceiveProps: function(nextProps) {
-        if(this.props.parentChecked !== nextProps.parentChecked){
-            this.setState({ checked: nextProps.parentChecked });
-        }
+    isChecked : function(){
+        if (!Array.isArray(this.props.files) || !(this.props.selectedFiles instanceof Set) || !this.props.files[0].uuid) return null;
+        return this.props.selectedFiles.has(this.props.files[0].uuid);
     },
 
     handleCheck: function() {
-        var newCheckedValue = !this.state.checked;
-        this.setState({ checked: newCheckedValue }, () => {
-            this.updateFileChecked(newCheckedValue);
-        });
+        this.updateFileChecked(!this.isChecked());
     },
 
     renderFileEntryBlock: function(file,i){
         return (
             <FileEntryBlock
                 key={file['@id']}
-                parentChecked={this.state.checked}
                 file={file}
                 columnHeaders={ this.props.columnHeaders }
-                handleFileUpdate={this.props.handleFileUpdate}
                 className={null}
                 isSingleItem={this.props.files.length < 2 ? true : false}
                 pairParent={this}
@@ -1213,12 +1156,14 @@ var FilePairBlock = React.createClass({
     },
 
     renderCheckBox : function(){
+        var checked = this.isChecked();
+        if (checked === null) return null;
         return (
             <Checkbox
                 validationState='warning'
-                checked={this.state.checked}
+                checked={checked}
                 name="file-checkbox"
-                id={this.state.checked + "~" + true + "~" + this.props.files[0].file_format + "~" + this.props.files[0].uuid}
+                id={checked + "~" + true + "~" + this.props.files[0].file_format + "~" + this.props.files[0].uuid}
                 className='exp-table-checkbox'
                 onChange={this.handleCheck}
             />
@@ -1252,7 +1197,9 @@ var FilePairBlock = React.createClass({
             <div className="s-block file-pair">
                 { nameColumn.call(this) }
                 <div className="files s-block-list">
-                    { Array.isArray(this.props.files) ? this.props.files.map(this.renderFileEntryBlock) :
+                    { Array.isArray(this.props.files) ? 
+                        this.props.files.map(this.renderFileEntryBlock)
+                        :
                         <FileEntryBlock file={null} columnHeaders={ this.props.columnHeaders } colWidthStyles={this.props.colWidthStyles} />
                     }
                 </div>
@@ -1263,37 +1210,28 @@ var FilePairBlock = React.createClass({
 
 var FileEntryBlock  = React.createClass({
 
-    getInitialState: function() {
-        return {
-            checked: this.props.parentChecked
-        };
+    propTypes : {
+        selectedFiles : React.PropTypes.instanceOf(Set),
+        handleFileUpdate : React.PropTypes.func
     },
 
-    // initial checkbox setting if parent is checked
-    componentWillMount: function(){
+    updateFileChecked : function(add=true){
         if(
-            !this.props.pairParent && // If part of a pair block, the pair block handles selection.
             this.props.file &&
-            this.props.file['@id'] &&
-            this.state.checked &&
+            this.props.file.uuid &&
             typeof this.props.handleFileUpdate === 'function'
         ){
-            this.props.handleFileUpdate(this.props.file.uuid, true);
+            this.props.handleFileUpdate(this.props.file.uuid, add);
         }
     },
 
-    componentWillReceiveProps: function(nextProps) {
-        if(this.props.parentChecked !== nextProps.parentChecked){
-            this.setState({
-                checked: nextProps.parentChecked
-            });
-        }
+    isChecked : function(){
+        if (!this.props.file || !this.props.file.uuid || !(this.props.selectedFiles instanceof Set)) return null;
+        return this.props.selectedFiles.has(this.props.file.uuid);
     },
 
     handleCheck: function() {
-        this.setState({
-            checked: !this.state.checked
-        });
+        this.updateFileChecked(!this.isChecked());
     },
     
     filledFileRow : function (file = this.props.file){
@@ -1335,12 +1273,15 @@ var FileEntryBlock  = React.createClass({
     renderCheckBox : function(){
         if (!this.props.file) return null; // No file to select.
         if (this.props.pairParent) return null; // Part of pair -- FilePairBlock has own checkbox.
+
+        var checked = this.isChecked();
+        if (checked === null) return null; // No checked state.
         return (
             <Checkbox
                 validationState='warning'
-                checked={this.state.checked}
+                checked={checked}
                 name="file-checkbox"
-                id={this.state.checked + "~" + true + "~" + this.props.file.file_format + "~" + this.props.file.uuid}
+                id={checked + "~" + true + "~" + this.props.file.file_format + "~" + this.props.file.uuid}
                 className='exp-table-checkbox'
                 onChange={this.handleCheck}
             />
@@ -1684,8 +1625,6 @@ var FileEntry = React.createClass({
         var fileOne = fileInfo.fileOne;
         var fileTwo = fileInfo.fileTwo;
         var fileID  = fileInfo.fileID;
-
-        console.log("FILEINFO", fileInfo);
 
         var experimentAccessionCell = null;
 

@@ -70,14 +70,15 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         passExperiments : React.PropTypes.instanceOf(Set),
         targetFiles : React.PropTypes.instanceOf(Set),
         rowNumber : React.PropTypes.number,
-        facets : React.PropTypes.array
+        facets : React.PropTypes.array,
+        selectAllFilesInitially : React.PropTypes.bool
     },
 
     getInitialState: function() {
     	return {
             open: false,
             checked: true,
-            selectedFiles: new Set()
+            selectedFiles: this.props.selectAllFilesInitially ? new Set(this.allFileIDs()) : new Set()
         };
     },
 
@@ -85,7 +86,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
 
         if(this.props.expSetFilters !== nextProps.expSetFilters){
             this.setState({
-                selectedFiles: new Set()
+                selectedFiles: this.props.selectAllFilesInitially ? new Set(this.allFileIDs()) : new Set()
             });
         }
 
@@ -102,6 +103,21 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         // }
     },
 
+    pairsAndFiles : function(){
+        // Combine file pairs and unpaired files into one array. [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
+        // Length will be file_pairs.length + unpaired_files.length, e.g. files other than first file in a pair are not counted.
+        return ExperimentsTable.funcs.listAllFilePairs(this.props.experimentArray).concat(
+            ExperimentsTable.funcs.listAllUnpairedFiles(this.props.experimentArray)
+        ); // (can always _.flatten() this or map out first file per pair, e.g. for targetFiles below)
+    },
+
+    allFileIDs : function(){
+        return this.pairsAndFiles().map(function(f){
+            if (Array.isArray(f)) return f[0].uuid;
+            else return f.uuid;
+        });
+    },
+
     handleToggle: function (e) {
         e.preventDefault();
         this.setState({
@@ -109,19 +125,22 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         });
     },
 
-    handleCheck: function() {
+    handleCheck: function(e) {
+        var newChecked = e.target.checked;
+        var selectedFiles;
+
+        if (newChecked === false){
+            selectedFiles = new Set();
+        } else {
+            selectedFiles = new Set(this.allFileIDs());
+        }
+
         this.setState({
-            checked: !this.state.checked
+            selectedFiles : selectedFiles
         });
     },
 
     render: function() {
-
-        // Combine file pairs and unpaired files into one array. [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
-        // Length will be file_pairs.length + unpaired_files.length, e.g. files other than first file in a pair are not counted.
-        var files = ExperimentsTable.funcs.listAllFilePairs(this.props.experimentArray).concat(
-            ExperimentsTable.funcs.listAllUnpairedFiles(this.props.experimentArray)
-        ); // (can always _.flatten() this or map out first file per pair, e.g. for targetFiles below)
 
         // unused for now... when format selection is added back in, adapt code below:
         // var filteredFiles = [];
@@ -186,6 +205,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                     experimentArray={[...this.props.passExperiments] /* Convert set to array */}
                     replicateExpsArray={this.props.replicateExpsArray}
                     experimentSetType={this.props.experimentSetType}
+                    selectedFiles={this.state.selectedFiles}
                     parentController={this}
                     expSetFilters={this.props.expSetFilters}
                     facets={this.props.facets}
@@ -193,9 +213,10 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
             );
         }
 
+        var files = this.pairsAndFiles();
 
         var disabled = files.length === 0;
-        var checked = this.state.selectedFiles.size === files.length || (!this.state.open && this.state.checked && !disabled);
+        var allFilesChecked = this.state.selectedFiles.size === files.length && !disabled;
         var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < files.length;
 
         return (
@@ -209,7 +230,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                     <td className="expset-table-cell">
                         <div className="control-cell">
                             <IndeterminateCheckbox
-                                checked={checked}
+                                checked={allFilesChecked}
                                 indeterminate={indeterminate}
                                 disabled={disabled}
                                 onChange={this.handleCheck}
@@ -599,6 +620,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                         columns={columns}
                         expSetFilters={this.props.expSetFilters}
                         experimentSetType={result.experimentset_type}
+                        selectAllFilesInitially={true}
                         targetFiles={this.props.targetFiles}
                         href={result['@id']}
                         experimentArray={experimentArray}
