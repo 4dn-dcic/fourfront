@@ -887,9 +887,6 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
     },
 
     renderExperimentBlock : function(exp,i){
-        if (typeof this.cache.oddExpRow === 'undefined'){
-            this.cache.oddExpRow = false;
-        }
         this.cache.oddExpRow = !this.cache.oddExpRow;
         
         var contentsClassName = Array.isArray(exp.file_pairs) ? 'file-pairs' : 'files';
@@ -967,6 +964,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
     },
 
     renderBiosampleStackedBlockOfExperiments : function(expsWithBiosample,i){
+        this.cache.oddExpRow = false; // Used & toggled by experiment stacked blocks for striping.
         return (
             <ExperimentsTable.StackedBlock
                 columnClass="biosample"
