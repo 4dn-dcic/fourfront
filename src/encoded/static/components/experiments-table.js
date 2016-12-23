@@ -853,7 +853,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         //if (this.props.selectedFiles) {
         //    return this.props.selectedFiles;
         if (this.props.parentController && this.props.parentController.state.selectedFiles){ 
-            return this.props.parentController.state.selectedFiles
+            return this.props.parentController.state.selectedFiles;
         } else if (this.state.selectedFiles){
             return this.state.selectedFiles;
         }
