@@ -225,7 +225,7 @@ describe('Testing experiments-table.js', function() {
             _.sample(filePairBlocksWithCheckboxes, 7).forEach(function(sBlock){
                 TestUtils.Simulate.change(
                     getFilePairCheckboxElement(sBlock)
-                )
+                );
             });
         }
 
