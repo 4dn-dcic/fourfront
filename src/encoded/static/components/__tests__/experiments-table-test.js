@@ -217,7 +217,7 @@ describe('Testing experiments-table.js', function() {
             return _.isEqual(
                 new Set(selectedFilePairBlocksFileUUIDs(filePairBlocksWithCheckboxes)),
                 testExperimentsTable.state.selectedFiles
-            )
+            );
         }
 
         function clickRandomFilePairCheckboxes(){
@@ -254,7 +254,7 @@ describe('Testing experiments-table.js', function() {
         var collapsibleSections = TestUtils.scryRenderedDOMComponentsWithClass(testExperimentsTable, 'collapsible-s-block-ext');
 
         // Every collapsible section collapsed
-        expect(_.every(collapsibleSections, function(c){ return c.className.split(' ').indexOf('in') === -1 })).toBe(true);
+        expect(_.every(collapsibleSections, function(c){ return c.className.split(' ').indexOf('in') === -1; })).toBe(true);
 
         _.forEach(viewMoreButtons, function(b){
             TestUtils.Simulate.click(b);
@@ -268,7 +268,7 @@ describe('Testing experiments-table.js', function() {
         jest.runAllTimers(); // Finish transitions
 
         // Every collapsible section visible
-        expect(_.every(collapsibleSections, function(c){ return c.className.split(' ').indexOf('in') > -1 })).toBe(true);
+        expect(_.every(collapsibleSections, function(c){ return c.className.split(' ').indexOf('in') > -1; })).toBe(true);
 
     });
 

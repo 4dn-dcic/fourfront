@@ -74,11 +74,11 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         selectAllFilesInitially : React.PropTypes.bool
     },
 
-    getInitialState: function() {
-    	return {
-            'open': false,
-            'selectedFiles': this.props.selectAllFilesInitially ? new Set(this.allFileIDs()) : new Set()
-        };
+    getInitialState : function(){
+        var state = {};
+        state.open = false;
+        state.selectedFiles = this.props.selectAllFilesInitially ? new Set(this.allFileIDs()) : new Set();
+        return state;
     },
 
     componentWillReceiveProps: function(nextProps) {
