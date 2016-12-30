@@ -681,7 +681,8 @@ tr.expset-addinfo-row {
 	}
 }
 
-// Column Widths
+// Column Widths - these are also set & used from JS, but these override.
+// ToDo: Remove and rely exclusively on JS? (Easier testing, no reliance on componentDidMount).
 $expset-col-biosample : 115px;
 $expset-col-experiment : 145px;
 $expset-col-file-pair : 40px;

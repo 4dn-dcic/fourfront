@@ -41,6 +41,29 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             
         },
 
+        /* Returns undefined if not set */
+        initialColumnWidths : function(columnClassName = null, expSetType = 'replicate'){
+            if (expSetType === 'replicate'){
+                // ToDo put into schemas?
+                var widthsByColumnClass = {
+                    'biosample' : 115,
+                    'experiment' : 145,
+                    'file-pair' : 40,
+                    'file' : 125,
+                    'file-detail' : 125,
+                    'default' : 120
+                };
+                // No columnClassName specified.
+                if (columnClassName === null) return widthsByColumnClass;
+                // columnClassName specified and set.
+                else if (columnClassName !== null && _.contains(Object.keys(widthsByColumnClass), columnClassName)){
+                    return widthsByColumnClass[columnClassName];
+                }
+                // columnClassName specified but width not configured.
+                else return widthsByColumnClass.default;
+            }
+        },
+
         /** 
          * Calculate amount of experiments out of provided experiments which match currently-set filters.
          * Use only for front-end faceting, e.g. on Exp-Set View page where all experiments are provided,
@@ -420,7 +443,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                         }.bind(this);
 
                         return (
-                            <div className={className}>
+                            <div className={className} data-count-collapsed={collapsibleChildren.length}>
                                 { children.slice(0, this.props.collapseShow) }
                                 <Collapse in={!this.state.collapsed} timeout={timeout} onExited={transitionFinish} onEntered={transitionFinish}>
                                     <div className="collapsible-s-block-ext">{ collapsibleChildren }</div>
@@ -761,6 +784,10 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         var origColumnWidths;
         if (!this.cache.origColumnWidths){
             origColumnWidths = _.map(this.refs.header.children, function(c){
+                if ( // For tests/server-side
+                    typeof c.offsetWidth !== 'number' ||
+                    Number.isNaN(c.offsetWidth)
+                ) return ExperimentsTable.initialColumnWidths(c.getAttribute('data-column-class'));
                 return c.offsetWidth;
             });
             this.cache.origColumnWidths = origColumnWidths;
@@ -768,7 +795,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             origColumnWidths = this.cache.origColumnWidths;
         }
 
-        var availableWidth = this.refs.header.offsetWidth,
+        var availableWidth = this.refs.header.offsetWidth || 960, // 960 = fallback for tests
             totalOrigColsWidth = _.reduce(origColumnWidths, function(m,v){ return m + v }, 0);
 
         if (totalOrigColsWidth > availableWidth){
@@ -776,7 +803,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             return; // No room to scale up widths.
         };
 
-        var scale = availableWidth / totalOrigColsWidth;
+        var scale = (availableWidth / totalOrigColsWidth) || 1;
         var newColWidths = origColumnWidths.map(function(c){
             return Math.floor(c * scale);
         });
@@ -1093,7 +1120,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 style = { 'width' : this.state.columnWidths[i] };
             }
             return (
-                <div className={"heading-block col-" + h.className} key={'header-' + i} style={style}>
+                <div className={"heading-block col-" + h.className} key={'header-' + i} style={style} data-column-class={h.className}>
                     { visibleTitle }
                 </div>
             );
@@ -1101,7 +1128,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
         return (
             <div className={"expset-experiments" + (this.state.mounted ? ' mounted' : '')}>
-                <div className="headers" ref="header">
+                <div className="headers expset-headers" ref="header">
                     { this.columnHeaders().map(renderHeader) }
                 </div>
                 { this.props.experimentSetType && typeof this.renderers[this.props.experimentSetType] === 'function' ? 

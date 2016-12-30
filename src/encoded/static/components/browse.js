@@ -195,6 +195,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         };
 
         function experimentsTable(){
+            /* Removed props.facets & props.expSetFilters as passing in props.passExperiments as experimentArray. */
             return (
                 <ExperimentsTable
                     columnHeaders={[
@@ -204,10 +205,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                     experimentArray={[...this.props.passExperiments] /* Convert set to array */}
                     replicateExpsArray={this.props.replicateExpsArray}
                     experimentSetType={this.props.experimentSetType}
-                    selectedFiles={this.state.selectedFiles}
                     parentController={this}
-                    expSetFilters={this.props.expSetFilters}
-                    facets={this.props.facets}
                 />
             );
         }
