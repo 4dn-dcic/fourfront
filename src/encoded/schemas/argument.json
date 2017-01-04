@@ -46,7 +46,6 @@
             "title": "Argument Mappings",
             "internal_comment": "same workflow argument can be passed to multiple steps",
             "description": "argument mapping between workflow and steps",
-            "subobject": true,
             "type": "array",
             "items": {
                 "title" : "Argument Mapping",

@@ -76,7 +76,6 @@
             "title": "Workflow Steps",
             "description": "The analysis steps that comprise the workflow with info on who are their parents.",
             "type": "array",
-            "subobject": true,
             "items": {
                 "description": "A step in the workflow and whose its parent are.",
                 "title": "Step Info",

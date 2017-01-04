@@ -56,7 +56,6 @@
             "title": "Workflow Parameters",
             "description": "The parameters that are used by the workflow",
             "type": "array",
-            "subobject": true,
             "items": {
                 "title": "Workflow Parameter",
                 "type": "object",
@@ -90,7 +89,6 @@
             "title": "Experiment Parameters",
             "description": "The experiment parameters that are defining the input data",
             "type": "array",
-            "subobject": true,
             "items": {
                 "title": "Experiment Parameter",
                 "type": "object",

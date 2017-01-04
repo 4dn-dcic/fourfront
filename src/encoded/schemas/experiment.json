@@ -62,7 +62,6 @@
             "title": "Experiment relations",
             "description": "All related experiments",
             "type": "array",
-            "subobject": true,
             "items": {
                 "title": "Experiment relation",
                 "type": "object",

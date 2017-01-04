@@ -48,7 +48,6 @@
             "title": "Targeted Regions",
             "description": "Information about the regions targeted for capture",
             "type": "array",
-            "subobject": true,
             "items": {
                 "description": "A region targeted for capture.",
                 "title": "Target Region",

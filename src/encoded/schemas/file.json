@@ -109,7 +109,6 @@
             "title": "Related Files",
             "description": "Files related to this one",
             "type": "array",
-            "subobject": true,
             "items": {
                 "title": "Related File",
                 "type": "object",

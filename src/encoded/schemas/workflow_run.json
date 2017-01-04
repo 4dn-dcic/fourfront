@@ -35,7 +35,6 @@
             "title": "Input files",
             "description": "The files used as initial input for the workflow.",
             "type": "array",
-            "subobject": true,
             "items": {
                 "title": "Input file mapping",
                 "description": "Info on file used as input and mapping to CWL argument for the workflow.",
@@ -60,7 +59,6 @@
             "title": "Output files",
             "description": "All files that are saved as output of the workflow",
             "type": "array",
-            "subobject": true,
             "items": {
                 "title": "Output file mapping",
                 "description": "Info on file output by the workflow and how it is mapped to CWL arguments.",
