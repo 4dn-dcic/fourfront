@@ -6,6 +6,7 @@ var announcements_data = require('../data/announcements_data');
 var Collapse = require('react-bootstrap').Collapse;
 var store = require('../store');
 var globals = require('./globals');
+var { ajaxLoad, console } = require('./objectutils');
 var SunBurstChart = require('./viz/sunburst');
 
 /* ****************
@@ -143,6 +144,26 @@ var Announcement = React.createClass({
     }
 });
 
+var Chart = React.createClass({
+
+    getInitialState : function(){
+        return {
+            data : null
+        };
+    },
+
+    componentDidMount : function(){
+
+    },
+
+    render : function(){
+        return (
+            <SunBurstChart data={this.state.data} />
+        );
+    }
+
+});
+
 var HomePage = module.exports = React.createClass({
 
     propTypes: {
@@ -190,7 +211,7 @@ var HomePage = module.exports = React.createClass({
                 </div>
                 <div className="row">
                     <div className="col-md-9 col-xs-12">
-                        <SunBurstChart/>
+                        <Chart/>
                     </div>
                     <div className="col-md-3 col-xs-12">
                         <h3 className="fourDN-header">4DN Links</h3>

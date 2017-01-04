@@ -1,0 +1,39 @@
+.chart {
+    position: relative;
+}
+
+/** Sunburst Chart Style(s) **/
+
+.chart-container-sunburst {
+
+    .chart {
+    
+        path {
+            stroke: #fff;
+        }
+
+        .explanation {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-top: -100px;
+            width: 140px;
+            text-align: center;
+            color:#777;
+            z-index: -1;
+
+            .percentage {
+                font-size: 2.5rem;
+            }
+
+        }    
+
+    }
+
+    .sequence text,
+    .legend text {
+        font-weight: 500;
+        fill: #fff;
+    }
+
+}
