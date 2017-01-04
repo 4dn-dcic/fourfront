@@ -226,6 +226,7 @@ h1.page-title + .page-subtitle {
 .text-600 { font-weight: 600; }
 
 .text-normal { font-size: 1rem; } // Reset to default size.
+.text-small { font-size: 0.9rem; }
 .text-medium { font-size: 15px; }
 .text-large { font-size: 17.5px; }
 
@@ -1023,14 +1024,29 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	margin-top: 20px;
 }
 
-.fourDN-section-title{
-	width: inherit;
-	font-weight: 300;
-	font-size: 1.4em !important;
-	border-bottom: 2px solid #168369;
-	padding-bottom: 5px;
-	margin-bottom: 15px;
+.announcement {
+	font-family: 'Work Sans', sans-serif;
+	padding-bottom: 10px;
+	margin-top: 20px;
 
+	.announcement-title {
+		font-weight: 300;
+		font-size: 1.35rem;
+		border-bottom: 2px solid #168369;
+		padding-bottom: 5px;
+		margin-bottom: 5px;
+	}
+
+	.announcement-subtitle {
+		color: #b3b3b3;
+		font-weight: 400;
+		font-size: 0.925rem;
+	}
+
+	.announcement-content {
+		margin-top: 10px;
+		font-size: 1.25rem;
+	}
 }
 
 .fourDN-section-toggle{

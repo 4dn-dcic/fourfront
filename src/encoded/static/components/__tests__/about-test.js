@@ -27,7 +27,7 @@ describe('Testing about.js', function() {
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
         App = require('../app');
-        statics = require('../../data/statics'); // Maybe keep version of statics.js and put into /testdata/
+        statics = require('../testdata/statics'); // Maybe keep version of statics.js and put into /testdata/
 
         sinon = require('sinon');
         server = sinon.fakeServer.create();
