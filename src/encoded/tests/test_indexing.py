@@ -80,6 +80,7 @@ def listening_conn(dbapi_conn):
 
 @pytest.mark.slow
 def test_indexing_workbook(testapp, indexer_testapp):
+    import pdb; pdb.set_trace()
     # First post a single item so that subsequent indexing is incremental
     testapp.post_json('/testing-post-put-patch/', {'required': ''})
     res = indexer_testapp.post_json('/index', {'record': True})
@@ -95,6 +96,11 @@ def test_indexing_workbook(testapp, indexer_testapp):
     assert res.json['indexed']
 
     res = testapp.get('/search/?type=Biosample')
+    # Compare this res.json to expected search result for a specific biosample
+    # NOTE: this is using old columns system
+    test_json = [bios for bios in res.json['@graph'] if bios['accession'] == '4DNBS1234567']
+    expected_json = {'biosource_summary': 'GM12878 and whole human', '@id': '/biosamples/4DNBS1234567/', 'accession': '4DNBS1234567', 'treatments_summary': 'siRNA for PARK2 and FMR1 and shRNA for PARK2 and FMR1', '@type': ['Biosample', 'Item'], 'modifications_summary': 'Stable Transfection for PARK2 and FMR1 and Other', 'description': 'GM12878 prepared for Hi-C', 'biosource': [{'individual': {'organism': {'name': 'human'}}}, {'individual': {'organism': {'name': 'human'}}}]}
+    assert test_json[0] == expected_json
     assert res.json['total'] > 1
 
 
@@ -103,7 +109,8 @@ def test_indexing_simple(testapp, indexer_testapp):
     testapp.post_json('/testing-post-put-patch/', {'required': ''})
     res = indexer_testapp.post_json('/index', {'record': True})
     assert res.json['indexed'] == 1
-    assert 'txn_count' not in res.json
+    res = testapp.get('/search/?type=TestingPostPutPatch')
+    assert res.json['total'] == 2
 
     res = testapp.post_json('/testing-post-put-patch/', {'required': ''})
     uuid = res.json['@graph'][0]['uuid']
@@ -112,7 +119,7 @@ def test_indexing_simple(testapp, indexer_testapp):
     assert res.json['txn_count'] == 1
     assert res.json['updated'] == [uuid]
     res = testapp.get('/search/?type=TestingPostPutPatch')
-    assert res.json['total'] == 2
+    assert res.json['total'] == 3
 
 
 def test_listening(testapp, listening_conn):
