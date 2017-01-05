@@ -864,7 +864,7 @@ var App = React.createClass({
                 <head>
                     <meta charSet="utf-8"/>
                     <meta httpEquiv="X-UA-Compatible" content="IE=edge"/>
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+                    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
                     <meta name="google-site-verification" content="t0PnhAqm80xyWalBxJHZdld9adAk40SHjUyPspYNm7I" />
                     <Title>{title}</Title>
                     {base ? <base href={base}/> : null}
@@ -872,6 +872,9 @@ var App = React.createClass({
                     <script async src='//www.google-analytics.com/analytics.js'></script>
                     <link href="https://fonts.googleapis.com/css?family=Work+Sans:200,300,400,500,600,700" rel="stylesheet" />
                     <link href="https://fonts.googleapis.com/css?family=Yrsa" rel="stylesheet" />
+                    <script data-prop-name="user_details" type="application/ld+json" dangerouslySetInnerHTML={{
+                        __html: jsonScriptEscape(JSON.stringify(JWT.getUserDetails())) /* Kept up-to-date in browser.js */
+                    }}></script>
                     <script data-prop-name="inline" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
                     <link rel="stylesheet" href="/static/css/style.css" />
                     <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
@@ -880,9 +883,6 @@ var App = React.createClass({
                 <body onClick={this.handleClick} onSubmit={this.handleSubmit}>
                     <script data-prop-name="context" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: '\n\n' + jsonScriptEscape(JSON.stringify(this.props.context)) + '\n\n'
-                    }}></script>
-                    <script data-prop-name="user_details" type="application/ld+json" dangerouslySetInnerHTML={{
-                        __html: jsonScriptEscape(JSON.stringify(JWT.getUserDetails())) /* Kept up-to-date in browser.js */
                     }}></script>
                     <script data-prop-name="alerts" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: jsonScriptEscape(JSON.stringify(this.props.alerts))
