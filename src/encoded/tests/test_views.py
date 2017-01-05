@@ -217,6 +217,7 @@ def test_collection_actions_filtered_by_permission(workbook, testapp, anontestap
 
 
 def test_item_actions_filtered_by_permission(testapp, authenticated_testapp, human_biosource):
+    import pdb; pdb.set_trace()
     location = human_biosource['@id']
 
     res = testapp.get(location)
