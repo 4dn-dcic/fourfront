@@ -24,6 +24,20 @@ var SunBurst = React.createClass({
             }
             return path;
         },
+
+        // Taken from http://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript
+        stringToColor : function(str) {
+            var hash = 0;
+            for (var i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            var colour = '#';
+            for (var i = 0; i < 3; i++) {
+                var value = (hash >> (i * 8)) & 0xFF;
+                colour += ('00' + value.toString(16)).substr(-2);
+            }
+            return colour;
+        }
     },
 
     getDefaultProps : function(){
@@ -31,9 +45,10 @@ var SunBurst = React.createClass({
             width : 750,
             height : 600,
             id : "main",
+            data : null,
             breadcrumbDims : {
                 // Breadcrumb dimensions: width, height, spacing, width of tip/tail.
-                w: 75, h: 30, s: 3, t: 10
+                w: 250, h: 30, s: 3, t: 10
             },
             colors : {
                 "home": "#5687d1",
@@ -57,6 +72,11 @@ var SunBurst = React.createClass({
 
         this.refs.percentage.innerHTML = percentageString;
         this.refs.explanation.style.visibility = "";
+        if (d.data.description) {
+            this.refs.description.innerHTML = d.data.description;
+        } else {
+            this.refs.description.innerHTML = '';
+        }
 
         var sequenceArray = SunBurst.getAncestors(d);
         this.updateBreadcrumbs(sequenceArray, percentageString);
@@ -112,7 +132,10 @@ var SunBurst = React.createClass({
 
         entering.append("svg:polygon")
             .attr("points", this.breadcrumbPoints)
-            .style("fill", (d) => this.props.colors[d.data.name] );
+            .style("fill", (d) => {
+                if (typeof this.props.colors[d.data.name] !== 'undefined') return this.props.colors[d.data.name];
+                else return SunBurst.stringToColor(d.data.name);
+            });
 
         entering.append("svg:text")
             .attr("x", (b.w + b.t) / 2)
@@ -194,14 +217,21 @@ var SunBurst = React.createClass({
             .innerRadius(function(d) { return Math.sqrt(d.y0); })
             .outerRadius(function(d) { return Math.sqrt(d.y1); });
 
-        // Use d3.text and d3.csv.parseRows so that we do not need to have a header
-        // row, and can receive the csv as an array of arrays.
-        d3.text("/static/data/test-data-for-chart-visit-sequences.csv", function(text) {
-            var csv = d3.csvParseRows(text);
-            var json = buildHierarchy(csv);
-            console.log(_.clone(json));
+        if (this.props.data === null){
+            // Use d3.text and d3.csv.parseRows so that we do not need to have a header
+            // row, and can receive the csv as an array of arrays.
+            d3.text("/static/data/test-data-for-chart-visit-sequences.csv", function(text) {
+                var csv = d3.csvParseRows(text);
+                var json = buildHierarchy(csv);
+                console.log(_.clone(json));
+                createVisualization(json);
+            });
+        } else if (Array.isArray(this.props.data)) {
+            var json = buildHierarchy(this.props.data);
             createVisualization(json);
-        });
+        } else {
+            createVisualization(this.props.data);
+        }
 
         // Main function to draw and set up the visualization, once we have the data.
         function createVisualization(json) {
@@ -221,9 +251,20 @@ var SunBurst = React.createClass({
                 .sum(function(d){
                     // Generates a value property for each node which governs sizing created for block in partition(root)
                     if (typeof d.size === 'number') return d.size;
+                    if (
+                        typeof d.fallbackSize === 'number' &&
+                        (!Array.isArray(d.children) || d.children.length === 0)
+                    ) return d.fallbackSize;
                     return 0;
                 })
-                .sort(function(a,b){ return b.value - a.value; });
+                .sort(function(a,b){
+                    var dif = b.value - a.value;
+                    if (dif !== 0) return dif;
+                    else {
+                        if (a.data.name < b.data.name) return -1;
+                        else if (a.data.name > b.data.name) return 1;
+                    }
+                });
 
             partition(root); // THE MAGIC (takes care of creating coordinates for our visualzation)
 
@@ -239,7 +280,10 @@ var SunBurst = React.createClass({
                 .attr("display", function(d) { return d.depth ? null : "none"; })
                 .attr("d", arc)
                 .attr("fill-rule", "evenodd")
-                .style("fill", function(d) { return _this.props.colors[d.data.name]; })
+                .style("fill", function(d) {
+                    if (typeof _this.props.colors[d.data.name] !== 'undefined') return _this.props.colors[d.data.name];
+                    else return SunBurst.stringToColor(d.data.name);
+                 })
                 .style("opacity", 1)
                 .on("mouseover", _this.mouseover);
 
@@ -356,8 +400,14 @@ var SunBurst = React.createClass({
          */
         this.totalSize = 0; // Will be sum of leaf values (same val as root node), used for getting percentages.
         this.vis = null; // Entrypoint to chart
-        this.adjustExplanationPosition(); // Center text in center of chart
         this.visualization(); // D3 initialization
+        this.adjustExplanationPosition(); // Center text in center of chart
+    },
+
+    componentDidUpdate : function(){
+        d3.select(this.refs.container).selectAll('svg').remove();
+        this.visualization(); // D3 initialization
+        this.adjustExplanationPosition(); // Center text in center of chart
     },
 
     containerDimensions : function(){
@@ -370,6 +420,7 @@ var SunBurst = React.createClass({
     adjustExplanationPosition : function(){
         var height = this.refs.explanation.offsetHeight || this.refs.explanation.clientHeight;
         var width = this.refs.explanation.offsetWidth || this.refs.explanation.clientWidth;
+        console.log(width, height);
         _.extend(this.refs.explanation.style, {
             'marginTop' : '-' + (height / 2) + 'px',
             'marginLeft' : '-' + (width / 2) + 'px'
@@ -396,9 +447,8 @@ var SunBurst = React.createClass({
                 <div id={this.props.id + "-sequence"} className="sequence" ref="sequence"></div>
                 <div id={this.props.id + "-chart"} className="chart chart-sunburst">
                     <div id={this.props.id + "-explanation"} ref="explanation" className="explanation" style={{ visibility: 'hidden' }}>
-                        <span id={this.props.id + "-percentage"} className="percentage" ref="percentage"></span>
-                        <br/>
-                        of visits begin with this sequence of pages
+                        <div id={this.props.id + "-percentage"} className="percentage" ref="percentage">0%</div>
+                        <div id={this.props.id + "-description"} className="description" ref="description"></div>
                     </div>
                 </div>
             </div>

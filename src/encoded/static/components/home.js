@@ -8,11 +8,13 @@ var store = require('../store');
 var globals = require('./globals');
 var { ajaxLoad, console } = require('./objectutils');
 var SunBurstChart = require('./viz/sunburst');
+var { ExperimentsTable } = require('./experiments-table');
+var expFuncs = require('./experiments-table').ExperimentsTable.funcs;
 
 /* ****************
 New homepage
 Uses fetch to get context necessary to populate banner entry
-ToDo : Include info needed
+ToDo : Embed info needed for chart(s) & banners into /home/?format=json endpoint (reduce AJAX reqs).
 **************** */
 
 var BannerEntry = React.createClass({
@@ -146,6 +148,27 @@ var Announcement = React.createClass({
 
 var Chart = React.createClass({
 
+    getDefaultProps : function(){
+        return {
+            fieldsToFetch : [ // What fields we need from /browse/... for this chart.
+                'experiments_in_set.experiment_summary',
+                'experiments_in_set.accession',
+                'experiments_in_set.status',
+                'experiments_in_set.files.file_type',
+                'experiments_in_set.files.accession',
+                'experiments_in_set.biosample.description',
+                'experiments_in_set.biosample.modifications_summary_short',
+                'experiments_in_set.biosample.biosource_summary',
+                'experiments_in_set.biosample.accession',
+                'experiments_in_set.biosample.biosource.description',
+                'experiments_in_set.biosample.biosource.biosource_name',
+                'experiments_in_set.biosample.biosource.biosource_type',
+                'experiments_in_set.biosample.biosource.individual.organism.name',
+                'experiments_in_set.biosample.biosource.individual.organism.scientific_name'
+            ]
+        };
+    },
+
     getInitialState : function(){
         return {
             data : null
@@ -153,7 +176,122 @@ var Chart = React.createClass({
     },
 
     componentDidMount : function(){
+        var reqUrl = '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&format=json';
+        reqUrl += this.props.fieldsToFetch.map(function(fieldToIncludeInResult){
+            return '&field=' + fieldToIncludeInResult;
+        }).join('');
 
+        ajaxLoad(reqUrl, (data) => {
+            this.setState({ 'data' : this.transformDataForChart(data['@graph']) });
+        });
+    },
+
+    transformDataForChart : function(experiment_sets){
+        // We needa turn these sets into either a hierarchical/directed graph of nodes containing 'name', 'children', and 'size' properties
+        // or into array of sequence & value sets ['name1-name2-name3-name4', <size>].
+        // once this is working we'll move into a static method on SunBurstChart
+
+        // First child (depth == 1) should be organism. ('root' node will have depth == 0)
+        var organisms = {};
+
+        function updateBiosource(biosource, exp){
+            if (
+                biosource.individual.organism.name &&
+                typeof organisms[biosource.individual.organism.name] === 'undefined'
+            ){
+                organisms[biosource.individual.organism.name] = {
+                    'name' : biosource.individual.organism.scientific_name + 
+                        " (" + biosource.individual.organism.name + ")",
+                    'children' : [],
+                    'biosamples' : {}
+                };
+            }
+            if (
+                exp.biosample.accession &&
+                typeof organisms[biosource.individual.organism.name].biosamples[exp.biosample.accession] === 'undefined'
+            ){
+                var description;
+                if (typeof exp.biosample.modifications_summary_short !== 'undefined' && exp.biosample.modifications_summary_short !== 'None'){
+                    description = exp.biosample.modification_summary_short;
+                } else if (exp.biosample.biosource_summary) {
+                    description = '<small>Biosample </small>' + exp.biosample.accession;
+                }
+                organisms[biosource.individual.organism.name].biosamples[exp.biosample.accession] = {
+                    'name' : exp.biosample.biosource_summary || exp.biosample.accession,
+                    'children' : [],
+                    'description' : description,
+                    'experiments' : {} // We don't show experiment_sets here because there may be multiple biosamples per set. 
+                }
+            }
+            if (
+                exp.accession &&
+                typeof organisms[biosource.individual.organism.name]
+                    .biosamples[exp.biosample.accession]
+                    .experiments[exp.accession] === 'undefined'
+            ){
+                expFuncs.flattenFileSetsToFilesIfNoFilesOnExperiment(exp);
+
+                organisms[biosource.individual.organism.name]
+                    .biosamples[exp.biosample.accession]
+                    .experiments[exp.accession] = {
+                        'name' : exp.experiment_summary,
+                        'fallbackSize' : 2,
+                        'description' : '<small>Experiment </small>' + exp.accession,
+                        'children' : Array.isArray(exp.files) ? exp.files.map(function(f){
+                                return {
+                                    'name' : f.accession,
+                                    'size' : 1
+                                };
+                            }) : []
+                    }
+            }
+        }
+
+        var expset, experiment, biosource;
+        for (var setIndex = 0; setIndex < experiment_sets.length; setIndex++){
+            expset = experiment_sets[setIndex];
+
+            for (var i = 0; i < expset.experiments_in_set.length; i++){
+                experiment = expset.experiments_in_set[i];
+                if (Array.isArray(experiment.biosample.biosource)){ // if array
+                    for (var j = 0; j < experiment.biosample.biosource.length; j++){
+                        biosource = experiment.biosample.biosource[j];
+                        updateBiosource(biosource, experiment);
+                    }
+                } else if ( // if object
+                    experiment.biosample.biosource.individual.organism.name &&
+                    typeof organisms[experiment.biosample.biosource.individual.organism.name] === 'undefined'
+                ){
+                    biosource = experiment.biosample.biosource;
+                    updateBiosource(biosource, experiment);
+                } else {
+                    console.error("Check biosource hierarchy code for chart.");
+                }
+            }
+
+        }
+
+        function recursivelySetChildren(node){
+            var childKey = _.find(Object.keys(node), function(k){
+                return ['name', 'children', 'size', 'description', 'fallbackSize'].indexOf(k) === -1;
+            });
+            if (typeof childKey === 'undefined') return;
+            if (Array.isArray(node.children.length) > 0) return; // Already set elsewhere.
+            if ((!Array.isArray(node.children.length) || node.children.length === 0) && Object.keys(node[childKey]).length > 0){
+                node.children = _.values(node[childKey]);
+                delete node[childKey];
+            }
+            if (typeof node.children === 'undefined' || node.children.length === 0){
+                return;
+            }
+            for (var i = 0; i < node.children.length; i++){
+                recursivelySetChildren(node.children[i]);
+            }
+        }
+
+        var rootNode = { 'name' : 'root', 'children' : [], 'organisms' : organisms };
+        recursivelySetChildren(rootNode);
+        return rootNode;
     },
 
     render : function(){
