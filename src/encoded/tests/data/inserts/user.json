@@ -75,7 +75,7 @@
         "lab": "test-4dn-lab",
         "last_name": "Wrangler",
         "status": "current",
-        "submits_for": ["test-4dn-lab"],
+        "submits_for": ["test-4dn-lab","4dn-dcic-lab"],
         "viewing_groups" : ["4DN"],
         "timezone": "US/Pacific",
         "uuid": "986b362f-4eb6-4a9c-8173-3ab267307e3b"

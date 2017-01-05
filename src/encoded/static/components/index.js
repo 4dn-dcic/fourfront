@@ -19,6 +19,7 @@ require('./navigation');
 require('./inputs');
 require('./schema');
 require('./search');
+require('./experiments-table');
 require('./browse');
 require('./testwarning');
 

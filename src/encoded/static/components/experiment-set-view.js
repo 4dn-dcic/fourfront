@@ -3,12 +3,13 @@
 var React = require('react');
 var globals = require('./globals');
 var Panel = require('react-bootstrap').Panel;
-var { ExperimentsTable, getFileDetailContainer } = require('./experiments-table');
+var { ExperimentsTable } = require('./experiments-table');
 var _ = require('underscore');
 var { SubIPanel, DescriptorField, tipsFromSchema } = require('./item');
 var FacetList = require('./facetlist');
-var { ajaxLoad, textContentWidth, gridContainerWidth, isServerSide, DateUtility, console, getNestedProperty } = require('./objectutils');
+var { ajaxLoad, DateUtility, console, getNestedProperty } = require('./objectutils');
 var FormattedInfoBlock = require('./formatted-info-block');
+var { FlexibleDescriptionBox } = require('./experiment-common');
 
 /**
  * Entire ExperimentSet page view.
@@ -36,30 +37,21 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
     getInitialState : function(){
         return {
-            selectedFiles: new Set(),
-            checked : true,
-            details_award : null,
-            details_lab : null
+            'selectedFiles': new Set(),
+            'checked' : true,
+            'details_award' : null,
+            'details_lab' : null,
+            'passExperiments' : ExperimentsTable.getPassedExperiments(this.props.context.experiments_in_set, this.props.expSetFilters, 'single-term')
         };
     },
 
     tips : null, // Value assumed immutable so not in state.
-
-    // Mutable but not in state, e.g. cached output values that may rely on other state.
-    fileDetailContainer : null,
-    counts : {
-        visibleExperiments : null,
-        visibleFiles : null,
-        totalExperiments : null,
-        totalFiles : null
-    },
 
     componentWillMount : function(){
         if (!this.tips) {
             this.tips = tipsFromSchema(this.props.schemas, this.props.context);
         }
 
-        this.updateFileDetailAndCachedCounts(true); // Sets this.counts and this.fileDetailContainer -- in lieu of having ExperimentsTable handle it.
         this.setLinkedDetails(false);
     },
 
@@ -70,52 +62,11 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
     componentWillReceiveProps: function(nextProps) {
         
         // Make sure state is updated upon filtering
-        if(this.props.expSetFilters !== nextProps.expSetFilters){
+        if(this.props.expSetFilters !== nextProps.expSetFilters || this.props.context.experiments_in_set !== nextProps.context.experiments_in_set){
             this.setState({
-                selectedFiles: new Set()
+                selectedFiles: new Set(),
+                passExperiments : ExperimentsTable.getPassedExperiments(nextProps.context.experiments_in_set, nextProps.expSetFilters, 'single-term')
             });
-            this.updateFileDetailAndCachedCounts(false, nextProps);
-        } else if (this.props.context.experiments_in_set !== nextProps.context.experiments_in_set){
-            this.updateFileDetailAndCachedCounts(true, nextProps);
-        }
-
-        /* For debugging
-        if (!isServerSide()){
-            window.table = this.refs.experimentsTable;
-            window.view = this;
-        }
-        */
-
-    },
-
-    /** Same functionality as exists in ExperimentsTable, but with different method to get ignoredFilters */
-    updateFileDetailAndCachedCounts : function(updateTotals = false, props = this.props){
-
-        // Set fileDetailContainer
-        var passExperiments = null, ignoredFilters = null, experimentArray = props.context.experiments_in_set;
-
-        if (props.expSetFilters) {
-            if (props.facets && props.facets.length > 0) {
-                ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(props.facets, props.expSetFilters);
-            } else {
-                // Ignore filters if none in current experiment_set match it so that if coming from 
-                // another page w/ filters enabled (i.e. browse) and deselect own 'static'/single term, it isn't empty.
-                ignoredFilters = FacetList.findIgnoredFiltersByStaticTerms(experimentArray, props.expSetFilters);
-            }
-            passExperiments = FacetList.siftExperiments(experimentArray, props.expSetFilters, ignoredFilters);
-        }
-        
-        this.fileDetailContainer = getFileDetailContainer(experimentArray, passExperiments);
-
-        var visibleCounts = ExperimentsTable.visibleExperimentsCount(this.fileDetailContainer);
-        this.counts.visibleExperiments = visibleCounts.experiments;
-        this.counts.visibleFiles = visibleCounts.files;
-        if (updateTotals && experimentArray && Array.isArray(experimentArray)){
-            var totalCounts = ExperimentsTable.totalExperimentsCount(experimentArray);
-            if (totalCounts){
-                this.counts.totalExperiments = totalCounts.experiments;
-                this.counts.totalFiles = totalCounts.files;
-            }
         }
     },
 
@@ -216,6 +167,15 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
         console.log('render ExperimentSet view');
 
+        /* In addition to built-in headers for experimentSetType defined by ExperimentsTable */
+        var expTableColumnHeaders = [
+            { className: 'file-detail', title : 'File Info'}
+        ];
+
+        if (this.props.context.experimentset_type === 'replicate') {
+            expTableColumnHeaders.unshift({ className: 'file-detail', title : 'File Type'});
+        }
+
         return (
             <div className={itemClass}>
 
@@ -246,29 +206,28 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                             {...this.props} 
                         />
 
-                        <div className="exp-table-container">
+                        <div className="exp-table-section">
                             <h3>
                                 <span>Experiments</span>
                                 <span className="exp-number small right">
                                     <span className="hidden-xs">Showing </span>
-                                    { this.counts.visibleExperiments } of { this.counts.totalExperiments }
+                                    { this.state.passExperiments.length } of { this.props.context.experiments_in_set.length }
                                     <span className="hidden-xs"> Experiments</span>
                                 </span>
                             </h3>
-                            <ExperimentsTable 
-                                ref="experimentsTable"
-                                columnHeaders={[ 
-                                    null, 
-                                    'Experiment Accession', 
-                                    'Biosample Accession',
-                                    'File Accession', 
-                                    'File Type',
-                                    'File Info'
-                                ]}
-                                parentController={this}
-                                fileDetailContainer={this.fileDetailContainer}
-                                keepCounts={false}
-                            />
+                            <div className="exp-table-container">
+                                <ExperimentsTable 
+                                    ref="experimentsTable"
+                                    parentController={this}
+                                    experimentSetType={this.props.context.experimentset_type}
+                                    expSetFilters={this.props.expSetFilters}
+                                    facets={ this.props.facets }
+                                    experimentArray={this.props.context.experiments_in_set}
+                                    replicateExpsArray={this.props.context.replicate_exps}
+                                    keepCounts={false}
+                                    columnHeaders={expTableColumnHeaders}
+                                />
+                            </div>
                         </div>
 
                     </div>
@@ -375,7 +334,18 @@ var ExperimentSetHeader = React.createClass({
                     </h5>
                 </div>
 
-                <ExperimentSetHeaderBar description={ this.props.context.description } />
+                <FlexibleDescriptionBox 
+                    description={ this.props.context.description } 
+                    className="item-page-heading experiment-heading"
+                    textClassName="text-large"
+                    fitTo="grid"
+                    dimensions={{
+                        paddingWidth : 32,
+                        paddingHeight : 22,
+                        buttonWidth : 30,
+                        initialHeight : 45
+                    }} 
+                />
 
                 <div className="row clearfix bottom-row">
                     <div className="col-sm-6 item-label-extra set-type-indicators">{ /* PLACEHOLDER / TEMP-EMPTY */ }</div>
@@ -385,131 +355,6 @@ var ExperimentSetHeader = React.createClass({
             </div>
         );
     }
-});
-
-var ExperimentSetHeaderBar = React.createClass({
-
-    propTypes : {
-        description : React.PropTypes.string.isRequired,
-        totalPaddingWidth : React.PropTypes.number,
-        totalPaddingHeight : React.PropTypes.number,
-        initialHeight : React.PropTypes.number,
-        expandButtonWidth : React.PropTypes.number
-    },
-
-    getDefaultProps : function(){
-        return {
-            totalPaddingWidth : 32,
-            totalPaddingHeight : 22,
-            expandButtonWidth : 30,
-            initialHeight : 45
-        };
-    },
-
-    getInitialState : function(){
-        return {
-            descriptionExpanded : false,
-            descriptionWillFitOneLine : true,
-            descriptionWhiteSpace : 'nowrap'
-        }
-    },
-
-    descriptionHeight : null, // Use for animating height, if needed.
-
-    
-    checkWillDescriptionFitOneLineAndUpdateHeight : function(){
-
-        if (isServerSide()) return true;
-        
-        var containerWidth = gridContainerWidth() - this.props.totalPaddingWidth; // Account for inner padding & border.
-        
-        var tcw = textContentWidth(this.props.description, 'p', 'text-large', containerWidth - this.props.expandButtonWidth); // Account for expand button.
-
-        if (!tcw) {
-            return true;
-        }
-
-        this.descriptionHeight = tcw.containerHeight + this.props.totalPaddingHeight; // Account for padding, border.
-
-        if ( tcw.textWidth < containerWidth ){ 
-            return true;
-        }
-        return false;
-
-    },
-    
-
-    componentDidMount : function(){
-        console.info("Mounted ExperimentSetHeaderBar");
-        if (!isServerSide()){
-
-            this.debouncedLayoutResizeStateChange = _.debounce(() => {
-                // Debounce to prevent from executing more than once every 300ms.
-                var oldHeight = this.descriptionHeight;
-                var willDescriptionFitAtNewWindowSize = this.checkWillDescriptionFitOneLineAndUpdateHeight();
-                if (willDescriptionFitAtNewWindowSize != this.state.descriptionWillFitOneLine){
-                    this.setState({
-                        descriptionWillFitOneLine : willDescriptionFitAtNewWindowSize
-                    });
-                } else if (this.descriptionHeight != oldHeight) {
-                    this.forceUpdate();
-                }
-            }, 300, false);
-
-            window.addEventListener('resize', this.debouncedLayoutResizeStateChange);
-            window.requestAnimationFrame(()=>{
-                this.setState({
-                    descriptionWillFitOneLine : this.checkWillDescriptionFitOneLineAndUpdateHeight()
-                });
-            });
-        }
-        
-    },
-
-    componentWillUnmount: function(){
-        if (typeof window != 'undefined'){
-            window.removeEventListener('resize', this.debouncedLayoutResizeStateChange);
-        }
-    },
-
-    handleDescriptionExpandToggle: function (e) {
-        e.preventDefault();
-        this.setState({
-            descriptionWhiteSpace : 'normal',
-  		    descriptionExpanded: !this.state.descriptionExpanded
-        }, ()=>{
-            if (!this.state.descriptionExpanded) {
-                // Delay whiteSpace style since can't transition it w/ CSS3
-                setTimeout(()=>{
-                    this.setState({
-                        descriptionWhiteSpace : 'nowrap'
-                    })
-                }, 350);
-            }
-        });
-    },
-
-    render : function(){
-        console.log('render ExperimentSetHeaderBar');
-        var expandButton;
-        if (!this.state.descriptionWillFitOneLine){
-            expandButton = (
-                <button type="button" className="description-expand-button right" onClick={this.handleDescriptionExpandToggle}>
-                    <i className={"icon icon-" + (this.state.descriptionExpanded ? 'minus' : 'plus' )} />
-                </button>
-            );
-        }
-        return (
-            <div className="item-page-heading experiment-heading" style={{
-                height : this.state.descriptionExpanded ? this.descriptionHeight : this.props.initialHeight + 'px',
-                whiteSpace : this.state.descriptionWhiteSpace
-            }}>
-                { expandButton }
-                <p className="text-large">{ this.props.description }</p>
-            </div>
-        );
-    }
-
 });
 
 

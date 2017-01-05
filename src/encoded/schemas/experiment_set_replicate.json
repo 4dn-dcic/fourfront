@@ -49,6 +49,7 @@
             "items": {
                 "title": "Replicate experiment",
                 "type": "object",
+                "required": ["replicate_exp", "bio_rep_no", "tec_rep_no"],
                 "additionalProperties": false,
                 "properties": {
                     "replicate_exp":{
@@ -124,6 +125,15 @@
         },
         "experiments_in_set": {
             "title": "Experiments"
+        },
+        "replicate_exps.replicate_exp.@id": {
+            "title": "Experiment ID"
+        },
+        "replicate_exps.bio_rep_no": {
+            "title": "Experiment Biological Replicate Number"
+        },
+        "replicate_exps.tec_rep_no": {
+            "title": "Experiment Technical Replicate Number"
         }
     }
 }

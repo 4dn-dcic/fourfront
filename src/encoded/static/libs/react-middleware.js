@@ -20,19 +20,19 @@ var render = function (Component, body, res) {
 
     // Subprocess-middleware re-uses process on prod. Might have left-over data from prev request. 
     // JWT 'localStorage' uses 'dummyStorage' plain object on server-side
-    JWT.remove('localStorage'); 
+    JWT.remove(); 
     // Grab JWT token if available to inform session
     var jwtToken = res.getHeader('X-Request-JWT'); // Only returned if successfully authenticated
     var sessionMayBeSet = false;
     var userInfo = null;
-    if (jwtToken && jwtToken.length > 0 && jwtToken !== "null" && jwtToken !== "expired"){
+    if (JWT.maybeValid(jwtToken)){
         sessionMayBeSet = true;
         userInfo = JSON.parse(res.getHeader('X-User-Info'));
         if (userInfo){
             JWT.saveUserInfoLocalStorage(userInfo);
         }
-        //res.removeHeader('X-User-Info');
-        //res.removeHeader('X-Request-JWT');
+        res.removeHeader('X-User-Info');
+        res.removeHeader('X-Request-JWT');
     } else if (
         /* (disp_dict.context.code === 403 || res.statusCode === 403) && */ 
         // Sometimes a different statusCode is returned (e.g. 404 if no search/browse result)
