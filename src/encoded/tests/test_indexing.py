@@ -108,8 +108,6 @@ def test_indexing_simple(testapp, indexer_testapp):
     testapp.post_json('/testing-post-put-patch/', {'required': ''})
     res = indexer_testapp.post_json('/index', {'record': True})
     assert res.json['indexed'] == 1
-    res = testapp.get('/search/?type=TestingPostPutPatch')
-    assert res.json['total'] == 2
 
     res = testapp.post_json('/testing-post-put-patch/', {'required': ''})
     uuid = res.json['@graph'][0]['uuid']
