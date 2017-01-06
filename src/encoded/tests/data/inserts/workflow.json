@@ -332,7 +332,63 @@
     "uuid": "2324ad76-ff37-4157-8bcc-3ce72b7dace9",
     "award": "1U01CA200059-01",
     "lab": "4dn-dcic-lab",
-    "arguments": ["dcic:arg1", "dcic:arg2", "dcic:arg3", "dcic:arg4", "dcic:arg5"],
+    "arguments": [
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "FastQC",
+                    "step_argument_name": "limits_file",
+                    "step_argument_type": "Input file"
+                }
+            ],
+            "workflow_argument_name": "limits_file",
+            "argument_type": "Input file"
+        },
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "FastQC",
+                    "step_argument_name": "input_fastq",
+                    "step_argument_type": "Input file"
+                }
+            ],
+            "workflow_argument_name": "input_fastq",
+            "argument_type": "Input file"
+        },
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "FastQC",
+                    "step_argument_name": "contaminants_file",
+                    "step_argument_type": "Input file"
+                }
+            ],
+            "workflow_argument_name": "contaminants_file",
+            "argument_type": "Input file"
+        },
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "FastQC",
+                    "step_argument_name": "adapters_file",
+                    "step_argument_type": "Input file"
+                }
+            ],
+            "workflow_argument_name": "adapters_file",
+            "argument_type": "Input file"
+        },
+        {
+            "argument_mapping": [
+                {
+                    "workflow_step": "FastQC",
+                    "step_argument_name": "report_zip",
+                    "step_argument_type": "Output file"
+                }
+            ],
+            "workflow_argument_name": "report_zip",
+            "argument_type": "Output file"
+        }
+    ],
     "title": "FastQC",
     "name": "fastqc-0-11-4-1",
     "workflow_type": "Data QC",

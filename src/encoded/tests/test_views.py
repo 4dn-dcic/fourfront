@@ -217,8 +217,7 @@ def test_collection_actions_filtered_by_permission(workbook, testapp, anontestap
 
 
 def test_item_actions_filtered_by_permission(testapp, authenticated_testapp, human_biosource):
-    import pdb; pdb.set_trace()
-    location = human_biosource['@id']
+    location = human_biosource['@id'] + '?frame=page'
 
     res = testapp.get(location)
     assert any(action for action in res.json.get('actions', []) if action['name'] == 'edit')
@@ -229,14 +228,14 @@ def test_item_actions_filtered_by_permission(testapp, authenticated_testapp, hum
 
 def test_collection_put(testapp, execute_counter):
     initial = {
-        'name': 'human',
-        'scientific_name': 'Homo sapiens',
-        'taxon_id': '9606',
+        "name": "human",
+        "scientific_name": "Homo sapiens",
+        "taxon_id": "9606",
     }
     item_url = testapp.post_json('/organism', initial).location
 
     with execute_counter.expect(1):
-        item = testapp.get(item_url).json
+        item = testapp.get(item_url + '?frame=object').json
 
     for key in initial:
         assert item[key] == initial[key]
@@ -247,8 +246,7 @@ def test_collection_put(testapp, execute_counter):
         'taxon_id': '10090',
     }
     testapp.put_json(item_url, update, status=200)
-
-    res = testapp.get('/' + item['uuid']).follow().json
+    res = testapp.get('/' + item['uuid'] + '?frame=object').follow().json
 
     for key in update:
         assert res[key] == update[key]

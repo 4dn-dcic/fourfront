@@ -92,7 +92,7 @@
         }
     ],
     "input_files": [],
-    "workflow": "02d636b9-d82d-4da9-950c-2ca994a0943e"
+    "workflow": "c7a60edf-49e5-4c33-afab-9ec90d65faf3"
 },{
     "uuid": "d8a60edf-49e5-4c33-afab-9ec90d65fae4",
     "award": "1U01CA200059-01",
@@ -118,6 +118,6 @@
         }
     ],
     "input_files": [],
-    "workflow": "2324ad76-ff37-4157-8bcc-3ce72b7dace9"
+    "workflow": "c7a60edf-49e5-4c33-afab-9ec90d65faf3"
 }
 ]

@@ -10,8 +10,7 @@ from snovault import (
 from .base import (
     Item
 )
-from snovault.resource_views import item_view_object
-from snovault.resource_views import item_view_embedded
+from snovault.resource_views import item_view_page
 from snovault.calculated import calculate_properties
 
 @collection(
@@ -83,5 +82,5 @@ class ExperimentSetReplicate(Item):
 # make it so any item page defaults to using the object, not embedded, view
 @view_config(context=ExperimentSetReplicate, permission='view', request_method='GET', name='page')
 def item_page_view(context, request):
-    """Return the frame=object view rather than embedded view by default."""
-    return item_view_embedded(context, request)
+    """Return the frame=page view rather than object view by default."""
+    return item_view_page(context, request)

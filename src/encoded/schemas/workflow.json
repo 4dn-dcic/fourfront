@@ -68,8 +68,68 @@
             "items": {
                 "title": "argument",
                 "description": "An argument of the workflow.",
-                "type": "string",
-                "linkTo": "Argument"
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "workflow_argument_name": {
+                        "title": "Workflow argument name",
+                        "description": "the name of the argument of the workflow",
+                        "type": "string"
+                    },
+                    "argument_type":{
+                        "titie": "Workflow argument type",
+                        "description": "type of the argument",
+                        "type": "string",
+                        "enum" : [
+                            "",
+                            "Input file",
+                            "Output file",
+                            "parameter"
+                        ]
+                    },
+                    "description": {
+                        "title": "description",
+                        "description": "description of the argument",
+                        "type": "string"
+                    },
+                    "argument_mapping": {
+                        "title": "Argument Mappings",
+                        "internal_comment": "same workflow argument can be passed to multiple steps",
+                        "description": "argument mapping between workflow and steps",
+                        "type": "array",
+                        "items": {
+                            "title" : "Argument Mapping",
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "workflow_step": {
+                                    "title": "Corresponding workflow step",
+                                    "description": "the step of the workflow that takes the input file",
+                                    "type": "string",
+                                    "linkTo": "AnalysisStep",
+                                    "internal_comment": "the same analysis step may appear multiple times"
+                                },
+                                "step_argument_name": {
+                                    "title": "Step argument name",
+                                    "description": "the name of the argument of the step that corresponds to the workflow argument",
+                                    "type": "string"
+                                },
+                                "step_argument_type": {
+                                    "title": "Step argument type",
+                                    "description": "type of the argument of the step",
+                                    "type": "string",
+                                    "enum": [
+                                        "Input file",
+                                        "Output file",
+                                        "parameter",
+                                        "Input file or parameter",
+                                        "Output file or parameter"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "workflow_steps": {

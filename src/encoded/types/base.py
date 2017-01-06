@@ -17,7 +17,7 @@ from pyramid.traversal import (
 )
 import snovault
 # from ..schema_formats import is_accession
-from snovault.resource_views import item_view_object
+from snovault.resource_views import item_view_page_object
 
 
 @lru_cache()
@@ -199,7 +199,7 @@ class Item(snovault.Item):
 @view_config(context=Item, permission='view', request_method='GET', name='page')
 def item_page_view(context, request):
     """Return the frame=object view rather than embedded view by default."""
-    properties = item_view_object(context, request)
+    properties = item_view_page_object(context, request)
     return properties
 
 class SharedItem(Item):
