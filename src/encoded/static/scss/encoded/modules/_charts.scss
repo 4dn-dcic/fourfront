@@ -1,3 +1,22 @@
+
+.chart-container {
+    transition: opacity .75s, transform .75s;
+    opacity: 1;
+
+    .chart {
+        transition: transform .75s;
+    }
+
+    &.no-data {
+        opacity: 0;
+
+        .chart {
+            transform: scale3d(0.8,0.8,0.8);
+        }
+    }
+
+}
+
 .chart {
     position: relative;
 }
@@ -5,6 +24,73 @@
 /** Sunburst Chart Style(s) **/
 
 .chart-container-sunburst {
+
+    .chart-breadcrumbs {
+        position: relative;
+        margin-bottom: 10px;
+        height: 26px;
+        overflow: visible;
+        margin-left: -12px;
+
+        &:before {
+            content : '';
+            position: absolute;
+            z-index: 1;
+            height: 52px;
+            width: 12px;
+            background-color: #fff;
+            left: 0;
+            top: 0;
+        }
+
+        .chart-crumb {
+            display: inline-block;
+            padding: 0 12px 0 25px;
+            position: relative;
+            transition: opacity 0.5s;
+            color: #fff;
+            font-weight: 500;
+            height: 26px;
+            line-height: 26px;
+
+            &:not(:first-child) {
+                padding-left: 25px;
+            }
+
+            &:not(:last-child){
+                &:after {
+                    //content: '\f105';
+                    content: '';
+                    //font-family: FontAwesome;
+                    position: absolute;
+                    transform: rotateZ(45deg);
+                    height: 18px;
+                    width: 18px;
+                    box-sizing: content-box;
+                    border-top: 2px solid #fff;
+                    border-right: 2px solid #fff;
+                    z-index: 2;
+                    background-color: inherit;
+                    right: -11px;
+                    top: 3px;
+                    color: #bbb;
+                }
+            }
+
+            &:first-child {
+                border-top-left-radius: 3px;
+                border-bottom-left-radius: 3px;
+            }
+
+            &:last-child {
+                //background-color: transparent !important;
+                //color: #333;
+                //padding-right: 0px;
+                border-top-right-radius: 3px;
+                border-bottom-right-radius: 3px;
+            }
+        }
+    }
 
     .chart {
     
@@ -29,6 +115,10 @@
 
         }    
 
+    }
+
+    &.no-data .chart {
+        transform: rotate3d(0,0,1,-90deg);
     }
 
     .sequence text,

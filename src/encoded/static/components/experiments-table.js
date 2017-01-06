@@ -636,6 +636,23 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 return 0;
             },
 
+            allFilesFromFileSetsInExperiment : function(experiment){
+                if (Array.isArray(experiment.filesets)){
+                    return _(experiment.filesets).chain()
+                        .pluck('files_in_set')
+                        .filter(function(files_in_set){ return typeof files_in_set !== 'undefined'; })
+                        .flatten(true)
+                        .value();
+                }
+                return [];
+            },
+
+            allFilesFromExperiment : function(experiment){
+                return (experiment.files || []).concat(
+                    ExperimentsTable.funcs.allFilesFromFileSetsInExperiment(experiment)
+                );
+            },
+
             groupFilesByPairs : function(files_in_experiment){
                 // Add 'file_pairs' property containing array of arrays of paired files to each experiment.
                 return _(files_in_experiment).chain()
@@ -678,10 +695,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                         Array.isArray(exp.filesets[0].files_in_set)
                     ){
                         exp.file_pairs = ExperimentsTable.funcs.groupFilesByPairs(
-                            _.flatten(
-                                _.pluck(exp.filesets, 'files_in_set'),
-                                true
-                            )
+                            ExperimentsTable.funcs.allFilesFromFileSetsInExperiment(exp)
                         );
                     }
                     return exp;
@@ -921,7 +935,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         return (
             <ExperimentsTable.StackedBlock 
                 key={exp['@id']}
-                hideNameOnHover={true}
+                hideNameOnHover={false}
                 columnClass="experiment"
                 label={{ 
                     title : 'Experiment',
@@ -995,7 +1009,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         return (
             <ExperimentsTable.StackedBlock
                 columnClass="biosample"
-                hideNameOnHover={true}
+                hideNameOnHover={false}
                 key={expsWithBiosample[0].biosample['@id']}
                 id={'bio-' + (expsWithBiosample[0].biosample.bio_rep_no || i + 1)}
                 label={{

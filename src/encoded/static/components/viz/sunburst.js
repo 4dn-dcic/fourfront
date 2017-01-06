@@ -3,6 +3,10 @@
 var React = require('react');
 var _ = require('underscore');
 var d3 = require('d3');
+var expFuncs = require('../experiments-table').ExperimentsTable.funcs;
+var { ChartBreadcrumbs, util } = require('./common');
+var { console } = require('../objectutils');
+
 
 /** 
  * Based on Sunburst D3 Example @ http://bl.ocks.org/kerryrodden/7090426
@@ -25,171 +29,348 @@ var SunBurst = React.createClass({
             return path;
         },
 
-        // Taken from http://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript
-        stringToColor : function(str) {
-            var hash = 0;
-            for (var i = 0; i < str.length; i++) {
-                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        transformDataForChart : function(experiment_sets){
+            // ToDo: Make configurable (e.g. pass in array of objects of depths/fields/description-accessor-func/etc.)
+
+            // We create children OBJECT on each layer to gather children by w.e. field needed, where the unique field value is key.
+            // Then recursively convert to array for use by chart.
+
+            // First child (depth == 1) should be organism. ('root' node will have depth == 0)
+            var rootNode = {
+                'name' : 'root',
+                'children' : {}
+            };
+
+            // Cache each file accession into here, check if has been added to a parentNode before, and if so, adjust color to
+            // indicate is a duplicate.
+            var files = {}; 
+
+            // Ideally (for readability) would looping over each experiment & grab property of each instead of biosource 
+            // (biosource is metadata property on experiment)
+            // but experiment.biosample.biosource is an array so might miss some.
+
+            function getDataFromExperiment(exp){
+
+                function updateBiosource(biosource){
+                    if (
+                        biosource.individual.organism.name &&
+                        typeof rootNode.children[biosource.individual.organism.name] === 'undefined'
+                    ){
+                        var name = biosource.individual.organism.name;
+                        name = name.charAt(0).toUpperCase() + name.slice(1);
+                        name += " (" + biosource.individual.organism.scientific_name + ")";
+
+                        rootNode.children[biosource.individual.organism.name] = {
+                            'name' : name,
+                            'children' : {},
+                            'field' : 'experiment.biosample.biosource.individual.organism.scientific_name'
+                        };
+                    }
+                    return biosource.individual.organism.name;
+                }
+
+                // A biosample can have multiple biosources in theory, so to avoid having an experiment show up multiple times,
+                // e.g. per organism that is relevant, we choose ONE organism that is best applicable to this experiment.
+                var organismName = null;
+
+                // Biosource Organism name; is an array of usually 1 but sometimes multiple biosources, so make sure to include all.
+                if (Array.isArray(exp.biosample.biosource)) {
+                    var organismNamesEncountered = [];
+                    for (var i = 0; i < exp.biosample.biosource.length; i++) {
+                        organismNamesEncountered.push(updateBiosource(exp.biosample.biosource[i]));
+                    }
+                    if (organismNamesEncountered.length === 1) organismName = organismNamesEncountered[0]; // Easy
+                    else { // Figure out most commonly-used organism for biosample, attach subsequent data to that.
+                        organismName = _(organismNamesEncountered).chain()
+                            .reduce(organismNamesEncountered, function(counts, orgName){
+                                counts[orgName] = (counts[orgName] || 0) + 1;
+                                return counts;
+                            }, {})
+                            .pairs()
+                            .sortBy(1)
+                            .value()[0];
+                        console.log(organismName, organismNamesEncountered); // ToDo test this
+                    }
+                } else if (exp.biosample.biosource) {
+                    organismName = updateBiosource(exp.biosample.biosource);
+                }
+
+                // Biosample biosource_summary (group experiment descriptions by)
+                if (
+                    exp.biosample.biosource_summary &&
+                    typeof rootNode.children[organismName].children[exp.biosample.biosource_summary] === 'undefined'
+                ){
+                    var description;
+                    if (typeof exp.biosample.modifications_summary_short !== 'undefined' && exp.biosample.modifications_summary_short !== 'None'){
+                        description = exp.biosample.modification_summary_short;
+                    } else if (exp.biosample.biosource_summary) {
+                        description = 'Biosample';
+                    }
+                    rootNode.children[organismName].children[exp.biosample.biosource_summary] = {
+                        'name' : exp.biosample.biosource_summary,
+                        'children' : {}, // We don't show experiment_sets here because there may be multiple biosamples per expset. 
+                        'description' : description,
+                        'field' : 'experiment.biosample.biosource_summary'
+                    }
+                }
+
+                // Experiment Description (group experiments by)
+                var attachExpSummaryTo = rootNode.children[organismName].children[exp.biosample.biosource_summary];
+
+                if (
+                    exp.biosample.biosource_summary &&
+                    exp.experiment_summary &&
+                    typeof attachExpSummaryTo.children[exp.experiment_summary] === 'undefined'
+                ){
+                    attachExpSummaryTo.children[exp.experiment_summary] = {
+                        'name' : exp.experiment_summary,
+                        //'description' : 'Experiment ' + exp.accession,
+                        'children' : {},
+                        'field' : 'experiment.experiment_summary'
+                    }
+                } else if (
+                    exp.biosample.biosource_summary &&
+                    !exp.experiment_summary &&
+                    typeof attachExpSummaryTo.children.other === 'undefined'
+                ){
+                    console.error("Experiment " + exp.accession + " missing experiment_summary.");
+                    attachExpSummaryTo.children.other = {
+                        'name' : 'Other',
+                        //'description' : 'Experiment ' + exp.accession,
+                        'children' : {},
+                        'field' : 'experiment.experiment_summary'
+                    }
+                }
+
+                var attachExpTo;
+                if (exp.experiment_summary){
+                    attachExpTo = attachExpSummaryTo.children[exp.experiment_summary];
+                } else {
+                    attachExpTo = attachExpSummaryTo.children.other;
+                }
+
+                // Experiments & Files
+                if (
+                    exp.accession &&
+                    exp.biosample.biosource_summary &&
+                    typeof attachExpTo.children[exp.accession] === 'undefined'
+                ){
+                    attachExpTo.children[exp.accession] = {
+                        'name' : exp.accession,
+                        'fallbackSize' : 1,
+                        'field' : 'experiment.accession',
+                        'children' : expFuncs.allFilesFromExperiment(exp).map(function(f){
+                                var color = "#ccc";
+                                if (typeof files[f.accession] !== 'undefined'){
+                                    files[f.accession] = true; // value doesn't really matter.
+                                } else {
+                                    color = '#ddd';
+                                }
+                                return {
+                                    'name' : f.accession,
+                                    'size' : 1,
+                                    'description' : 'File ' + f.accession,
+                                    'color' : color,
+                                    'field' : 'experiment.files.accession'
+                                };
+                            })
+                    }
+                } else {
+                    console.error("Check experiment hierarchy code for chart.");
+                }
             }
-            var colour = '#';
-            for (var i = 0; i < 3; i++) {
-                var value = (hash >> (i * 8)) & 0xFF;
-                colour += ('00' + value.toString(16)).substr(-2);
+
+            // Loop over every experiment we have that was returned from /browse/ endpoint.
+            for (var h = 0; h < experiment_sets.length; h++){
+                for (var i = 0; i < experiment_sets[h].experiments_in_set.length; i++){
+                    getDataFromExperiment(experiment_sets[h].experiments_in_set[i]);
+                }
             }
-            return colour;
+
+            function childrenObjectsToArrays(node){
+                if (Array.isArray(node.children)) return; // Already set elsewhere.
+                if (typeof node.children === 'object' && node.children && Object.keys(node.children).length > 0){
+                    // Convert children object to array.
+                    node.children = _.values(node.children);
+                }
+                // If no children, we're done.
+                if (typeof node.children === 'undefined' || !Array.isArray(node.children) || node.children.length === 0){
+                    return;
+                }
+                // Repeat for each child node in children array.
+                node.children.forEach(childrenObjectsToArrays);
+            }
+
+            childrenObjectsToArrays(rootNode);
+            return rootNode;
         }
     },
 
     getDefaultProps : function(){
         return {
-            width : 750,
-            height : 600,
-            id : "main",
-            data : null,
-            breadcrumbDims : {
+            'data' : null,
+            'width' : 750,
+            'height' : 600,
+            'id' : 'main',
+            'breadcrumbDims' : {
                 // Breadcrumb dimensions: width, height, spacing, width of tip/tail.
-                w: 250, h: 30, s: 3, t: 10
+                w: 100, h: 30, s: 3, t: 10
             },
-            colors : {
-                "home": "#5687d1",
-                "product": "#7b615c",
-                "search": "#de783b",
-                "account": "#6ab975",
+            'fallbackToSampleData' : false, // Perhaps for tests.
+            'colors' : { // Keys should be all lowercase
+                "human (homo sapiens)" : "rgb(218, 112, 6)",
+                "mouse (mus musculus)" : "rgb(43, 88, 169)",
                 "other": "#a173d1",
                 "end": "#bbbbbb"
             }
         };
     },
 
-    // Fade all but the current sequence, and show it in the breadcrumb trail.
-    mouseover : function(d){
-
+    /* We create a throttled version of this function in componentDidMount for performance */
+    mouseoverHandle : function(d){
         var percentage = (100 * d.value / this.totalSize).toPrecision(3);
         var percentageString = percentage + "%";
         if (percentage < 0.1) {
             percentageString = "< 0.1%";
         }
 
+        // .appendChild used to be faster than .innerHTML but seems
+        // innerHTML is better now (?) https://jsperf.com/appendchild-vs-documentfragment-vs-innerhtml/24
+
         this.refs.percentage.innerHTML = percentageString;
-        this.refs.explanation.style.visibility = "";
+
         if (d.data.description) {
             this.refs.description.innerHTML = d.data.description;
         } else {
             this.refs.description.innerHTML = '';
         }
 
+        this.refs.explanation.style.visibility = "";
+        
         var sequenceArray = SunBurst.getAncestors(d);
-        this.updateBreadcrumbs(sequenceArray, percentageString);
 
         // Fade all the segments.
-        this.vis.selectAll("path").style("opacity", 0.3);
-
         // Then highlight only those that are an ancestor of the current segment.
         this.vis.selectAll("path")
-            .filter(function(node) {
+            .interrupt()
+            .style("opacity", 0.3)
+            .filter(function(node){
                 return (sequenceArray.indexOf(node) >= 0);
             })
             .style("opacity", 1);
+
+        this.updateBreadcrumbs(sequenceArray, percentageString);
     },
 
     // Restore everything to full opacity when moving off the visualization.
     mouseleave : function(d) {
 
         var _this = this;
+        setTimeout(function(){ // Wait 50ms (duration of mouseenter throttle) so delayed handler doesn't cancel this mouseleave transition.
+            // Hide the breadcrumb trail
+            _this.refs.breadcrumbs.setState({ 'visible' : false });
 
-        // Hide the breadcrumb trail
-        d3.select(this.refs.sequence).select("#" + _this.props.id + "-trail").style("visibility", "hidden");
+            // Deactivate all segments during transition.
+            _this.vis.selectAll("path").on("mouseover", null);
 
-        // Deactivate all segments during transition.
-        _this.vis.selectAll("path").on("mouseover", null);
+            // Transition each segment to full opacity and then reactivate it.
+            _this.vis.selectAll("path")
+                .transition()
+                .duration(750)
+                .style("opacity", 1)
+                //.filter(function(d){ return  })
+                .each(function(path) {
+                    d3.select(this).on("mouseover", _this.throttledMouseOverHandler);
+                });
 
-        // Transition each segment to full opacity and then reactivate it.
-        _this.vis.selectAll("path")
-            .transition()
-            .duration(1000)
-            .style("opacity", 1)
-            //.filter(function(d){ return  })
-            .each(function(path) {
-                d3.select(this).on("mouseover", _this.mouseover);
-            });
-
-        _this.refs.explanation.style.visibility = "hidden";            
+            _this.refs.explanation.style.visibility = "hidden";            
+        }, 50);
     },
 
-    // Update the breadcrumb trail to show the current sequence and percentage.
-    updateBreadcrumbs : function(nodeArray, percentageString) {
-        var b = this.props.breadcrumbDims;
-
-        // Data join; key function combines name and depth (= position in sequence).
-        var g = d3.select(this.refs.sequence).select("#" + this.props.id + "-trail")
-            .selectAll("g")
-            .data(nodeArray, function(d) { return d.data.name + d.depth; });
-
-        // Add breadcrumb and label for entering nodes.
-        var entering = g.enter()
-            .append("svg:g")
-            .attr("transform", function(d) { return "translate(" + (d.depth - 1) * (b.w + b.s) + ",0)"; });
-
-        entering.append("svg:polygon")
-            .attr("points", this.breadcrumbPoints)
-            .style("fill", (d) => {
-                if (typeof this.props.colors[d.data.name] !== 'undefined') return this.props.colors[d.data.name];
-                else return SunBurst.stringToColor(d.data.name);
-            });
-
-        entering.append("svg:text")
-            .attr("x", (b.w + b.t) / 2)
-            .attr("y", (b.h / 2) - 1)
-            .attr("dy", "0.35em")
-            .attr("text-anchor", "middle")
-            .text(function(d) { return d.data.name; });
-
-        // Remove exiting nodes.
-        g.exit().remove();
-
-        // Set position for entering and updating nodes.
-        g.attr("transform", function(d, i) {
-            return "translate(" + (d.depth - 1) * (b.w + b.s) + ", 0)";
+    updateBreadcrumbs : function(nodeArray, percentageString){
+        this.refs.breadcrumbs.setState({ 
+            nodes : nodeArray.map((n)=>{
+                n.color = this.colorForNode(n);
+                return n;
+            }),
+            visible : true
         });
-
-        // Now move and update the percentage at the end.
-        d3.select(this.refs.sequence).select("#" + this.props.id + "-trail").select("#" + this.props.id + "-endlabel")
-            .attr("x", (nodeArray.length + 0.5) * (b.w + b.s))
-            .attr("y", b.h / 2)
-            .attr("dy", "0.35em")
-            .attr("text-anchor", "middle")
-            .text(percentageString);
-
-        // Make the breadcrumb trail visible, if it's hidden.
-        d3.select(this.refs.sequence).select("#" + this.props.id + "-trail")
-            .style("visibility", "");
-
     },
 
-    // Generate a string that describes the points of a breadcrumb polygon.
-    breadcrumbPoints : function(d, i) {
-        var b = this.props.breadcrumbDims;
-        var points = [];
-        points.push("0,0");
-        points.push(b.w + ",0");
-        points.push(b.w + b.t + "," + (b.h / 2));
-        points.push(b.w + "," + b.h);
-        points.push("0," + b.h);
-        if (i > 0) { // Leftmost breadcrumb; don't include 6th vertex.
-            points.push(b.t + "," + (b.h / 2));
+    containerDimensions : function(){
+        return {
+            width  : this.refs.container.offsetWidth  || this.refs.container.clientWidth  || this.props.width,
+            height : this.refs.container.offsetHeight || this.refs.container.clientHeight || this.props.height
+        };
+    },
+
+    colorForNode : function(node){
+        if (node.data.color){
+            return node.data.color;
         }
-        return points.join(" ");
-    },
 
+        // Normalize name to lower case (as capitalization etc may change in future)
+        var nodeName = node.data.name.toLowerCase();
+
+        if (typeof this.props.colors[nodeName] !== 'undefined'){
+            return this.props.colors[nodeName];
+        } else if (typeof this.colorCache[nodeName] !== 'undefined') {
+            return this.colorCache[nodeName]; // Previously calc'd color
+        } else if (
+            node.data.field === 'experiment.accession' || 
+            node.data.field === 'experiment.experiment_summary' ||
+            node.data.field === 'experiment.biosample.biosource_summary'
+        ){
+            // Use a variant of parent node's color
+            if (node.parent) {
+                var color;
+                if (node.data.field === 'experiment.experiment_summary'){
+                    color = d3.interpolateRgb(
+                        this.colorForNode(node.parent),
+                        util.stringToColor(nodeName)
+                    )(.4);
+                } else if (node.data.field === 'experiment.biosample.biosource_summary'){
+                    color = d3.interpolateRgb(
+                        this.colorForNode(node.parent),
+                        d3.color(util.stringToColor(nodeName)).darker(
+                            0.5 + (
+                                (2 * (node.parent.children.indexOf(node) + 1)) / node.parent.children.length
+                            )
+                        )
+                    )(.3);
+                } else if (node.data.field === 'experiment.accession') {
+                    color = d3.color(this.colorForNode(node.parent)).brighter(
+                        0.7
+                        // uncomment below for sequence 'gradient'. Doesn't work too well if parent colors are close to each other and subsequent parent is slightly lighter.
+                        //0.5 + (
+                        //    (node.parent.children.indexOf(node) + 1) / (node.parent.children.length * 2)
+                        //)
+                    );
+                }
+                this.colorCache[nodeName] = color;
+                return color;
+            }
+        }
+
+        // Fallback
+        this.colorCache[nodeName] = util.stringToColor(nodeName);
+        return this.colorCache[nodeName];
+    },
 
     visualization: function(){
 
         var _this = this; // So can use w/o needing to .apply internal functions.
 
+        if (_this.props.data === null && !_this.props.fallbackToSampleData){
+            // Nothing to visualize, maybe add loading indicator or something.
+            console.info("Nothing to visualize for Sunburst chart.");
+            return;
+        }
+
         // Dimensions of sunburst.
         var containerDimensions = this.containerDimensions();
-        var width = containerDimensions.width || _this.props.width;
-        var height = containerDimensions.height || _this.props.height;
+        var width = containerDimensions.width;
+        var height = containerDimensions.height;
         var radius = Math.min(width, height) / 2;
 
         // Breadcrumb dimensions: width, height, spacing, width of tip/tail.
@@ -217,29 +398,29 @@ var SunBurst = React.createClass({
             .innerRadius(function(d) { return Math.sqrt(d.y0); })
             .outerRadius(function(d) { return Math.sqrt(d.y1); });
 
-        if (this.props.data === null){
+        if (_this.props.data === null && _this.props.fallbackToSampleData){
             // Use d3.text and d3.csv.parseRows so that we do not need to have a header
             // row, and can receive the csv as an array of arrays.
             d3.text("/static/data/test-data-for-chart-visit-sequences.csv", function(text) {
                 var csv = d3.csvParseRows(text);
                 var json = buildHierarchy(csv);
-                console.log(_.clone(json));
                 createVisualization(json);
             });
-        } else if (Array.isArray(this.props.data)) {
-            var json = buildHierarchy(this.props.data);
+        } else if (Array.isArray(_this.props.data)) {
+            var json = buildHierarchy(_this.props.data);
             createVisualization(json);
+        } else if (_this.props.data !== null) {
+            createVisualization(_this.props.data);
         } else {
-            createVisualization(this.props.data);
+            throw new Error('Nothing to visualize.');
         }
 
         // Main function to draw and set up the visualization, once we have the data.
         function createVisualization(json) {
 
             // Basic setup of page elements.
-            initializeBreadcrumbTrail();
-            drawLegend();
-            d3.select("#" + _this.props.id + "-togglelegend").on("click", toggleLegend);
+            //drawLegend();
+            //d3.select("#" + _this.props.id + "-togglelegend").on("click", toggleLegend);
 
             // Bounding circle underneath the sunburst, to make it easier to detect
             // when the mouse leaves the parent g.
@@ -270,7 +451,7 @@ var SunBurst = React.createClass({
 
             // For efficiency, filter nodes to keep only those large enough to see.
             var nodes = root.descendants().filter(function(d){
-                return (Math.abs(d.x1-d.x0) > 0.005); // 0.005 radians = 0.29 degrees 
+                return (Math.abs(d.x1-d.x0) > 0.01); // 0.005 radians = 0.29 degrees 
             });
 
             var path = _this.vis.data([json])
@@ -280,12 +461,9 @@ var SunBurst = React.createClass({
                 .attr("display", function(d) { return d.depth ? null : "none"; })
                 .attr("d", arc)
                 .attr("fill-rule", "evenodd")
-                .style("fill", function(d) {
-                    if (typeof _this.props.colors[d.data.name] !== 'undefined') return _this.props.colors[d.data.name];
-                    else return SunBurst.stringToColor(d.data.name);
-                 })
+                .style("fill", _this.colorForNode)
                 .style("opacity", 1)
-                .on("mouseover", _this.mouseover);
+                .on("mouseover", _this.throttledMouseOverHandler);
 
             // Add the mouseleave handler to the bounding circle.
             d3.select("#" + _this.props.id + "-container").on("mouseleave", _this.mouseleave);
@@ -293,18 +471,6 @@ var SunBurst = React.createClass({
             // Get total size of the tree = value of root node from partition.
             _this.totalSize = path.node().__data__.value;
         };
-
-        function initializeBreadcrumbTrail() {
-            // Add the svg area.
-            var trail = d3.select(_this.refs.sequence).append("svg:svg")
-                .attr("width", width)
-                .attr("height", 50)
-                .attr("id", _this.props.id + "-trail");
-            // Add the label at the end, for the percentage.
-            trail.append("svg:text")
-                .attr("id", _this.props.id + "-endlabel")
-                .style("fill", "#000");
-        }
 
         function drawLegend() {
 
@@ -396,12 +562,16 @@ var SunBurst = React.createClass({
     componentDidMount : function(){
         /**
          * Manage own state for this component so don't need to re-render and re-initialize chart each time.
-         * Comment from D3 example : Total size of all segments; we set this later, after loading the data.
          */
+
         this.totalSize = 0; // Will be sum of leaf values (same val as root node), used for getting percentages.
         this.vis = null; // Entrypoint to chart
+        this.colorCache = {}; // Save any calc'd-from-string colors to avoid recomputing each time.
+
         this.visualization(); // D3 initialization
         this.adjustExplanationPosition(); // Center text in center of chart
+
+        this.throttledMouseOverHandler = _.throttle(this.mouseoverHandle, 50);
     },
 
     componentDidUpdate : function(){
@@ -410,17 +580,9 @@ var SunBurst = React.createClass({
         this.adjustExplanationPosition(); // Center text in center of chart
     },
 
-    containerDimensions : function(){
-        return {
-            width : this.refs.container.offsetWidth || this.refs.container.clientWidth,
-            height : this.refs.container.offsetHeight || this.refs.container.clientHeight
-        };
-    },
-
     adjustExplanationPosition : function(){
         var height = this.refs.explanation.offsetHeight || this.refs.explanation.clientHeight;
         var width = this.refs.explanation.offsetWidth || this.refs.explanation.clientWidth;
-        console.log(width, height);
         _.extend(this.refs.explanation.style, {
             'marginTop' : '-' + (height / 2) + 'px',
             'marginLeft' : '-' + (width / 2) + 'px'
@@ -443,9 +605,13 @@ var SunBurst = React.createClass({
 
     render : function(){
         return (
-            <div className="chart-container chart-container-sunburst" id={this.props.id} ref="container">
-                <div id={this.props.id + "-sequence"} className="sequence" ref="sequence"></div>
-                <div id={this.props.id + "-chart"} className="chart chart-sunburst">
+            <div
+                className={"chart-container chart-container-sunburst" + (this.props.data === null && !this.props.fallbackToSampleData ? ' no-data' : '')}
+                id={this.props.id}
+                ref="container"
+            >
+                <ChartBreadcrumbs parentId={this.props.id} ref="breadcrumbs" />
+                <div id={this.props.id + "-chart"} className="chart chart-sunburst" ref="chart" style={{ 'minHeight' : this.props.height }}>
                     <div id={this.props.id + "-explanation"} ref="explanation" className="explanation" style={{ visibility: 'hidden' }}>
                         <div id={this.props.id + "-percentage"} className="percentage" ref="percentage">0%</div>
                         <div id={this.props.id + "-description"} className="description" ref="description"></div>
