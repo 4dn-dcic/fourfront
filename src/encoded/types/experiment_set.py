@@ -81,7 +81,8 @@ class ExperimentSetReplicate(Item):
         properties['experiments_in_set'] = all_experiments
         super(ExperimentSetReplicate, self)._update(properties, sheets)
 
-# make it so any item page defaults to using the object, not embedded, view
+# Use the the page view as default for experiment sets. This means that embedding
+# IS relevant with regard to this specific object pages
 @view_config(context=ExperimentSetReplicate, permission='view', request_method='GET', name='page')
 def item_page_view(context, request):
     """Return the frame=page view rather than object view by default."""
