@@ -17,6 +17,7 @@ var serialize = require('form-serialize');
 var { ajaxLoad, ajaxPromise, JWT, console, responsiveGridState, isServerSide } = require('./objectutils');
 var Alerts = require('./alerts');
 var jwt = require('jsonwebtoken');
+var { FacetCharts } = require('./facetcharts');
 
 var dispatch_dict = {}; //used to store value for simultaneous dispatch
 
@@ -838,6 +839,7 @@ var App = React.createClass({
                         expSetFilters={this.props.expSetFilters}
                         expIncompleteFacets={this.props.expIncompleteFacets}
                         session={this.state.session}
+                        key={key}
                     />
                 );
                 title = context.title || context.name || context.accession || context['@id'];
@@ -891,8 +893,13 @@ var App = React.createClass({
                         <div id="application" className={appClass}>
                             <div className="loading-spinner"></div>
                             <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
-                                <Navigation href={ this.props.href } session={this.state.session} ref="navigation" />
-                                <div id="content" className="container" key={key}>
+                                <Navigation href={this.props.href} session={this.state.session} ref="navigation" />
+                                <div id="content" className="container">
+                                    <FacetCharts
+                                        href={this.props.href}
+                                        context={this.props.context}
+                                        expSetFilters={this.props.expSetFilters}
+                                    />
                                     <Alerts alerts={this.props.alerts} />
                                     { content }
                                 </div>

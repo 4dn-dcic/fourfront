@@ -152,7 +152,7 @@ var ExpTerm = React.createClass({
         this.setState(
             { filtering : true },
             () => {
-                this.props.changeFilters(
+                this.props.changeFilter(
                     this.props.facet.field,
                     this.props.term.key
                 );
@@ -207,7 +207,7 @@ var Facet = React.createClass({
         experimentSetListJSON : React.PropTypes.array,
         expSetFilters : React.PropTypes.object.isRequired,
         ignoredFilters : React.PropTypes.object,
-        changeFilters : React.PropTypes.func.isRequired,    // Executed on term click
+        changeFilter : React.PropTypes.func.isRequired,     // Executed on term click
         experimentsOrSets : React.PropTypes.string,         // Defaults to 'sets'
         width : React.PropTypes.any,
         extraClassname : React.PropTypes.string
@@ -245,7 +245,7 @@ var Facet = React.createClass({
         this.setState(
             { filtering : true },
             () => {
-                this.props.changeFilters(
+                this.props.changeFilter(
                     this.props.facet.field,
                     this.props.facet.terms[0].key,
                     ()=> {
@@ -351,6 +351,49 @@ var FacetList = module.exports = React.createClass({
 
         // Include sub-components as static (sub-)properties of main FacetList
         Facet : Facet,
+
+        changeFilter: function(field, term, experimentsOrSets = 'experiments', currentFilters = null, callback = null, returnInsteadOfSave = false) {
+
+            if (!currentFilters){
+                currentFilters = store.getState().expSetFilters;
+            }
+
+            // store currently selected filters as a dict of sets
+            var tempObj = {};
+            var newObj = {};
+
+            // standardize on field naming convention for expSetFilters before they hit the redux store.
+            field = FacetList.Facet.ExpTerm.standardizeFieldKey(field, experimentsOrSets);
+
+            var expSet = currentFilters[field] ? new Set(currentFilters[field]) : new Set();
+            if(expSet.has(term)){
+                // term is already present, so delete it
+                expSet.delete(term);
+            }else{
+                expSet.add(term);
+            }
+            if(expSet.size > 0){
+                tempObj[field] = expSet;
+                newObj = Object.assign({}, currentFilters, tempObj);
+            }else{ //remove key if set is empty
+                newObj = Object.assign({}, currentFilters);
+                delete newObj[field];
+            }
+
+            if (returnInsteadOfSave){
+                return newObj;
+            } else {
+                FacetList.saveChangedFilters(newObj);
+                if (typeof callback === 'function') setTimeout(callback, 0);
+            }
+        },
+
+        saveChangedFilters : function(expSetFilters){
+            console.log(expSetFilters, expSetFilters == true, expSetFilters == false);
+            store.dispatch({
+                type : {'expSetFilters' : expSetFilters}
+            });
+        },
 
         /**
          * Adds a restrictions property to each facet from restrictions object
@@ -773,7 +816,7 @@ var FacetList = module.exports = React.createClass({
             }
 
             if (!this.props.ignoredFilters && (this.state.usingProvidedFacets === true || this.state.facetsLoaded)){
-                this.ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(this.facets, this.props.expSetFilters);
+                this.ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(this.facets, nextProps.expSetFilters);
             } // else: See @componentDidMount > this.loadFacets() callback param
         }
     },
@@ -820,37 +863,8 @@ var FacetList = module.exports = React.createClass({
         }, 0);
     },
 
-    changeFilters: function(field, term, callback) {
-
-        setTimeout(function(){
-
-            // store currently selected filters as a dict of sets
-            var tempObj = {};
-            var newObj = {};
-
-            // standardize on field naming convention for expSetFilters before they hit the redux store.
-            field = FacetList.Facet.ExpTerm.standardizeFieldKey(field, this.props.experimentsOrSets);
-
-            var expSet = this.props.expSetFilters[field] ? new Set(this.props.expSetFilters[field]) : new Set();
-            if(expSet.has(term)){
-                // term is already present, so delete it
-                expSet.delete(term);
-            }else{
-                expSet.add(term);
-            }
-            if(expSet.size > 0){
-                tempObj[field] = expSet;
-                newObj = Object.assign({}, this.props.expSetFilters, tempObj);
-            }else{ //remove key if set is empty
-                newObj = Object.assign({}, this.props.expSetFilters);
-                delete newObj[field];
-            }
-            store.dispatch({
-                type : {'expSetFilters' : newObj}
-            });
-            if (typeof callback === 'function') setTimeout(callback, 0);
-
-        }.bind(this), 1);
+    changeFilter: function(field, term, callback) {
+        return FacetList.changeFilter(field, term, this.props.experimentsOrSets, this.props.expSetFilters, callback);
     },
 
     searchQueryTerms : function(){
@@ -876,7 +890,7 @@ var FacetList = module.exports = React.createClass({
                 experimentSetListJSON={ this.props.experimentSetListJSON || this.props.context['@graph'] || null }
                 expSetFilters={this.props.expSetFilters}
                 ignoredFilters={ this.props.ignoredFilters || this.ignoredFilters }
-                changeFilters={this.changeFilters}
+                changeFilter={this.changeFilter}
                 key={facet.field}
                 facet={facet}
                 width="inherit"

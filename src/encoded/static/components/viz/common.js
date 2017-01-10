@@ -7,7 +7,8 @@ module.exports.ChartBreadcrumbs = React.createClass({
 
     getDefaultProps : function(){
         return {
-            'parentId' : 'main'
+            'parentId' : 'main',
+            'selectedNodes' : []
         };
     },
 
@@ -24,7 +25,9 @@ module.exports.ChartBreadcrumbs = React.createClass({
     },
 
     renderCrumbs : function(){
-        return this.state.nodes.map(function(node,i){
+        return _.uniq(this.props.selectedNodes.concat(this.state.nodes), function(node){
+            return node.data.name;
+        }).map(function(node,i){
             return (
                 <span 
                     className="chart-crumb"
@@ -61,6 +64,33 @@ var util = {
             colour += ('00' + value.toString(16)).substr(-2);
         }
         return colour;
+    },
+
+    /** Functions which are to be called from Chart instances with .apply(this, ...) */
+    mixin : {
+
+        getBreadcrumbs : function(){
+            if (this.refs && typeof this.refs.breadcrumbs !== 'undefined') return this.refs.breadcrumbs;
+            if (this.props.breadcrumbs && typeof this.props.breadcrumbs === 'function') {
+                return this.props.breadcrumbs();
+            }
+            if (this.props.breadcrumbs && typeof this.props.breadcrumbs !== 'boolean') {
+                return this.props.breadcrumbs;
+            }
+            return null;
+        },
+
+        getDescriptionElement : function(){
+            if (this.refs && typeof this.refs.description !== 'undefined') return this.refs.description;
+            if (this.props.descriptionElement && typeof this.props.descriptionElement === 'function') {
+                return this.props.descriptionElement();
+            }
+            if (this.props.descriptionElement && typeof this.props.descriptionElement !== 'boolean') {
+                return this.props.descriptionElement;
+            }
+            return null;
+        }
+
     }
 
 };

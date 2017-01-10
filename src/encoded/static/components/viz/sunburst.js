@@ -5,7 +5,7 @@ var _ = require('underscore');
 var d3 = require('d3');
 var expFuncs = require('../experiments-table').ExperimentsTable.funcs;
 var { ChartBreadcrumbs, util } = require('./common');
-var { console } = require('../objectutils');
+var { console, isServerSide } = require('../objectutils');
 
 
 /** 
@@ -29,7 +29,65 @@ var SunBurst = React.createClass({
             return path;
         },
 
-        transformDataForChart : function(experiment_sets){
+        /** Check if data is valid; must be array of experiment_sets w/ minimally-needed properties. */
+        isDataValid : function(data){
+            if (typeof data['@graph'] === 'undefined') return false;
+
+            var experiment_sets = data['@graph'];
+            if (!Array.isArray(experiment_sets)) return false;
+            if (experiment_sets.length === 0) return true; // Valid but no data.
+            
+            var expset = experiment_sets[0];
+            if (!Array.isArray(expset.experiments_in_set)) return false;
+            if (expset.experiments_in_set.length === 0) return true; // Valid but no data.
+            
+            var exp = expset.experiments_in_set[0];
+            if (typeof exp.accession === 'undefined') return false;
+            if (typeof exp.experiment_summary === 'undefined') return false;
+            if (typeof exp.biosample !== 'object') return false;
+            if (typeof exp.biosample.biosource_summary !== 'string') return false;
+            if (typeof exp.biosample.biosource === 'undefined') return false;
+
+            var biosource = Array.isArray(exp.biosample.biosource) ? 
+                (exp.biosample.biosource.length > 0 ? exp.biosample.biosource[0] : null) : exp.biosample.biosource;
+
+            if (biosource === null) return false;
+            if (typeof biosource.individual !== 'object' || !biosource.individual) return false;
+            if (typeof biosource.individual.organism !== 'object' || !biosource.individual.organism) return false;
+            if (typeof biosource.individual.organism.name !== 'string') return false;
+            if (typeof biosource.individual.organism.scientific_name !== 'string') return false;
+            return true;
+        },
+
+        isDataEqual(data1, data2){
+            var equal = true;
+
+            function checkChildrenLengthRecursive(node1, node2, depth = 0){
+                if (Array.isArray(node1.children) && !Array.isArray(node2.children)) equal = false;
+                if (!Array.isArray(node1.children) && Array.isArray(node2.children)) equal = false;
+                if (!equal) return;
+                if (node1.children.length !== node2.children.length) equal = false;
+                if (node1.name !== node2.name) equal = false;
+                if (!equal) return;
+                if (depth > 3) return;
+                _.zip(node1.children, node2.children).forEach(function(nodeSet){
+                    checkChildrenLengthRecursive(nodeSet[0], nodeSet[1], depth + 1);
+                });
+            }
+            checkChildrenLengthRecursive(data1,data2);
+            return equal;
+        },
+
+        transformDataForChart : function(experiment_sets, experimentsInsteadOfSets = false){
+
+            // Correct if we passed in a context instead of experiment_sets.
+            if (
+                !Array.isArray(experiment_sets) &&
+                experiment_sets &&
+                typeof experiment_sets === 'object' &&
+                Array.isArray(experiment_sets['@graph'])
+            ) experiment_sets = experiment_sets['@graph'];
+
             // ToDo: Make configurable (e.g. pass in array of objects of depths/fields/description-accessor-func/etc.)
 
             // We create children OBJECT on each layer to gather children by w.e. field needed, where the unique field value is key.
@@ -63,7 +121,8 @@ var SunBurst = React.createClass({
                         rootNode.children[biosource.individual.organism.name] = {
                             'name' : name,
                             'children' : {},
-                            'field' : 'experiment.biosample.biosource.individual.organism.scientific_name'
+                            'field' : 'experiments_in_set.biosample.biosource.individual.organism.name',
+                            'term' : biosource.individual.organism.name
                         };
                     }
                     return biosource.individual.organism.name;
@@ -110,7 +169,8 @@ var SunBurst = React.createClass({
                         'name' : exp.biosample.biosource_summary,
                         'children' : {}, // We don't show experiment_sets here because there may be multiple biosamples per expset. 
                         'description' : description,
-                        'field' : 'experiment.biosample.biosource_summary'
+                        'field' : 'experiments_in_set.biosample.biosource_summary',
+                        'term' : exp.biosample.biosource_summary
                     }
                 }
 
@@ -126,7 +186,8 @@ var SunBurst = React.createClass({
                         'name' : exp.experiment_summary,
                         //'description' : 'Experiment ' + exp.accession,
                         'children' : {},
-                        'field' : 'experiment.experiment_summary'
+                        'field' : 'experiments_in_set.experiment_summary',
+                        'term' : exp.experiment_summary
                     }
                 } else if (
                     exp.biosample.biosource_summary &&
@@ -138,7 +199,8 @@ var SunBurst = React.createClass({
                         'name' : 'Other',
                         //'description' : 'Experiment ' + exp.accession,
                         'children' : {},
-                        'field' : 'experiment.experiment_summary'
+                        'field' : 'experiments_in_set.experiment_summary',
+                        'term' : exp.experiment_summary
                     }
                 }
 
@@ -158,7 +220,7 @@ var SunBurst = React.createClass({
                     attachExpTo.children[exp.accession] = {
                         'name' : exp.accession,
                         'fallbackSize' : 1,
-                        'field' : 'experiment.accession',
+                        'field' : 'experiments_in_set.accession',
                         'children' : expFuncs.allFilesFromExperiment(exp).map(function(f){
                                 var color = "#ccc";
                                 if (typeof files[f.accession] !== 'undefined'){
@@ -171,7 +233,7 @@ var SunBurst = React.createClass({
                                     'size' : 1,
                                     'description' : 'File ' + f.accession,
                                     'color' : color,
-                                    'field' : 'experiment.files.accession'
+                                    'field' : 'experiments_in_set.files.accession'
                                 };
                             })
                     }
@@ -182,8 +244,11 @@ var SunBurst = React.createClass({
 
             // Loop over every experiment we have that was returned from /browse/ endpoint.
             for (var h = 0; h < experiment_sets.length; h++){
-                for (var i = 0; i < experiment_sets[h].experiments_in_set.length; i++){
-                    getDataFromExperiment(experiment_sets[h].experiments_in_set[i]);
+                if (experimentsInsteadOfSets) getDataFromExperiment(experiment_sets[h]);
+                else {
+                    for (var i = 0; i < experiment_sets[h].experiments_in_set.length; i++){
+                        getDataFromExperiment(experiment_sets[h].experiments_in_set[i]);
+                    }
                 }
             }
 
@@ -212,16 +277,17 @@ var SunBurst = React.createClass({
             'width' : 750,
             'height' : 600,
             'id' : 'main',
-            'breadcrumbDims' : {
-                // Breadcrumb dimensions: width, height, spacing, width of tip/tail.
-                w: 100, h: 30, s: 3, t: 10
-            },
+            'breadcrumbs' : true, // true (show built-in), false (don't show), function (returns ChartBreadcrumbs instance), or instance of ChartBreadcrumbs.
+            'descriptionElement' : true, // same as above, but for a <div> element to hold description.
             'fallbackToSampleData' : false, // Perhaps for tests.
             'colors' : { // Keys should be all lowercase
                 "human (homo sapiens)" : "rgb(218, 112, 6)",
                 "mouse (mus musculus)" : "rgb(43, 88, 169)",
                 "other": "#a173d1",
                 "end": "#bbbbbb"
+            },
+            'handleClick' : function(e){
+                console.log('Default Click Handler, clicked on:', e.target);
             }
         };
     },
@@ -239,10 +305,10 @@ var SunBurst = React.createClass({
 
         this.refs.percentage.innerHTML = percentageString;
 
-        if (d.data.description) {
-            this.refs.description.innerHTML = d.data.description;
+        if (d.data.description && this.descriptionElement() !== null) {
+            this.descriptionElement().innerHTML = d.data.description;
         } else {
-            this.refs.description.innerHTML = '';
+            this.descriptionElement().innerHTML = '';
         }
 
         this.refs.explanation.style.visibility = "";
@@ -252,14 +318,13 @@ var SunBurst = React.createClass({
         // Fade all the segments.
         // Then highlight only those that are an ancestor of the current segment.
         this.vis.selectAll("path")
-            .interrupt()
-            .style("opacity", 0.3)
+            .classed("hover", false)
             .filter(function(node){
                 return (sequenceArray.indexOf(node) >= 0);
             })
-            .style("opacity", 1);
+            .classed("hover", true);
 
-        this.updateBreadcrumbs(sequenceArray, percentageString);
+        if (this.props.breadcrumbs !== false) this.updateBreadcrumbs(sequenceArray, percentageString);
     },
 
     // Restore everything to full opacity when moving off the visualization.
@@ -268,27 +333,32 @@ var SunBurst = React.createClass({
         var _this = this;
         setTimeout(function(){ // Wait 50ms (duration of mouseenter throttle) so delayed handler doesn't cancel this mouseleave transition.
             // Hide the breadcrumb trail
-            _this.refs.breadcrumbs.setState({ 'visible' : false });
+            if (_this.props.breadcrumbs !== false) _this.updateBreadcrumbs([], '0%'); //_this.breadcrumbs().setState({ 'visible' : false });
 
             // Deactivate all segments during transition.
-            _this.vis.selectAll("path").on("mouseover", null);
+            //_this.vis.selectAll("path").on("mouseover", null);
 
             // Transition each segment to full opacity and then reactivate it.
             _this.vis.selectAll("path")
-                .transition()
-                .duration(750)
-                .style("opacity", 1)
-                //.filter(function(d){ return  })
-                .each(function(path) {
-                    d3.select(this).on("mouseover", _this.throttledMouseOverHandler);
-                });
+                .classed('hover', false);
+                //.transition()
+                //.duration(750)
+                //.style("opacity", 1)
+                //.each(function(path) {
+                //    d3.select(this).on("mouseover", _this.throttledMouseOverHandler);
+                //});
 
-            _this.refs.explanation.style.visibility = "hidden";            
+            _this.refs.explanation.style.visibility = "hidden";
+
+            // Erase description (important if contained outside explanation element)
+            if (_this.descriptionElement()){
+                _this.descriptionElement().innerHTML = '';
+            }
         }, 50);
     },
 
     updateBreadcrumbs : function(nodeArray, percentageString){
-        this.refs.breadcrumbs.setState({ 
+        this.breadcrumbs().setState({ 
             nodes : nodeArray.map((n)=>{
                 n.color = this.colorForNode(n);
                 return n;
@@ -317,19 +387,19 @@ var SunBurst = React.createClass({
         } else if (typeof this.colorCache[nodeName] !== 'undefined') {
             return this.colorCache[nodeName]; // Previously calc'd color
         } else if (
-            node.data.field === 'experiment.accession' || 
-            node.data.field === 'experiment.experiment_summary' ||
-            node.data.field === 'experiment.biosample.biosource_summary'
+            node.data.field === 'experiments_in_set.accession' || 
+            node.data.field === 'experiments_in_set.experiment_summary' ||
+            node.data.field === 'experiments_in_set.biosample.biosource_summary'
         ){
             // Use a variant of parent node's color
             if (node.parent) {
                 var color;
-                if (node.data.field === 'experiment.experiment_summary'){
+                if (node.data.field === 'experiments_in_set.experiment_summary'){
                     color = d3.interpolateRgb(
                         this.colorForNode(node.parent),
                         util.stringToColor(nodeName)
                     )(.4);
-                } else if (node.data.field === 'experiment.biosample.biosource_summary'){
+                } else if (node.data.field === 'experiments_in_set.biosample.biosource_summary'){
                     color = d3.interpolateRgb(
                         this.colorForNode(node.parent),
                         d3.color(util.stringToColor(nodeName)).darker(
@@ -338,7 +408,7 @@ var SunBurst = React.createClass({
                             )
                         )
                     )(.3);
-                } else if (node.data.field === 'experiment.accession') {
+                } else if (node.data.field === 'experiments_in_set.accession') {
                     color = d3.color(this.colorForNode(node.parent)).brighter(
                         0.7
                         // uncomment below for sequence 'gradient'. Doesn't work too well if parent colors are close to each other and subsequent parent is slightly lighter.
@@ -359,6 +429,8 @@ var SunBurst = React.createClass({
 
     visualization: function(){
 
+        console.log("Rendering Sunburst Chart");
+
         var _this = this; // So can use w/o needing to .apply internal functions.
 
         if (_this.props.data === null && !_this.props.fallbackToSampleData){
@@ -368,20 +440,17 @@ var SunBurst = React.createClass({
         }
 
         // Dimensions of sunburst.
-        var containerDimensions = this.containerDimensions();
-        var width = containerDimensions.width;
-        var height = containerDimensions.height;
-        var radius = Math.min(width, height) / 2;
-
-        // Breadcrumb dimensions: width, height, spacing, width of tip/tail.
-        var b = _this.props.breadcrumbDims;
+        var containerDimensions = _this.containerDimensions();
+        _this.width = containerDimensions.width;
+        var height = _this.props.height; //containerDimensions.height;
+        var radius = Math.min(_this.width, height) / 2;
 
         _this.vis = d3.select("#" + _this.props.id + "-chart").append("svg:svg")
-            .attr("width", width)
-            .attr("height", height)
+            .style("width", _this.width)
+            .style("height", height)
             .append("svg:g")
             .attr("id", _this.props.id + "-container")
-            .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+            .attr("transform", "translate(" + _this.width / 2 + "," + height / 2 + ")");
 
 
         // This partition object/function is pretty much the magic behind the starburst layout.
@@ -389,14 +458,26 @@ var SunBurst = React.createClass({
         // Then these are used by 'arc' transform below to draw/put into the SVG.
 
         var partition = d3.partition()
-            .size([2 * Math.PI, radius * radius]);
+            .size([2 * Math.PI, radius * radius * 1.2]);
             //.value(function(d) { return d.size; });
 
         var arc = d3.arc()
             .startAngle(function(d) { return d.x0; })
             .endAngle(function(d) { return d.x1; })
-            .innerRadius(function(d) { return Math.sqrt(d.y0); })
-            .outerRadius(function(d) { return Math.sqrt(d.y1); });
+            .innerRadius(function(d) {
+                //if (d.depth && d.depth > 4) return d.y0;
+                if (d.data.field === 'experiments_in_set.files.accession') return Math.sqrt(d.y0) - ((Math.sqrt(d.y1) - Math.sqrt(d.y0)) / 2);
+                //if (d.data.depth === 1) return Math.sqrt(d.y0) * 0.75;
+                //return d.y0;
+                return Math.sqrt(d.y0);
+            })
+            .outerRadius(function(d) {
+                //if (d.depth && d.depth > 3) return d.y1 * 0.5;
+                if (d.data.field === 'experiments_in_set.accession') return Math.sqrt(d.y1) - ((Math.sqrt(d.y1) - Math.sqrt(d.y0)) / 2);
+                if (d.data.field === 'experiments_in_set.files.accession') return Math.sqrt(d.y0);
+                //return d.y1;
+                return Math.sqrt(d.y1);
+            });
 
         if (_this.props.data === null && _this.props.fallbackToSampleData){
             // Use d3.text and d3.csv.parseRows so that we do not need to have a header
@@ -426,6 +507,7 @@ var SunBurst = React.createClass({
             // when the mouse leaves the parent g.
             _this.vis.append("svg:circle")
                 .attr("r", radius)
+                .classed('bounding-circle', true)
                 .style("opacity", 0);
 
             var root = d3.hierarchy(json)
@@ -462,8 +544,12 @@ var SunBurst = React.createClass({
                 .attr("d", arc)
                 .attr("fill-rule", "evenodd")
                 .style("fill", _this.colorForNode)
-                .style("opacity", 1)
-                .on("mouseover", _this.throttledMouseOverHandler);
+                .on("mouseover", _this.throttledMouseOverHandler)
+                .filter(function(d){
+                    return typeof d.data.field === 'string' && typeof d.data.term === 'string';
+                })
+                .classed('clickable', true)
+                .on('click', _this.props.handleClick);
 
             // Add the mouseleave handler to the bounding circle.
             d3.select("#" + _this.props.id + "-container").on("mouseleave", _this.mouseleave);
@@ -560,6 +646,8 @@ var SunBurst = React.createClass({
     },
 
     componentDidMount : function(){
+        console.log("Mounted Sunburst chart");
+        
         /**
          * Manage own state for this component so don't need to re-render and re-initialize chart each time.
          */
@@ -567,17 +655,82 @@ var SunBurst = React.createClass({
         this.totalSize = 0; // Will be sum of leaf values (same val as root node), used for getting percentages.
         this.vis = null; // Entrypoint to chart
         this.colorCache = {}; // Save any calc'd-from-string colors to avoid recomputing each time.
-
-        this.visualization(); // D3 initialization
-        this.adjustExplanationPosition(); // Center text in center of chart
+        this.width = null;
 
         this.throttledMouseOverHandler = _.throttle(this.mouseoverHandle, 50);
+        this.visualization(); // D3 initialization
+
+        //if (!isServerSide() && typeof window !== 'undefined'){
+        //    this.debouncedResizeHandler = _.debounce(this.reset, 300);
+        //    window.addEventListener('resize', this.debouncedResizeHandler);
+        //}
+        this.adjustExplanationPosition(); // Center text in center of chart
     },
 
-    componentDidUpdate : function(){
-        d3.select(this.refs.container).selectAll('svg').remove();
-        this.visualization(); // D3 initialization
-        this.adjustExplanationPosition(); // Center text in center of chart
+    reset : function(){
+
+        var func = function(){
+            d3.select(this.refs.container).selectAll('svg').remove();
+            this.visualization(); // D3 initialization
+            this.adjustExplanationPosition(); // Center text in center of chart
+        }.bind(this);
+
+        if (window.requestAnimationFrame){
+            window.requestAnimationFrame(func);
+        } else {
+            func();
+        }
+        
+    },
+
+    shouldComponentUpdate : function(nextProps, nextState){
+        if (
+            nextProps.data &&
+            nextProps.data !== this.props.data &&
+            !SunBurst.isDataEqual(nextProps.data, this.props.data)
+        ){
+            return true;
+        }
+
+        if (nextProps.height !== this.props.height) {
+            return true;
+        }
+
+        return false;
+    },
+
+    componentDidUpdate : function(pastProps){
+
+        console.log("Sunburst chart updated");
+        console.log(this.props.data, pastProps.data);
+        if (!SunBurst.isDataEqual(pastProps.data, this.props.data)) {
+            this.reset();
+            return;
+        }
+        
+        if (this.props.height > pastProps.height) {
+            this.reset();
+        } else {
+            var newWidth = this.containerDimensions().width;
+            //var s = Math.max((this.props.height / pastProps.height), (newWidth / this.width));
+            var s = Math.min(this.props.height, newWidth) / Math.min(pastProps.height, this.width); // Circle's radius is based off smaller dimension (w or h).
+            console.log('width', newWidth, this.width);
+            this.refs.chart.style.transform = 'scale3d(' + s + ',' + s + ',' + s + ') translate3d(' + ((newWidth - this.width) / 2) + 'px,' + ((this.props.height - pastProps.height) / 2) + 'px,0)';
+            setTimeout(()=>{
+                this.refs.chart.style.transition = 'none';
+                this.refs.chart.style.transform = '';
+                this.reset();
+                setTimeout(() => { this.refs.chart.style.transition = '' }, 50);
+            }, 750);
+        }
+    },
+
+    breadcrumbs : function(){
+        return util.mixin.getBreadcrumbs.apply(this);
+    },
+
+    descriptionElement : function(){
+        return util.mixin.getDescriptionElement.apply(this);
     },
 
     adjustExplanationPosition : function(){
@@ -590,6 +743,13 @@ var SunBurst = React.createClass({
     },
 
     componentWillUnmount : function(){
+        //if (!isServerSide() && typeof window !== 'undefined'){
+        //    window.removeEventListener('resize', this.debouncedResizeHandler);
+        //    delete this.debouncedResizeHandler;
+        //}
+        delete this.throttledMouseOverHandler;
+        delete this.colorCache;
+        delete this.width;
         delete this.totalSize;
         delete this.vis;
     },
@@ -604,17 +764,28 @@ var SunBurst = React.createClass({
     },
 
     render : function(){
+        
+        function breadcrumbs(){
+            if (this.props.breadcrumbs !== true) return null;
+            return <ChartBreadcrumbs parentId={this.props.id} ref="breadcrumbs" />;
+        }
+        function description(){
+            if (this.props.descriptionElement !== true) return null;
+            return <div id={this.props.id + "-description"} className="description" ref="description"></div>;
+        }
+        
         return (
             <div
                 className={"chart-container chart-container-sunburst" + (this.props.data === null && !this.props.fallbackToSampleData ? ' no-data' : '')}
                 id={this.props.id}
                 ref="container"
+                key={this.props.id + '-chart-container'}
             >
-                <ChartBreadcrumbs parentId={this.props.id} ref="breadcrumbs" />
-                <div id={this.props.id + "-chart"} className="chart chart-sunburst" ref="chart" style={{ 'minHeight' : this.props.height }}>
+                { breadcrumbs.call(this) }
+                <div id={this.props.id + "-chart"} className="chart chart-sunburst" ref="chart" style={{ 'height' : this.props.height }}>
                     <div id={this.props.id + "-explanation"} ref="explanation" className="explanation" style={{ visibility: 'hidden' }}>
                         <div id={this.props.id + "-percentage"} className="percentage" ref="percentage">0%</div>
-                        <div id={this.props.id + "-description"} className="description" ref="description"></div>
+                        { description.call(this) }
                     </div>
                 </div>
             </div>

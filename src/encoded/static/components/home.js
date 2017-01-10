@@ -1,4 +1,5 @@
 'use strict';
+
 var React = require('react');
 var ReactDOM = require('react-dom');
 var _ = require('underscore');
@@ -7,7 +8,6 @@ var Collapse = require('react-bootstrap').Collapse;
 var store = require('../store');
 var globals = require('./globals');
 var { ajaxLoad, console } = require('./objectutils');
-var SunBurstChart = require('./viz/sunburst');
 
 /* ****************
 New homepage
@@ -144,55 +144,6 @@ var Announcement = React.createClass({
     }
 });
 
-var Chart = React.createClass({
-
-    getDefaultProps : function(){
-        return {
-            fieldsToFetch : [ // What fields we need from /browse/... for this chart.
-                'experiments_in_set.experiment_summary',
-                'experiments_in_set.accession',
-                'experiments_in_set.status',
-                'experiments_in_set.files.file_type',
-                'experiments_in_set.files.accession',
-                'experiments_in_set.filesets.files_in_set.accession',
-                'experiments_in_set.biosample.description',
-                'experiments_in_set.biosample.modifications_summary_short',
-                'experiments_in_set.biosample.biosource_summary',
-                'experiments_in_set.biosample.accession',
-                'experiments_in_set.biosample.biosource.description',
-                'experiments_in_set.biosample.biosource.biosource_name',
-                'experiments_in_set.biosample.biosource.biosource_type',
-                'experiments_in_set.biosample.biosource.individual.organism.name',
-                'experiments_in_set.biosample.biosource.individual.organism.scientific_name'
-            ]
-        };
-    },
-
-    getInitialState : function(){
-        return {
-            data : null
-        };
-    },
-
-    componentDidMount : function(){
-        var reqUrl = '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&format=json';
-        reqUrl += this.props.fieldsToFetch.map(function(fieldToIncludeInResult){
-            return '&field=' + fieldToIncludeInResult;
-        }).join('');
-
-        ajaxLoad(reqUrl, (data) => {
-            this.setState({ 'data' : SunBurstChart.transformDataForChart(data['@graph']) });
-        });
-    },
-
-    render : function(){
-        return (
-            <SunBurstChart data={this.state.data} />
-        );
-    }
-
-});
-
 var HomePage = module.exports = React.createClass({
 
     propTypes: {
@@ -240,7 +191,7 @@ var HomePage = module.exports = React.createClass({
                 </div>
                 <div className="row">
                     <div className="col-md-9 col-xs-12">
-                        <Chart/>
+
                     </div>
                     <div className="col-md-3 col-xs-12">
                         <h3 className="fourDN-header">4DN Links</h3>
