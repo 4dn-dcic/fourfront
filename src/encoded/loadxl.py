@@ -40,6 +40,8 @@ ORDER = [
     'treatment_rnai',
     'treatment_chemical',
     'biosample',
+    'quality_metric',
+    'quality_metric_fastqc',
     'file_fastq',
     'file_fasta',
     'file_processed',
