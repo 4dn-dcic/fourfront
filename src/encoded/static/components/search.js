@@ -482,7 +482,6 @@ var ResultTable = search.ResultTable = React.createClass({
         var results = context['@graph'];
         var total = context['total'];
         var batch_hub_disabled = total > batchHubLimit;
-        var columns = context['columns'];
         var filters = context['filters'];
         var label = 'results. ';
         var searchBase = this.props.searchBase;
@@ -509,20 +508,16 @@ var ResultTable = search.ResultTable = React.createClass({
         }
         // Check to see if we are searching among multiple data types
         // True if only facet is of field "type" when ignoring audits
-        var facet_types = [];
         for (var i = 0; i < facets.length; i++){
             if (facets[i]['field']){
-                if (!(facets[i]['field'].includes("audit"))){
-                    facet_types.push(facets[i]['field'])
+                if (!facets[i]['field'].includes("audit") && facets[i]['field'] == 'type'){
+                    if (facets[i]['terms'][0]['doc_count'] === facets[i]['total'] && facets[0]['total'] > 1){
+                        // it's a single data type, so grab it
+                        specificFilter = facets[i]['terms'][0]['key'];
+                    }else{
+                        specificFilter = 'Multiple type';
+                    }
                 }
-            }
-        }
-        if (facet_types.length === 1 && facet_types[0] === 'type'){
-            if (facets[0]['terms'][0]['doc_count'] === facets[0]['total'] && facets[0]['total'] > 1){
-                // it's a single data type, so grab it
-                specificFilter = facets[0]['terms'][0]['key'];
-            }else{
-                specificFilter = 'Multiple type';
             }
         }
         // Get a sorted list of batch hubs keys with case-insensitive sort
@@ -597,7 +592,7 @@ var ResultTable = search.ResultTable = React.createClass({
                         <ul className="nav result-table" id="result-table">
                             {results.length ?
                                 results.map(function (result) {
-                                    return Listing({context:result, columns: columns, key: result['@id']});
+                                    return Listing({context:result, key: result['@id']});
                                 })
                             : null}
                         </ul>

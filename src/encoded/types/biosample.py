@@ -30,6 +30,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
     #name_key = 'accession'
     embedded = [
         'biosource.uuid',
+        'biosource.biosource_type',
         'biosource.individual',
         'biosource.individual.organism.name',
         'biosource.biosource_vendor',

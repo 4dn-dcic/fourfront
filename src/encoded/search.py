@@ -16,8 +16,6 @@ from collections import OrderedDict
 def includeme(config):
     config.add_route('search', '/search{slash:/?}')
     config.add_route('browse', '/browse{slash:/?}')
-    # config.add_route('report', '/report{slash:/?}')
-    # config.add_route('matrix', '/matrix{slash:/?}')
     # config.add_route('available_facets', '/facets{slash:/?}')
     config.scan(__name__)
 
@@ -38,11 +36,9 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         '@type': [forced_type],
         'title': forced_type,
         'filters': [],
-        'columns': [],  # will eliminate
         'facets': [],
         '@graph': [],
         'notification': '',
-        'views': [],  # probably could eliminate
         'sort': {}  # probably could eliminate
     }
     principals = effective_principals(request)
@@ -62,8 +58,11 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     doc_types = set_doc_types(request, types, search_type)
 
-    ### ADD VIEWS AND FILTERS TO RESULT
-    # use result['filters'] and result['views']
+    # set up clear_filters path
+    result['clear_filters'] = clear_filters_setup(request, doc_types, forced_type)
+
+    ### SET TYPE FILTERS
+    build_type_filters(result, request, doc_types, types)
 
     ### GET SEARCH FIELDS
     # we probably don't need this. Searching should be schemaless
@@ -91,10 +90,8 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # TODO: implement BOOST here? For now, don't set a sort order
     has_sort = False
 
-    ### Setting filters
-    # TODO: implement (see set_filters fxn in this file)
-    # used_filters = set_filters(request, query, result)
-    used_filters = {}
+    ### Set filters
+    used_filters = set_filters(request, query, result)
 
     ### Set starting facets
     facets = initialize_facets(types, doc_types, search_audit, principals)
@@ -121,7 +118,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     schemas = (types[item_type].schema for item_type in doc_types)
     result['facets'] = format_facets(
         es_results, facets, used_filters, schemas, total)
-
     # Add batch actions
     # TODO: figure out exactly what this does. Provide download URLs?
     # Implement later
@@ -158,7 +154,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
 @view_config(route_name='browse', request_method='GET', permission='search')
 def browse(context, request, search_type=None, return_generator=False):
-    # import pdb; pdb.set_trace()
     return search(context, request, search_type, return_generator, forced_type='Browse')
 
 
@@ -173,6 +168,40 @@ def normalize_query(request):
         for k, v in fixed_types
     ])
     return '?' + qs if qs else ''
+
+
+def clear_filters_setup(request, doc_types, forced_type):
+    # Clear Filters path -- make a path that clears all non-datatype filters.
+    # http://stackoverflow.com/questions/16491988/how-to-convert-a-list-of-strings-to-a-query-string#answer-16492046
+    searchterm_specs = request.params.getall('searchTerm')
+    searchterm_only = urlencode([("searchTerm", searchterm) for searchterm in searchterm_specs])
+    if searchterm_only:
+        # Search term in query string; clearing keeps that
+        clear_qs = searchterm_only
+    else:
+        # Possibly type(s) in query string
+        clear_qs = urlencode([("type", typ) for typ in doc_types])
+    return request.route_path(forced_type.lower(), slash='/') + (('?' + clear_qs) if clear_qs else '')
+
+
+def build_type_filters(result, request, doc_types, types):
+    """
+    Set the type filters for the search. If no doc_types, default to Item
+    """
+    if not doc_types:
+        doc_types = ['Item']
+    else:
+        for item_type in doc_types:
+            ti = types[item_type]
+            qs = urlencode([
+                (k.encode('utf-8'), v.encode('utf-8'))
+                for k, v in request.params.items() if not (k == 'type' and types['Item' if v == '*' else v] is ti)
+            ])
+            result['filters'].append({
+                'field': 'type',
+                'term': ti.name,
+                'remove': '{}?{}'.format(request.path, qs)
+            })
 
 
 def set_doc_types(request, types, search_type):
@@ -285,7 +314,6 @@ def get_filtered_query(term, search_fields, result_fields, principals, doc_types
     # }
 
 
-# TODO: Refine this fxn. Basically just setting the filters used in Result
 def set_filters(request, query, result):
     """
     Sets filters in the query
@@ -462,7 +490,8 @@ def format_facets(es_results, facets, used_filters, schemas, total):
         if agg_name not in aggregations:
             continue
         terms = aggregations[agg_name][agg_name]['buckets']
-        if len(terms) < 2:
+        # Choosing to show facets with one term for summary info on search it provides
+        if len(terms) < 1:
             continue
         result.append({
             'field': field,
@@ -506,13 +535,17 @@ def format_results(request, hits):
             yield hit['_source'][frame]
         return
 
-## stupid things to remove; had to add because of other fxns importing
+### stupid things to remove; had to add because of other fxns importing
+
+# Update? used in ./batch_download.py
 def iter_search_results(context, request):
     return search(context, request, return_generator=True)
 
+# DUMMY FUNCTION. TODO: update ./batch_download.py to use embeds instead of cols
 def list_visible_columns_for_schemas(request, schemas):
     return []
 
+# DUMMY FUNCTION. TODO: update ./region_search.py
 def search_result_actions(request, doc_types, es_results, position=None):
     return {}
 
