@@ -16,7 +16,8 @@
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/notes" },
-        { "$ref": "mixins.json#/documents" }
+        { "$ref": "mixins.json#/documents" },
+        { "$ref": "experiment_set.json#/properties" }
     ],
     "properties": {
         "schema_version": {
@@ -25,19 +26,8 @@
         "accession": {
             "accessionType": "ES"
         },
-        "description": {
-            "title": "Description",
-            "description": "A description of why experiments are part of the set.",
-            "type": "string",
-            "default": ""
-        },
         "experimentset_type": {
-            "title": "Experiment Set type",
-            "description": "The categorization of the set of experiments.",
-            "type": "string",
-            "default" : "replicate",
-            "exclude_from" : "submit4dn",
-            "internal_comment" : "have a default value and doesn't need to be submitted"
+            "default" : "replicate"
         },
         "replicate_exps": {
             "title": "Set of replicate experiments",
@@ -60,27 +50,14 @@
                     "bio_rep_no":{
                             "title": "Biological replicate number",
                             "description": "Biological replicate identifier for the experiment in an experiment set",
-                            "type": "number"
+                            "type": "integer"
                     },
                     "tec_rep_no":{
                             "title": "Technical replicate number",
                             "description": "Technical replicate identifier for the experiment in a biological replicate group",
-                            "type": "number"
+                            "type": "integer"
                     }
                 }
-            }
-        },
-        "experiments_in_set": {
-            "title": "All experiments in set",
-            "description": "Calculated from replicate_exps.",
-            "type": "array",
-            "exclude_from": "submit4dn",
-            "default": [],
-            "uniqueItems": true,
-            "items": {
-                "title": "Experiment",
-                "type": "string",
-                "linkTo": "Experiment"
             }
         }
     },

@@ -95,6 +95,24 @@ class Experiment(Item):
                         target_exp.properties['experiment_relation'].append(relationship_entry)
                         target_exp.update(target_exp.properties)
 
+    @calculated_property(schema={
+        "title": "Experiment Sets",
+        "description": "Experiment Sets to which this experiment belongs.",
+        "type": "array",
+        "items": {
+            "title": "Experiment Set",
+            "type": "string"
+        }
+    })
+    def experiment_sets(self, request, experiment_sets=None):
+        exp_set_coll = list(self.registry['collections']['ExperimentSet'])
+        exp_set_coll.extend(list(self.registry['collections']['ExperimentSetReplicate']))
+        sets = []
+        for uuid in exp_set_coll:
+            eset = self.collection.get(uuid)
+            sets.extend([uuid for exp in eset.properties['experiments_in_set'] if str(exp) == str(self.uuid)])
+        return list(set(sets))
+
 
 @collection(
     name='experiments-hi-c',

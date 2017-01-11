@@ -1,4 +1,4 @@
-"""Abstract collection for experiment and integration of all experiment types."""
+"""Collection for ExperimentSet and ExperimentSetReplicate."""
 
 from snovault import (
     collection,
@@ -45,27 +45,13 @@ class ExperimentSet(Item):
         'title': 'Replicate Experiment Sets',
         'description': 'Experiment set covering biological and technical experiments',
     })
-class ExperimentSetReplicate(Item):
+class ExperimentSetReplicate(ExperimentSet):
     """The experiment set class for replicate experiments."""
 
     item_type = 'experiment_set_replicate'
     schema = load_schema('encoded:schemas/experiment_set_replicate.json')
     name_key = "accession"
-    embedded = ["replicate_exps.replicate_exp",
-                "experiments_in_set",
-                "experiments_in_set.protocol",
-                "experiments_in_set.protocol_variation",
-                "experiments_in_set.lab",
-                "experiments_in_set.award",
-                "experiments_in_set.biosample",
-                "experiments_in_set.biosample.biosource",
-                "experiments_in_set.biosample.modifications",
-                "experiments_in_set.biosample.treatments",
-                "experiments_in_set.biosample.biosource.individual.organism",
-                "experiments_in_set.files",
-                "experiments_in_set.filesets",
-                "experiments_in_set.filesets.files_in_set",
-                "experiments_in_set.digestion_enzyme"]
+    embedded = ExperimentSet.embedded + ["replicate_exps.replicate_exp"]
 
     def _update(self, properties, sheets=None):
         all_experiments = [exp['replicate_exp'] for exp in properties['replicate_exps']]
