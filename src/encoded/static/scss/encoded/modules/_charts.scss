@@ -124,6 +124,26 @@
             border-top-right-radius: 3px;
             border-bottom-right-radius: 3px;
         }
+
+        &[data-field="experiments_in_set.biosample.biosource.biosource_type"]{
+            text-transform: capitalize;
+        }
+
+    }
+}
+
+/** Bar Plot Chart Style(s) **/
+
+svg.bar-plot-chart { // SVG is top-level element rendered by component;
+    display: block;
+
+    line.y-axis-top {
+        stroke: #ccc;
+        stroke-width: 1px;
+    }
+
+    g.chart-bar {
+        transition: transform .75s, opacity .5s;
     }
 }
 
@@ -138,8 +158,8 @@
             transition: opacity 1s;
         }
 
-        svg:hover path {
-            transition: opacity 0.2s;
+        svg g.group-container:hover path {
+            transition: opacity 0.25s;
             opacity: 0.3;
             &.hover, 
             &:hover {
@@ -154,15 +174,47 @@
             margin-top: -100px;
             width: 140px;
             text-align: center;
-            color:#777;
+            color:#888;
             z-index: -1;
+            opacity: 1;
+            transition: opacity .3s;
 
-            .percentage {
+            &.invisible {
+                opacity: 0;
+                transition: opacity 1s;
+            }
+
+            .experiments-count {
                 font-size: 1.5rem;
-                line-height: 3rem;
+                line-height: 2rem;
+                font-weight: 300;
+                color: rgba(100, 100, 100, 1);
+                transition: color 0.3s;
 
                 .facet-charts.large & {
                     font-size: 2.5rem;
+                    font-weight: 300;
+                    line-height: 3rem;
+                }
+                &.invisible {
+                    opacity: 0;
+                    transition: opacity 1s;
+                    
+                }
+                &.half-visible {
+                    color: rgba(100, 100, 100, 0.66);
+                }
+                &:after {
+                    content: "Experiments";
+                    position: relative;
+                    font-size: 1.125rem;
+                    line-height: 1rem;
+                    display: block;
+                    width: 100%;
+                    text-align: center;
+                }
+                .facet-charts.small &:after {
+                    font-size: .975rem;
                 }
             }
 

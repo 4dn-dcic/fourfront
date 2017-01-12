@@ -4,11 +4,15 @@ var React = require('react');
 var _ = require('underscore');
 var url = require('url');
 var SunBurstChart = require('./viz/sunburst');
-var { ajaxLoad, gridContainerWidth, responsiveGridState, isServerSide } = require('./objectutils');
+var BarPlotChart = require('./viz/barplot');
+var { ajaxLoad, gridContainerWidth, responsiveGridState, isServerSide, console } = require('./objectutils');
 var FacetList = require('./facetlist');
-var { ChartBreadcrumbs } = require('./viz/common');
+var { ChartBreadcrumbs, util } = require('./viz/common');
+var d3 = require('d3');
+var expFuncs = require('./experiments-table').ExperimentsTable.funcs;
 
 
+var colorCache = {}; // We cache generated colors into here to re-use and speed up.
 
 /**
  * @callback showFunc
@@ -28,10 +32,43 @@ var { ChartBreadcrumbs } = require('./viz/common');
 var FacetCharts = module.exports.FacetCharts = React.createClass({
 
     statics : {
-        /** Check if data is good enough to visualize (has minimum data) */
-        isContextDataValid : function(data){
-            return SunBurstChart.isDataValid(data);
-        }
+
+        /** Check if data is valid; must be array of experiment_sets w/ minimally-needed properties. */
+        isContextDataValid : function(context){
+            if (typeof context['@graph'] === 'undefined') return false;
+
+            var experiment_sets = context['@graph'];
+            if (!Array.isArray(experiment_sets)) return false;
+            if (experiment_sets.length === 0) return true; // Valid but no data.
+            
+            var expset = experiment_sets[0];
+            if (!Array.isArray(expset.experiments_in_set)) return false;
+            if (expset.experiments_in_set.length === 0) return true; // Valid but no data.
+            
+            var exp = expset.experiments_in_set[0];
+            if (typeof exp.accession === 'undefined') return false;
+            if (typeof exp.experiment_summary === 'undefined') return false;
+            if (typeof exp.biosample !== 'object') return false;
+            if (typeof exp.biosample.biosource_summary !== 'string') return false;
+            if (typeof exp.biosample.biosource === 'undefined') return false;
+
+            var biosource = Array.isArray(exp.biosample.biosource) ? 
+                (exp.biosample.biosource.length > 0 ? exp.biosample.biosource[0] : null) : exp.biosample.biosource;
+
+            if (biosource === null) return false;
+            if (typeof biosource.individual !== 'object' || !biosource.individual) return false;
+            if (typeof biosource.individual.organism !== 'object' || !biosource.individual.organism) return false;
+            if (typeof biosource.individual.organism.name !== 'string') return false;
+            if (typeof biosource.individual.organism.scientific_name !== 'string') return false;
+            return true;
+        },
+
+        getExperimentsFromContext : function(context){
+            if (!context) return null;
+            if (!FacetCharts.isContextDataValid(context)) return null;
+            return expFuncs.listAllExperimentsFromExperimentSets(context['@graph']);
+        },
+        
     },
     
     getDefaultProps : function(){
@@ -42,7 +79,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 if (path.indexOf('/browse/') > -1) return true;
                 return false;
             },
-            'data' : null,
+            'context' : null,
             'ajax' : true,
             'views' : ['small', 'large'],
             'requestURLBase' : '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all',
@@ -62,14 +99,30 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 'experiments_in_set.biosample.biosource.biosource_type',
                 'experiments_in_set.biosample.biosource.individual.organism.name',
                 'experiments_in_set.biosample.biosource.individual.organism.scientific_name'
-            ]
+            ],
+            'colors' : { // Keys should be all lowercase
+                "human (homo sapiens)" : "rgb(218, 112, 6)",
+                "mouse (mus musculus)" : "rgb(43, 88, 169)",
+                "other": "#a173d1",
+                "end": "#bbbbbb"
+            },
+            colWidthPerScreenSize : {
+                'small' : [
+                    {'xs' : 12, 'sm' : 5,  'md' : 4, 'lg' : 3},
+                    {'xs' : 12, 'sm' : 7,  'md' : 8, 'lg' : 9}
+                ],
+                'large' : [
+                    {'xs' : 12, 'sm' : 12, 'md' : 6, 'lg' : 6},
+                    {'xs' : 12, 'sm' : 12, 'md' : 6, 'lg' : 6}
+                ]
+            }
         };
     },
 
     getInitialState : function(){
         // Eventually will have dataTree, dataBlocks, etc. or other naming convention as needed for different charts.
         return {
-            'data' : this.transformData(this.props),
+            'experiments' : FacetCharts.getExperimentsFromContext(this.props.context),
             'mounted' : false,
             'selectedNodes' : [] // expSetFilters, but with nodes (for colors, etc.)
         };
@@ -85,7 +138,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             window.addEventListener('resize', this.debouncedResizeHandler);
         }
 
-        if (this.props.ajax && this.state.data === null){
+        if (this.props.ajax && this.state.experiments === null){
 
             var reqUrl = this.props.requestURLBase;
             if (reqUrl.indexOf('&format=json') === -1) {
@@ -101,12 +154,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             
             ajaxLoad(reqUrl, (res) => {
                 this.setState({
-                    'data' : this.transformData(
-                        _.extend(
-                            _.clone(this.props),
-                            { 'context' : res } 
-                        )
-                    ),
+                    'experiments' : expFuncs.listAllExperimentsFromExperimentSets(res['@graph']),
                     'mounted' : true
                 });
             });
@@ -124,25 +172,92 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         }
     },
 
-    transformData : function(props, toFormat = 'tree'){
-        if (!props.context || !FacetCharts.isContextDataValid(props.context)){
+    /**
+     * Run experiments through this function before passing to a Chart component.
+     * It filters experiments if any filters are set (will become deprecated eventually),
+     * as well as handles transform to different data structure or format, if needed for chart.
+     */
+    transformData : function(experiments, toFormat = null, filters = this.props.expSetFilters){
+        if (!Array.isArray(experiments)){
             return null;
         }
-        if (props.expSetFilters && Object.keys(props.expSetFilters).length > 0){
-            // We have locally-set filters. Filter experiments before transforming. Will become deprecated w/ GraphQL update(s).
-            return SunBurstChart.transformDataForChart(
-                [...FacetList.siftExperiments(props.context['@graph'], props.expSetFilters)],
-                true
-            )
-        } else {
-            return SunBurstChart.transformDataForChart(props.context['@graph']);
+        if (toFormat === 'tree'){
+            if (filters && Object.keys(filters).length > 0){
+                // We have locally-set filters. Filter experiments before transforming. Will become deprecated w/ GraphQL update(s).
+                return SunBurstChart.transformDataForChart(
+                    [...FacetList.siftExperiments(experiments, filters)],
+                    true
+                )
+            } else {
+                return SunBurstChart.transformDataForChart(experiments, true);
+            }
         }
 
+        return [...FacetList.siftExperiments(experiments, filters)];
+
+    },
+
+    colorForNode : function(node){
+        var nodeDatum = node.data || node; // So can process on d3-gen'd/wrapped elements as well as plain datums.
+
+        if (nodeDatum.color){
+            return nodeDatum.color;
+        }
+
+        // Normalize name to lower case (as capitalization etc may change in future)
+        var nodeName = nodeDatum.name.toLowerCase();
+
+        if (typeof this.props.colors[nodeName] !== 'undefined'){
+            return this.props.colors[nodeName];
+        } else if (typeof colorCache[nodeName] !== 'undefined') {
+            return colorCache[nodeName]; // Previously calc'd color
+        } else if (
+            nodeDatum.field === 'experiments_in_set.accession' || 
+            nodeDatum.field === 'experiments_in_set.experiment_summary' ||
+            nodeDatum.field === 'experiments_in_set.biosample.biosource_summary'
+        ){
+
+            //if (node.data.field === 'experiments_in_set.accession'){
+            //    return '#bbb';
+            //}
+
+            // Use a variant of parent node's color
+            if (node.parent) {
+                var color;
+                if (nodeDatum.field === 'experiments_in_set.experiment_summary'){
+                    color = d3.interpolateRgb(
+                        this.colorForNode(node.parent),
+                        util.stringToColor(nodeName)
+                    )(.4);
+                } else if (nodeDatum.field === 'experiments_in_set.biosample.biosource_summary'){
+                    color = d3.interpolateRgb(
+                        this.colorForNode(node.parent),
+                        d3.color(util.stringToColor(nodeName)).darker(
+                            0.5 + (
+                                (2 * (node.parent.children.indexOf(node) + 1)) / node.parent.children.length
+                            )
+                        )
+                    )(.3);
+                } else if (nodeDatum.field === 'experiments_in_set.accession') {
+                    // color = d3.color(this.colorForNode(node.parent)).brighter(0.7);
+                    color = d3.interpolateRgb(
+                        this.colorForNode(node.parent),
+                        d3.color("#ddd")
+                    )(.8);
+                }
+                colorCache[nodeName] = color;
+                return color;
+            }
+        }
+
+        // Fallback
+        colorCache[nodeName] = util.stringToColor(nodeName);
+        return colorCache[nodeName];
     },
 
     componentWillReceiveProps : function(nextProps){
 
-        function updatedBreadcrumbsSequence(){
+        function updatedBreadcrumbsSequenceDeprecated(){
             // Remove selected breadcrumb and its descendant crumbs, if no longer selected.
             var sequence = [];
             if (this.state.selectedNodes.length > 0){
@@ -162,6 +277,40 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             return sequence;
         }
 
+        /** 
+         * Given list of fields from inner to outer circle of sunburst chart, 
+         * check if one is part of selected expSetFilters,
+         * and if so, add to sequenceArray for ChartBreadcrumbs. 
+         */
+        function updatedBreadcrumbsSequence(){
+            var sequence = [];
+            if (typeof this.refs.sunburstChart === 'undefined') return sequence;
+            
+            var chartFields = this.refs.sunburstChart.getRootNode().data.fields;
+            var filters = nextProps.expSetFilters;
+            var term, node;
+
+            for (var i = 0; i < chartFields.length; i++){
+                if (typeof filters[chartFields[i]] !== 'undefined'){
+                    if (filters[chartFields[i]].size === 1) {
+                        // Grab first node (for colors, name, etc.) with matching term and append to sequence.
+                        term = filters[chartFields[i]].values().next().value;
+                        node = SunBurstChart.findNode(this.refs.sunburstChart.getRootNode(), function(n){
+                            return n.data.term && n.data.term === term;
+                        });
+                        if (typeof node !== 'undefined') {
+                            if (typeof node.color === 'undefined'){
+                                node = _.extend({ 'color' : this.colorForNode(node) }, node);
+                            }
+                            sequence.push(node);
+                        }
+                        else break;
+                    } else break;
+                } else break;
+            }
+            return sequence;
+        }
+
         if (
             (
                 nextProps.context &&
@@ -173,7 +322,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         ){
             var newState = {};
             if (FacetCharts.isContextDataValid(nextProps.context)){
-                newState.data = this.transformData(nextProps);
+                newState.experiments = FacetCharts.getExperimentsFromContext(nextProps.context);
             }
             if (nextProps.expSetFilters !== this.props.expSetFilters){
                 newState.selectedNodes = updatedBreadcrumbsSequence.call(this);
@@ -190,44 +339,58 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             return;
         }
 
-        // if part of tree
-        if (node.parent) {
+        function updateExpSetFilters(){
+            // if part of tree
+            if (node.parent) {
 
-            // Don't save filters until all filters updated (prevent app re-renders)
-            var newFilters = _.clone(this.props.expSetFilters);
+                // Don't save filters until all filters updated (prevent app re-renders)
+                var newFilters = _.clone(this.props.expSetFilters);
 
-            // If not selected, add any ancestor nodes' terms to filters as well.
-            if (typeof this.props.expSetFilters[node.data.field] === 'undefined' || !this.props.expSetFilters[node.data.field].has(node.data.term)){
-                var sequenceArray = SunBurstChart.getAncestors(node);
-                var i;
-                for (i = 0; i < sequenceArray.length; i++){
-                    // Check if clicked on a term that's already set, then unset it to re-set it later down.
-                    if (typeof sequenceArray[i].data.field !== 'string' || typeof sequenceArray[i].data.term !== 'string') continue;
-                    if (typeof this.props.expSetFilters[sequenceArray[i].data.field] !== 'undefined') {
-                        if (this.props.expSetFilters[sequenceArray[i].data.field].has(sequenceArray[i].data.term)) {
-                            this.props.expSetFilters[sequenceArray[i].data.field].delete(sequenceArray[i].data.term);
+                // If not selected, add any ancestor nodes' terms to filters as well.
+                if (typeof this.props.expSetFilters[node.data.field] === 'undefined' || !this.props.expSetFilters[node.data.field].has(node.data.term)){
+                    var sequenceArray = SunBurstChart.getAncestors(node);
+                    var i;
+                    for (i = 0; i < sequenceArray.length; i++){
+                        // Check if clicked on a term that's already set, then unset it to re-set it later down.
+                        if (typeof sequenceArray[i].data.field !== 'string' || typeof sequenceArray[i].data.term !== 'string') continue;
+                        if (typeof this.props.expSetFilters[sequenceArray[i].data.field] !== 'undefined') {
+                            if (this.props.expSetFilters[sequenceArray[i].data.field].has(sequenceArray[i].data.term)) {
+                                this.props.expSetFilters[sequenceArray[i].data.field].delete(sequenceArray[i].data.term);
+                            }
                         }
                     }
-                }
-                for (i = 0; i < sequenceArray.length; i++){
-                    if (typeof sequenceArray[i].data.field !== 'string' || typeof sequenceArray[i].data.term !== 'string') continue;
-                    newFilters = FacetList.changeFilter(sequenceArray[i].data.field, sequenceArray[i].data.term, 'sets', newFilters, null, true);
-                }
-                this.setState({ 'selectedNodes' : sequenceArray });
-            } else {
-                // Remove node's term from filter, as well as any childrens' filters (recursively), if set.
-                (function removeOwnAndChildrensTermsIfSet(n){
-                    if (typeof newFilters[n.data.field] !== 'undefined' && newFilters[n.data.field].has(n.data.term)){
-                        newFilters = FacetList.changeFilter(n.data.field, n.data.term, 'sets', newFilters, null, true);
+                    for (i = 0; i < sequenceArray.length; i++){
+                        if (typeof sequenceArray[i].data.field !== 'string' || typeof sequenceArray[i].data.term !== 'string') continue;
+                        newFilters = FacetList.changeFilter(sequenceArray[i].data.field, sequenceArray[i].data.term, 'sets', newFilters, null, true);
                     }
-                    if (Array.isArray(n.children) && n.children.length > 0) n.children.forEach(removeOwnAndChildrensTermsIfSet);
-                })(node);
-            }
+                    //this.setState({ 'selectedNodes' : sequenceArray }); Will be updated in componentWillReceiveProps.
+                } else {
+                    // Remove node's term from filter, as well as any childrens' filters (recursively), if set.
+                    (function removeOwnAndChildrensTermsIfSet(n){
+                        if (typeof newFilters[n.data.field] !== 'undefined' && newFilters[n.data.field].has(n.data.term)){
+                            newFilters = FacetList.changeFilter(n.data.field, n.data.term, 'sets', newFilters, null, true);
+                        }
+                        if (Array.isArray(n.children) && n.children.length > 0) n.children.forEach(removeOwnAndChildrensTermsIfSet);
+                    })(node);
+                }
 
-            FacetList.saveChangedFilters(newFilters);
+                FacetList.saveChangedFilters(newFilters);
+            } else {
+                // If not a tree, adjust filter re: node's term.
+                FacetList.changeFilter(node.data.field, node.data.term, 'sets', this.props.expSetFilters, null, false);
+            }
+        }
+
+        if (this.props.href.indexOf('/browse/') === -1){
+            // We're not on browse page, so filters probably wouldn't be useful to set without navigating to there.
+            if (typeof this.props.navigate === 'function'){
+                this.props.navigate(this.props.requestURLBase, {}, () => setTimeout(()=>{
+                    updateExpSetFilters.call(this); // Wait for chart size to transition before updating.
+                }, 800));
+            }
         } else {
-            // If not a tree, adjust filter re: node's term.
-            FacetList.changeFilter(node.data.field, node.data.term, 'sets', this.props.expSetFilters, null, false);
+            // Swap filters only (no navigation).
+            updateExpSetFilters.call(this);
         }
             
     },
@@ -248,30 +411,30 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         return this.props.views[0]; // Default
     },
 
+    /** We want a square for circular charts, so we determine WIDTH available for first chart (which is circular), and return that as height. */
+    height : function(show = null, chartIndex = 0){
+        if (!show) show = this.show();
+        if (!show) return null;
+        if (!this.state.mounted || isServerSide()){
+            return 1160 * (this.props.colWidthPerScreenSize[show][chartIndex].lg / 12); // Full width container size (1160) 
+        } else {
+            return (gridContainerWidth() + 20) * (this.props.colWidthPerScreenSize[show][chartIndex][responsiveGridState()] / 12);
+        }
+    },
+
     render : function(){
 
         var show = this.show();
-
         if (!show) return null; // We don't show section at all.
 
-        // Height depends on avail width so we have a square area per chart.
-        var colWidthPerScreenSize = {
-            small : {'xs' : 12, 'sm' : 5,  'md' : 4, 'lg' : 3},
-            large : {'xs' : 12, 'sm' : 12, 'md' : 6, 'lg' : 6}
-        };
-
-        function genChartColClassName(){
-            return Object.keys(colWidthPerScreenSize[show]).map(function(size){
-                return 'col-' + size + '-' + colWidthPerScreenSize[show][size];
+        var colWidthPerScreenSize = this.props.colWidthPerScreenSize;
+        function genChartColClassName(chartNumber = 1){
+            return Object.keys(colWidthPerScreenSize[show][chartNumber - 1]).map(function(size){
+                return 'col-' + size + '-' + colWidthPerScreenSize[show][chartNumber - 1][size];
             }).join(' ');
         }
 
-        var height = 200; // Fallback/default
-        if (!this.state.mounted || isServerSide()){
-            height = 1160 * (colWidthPerScreenSize[show].lg / 12);
-        } else {
-            height = (gridContainerWidth() + 20) * (colWidthPerScreenSize[show][responsiveGridState()] / 12);
-        }
+        var height = this.height();
 
         if (!this.state.mounted){
             return ( // + 66 == breadcrumbs (26) + breadcrumbs-margin-bottom (10) + description (30)
@@ -291,15 +454,24 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 <ChartBreadcrumbs ref="breadcrumbs" selectedNodes={this.state.selectedNodes} key="facet-crumbs" />
                 <div className="facet-charts-description description" ref="description" key="facet-chart-description"></div>
                 <div className="row" key="facet-chart-row-1">
-                    <div className={genChartColClassName()} key="facet-chart-row-1-chart-1">
+                    <div className={genChartColClassName(1)} key="facet-chart-row-1-chart-1">
                         <SunBurstChart
-                            data={this.state.data}
+                            data={this.transformData(this.state.experiments, 'tree')}
                             height={height}
                             fields={this.props.fieldsToFetch}
                             breadcrumbs={() => this.refs.breadcrumbs}
                             descriptionElement={() => this.refs.description}
-                            key="sunburst" 
                             handleClick={this.handleVisualNodeClickToUpdateFilters}
+                            colorForNode={this.colorForNode}
+                            key="sunburst"
+                            ref="sunburstChart"
+                        />
+                    </div>
+                    <div className={genChartColClassName(2)} key="facet-chart-row-1-chart-2">
+                        <BarPlotChart 
+                            experiments={this.transformData(this.state.experiments)}
+                            height={height}
+                            colorForNode={this.colorForNode}
                         />
                     </div>
                 </div>

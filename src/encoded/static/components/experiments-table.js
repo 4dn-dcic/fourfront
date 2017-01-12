@@ -578,6 +578,35 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 )
             },
 
+            /** Grab all experiments from experiment_sets, and save non-circular reference to parent experiment_set on experiment. */
+            listAllExperimentsFromExperimentSets : function(experiment_sets){
+                var uniqExpAccessions = {};
+                return _(experiment_sets).chain()
+                    .map(function(set){ 
+                        return set.experiments_in_set.map(function(exp){
+                            // Make sure we return new exp & set objects instead of mutating existing ones.
+                            var cExp = _.clone(exp);
+                            var cSet = _.clone(set);
+                            delete cSet.experiments_in_set;
+                            cExp.experiment_sets = [cSet];
+                            return cExp;
+                        }); 
+                    })
+                    .flatten(true)
+                    .filter(function(exp){
+                        if (typeof uniqExpAccessions[exp.accession] !== 'undefined'){
+                            // Already have exp with same accession; keep 1 instance of it but combine their experiment_sets.
+                            uniqExpAccessions[exp.accession].experiment_sets = uniqExpAccessions[exp.accession].experiment_sets.concat(exp.experiment_sets);
+                            return false;
+                        } else {
+                            uniqExpAccessions[exp.accession] = exp;
+                            return true;
+                        }
+                    })
+                    .value();
+                //return _.flatten(experiment_sets.map(function(set){ return set.experiments_in_set }), true);
+            },
+
             /** 
              *  Partial Funcs (probably don't use these unless composing a function)
              */

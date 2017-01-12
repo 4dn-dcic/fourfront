@@ -387,9 +387,9 @@ var FacetList = module.exports = React.createClass({
                 if (typeof callback === 'function') setTimeout(callback, 0);
             }
         },
-
+        
+        /** N.B. Make sure expSetFilters is a new or cloned object (not props.expSetFilters) for Redux to recognize that it has changed. */
         saveChangedFilters : function(expSetFilters){
-            console.log(expSetFilters, expSetFilters == true, expSetFilters == false);
             store.dispatch({
                 type : {'expSetFilters' : expSetFilters}
             });

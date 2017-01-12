@@ -14,14 +14,13 @@ module.exports.ChartBreadcrumbs = React.createClass({
 
     getInitialState : function(){
         return {
-            'nodes' : [{
-                'data' : {
-                    'name' : 'Initial Crumb (invisible)'
-                },
-                'color' : '#ccc'
-            }],
-            'visible' : false
+            'nodes' : [],
+            'sequential' : true
         };
+    },
+
+    updateHoverNodes : function(sequence = []){
+        this.setState({ 'nodes' :  sequence });
     },
 
     renderCrumbs : function(){
@@ -31,6 +30,7 @@ module.exports.ChartBreadcrumbs = React.createClass({
             return (
                 <span 
                     className="chart-crumb"
+                    data-field={node.data.field ? node.data.field : null}
                     key={i} 
                     style={{ backgroundColor : node.color }}
 
@@ -43,7 +43,7 @@ module.exports.ChartBreadcrumbs = React.createClass({
 
     render : function(){
         return (
-            <div className="chart-breadcrumbs" id={this.props.parentId + '-crumbs'} style={{ 'opacity' : this.state.visible ? 1 : 0 }}>
+            <div className="chart-breadcrumbs" id={this.props.parentId + '-crumbs'}>
                 { this.renderCrumbs() }
             </div>
         );
@@ -64,6 +64,17 @@ var util = {
             colour += ('00' + value.toString(16)).substr(-2);
         }
         return colour;
+    },
+
+    style : {
+        translate3d : function(x=0, y=0, z=0){
+            return 'translate3d(' + x + 'px,' + y + 'px,' + z + 'px)';
+        },
+        scale3d : function(x=1, y=null, z=null){
+            if (!y) y = x;
+            if (!z) z = 1;
+            return 'scale3d(' + x + ',' + y + ',' + z + ')';
+        }
     },
 
     /** Functions which are to be called from Chart instances with .apply(this, ...) */

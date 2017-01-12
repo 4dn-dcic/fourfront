@@ -899,6 +899,7 @@ var App = React.createClass({
                                         href={this.props.href}
                                         context={this.props.context}
                                         expSetFilters={this.props.expSetFilters}
+                                        navigate={this.navigate}
                                     />
                                     <Alerts alerts={this.props.alerts} />
                                     { content }
