@@ -167,6 +167,10 @@ svg.bar-plot-chart { // SVG is top-level element rendered by component;
             }
         }
 
+        circle.bounding-circle {
+            opacity : 0;
+        }
+
         .explanation {
             position: absolute;
             top: 50%;

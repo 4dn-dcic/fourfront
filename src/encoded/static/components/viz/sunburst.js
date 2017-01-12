@@ -328,13 +328,34 @@ var SunBurst = React.createClass({
 
             childrenObjectsToArrays(rootNode);
             return rootNode;
+        },
+
+        sortAndSizeTreeDataD3 : function(data){
+            return d3.hierarchy(data)
+                .sum(function(d){
+                    // Generates a value property for each node which governs sizing created for block in partition(root)
+                    if (typeof d.size === 'number') return d.size;
+                    if (
+                        typeof d.fallbackSize === 'number' &&
+                        (!Array.isArray(d.children) || d.children.length === 0)
+                    ) return d.fallbackSize;
+                    return 0;
+                })
+                .sort(function(a,b){
+                    var dif = b.value - a.value;
+                    if (dif !== 0) return dif;
+                    else {
+                        if (a.data.name < b.data.name) return -1;
+                        else if (a.data.name > b.data.name) return 1;
+                    }
+                });
         }
     },
 
     getDefaultProps : function(){
         return {
             'data' : null,
-            'width' : 750,
+            'width' : 100, // Used only as fallback pre-mount.
             'height' : 600,
             'id' : 'main',
             'breadcrumbs' : true, // true (show built-in), false (don't show), function (returns ChartBreadcrumbs instance), or instance of ChartBreadcrumbs.
@@ -347,6 +368,10 @@ var SunBurst = React.createClass({
                 return 'red';
             }
         };
+    },
+
+    getInitialState : function(){
+        return { 'mounted' : false };
     },
 
     resetActiveExperimentsCount : function(){
@@ -362,11 +387,11 @@ var SunBurst = React.createClass({
 
     /* We create a throttled version of this function in componentDidMount for performance */
     mouseoverHandle : function(d){
-        //var percentage = (100 * d.value / this.totalSize).toPrecision(3);
-        //var percentageString = percentage + "%";
-        //if (percentage < 0.1) {
-        //    percentageString = "< 0.1%";
-        //}
+        if (typeof d.target !== 'undefined'){
+            // We have a click event from element rather than D3.
+            d = d3.select(d.target).datum();
+        }
+
         var expCount = d.data.experiments || d.experiments || null;
 
         // .appendChild used to be faster than .innerHTML but seems
@@ -438,48 +463,30 @@ var SunBurst = React.createClass({
     },
 
     containerDimensions : function(){
+        var container = this.refs.container || null;
+        if (!container){
+            return { width: this.props.width, height : this.props.height };
+        }
         return {
-            width  : this.refs.container.offsetWidth  || this.refs.container.clientWidth  || this.props.width,
-            height : this.refs.container.offsetHeight || this.refs.container.clientHeight || this.props.height
+            width  : container.offsetWidth  || container.clientWidth  || this.props.width,
+            height : container.offsetHeight || container.clientHeight || this.props.height
         };
     },
 
-    visualization: function(){
+    visualizationSetup : function(){
+        var containerDimensions = this.containerDimensions();
+        this.width = containerDimensions.width;
+        this.height = this.props.height || containerDimensions.height;
+        this.radius = Math.min(this.width, this.height) / 2;
 
-        console.log("Rendering Sunburst Chart");
-
-        var _this = this; // So can use w/o needing to .apply internal functions.
-
-        if (_this.props.data === null && !_this.props.fallbackToSampleData){
-            // Nothing to visualize, maybe add loading indicator or something.
-            console.info("Nothing to visualize for Sunburst chart.");
-            return;
-        }
-
-        // Dimensions of sunburst.
-        var containerDimensions = _this.containerDimensions();
-        _this.width = containerDimensions.width;
-        var height = _this.props.height; //containerDimensions.height;
-        var radius = Math.min(_this.width, height) / 2;
-
-        _this.vis = d3.select("#" + _this.props.id + "-chart").append("svg:svg")
-            .style("width", _this.width)
-            .style("height", height)
-            .append("svg:g")
-            .attr("id", _this.props.id + "-container")
-            .classed("group-container", true)
-            .attr("transform", "translate(" + _this.width / 2 + "," + height / 2 + ")");
-
+        this.totalSize = 0; // Will be sum of leaf values (same val as root node), used for getting percentages.
+        this.root = null; // Root node.
 
         // This partition object/function is pretty much the magic behind the starburst layout.
         // It creates all the points/sizes (x0, x1, y0, y1) needed for a partitioned layout.
         // Then these are used by 'arc' transform below to draw/put into the SVG.
-
-        var partition = d3.partition()
-            .size([2 * Math.PI, radius * radius * 1.1667]);
-            //.value(function(d) { return d.size; });
-
-        var arc = d3.arc()
+        this.partition = d3.partition().size([2 * Math.PI, this.radius * this.radius * 1.1667]);
+        this.arc = d3.arc()
             .startAngle(function(d) { return d.x0; })
             .endAngle(function(d) { return d.x1; })
             .innerRadius(function(d) {
@@ -499,221 +506,76 @@ var SunBurst = React.createClass({
                 //return d.y1;
                 return Math.sqrt(d.y1);
             });
+    },
 
-        if (_this.props.data === null && _this.props.fallbackToSampleData){
-            // Use d3.text and d3.csv.parseRows so that we do not need to have a header
-            // row, and can receive the csv as an array of arrays.
-            d3.text("/static/data/test-data-for-chart-visit-sequences.csv", function(text) {
-                var csv = d3.csvParseRows(text);
-                var json = buildHierarchy(csv);
-                createVisualization(json);
-            });
-        } else if (Array.isArray(_this.props.data)) {
-            var json = buildHierarchy(_this.props.data);
-            createVisualization(json);
-        } else if (_this.props.data !== null) {
-            createVisualization(_this.props.data);
-        } else {
-            throw new Error('Nothing to visualize.');
+    generatePaths : function(data = this.props.data){
+
+        this.root = SunBurst.sortAndSizeTreeDataD3(data);
+        this.partition(this.root);
+        var _this = this;
+
+        // For efficiency, filter nodes to keep only those large enough to see.
+        var nodes = _this.root.descendants().filter(function(d){
+            return (Math.abs(d.x1-d.x0) > 0.01); // 0.005 radians = 0.29 degrees 
+        });
+
+        var paths = _this.vis.data([data]).selectAll("path");
+        var newPaths = paths.data(nodes).enter();
+        var remainingPaths = paths.data(nodes);
+
+        function genKey(n){
+            var prefix = '';
+            if (n.parent && n.parent.data && n.parent.data.name) prefix = n.parent.data.name + '-';
+            return prefix + n.data.field + '-' + n.data.name;
         }
 
-        // Main function to draw and set up the visualization, once we have the data.
-        function createVisualization(json) {
+        var pathElements = [];
 
-            // Basic setup of page elements.
-            //drawLegend();
-            //d3.select("#" + _this.props.id + "-togglelegend").on("click", toggleLegend);
-
-            // Bounding circle underneath the sunburst, to make it easier to detect
-            // when the mouse leaves the parent g.
-            _this.vis.append("svg:circle")
-                .attr("r", radius)
-                .classed('bounding-circle', true)
-                .style("opacity", 0);
-
-            _this.root = d3.hierarchy(json)
-                .sum(function(d){
-                    // Generates a value property for each node which governs sizing created for block in partition(root)
-                    if (typeof d.size === 'number') return d.size;
-                    if (
-                        typeof d.fallbackSize === 'number' &&
-                        (!Array.isArray(d.children) || d.children.length === 0)
-                    ) return d.fallbackSize;
-                    return 0;
-                })
-                .sort(function(a,b){
-                    var dif = b.value - a.value;
-                    if (dif !== 0) return dif;
-                    else {
-                        if (a.data.name < b.data.name) return -1;
-                        else if (a.data.name > b.data.name) return 1;
-                    }
-                });
-
-            partition(_this.root); // THE MAGIC (takes care of creating coordinates for our visualzation)
-
-            // For efficiency, filter nodes to keep only those large enough to see.
-            var nodes = _this.root.descendants().filter(function(d){
-                return (Math.abs(d.x1-d.x0) > 0.01); // 0.005 radians = 0.29 degrees 
-            });
-
-            var path = _this.vis.data([json])
-                .selectAll("path")
-                .data(nodes)
-                .enter().append("svg:path")
-                .attr("display", function(d) { return d.depth ? null : "none"; })
-                .attr("d", arc)
-                .attr("fill-rule", "evenodd")
-                .style("fill", _this.props.colorForNode)
-                .on("mouseover", _this.throttledMouseOverHandler)
-                .filter(function(d){
-                    return typeof d.data.field === 'string' && typeof d.data.term === 'string';
-                })
-                .classed('clickable', true)
-                .on('click', _this.props.handleClick);
-
-            // Add the mouseleave handler to the bounding circle.
-            d3.select("#" + _this.props.id + "-container").on("mouseleave", _this.mouseleave);
-
-            // Get total size of the tree = value of root node from partition.
-            _this.totalSize = path.node().__data__.value;
-
-            setTimeout(function(){
-                console.log('RootNode', _this.getRootNode());
-                _this.refs.experimentsCount.innerHTML = _this.getRootNode().data.experiments;
-                _this.refs.experimentsCount.className = _this.refs.experimentsCount.className.replace(' invisible',' half-visible');
-                _this.refs.explanation.className = _this.refs.explanation.className.replace(' invisible','');
-            }, 500);
-        };
-
-        /*
-        function drawLegend() {
-
-            // Dimensions of legend item: width, height, spacing, radius of rounded rect.
-            var li = {
-                w: 75, h: 30, s: 3, r: 3
-            };
-
-            var legend = d3.select("#" + _this.props.id + "-legend").append("svg:svg")
-                .attr("width", li.w)
-                .attr("height", d3.keys(_this.props.colors).length * (li.h + li.s));
-
-            var g = legend.selectAll("g")
-                .data(d3.entries(_this.props.colors))
-                .enter().append("svg:g")
-                .attr("transform", function(d, i) {
-                        return "translate(0," + i * (li.h + li.s) + ")";
-                    });
-
-            g.append("svg:rect")
-                .attr("rx", li.r)
-                .attr("ry", li.r)
-                .attr("width", li.w)
-                .attr("height", li.h)
-                .style("fill", function(d) { return d.value; });
-
-            g.append("svg:text")
-                .attr("x", li.w / 2)
-                .attr("y", li.h / 2)
-                .attr("dy", "0.35em")
-                .attr("text-anchor", "middle")
-                .text(function(d) { return d.key; });
+        function genPath(node, nodeIndex){
+            if (nodeIndex < 5) console.log('NEW NODE', node);
+            var hasTerm = typeof node.data.field === 'string' && typeof node.data.term === 'string';
+            pathElements.push(
+                <path
+                    style={{
+                        opacity : node.depth ? null : 0,
+                        fill : _this.props.colorForNode(node)
+                    }}
+                    ref={function(r){
+                        // Save our data to element for re-use by D3.
+                        d3.select(r).datum(node);
+                    }}
+                    d={_this.arc(node)}
+                    fillRule="evenodd"
+                    className={hasTerm ? "clickable" : "static"}
+                    onMouseOver={function(e){ e.persist(); _this.throttledMouseOverHandler(e); }}
+                    onClick={hasTerm ? _this.props.handleClick : null}
+                    key={genKey(node)}
+                />
+            );
         }
+        
+        
+        newPaths.each(genPath);
+        remainingPaths.each(genPath); // ToDo animate existing paths
 
-        function toggleLegend() {
-            var legend = d3.select("#" + _this.props.id + "-legend");
-            if (legend.style("visibility") == "hidden") {
-                legend.style("visibility", "");
-            } else {
-                legend.style("visibility", "hidden");
-            }
-        }
-        */
-
-        // Take a 2-column CSV and transform it into a hierarchical structure suitable
-        // for a partition layout. The first column is a sequence of step names, from
-        // root to leaf, separated by hyphens. The second column is a count of how 
-        // often that sequence occurred.
-        function buildHierarchy(csv) {
-            var root = {"name": "root", "children": []};
-            for (var i = 0; i < csv.length; i++) {
-                var sequence = csv[i][0];
-                var size = +csv[i][1];
-                if (isNaN(size)) { // e.g. if this is a header row
-                    continue;
-                }
-                var parts = sequence.split("-");
-                var currentNode = root;
-                for (var j = 0; j < parts.length; j++) {
-                    var children = currentNode["children"];
-                    var nodeName = parts[j];
-                    var childNode;
-                    if (j + 1 < parts.length) {
-                        // Not yet at the end of the sequence; move down the tree.
-                        var foundChild = false;
-                        for (var k = 0; k < children.length; k++) {
-                            if (children[k]["name"] == nodeName) {
-                                childNode = children[k];
-                                foundChild = true;
-                                break;
-                            }
-                        }
-                    // If we don't already have a child node for this branch, create it.
-                        if (!foundChild) {
-                            childNode = {"name": nodeName, "children": []};
-                            children.push(childNode);
-                        }
-                        currentNode = childNode;
-                    } else {
-                        // Reached the end of the sequence; create a leaf node.
-                        childNode = {"name": nodeName, "size": size};
-                        children.push(childNode);
-                    }
-                }
-            }
-            return root;
-        };
+        return pathElements;
     },
 
     componentDidMount : function(){
         console.log("Mounted Sunburst chart");
-        
         /**
-         * Manage own state for this component so don't need to re-render and re-initialize chart each time.
+         * Manage own state for this component (ex. mounted state) so don't need to re-render and re-initialize chart each time.
          */
+        this.throttledMouseOverHandler = _.throttle(this.mouseoverHandle, 50); // Improve performance
 
-        this.totalSize = 0; // Will be sum of leaf values (same val as root node), used for getting percentages.
-        this.vis = null; // Entrypoint to chart
-        this.root = null; // Root node.
-        this.width = null;
-
-        this.throttledMouseOverHandler = _.throttle(this.mouseoverHandle, 50);
-        this.visualization(); // D3 initialization
-
-        //if (!isServerSide() && typeof window !== 'undefined'){
-        //    this.debouncedResizeHandler = _.debounce(this.reset, 300);
-        //    window.addEventListener('resize', this.debouncedResizeHandler);
-        //}
-        setTimeout(this.adjustExplanationPosition, 0); // Center text in center of chart
+        if (!this.state.mounted){
+            this.setState({ 'mounted' : true });
+            if (this.refs.explanation) this.refs.explanation.className = this.refs.explanation.className.replace(' invisible','');
+            return;
+        }
     },
 
     getRootNode : function(){ return this.root || this.props.data || null; },
-
-    reset : function(){
-
-        var func = function(){
-            d3.select(this.refs.container).selectAll('svg').remove();
-            this.visualization(); // D3 initialization
-            setTimeout(this.adjustExplanationPosition, 0); // Center text in center of chart
-        }.bind(this);
-
-        if (window.requestAnimationFrame){
-            window.requestAnimationFrame(func);
-        } else {
-            func();
-        }
-        
-    },
 
     shouldComponentUpdate : function(nextProps, nextState){
         if (
@@ -722,52 +584,51 @@ var SunBurst = React.createClass({
             !SunBurst.isDataEqual(nextProps.data, this.props.data)
         ){
             return true;
-        }
-
-        if (nextProps.height !== this.props.height) {
+        } else if (nextState.mounted !== this.state.mounted){
+            return true;
+        } else if (nextProps.height !== this.props.height) {
+            if (nextProps.height < this.props.height){
+                this.resizeChartThenUpdate(nextProps, this.props); // Defer update so we can scale chart down (visual effect)
+                return false;
+            }
             return true;
         }
-
+        // Default - don't update for most changes (performance, keep chart if new but outdated/invalid data, etc.)
         return false;
     },
 
-    componentDidUpdate : function(pastProps){
+    resizeChartThenUpdate : function(nextProps, pastProps){
+        console.info('Resizing Sunburst Chart');
 
-        console.info("Sunburst chart updated");
-
-        if (!SunBurst.isDataEqual(pastProps.data, this.props.data)) {
-            this.reset();
-            return;
-        }
+        var newWidth = this.containerDimensions().width;
+        var s = Math.min(nextProps.height, newWidth) / Math.min(pastProps.height, this.width); // Circle's radius is based off smaller dimension (w or h).
         
-        // Size of chart (or container) has changed. If has shrunk, transition size + position down before redrawing chart.
-        if (this.props.height > pastProps.height) {
-            this.reset();
-        } else {
-            var newWidth = this.containerDimensions().width;
-            //var s = Math.max((this.props.height / pastProps.height), (newWidth / this.width));
-            var s = Math.min(this.props.height, newWidth) / Math.min(pastProps.height, this.width); // Circle's radius is based off smaller dimension (w or h).
-            this.refs.explanation.className += ' invisible'; 
-            this.refs.chart.style.transform = util.style.scale3d(s) + ' ' + util.style.translate3d((newWidth - this.width) / 2, (this.props.height - pastProps.height) / 2, 0);
+        util.requestAnimationFrame(() => {
+            this.refs.explanation.className += ' invisible';
+            this.refs.chart.style.height = nextProps.height + 'px';
+            this.refs.chart.style.transform = util.style.scale3d(s) + ' ' + util.style.translate3d((newWidth - this.width) / 2, (nextProps.height - pastProps.height) / 2, 0);
             setTimeout(()=>{
                 this.refs.chart.style.transition = 'none';
                 this.refs.chart.style.transform = '';
-                this.reset();
-                setTimeout(() => { 
-                    this.refs.chart.style.transition = '';
-                    this.refs.explanation.className = this.refs.explanation.className.replace(' invisible','');
-                }, 50);
+                this.forceUpdate(() => {
+                    setTimeout(() => {
+                        this.refs.chart.style.transition = '';
+                    }, 50);
+                });
             }, 750);
-        }
+        });
     },
 
-    breadcrumbs : function(){
-        return util.mixin.getBreadcrumbs.apply(this);
+    componentDidUpdate : function(pastProps, pastState){
+
+        console.info("Sunburst chart updated");
+        // Size of chart (or container) has changed. If has shrunk, transition size + position down before redrawing chart.
+        this.adjustExplanationPosition();
     },
 
-    descriptionElement : function(){
-        return util.mixin.getDescriptionElement.apply(this);
-    },
+    /** Get refs to breadcrumb and description components, whether they created by own component or passed in as props. */
+    breadcrumbs : function(){ return util.mixin.getBreadcrumbs.call(this); },
+    descriptionElement : function(){ return util.mixin.getDescriptionElement.call(this); },
 
     adjustExplanationPosition : function(){
         var height = this.refs.explanation.offsetHeight || this.refs.explanation.clientHeight || 45;
@@ -776,40 +637,63 @@ var SunBurst = React.createClass({
             'marginTop' : '-' + (height / 2) + 'px',
             'marginLeft' : '-' + (width / 2) + 'px'
         });
+        setTimeout(()=>{
+            console.log('RootNode', this.getRootNode());
+            this.refs.experimentsCount.innerHTML = this.getRootNode().data.experiments;
+            this.refs.experimentsCount.className = this.refs.experimentsCount.className.replace(' invisible',' half-visible');
+            this.refs.explanation.className = this.refs.explanation.className.replace(' invisible','');
+        }, 500);
     },
 
     componentWillUnmount : function(){
-        //if (!isServerSide() && typeof window !== 'undefined'){
-        //    window.removeEventListener('resize', this.debouncedResizeHandler);
-        //    delete this.debouncedResizeHandler;
-        //}
+        // Clean up our stuff, just in case.
         delete this.throttledMouseOverHandler;
+        delete this.arc;
+        delete this.partition;
         delete this.width;
+        delete this.height;
+        delete this.radius;
         delete this.totalSize;
         delete this.root;
         delete this.vis;
     },
 
-    renderSideBar : function(){
-        return (
-            <div id="sidebar">
-                <input type="checkbox" id={this.props.id + "togglelegend"} /> Legend<br/>
-                <div className="legend" id={this.props.id + "legend"} style={{ visibility: 'hidden' }}></div>
-            </div>
-        );
-    },
-
     render : function(){
         
+        // Generate breadcrumb/description elements IF their prop vals are true.
         function breadcrumbs(){
             if (this.props.breadcrumbs !== true) return null;
             return <ChartBreadcrumbs parentId={this.props.id} ref="breadcrumbs" />;
         }
+
         function description(){
             if (this.props.descriptionElement !== true) return null;
             return <div id={this.props.id + "-description"} className="description" ref="description"></div>;
         }
-        
+
+        this.visualizationSetup(); // Create partition and arc generators for data.
+
+        function renderSVG(){
+            return (
+                <svg key={this.props.id + "-svg"} style={{'width' : this.width, 'height' : this.height }}>
+                    <g 
+                        key={this.props.id + "-svg-group"} 
+                        className="group-container"
+                        ref={(r) => { this.vis = d3.select(r); }}
+                        transform={"translate(" + (this.width / 2) + "," + (this.height / 2) + ")"}
+                        onMouseLeave={this.mouseleave}
+                    >
+                        <circle r={this.radius} className="bounding-circle" key={"bounding-circle"} />
+                        { this.state.mounted ? this.generatePaths() : null }
+                    </g>
+                </svg>
+            );
+        }
+
+        // Wrapping stuff
+        var expCount = null; 
+        if (this.root) expCount = this.root.data.experiments;
+
         return (
             <div
                 className={"chart-container chart-container-sunburst" + (this.props.data === null && !this.props.fallbackToSampleData ? ' no-data' : '')}
@@ -818,11 +702,14 @@ var SunBurst = React.createClass({
                 key={this.props.id + '-chart-container'}
             >
                 { breadcrumbs.call(this) }
-                <div id={this.props.id + "-chart"} className="chart chart-sunburst" ref="chart" style={{ 'height' : this.props.height }}>
+                <div id={this.props.id + "-chart"} className="chart chart-sunburst" ref="chart" style={{ 'height' : this.height || this.props.height }} key={this.props.id + "-chart"}>
                     <div id={this.props.id + "-explanation"} ref="explanation" className="explanation invisible">
-                        <div id={this.props.id + "-experiments-count"} className="experiments-count half-visible" ref="experimentsCount">&nbsp;</div>
+                        <div id={this.props.id + "-experiments-count"} className="experiments-count half-visible" ref="experimentsCount">
+                            { expCount || <span>&nbsp;</span> }
+                        </div>
                         { description.call(this) }
                     </div>
+                    { renderSVG.call(this) }
                 </div>
             </div>
                 

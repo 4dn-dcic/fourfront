@@ -11,18 +11,19 @@ var { console, isServerSide } = require('../objectutils');
 var BarPlot = React.createClass({
 
     statics : {
+
         genChartData : function(
             experiments = [],
             availWidth = 400,
             availHeight = 400,
-            fields = [],
+            fields = [{ 'name' : 'Biosample' , field : 'experiments_in_set.biosample.biosource_summary' }],
             experimentsOrSets='experiments',
             styleOpts = BarPlot.getDefaultStyleOpts()
         ){
         
-            var fieldTermCounts = {
-                'experiments_in_set.biosample.biosource_summary' : {}
-            };
+            var fieldTermCounts = {};
+
+            fields.forEach(function(field){ fieldTermCounts[field.field] = {}; });
             
             var fieldTotals = {
                 'experiments_in_set.biosample.biosource_summary' : 0
@@ -103,7 +104,7 @@ var BarPlot = React.createClass({
 
     propTypes : {
         'experiments'   : React.PropTypes.array,
-        'field'         : React.PropTypes.array,
+        'fields'        : React.PropTypes.array,
         'styleOptions'  : React.PropTypes.shape({
             'gap'           : React.PropTypes.number,
             'offset'        : React.PropTypes.shape({
@@ -160,85 +161,93 @@ var BarPlot = React.createClass({
         return this.refs.container.parentElement.clientHeight;
     },
 
+    shouldPerformManualTransitions : function(nextProps, pastProps){
+        return !!(!_.isEqual(pastProps.experiments, nextProps.experiments) || pastProps.height !== nextProps.height);
+    },
+
     componentWillReceiveProps : function(nextProps){
-        if (!_.isEqual(this.props.experiments, nextProps.experiments)){
-            console.info("Updating BarPlot experiments prop.");
-            this.setState({ transitioning : true }, ()=>{
-                setTimeout(()=>{
-                    this.setState({ transitioning : false });
-                }, 500);
-            });
+        if (this.shouldPerformManualTransitions(nextProps, this.props)){
+            this.setState({ transitioning : true });
         }
     },
 
-    shouldComponentUpdate : function(nextProps, nextState){
-        //if (!_.isEqual(this.props.experiments, nextProps.experiments)){
-        //    console.info('ShouldComponentUpdate: Experiments not equal');
-            //return false;
-        //}
-        return true;
-    },
-
     componentDidUpdate : function(pastProps){
-        if (!_.isEqual(this.props.experiments, pastProps.experiments)){
+        if (this.shouldPerformManualTransitions(this.props, pastProps)){
             if (typeof this.pastBars !== 'undefined'){
 
                 var styleOpts = this.styleOptions();
                 var _this = this;
 
+                var existingAndCurrentBars = _.intersection( // Grab all bars which are current & pre-update-existing.
+                    _.values(this.pastBars), // Obj to array
+                    _.values(this.bars)
+                );
+
+                // Since 'on end' callback is called many times (multiple bars transition), defer until called for each.
+                var transitionCompleteCallback = _.after(existingAndCurrentBars.length, function(){
+                    console.info("Finished D3 transition on BarPlot.")
+                    _this.setState({ transitioning : false });
+                });
+
                 d3.selectAll(
                     _.map(
-                        _.intersection( // Grab all bars which are current & pre-update-existing.
-                            _.values(this.pastBars), // Obj to array
-                            _.values(this.bars)
-                        ),
+                        existingAndCurrentBars,
                         function(b){ return b.childNodes[0]; } // Get rects (first child of 'g' svg elems)
                     )
                 )
                 .transition().duration(750)
                 .attr('height', function(d){
-                    return parseFloat(this.getAttribute('data-target-height'));
+                    return d3.select(this.parentElement).datum().attr.height;
+                    //return parseFloat(this.getAttribute('data-target-height'));
                 })
                 .attr('y', function(d){
-                    return _this.height() - parseFloat(this.getAttribute('data-target-height')) - styleOpts.offset.bottom;
-                });
-                    
+                    return _this.height() - d3.select(this.parentElement).datum().attr.height - styleOpts.offset.bottom;
+                    //return _this.height() - parseFloat(this.getAttribute('data-target-height')) - styleOpts.offset.bottom;
+                })
+                .on('end', transitionCompleteCallback);
             }
         }
     },
 
     renderParts : {
 
-        bar : function(d, index, all, styleOpts = null, existingBars = this.bars){
+        bar : function(d, index, all, styleOpts = null, existingBars = this.pastBars){
             if (!styleOpts) styleOpts = this.styleOptions();
+
+            var barExists = function(){ return typeof existingBars[d.term] !== 'undefined' && existingBars[d.term] !== null; }
+            var prevBarData = null;
+            if (barExists() && this.state.transitioning) prevBarData = d3.select(existingBars[d.term]).datum();
+
 
             function barStyle(){
                 var style = {};
 
                 // Position bar's x coord via translate3d CSS property for CSS3 transitioning.
-                if (typeof existingBars[d.term] === 'undefined' && this.state.transitioning){
-                    // Slide in new bar.
+                if (!barExists() && this.state.transitioning){
+                    // Defer to slide in new bar via CSS on state.transitioning = false.
                     style.transform = util.style.translate3d(d.attr.x, d.attr.height + 2, 0);
                     style.opacity = 0;
                 } else {
+                    // 'Default' (no transitioning) style
                     style.transform = util.style.translate3d(d.attr.x, 0, 0);
                     style.opacity = 1;
                 }
                 return style;
             }
 
+
             function rectHeight(){
                 // Defer updating rect height so we can use D3 to transition it in componentDidUpdate.
-                if (typeof existingBars[d.term] !== 'undefined' && this.state.transitioning){
-                    return parseFloat(existingBars[d.term].childNodes[0].getAttribute('height'));
+                if (barExists() && this.state.transitioning){
+                    return prevBarData.attr.height;
                 }
                 return d.attr.height;
             }
             
 
             function rectY(){
-                if (typeof existingBars[d.term] !== 'undefined' && this.state.transitioning){
-                    return this.height() - parseFloat(existingBars[d.term].childNodes[0].getAttribute('height')) - styleOpts.offset.bottom;
+                if (barExists() && this.state.transitioning){
+                    return this.height() - prevBarData.attr.height - styleOpts.offset.bottom;
                 }
                 return this.height() - d.attr.height - styleOpts.offset.bottom;
             }
@@ -250,7 +259,9 @@ var BarPlot = React.createClass({
                     key={"bar-" + d.term}
                     style={barStyle.call(this)}
                     ref={(r) => {
-                        if (this.bars){
+                        if (typeof this.bars !== 'undefined' && r !== null){
+                            // Save bar element; set its data w/ D3 but don't save D3 wrapped-version
+                            d3.select(r).datum(d);
                             this.bars[d.term] = r;
                         }
                     }}
@@ -293,8 +304,20 @@ var BarPlot = React.createClass({
             styleOpts = this.styleOptions();
 
         // Reset this.bars, cache past ones.
-        this.pastBars = this.bars;
+        this.pastBars = _.clone(this.bars);
         this.bars = {};
+
+        var currentBars = BarPlot.genChartData(
+            this.props.experiments,
+            availWidth,
+            availHeight,
+            this.props.fields,
+            'experiments',
+            this.styleOptions()
+        ).map((d,i,a) => this.renderParts.bar.call(this, d, i, a, styleOpts, this.pastBars));
+
+        //var renderBars = _.uniq(bars, this.pastBars);
+        //var removingBars = _.difference(this.pastBars, bars);
 
         // Keep in mind that 0,0 coordinate is located at top left for SVGs.
         // Easier to reason in terms of 0,0 being bottom left, thus e.g. d.attr.y for bars is set to be positive,
@@ -305,16 +328,7 @@ var BarPlot = React.createClass({
                 'width' : availWidth
             }}>
                 { this.renderParts.topYAxis.call(this, availWidth, styleOpts) }
-                {
-                    BarPlot.genChartData(
-                        this.props.experiments,
-                        availWidth,
-                        availHeight,
-                        this.props.fields,
-                        'experiments',
-                        this.styleOptions()
-                    ).map((d,i,a) => this.renderParts.bar.call(this, d, i, a, styleOpts, this.pastBars))
-                }
+                { currentBars }
             </svg>
         );
     }

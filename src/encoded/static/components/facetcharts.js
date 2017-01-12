@@ -333,6 +333,12 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
     },
 
     handleVisualNodeClickToUpdateFilters : function(node){
+
+        if (typeof node.target !== 'undefined' && typeof node.target.nodeName === 'string'){
+            // We have a click event from element rather than D3.
+            //node = d3.select(node.target).datum();
+            node = node.target.__data__;
+        }
         
         if (typeof node.data.field !== 'string' || typeof node.data.term !== 'string'){
             console.error("No field or term on this node.");

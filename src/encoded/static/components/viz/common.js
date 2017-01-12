@@ -2,6 +2,7 @@
 
 var React = require('react');
 var _ = require('underscore');
+var { console, isServerSide } = require('../objectutils');
 
 module.exports.ChartBreadcrumbs = React.createClass({
 
@@ -66,10 +67,21 @@ var util = {
         return colour;
     },
 
+    requestAnimationFrame : function(cb){
+        if (!isServerSide() && typeof window !== undefined){
+            if (typeof window.requestAnimationFrame !== undefined) return window.requestAnimationFrame(cb);
+            if (typeof window.webkitRequestAnimationFrame !== undefined) return window.requestAnimationFrame(cb);
+            if (typeof window.mozRequestAnimationFrame !== undefined) return window.requestAnimationFrame(cb);
+        }
+        return setTimeout(cb, 0);
+    },
+
     style : {
+
         translate3d : function(x=0, y=0, z=0){
             return 'translate3d(' + x + 'px,' + y + 'px,' + z + 'px)';
         },
+
         scale3d : function(x=1, y=null, z=null){
             if (!y) y = x;
             if (!z) z = 1;
