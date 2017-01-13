@@ -110,7 +110,14 @@ class Experiment(Item):
         sets = []
         for uuid in exp_set_coll:
             eset = self.collection.get(uuid)
-            sets.extend([uuid for exp in eset.properties['experiments_in_set'] if str(exp) == str(self.uuid)])
+            for exp in eset.properties['experiments_in_set']:
+                if str(exp) == str(self.uuid):
+                    ty = eset.properties['experimentset_type']
+                    prefix = '/experiment_set/'
+                    if ty == 'replicate':
+                        prefix = '/experiment_set_replicate/'
+                    s = prefix + str(uuid)
+                    sets.append(s)
         return list(set(sets))
 
 

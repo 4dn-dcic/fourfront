@@ -3,10 +3,15 @@
 from snovault import (
     collection,
     load_schema,
+    AfterModified,
+    BeforeModified
 )
+
 from .base import (
     Item
 )
+
+from pyramid.threadlocal import get_current_request
 
 
 @collection(
@@ -57,3 +62,11 @@ class ExperimentSetReplicate(ExperimentSet):
         all_experiments = [exp['replicate_exp'] for exp in properties['replicate_exps']]
         properties['experiments_in_set'] = all_experiments
         super(ExperimentSetReplicate, self)._update(properties, sheets)
+
+        # invalidating the experiments that are in the experiments_in_set field
+        request = get_current_request()
+        registry = self.registry
+        for exp in properties['experiments_in_set']:
+            expt = self.collection.get(exp)
+            registry.notify(BeforeModified(expt, request))
+            registry.notify(AfterModified(expt, request))
