@@ -509,14 +509,12 @@ var ResultTable = search.ResultTable = React.createClass({
         // Check to see if we are searching among multiple data types
         // True if only facet is of field "type" when ignoring audits
         for (var i = 0; i < facets.length; i++){
-            if (facets[i]['field']){
-                if (!facets[i]['field'].includes("audit") && facets[i]['field'] == 'type'){
-                    if (facets[i]['terms'][0]['doc_count'] === facets[i]['total'] && facets[0]['total'] > 1){
-                        // it's a single data type, so grab it
-                        specificFilter = facets[i]['terms'][0]['key'];
-                    }else{
-                        specificFilter = 'Multiple type';
-                    }
+            if (facets[i]['field'] && facets[i]['field'] == 'type'){
+                if (facets[i]['terms'][0]['doc_count'] === facets[i]['total'] && facets[0]['total'] > 0){
+                    // it's a single data type, so grab it
+                    specificFilter = facets[i]['terms'][0]['key'];
+                }else{
+                    specificFilter = 'Multiple type';
                 }
             }
         }

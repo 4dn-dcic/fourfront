@@ -29,7 +29,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     types = request.registry[TYPES]
     search_base = normalize_query(request)
     ### INITIALIZE RESULT
-    # These are the fields I need to fill
     result = {
         '@context': request.route_path('jsonld_context'),
         '@id': '/' + forced_type.lower() + '/' + search_base,
@@ -50,11 +49,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     from_, size = 0, 25
 
     ### PREPARE SEARCH TERM
-    # search_term = prepare_search_term(request)
-    # Using * is okay for now because we haven't implemented any specific
-    # searching (i.e. the search bar)
-    # TODO: adapt prepare_search_term when specific searching is needed
-    search_term = '*'
+    prepared_terms = prepare_search_term(request)
 
     doc_types = set_doc_types(request, types, search_type)
 
@@ -64,26 +59,15 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     ### SET TYPE FILTERS
     build_type_filters(result, request, doc_types, types)
 
-    ### GET SEARCH FIELDS
-    # we probably don't need this. Searching should be schemaless
-    # search_fields, highlights = get_search_fields(request, doc_types)
-    search_fields = {'uuid'}
-
     ### GET FILTERED QUERY
     # Builds filtered query which supports multiple facet selection
-    query = get_filtered_query(search_term,
-                               search_fields,
+    query = get_filtered_query(prepared_terms,
                                sorted(list_result_fields(request, doc_types)),
                                principals,
                                doc_types)
+
     # TODO: decide if the schemas are useful
     schemas = [types[doc_type].schema for doc_type in doc_types]
-
-    # DON'T NEED COLUMNS b/c metadata is already precisely embedded
-    # columns = list_visible_columns_for_schemas(request, schemas)
-    # if columns:
-    #     result['columns'] = columns
-
 
     ### Set sort order
     # has_sort = set_sort_order(request, search_term, types, doc_types, query, result)
@@ -98,7 +82,6 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     ### Adding facets to the query
     query['aggs'] = set_facets(facets, used_filters, principals, doc_types)
-
     # TODO: Implement search constraints based on size variable
     # # Decide whether to use scan for results.
     # do_scan = size is None or size > 1000
@@ -158,6 +141,10 @@ def browse(context, request, search_type=None, return_generator=False):
 
 
 def normalize_query(request):
+    """
+    Normalize the query used to make the search. If no type is provided,
+    use type=Item
+    """
     types = request.registry[TYPES]
     fixed_types = (
         (k, types[v].name if k == 'type' and v in types else v)
@@ -167,7 +154,11 @@ def normalize_query(request):
         (k.encode('utf-8'), v.encode('utf-8'))
         for k, v in fixed_types
     ])
-    return '?' + qs if qs else ''
+    # default to type=Item if no type is specified
+    qs = '?' + qs if qs else '?type=Item'
+    if 'type=' not in qs:
+        qs += '&type=Item'
+    return qs
 
 
 def clear_filters_setup(request, doc_types, forced_type):
@@ -204,11 +195,27 @@ def build_type_filters(result, request, doc_types, types):
             })
 
 
+def prepare_search_term(request):
+    """
+    Prepares search terms by making a dictionary where the keys are fields
+    and the values are arrays of query strings
+    """
+    prepared_terms = {}
+    prepared_vals = []
+    for field, val in request.params.iteritems():
+        if field not in ['type', 'frame', 'format', 'limit', 'sort', 'from']:
+            if 'embedded.*' + field not in prepared_terms.keys():
+                prepared_terms['embedded.*' + field] = []
+            prepared_terms['embedded.*' + field].append(val)
+    return prepared_terms
+
+
 def set_doc_types(request, types, search_type):
     """
     Set the type of documents resulting from the search; order and check for
     invalid types as well.
     """
+    doc_types = []
     if search_type is None:
         doc_types = request.params.getall('type')
         if '*' in doc_types:
@@ -223,6 +230,8 @@ def set_doc_types(request, types, search_type):
         bad_types = [t for t in doc_types if t not in types]
         msg = "Invalid type: {}".format(', '.join(bad_types))
         raise HTTPBadRequest(explanation=msg)
+    if len(doc_types) == 0:
+        doc_types = ['Item']
     return doc_types
 
 def get_search_fields(request, doc_types):
@@ -257,15 +266,19 @@ def list_result_fields(request, doc_types):
 
 
 # TODO: Make ES5 complaint query dsl ('query' should be ok, but not 'filter')
-def get_filtered_query(term, search_fields, result_fields, principals, doc_types):
+def get_filtered_query(prepared_terms, result_fields, principals, doc_types):
+    # prepare the query from prepared_terms
+    bool_query = {"must":[]}
+    for field in prepared_terms.keys():
+        this_query = {"query_string":{}}
+        this_query["query_string"]["fields"] = [field]
+        query_prep = ['\"{0}\"'.format(term) for term in prepared_terms[field]]
+        this_query["query_string"]["query"] = ' '.join(query_prep)
+        bool_query["must"].append(this_query)
     ### FOR ES1
     return {
-        'query': {
-            'query_string': {
-                'query': term,
-                'fields': search_fields,
-                'default_operator': 'AND'
-            }
+        "query": {
+            "bool" : bool_query
         },
         'filter': {
             'and': {
@@ -285,114 +298,42 @@ def get_filtered_query(term, search_fields, result_fields, principals, doc_types
         },
         '_source': list(result_fields),
     }
-    ### FOR ES5
-    # return {
-    #     'query': {
-    #         'simple_query_string': {
-    #             'query': term,
-    #             'fields': ["_all"],
-    #             'default_operator': 'AND'
-    #         }
-    #     },
-    #     'filter': {
-    #         'and': {
-    #             'filters': [
-    #                 {
-    #                     'terms': {
-    #                         'principals_allowed.view': principals
-    #                     }
-    #                 },
-    #                 {
-    #                     'terms': {
-    #                         'embedded.@type.raw': doc_types
-    #                     }
-    #                 }
-    #             ]
-    #         }
-    #     },
-    #     '_source': list(result_fields),
-    # }
 
 
 def set_filters(request, query, result):
     """
-    Sets filters in the query
+    Sets filters in the query. Use only for types. Specific fields are contained
+    within the query_string.
     """
     query_filters = query['filter']['and']['filters']
     used_filters = {}
     for field, term in request.params.items():
-        if field in ['type', 'limit', 'y.limit', 'x.limit', 'mode', 'annotation',
+        if field in ['limit', 'y.limit', 'x.limit', 'mode', 'annotation',
                      'format', 'frame', 'datastore', 'field', 'region', 'genome',
                      'sort', 'from', 'referrer']:
             continue
-
+        elif field == 'type' and term != 'Item':
+            continue
         # Add filter to result
         qs = urlencode([
             (k.encode('utf-8'), v.encode('utf-8'))
             for k, v in request.params.items() if v != term
         ])
+        remove_path = '{}?{}'.format(request.path, qs)
+        # default to searching type=Item rather than empty filter path
+        if remove_path[-1] == '?':
+            remove_path += 'type=Item'
         result['filters'].append({
             'field': field,
             'term': term,
-            'remove': '{}?{}'.format(request.path, qs)
+            'remove': remove_path
         })
 
         if field == 'searchTerm':
             continue
 
-        # Add filter to query
-        if field.startswith('audit'):
-            query_field = field
-        else:
-            query_field = 'embedded.' + field + '.raw'
-
-        if field.endswith('!'):
-            if field not in used_filters:
-                # Setting not filter instead of terms filter
-                query_filters.append({
-                    'not': {
-                        'terms': {
-                            'embedded.' + field[:-1] + '.raw': [term],
-                        }
-                    }
-                })
-                query_terms = used_filters[field] = []
-            else:
-                query_filters.remove({
-                    'not': {
-                        'terms': {
-                            'embedded.' + field[:-1] + '.raw': used_filters[field]
-                        }
-                    }
-                })
-                used_filters[field].append(term)
-                query_filters.append({
-                    'not': {
-                        'terms': {
-                            'embedded.' + field[:-1] + '.raw': used_filters[field]
-                        }
-                    }
-                })
-        else:
-            if field not in used_filters:
-                query_terms = used_filters[field] = []
-                query_filters.append({
-                    'terms': {
-                        query_field: query_terms,
-                    }
-                })
-            else:
-                query_filters.remove({
-                    'terms': {
-                        query_field: used_filters[field]
-                    }
-                })
-                used_filters[field].append(term)
-                query_filters.append({
-                    'terms': {
-                        query_field: used_filters[field]
-                    }
-                })
+        if field not in used_filters.keys():
+            used_filters[field] = []
         used_filters[field].append(term)
     return used_filters
 
@@ -427,11 +368,13 @@ def set_facets(facets, used_filters, principals, doc_types):
     Sets facets in the query using filters
     """
     aggs = {}
+    facet_dict = dict(facets)
     for field, _ in facets:
-        exclude = []
+        # This is a not facet field. Cannot ensure that embed path is correct
+        if field not in facet_dict.keys():
+            continue
         if field == 'type':
             query_field = 'embedded.@type.raw'
-            exclude = ['Item']
         elif field.startswith('audit'):
             query_field = field
         else:
@@ -444,6 +387,8 @@ def set_facets(facets, used_filters, principals, doc_types):
         ]
         # Adding facets based on filters
         for q_field, q_terms in used_filters.items():
+            if q_field not in facet_dict.keys():
+                continue
             if q_field != field and q_field.startswith('audit'):
                 terms.append({'terms': {q_field: q_terms}})
             elif q_field != field and not q_field.endswith('!'):
@@ -456,7 +401,6 @@ def set_facets(facets, used_filters, principals, doc_types):
                 agg_name: {
                     'terms': {
                         'field': query_field,
-                        'exclude': exclude,
                         'min_doc_count': 0,
                         'size': 100
                     }
