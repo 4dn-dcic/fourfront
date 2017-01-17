@@ -93,13 +93,14 @@ def test_indexing_workbook(testapp, indexer_testapp):
     res = indexer_testapp.post_json('/index', {'record': True})
     assert res.json['updated']
     assert res.json['indexed']
-
     res = testapp.get('/search/?type=Biosample')
     # Compare specific fields of the search result from expected inserts
-    test_json = [bios for bios in res.json['@graph'] if bios['accession'] == '4DNBS1234567']
-    assert test_json['uuid'] == "231111bc-8535-4448-903e-854af460ba4d"
-    assert test_json['biosource']['biosource_type'] == "whole organisms"
-    assert test_json['biosource']['individual']['organism']['name'] == "human"
+    # The following assertions correspond to insert data for these embeds,
+    # (in types/biosample.py): 'biosource.biosource_type', 'biosource.individual.organism.name'
+    test_json = [bios for bios in res.json['@graph'] if bios['accession'] == '4DNBS1234567'][0]
+    assert test_json['uuid'] == "231111bc-8535-4448-903e-854af460b254"
+    assert test_json['biosource'][0]['biosource_type'] == "immortalized cell line"
+    assert test_json['biosource'][0]['individual']['organism']['name'] == "human"
     assert res.json['total'] > 1
 
 
