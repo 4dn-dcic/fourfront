@@ -5,9 +5,9 @@ pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 
 def test_search_view(workbook, testapp):
-    res = testapp.get('/search/').json
+    res = testapp.get('/search/?type=Item').json
     assert res['@type'] == ['Search']
-    assert res['@id'] == '/search/'
+    assert res['@id'] == '/search/?type=Item'
     assert res['@context'] == '/terms/'
     assert res['notification'] == 'Success'
     assert res['title'] == 'Search'
@@ -15,43 +15,3 @@ def test_search_view(workbook, testapp):
     assert 'facets' in res
     assert 'filters' in res
     assert '@graph' in res
-
-@pytest.mark.skip(reason="we dont have report view currently")
-def test_report_view(workbook, testapp):
-    res = testapp.get('/report/?type=Experiment').json
-    assert res['@type'] == ['Report']
-    assert res['@id'] == '/report/?type=Experiment'
-    assert res['@context'] == '/terms/'
-    assert res['notification'] == 'Success'
-    assert res['title'] == 'Report'
-    assert res['total'] > 0
-    assert 'facets' in res
-    assert 'filters' in res
-    assert 'columns' in res
-    assert '@graph' in res
-
-
-@pytest.mark.skip(reason="we dont have matrix view currently")
-def test_matrix_view(workbook, testapp):
-    res = testapp.get('/matrix/?type=Experiment').json
-    assert res['@type'] == ['Matrix']
-    assert res['@id'] == '/matrix/?type=Experiment'
-    assert res['@context'] == '/terms/'
-    assert res['notification'] == 'Success'
-    assert res['title'] == 'Experiment Matrix'
-    assert res['total'] > 0
-    assert 'facets' in res
-    assert 'filters' in res
-    assert 'matrix' in res
-    assert res['matrix']['max_cell_doc_count'] > 0
-    assert res['matrix']['search_base'] == '/search/?type=Experiment'
-    assert res['matrix']['x']['group_by'] == 'assay_title'
-    assert res['matrix']['x']['label'] == 'Assay'
-    assert res['matrix']['x']['limit'] == 20
-    assert len(res['matrix']['x']['buckets']) > 0
-    assert len(res['matrix']['x']['facets']) > 0
-    assert res['matrix']['y']['group_by'] == ['replicates.library.biosample.biosample_type', 'biosample_term_name']
-    assert res['matrix']['y']['label'] == 'Biosample'
-    assert res['matrix']['y']['limit'] == 5
-    assert len(res['matrix']['y']['replicates.library.biosample.biosample_type']['buckets']) > 0
-    assert len(res['matrix']['y']['replicates.library.biosample.biosample_type']['buckets'][0]['biosample_term_name']['buckets']) > 0
