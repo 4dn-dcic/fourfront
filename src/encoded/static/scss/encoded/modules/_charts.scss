@@ -142,8 +142,45 @@ svg.bar-plot-chart { // SVG is top-level element rendered by component;
         stroke-width: 1px;
     }
 
+    line.y-axis-bottom {
+        stroke : #aaa;
+        stroke-width: 1px;
+    }
+
     g.chart-bar {
         transition: transform .75s, opacity .5s;
+
+        text.bar-top-label {
+            transform : translate3d(0, -3px, 0);
+        }
+
+        > rect {
+            fill-opacity: 1;
+            transition : fill-opacity .5s;
+        }
+
+    }
+
+    text.y-axis-label-count {
+        opacity: 1;
+        transition: opacity .5s;
+    }
+
+    &.highlight {
+        g.chart-bar > rect {
+            fill-opacity: 0.4;
+        }
+        g.chart-bar.highlight {
+            > rect {
+                fill-opacity: 1;
+            }
+        }
+        text.y-axis-label-count {
+            opacity : 0.4;
+            &.highlight {
+                opacity : 1;
+            }
+        }
     }
 }
 
@@ -156,11 +193,17 @@ svg.bar-plot-chart { // SVG is top-level element rendered by component;
         path {
             stroke: #fff;
             transition: opacity 1s;
+            position: relative;
+            &.removing {
+                opacity : 0 !important;
+                z-index: -1;
+                transition: opacity .75s !important;
+            }
         }
 
         svg g.group-container:hover path {
             transition: opacity 0.25s;
-            opacity: 0.3;
+            opacity: 0.4;
             &.hover, 
             &:hover {
                 opacity: 1;

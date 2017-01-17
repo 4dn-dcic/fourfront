@@ -3,7 +3,8 @@ var url = require('url');
 var queryString = require('query-string');
 var _ = require('underscore');
 var store = require('../store');
-var { ajaxLoad, getNestedProperty, flattenArrays, console } = require('./objectutils');
+var { ajaxLoad, getNestedProperty, flattenArrays, console, isServerSide } = require('./objectutils');
+var { util } = require('./viz/common');
 
 
 /**
@@ -168,7 +169,7 @@ var ExpTerm = React.createClass({
         var selected = this.isSelected();
         return (
             <li className={"facet-list-element" + (selected ? " selected" : '')} key={this.props.term.key}>
-                <a className={"term" + (selected ? " selected" : '')} href="#" onClick={this.handleClick}>
+                <a className="term" data-selected={selected} href="#" onClick={this.handleClick} data-term={this.props.term.key}>
                     <span className="pull-left facet-selector">
                         { this.state.filtering ?
                             <i className="icon icon-circle-o-notch icon-spin icon-fw"></i>
@@ -352,6 +353,76 @@ var FacetList = module.exports = React.createClass({
         // Include sub-components as static (sub-)properties of main FacetList
         Facet : Facet,
 
+        /** 
+         * Highlights all terms on document (changes background color) of given field,term.
+         * @param {string} field - Field, in object dot notation.
+         * @param {string} term - Term to highlight.
+         * @param {string} color - A valid CSS color.
+         */
+        highlightTerm : function(
+            field = 'experiments_in_set.biosample.biosource.individual.organism.name',
+            term = 'human',
+            color = ''
+        ){
+            if (isServerSide()) return false;
+            if (!document.querySelectorAll) return false;
+
+            function setHighlightClass(el, off = false){
+                var isSVG, className;
+                if (el.className.baseVal) {
+                    isSVG = true;
+                    className = el.className.baseVal;
+                } else {
+                    isSVG = false;
+                    className = el.className;
+                }
+
+                if (!off){
+                    if (className.indexOf(' highlight') === -1) className += ' highlight';
+                } else {
+                    if (className.indexOf(' highlight') > -1)   className = className.replace(' highlight', '');
+                }
+                
+                if (isSVG)  el.className.baseVal = className;
+                else        el.className = className;
+                return isSVG;
+            }
+
+            util.requestAnimationFrame(function(){
+                _.each(document.querySelectorAll('[data-field' + (field ? '="' + field + '"' : '') + ']'), function(fieldContainerElement){
+                    setHighlightClass(fieldContainerElement, color.length === 0);
+                });
+
+                // unhighlight previously selected terms, if any.
+                _.each(document.querySelectorAll('[data-term]'), function(termElement){
+                    var isSVG = setHighlightClass(termElement, true);
+                    if (!isSVG) termElement.style.backgroundColor = '';
+                });
+
+                if (color.length > 0){
+                    _.each(document.querySelectorAll('[data-term="' + term + '"]'), function(termElement){
+                        var isSVG = setHighlightClass(termElement, color.length === 0);
+                        if (!isSVG) termElement.style.backgroundColor = color;
+                    });
+                }
+            });
+            return true;
+        },
+
+        /** Resets background color of term(s). @see FacetList.highlightTerm */
+        unhighlightTerms : function(field = null){
+            return FacetList.highlightTerm.call(this, field, null, '');
+        },
+
+        /**
+         * Given a field/term, add or remove filter from expSetFilters (in redux store) within context of current state of filters.
+         * @param {string} field - Field, in object dot notation.
+         * @param {string} term - Term to add/remove from active filters.
+         * @param {string} [experimentsOrSets='experiments'] - Informs whether we're standardizing field to experiments_in_set or not. Defaults to 'experiments'.
+         * @param {Object} [currentFilters] - The expSetFilters object that term is being added or removed from; if not provided it grabs state from redux store.
+         * @param {function} [callback] - Callback function to call after updating redux store.
+         * @param {boolean} [returnInsteadOfSave=false] - Whether to return a new updated expSetFilters object representing would-be changed state INSTEAD of updating redux store. Useful for doing a batched update.
+         */
         changeFilter: function(field, term, experimentsOrSets = 'experiments', currentFilters = null, callback = null, returnInsteadOfSave = false) {
 
             if (!currentFilters){
@@ -388,7 +459,10 @@ var FacetList = module.exports = React.createClass({
             }
         },
         
-        /** N.B. Make sure expSetFilters is a new or cloned object (not props.expSetFilters) for Redux to recognize that it has changed. */
+        /**
+         * Quickhand method to update expSetFilters in redux store.
+         * Before calling, make sure expSetFilters is a new or cloned object (not props.expSetFilters) for Redux to recognize that it has changed.
+         */
         saveChangedFilters : function(expSetFilters){
             store.dispatch({
                 type : {'expSetFilters' : expSetFilters}
@@ -396,11 +470,11 @@ var FacetList = module.exports = React.createClass({
         },
 
         /**
-         * Adds a restrictions property to each facet from restrictions object
-         * and uses it to filter terms.
+         * Adds a restrictions property to each facet from restrictions object and uses it to filter terms.
          * 
          * @param {Object[]} origFacets - Array of initial facets; should have terms already.
          * @param {Object} [restrictions] - Object containing restricted facet fields as property names and arrays of term keys as values.
+         * @return {Object[]} Facets which have filtered terms and a restrictions property, if there is a restriction for it in restrictions object.
          */
         adjustedFacets : function(origFacets, restrictions = {}){
             return origFacets.map(function(facet){
@@ -571,7 +645,7 @@ var FacetList = module.exports = React.createClass({
                 }
 
             }
-            if (Object.keys(ignoredFilters).length) console.log("Found Ignored Filters: ", ignoredFilters);
+            if (Object.keys(ignoredFilters).length && this.props.debug) console.log("Found Ignored Filters: ", ignoredFilters);
             return ignoredFilters;
         },
 
@@ -700,7 +774,8 @@ var FacetList = module.exports = React.createClass({
             facets : null,
             experimentsOrSets : 'sets',
             urlPath : null,
-            title : "Properties"
+            title : "Properties",
+            debug : false
         };
     },
 
@@ -757,7 +832,7 @@ var FacetList = module.exports = React.createClass({
      */
     componentDidMount : function(){
 
-        console.log(
+        if (this.props.debug) console.log(
             'Mounted FacetList on ' + (this.props.urlPath || 'unknown page.'),
             '\nFacets Provided: ' + this.state.usingProvidedFacets,
             'Facets Loaded: ' + this.state.facetsLoaded
@@ -796,10 +871,10 @@ var FacetList = module.exports = React.createClass({
             !_.isEqual(nextProps.facets, this.props.facets) ||
             !_.isEqual(nextProps.ignoredFilters, this.props.ignoredFilters)
         ){
-            console.log('%cWill','color: green', 'update FacetList');
+            if (this.props.debug) console.log('%cWill','color: green', 'update FacetList');
             return true;
         }
-        console.log('%cWill not', 'color: red', 'update FacetList');
+        if (this.props.debug) console.log('%cWill not', 'color: red', 'update FacetList');
         return false;
     },
 
@@ -812,7 +887,7 @@ var FacetList = module.exports = React.createClass({
 
             if (this.state.usingProvidedFacets === true && this.props.facets !== nextProps.facets){
                 this.facets = this.filterFacets(nextProps.facets);
-                console.timeLog('FacetList props.facets updated.');
+                if (this.props.debug) console.log('FacetList props.facets updated.');
             }
 
             if (!this.props.ignoredFilters && (this.state.usingProvidedFacets === true || this.state.facetsLoaded)){
@@ -825,7 +900,7 @@ var FacetList = module.exports = React.createClass({
         var facetType = (this.props.experimentsOrSets == 'sets' ? 'ExperimentSet' : 'Experiment');
         ajaxLoad('/facets?type=' + facetType + '&format=json', function(r){
             this.facets = this.filterFacets(r);
-            console.log('Loaded Facet List via AJAX.');
+            if (this.props.debug) console.log('Loaded Facet List via AJAX.');
             if (typeof callback == 'function') callback();
             if (facetType == 'Experiment' && !this.props.expIncompleteFacets && typeof window !== 'undefined'){
                 window.requestAnimationFrame(()=>{
@@ -833,7 +908,7 @@ var FacetList = module.exports = React.createClass({
                     store.dispatch({
                         type : {'expIncompleteFacets' : this.facets}
                     });
-                    console.info('Stored Incomplete Facet List in Redux store.');
+                    if (this.props.debug) console.info('Stored Incomplete Facet List in Redux store.');
                 });
             }
         }.bind(this));
@@ -901,7 +976,7 @@ var FacetList = module.exports = React.createClass({
     },
 
     render: function() {
-        console.timeLog('render facetlist');
+        if (this.props.debug) console.log('render facetlist');
         var exptypeDropdown;
 
         if (

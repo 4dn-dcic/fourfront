@@ -10,6 +10,7 @@ var FacetList = require('./facetlist');
 var { ChartBreadcrumbs, util } = require('./viz/common');
 var d3 = require('d3');
 var expFuncs = require('./experiments-table').ExperimentsTable.funcs;
+var { highlightTerm, unhighlightTerms } = require('./facetlist');
 
 
 var colorCache = {}; // We cache generated colors into here to re-use and speed up.
@@ -102,7 +103,9 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             ],
             'colors' : { // Keys should be all lowercase
                 "human (homo sapiens)" : "rgb(218, 112, 6)",
+                "human" : "rgb(218, 112, 6)",
                 "mouse (mus musculus)" : "rgb(43, 88, 169)",
+                "mouse" : "rgb(43, 88, 169)",
                 "other": "#a173d1",
                 "end": "#bbbbbb"
             },
@@ -126,6 +129,21 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             'mounted' : false,
             'selectedNodes' : [] // expSetFilters, but with nodes (for colors, etc.)
         };
+    },
+
+    shouldComponentUpdate : function(nextProps, nextState){
+        if (
+            this.props.href !== nextProps.href ||
+            this.props.expSetFilters !== nextProps.expSetFilters ||
+            this.props.context !== nextProps.context ||
+            !_.isEqual(this.state.experiments, nextState.experiments) ||
+            (nextState.mounted === true && this.state.mounted === false)
+        ){
+            console.log('WILLUPDATE');
+            return true;
+        }
+        console.log('shouldupdate', _.clone(this.props), _.clone(nextProps));
+        return false;
     },
 
     componentDidMount : function(){
@@ -184,12 +202,9 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         if (toFormat === 'tree'){
             if (filters && Object.keys(filters).length > 0){
                 // We have locally-set filters. Filter experiments before transforming. Will become deprecated w/ GraphQL update(s).
-                return SunBurstChart.transformDataForChart(
-                    [...FacetList.siftExperiments(experiments, filters)],
-                    true
-                )
+                return SunBurstChart.transformDataForChart([...FacetList.siftExperiments(experiments, filters)])
             } else {
-                return SunBurstChart.transformDataForChart(experiments, true);
+                return SunBurstChart.transformDataForChart(experiments);
             }
         }
 
@@ -334,10 +349,28 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
     handleVisualNodeClickToUpdateFilters : function(node){
 
+        if (this.preventClicks === true){
+            console.warn("Excess click prevented.");
+            return;
+        }
+        this.preventClicks = true; // Prevent more clicks while this is true.
+
+        // Pass this func to child charts via 'getCancelPreventClicksCallback' function prop (which returns this function),
+        // with count (first arg to _.after) being number of charts this function is passed to.
+        // When all charts complete their transitions, they call this function to allow handleVisualNodeClickToUpdateFilters to start accepting
+        // clicks again. Otherwise, bad things happen when try to filter when charts are still performing transitions (the elements being transitioned may become unmounted).
+        this.cancelPreventClicks = _.after(2, () => {
+            console.info('Unsetting FacetCharts preventClicks.');
+            this.preventClicks = false;
+            this.cancelPreventClicks = null;
+            return true;
+        });
+
+
+
         if (typeof node.target !== 'undefined' && typeof node.target.nodeName === 'string'){
             // We have a click event from element rather than D3.
-            //node = d3.select(node.target).datum();
-            node = node.target.__data__;
+            node = node.target.__data__; // Same as: node = d3.select(node.target).datum();
         }
         
         if (typeof node.data.field !== 'string' || typeof node.data.term !== 'string'){
@@ -398,8 +431,8 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             // Swap filters only (no navigation).
             updateExpSetFilters.call(this);
         }
-            
-    },
+
+    }, // Prevent more than 1 click per 1s.
 
     show : function(){
         if (typeof this.props.show === false) return false;
@@ -442,6 +475,8 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
         var height = this.height();
 
+        unhighlightTerms();
+
         if (!this.state.mounted){
             return ( // + 66 == breadcrumbs (26) + breadcrumbs-margin-bottom (10) + description (30)
                 <div className={"facet-charts loading " + show} key="facet-charts" style={{ 'height' : height + 66 }}>
@@ -471,6 +506,8 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                             colorForNode={this.colorForNode}
                             key="sunburst"
                             ref="sunburstChart"
+                            debug
+                            getCancelPreventClicksCallback={()=> this.cancelPreventClicks }
                         />
                     </div>
                     <div className={genChartColClassName(2)} key="facet-chart-row-1-chart-2">
@@ -478,6 +515,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                             experiments={this.transformData(this.state.experiments)}
                             height={height}
                             colorForNode={this.colorForNode}
+                            getCancelPreventClicksCallback={()=> this.cancelPreventClicks }
                         />
                     </div>
                 </div>
