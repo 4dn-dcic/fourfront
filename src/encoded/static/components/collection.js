@@ -169,21 +169,18 @@ var lookup_column = function (result, column) {
         },
 
         guessColumns: function (props) {
-            var column_list = props.columns || props.context.columns;
             var columns = [];
-            if (!column_list || Object.keys(column_list).length === 0) {
-                for (var key in props.context['@graph'][0]) {
-                    if (key.slice(0, 1) != '@' && key.search(/(uuid|_no|accession)/) == -1) {
+            // Get columns right from results. Selective embedding defines cols used
+            for (var key in props.context['@graph'][0]) {
+                if (key.slice(0, 1) != '@' && key.search(/(uuid|_no|accession)/) == -1) {
+                    // Do not use fields with obj vals as columns
+                    if (typeof props.context['@graph'][0][key] !== 'object'){
                         columns.push(key);
                     }
                 }
-                columns.sort();
-                columns.unshift('@id');
-            } else {
-                for(var column in column_list) {
-                    columns.push(column);
-                }
             }
+            columns.sort();
+            columns.unshift('@id');
             if(this._isMounted){
                 this.setState({columns: columns});
             }
@@ -201,7 +198,6 @@ var lookup_column = function (result, column) {
                     //    return factory({context: item, column: column});
                     //};
                     var value = lookup_column(item, column);
-                    console.log(value);
                     if (column == '@id') {
                         factory = globals.listing_titles.lookup(item);
                         value = factory({context: item});

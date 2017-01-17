@@ -14,10 +14,9 @@ def test_search_view(workbook, testapp):
     assert res['total'] > 0
     assert 'facets' in res
     assert 'filters' in res
-    assert 'columns' in res
     assert '@graph' in res
 
-
+@pytest.mark.skip(reason="we dont have report view currently")
 def test_report_view(workbook, testapp):
     res = testapp.get('/report/?type=Experiment').json
     assert res['@type'] == ['Report']

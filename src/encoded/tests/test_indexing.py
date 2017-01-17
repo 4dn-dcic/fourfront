@@ -95,11 +95,11 @@ def test_indexing_workbook(testapp, indexer_testapp):
     assert res.json['indexed']
 
     res = testapp.get('/search/?type=Biosample')
-    # Compare this res.json to expected search result for a specific biosample
-    # NOTE: this is using old columns system
+    # Compare specific fields of the search result from expected inserts
     test_json = [bios for bios in res.json['@graph'] if bios['accession'] == '4DNBS1234567']
-    expected_json = {'biosource_summary': 'GM12878 and whole human', '@id': '/biosamples/4DNBS1234567/', 'accession': '4DNBS1234567', 'treatments_summary': 'siRNA for PARK2 and FMR1 and shRNA for PARK2 and FMR1', '@type': ['Biosample', 'Item'], 'modifications_summary': 'Stable Transfection for PARK2 and FMR1 and Other', 'description': 'GM12878 prepared for Hi-C', 'biosource': [{'individual': {'organism': {'name': 'human'}}}, {'individual': {'organism': {'name': 'human'}}}]}
-    assert test_json[0] == expected_json
+    assert test_json['uuid'] == "231111bc-8535-4448-903e-854af460ba4d"
+    assert test_json['biosource']['biosource_type'] == "whole organisms"
+    assert test_json['biosource']['individual']['organism']['name'] == "human"
     assert res.json['total'] > 1
 
 
