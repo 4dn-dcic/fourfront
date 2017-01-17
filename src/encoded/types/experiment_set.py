@@ -14,6 +14,33 @@ from .base import (
 from pyramid.threadlocal import get_current_request
 
 
+def invalidate_linked_items(item, field, updates=None):
+    '''Invalidates the linkTo item(s) in the given field of an item
+        which will trigger re-indexing the linked items
+
+        a dictionary of field value pairs to update for the linked item(s)
+        can be provided that will be applied prior to invalidation -
+        beware that each update will be applied to every linked item in the field
+    '''
+    request = get_current_request()
+    registry = item.registry
+    properties = item.properties
+    if field in properties:
+        links = properties[field]
+        if hasattr(links, 'lower'):
+            # if string turn into list
+            links = [links]
+        for link in links:
+            linked_item = item.collection.get(link)
+            registry.notify(BeforeModified(linked_item, request))
+            # update item info if provided
+            if updates is not None:
+                for f, val in updates.items():
+                    linked_item.properties[f] = val
+                    linked_item.update(linked_item.properties)
+            registry.notify(AfterModified(linked_item, request))
+
+
 @collection(
     name='experiment-sets',
     unique_key='accession',
@@ -42,6 +69,14 @@ class ExperimentSet(Item):
                 "experiments_in_set.filesets.files_in_set",
                 "experiments_in_set.digestion_enzyme"]
 
+    def _update(self, properties, sheets=None):
+        super(ExperimentSet, self)._update(properties, sheets)
+
+        request = get_current_request()
+        registry = self.registry
+        if 'experiments_in_set' in properties:
+            invalidate_linked_items(self, 'experiments_in_set')
+
 
 @collection(
     name='experiment-set-replicates',
@@ -62,11 +97,3 @@ class ExperimentSetReplicate(ExperimentSet):
         all_experiments = [exp['replicate_exp'] for exp in properties['replicate_exps']]
         properties['experiments_in_set'] = all_experiments
         super(ExperimentSetReplicate, self)._update(properties, sheets)
-
-        # invalidating the experiments that are in the experiments_in_set field
-        request = get_current_request()
-        registry = self.registry
-        for exp in properties['experiments_in_set']:
-            expt = self.collection.get(exp)
-            registry.notify(BeforeModified(expt, request))
-            registry.notify(AfterModified(expt, request))
