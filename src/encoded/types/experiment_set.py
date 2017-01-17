@@ -71,9 +71,6 @@ class ExperimentSet(Item):
 
     def _update(self, properties, sheets=None):
         super(ExperimentSet, self)._update(properties, sheets)
-
-        request = get_current_request()
-        registry = self.registry
         if 'experiments_in_set' in properties:
             invalidate_linked_items(self, 'experiments_in_set')
 
