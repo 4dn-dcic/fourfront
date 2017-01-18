@@ -26,6 +26,7 @@
         "term_url": "http://purl.obolibrary.org/obo/UBERON_0002199"
     },
     {
+        "uuid": "530056bc-8535-4448-903e-854af460a233",
         "term_name": "has_exact_synonym",
         "term_id": "OBO:hasExactSynonym",
         "source_ontology": "530006bc-8535-4448-903e-854af460b254",

@@ -88,12 +88,10 @@
             "permission": "import-items",
             "type": "array",
             "items": {
-                "parent": {
-                    "title": "Parent",
-                    "description": "The parent ontology term",
-                    "type": "string",
-                    "linkTo": "OntologyTerm"
-                  }
+                "title": "Parent",
+                "description": "The parent ontology term",
+                "type": "string",
+                "linkTo": "OntologyTerm"
             }
         },
         "slim_terms": {
@@ -102,11 +100,9 @@
             "permission": "import-items",
             "type": "array",
             "items": {
-                "slim_term": {
-                    "title": "Slim Term",
-                    "type": "string",
-                    "linkTo": "OntologyTerm"
-                }
+                "title": "Slim Term",
+                "type": "string",
+                "linkTo": "OntologyTerm"
             }
         },
         "is_slim_for": {
