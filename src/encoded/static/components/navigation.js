@@ -264,7 +264,7 @@ var UserActions = React.createClass({
         
         acctTitle = (
             <span>
-                <i title={session ? "Signed In" : null} className={"icon icon-user" + (session ? "" : "-o")}></i>&nbsp; { acctTitle }
+                <i title={session ? "Signed In" : null} className={"account-icon icon icon-user" + (session ? "" : "-o")}></i> { acctTitle }
             </span>
         );
 

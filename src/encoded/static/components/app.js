@@ -865,6 +865,7 @@ var App = React.createClass({
             <html lang="en">
                 <head>
                     <meta charSet="utf-8"/>
+                    <meta httpEquiv="Content-Type" content="text/html, charset=UTF-8"/>
                     <meta httpEquiv="X-UA-Compatible" content="IE=edge"/>
                     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
                     <meta name="google-site-verification" content="t0PnhAqm80xyWalBxJHZdld9adAk40SHjUyPspYNm7I" />
@@ -877,7 +878,7 @@ var App = React.createClass({
                     <script data-prop-name="user_details" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: jsonScriptEscape(JSON.stringify(JWT.getUserDetails())) /* Kept up-to-date in browser.js */
                     }}></script>
-                    <script data-prop-name="inline" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
+                    <script data-prop-name="inline" type="application/javascript" charSet="utf-8" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
                     <link rel="stylesheet" href="/static/css/style.css" />
                     <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
                     <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />

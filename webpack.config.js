@@ -11,7 +11,7 @@ var plugins = [];
 // don't include momentjs locales (large)
 plugins.push(new webpack.IgnorePlugin(/^\.\/locale$/, [/moment$/]));
 var chunkFilename = '[name].js';
-var sourceMapType = null;
+var sourceMapType = 'eval';
 
 if (env === 'production') {
     // tell react to use production build
