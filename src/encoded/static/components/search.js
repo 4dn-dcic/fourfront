@@ -476,6 +476,24 @@ var ResultTable = search.ResultTable = React.createClass({
         };
     },
 
+    getSearchType: function(facets){
+        var specificSearchType;
+        // Check to see if we are searching among multiple data types
+        // If only one type, use that as the search title
+        for (var i = 0; i < facets.length; i++){
+            if (facets[i]['field'] && facets[i]['field'] == 'type'){
+                if (facets[i]['terms'][0]['doc_count'] === facets[i]['total']
+                    && facets[i]['total'] > 0 && facets[i]['terms'][0]['key'] !== 'Item'){
+                    // it's a single data type, so grab it
+                    specificSearchType = facets[i]['terms'][0]['key'];
+                }else{
+                    specificSearchType = 'Multiple type';
+                }
+            }
+            return specificSearchType;
+        }
+    },
+
     render: function() {
         const batchHubLimit = 100;
         var context = this.props.context;
@@ -486,7 +504,6 @@ var ResultTable = search.ResultTable = React.createClass({
         var label = 'results. ';
         var searchBase = this.props.searchBase;
         var trimmedSearchBase = searchBase.replace(/[\?|\&]limit=all/, "");
-        var specificFilter;
         var show_link;
         var facets = context['facets'].map(function(facet) {
             if (this.props.restrictions[facet.field] !== undefined) {
@@ -497,27 +514,9 @@ var ResultTable = search.ResultTable = React.createClass({
             return facet;
         }.bind(this));
 
-        // See if a specific result type was requested ('type=x')
-        // Satisfied iff exactly one type is in the search
-        if (results.length) {
-            filters.forEach(function(filter) {
-                if (filter.field === 'type') {
-                    specificFilter = specificFilter ? '' : filter.term;
-                }
-            });
-        }
-        // Check to see if we are searching among multiple data types
-        // True if only facet is of field "type" when ignoring audits
-        for (var i = 0; i < facets.length; i++){
-            if (facets[i]['field'] && facets[i]['field'] == 'type'){
-                if (facets[i]['terms'][0]['doc_count'] === facets[i]['total'] && facets[0]['total'] > 0){
-                    // it's a single data type, so grab it
-                    specificFilter = facets[i]['terms'][0]['key'];
-                }else{
-                    specificFilter = 'Multiple type';
-                }
-            }
-        }
+        // get type of search for building the page title
+        var specificSearchType = this.getSearchType(facets);
+
         // Get a sorted list of batch hubs keys with case-insensitive sort
         var batchHubKeys = [];
         if (context.batch_hub && Object.keys(context.batch_hub).length) {
@@ -576,7 +575,7 @@ var ResultTable = search.ResultTable = React.createClass({
         return (
             <div>
                 <div className="row search-title">
-                    <h3>{specificFilter ? specificFilter : 'Unresolved type'} search</h3>
+                    <h3>{specificSearchType ? specificSearchType : 'Unresolved type'} search</h3>
                     <div className="row">
                         <h4 className='inline-subheader'>Showing {results.length} of {total} {label} {show_link}</h4>
                     </div>

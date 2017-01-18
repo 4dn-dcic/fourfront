@@ -171,7 +171,9 @@ var lookup_column = function (result, column) {
         guessColumns: function (props) {
             var columns = [];
             // Get columns right from results. Selective embedding defines cols used
+            // Use the first obj in the collection to find columns
             for (var key in props.context['@graph'][0]) {
+                // exclude special fields explicitly from being columns
                 if (key.slice(0, 1) != '@' && key.search(/(uuid|_no|accession)/) == -1) {
                     // Do not use fields with obj vals as columns
                     if (typeof props.context['@graph'][0][key] !== 'object'){
@@ -179,6 +181,7 @@ var lookup_column = function (result, column) {
                     }
                 }
             }
+            // sort alphabetically for now. maybe sort by boost values of fields later?
             columns.sort();
             columns.unshift('@id');
             if(this._isMounted){
