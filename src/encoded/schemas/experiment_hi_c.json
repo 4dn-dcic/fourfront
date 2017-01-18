@@ -136,49 +136,5 @@
         "lab.title": {
             "title": "Lab"
         }
-    },
-    "columns": {
-        "award.project": {
-            "title": "Project"
-        },
-        "biosample.biosource.individual.organism.name": {
-            "title": "Organism"
-        },
-        "biosample.biosource.biosource_type": {
-            "title": "Biosource type"
-        },
-        "biosample.biosource_summary": {
-            "title": "Biosource"
-        },
-        "digestion_enzyme.name": {
-            "title": "Enzyme"
-        },
-        "biosample.modifications_summary": {
-            "title": "Modifications"
-        },
-        "biosample.modifications_summary_short": {
-            "title": "Modifications"
-        },
-        "biosample.treatments_summary": {
-            "title": "Treatments"
-        },
-        "lab.title": {
-            "title": "Lab"
-        },
-        "description":{
-            "title": "Description"
-        },
-        "accession":{
-            "title": "Accession"
-        },
-        "title":{
-            "title": "Title"
-        },
-        "name":{
-            "title": "Name"
-        },
-        "experiment_summary":{
-            "title": "Experiment summary"
-        }
     }
 }
