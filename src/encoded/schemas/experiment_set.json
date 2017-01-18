@@ -42,8 +42,11 @@
             "title": "Experiment Set type",
             "description": "The categorization of the set of experiments.",
             "type": "string",
+            "default": "custom",
+            "exclude_from": "submit4dn",
             "enum" : [
-              "custom"
+              "custom",
+              "replicate"
             ]
         },
         "description": {
