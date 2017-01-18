@@ -93,8 +93,14 @@ def test_indexing_workbook(testapp, indexer_testapp):
     res = indexer_testapp.post_json('/index', {'record': True})
     assert res.json['updated']
     assert res.json['indexed']
-
     res = testapp.get('/search/?type=Biosample')
+    # Compare specific fields of the search result from expected inserts
+    # The following assertions correspond to insert data for these embeds,
+    # (in types/biosample.py): 'biosource.biosource_type', 'biosource.individual.organism.name'
+    test_json = [bios for bios in res.json['@graph'] if bios['accession'] == '4DNBS1234567'][0]
+    assert test_json['uuid'] == "231111bc-8535-4448-903e-854af460b254"
+    assert test_json['biosource'][0]['biosource_type'] == "immortalized cell line"
+    assert test_json['biosource'][0]['individual']['organism']['name'] == "human"
     assert res.json['total'] > 1
 
 
@@ -103,7 +109,6 @@ def test_indexing_simple(testapp, indexer_testapp):
     testapp.post_json('/testing-post-put-patch/', {'required': ''})
     res = indexer_testapp.post_json('/index', {'record': True})
     assert res.json['indexed'] == 1
-    assert 'txn_count' not in res.json
 
     res = testapp.post_json('/testing-post-put-patch/', {'required': ''})
     uuid = res.json['@graph'][0]['uuid']
@@ -112,7 +117,7 @@ def test_indexing_simple(testapp, indexer_testapp):
     assert res.json['txn_count'] == 1
     assert res.json['updated'] == [uuid]
     res = testapp.get('/search/?type=TestingPostPutPatch')
-    assert res.json['total'] == 2
+    assert res.json['total'] == 3
 
 
 def test_listening(testapp, listening_conn):

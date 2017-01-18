@@ -1,5 +1,8 @@
 """Abstract collection for experiment and integration of all experiment types."""
 
+from pyramid.view import (
+    view_config,
+)
 from snovault import (
     collection,
     load_schema,
@@ -7,7 +10,8 @@ from snovault import (
 from .base import (
     Item
 )
-
+from snovault.resource_views import item_view_page
+from snovault.calculated import calculate_properties
 
 @collection(
     name='experiment-sets',
@@ -22,7 +26,9 @@ class ExperimentSet(Item):
     item_type = 'experiment_set'
     schema = load_schema('encoded:schemas/experiment_set.json')
     name_key = "accession"
-    embedded = ["experiments_in_set",
+    embedded = ["award",
+                "lab",
+                "experiments_in_set",
                 "experiments_in_set.protocol",
                 "experiments_in_set.protocol_variation",
                 "experiments_in_set.lab",
@@ -52,6 +58,8 @@ class ExperimentSetReplicate(Item):
     schema = load_schema('encoded:schemas/experiment_set_replicate.json')
     name_key = "accession"
     embedded = ["replicate_exps.replicate_exp",
+                "award",
+                "lab",
                 "experiments_in_set",
                 "experiments_in_set.protocol",
                 "experiments_in_set.protocol_variation",
@@ -65,9 +73,17 @@ class ExperimentSetReplicate(Item):
                 "experiments_in_set.files",
                 "experiments_in_set.filesets",
                 "experiments_in_set.filesets.files_in_set",
-                "experiments_in_set.digestion_enzyme"]
+                "experiments_in_set.digestion_enzyme",
+                "replicate_exps.replicate_exp"]
 
     def _update(self, properties, sheets=None):
         all_experiments = [exp['replicate_exp'] for exp in properties['replicate_exps']]
         properties['experiments_in_set'] = all_experiments
         super(ExperimentSetReplicate, self)._update(properties, sheets)
+
+# Use the the page view as default for experiment sets. This means that embedding
+# IS relevant with regard to this specific object pages
+@view_config(context=ExperimentSetReplicate, permission='view', request_method='GET', name='page')
+def item_page_view(context, request):
+    """Return the frame=page view rather than object view by default."""
+    return item_view_page(context, request)

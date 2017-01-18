@@ -1,5 +1,8 @@
 """base class creation for all the schemas that exist."""
 from functools import lru_cache
+from pyramid.view import (
+    view_config,
+)
 from pyramid.security import (
     # ALL_PERMISSIONS,
     Allow,
@@ -14,6 +17,7 @@ from pyramid.traversal import (
 )
 import snovault
 # from ..schema_formats import is_accession
+from snovault.resource_views import item_view_page_object
 
 
 @lru_cache()
@@ -191,6 +195,12 @@ class Item(snovault.Item):
             keys['accession'].append(properties['accession'])
         return keys
 
+# make it so any item page defaults to using the object, not embedded, view
+@view_config(context=Item, permission='view', request_method='GET', name='page')
+def item_page_view(context, request):
+    """Return the frame=object view rather than embedded view by default."""
+    properties = item_view_page_object(context, request)
+    return properties
 
 class SharedItem(Item):
     """An Item visible to all authenticated users while "proposed" or "in progress"."""

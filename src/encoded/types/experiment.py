@@ -140,7 +140,11 @@ class ExperimentCaptureC(Experiment):
     """The experiment class for Capture Hi-C experiments."""
     item_type = 'experiment_capture_c'
     schema = load_schema('encoded:schemas/experiment_capture_c.json')
-    embedded = Experiment.embedded + ["digestion_enzyme", "submitted_by"]
+    embedded = Experiment.embedded + ["digestion_enzyme",
+                                      "submitted_by",
+                                      "targeted_regions",
+                                      "targeted_regions.target",
+                                      "targeted_regions.oligo_file"]
     name_key = 'accession'
 
     @calculated_property(schema={
