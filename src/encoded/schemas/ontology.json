@@ -40,12 +40,12 @@
             "type": "string",
             "format": "uri"
         },
-        "base_url": {
-            "title": "Base URL",
+        "namespace_url": {
+            "title": "Namespace URL",
             "description": "The base URL to which a term identifier can be added to construct a url to a term.",
             "type": "string",
             "format": "uri",
-            "internal_comment": "may not be the same as home url - this to get specific terms"
+            "internal_comment": "may not be the same as home url - this to get specific terms or to use as namespace when parsing rdf"
         },
         "ontology_prefix": {
             "title": "Ontology Prefix",
@@ -57,14 +57,35 @@
             "description": "A short description of the ontology.",
             "type": "string"
         },
-        "branches": {
-            "title": "Branches",
-            "description": "Branches that contain relevant subsets of terms",
-            "internal_comment": "A branch within the ontology",
+        "synonym_terms" : {
+            "title": "Synonym Terms",
+            "decription": "Terms that are used to denote synonyms - eg. 'exact synonym', 'alternative term' ...",
             "type": "array",
             "items": {
-                "title": "Branch",
-                "type": "string"
+                "title": "Synonym",
+                "type": "string",
+                "linkTo": "OntologyTerm"
+            }
+        },
+        "definition_terms" : {
+            "title": "Definition Terms",
+            "decription": "Terms that are used to denote definitions - eg. 'definition', 'IAO:00000115' ...",
+            "type": "array",
+            "items": {
+                "title": "Definition",
+                "type": "string",
+                "linkTo": "OntologyTerm"
+            }
+        },
+        "relation_terms" : {
+            "title": "Relationship Terms",
+            "decription": "Terms that are used to denote relationships often found in onProperty triple - eg. 'part of', 'develops from' ...",
+            "internal_comment": "Will only store a subset of relationships - those of interest when parsing ontologies",
+            "type": "array",
+            "items": {
+                "title": "Relationship",
+                "type": "string",
+                "linkTo": "OntologyTerm"
             }
         }
     }

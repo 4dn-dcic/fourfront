@@ -1,34 +1,28 @@
-from rdflib import ConjunctiveGraph, exceptions, Namespace
-from rdflib import RDFS, RDF, BNode
-from rdflib.collection import Collection
 import json
+from rdflib.collection import Collection
+from owltools import (
+    Namespace,
+    Owler,
+    splitNameFromNamespace,
+    isBlankNode,
+    subClassOf,
+    SomeValuesFrom,
+    IntersectionOf,
+    OnProperty
+)
 
 EPILOG = __doc__
 
-OWLNS = Namespace("http://www.w3.org/2002/07/owl#")
-OBO_OWL = Namespace("http://www.geneontology.org/formats/oboInOwl#")
 EFO = Namespace("http://www.ebi.ac.uk/efo/")
-OBO = Namespace("http://purl.obolibrary.org/obo/")
-
-EFO_Synonym = EFO["alternative_term"]
-OBO_Synonym = OBO["IAO_0000118"]
-Synonym = OBO_OWL["hasExactSynonym"]
-Ontology = OWLNS["Ontology"]
-
-Restriction = OWLNS["Restriction"]
-Class = OWLNS["Class"]
-Thing = OWLNS["Thing"]
-OnProperty = OWLNS["onProperty"]
-SomeValuesFrom = OWLNS["someValuesFrom"]
-IntersectionOf = OWLNS["intersectionOf"]
-
+EFO_DEF = EFO['definition']
 PART_OF = "http://purl.obolibrary.org/obo/BFO_0000050"
 DEVELOPS_FROM = "http://purl.obolibrary.org/obo/RO_0002202"
 HUMAN_TAXON = "http://purl.obolibrary.org/obo/NCBITaxon_9606"
 HAS_PART = "http://purl.obolibrary.org/obo/BFO_0000051"
 ACHIEVES_PLANNED_OBJECTIVE = "http://purl.obolibrary.org/obo/OBI_0000417"
-DEFAULT_LANGUAGE = "en"
 
+# A goal is to get rid of these hard-coded slim terms by querying
+# the database for terms and having the slim terms tagged as such
 developental_slims = {
     'UBERON:0000926': 'mesoderm',
     'UBERON:0000924': 'ectoderm',
@@ -317,262 +311,14 @@ ntr_assays = {
         "types": []
     }
 }
+# end slim and NTR terms
 
 
-class Inspector(object):
-
-    """ Class that includes methods for querying an RDFS/OWL ontology """
-
-    def __init__(self, uri, language=""):
-        super(Inspector, self).__init__()
-        self.rdfGraph = ConjunctiveGraph()
-        try:
-            self.rdfGraph.parse(uri, format="application/rdf+xml")
-        except:
-            try:
-                self.rdfGraph.parse(uri, format="n3")
-            except:
-                raise exceptions.Error("Could not parse the file! Is it a valid RDF/OWL ontology?")
-        finally:
-            self.baseURI = self.get_OntologyURI() or uri
-            self.allclasses = self.__getAllClasses(includeDomainRange=True, includeImplicit=True, removeBlankNodes=False, excludeRDF_OWL=False)
-
-    def get_OntologyURI(self, return_as_string=True):
-        test = [x for x, y, z in self.rdfGraph.triples((None, RDF.type, Ontology))]
-        if test:
-            if return_as_string:
-                return str(test[0])
-            else:
-                return test[0]
-        else:
-            return None
-
-    def __getAllClasses(self, classPredicate="", includeDomainRange=False, includeImplicit=False, removeBlankNodes=True, addOWLThing=True, excludeRDF_OWL=True):
-
-        rdfGraph = self.rdfGraph
-        exit = {}
-
-        def addIfYouCan(x, mydict):
-            if excludeRDF_OWL:
-                if x.startswith('http://www.w3.org/2002/07/owl#') or  \
-                   x.startswith("http://www.w3.org/1999/02/22-rdf-syntax-ns#") or \
-                   x.startswith("http://www.w3.org/2000/01/rdf-schema#"):
-                    return mydict
-            if x not in mydict:
-                mydict[x] = None
-            return mydict
-
-        if addOWLThing:
-            exit = addIfYouCan(Thing, exit)
-
-        if classPredicate == "rdfs" or classPredicate == "":
-            for s in rdfGraph.subjects(RDF.type, RDFS.Class):
-                exit = addIfYouCan(s, exit)
-
-        if classPredicate == "owl" or classPredicate == "":
-            for s in rdfGraph.subjects(RDF.type, Class):
-                exit = addIfYouCan(s, exit)
-
-        if includeDomainRange:
-            for o in rdfGraph.objects(None, RDFS.domain):
-                exit = addIfYouCan(o, exit)
-            for o in rdfGraph.objects(None, RDFS.range):
-                exit = addIfYouCan(o, exit)
-
-        if includeImplicit:
-            for s, v, o in rdfGraph.triples((None, RDFS.subClassOf, None)):
-                exit = addIfYouCan(s, exit)
-                exit = addIfYouCan(o, exit)
-            for o in rdfGraph.objects(None, RDF.type):
-                exit = addIfYouCan(o, exit)
-
-        # get a list
-        exit = exit.keys()
-        if removeBlankNodes:
-            exit = [x for x in exit if not isBlankNode(x)]
-        return sort_uri_list_by_name(exit)
-
-    def __getTopclasses(self, classPredicate=''):
-        returnlist = []
-
-        for eachclass in self.__getAllClasses(classPredicate):
-            x = self.get_classDirectSupers(eachclass)
-            if not x:
-                returnlist.append(eachclass)
-        return sort_uri_list_by_name(returnlist)
-
-    def __getTree(self, father=None, out=None):
-        if not father:
-            out = {}
-            topclasses = self.toplayer
-            out[0] = topclasses
-
-            for top in topclasses:
-                children = self.get_classDirectSubs(top)
-                out[top] = children
-                for potentialfather in children:
-                    self.__getTree(potentialfather, out)
-
-            return out
-
-        else:
-            children = self.get_classDirectSubs(father)
-            out[father] = children
-            for ch in children:
-                self.__getTree(ch, out)
-
-    def __buildClassTree(self, father=None, out=None):
-        if not father:
-            out = {}
-            topclasses = self.toplayer
-            out[0] = [Thing]
-            out[Thing] = sort_uri_list_by_name(topclasses)
-            for top in topclasses:
-                children = self.get_classDirectSubs(top)
-                out[top] = sort_uri_list_by_name(children)
-                for potentialfather in children:
-                    self.__buildClassTree(potentialfather, out)
-            return out
-        else:
-            children = self.get_classDirectSubs(father)
-            out[father] = sort_uri_list_by_name(children)
-            for ch in children:
-                self.__buildClassTree(ch, out)
-
-    # methods for getting ancestores and descendants of classes: by default, we do not include blank nodes
-    def get_classDirectSupers(self, aClass, excludeBnodes=True, sortUriName=False):
-        returnlist = []
-        for o in self.rdfGraph.objects(aClass, RDFS.subClassOf):
-            if not (o == Thing):
-                if excludeBnodes:
-                    if not isBlankNode(o):
-                        returnlist.append(o)
-                else:
-                    returnlist.append(o)
-        if sortUriName:
-            return sort_uri_list_by_name(remove_duplicates(returnlist))
-        else:
-            return remove_duplicates(returnlist)
-
-    def get_classDirectSubs(self, aClass, excludeBnodes=True):
-        returnlist = []
-        for s, v, o in self.rdfGraph.triples((None, RDFS.subClassOf, aClass)):
-            if excludeBnodes:
-                if not isBlankNode(s):
-                    returnlist.append(s)
-            else:
-                returnlist.append(s)
-        return sort_uri_list_by_name(remove_duplicates(returnlist))
-
-    def get_classSiblings(self, aClass, excludeBnodes=True):
-        returnlist = []
-        for father in self.get_classDirectSupers(aClass, excludeBnodes):
-            for child in self.get_classDirectSubs(father, excludeBnodes):
-                if child != aClass:
-                    returnlist.append(child)
-
-        return sort_uri_list_by_name(remove_duplicates(returnlist))
-
-    def entitySynonyms(self, anEntity, language=DEFAULT_LANGUAGE, getall=True):
-        if getall:
-            temp = []
-            # Uberon synonyms
-            for o in self.rdfGraph.objects(anEntity, Synonym):
-                temp += [o]
-            # EFO synonyms
-            for o in self.rdfGraph.objects(anEntity, EFO_Synonym):
-                temp += [o]
-            # OBI synonyms
-            for o in self.rdfGraph.objects(anEntity, OBO_Synonym):
-                temp += [o]
-            return temp
-        else:
-            for o in self.rdfGraph.objects(anEntity, Synonym):
-                if getattr(o, 'language') and getattr(o, 'language') == language:
-                    return o
-            return ""
-
-    def classFind(self, name, exact=False):
-        temp = []
-        if name:
-            for x in self.allclasses:
-                if exact:
-                    if x.__str__().lower() == str(name).lower():
-                        return [x]
-                else:
-                    if x.__str__().lower().find(str(name).lower()) >= 0:
-                        temp.append(x)
-        return temp
-
-
-def inferNamespacePrefix(aUri):
-    stringa = aUri.__str__()
-    try:
-        prefix = stringa.replace("#", "").split("/")[-1]
-    except:
-        prefix = ""
-    return prefix
-
-
-def sort_uri_list_by_name(uri_list):
-
-    def get_last_bit(uri_string):
-        try:
-            x = uri_string.split("#")[1]
-        except:
-            x = uri_string.split("/")[-1]
-        return x
-
-    try:
-        return sorted(uri_list, key=lambda x: get_last_bit(x.__str__()))
-    except:
-        # TODO: do more testing.. maybe use a unicode-safe method instead of __str__
-        print("Error in <sort_uri_list_by_name>: possibly a UnicodeEncodeError")
-        return uri_list
-
-
-def remove_duplicates(seq, idfun=None):
-    if seq:
-        if idfun is None:
-            def idfun(x):
-                return x
-        seen = {}
-        result = []
-        for item in seq:
-            marker = idfun(item)
-            if marker in seen:
-                continue
-            seen[marker] = 1
-            result.append(item)
-        return result
-    else:
-        return []
-
-
-def isBlankNode(aClass):
-    ''' Checks for blank node '''
-    if type(aClass) == BNode:
-        return True
-    else:
-        return False
-
-
-def splitNameFromNamespace(aUri):
-    stringa = aUri.__str__()
-    try:
-        ns = stringa.split("#")[0]
-        name = stringa.split("#")[1]
-    except:
-        ns = stringa.rsplit("/", 1)[0]
-        name = stringa.rsplit("/", 1)[1]
-    return (name, ns)
-
-
-def iterativeChildren(nodes, terms, closure):
-    if closure == 'data':
-        data = 'data'
-    else:
-        data = 'data_with_develops_from'
+def iterativeChildren(nodes, terms, data):
+    '''returns all the parents traversing the term graph structure
+        - (not the direct RDF graph) by iteratively following parents
+        until there are no more parents
+    '''
     results = []
     while 1:
         newNodes = []
@@ -627,6 +373,7 @@ def getTermStructure():
     return {
         'id': '',
         'name': '',
+        'definition': '',
         'preferred_name': '',
         'parents': [],
         'part_of': [],
@@ -655,83 +402,105 @@ def main():
         description="Get Uberon, EFO and OBI ontologies and generate the JSON file", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    parser.add_argument('--uberon-url', help="Uberon version URL")
-    parser.add_argument('--efo-url', help="EFO version URL")
-    parser.add_argument('--obi-url', help="OBI version URL")
+    parser.add_argument('--test-url', default=None, help="Test ontology path")
+    parser.add_argument('--uberon-url', default=None, help="Uberon version URL")
+    parser.add_argument('--efo-url', default=None, help="EFO version URL")
+    parser.add_argument('--obi-url', default=None, help="OBI version URL")
     args = parser.parse_args()
 
+    test_url = args.test_url
     uberon_url = args.uberon_url
     efo_url = args.efo_url
     obi_url = args.obi_url
-    urls = [obi_url, uberon_url, efo_url]
+    urls = [test_url, obi_url, uberon_url, efo_url]
 
     terms = {}
     for url in urls:
-        data = Inspector(url)
-        for c in data.allclasses:
-            if isBlankNode(c):
-                for o in data.rdfGraph.objects(c, RDFS.subClassOf):
-                    if isBlankNode(o):
-                        pass
-                    else:
-                        for o1 in data.rdfGraph.objects(c, IntersectionOf):
-                            collection = Collection(data.rdfGraph, o1)
-                            col_list = []
-                            for col in data.rdfGraph.objects(collection[1]):
-                                col_list.append(col.__str__())
-                            if HUMAN_TAXON in col_list:
-                                if PART_OF in col_list:
-                                    for subC in data.rdfGraph.objects(c, RDFS.subClassOf):
-                                        term_id = splitNameFromNamespace(collection[0])[0].replace('_', ':')
-                                        if term_id not in terms:
-                                            terms[term_id] = getTermStructure()
-                                        terms[term_id]['part_of'].append(splitNameFromNamespace(subC)[0].replace('_', ':'))
+        if url is not None:
+            data = Owler(url)
+            for c in data.allclasses:
+                if isBlankNode(c):
+                    # print('BNODE=Class: ', c)
+                    for o in data.rdfGraph.objects(c, subClassOf):
+                        # see if the blank node has direct parents
+                        if isBlankNode(o):
+                            # print('\tBLANK PARENT')
+                            pass
+                        else:
+                            # if the parent Class is a resource
+                            for o1 in data.rdfGraph.objects(c, IntersectionOf):
+                                # see if there are any IntersectionOf triples for the blank node
+                                # and if so make a collection? using those objects (collection of what?)
+                                collection = Collection(data.rdfGraph, o1)
+                                col_list = []
+                                # i = 0
+                                # for coll in collection:
+                                    # print('\tCOLLECTION[', i, ']', coll)
+                                    # i = i + 1
+
+                                for col in data.rdfGraph.objects(collection[1]):
+                                    # getting the objects that are associated with the 2nd member of the collection
+                                    # what the heck is that?
+                                    # print('\t\tCOLLECTION OBJECT STRING: ', col.__str__())
+                                    col_list.append(col.__str__())
+                                if HUMAN_TAXON in col_list:
+                                    # why are we only doing this for the human taxon?
+                                    # adding part_of and develops_from relationships to the terms that are the
+                                    # resources in the first item of the collection from each subClassOf the blank node
+                                    if PART_OF in col_list:
+                                        for subC in data.rdfGraph.objects(c, subClassOf):
+                                            term_id = splitNameFromNamespace(collection[0])[0].replace('_', ':')
+                                            if term_id not in terms:
+                                                terms[term_id] = getTermStructure()
+                                            terms[term_id]['part_of'].append(splitNameFromNamespace(subC)[0].replace('_', ':'))
                                 elif DEVELOPS_FROM in col_list:
-                                    for subC in data.rdfGraph.objects(c, RDFS.subClassOf):
+                                    for subC in data.rdfGraph.objects(c, subClassOf):
                                         term_id = splitNameFromNamespace(collection[0])[0].replace('_', ':')
                                         if term_id not in terms:
                                             terms[term_id] = getTermStructure()
                                         terms[term_id]['develops_from'].append(splitNameFromNamespace(subC)[0].replace('_', ':'))
-            else:
-                term_id = splitNameFromNamespace(c)[0].replace('_', ':')
-                if term_id not in terms:
-                    terms[term_id] = getTermStructure()
-                terms[term_id]['id'] = term_id
-                
-                try:
-                    terms[term_id]['name'] = data.rdfGraph.label(c).__str__()
-                except:
-                    terms[term_id]['name'] = ''
+                else:
+                    # print('Class: ', c)
+                    term_id = splitNameFromNamespace(c)[0].replace('_', ':')
+                    if term_id not in terms:
+                        terms[term_id] = getTermStructure()
+                    terms[term_id]['id'] = term_id
 
-                terms[term_id]['preferred_name'] = preferred_name.get(term_id, '')
-                # Get all parents
-                for parent in data.get_classDirectSupers(c, excludeBnodes=False):
-                    if isBlankNode(parent):
-                        for s, v, o in data.rdfGraph.triples((parent, OnProperty, None)):
-                            if o.__str__() == PART_OF:
-                                for o1 in data.rdfGraph.objects(parent, SomeValuesFrom):
-                                    if not isBlankNode(o1):
-                                        terms[term_id]['part_of'].append(splitNameFromNamespace(o1)[0].replace('_', ':'))
-                            elif o.__str__() == DEVELOPS_FROM:
-                                for o1 in data.rdfGraph.objects(parent, SomeValuesFrom):
-                                    if not isBlankNode(o1):
-                                        terms[term_id]['develops_from'].append(splitNameFromNamespace(o1)[0].replace('_', ':'))
-                            elif o.__str__() == HAS_PART:
-                                for o1 in data.rdfGraph.objects(parent, SomeValuesFrom):
-                                    if not isBlankNode(o1):
-                                        terms[term_id]['has_part'].append(splitNameFromNamespace(o1)[0].replace('_', ':'))
-                            elif o.__str__() == ACHIEVES_PLANNED_OBJECTIVE:
-                                for o1 in data.rdfGraph.objects(parent, SomeValuesFrom):
-                                    if not isBlankNode(o1):
-                                        terms[term_id]['achieves_planned_objective'].append(splitNameFromNamespace(o1)[0].replace('_', ':'))
-                    else:
-                        terms[term_id]['parents'].append(splitNameFromNamespace(parent)[0].replace('_', ':'))
-                
-                for syn in data.entitySynonyms(c):
                     try:
-                        terms[term_id]['synonyms'].append(syn.__str__())
+                        terms[term_id]['name'] = data.rdfGraph.label(c).__str__()
                     except:
-                        pass
+                        terms[term_id]['name'] = ''
+
+                    # terms[term_id]['preferred_name'] = preferred_name.get(term_id, '')
+                    # Get all parents
+                    for parent in data.get_classDirectSupers(c, excludeBnodes=False):
+                        if isBlankNode(parent):
+                            for s, v, o in data.rdfGraph.triples((parent, OnProperty, None)):
+                                if o.__str__() == PART_OF:
+                                    for o1 in data.rdfGraph.objects(parent, SomeValuesFrom):
+                                        if not isBlankNode(o1):
+                                            terms[term_id]['part_of'].append(splitNameFromNamespace(o1)[0].replace('_', ':'))
+                                elif o.__str__() == DEVELOPS_FROM:
+                                    for o1 in data.rdfGraph.objects(parent, SomeValuesFrom):
+                                        if not isBlankNode(o1):
+                                            terms[term_id]['develops_from'].append(splitNameFromNamespace(o1)[0].replace('_', ':'))
+                                elif o.__str__() == HAS_PART:
+                                    for o1 in data.rdfGraph.objects(parent, SomeValuesFrom):
+                                        if not isBlankNode(o1):
+                                            terms[term_id]['has_part'].append(splitNameFromNamespace(o1)[0].replace('_', ':'))
+                                elif o.__str__() == ACHIEVES_PLANNED_OBJECTIVE:
+                                    for o1 in data.rdfGraph.objects(parent, SomeValuesFrom):
+                                        if not isBlankNode(o1):
+                                            terms[term_id]['achieves_planned_objective'].append(splitNameFromNamespace(o1)[0].replace('_', ':'))
+                        else:
+                            terms[term_id]['parents'].append(splitNameFromNamespace(parent)[0].replace('_', ':'))
+
+                    # for syn in data.entitySynonyms(c):
+                    #    try:
+                    #        terms[term_id]['synonyms'].append(syn.__str__())
+                    #    except:
+                    #        pass
+
     for term in terms:
         terms[term]['data'] = list(set(terms[term]['parents']) | set(terms[term]['part_of']) | set(terms[term]['achieves_planned_objective']))
         terms[term]['data_with_develops_from'] = list(set(terms[term]['data']) | set(terms[term]['develops_from']))
@@ -744,7 +513,7 @@ def main():
         d = iterativeChildren(terms[term]['data_with_develops_from'], terms, 'data_with_develops_from')
         for dd in d:
             terms[term]['closure_with_develops_from'].append(dd)
-       
+
         terms[term]['closure'].append(term)
         terms[term]['closure_with_develops_from'].append(term)
 
@@ -756,15 +525,16 @@ def main():
         terms[term]['objectives'] = getSlims(term, terms, 'objective')
         terms[term]['types'] = getSlims(term, terms, 'type')
 
+        # this removes the iterative parent term info
         del terms[term]['closure'], terms[term]['closure_with_develops_from']
-    
+
     for term in terms:
         del terms[term]['parents'], terms[term]['develops_from']
         del terms[term]['has_part'], terms[term]['achieves_planned_objective']
         del terms[term]['id'], terms[term]['data'], terms[term]['data_with_develops_from']
-    
-    terms.update(ntr_assays)
-    with open('ontology.json', 'w') as outfile:
+
+    # terms.update(ntr_assays)
+    with open('test_ontology.json', 'w') as outfile:
         json.dump(terms, outfile)
 
 
