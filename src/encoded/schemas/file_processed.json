@@ -43,11 +43,6 @@
                 "wig",
                 "other"
             ]
-        },
-        "workflow_run": {
-            "title": "File format",
-            "type": "string",
-            "linkTo": "WorkflowRun"
         }
     },
     "file_format_file_extension": {
