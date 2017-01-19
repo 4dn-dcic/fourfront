@@ -143,28 +143,5 @@
               "title": "Organism"
           }
 
-      },
-      "columns": {
-          "biosource_type": {
-              "title": "Biosource type"
-          },
-          "biosource_name": {
-              "title": "Biosource"
-          },
-          "individual.organism.name": {
-              "title": "Organism"
-          },
-          "description":{
-              "title": "Description"
-          },
-          "accession":{
-              "title": "Accession"
-          },
-          "title":{
-              "title": "Title"
-          },
-          "name":{
-              "title": "Name"
-          }
       }
 }

@@ -60,7 +60,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
     },
 
     componentWillReceiveProps: function(nextProps) {
-        
+
         // Make sure state is updated upon filtering
         if(this.props.expSetFilters !== nextProps.expSetFilters || this.props.context.experiments_in_set !== nextProps.context.experiments_in_set){
             this.setState({
@@ -72,7 +72,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
     /**
      * Get data for nested properties - Award and Lab. Save to state or use state object in callback.
-     * 
+     *
      * @param {boolean} [fallbackToAjax] - Whether to revert to AJAX to fetch info if not in provided ExpSet object.
      * @param {function} [callback] - A function ran after execution, before any AJAX fetching, which takes ones parameter - an object representing resulting state change. Used in place of setState if have more state to apply.
      * @param {Object} [newState] - State object to use. Defaults to empty object.
@@ -90,11 +90,11 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                 newState.details_award = awardDetails;
             }
         }
-        if (typeof callback == 'function') { 
+        if (typeof callback == 'function') {
             callback(newState);
         } else if (Object.keys(newState).length > 0) {
             this.setState(newState);
-        } 
+        }
     },
 
     /**
@@ -103,16 +103,16 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
      * to keep size of ExperimentSets down as can't remove (for example) experiments_in_set.lab
      * from encoded/types/experiment.py > ExperimentSet as it'd affect Browse page
      * experiment filtering & view.
-     * 
+     *
      * @param {string} propertyName - Name of property/key in schema for which to get details.
      * @param {boolean} allowAjaxFallback - Whether to start an AJAX request to fetch details if they are not in experiment(s).
-     * @return {Object} Details for the property/key supplied, or null if not available or not matched. 
+     * @return {Object} Details for the property/key supplied, or null if not available or not matched.
      */
     getLinkedPropertyDetailsFromExperiments : function(propertyName, allowAjaxFallback = false){
-
         if (!this.props.context[propertyName]) return null;
 
         // If we have property already embedded as object, lets use it.
+
         if (typeof this.props.context[propertyName] == 'object') return this.props.context[propertyName];
 
 
@@ -121,8 +121,8 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
             propertyID = null,
             propertyInfo = null;
 
-        if (typeof this.props.context[propertyName] == 'string') { 
-            propertyID = this.props.context[propertyName]; 
+        if (typeof this.props.context[propertyName] == 'string') {
+            propertyID = this.props.context[propertyName];
         }
 
         for (var i = 0; i < experiments.length; i++){
@@ -135,7 +135,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                 // Fallback : set property from first experiment if no ID in expset.
                 // Then confirm all other experiments match first experiment's ID.
                 if (i == 0) {
-                    propertyInfo = experiments[i][propertyName]; 
+                    propertyInfo = experiments[i][propertyName];
                     continue;
                 } else if (experiments[i][propertyName]['@id'] == propertyInfo['@id']) {
                     continue; // Good.
@@ -184,7 +184,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                 <ExperimentSetHeader {...this.props} />
 
                 <div className="row">
-                
+
                     <div className="col-sm-5 col-md-4 col-lg-3">
                         <FacetList
                             urlPath={this.props.context['@id']}
@@ -200,10 +200,10 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
                     <div className="col-sm-7 col-md-8 col-lg-9">
 
-                        <ExperimentSetInfoArea 
+                        <ExperimentSetInfoArea
                             labInfo={ this.state.details_lab }
                             awardInfo={ this.state.details_award }
-                            {...this.props} 
+                            {...this.props}
                         />
 
                         <div className="exp-table-section">
@@ -216,7 +216,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                                 </span>
                             </h3>
                             <div className="exp-table-container">
-                                <ExperimentsTable 
+                                <ExperimentsTable
                                     ref="experimentsTable"
                                     parentController={this}
                                     experimentSetType={this.props.context.experimentset_type}
@@ -237,20 +237,20 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                 {/*
                 <br/><br/><br /><br /><hr />
                 <h6>Existing Print-out (temporary):</h6>
-                
+
                 <Panel className="data-display panel-body-with-header">
                     <dl className="key-value">
                         {Object.keys(this.props.context).sort().map((ikey, idx) =>
                             <div key={ikey} data-test="term-name">
 
-                                <DescriptorField 
-                                    field={ikey} 
+                                <DescriptorField
+                                    field={ikey}
                                     description={
-                                        this.tips[ikey] && this.tips[ikey].description ? 
+                                        this.tips[ikey] && this.tips[ikey].description ?
                                             this.tips[ikey].description : ''
-                                    } 
+                                    }
                                 />
-                                
+
                                 <dd>{ formValue(this.props.schemas, this.props.context[ikey], ikey, 0) }</dd>
                             </div>
                         )}
@@ -334,8 +334,8 @@ var ExperimentSetHeader = React.createClass({
                     </h5>
                 </div>
 
-                <FlexibleDescriptionBox 
-                    description={ this.props.context.description } 
+                <FlexibleDescriptionBox
+                    description={ this.props.context.description }
                     className="item-page-heading experiment-heading"
                     textClassName="text-large"
                     fitTo="grid"
@@ -344,7 +344,7 @@ var ExperimentSetHeader = React.createClass({
                         paddingHeight : 22,
                         buttonWidth : 30,
                         initialHeight : 45
-                    }} 
+                    }}
                 />
 
                 <div className="row clearfix bottom-row">
@@ -365,7 +365,7 @@ var ExperimentSetInfoArea = React.createClass({
             <div className="row info-area">
                 <div className="col-sm-12">
                     <div className="row">
-                        
+
                         <div className="col-sm-6 col-sm-float-right">
                             { FormattedInfoBlock.Lab(this.props.labInfo) }
                         </div>
@@ -386,7 +386,7 @@ var ExperimentSetInfoArea = React.createClass({
 /**
  * Recursively render keys/values included in a provided item.
  * Wraps URLs/paths in link elements. Sub-panels for objects.
- * 
+ *
  * @param {Object} schemas - Object containing schemas for server's JSONized object output.
  * @param {*|*[]} item - Item(s) to render recursively.
  */
@@ -402,7 +402,7 @@ var formValue = function (schemas, item, keyPrefix = '', depth = 0) {
             <SubIPanel
                 schemas={schemas}
                 content={item}
-                key={item['@id'] || item.name || (keyPrefix.length > 0 ? keyPrefix + '-' : '') + depth + '-' + toReturn.length } 
+                key={item['@id'] || item.name || (keyPrefix.length > 0 ? keyPrefix + '-' : '') + depth + '-' + toReturn.length }
             />
         );
     }else{

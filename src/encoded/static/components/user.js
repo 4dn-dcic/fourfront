@@ -10,6 +10,7 @@ var { Modal, Alert } = require('react-bootstrap');
 var { ItemStore } = require('./lib/store');
 var { ajaxLoad, DateUtility, console, JWT } = require('./objectutils');
 var FormattedInfoBlock = require('./formatted-info-block');
+var _ = require('underscore');
 var { EditableField, FieldSet } = require('./forms');
 var jwt = require('jsonwebtoken');
 
@@ -452,7 +453,7 @@ var ProfileWorkFields = React.createClass({
                 currentAwardsList.push(newAwards[i]);
             }
         }
-        if (!this.state.awards_list || this.state.awards_list.length < currentAwardsList.length){
+        if (!Array.isArray(this.state.awards_list )|| !_.isEqual(this.state.awards_list, currentAwardsList)){
             this.setState({'awards_list' : currentAwardsList});
         }
     },
