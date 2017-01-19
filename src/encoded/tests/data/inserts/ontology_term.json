@@ -26,12 +26,53 @@
         "term_url": "http://purl.obolibrary.org/obo/UBERON_0002199"
     },
     {
-        "uuid": "530056bc-8535-4448-903e-854af460a233",
+        "uuid": "111111bc-8535-4448-903e-854af460a233",
+        "term_name": "alternative_term",
+        "term_id": "EFO:alternative_term",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "term_url": "http://www.ebi.ac.uk/efo/alternative_term",
+        "definition": "An alternative label for a given entity such as a commonly used abbreviation or synonym.",
+        "namespace": "http://www.ebi.ac.uk/efo"
+    },
+    {
+        "uuid": "111112bc-8535-4448-903e-854af460a233",
         "term_name": "has_exact_synonym",
-        "term_id": "OBO:hasExactSynonym",
+        "term_id": "oboInOwl:hasExactSynonym",
         "source_ontology": "530006bc-8535-4448-903e-854af460b254",
         "term_url": "http://www.geneontology.org/formats/oboInOwl#hasExactSynonym",
         "definition": "An alias in which the alias exhibits true synonymy. Example: ornithine cycle is an exact synonym of urea cycle.",
         "namespace": "http://www.geneontology.org/formats/oboInOwl"
+    },
+    {
+        "uuid": "111113bc-8535-4448-903e-854af460a233",
+        "term_name": "has_narrow_synonym",
+        "term_id": "oboInOwl:hasNarrowSynonym",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "term_url": "http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym",
+        "namespace": "http://www.geneontology.org/formats/oboInOwl"
+    },
+    {
+        "uuid": "111114bc-8535-4448-903e-854af460a233",
+        "term_name": "has_related_synonym",
+        "term_id": "oboInOwl:hasRelatedSynonym",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "term_url": "http://www.geneontology.org/formats/oboInOwl#RelatedSynonym",
+        "namespace": "http://www.geneontology.org/formats/oboInOwl"
+    },
+    {
+        "uuid": "111115bc-8535-4448-903e-854af460a233",
+        "term_name": "definition",
+        "term_id": "EFO:definition",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "term_url": "http://www.ebi.ac.uk/efo/definition",
+        "namespace": "http://www.ebi.ac.uk/efo"
+    },
+    {
+        "uuid": "111116bc-8535-4448-903e-854af460a233",
+        "term_name": "definition",
+        "term_id": "IAO:0000115",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "term_url": "http://purl.obolibrary.org/obo/IAO_0000115",
+        "namespace": "http://purl.obolibrary.org/obo"
     }
 ]
