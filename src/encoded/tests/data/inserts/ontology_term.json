@@ -74,5 +74,13 @@
         "source_ontology": "530006bc-8535-4448-903e-854af460b254",
         "term_url": "http://purl.obolibrary.org/obo/IAO_0000115",
         "namespace": "http://purl.obolibrary.org/obo"
+    },
+    {
+        "uuid": "111117bc-8535-4448-903e-854af460a233",
+        "term_name": "alternative term",
+        "term_id": "IAO:0000118",
+        "source_ontology": "530026bc-8535-4448-903e-854af460b254",
+        "term_url": "http://purl.obolibrary.org/obo/IAO_0000118",
+        "namespace": "http://purl.obolibrary.org/obo"
     }
 ]
