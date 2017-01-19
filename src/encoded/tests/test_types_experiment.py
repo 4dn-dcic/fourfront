@@ -61,17 +61,21 @@ def test_experiment_set_replicate_update_adds_experiments_in_set(testapp, experi
 # tests for the experiment_sets calculated property
 def test_calculated_experiment_sets_for_custom_experiment_set(testapp, experiment, custom_experiment_set):
     assert not experiment['experiment_sets']
-    testapp.patch_json(custom_experiment_set['@id'], {'experiments_in_set': [experiment['@id']]}, status=200)
+    res = testapp.patch_json(custom_experiment_set['@id'], {'experiments_in_set': [experiment['@id']]}, status=200)
+    print(res)
     expt_res = testapp.get(experiment['@id'])
+    print(expt_res)
     assert '/experiment_set/' + custom_experiment_set['uuid'] in expt_res.json['experiment_sets']
 
 
 def test_calculated_experiment_sets_for_replicate_experiment_set(testapp, experiment, replicate_experiment_set):
     assert not experiment['experiment_sets']
-    testapp.patch_json(
+    res = testapp.patch_json(
         replicate_experiment_set['@id'],
         {'replicate_exps':
             [{'replicate_exp': experiment['@id'], 'bio_rep_no': 1, 'tec_rep_no': 1}]},
         status=200)
+    print(res)
     expt_res = testapp.get(experiment['@id'])
+    print(expt_res)
     assert '/experiment_set_replicate/' + replicate_experiment_set['uuid'] in expt_res.json['experiment_sets']

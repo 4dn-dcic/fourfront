@@ -12,7 +12,6 @@ from snovault import (
     BeforeModified
 )
 from snovault.resource_views import item_view_page
-from snovault.calculated import calculate_properties
 
 from .base import (
     Item
