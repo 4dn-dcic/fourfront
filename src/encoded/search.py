@@ -1,4 +1,5 @@
 import re
+import math
 from pyramid.view import view_config
 from snovault import (
     AbstractCollection,
@@ -85,7 +86,9 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     query['aggs'] = set_facets(facets, used_filters, principals, doc_types)
 
     # Execute the query
-    if size:
+    if size == 'all':
+        es_results = get_all_results(request, query)
+    elif size:
         es_results = es.search(body=query, index=es_index, from_=from_, size=size)
     else:
         es_results = es.search(body=query, index=es_index)
@@ -102,7 +105,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # result.update(search_result_actions(request, doc_types, es_results))
 
     # Add all link for collections
-    if size is not None and size < result['total']:
+    if size not in (None, 'all') and size < result['total']:
         params = [(k, v) for k, v in request.params.items() if k != 'limit']
         params.append(('limit', 'all'))
         result['all'] = '%s?%s' % (request.resource_path(context), urlencode(params))
@@ -193,13 +196,41 @@ def get_pagination(request):
     from_ = request.params.get('from', 0)
     size = request.params.get('limit', 25)
     if size in ('all', ''):
-        size = 10000 # ES returns 10 results by default if no size param specified.
+       # size = 10000 # ES returns 10 results by default if no size param specified.
+       size = "all"
     else:
         try:
             size = int(size)
         except ValueError:
             size = 25
     return from_, size
+
+
+def get_all_results(request, origQuery):
+    es = request.registry[ELASTIC_SEARCH]
+    es_index = request.registry.settings['snovault.elasticsearch.index']
+    from_ = 0
+    sizeIncrement = 100 # Decrease this to like 5 or 10 to test.
+
+    es_result = es.search(body=origQuery, index=es_index, from_=from_, size=sizeIncrement) # get our aggregations from here
+    total = es_result['hits'].get('total',0)
+    extraRequestsNeeded = int(math.ceil(total / sizeIncrement)) - 1 # Decrease by 1 (first es_result already happened)
+
+    if extraRequestsNeeded <= 0:
+        return es_result
+
+    # We don't need to grab aggs for subsequent queries, already obtained from first one, incr. performance instead maybe.
+    query = { k:v for k,v in origQuery.items() if k != 'aggs' }
+
+    while extraRequestsNeeded > 0:
+        # print(str(extraRequestsNeeded) + " requests left to get all results.")
+        from_ = from_ + sizeIncrement
+        subsequent_es_result = es.search(body=query, index=es_index, from_=from_, size=sizeIncrement)
+        es_result['hits']['hits'] = es_result['hits']['hits'] + subsequent_es_result['hits'].get('hits', [])
+        extraRequestsNeeded -= 1
+        # print("Found " + str(len(es_result['hits']['hits'])) + ' results so far.')
+
+    return es_result
 
 
 def normalize_query(request):
