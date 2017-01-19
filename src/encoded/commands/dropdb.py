@@ -18,7 +18,13 @@ def run(host, dbname, port, user, pwd):
     def dbcmd(cmd):
         return "%s -p %s -h %s -U %s -e %s" % (cmd, port, host, user, dbname)
 
-    subprocess.Popen(dbcmd('/usr/bin/dropdb'), shell=True, env=env)
+    with subprocess.Popen(dbcmd('/usr/bin/dropdb'), shell=True, env=env) as proc:
+        try:
+            proc.wait(timeout=10)
+        except:
+            pcoc.kill()
+            proc.wait()
+
 
     # drop elastic search
     es_server = "http://172.31.49.128:9872"

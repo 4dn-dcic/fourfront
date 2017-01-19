@@ -31,8 +31,8 @@ var render = function (Component, body, res) {
         if (userInfo){
             JWT.saveUserInfoLocalStorage(userInfo);
         }
-        res.removeHeader('X-User-Info');
-        res.removeHeader('X-Request-JWT');
+        //res.removeHeader('X-User-Info');
+        //res.removeHeader('X-Request-JWT');
     } else if (
         /* (disp_dict.context.code === 403 || res.statusCode === 403) && */ 
         // Sometimes a different statusCode is returned (e.g. 404 if no search/browse result)

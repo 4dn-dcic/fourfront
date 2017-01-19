@@ -716,17 +716,20 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
             groupFilesByPairsForEachExperiment: function(experiments){
                 return experiments.map(function(exp){
+                    var file_pairs;
                     if (Array.isArray(exp.files)){
-                        exp.file_pairs = ExperimentsTable.funcs.groupFilesByPairs(exp.files);
+                        file_pairs = ExperimentsTable.funcs.groupFilesByPairs(exp.files);
                     } else if (
                         Array.isArray(exp.filesets) && 
                         exp.filesets.length > 0 && 
                         Array.isArray(exp.filesets[0].files_in_set)
                     ){
-                        exp.file_pairs = ExperimentsTable.funcs.groupFilesByPairs(
+                        file_pairs = ExperimentsTable.funcs.groupFilesByPairs(
                             ExperimentsTable.funcs.allFilesFromFileSetsInExperiment(exp)
                         );
                     }
+
+                    if (Array.isArray(file_pairs) && file_pairs.length > 0) exp.file_pairs = file_pairs;
                     return exp;
                 });
             },
