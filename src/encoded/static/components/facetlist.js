@@ -396,13 +396,13 @@ var FacetList = module.exports = React.createClass({
                 // unhighlight previously selected terms, if any.
                 _.each(document.querySelectorAll('[data-term]'), function(termElement){
                     var isSVG = setHighlightClass(termElement, true);
-                    if (!isSVG) termElement.style.backgroundColor = '';
+                    if (!isSVG && termElement.className.indexOf('no-highlight-color') === -1) termElement.style.backgroundColor = '';
                 });
 
                 if (color.length > 0){
                     _.each(document.querySelectorAll('[data-term="' + term + '"]'), function(termElement){
                         var isSVG = setHighlightClass(termElement, color.length === 0);
-                        if (!isSVG) termElement.style.backgroundColor = color;
+                        if (!isSVG && termElement.className.indexOf('no-highlight-color') === -1) termElement.style.backgroundColor = color;
                     });
                 }
             });

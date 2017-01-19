@@ -69,6 +69,14 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             if (!FacetCharts.isContextDataValid(context)) return null;
             return expFuncs.listAllExperimentsFromExperimentSets(context['@graph']);
         },
+
+        isBrowserMSEdge : function(){
+            if (isServerSide()) return false;
+            console.log(document.documentElement.className);
+            if (document.documentElement.className.indexOf('no-uaEdge') > -1) return false;
+            if (document.documentElement.className.indexOf('uaEdge') > -1) return true;
+            return true;
+        }
         
     },
     
@@ -139,10 +147,10 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             !_.isEqual(this.state.experiments, nextState.experiments) ||
             (nextState.mounted === true && this.state.mounted === false)
         ){
-            console.log('WILLUPDATE');
+            if (this.props.debug) console.log('Will Update FacetCharts');
             return true;
         }
-        console.log('shouldupdate', _.clone(this.props), _.clone(nextProps));
+        if (this.props.debug) console.log('Will Not Update FacetCharts');
         return false;
     },
 
@@ -347,26 +355,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
     },
 
-    handleVisualNodeClickToUpdateFilters : function(node){
-
-        if (this.preventClicks === true){
-            console.warn("Excess click prevented.");
-            return;
-        }
-        this.preventClicks = true; // Prevent more clicks while this is true.
-
-        // Pass this func to child charts via 'getCancelPreventClicksCallback' function prop (which returns this function),
-        // with count (first arg to _.after) being number of charts this function is passed to.
-        // When all charts complete their transitions, they call this function to allow handleVisualNodeClickToUpdateFilters to start accepting
-        // clicks again. Otherwise, bad things happen when try to filter when charts are still performing transitions (the elements being transitioned may become unmounted).
-        this.cancelPreventClicks = _.after(2, () => {
-            console.info('Unsetting FacetCharts preventClicks.');
-            this.preventClicks = false;
-            this.cancelPreventClicks = null;
-            return true;
-        });
-
-
+    handleVisualNodeClickToUpdateFilters : _.throttle(function(node){
 
         if (typeof node.target !== 'undefined' && typeof node.target.nodeName === 'string'){
             // We have a click event from element rather than D3.
@@ -402,7 +391,6 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                         if (typeof sequenceArray[i].data.field !== 'string' || typeof sequenceArray[i].data.term !== 'string') continue;
                         newFilters = FacetList.changeFilter(sequenceArray[i].data.field, sequenceArray[i].data.term, 'sets', newFilters, null, true);
                     }
-                    //this.setState({ 'selectedNodes' : sequenceArray }); Will be updated in componentWillReceiveProps.
                 } else {
                     // Remove node's term from filter, as well as any childrens' filters (recursively), if set.
                     (function removeOwnAndChildrensTermsIfSet(n){
@@ -432,7 +420,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             updateExpSetFilters.call(this);
         }
 
-    }, // Prevent more than 1 click per 1s.
+    }, 500, { trailing : false }), // Prevent more than 1 click per 500ms because it takes a while to grab calculate exps matching filters.
 
     show : function(){
         if (typeof this.props.show === false) return false;
@@ -491,7 +479,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         }
 
         return (
-            <div className={"facet-charts " + show} key="facet-charts">
+            <div className={"facet-charts show-" + show} key="facet-charts">
                 <ChartBreadcrumbs ref="breadcrumbs" selectedNodes={this.state.selectedNodes} key="facet-crumbs" />
                 <div className="facet-charts-description description" ref="description" key="facet-chart-description"></div>
                 <div className="row" key="facet-chart-row-1">
@@ -507,7 +495,6 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                             key="sunburst"
                             ref="sunburstChart"
                             debug
-                            getCancelPreventClicksCallback={()=> this.cancelPreventClicks }
                         />
                     </div>
                     <div className={genChartColClassName(2)} key="facet-chart-row-1-chart-2">
@@ -515,7 +502,6 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                             experiments={this.transformData(this.state.experiments)}
                             height={height}
                             colorForNode={this.colorForNode}
-                            getCancelPreventClicksCallback={()=> this.cancelPreventClicks }
                         />
                     </div>
                 </div>

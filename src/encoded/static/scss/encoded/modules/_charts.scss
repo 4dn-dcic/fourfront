@@ -134,8 +134,9 @@
 
 /** Bar Plot Chart Style(s) **/
 
-svg.bar-plot-chart { // SVG is top-level element rendered by component;
+.bar-plot-chart { // SVG is top-level element rendered by component;
     display: block;
+    position: relative;
 
     line.y-axis-top {
         stroke: #ccc;
@@ -147,11 +148,42 @@ svg.bar-plot-chart { // SVG is top-level element rendered by component;
         stroke-width: 1px;
     }
 
-    g.chart-bar {
-        transition: transform .75s, opacity .5s;
+    div.y-axis-bottom {
+        border-top: 1px solid #aaa;
+        position: absolute;
+        bottom: 0;
+    }
 
-        text.bar-top-label {
-            transform : translate3d(0, -3px, 0);
+    .chart-bar {
+        transition: transform .75s ease-out, opacity .5s;
+        position: absolute;
+
+        .bar-top-label {
+            display: block;
+            text-align: center;
+            width: 100%;
+        }
+
+        &.larger-height .bar-top-label {
+            position: absolute;
+            top: 50%;
+            margin-top: -10px;
+            color: #fff;
+        }
+
+        .bar-part {
+            opacity: 1;
+            transition: opacity 0.5s, height .75s, width .75s;
+
+            &:first-of-type {
+                border-top-left-radius: 5px;
+                border-top-right-radius: 5px;
+            }
+
+            &:last-of-type {
+                border-bottom-left-radius: 5px;
+                border-bottom-right-radius: 5px;
+            }
         }
 
         > rect {
@@ -161,21 +193,37 @@ svg.bar-plot-chart { // SVG is top-level element rendered by component;
 
     }
 
-    text.y-axis-label-count {
+    .y-axis-label {
         opacity: 1;
-        transition: opacity .5s;
+        transition: opacity .5s, transform .75s ease-out;
+        position: absolute;
+
+        > .label-text {
+            display: block;
+            transform-origin: 100% 0;
+            text-align: right;
+            position: relative;
+            font-size: 0.85rem;
+            line-height: 1.2rem;
+        }
     }
 
     &.highlight {
-        g.chart-bar > rect {
+        .chart-bar > rect {
             fill-opacity: 0.4;
         }
-        g.chart-bar.highlight {
+        .chart-bar .bar-part {
+            opacity: 0.4;
+        }
+        .chart-bar.highlight {
             > rect {
                 fill-opacity: 1;
             }
+            .bar-part {
+                opacity: 1;
+            }
         }
-        text.y-axis-label-count {
+        .y-axis-label {
             opacity : 0.4;
             &.highlight {
                 opacity : 1;
@@ -238,7 +286,7 @@ svg.bar-plot-chart { // SVG is top-level element rendered by component;
                 color: rgba(100, 100, 100, 1);
                 transition: color 0.3s;
 
-                .facet-charts.large & {
+                .facet-charts.show-large & {
                     font-size: 2.5rem;
                     font-weight: 300;
                     line-height: 3rem;
@@ -260,7 +308,7 @@ svg.bar-plot-chart { // SVG is top-level element rendered by component;
                     width: 100%;
                     text-align: center;
                 }
-                .facet-charts.small &:after {
+                .facet-charts.show-small &:after {
                     font-size: .975rem;
                 }
             }

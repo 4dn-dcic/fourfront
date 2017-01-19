@@ -137,8 +137,24 @@ var util = {
 
     style : {
 
-        translate3d : function(x=0, y=0, z=0){
-            return 'translate3d(' + x + 'px,' + y + 'px,' + z + 'px)';
+        translate3d : function(x=0, y=0, z=0, append = 'px'){
+            if (!append) append = '';
+            return 'translate3d(' + x + append + ',' + y + append + ',' + z + append + ')';
+        },
+
+        translate : function(x=0, y=0, append = 'px'){
+            if (!append) append = '';
+            return 'translate(' + x + append + ',' + y + append + ')';
+        },
+
+        /** 
+         * @param {number} rotation - How much to rotate, in degrees.
+         * @param {string|string[]|Object} [axes='z'] - Axes around which to rotate.
+         */
+        rotate3d : function(rotation, axes=['z']){
+            if (typeof axes === 'string') axes = axes.split(',').map(function(axis){ return axis.trim(); });
+            if (Array.isArray(axes)) axes = _.extend({ 'x': 0 , 'y': 0, 'z': 0 }, _.object(axes.map(function(axis){ return [axis, 1]; })));
+            return 'rotate3d(' + axes.x + ',' + axes.y + ',' + axes.z + ',' + rotation + 'deg)';
         },
 
         scale3d : function(x=1, y=null, z=null){

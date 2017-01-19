@@ -113,6 +113,9 @@ var BarPlot = React.createClass({
             return {
                 'gap' : 5,
                 'maxBarWidth' : 60,
+                'labelRotation' : 45,
+                'labelWidth' : 80,
+                'yAxisMaxHeight' : 100, // This will override labelWidth to set it to something that will fit at angle.
                 'offset' : {
                     'top' : 0,
                     'bottom' : 50,
@@ -144,8 +147,7 @@ var BarPlot = React.createClass({
                 'right'         : React.PropTypes.number
             })
         }),
-        'colorForNode' : React.PropTypes.func,
-        'getCancelPreventClicksCallback' : React.PropTypes.func.isRequired
+        'colorForNode' : React.PropTypes.func
     },
   
     getDefaultProps : function(){
@@ -200,13 +202,23 @@ var BarPlot = React.createClass({
     componentWillReceiveProps : function(nextProps){
         if (this.shouldPerformManualTransitions(nextProps, this.props)){
             this.setState({ transitioning : true });
-        } else {
-            util.mixin.cancelPreventClicks.call(this); // Disable click prevention, if enabled (occurs on new filter selected from chart)
         }
     },
 
     componentDidUpdate : function(pastProps){
-        console.log(this.shouldPerformManualTransitions(this.props, pastProps), this.pastBars);
+
+
+        if (this.shouldPerformManualTransitions(this.props, pastProps)){
+            // Cancel out of transitioning state after delay. Delay is to allow new/removing elements to adjust opacity.
+            setTimeout(()=>{
+                this.setState({ transitioning : false });
+            },750);
+        }
+
+        return;
+
+        // THE BELOW IF BLOCK IS NO LONGER NECESSARY AS CONVERTED TO HTML ELEMS, KEEPING FOR IF NEEDED IN FUTURE.
+        // shouldPerformManualTransitions WILL ALWAYS RETURN FALSE CURRENTLY.
         if (this.shouldPerformManualTransitions(this.props, pastProps)){
             if (typeof this.pastBars !== 'undefined'){
 
@@ -228,19 +240,17 @@ var BarPlot = React.createClass({
 
                 if (existingAndCurrentElements.length === 0){
                     console.info("No existing bars to do D3 transitions on, unsetting state.transitioning immediately.");
-                    _this.setState({ transitioning : false }, util.mixin.cancelPreventClicks.bind(_this));
+                    _this.setState({ transitioning : false });
                     return;
                 }
                 
                 // Since 'on end' callback is called many times (multiple bars transition), defer until called for each.
                 var transitionCompleteCallback = _.after(existingAndCurrentElements.length, function(){
                     console.info("Finished D3 transitions on BarPlot.");
-                    _this.setState({ transitioning : false }, util.mixin.cancelPreventClicks.bind(_this));
+                    _this.setState({ transitioning : false });
                 });
 
-                d3.selectAll(
-                    existingAndCurrentElements
-                )
+                d3.selectAll(existingAndCurrentElements)
                 .transition().duration(750)
                 .attr('height', function(d){
                     return this.parentElement.__data__.attr.height;
@@ -256,52 +266,177 @@ var BarPlot = React.createClass({
 
     renderParts : {
 
-        bar : function(d, index, all, styleOpts = null, existingBars = this.pastBars){
-            var transitioning = this.state.transitioning; // Cache state.transitioning to avoid risk of race condition in ref function.
+        svg: {
 
+            bar : function(d, index, all, styleOpts = null, existingBars = this.pastBars){
+                var transitioning = this.state.transitioning; // Cache state.transitioning to avoid risk of race condition in ref function.
+
+                if (!styleOpts) styleOpts = this.styleOptions();
+
+                var prevBarExists = function(){ return typeof existingBars[d.term] !== 'undefined' && existingBars[d.term] !== null; }
+                var prevBarData = null;
+                if (prevBarExists() && transitioning) prevBarData = existingBars[d.term].__data__;
+
+                /** Get transform (CSS style, or SVG attribute) for bar group. Positions bar's x coord via translate3d. */
+                function transformStyle(){
+                    var xyCoords;
+                    if ((d.removing || !prevBarExists()) && transitioning){
+                        // Defer to slide in new bar via CSS on state.transitioning = false.
+                        xyCoords = [d.attr.x, d.attr.height];
+                    } else {
+                        // 'Default' (no transitioning) style
+                        xyCoords = [d.attr.x, 0];
+                    }
+                    return util.style.translate3d.apply(this, xyCoords);
+                }
+
+                function barStyle(){
+                    var style = {};
+
+                    // Position bar's x coord via translate3d CSS property for CSS3 transitioning.
+                    if ((d.removing || !prevBarExists()) && transitioning){
+                        // Defer to slide in new bar via CSS on state.transitioning = false.
+                        style.opacity = 0;
+                    } else {
+                        // 'Default' (no transitioning) style
+                        style.opacity = 1;
+                    }
+                    style.transform = transformStyle.call(this);
+                    return style;
+                }
+
+                function rectHeight(){
+                    // Defer updating rect height so we can use D3 to transition it in componentDidUpdate.
+                    if (prevBarExists() && transitioning){
+                        return prevBarData.attr.height;
+                    }
+                    return d.attr.height;
+                }
+                
+
+                function rectY(){
+                    if (prevBarExists() && transitioning){
+                        return this.height() - prevBarData.attr.height - styleOpts.offset.bottom;
+                    }
+                    return this.height() - d.attr.height - styleOpts.offset.bottom;
+                }
+
+                return (
+                    <g
+                        className="chart-bar"
+                        data-term={d.term}
+                        key={"bar-" + d.term}
+                        style={barStyle.call(this)}
+                        ref={(r) => {
+                            if (typeof this.bars !== 'undefined' && r !== null){
+                                // Save bar element; set its data w/ D3 but don't save D3 wrapped-version
+                                d3.select(r).datum(d);
+                                if (!(d.removing && !transitioning)) this.bars[d.term] = r;
+                            }
+                        }}
+                    >
+                        <text
+                            className="bar-top-label"
+                            x={styleOpts.offset.left}
+                            y={rectY.call(this)}
+                            key="text-label"
+                        >
+                            { d.name }
+                        </text>
+                        <rect
+                            y={rectY.call(this)}
+                            x={styleOpts.offset.left /* Use style.transform for X coord */}
+                            height={rectHeight.call(this)}
+                            data-target-height={d.attr.height}
+                            width={d.attr.width}
+                            key="rect1"
+                            rx={5}
+                            ry={5}
+                            style={{
+                                fill : this.props.colorForNode(d)
+                            }}
+                        />
+                    </g>
+                );
+            },
+
+            topYAxis : function(availWidth, styleOpts){
+                return (
+                    <line
+                        key="y-axis-top"
+                        className="y-axis-top"
+                        x1={styleOpts.offset.left}
+                        y1={styleOpts.offset.top}
+                        x2={availWidth - styleOpts.offset.right}
+                        y2={styleOpts.offset.top}
+                    />
+                );
+            },
+
+            bottomYAxis : function(availWidth, availHeight, currentBars, styleOpts){
+                var lineYCoord = availHeight - (styleOpts.offset.bottom * 0.75);
+                return (
+                    <g key="y-axis-bottom">
+                        <line
+                            key="y-axis-bottom-line"
+                            className="y-axis-bottom"
+                            x1={styleOpts.offset.left}
+                            y1={lineYCoord}
+                            x2={availWidth - styleOpts.offset.right}
+                            y2={lineYCoord}
+                        />
+                        { currentBars.map(function(bar){
+                            return (
+                                <text
+                                    key={'count-for-' + bar.term}
+                                    data-term={bar.term}
+                                    className="y-axis-label-count"
+                                    x={bar.attr.x + styleOpts.offset.left + (bar.attr.width / 2)}
+                                    y={lineYCoord + 20}
+                                >{ bar.count }</text>
+                            );
+                        }) }
+                    </g>
+                );
+            }
+
+
+        },
+
+        bar : function(d, index, all, styleOpts = null, existingBars = this.pastBars){
+
+            var transitioning = this.state.transitioning; // Cache state.transitioning to avoid risk of race condition in ref function.
             if (!styleOpts) styleOpts = this.styleOptions();
 
-            var prevBarExists = function(){ return typeof existingBars[d.term] !== 'undefined' && existingBars[d.term] !== null; }
             var prevBarData = null;
-            if (prevBarExists() && transitioning) prevBarData = existingBars[d.term].__data__;
-
+            if (d.existing && transitioning) prevBarData = existingBars[d.term].__data__;
 
             function barStyle(){
                 var style = {};
 
                 // Position bar's x coord via translate3d CSS property for CSS3 transitioning.
-                if ((d.removing || !prevBarExists()) && transitioning){
-                    // Defer to slide in new bar via CSS on state.transitioning = false.
-                    style.transform = util.style.translate3d(d.attr.x, d.attr.height + 2, 0);
+                if ((d.removing || !d.existing) && transitioning){
                     style.opacity = 0;
+                    style.transform = util.style.translate3d(d.attr.x, Math.max(d.attr.height / 5, 10) + 10, 0);
                 } else {
                     // 'Default' (no transitioning) style
-                    style.transform = util.style.translate3d(d.attr.x, 0, 0);
                     style.opacity = 1;
+                    style.transform = util.style.translate3d(d.attr.x,0,0);
                 }
+                style.left = styleOpts.offset.left;
+                style.bottom = styleOpts.offset.bottom;
                 return style;
             }
 
-
-            function rectHeight(){
-                // Defer updating rect height so we can use D3 to transition it in componentDidUpdate.
-                if (prevBarExists() && transitioning){
-                    return prevBarData.attr.height;
-                }
-                return d.attr.height;
-            }
-            
-
-            function rectY(){
-                if (prevBarExists() && transitioning){
-                    return this.height() - prevBarData.attr.height - styleOpts.offset.bottom;
-                }
-                return this.height() - d.attr.height - styleOpts.offset.bottom;
-            }
-
             return (
-                <g
-                    className="chart-bar"
+                <div
+                    className={
+                        "chart-bar no-highlight-color" + 
+                        (
+                            d.attr.height > Math.max((this.height() - styleOpts.offset.bottom - styleOpts.offset.top) / 2, 30) ?
+                            ' larger-height' : ''
+                        )
+                    }
                     data-term={d.term}
                     key={"bar-" + d.term}
                     style={barStyle.call(this)}
@@ -313,28 +448,21 @@ var BarPlot = React.createClass({
                         }
                     }}
                 >
-                    <text
-                        className="bar-top-label"
-                        x={styleOpts.offset.left}
-                        y={rectY.call(this)}
-                        key="text-label"
-                    >
-                        { d.name }
-                    </text>
-                    <rect
-                        y={rectY.call(this)}
-                        x={styleOpts.offset.left /* Use style.transform for X coord */}
-                        height={rectHeight.call(this)}
-                        data-target-height={d.attr.height}
-                        width={d.attr.width}
-                        key="rect1"
-                        rx={5}
-                        ry={5}
+                    <span className="bar-top-label" key="text-label">
+                        { d.count }
+                    </span>
+                    <div
+                        className="bar-part"
                         style={{
-                            fill : this.props.colorForNode(d)
+                            //top : rectY.call(this),
+                            height : d.attr.height,
+                            width: d.attr.width,
+                            backgroundColor : this.props.colorForNode(d)
                         }}
-                    />
-                </g>
+                        data-target-height={d.attr.height}
+                        key="rect1"
+                    ></div>
+                </div>
             );
         },
 
@@ -352,29 +480,40 @@ var BarPlot = React.createClass({
         },
 
         bottomYAxis : function(availWidth, availHeight, currentBars, styleOpts){
-            var lineYCoord = availHeight - (styleOpts.offset.bottom * 0.75);
+            var _this = this;
+            //(styleOpts.yAxisMaxHeight * styleOpts.yAxisMaxHeight);
+            console.log('hyp', styleOpts.yAxisMaxHeight * Math.cos(styleOpts.labelRotation))
             return (
-                <g key="y-axis-bottom">
-                    <line
-                        key="y-axis-bottom-line"
-                        className="y-axis-bottom"
-                        x1={styleOpts.offset.left}
-                        y1={lineYCoord}
-                        x2={availWidth - styleOpts.offset.right}
-                        y2={lineYCoord}
-                    />
+                <div className="y-axis-bottom" style={{ 
+                    left : styleOpts.offset.left, 
+                    right : styleOpts.offset.right,
+                    height : styleOpts.offset.bottom - 5
+                }}>
                     { currentBars.map(function(bar){
                         return (
-                            <text
+                            <div
                                 key={'count-for-' + bar.term}
                                 data-term={bar.term}
-                                className="y-axis-label-count"
-                                x={bar.attr.x + styleOpts.offset.left + (bar.attr.width / 2)}
-                                y={lineYCoord + 20}
-                            >{ bar.count }</text>
+                                className="y-axis-label no-highlight-color"
+                                style={{
+                                    transform : util.style.translate3d(bar.attr.x, 0, 0),
+                                    width : bar.attr.width,
+                                    opacity : _this.state.transitioning && (bar.removing || !bar.existing) ? 0 : ''
+                                }}
+                            >
+                            
+                            <span className="label-text" style={{
+                                width: (bar.attr.width / 2) + styleOpts.labelWidth,
+                                left: -styleOpts.labelWidth,
+                                transform : util.style.rotate3d(-styleOpts.labelRotation, 'z'), 
+                            }}>
+                                { bar.name }
+                            </span>
+                            
+                            </div>
                         );
                     }) }
-                </g>
+                </div>
             );
         }
 
@@ -391,7 +530,7 @@ var BarPlot = React.createClass({
         this.pastBars = _.clone(this.bars); // Difference between current and pastBars used to determine which bars to do D3 transitions on (if any).
         this.bars = {}; // ref to 'g' element is stored here.
 
-        var barData = BarPlot.genChartBarDims( // Gen bar dimensions (width, height, x/y coords).
+        var barData = BarPlot.genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
             BarPlot.genChartData( // Get counts by term per field.
                 this.props.experiments,
                 this.props.fields,
@@ -400,10 +539,13 @@ var BarPlot = React.createClass({
             availWidth,
             availHeight,
             this.styleOptions()
-        ); // Returns { fieldIndex, bars, fields (first arg supplied) }
+        );
 
         // Bars from current dataset/filters only.
-        var currentBars = barData.bars;
+        var currentBars = barData.bars.map((d)=>{
+            // Determine whether bar existed before, for this.renderParts.bar render func.
+            return _.extend(d, { 'existing' : typeof this.pastBars[d.term] !== 'undefined' && this.pastBars[d.term] !== null })
+        });
 
         var allBars = currentBars; // All bars -- current (from barData) and those which now need to be removed if transitioning (see block below).
 
@@ -417,7 +559,22 @@ var BarPlot = React.createClass({
 
         // The sort below only helps maintain order in which is processed thru renderParts.bar(), not order of bars shown.
         // This is to help React's keying algo adjust existing bars rather than un/remount them.
-        var barComponents = allBars.sort(function(a,b){ return a.term < b.term ? -1 : 1; }).map((d,i,a) => this.renderParts.bar.call(this, d, i, a, styleOpts, this.pastBars));
+        var barComponents = allBars
+            .sort(function(a,b){ return a.term < b.term ? -1 : 1; })
+            .map((d,i,a) => this.renderParts.bar.call(this, d, i, a, styleOpts, this.pastBars));
+
+        return (
+            <div
+                className="bar-plot-chart chart-container"
+                key="container"
+                ref="container"
+                data-field={this.props.fields[barData.fieldIndex].field}
+                style={{ height : availHeight, width: availWidth }}
+            >
+                { barComponents }
+                { this.renderParts.bottomYAxis.call(this, availWidth, availHeight, allBars, styleOpts) }
+            </div>
+        );
 
         // Keep in mind that 0,0 coordinate is located at top left for SVGs.
         // Easier to reason in terms of 0,0 being bottom left, thus e.g. d.attr.y for bars is set to be positive,
@@ -427,9 +584,9 @@ var BarPlot = React.createClass({
                 'height' : availHeight,
                 'width' : availWidth
             }}>
-                { this.renderParts.topYAxis.call(this, availWidth, styleOpts) }
+                { this.renderParts.svg.topYAxis.call(this, availWidth, styleOpts) }
                 { barComponents }
-                { this.renderParts.bottomYAxis.call(this, availWidth, availHeight, currentBars, styleOpts) }
+                { this.renderParts.svg.bottomYAxis.call(this, availWidth, availHeight, currentBars, styleOpts) }
             </svg>
         );
     }

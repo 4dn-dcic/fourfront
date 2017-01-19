@@ -198,6 +198,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
             /* Removed props.facets & props.expSetFilters as passing in props.passExperiments as experimentArray. */
             return (
                 <ExperimentsTable
+                    key='experiments-table'
                     columnHeaders={[
                         { className: 'file-detail', title : 'File Type'},
                         { className: 'file-detail', title : 'File Info'}
@@ -217,7 +218,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < files.length;
 
         return (
-            <tbody className={"expset-section expset-entry-passed " + (this.state.open ? "open" : "closed")} data-row={this.props.rowNumber}>
+            <tbody data-key={this.props['data-key']} className={"expset-section expset-entry-passed " + (this.state.open ? "open" : "closed")} data-row={this.props.rowNumber}>
                 <tr className="expset-table-row">
                     <td className="expset-table-cell dropdown-button-cell">
                         <Button bsSize="xsmall" className="expset-button icon-container" onClick={this.handleToggle}>
@@ -467,7 +468,8 @@ var ResultTable = browse.ResultTable = React.createClass({
     getDefaultProps: function() {
         // 'restrictions' object migrated to facetlist.js > FacetList
         return {
-            searchBase: ''
+            'searchBase': '',
+            'debug' : false
         };
     },
 
@@ -492,6 +494,21 @@ var ResultTable = browse.ResultTable = React.createClass({
 
         if (Object.keys(newState).length > 0){
             this.setState(newState);
+        }
+    },
+
+    shouldComponentUpdate : function(nextProps, nextState){
+        if (this.state.passedExperiments !== nextState.passedExperiments) return true;
+        if (this.state.sortColumn !== nextState.sortColumn) return true;
+        if (this.state.sortReverse !== nextState.sortReverse) return true;
+        if (this.state.overflowingRight !== nextState.overflowingRight) return true;
+        if (this.props.searchBase !== nextProps.searchBase) return true;
+        return false;
+    },
+
+    componentDidUpdate : function(pastProps, pastState){
+        if (this.props.debug) { 
+            console.log('ResultTable updated.');
         }
     },
 
@@ -554,6 +571,17 @@ var ResultTable = browse.ResultTable = React.createClass({
         }
     },
 
+    getSelectedFiles : function(){
+        if (!this.experimentSetRows) return null;
+        return _(this.experimentSetRows).chain()
+            .pairs()
+            .map(function(expRow){
+                return [expRow[0], expRow[1].state.selectedFiles];
+            })
+            .object()
+            .value();
+    },
+
     formatExperimentSetListings : function(passExperiments, facets = null){
         // use first experiment set to grap type (all types are the same in any given graph)
         var columnTemplate = this.getTemplate('column');
@@ -612,6 +640,10 @@ var ResultTable = browse.ResultTable = React.createClass({
                 }
                 resultListings.push(
                     <ExperimentSetRow
+                        ref={(r)=>{
+                            // Cache component instance.
+                            this.experimentSetRows[result['@id']] = r;
+                        }}
                         addInfo={addInfo}
                         description={result.description}
                         columns={columns}
@@ -623,7 +655,8 @@ var ResultTable = browse.ResultTable = React.createClass({
                         experimentArray={experimentArray}
                         replicateExpsArray={result.replicate_exps}
                         passExperiments={intersection}
-                        key={keyVal+result['@id']}
+                        key={result['@id']}
+                        data-key={result['@id']}
                         rowNumber={resultCount++}
                         facets={facets}
                         fileStats={this.props.fileStats}
@@ -660,8 +693,11 @@ var ResultTable = browse.ResultTable = React.createClass({
     },
 
     renderTable : function(){
+        if (this.props.debug) console.log('Rendering ResultTable.');
         var formattedExperimentSetListings = this.formatExperimentSetListings(this.state.passedExperiments);
         if (!formattedExperimentSetListings) return null;
+
+        this.experimentSetRows = {}; // ExperimentSetRow instances stored here, keyed by @id, to get selectFiles from (?).
 
         return (
             <div className={
@@ -749,6 +785,10 @@ var FileButton = browse.FileButton = React.createClass({
 
 var ControlsAndResults = browse.ControlsAndResults = React.createClass({
 
+    // TODO: ADJUST THIS!!! SELECTED FILES ARE NO LONGER GUARANTEED TO BE IN DOM!!!!!
+    // They are now in ExperimentSetRows state. We need to grab state.selectedFiles from each.
+    // We may in future store selectedFiles completely in Redux store or localStorage to allow a 'shopping cart' -like experience.
+
     getInitialState: function(){
         var initStats = {};
         initStats['checked'] = new Set();
@@ -789,6 +829,10 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
         e.preventDefault();
     },
 
+    /** 
+     * DEPRECATED (probably), get current selected files sets via this.getSelectedFiles(), keyed by experiment set @id. 
+     * Use _.flatten(_.values(this.getSelectedFiles())) to get single array of selected files, maybe also wrapped in a _.uniq() if files might be shared between expsets.
+     */
     downloadFiles: function(e){
         e.preventDefault();
         var currStats = findFiles(this.props.fileFormats);
@@ -797,6 +841,7 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
         console.log(checkedFiles);
     },
 
+    /** DEPRECATED */
     selectFiles: function(format, selected){
         var newSet = this.state.filesToFind;
         if(newSet.has(format) && selected){
@@ -807,6 +852,11 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
         this.setState({
             filesToFind: newSet
         });
+    },
+
+    getSelectedFiles : function(){
+        if (!this.refs.resultTable) return null;
+        return this.refs.resultTable.getSelectedFiles();
     },
 
     render: function(){
@@ -850,7 +900,14 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
                     </div>
                 </div>*/}
 
-                <ResultTable {...this.props} targetFiles={targetFiles} fileStats={this.state.fileStats} />
+                <ResultTable
+                    ref="resultTable"
+                    targetFiles={targetFiles}
+                    fileStats={this.state.fileStats}
+                    context={this.props.context}
+                    expSetFilters={this.props.expSetFilters}
+                    session={this.props.session}
+                />
 
             </div>
 
@@ -865,11 +922,27 @@ var Browse = browse.Browse = React.createClass({
         navigate: React.PropTypes.func
     },
 
+    propTypes : {
+        'context' : React.PropTypes.object.isRequired,
+        'expIncompleteFacets' : React.PropTypes.object,
+        'expSetFilters' : React.PropTypes.object,
+        'session' : React.PropTypes.bool,
+        'schemas' : React.PropTypes.object,
+    },
+
+    shouldComponentUpdate : function(nextProps, nextState){
+        if (this.props.context !== nextProps.context) return true;
+        if (this.props.expSetFilters !== nextProps.expSetFilters) return true;
+        if (this.props.session !== nextProps.session) return true;
+        return false; // We don't care about props.schemas or props.expIncomplete props (other views might), so we can skip re-render.
+    },
+
     componentWillMount: function() {
         //var searchBase = url.parse(this.context.location_href).search || '';
     },
 
     render: function() {
+        console.log('BROWSE PROPS', this.props);
         var context = this.props.context;
         var fileFormats = findFormats(context['@graph']);
 
@@ -901,7 +974,7 @@ var Browse = browse.Browse = React.createClass({
 
                 <ControlsAndResults
                     {...this.props}
-                    key={undefined}
+                    key="controlsAndResults"
                     fileFormats={fileFormats}
                     searchBase={searchBase}
                     onChange={this.context.navigate}
@@ -909,12 +982,6 @@ var Browse = browse.Browse = React.createClass({
 
             </div>
         );
-
-        /**
-         * Re: removing .panel above: .panel not really needed; adds extra outer padding which causes
-         * non-alignment w/ navbar logo.
-         */
-
     }
 });
 

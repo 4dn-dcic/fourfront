@@ -651,6 +651,10 @@ var SunBurst = React.createClass({
     },
 
     componentWillReceiveProps : function(nextProps){
+        // Stop current transitions or things will throw errors and break (D3 unable to find element it was transitioning)
+        if (this.state.transitioning){
+            this.getPathsToManuallyTransition().interrupt();
+        }
         if (this.shouldPerformManualTransitions(nextProps, this.props)){
             this.setState({ 'transitioning' : true });
         }
@@ -678,39 +682,41 @@ var SunBurst = React.createClass({
 
         if (this.props.debug) console.info("Sunburst chart updated");
 
+        if (this.justMounted){
+            this.justMounted = false; // unset (execs after render)
+        }
+
         if (this.shouldPerformManualTransitions(this.props, pastProps)){
             // state.transitioning = false was set in componentWillReceiveProps.
             if (this.existingNodes && _.keys(this.existingNodes).length > 0){ // We might not have any existing paths to transition.
                 this.transitionPathsD3ThenEndTransitionState(); // Animate here, then end transition state.
             } else {
                 if (this.props.debug) console.info("No paths to perform transitions on.");
-                this.setState({ 'transitioning' : false }, util.mixin.cancelPreventClicks.bind(this));
+                this.setState({ 'transitioning' : false });
            }
-        } else {
-            util.mixin.cancelPreventClicks.call(this);
-        }
-
-        if (this.state.mounted === true){
-            this.justMounted = false; // unset (execs after render)
         }
 
         this.adjustExplanationPosition();
     },
 
+    getPathsToManuallyTransition: function(){
+        return this.vis.selectAll('path').filter(function(d){
+            return d.depth < 5;
+        });
+    },
+
     transitionPathsD3ThenEndTransitionState : function(duration = 750){
         if (this.props.debug) console.info("Starting D3 transition on SunBurst.");
 
-        var existingToTransition2 = this.vis.selectAll('path').filter(function(d){
-            return d.depth < 5;
-        });
+        var existingToTransition = this.getPathsToManuallyTransition();
 
         // Since 'on end' callback is called many times (multiple paths transition), defer until called for each.
-        var transitionCompleteCallback = _.after(existingToTransition2.nodes().length, ()=>{
+        var transitionCompleteCallback = _.after(existingToTransition.nodes().length, ()=>{
             if (this.props.debug) console.info('Finished D3 transition on SunBurst.');
-            this.setState({ transitioning : false }, util.mixin.cancelPreventClicks.bind(this));
+        this.setState({ transitioning : false });
         });
 
-        existingToTransition2
+        existingToTransition
             .transition()
             .duration(duration)
             .attrTween('d', this.arcTween)
@@ -823,7 +829,7 @@ var SunBurst = React.createClass({
         });
 
         var pastExistingNodes = _.clone(_this.existingNodes);
-
+        console.log('mustmOUNTED', this.justMounted);
         if (this.state.transitioning || this.justMounted) {
             _this.existingNodes = {};
         }
@@ -841,41 +847,41 @@ var SunBurst = React.createClass({
                     style={{
                         opacity : node.depth && node.depth > 0 ? null : 0,
                         fill    : _this.props.colorForNode(node),
-                        zIndex: existing ? 2 : 1
+                        zIndex: existing ? 3 : ( removing ? 1 : 2 )
                     }}
                     ref={(r)=>{
                         if (r && _this.state.transitioning){
                             if (!existing) {
-                                d3.select(r).datum(_.extend(node, {
+                                d3.select(r).datum(_.extend({}, node, {
                                     x0_past: node.x0 + ((node.x1 - node.x0) / 2),
                                     x1_past: node.x0 + ((node.x1 - node.x0) / 2)
                                 }));
                             } else if (removing) {
-                                d3.select(r).datum(_.extend(node, {
+                                d3.select(r).datum(_.extend({}, node, {
                                     x0_past: node.x0,
                                     x1_past: node.x1,
                                     x0: node.x0 + ((node.x1 - node.x0) / 2),
                                     x1: node.x0 + ((node.x1 - node.x0) / 2)
                                 }));
-                            } else if (existing){ // also 'removing'
-                                d3.select(r).datum(_.extend(node, {
+                            } else if (existing){
+                                d3.select(r).datum(_.extend({}, node, {
                                     x0_past: pastExistingNodes[node.data.id].x0,
                                     x1_past: pastExistingNodes[node.data.id].x1
                                 }));
                             } else {
-                                d3.select(r).datum(node);
+                                d3.select(r).datum(_.extend({}, node));
                             }
                         } else {
-                            d3.select(r).datum(node);
+                            d3.select(r).datum(_.extend({}, node));
                         }
                     }}
                     d={_this.arc(node)}
                     fillRule="evenodd"
                     className={className + (removing ? ' removing' : (!existing ? ' adding' : ''))}
-                    onMouseOver={node.depth ? (e)=>{ e.persist(); _this.throttledMouseOverHandler(e); } : null }
+                    onMouseOver={node.depth > 0 ? (e)=>{ e.persist(); _this.throttledMouseOverHandler(e); } : null }
                     onMouseEnter={ node.depth === 0 ? _this.mouseleave : null }
-                    onMouseLeave={node.depth ? function(e){ unhighlightTerms(e.target.__data__.data.field); } : null}
-                    onClick={hasTerm && !node.data.noClick ? _this.props.handleClick : null}
+                    onMouseLeave={node.depth > 0 ? function(e){ unhighlightTerms(e.target.__data__.data.field); } : null}
+                    onClick={className === 'clickable' ? (e) => _this.props.handleClick(e.target.__data__) : null}
                     key={node.data.id}
                     data-key={node.data.id}
                 />
@@ -884,17 +890,18 @@ var SunBurst = React.createClass({
         
         //return nodes.map(genPath);
 
+        function sortByID(a,b){ return a.data.id < b.data.id ? -1 : 1; };
+
         ///* ToDo: 'Removing' nodes transition
-        var pathComponents = nodes.map(genPath);
-        var pathComponentsToRemove = _.map(
-            _.filter(
-                _.values(pastExistingNodes),
-                function(n){ return typeof _this.existingNodes[n.data.id] === 'undefined'; }
-            ),
-            function(n,i,a){
-                return genPath(n,i,a,true);
-            }
+        var pathComponents = nodes.sort(sortByID).map(genPath);
+        var pathComponentsToRemove = _.filter(
+            _.values(pastExistingNodes), 
+            function(n){ return typeof _this.existingNodes[n.data.id] === 'undefined'; }
         )
+        .sort(sortByID)
+        .map(function(n,i,a){
+            return genPath(n,i,a, true);
+        });
 
         return pathComponentsToRemove.concat(pathComponents);
         //*/
