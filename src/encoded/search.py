@@ -91,6 +91,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     elif size:
         es_results = es.search(body=query, index=es_index, from_=from_, size=size)
     else:
+        # fallback size for elasticsearch is 10
         es_results = es.search(body=query, index=es_index)
 
     # record total number of hits
@@ -196,7 +197,6 @@ def get_pagination(request):
     from_ = request.params.get('from', 0)
     size = request.params.get('limit', 25)
     if size in ('all', ''):
-       # size = 10000 # ES returns 10 results by default if no size param specified.
        size = "all"
     else:
         try:
@@ -229,7 +229,6 @@ def get_all_results(request, origQuery):
         es_result['hits']['hits'] = es_result['hits']['hits'] + subsequent_es_result['hits'].get('hits', [])
         extraRequestsNeeded -= 1
         # print("Found " + str(len(es_result['hits']['hits'])) + ' results so far.')
-
     return es_result
 
 
