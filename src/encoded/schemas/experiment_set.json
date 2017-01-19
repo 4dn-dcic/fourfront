@@ -84,19 +84,5 @@
         "experiments_in_set.lab.title": {
             "title": "Lab"
         }
-    },
-    "columns": {
-        "accession": {
-            "title": "Accession"
-        },
-        "experimentset_type": {
-            "title": "Experiment set type"
-        },
-        "description": {
-            "title": "Description"
-        },
-        "experiments_in_set": {
-            "title": "Experiments"
-        }
     }
 }

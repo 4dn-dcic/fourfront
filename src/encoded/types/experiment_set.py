@@ -1,17 +1,22 @@
 """Collection for ExperimentSet and ExperimentSetReplicate."""
 
+from pyramid.view import (
+    view_config,
+)
+from pyramid.threadlocal import get_current_request
+
 from snovault import (
     collection,
     load_schema,
     AfterModified,
     BeforeModified
 )
+from snovault.resource_views import item_view_page
+from snovault.calculated import calculate_properties
 
 from .base import (
     Item
 )
-
-from pyramid.threadlocal import get_current_request
 
 
 def invalidate_linked_items(item, field, updates=None):
@@ -54,7 +59,9 @@ class ExperimentSet(Item):
     item_type = 'experiment_set'
     schema = load_schema('encoded:schemas/experiment_set.json')
     name_key = "accession"
-    embedded = ["experiments_in_set",
+    embedded = ["award",
+                "lab",
+                "experiments_in_set",
                 "experiments_in_set.protocol",
                 "experiments_in_set.protocol_variation",
                 "experiments_in_set.lab",
@@ -94,3 +101,11 @@ class ExperimentSetReplicate(ExperimentSet):
         all_experiments = [exp['replicate_exp'] for exp in properties['replicate_exps']]
         properties['experiments_in_set'] = all_experiments
         super(ExperimentSetReplicate, self)._update(properties, sheets)
+
+
+# Use the the page view as default for experiment sets. This means that embedding
+# IS relevant with regard to this specific object pages
+@view_config(context=ExperimentSetReplicate, permission='view', request_method='GET', name='page')
+def item_page_view(context, request):
+    """Return the frame=page view rather than object view by default."""
+    return item_view_page(context, request)

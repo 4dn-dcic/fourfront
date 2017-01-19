@@ -89,28 +89,5 @@
         "experiments_in_set.lab.title": {
             "title": "Lab"
         }
-    },
-    "columns": {
-        "accession": {
-            "title": "Accession"
-        },
-        "experimentset_type": {
-            "title": "Experiment set type"
-        },
-        "description": {
-            "title": "Description"
-        },
-        "experiments_in_set": {
-            "title": "Experiments"
-        },
-        "replicate_exps.replicate_exp.@id": {
-            "title": "Experiment ID"
-        },
-        "replicate_exps.bio_rep_no": {
-            "title": "Experiment Biological Replicate Number"
-        },
-        "replicate_exps.tec_rep_no": {
-            "title": "Experiment Technical Replicate Number"
-        }
     }
 }

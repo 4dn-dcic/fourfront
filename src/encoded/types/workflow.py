@@ -1,5 +1,4 @@
 """The type file for the workflow related items.
-
 """
 from snovault import (
     # calculated_property,
@@ -22,7 +21,8 @@ class Workflow(Item):
 
     item_type = 'workflow'
     schema = load_schema('encoded:schemas/workflow.json')
-
+    embedded = ['workflow_steps.step',
+                'workflow_steps.step_name']
 
 @collection(
     name='workflow-runs',
