@@ -7,6 +7,7 @@
     "build": "gulp build",
     "build-quick": "gulp build-quick",
     "dev": "gulp dev",
+    "dev-quick": "gulp dev-quick",
     "dev-uglified" : "gulp dev-uglified"
   },
   "author": "",

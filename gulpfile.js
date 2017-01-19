@@ -5,6 +5,7 @@ var webpack = require('webpack');
 
 gulp.task('default', ['webpack', 'watch']);
 gulp.task('dev', ['default']);
+gulp.task('dev-quick', ['set-quick', 'webpack', 'watch']);
 gulp.task('dev-uglified', ['set-quick-uglified','default']);
 gulp.task('build', ['set-production', 'webpack']);
 gulp.task('build-quick', ['set-quick', 'webpack']);

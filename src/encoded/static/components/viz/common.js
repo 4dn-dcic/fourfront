@@ -15,17 +15,17 @@ module.exports.ChartBreadcrumbs = React.createClass({
 
     getInitialState : function(){
         return {
-            'nodes' : [],
+            'highlighted' : [],
             'sequential' : true
         };
     },
 
     updateHoverNodes : function(sequence = []){
-        this.setState({ 'nodes' :  sequence });
+        this.setState({ 'highlighted' :  sequence });
     },
 
     renderCrumbs : function(){
-        return _.uniq(this.props.selectedNodes.concat(this.state.nodes), function(node){
+        return _.uniq(this.props.selectedNodes.concat(this.state.highlighted), function(node){
             return node.data.name;
         }).map(function(node,i){
             return (

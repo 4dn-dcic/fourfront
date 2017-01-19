@@ -140,6 +140,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
     },
 
     shouldComponentUpdate : function(nextProps, nextState){
+        if (this.props.debug) console.log('FacetChart next props & state:', nextProps, nextState);
         if (
             this.props.href !== nextProps.href ||
             this.props.expSetFilters !== nextProps.expSetFilters ||
@@ -155,6 +156,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
     },
 
     componentDidMount : function(){
+        if (this.props.debug) console.log('Mounted FacetCharts');
 
         if (!isServerSide() && typeof window !== 'undefined'){
             var _this = this;
@@ -166,19 +168,16 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
         if (this.props.ajax && this.state.experiments === null){
 
+            if (this.props.debug) console.log('FacetCharts - no experiments in current context, fetching from ' + this.props.requestURLBase);
+
             var reqUrl = this.props.requestURLBase;
-            if (reqUrl.indexOf('&format=json') === -1) {
-                if (reqUrl.indexOf('?') === -1){
-                    reqUrl += '?format=json';
-                } else {
-                    reqUrl += '&format=json';
-                }
-            }
+
             reqUrl += this.props.fieldsToFetch.map(function(fieldToIncludeInResult){
                 return '&field=' + fieldToIncludeInResult;
             }).join('');
             
             ajaxLoad(reqUrl, (res) => {
+                if (this.props.debug) console.log('FacetCharts - received via AJAX:', res);
                 this.setState({
                     'experiments' : expFuncs.listAllExperimentsFromExperimentSets(res['@graph']),
                     'mounted' : true

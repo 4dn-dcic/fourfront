@@ -172,6 +172,7 @@ var SunBurst = React.createClass({
                     if (Array.isArray(attachToNode.children)) return null; // Can't attach, children already set as array.
 
                     if (Array.isArray(fieldValue)){
+                        //fieldValue = _.uniq(fieldValue);
                         if (fieldValue.length === 1){
                             fieldValue = fieldValue[0];
                         } else {
@@ -183,8 +184,8 @@ var SunBurst = React.createClass({
                                     return counts;
                                 }, {})
                                 .pairs()
-                                .sortBy(1)
-                                .value()[0];
+                                .sortBy(function(fieldValPair){ return fieldValPair[1]; })
+                                .value()[0][0]; // [['human', 2], ...] -- grab first item from first array ('human')
                             console.log('FV2',fieldValue);
                         }
                     }
@@ -551,7 +552,7 @@ var SunBurst = React.createClass({
 
     updateBreadcrumbs : function(nodeArray){
         this.breadcrumbs().setState({ 
-            nodes : nodeArray.map((n)=>{
+            highlighted : nodeArray.map((n)=>{
                 n.color = this.props.colorForNode(n);
                 return n;
             })

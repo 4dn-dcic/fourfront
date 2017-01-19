@@ -583,7 +583,7 @@ var App = React.createClass({
             }
 
             var request = this.fetch(
-                href.match(/\?./) ? href + '&format=json' : href + '?format=json',  // URL
+                href,
                 {
                     'headers': {}, // Filled in by ajaxPromise
                     'cache' : options.cache === false ? false : true
@@ -901,6 +901,7 @@ var App = React.createClass({
                                         context={this.props.context}
                                         expSetFilters={this.props.expSetFilters}
                                         navigate={this.navigate}
+                                        debug
                                     />
                                     <Alerts alerts={this.props.alerts} />
                                     { content }

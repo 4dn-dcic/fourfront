@@ -11,7 +11,7 @@ var plugins = [];
 // don't include momentjs locales (large)
 plugins.push(new webpack.IgnorePlugin(/^\.\/locale$/, [/moment$/]));
 var chunkFilename = '[name].js';
-var sourceMapType = 'eval';
+var devTool = 'source-map'; // Default, slowest.
 
 if (env === 'production') {
     // tell react to use production build
@@ -24,14 +24,16 @@ if (env === 'production') {
     plugins.push(new webpack.optimize.UglifyJsPlugin({minimize: true}));
     // add chunkhash to chunk names for production only (it's slower)
     chunkFilename = '[name].[chunkhash].js';
-    sourceMapType = 'source-map';
+    devTool = 'source-map';
+} else if (env === 'quick') {
+    devTool = 'eval'; // Fastest
 } else if (env === 'quick-uglified') {
     // Uglify JS for dev as well on task 'npm run dev-uglified' -
     // slightly slower but reduces invariant violations where
     // client-side render != server-side reason (*perhaps* allowing clientside JS to exec faster)
     // set 'beautify : true' to get nicer output (whitespace, linebreaks) for debugging.
     plugins.push(new webpack.optimize.UglifyJsPlugin({compress: false, mangle: false, minimize: false, sourceMap: true}));
-    sourceMapType = 'source-map';
+    devTool = 'source-map';
 }
 
 var preLoaders = [
@@ -83,7 +85,7 @@ module.exports = [
             preLoaders: preLoaders,
             loaders: loaders,
         },
-        devtool: sourceMapType,
+        devtool: devTool,
         plugins: plugins,
         debug: true
     },
@@ -117,7 +119,7 @@ module.exports = [
             preLoaders: preLoaders,
             loaders: loaders,
         },
-        devtool: null, // No way to debug/log serverside JS currently, so may as well speed up builds for now.
+        devtool: devTool, // No way to debug/log serverside JS currently, so may as well speed up builds for now.
         plugins: plugins,
         debug: false // See devtool comment.
     }
