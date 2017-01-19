@@ -4,18 +4,18 @@
         "ontology_name": "Experimental Factor Ontology",
         "ontology_url": "http://www.ebi.ac.uk/efo/",
         "download_url": "http://www.ebi.ac.uk/efo/efo_inferred.owl",
-        "base_url": "http://www.ebi.ac.uk/efo/",
+        "namespace_url": "http://www.ebi.ac.uk/efo/",
         "ontology_prefix": "EFO",
         "description": "The Experimental Factor Ontology (EFO) provides a systematic description of many experimental variables available in EBI databases, and for external projects such as the NHGRI GWAS catalog.",
-        "branches": ["cell line"],
-        "notes": "The download link also downloads all of CL cell type ontology which will get split into it's own ontology during processing"
+        "notes": "The download link also downloads all of CL cell type ontology which will get split into it's own ontology during processing",
+        "synonym_terms": ["530056bc-8535-4448-903e-854af460a233"]
     },
     {
         "uuid": "530016bc-8535-4448-903e-854af460b254",
         "ontology_name": "Uberon",
         "ontology_url": "http://uberon.github.io/",
         "download_url": "http://purl.obolibrary.org/obo/uberon/composite-metazoan.owl",
-        "base_url": "http://purl.obolibrary.org/obo/",
+        "namespace_url": "http://purl.obolibrary.org/obo/",
         "ontology_prefix": "UBERON",
         "description": "Uberon is an integrated cross-species ontology covering anatomical structures in animals."
     },
@@ -24,7 +24,7 @@
         "ontology_name": "Cell Ontology",
         "ontology_url": "http://www.obofoundry.org/ontology/cl.html",
         "download_url": "http://www.ebi.ac.uk/efo/efo_inferred.owl",
-        "base_url": "http://purl.obolibrary.org/obo/",
+        "namespace_url": "http://purl.obolibrary.org/obo/",
         "ontology_prefix": "CL",
         "description": "The Cell Ontology is a structured controlled vocabulary for cell types in animals",
         "notes": "The download link also downloads all of EFO which will get split into it's own ontology during processing"
