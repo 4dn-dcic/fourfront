@@ -21,7 +21,15 @@ def fetch_pubmed(PMID):
     NIHw = "https://www.ncbi.nlm.nih.gov/pubmed/"
     url = NIHw + PMID
     www = "{NIH}efetch.fcgi?db=pubmed&id={id}&rettype=medline".format(NIH=NIHe, id=PMID)
-    r = requests.get(www).text
+    # try fetching data 5 times and return empty if fails
+    for count in range(5):
+        resp = requests.get(www)
+        if resp.status_code == 200:
+            break
+        if count == 4:
+            return '', '', '', '', ''
+    # parse the text to get the fields
+    r = resp.text
     full_text = r.replace('\n      ', ' ')
     data_list = [a.split('-', 1) for a in full_text.split('\n') if a != '']
     for key_pb, data_pb in data_list:
@@ -74,7 +82,13 @@ def fetch_biorxiv(url):
     abstract = ''
     authors = ''
     date = ''
-    r = requests.get(url)
+    # try fetching data 5 times and return empty if fails
+    for count in range(5):
+        r = requests.get(url)
+        if r.status_code == 200:
+            break
+        if count == 4:
+            return '', '', '', '', ''
     resp = r.text.encode('utf-8').decode('ascii', 'ignore')
     parser = BioRxivExtractor()
     parser.feed(resp)
@@ -89,6 +103,13 @@ def map_doi_pmid(doi):
     """If a doi is given, checks if it maps to pmid"""
     NIHid = "https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/"
     www = "{NIH}?ids={id}&versions=no&format=json".format(NIH=NIHid, id=doi)
+    # try fetching data 5 times
+    for count in range(5):
+        resp = requests.get(www)
+        if resp.status_code == 200:
+            break
+    # parse the text to get the fields
+    r = resp.text
     r = requests.get(www).text
     res = json.loads(r)
     try:
