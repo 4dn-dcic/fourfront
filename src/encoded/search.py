@@ -190,10 +190,10 @@ def get_pagination(request):
     """
     Fill from_ and size parameters for search if given in the query string
     """
-    from_ = request.params.get('from') or 0
+    from_ = request.params.get('from', 0)
     size = request.params.get('limit', 25)
     if size in ('all', ''):
-        size = None
+        size = 10000 # ES returns 10 results by default if no size param specified.
     else:
         try:
             size = int(size)
