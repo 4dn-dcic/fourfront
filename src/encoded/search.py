@@ -210,7 +210,7 @@ def get_all_results(request, origQuery):
     es = request.registry[ELASTIC_SEARCH]
     es_index = request.registry.settings['snovault.elasticsearch.index']
     from_ = 0
-    sizeIncrement = 100 # Decrease this to like 5 or 10 to test.
+    sizeIncrement = 1000 # Decrease this to like 5 or 10 to test.
 
     es_result = es.search(body=origQuery, index=es_index, from_=from_, size=sizeIncrement) # get our aggregations from here
     total = es_result['hits'].get('total',0)
