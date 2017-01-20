@@ -10,7 +10,6 @@ from .base import (
     Item
 )
 
-
 @abstract_collection(
     name='experiments',
     unique_key='accession',
@@ -24,7 +23,8 @@ class Experiment(Item):
     base_types = ['Experiment'] + Item.base_types
     embedded = ["protocol", "protocol_variation", "lab", "award", "biosample",
                 "biosample.biosource", "biosample.modifications",
-                "biosample.treatments", "biosample.biosource.individual.organism"]
+                "biosample.treatments", "biosample.biosource.individual.organism",
+                "experiment_sets"]
     name_key = 'accession'
 
     def generate_mapid(self, experiment_type, num):
@@ -94,6 +94,32 @@ class Experiment(Item):
                         # make data for new experiemnt_relation
                         target_exp.properties['experiment_relation'].append(relationship_entry)
                         target_exp.update(target_exp.properties)
+
+    @calculated_property(schema={
+        "title": "Experiment Sets",
+        "description": "Experiment Sets to which this experiment belongs.",
+        "type": "array",
+        "items": {
+            "title": "Experiment Set",
+            "type": "string",
+            "linkTo": "ExperimentSet"
+        }
+    })
+    def experiment_sets(self, request):
+        exp_set_coll = list(self.registry['collections']['ExperimentSet'])
+        exp_set_coll.extend(list(self.registry['collections']['ExperimentSetReplicate']))
+        sets = []
+        for uuid in exp_set_coll:
+            eset = self.collection.get(uuid)
+            for exp in eset.properties['experiments_in_set']:
+                if str(exp) == str(self.uuid):
+                    ty = eset.properties['experimentset_type']
+                    prefix = '/experiment_set/'
+                    if ty == 'replicate':
+                        prefix = '/experiment_set_replicate/'
+                    s = prefix + str(uuid)
+                    sets.append(s)
+        return list(set(sets))
 
 
 @collection(
