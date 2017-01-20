@@ -611,17 +611,17 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
              *  Partial Funcs (probably don't use these unless composing a function)
              */
 
-            combineWithReplicateNumbers : function(experimentsWithReplicateNums, fullExperimentData){
+            combineWithReplicateNumbers : function(experimentsWithReplicateNums, experimentsInSet){
                 if (!Array.isArray(experimentsWithReplicateNums)) return false;
                 return _(experimentsWithReplicateNums).chain()
                     .map(function(r){ 
                         return {
                             'tec_rep_no' : r.tec_rep_no || null,
                             'bio_rep_no' : r.bio_rep_no || null,
-                            '@id' : r.replicate_exp['@id']
+                            '@id' : r.replicate_exp && r.replicate_exp['@id'] || null
                         };
                     })
-                    .zip(fullExperimentData) // 'replicate_exps' and 'experiments_in_set' are delivered in same order from backend, so can .zip (linear) vs .map -> .findWhere  (nested loop).
+                    .zip(experimentsInSet) // 'replicate_exps' and 'experiments_in_set' are delivered in same order from backend, so can .zip (linear) vs .map -> .findWhere  (nested loop).
                     .map(function(r){
                         r[1].biosample.bio_rep_no = r[0].bio_rep_no; // Copy over bio_rep_no to biosample to ensure sorting.
                         return _.extend(r[0], r[1]);

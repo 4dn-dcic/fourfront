@@ -70,13 +70,72 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             return expFuncs.listAllExperimentsFromExperimentSets(context['@graph']);
         },
 
+        /** Not used/necessary, keeping for future if needed. */
         isBrowserMSEdge : function(){
             if (isServerSide()) return false;
             console.log(document.documentElement.className);
             if (document.documentElement.className.indexOf('no-uaEdge') > -1) return false;
             if (document.documentElement.className.indexOf('uaEdge') > -1) return true;
             return true;
-        }
+        },
+
+        colorForNode : function(node, predefinedColors){
+            var nodeDatum = node.data || node; // So can process on d3-gen'd/wrapped elements as well as plain datums.
+
+            if (nodeDatum.color){
+                return nodeDatum.color;
+            }
+
+            // Normalize name to lower case (as capitalization etc may change in future)
+            var nodeName = nodeDatum.name.toLowerCase();
+
+            if (typeof predefinedColors[nodeName] !== 'undefined'){
+                return predefinedColors[nodeName];
+            } else if (typeof colorCache[nodeName] !== 'undefined') {
+                return colorCache[nodeName]; // Previously calc'd color
+            } else if (
+                nodeDatum.field === 'experiments_in_set.accession' || 
+                nodeDatum.field === 'experiments_in_set.experiment_summary' ||
+                nodeDatum.field === 'experiments_in_set.biosample.biosource_summary'
+            ){
+
+                //if (node.data.field === 'experiments_in_set.accession'){
+                //    return '#bbb';
+                //}
+
+                // Use a variant of parent node's color
+                if (node.parent) {
+                    var color;
+                    if (nodeDatum.field === 'experiments_in_set.experiment_summary'){
+                        color = d3.interpolateRgb(
+                            FacetCharts.colorForNode(node.parent, predefinedColors),
+                            util.stringToColor(nodeName)
+                        )(.4);
+                    } else if (nodeDatum.field === 'experiments_in_set.biosample.biosource_summary'){
+                        color = d3.interpolateRgb(
+                            FacetCharts.colorForNode(node.parent, predefinedColors),
+                            d3.color(util.stringToColor(nodeName)).darker(
+                                0.5 + (
+                                    (2 * (node.parent.children.indexOf(node) + 1)) / node.parent.children.length
+                                )
+                            )
+                        )(.3);
+                    } else if (nodeDatum.field === 'experiments_in_set.accession') {
+                        // color = d3.color(this.colorForNode(node.parent)).brighter(0.7);
+                        color = d3.interpolateRgb(
+                            FacetCharts.colorForNode(node.parent, predefinedColors),
+                            d3.color("#ddd")
+                        )(.8);
+                    }
+                    colorCache[nodeName] = color;
+                    return color;
+                }
+            }
+
+            // Fallback
+            colorCache[nodeName] = util.stringToColor(nodeName);
+            return colorCache[nodeName];
+        },
         
     },
     
@@ -119,8 +178,8 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             },
             colWidthPerScreenSize : {
                 'small' : [
-                    {'xs' : 12, 'sm' : 5,  'md' : 4, 'lg' : 3},
-                    {'xs' : 12, 'sm' : 7,  'md' : 8, 'lg' : 9}
+                    {'xs' : 12, 'sm' : 6,  'md' : 6, 'lg' : 6},
+                    {'xs' : 12, 'sm' : 6,  'md' : 6, 'lg' : 6}
                 ],
                 'large' : [
                     {'xs' : 12, 'sm' : 12, 'md' : 6, 'lg' : 6},
@@ -219,63 +278,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
     },
 
-    colorForNode : function(node){
-        var nodeDatum = node.data || node; // So can process on d3-gen'd/wrapped elements as well as plain datums.
-
-        if (nodeDatum.color){
-            return nodeDatum.color;
-        }
-
-        // Normalize name to lower case (as capitalization etc may change in future)
-        var nodeName = nodeDatum.name.toLowerCase();
-
-        if (typeof this.props.colors[nodeName] !== 'undefined'){
-            return this.props.colors[nodeName];
-        } else if (typeof colorCache[nodeName] !== 'undefined') {
-            return colorCache[nodeName]; // Previously calc'd color
-        } else if (
-            nodeDatum.field === 'experiments_in_set.accession' || 
-            nodeDatum.field === 'experiments_in_set.experiment_summary' ||
-            nodeDatum.field === 'experiments_in_set.biosample.biosource_summary'
-        ){
-
-            //if (node.data.field === 'experiments_in_set.accession'){
-            //    return '#bbb';
-            //}
-
-            // Use a variant of parent node's color
-            if (node.parent) {
-                var color;
-                if (nodeDatum.field === 'experiments_in_set.experiment_summary'){
-                    color = d3.interpolateRgb(
-                        this.colorForNode(node.parent),
-                        util.stringToColor(nodeName)
-                    )(.4);
-                } else if (nodeDatum.field === 'experiments_in_set.biosample.biosource_summary'){
-                    color = d3.interpolateRgb(
-                        this.colorForNode(node.parent),
-                        d3.color(util.stringToColor(nodeName)).darker(
-                            0.5 + (
-                                (2 * (node.parent.children.indexOf(node) + 1)) / node.parent.children.length
-                            )
-                        )
-                    )(.3);
-                } else if (nodeDatum.field === 'experiments_in_set.accession') {
-                    // color = d3.color(this.colorForNode(node.parent)).brighter(0.7);
-                    color = d3.interpolateRgb(
-                        this.colorForNode(node.parent),
-                        d3.color("#ddd")
-                    )(.8);
-                }
-                colorCache[nodeName] = color;
-                return color;
-            }
-        }
-
-        // Fallback
-        colorCache[nodeName] = util.stringToColor(nodeName);
-        return colorCache[nodeName];
-    },
+    colorForNode : function(node){ return FacetCharts.colorForNode(node, this.props.colors); },
 
     componentWillReceiveProps : function(nextProps){
 
@@ -438,7 +441,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
     },
 
     /** We want a square for circular charts, so we determine WIDTH available for first chart (which is circular), and return that as height. */
-    height : function(show = null, chartIndex = 0){
+    width : function(chartIndex = 0, show = null){
         if (!show) show = this.show();
         if (!show) return null;
         if (!this.state.mounted || isServerSide()){
@@ -460,7 +463,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             }).join(' ');
         }
 
-        var height = this.height();
+        var height = show === 'small' ? 360 : this.width();
 
         unhighlightTerms();
 
@@ -481,7 +484,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             <div className={"facet-charts show-" + show} key="facet-charts">
                 <ChartBreadcrumbs ref="breadcrumbs" selectedNodes={this.state.selectedNodes} key="facet-crumbs" />
                 <div className="facet-charts-description description" ref="description" key="facet-chart-description"></div>
-                <div className="row" key="facet-chart-row-1">
+                <div className="row facet-chart-row-1" key="facet-chart-row-1" height={height}>
                     <div className={genChartColClassName(1)} key="facet-chart-row-1-chart-1">
                         <SunBurstChart
                             data={this.transformData(this.state.experiments, 'tree')}
@@ -499,6 +502,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                     <div className={genChartColClassName(2)} key="facet-chart-row-1-chart-2">
                         <BarPlotChart 
                             experiments={this.transformData(this.state.experiments)}
+                            width={this.width(1) - 20}
                             height={height}
                             colorForNode={this.colorForNode}
                         />

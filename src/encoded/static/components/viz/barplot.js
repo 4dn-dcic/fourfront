@@ -82,8 +82,6 @@ var BarPlot = React.createClass({
             var barXCoords = d3.range(0, insetDims.width, availWidthPerBar);
             var barWidth = Math.min(Math.abs(availWidthPerBar - styleOpts.gap), styleOpts.maxBarWidth);
 
-            console.log('field', fields[topIndex], topIndex);
-
             return {
                 'fieldIndex' : topIndex,
                 'bars' : _(fields[topIndex].terms).chain()
@@ -113,8 +111,8 @@ var BarPlot = React.createClass({
             return {
                 'gap' : 5,
                 'maxBarWidth' : 60,
-                'labelRotation' : 45,
-                'labelWidth' : 80,
+                'labelRotation' : 'auto',
+                'labelWidth' : 200,
                 'yAxisMaxHeight' : 100, // This will override labelWidth to set it to something that will fit at angle.
                 'offset' : {
                     'top' : 0,
@@ -147,7 +145,9 @@ var BarPlot = React.createClass({
                 'right'         : React.PropTypes.number
             })
         }),
-        'colorForNode' : React.PropTypes.func
+        'colorForNode'  : React.PropTypes.func,
+        'height'        : React.PropTypes.number,
+        'width'         : React.PropTypes.number
     },
   
     getDefaultProps : function(){
@@ -481,8 +481,9 @@ var BarPlot = React.createClass({
 
         bottomYAxis : function(availWidth, availHeight, currentBars, styleOpts){
             var _this = this;
-            //(styleOpts.yAxisMaxHeight * styleOpts.yAxisMaxHeight);
-            console.log('hyp', styleOpts.yAxisMaxHeight * Math.cos(styleOpts.labelRotation))
+            
+            // We need to know label height to make use of this (to subtract from to get max labelWidth), which would be too much work (in browser calculation) given character size variance for most fonts to be performant.
+            // var maxHypotenuse = styleOpts.yAxisMaxHeight * (1/Math.cos((Math.PI * 2) / (360 / styleOpts.labelRotation)));
             return (
                 <div className="y-axis-bottom" style={{ 
                     left : styleOpts.offset.left, 
@@ -502,13 +503,23 @@ var BarPlot = React.createClass({
                                 }}
                             >
                             
-                            <span className="label-text" style={{
-                                width: (bar.attr.width / 2) + styleOpts.labelWidth,
-                                left: -styleOpts.labelWidth,
-                                transform : util.style.rotate3d(-styleOpts.labelRotation, 'z'), 
-                            }}>
-                                { bar.name }
-                            </span>
+                                <span className={"label-text" + (styleOpts.labelRotation === 'auto' ? ' auto-rotation' : '')} style={{
+                                    width: typeof styleOpts.labelWidth === 'number' ? styleOpts.labelWidth : null,
+                                    left:  0 - (
+                                        (
+                                            typeof styleOpts.labelWidth === 'number' ? styleOpts.labelWidth : bar.attr.width
+                                        )
+                                        - ((bar.attr.width / (90 / bar.attr.width) ))
+                                    ),
+                                    transform : util.style.rotate3d(
+                                        typeof styleOpts.labelRotation === 'number' ? 
+                                            styleOpts.labelRotation : 
+                                                -(90 / (bar.attr.width * .1)), // If not set, rotate so 1 line will fit.
+                                        'z'
+                                    ), 
+                                }}>
+                                    { bar.name }
+                                </span>
                             
                             </div>
                         );

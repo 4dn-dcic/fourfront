@@ -30,6 +30,10 @@
         cursor : pointer;
     }
 
+    > .facet-chart-row-1 > div {
+        transition : width .75s ease-out;
+    }
+
 }
 
 /** Individual and standalone chart styles **/
@@ -136,7 +140,9 @@
 
 .bar-plot-chart { // SVG is top-level element rendered by component;
     display: block;
-    position: relative;
+    position: absolute;
+    transition: height .75s ease-out;
+    //overflow: hidden;
 
     line.y-axis-top {
         stroke: #ccc;
@@ -206,6 +212,12 @@
             position: relative;
             font-size: 0.85rem;
             line-height: 1.2rem;
+            &.auto-rotation {
+                transition: transform 1s, left 1s;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
         }
     }
 

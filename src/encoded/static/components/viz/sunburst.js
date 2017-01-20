@@ -172,7 +172,6 @@ var SunBurst = React.createClass({
                     if (Array.isArray(attachToNode.children)) return null; // Can't attach, children already set as array.
 
                     if (Array.isArray(fieldValue)){
-                        //fieldValue = _.uniq(fieldValue);
                         if (fieldValue.length === 1){
                             fieldValue = fieldValue[0];
                         } else {
@@ -184,7 +183,7 @@ var SunBurst = React.createClass({
                                     return counts;
                                 }, {})
                                 .pairs()
-                                .sortBy(function(fieldValPair){ return fieldValPair[1]; })
+                                .sortBy(function(fieldValPair){ return -fieldValPair[1]; })
                                 .value()[0][0]; // [['human', 2], ...] -- grab first item from first array ('human')
                             console.log('FV2',fieldValue);
                         }
@@ -436,7 +435,7 @@ var SunBurst = React.createClass({
                 })
                 .sort(function(a,b){
                     var dif = b.value - a.value;
-                    if (dif !== 0) return dif;
+                    if (dif !== 0) return -dif; // Ascending
                     else {
                         if (a.data.name < b.data.name) return -1;
                         else if (a.data.name > b.data.name) return 1;
@@ -578,7 +577,7 @@ var SunBurst = React.createClass({
             this.width = this.props.width;
         }
         this.radius = Math.min(this.width, this.props.height) / 2;
-        this.partition = d3.partition().size([2 * Math.PI, this.radius * this.radius * 1.1667]);
+        //this.partition = d3.partition().size([2 * Math.PI, this.radius * this.radius * 1.1667]);
     },
 
     visualizationSetup : function(){
@@ -588,7 +587,9 @@ var SunBurst = React.createClass({
         // This partition object/function is pretty much the magic behind the starburst layout.
         // It creates all the points/sizes (x0, x1, y0, y1) needed for a partitioned layout.
         // Then these are used by 'arc' transform below to draw/put into the SVG.
-        this.partition = d3.partition().size([2 * Math.PI, this.radius * this.radius * 1.1667]);
+        this.partition = d3.partition().size([this.width, this.props.height - 80]);
+        return;
+
         this.arc = d3.arc()
             .startAngle(function(d) { return d.x0; })
             .endAngle(function(d) { return d.x1; })
@@ -608,6 +609,12 @@ var SunBurst = React.createClass({
                 //return d.y1;
                 return Math.sqrt(d.y1);
             });
+    },
+
+    generateRectPath : function(node){
+        var path = d3.path();
+        path.rect(node.x0, node.y0, node.x1 - node.x0, node.y1 - node.y0);
+        return path;
     },
 
     componentWillMount : function(){
@@ -714,7 +721,7 @@ var SunBurst = React.createClass({
         // Since 'on end' callback is called many times (multiple paths transition), defer until called for each.
         var transitionCompleteCallback = _.after(existingToTransition.nodes().length, ()=>{
             if (this.props.debug) console.info('Finished D3 transition on SunBurst.');
-        this.setState({ transitioning : false });
+            this.setState({ transitioning : false });
         });
 
         existingToTransition
@@ -734,7 +741,8 @@ var SunBurst = React.createClass({
             //console.log('TWEENB', b, a);
             //a.x0_past = b.x0;
             //a.x1_past = b.x1;
-            return this.arc(b);
+            return this.generateRectPath(b);
+            return b;//this.arc(b);
         };
     },
 
@@ -750,7 +758,7 @@ var SunBurst = React.createClass({
     scaleChart : function(nextProps, pastProps){
         if (this.props.debug) console.info('Scaling SunBurst Chart');
         var newWidth =  this.refs.container ? this.refs.container.offsetWidth : this.width;
-        //this.updateWidthAndRadius();
+
         var s = Math.min(nextProps.height, newWidth) / Math.min(pastProps.height, this.width); // Circle's radius is based off smaller dimension (w or h).
         
         util.requestAnimationFrame(() => {
@@ -770,7 +778,7 @@ var SunBurst = React.createClass({
                         }, 50);
                     //});
                 });
-            }, 750);
+            }, 775);
         });
     },
 
@@ -822,7 +830,8 @@ var SunBurst = React.createClass({
 
         // For efficiency, filter nodes to keep only those large enough to see.
         var nodes = _this.root.descendants().filter(function(d){
-            return (Math.abs(d.x1-d.x0) > 0.01); // 0.005 radians = 0.29 degrees 
+            return (Math.abs(d.x1-d.x0) > 2); 
+            //return (Math.abs(d.x1-d.x0) > 0.01); // 0.005 radians = 0.29 degrees 
         }).sort(function(a,b){
             return a.data.name < b.data.name ? -1 : 1;
         }).sort(function(a,b){
@@ -875,8 +884,10 @@ var SunBurst = React.createClass({
                         } else {
                             d3.select(r).datum(_.extend({}, node));
                         }
+
+                        if (node.depth < 3) console.log('PATH',node);
                     }}
-                    d={_this.arc(node)}
+                    d={_this.generateRectPath(node)}
                     fillRule="evenodd"
                     className={className + (removing ? ' removing' : (!existing ? ' adding' : ''))}
                     onMouseOver={node.depth > 0 ? (e)=>{ e.persist(); _this.throttledMouseOverHandler(e); } : null }
@@ -928,7 +939,10 @@ var SunBurst = React.createClass({
                         key={this.props.id + "-svg-group"} 
                         className="group-container"
                         ref={(r) => { this.vis = d3.select(r); }}
-                        transform={"translate(" + (this.width / 2) + "," + (this.props.height / 2) + ")"}
+                        transform={
+                            //"translate(" + (this.width / 2) + "," + (this.props.height / 2) + ")"
+                            null
+                        }
                         onMouseLeave={this.mouseleave}
                     >
                         <circle r={this.radius} className="bounding-circle" key={this.props.id +"-bounding-circle"} />
