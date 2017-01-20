@@ -21,13 +21,13 @@ def fetch_pubmed(PMID):
     NIHw = "https://www.ncbi.nlm.nih.gov/pubmed/"
     url = NIHw + PMID
     www = "{NIH}efetch.fcgi?db=pubmed&id={id}&rettype=medline".format(NIH=NIHe, id=PMID)
-    # try fetching data 5 times and return empty if fails
+    # try fetching data 5 times
     for count in range(5):
         resp = requests.get(www)
         if resp.status_code == 200:
             break
         if count == 4:
-            return '', '', '', '', ''
+            return
     # parse the text to get the fields
     r = resp.text
     full_text = r.replace('\n      ', ' ')
@@ -88,7 +88,7 @@ def fetch_biorxiv(url):
         if r.status_code == 200:
             break
         if count == 4:
-            return '', '', '', '', ''
+            return
     resp = r.text.encode('utf-8').decode('ascii', 'ignore')
     parser = BioRxivExtractor()
     parser.feed(resp)
@@ -122,7 +122,11 @@ def map_doi_biox(doi):
     "If a doi is not mapped to pubmed, check where it goes"
     DOIad = "https://doi.org/"
     www = "{DOIad}{doi}".format(DOIad=DOIad, doi=doi)
-    landing_page = requests.get(www).url
+    for count in range(5):
+        resp = requests.get(www)
+        if resp.status_code == 200:
+            break
+    landing_page = resp.url
     if "biorxiv" in landing_page.lower():
         return landing_page
     else:

@@ -4,11 +4,7 @@ pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 # data from test/datafixtures
 def test_update_publication_PMID(testapp, publication_PMID):
-    try:
-        assert publication_PMID['title'][:50] == 'A deep proteomics perspective on CRM1-mediated nuc'
-    except KeyError:
-        # pub med seems to go down at times... let's ignore this if it does
-        return
+    assert publication_PMID['title'][:50] == 'A deep proteomics perspective on CRM1-mediated nuc'
     assert publication_PMID['abstract'][:50] == 'CRM1 is a highly conserved, RanGTPase-driven expor'
     assert publication_PMID['authors'] == 'Kirli K, Karaca S, Dehne HJ, Samwer M, Pan KT, Lenz C, Urlaub H, Gorlich D'
     assert publication_PMID['url'] == 'https://www.ncbi.nlm.nih.gov/pubmed/26673895'
