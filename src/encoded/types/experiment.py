@@ -10,7 +10,6 @@ from .base import (
     Item
 )
 
-
 @abstract_collection(
     name='experiments',
     unique_key='accession',
@@ -24,7 +23,8 @@ class Experiment(Item):
     base_types = ['Experiment'] + Item.base_types
     embedded = ["protocol", "protocol_variation", "lab", "award", "biosample",
                 "biosample.biosource", "biosample.modifications",
-                "biosample.treatments", "biosample.biosource.individual.organism"]
+                "biosample.treatments", "biosample.biosource.individual.organism",
+                "experiment_sets"]
     name_key = 'accession'
 
     def generate_mapid(self, experiment_type, num):
@@ -101,10 +101,11 @@ class Experiment(Item):
         "type": "array",
         "items": {
             "title": "Experiment Set",
-            "type": "string"
+            "type": "string",
+            "linkTo": "ExperimentSet"
         }
     })
-    def experiment_sets(self, request, experiment_sets=None):
+    def experiment_sets(self, request):
         exp_set_coll = list(self.registry['collections']['ExperimentSet'])
         exp_set_coll.extend(list(self.registry['collections']['ExperimentSetReplicate']))
         sets = []
