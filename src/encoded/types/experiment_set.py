@@ -12,6 +12,7 @@ from snovault import (
     BeforeModified
 )
 from snovault.resource_views import item_view_page
+from snovault.calculated import calculate_properties
 
 from .base import (
     Item
@@ -21,7 +22,6 @@ from .base import (
 def invalidate_linked_items(item, field, updates=None):
     '''Invalidates the linkTo item(s) in the given field of an item
         which will trigger re-indexing the linked items
-
         a dictionary of field value pairs to update for the linked item(s)
         can be provided that will be applied prior to invalidation -
         beware that each update will be applied to every linked item in the field
@@ -104,7 +104,7 @@ class ExperimentSetReplicate(ExperimentSet):
 
 # Use the the page view as default for experiment sets. This means that embedding
 # IS relevant with regard to this specific object pages
-@view_config(context=ExperimentSetReplicate, permission='view', request_method='GET', name='page')
+@view_config(context=ExperimentSet, permission='view', request_method='GET', name='page')
 def item_page_view(context, request):
     """Return the frame=page view rather than object view by default."""
     return item_view_page(context, request)

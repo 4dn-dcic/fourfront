@@ -1,4 +1,5 @@
 import re
+import math
 from pyramid.view import view_config
 from snovault import (
     AbstractCollection,
@@ -46,7 +47,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     es_index = request.registry.settings['snovault.elasticsearch.index']
     search_audit = request.has_permission('search_audit')
 
-    from_, size = 0, 25
+    from_, size = get_pagination(request)
 
     ### PREPARE SEARCH TERM
     prepared_terms = prepare_search_term(request)
@@ -61,8 +62,9 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     ### GET FILTERED QUERY
     # Builds filtered query which supports multiple facet selection
+    result_fields = sorted(list_result_fields(request, doc_types))
     query = get_filtered_query(prepared_terms,
-                               sorted(list_result_fields(request, doc_types)),
+                               result_fields,
                                principals,
                                doc_types)
 
@@ -82,18 +84,15 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
 
     ### Adding facets to the query
     query['aggs'] = set_facets(facets, used_filters, principals, doc_types)
-    # TODO: Implement search constraints based on size variable
-    # # Decide whether to use scan for results.
-    # do_scan = size is None or size > 1000
-    #
-    # # Execute the query
-    # if do_scan:
-    #     query['size'] = 0
-    #     es_results = es.search(body=query, index=es_index)
-    #     # es_results = es.search(body=query, index=es_index, search_type='count')
-    # else:
-    #     es_results = es.search(body=query, index=es_index, from_=from_, size=size)
-    es_results = es.search(body=query, index=es_index, from_=from_, size=size)
+
+    # Execute the query
+    if size == 'all':
+        es_results = get_all_results(request, query)
+    elif size:
+        es_results = es.search(body=query, index=es_index, from_=from_, size=size)
+    else:
+        # fallback size for elasticsearch is 10
+        es_results = es.search(body=query, index=es_index)
 
     # record total number of hits
     result['total'] = total = es_results['hits']['total']
@@ -107,7 +106,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     # result.update(search_result_actions(request, doc_types, es_results))
 
     # Add all link for collections
-    if size is not None and size < result['total']:
+    if size not in (None, 'all') and size < result['total']:
         params = [(k, v) for k, v in request.params.items() if k != 'limit']
         params.append(('limit', 'all'))
         result['all'] = '%s?%s' % (request.resource_path(context), urlencode(params))
@@ -191,6 +190,48 @@ def get_available_facets(context, request):
     return result
 
 
+def get_pagination(request):
+    """
+    Fill from_ and size parameters for search if given in the query string
+    """
+    from_ = request.params.get('from', 0)
+    size = request.params.get('limit', 25)
+    if size in ('all', ''):
+       size = "all"
+    else:
+        try:
+            size = int(size)
+        except ValueError:
+            size = 25
+    return from_, size
+
+
+def get_all_results(request, origQuery):
+    es = request.registry[ELASTIC_SEARCH]
+    es_index = request.registry.settings['snovault.elasticsearch.index']
+    from_ = 0
+    sizeIncrement = 1000 # Decrease this to like 5 or 10 to test.
+
+    es_result = es.search(body=origQuery, index=es_index, from_=from_, size=sizeIncrement) # get our aggregations from here
+    total = es_result['hits'].get('total',0)
+    extraRequestsNeeded = int(math.ceil(total / sizeIncrement)) - 1 # Decrease by 1 (first es_result already happened)
+
+    if extraRequestsNeeded <= 0:
+        return es_result
+
+    # We don't need to grab aggs for subsequent queries, already obtained from first one, incr. performance instead maybe.
+    query = { k:v for k,v in origQuery.items() if k != 'aggs' }
+
+    while extraRequestsNeeded > 0:
+        # print(str(extraRequestsNeeded) + " requests left to get all results.")
+        from_ = from_ + sizeIncrement
+        subsequent_es_result = es.search(body=query, index=es_index, from_=from_, size=sizeIncrement)
+        es_result['hits']['hits'] = es_result['hits']['hits'] + subsequent_es_result['hits'].get('hits', [])
+        extraRequestsNeeded -= 1
+        # print("Found " + str(len(es_result['hits']['hits'])) + ' results so far.')
+    return es_result
+
+
 def normalize_query(request):
     """
     Normalize the query used to make the search. If no type is provided,
@@ -250,11 +291,12 @@ def prepare_search_term(request):
     """
     Prepares search terms by making a dictionary where the keys are fields
     and the values are arrays of query strings
+    Ignore certain keywords, such as type, format, and field
     """
     prepared_terms = {}
     prepared_vals = []
     for field, val in request.params.iteritems():
-        if field not in ['type', 'frame', 'format', 'limit', 'sort', 'from']:
+        if field not in ['type', 'frame', 'format', 'limit', 'sort', 'from', 'field']:
             if 'embedded.*' + field not in prepared_terms.keys():
                 prepared_terms['embedded.*' + field] = []
             prepared_terms['embedded.*' + field].append(val)
@@ -302,7 +344,11 @@ def get_search_fields(request, doc_types):
 
 def list_result_fields(request, doc_types):
     """
-    Returns set of fields that are requested by user or default fields
+    Returns set of fields that are requested by user or default fields.
+    These fields are used to further limit the results from the search.
+    Note that you must provide the full fieldname with embeds, such as:
+    'field=biosample.biosource.individual.organism.name' and not just
+    'field=name'
     """
     frame = request.params.get('frame')
     fields_requested = request.params.getall('field')
