@@ -646,8 +646,10 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                             pairsObj[file['@id']] = { '1' : file };
                         } else if (Array.isArray(file.related_files)) {
                             _.each(file.related_files, function(related){
-                                if (pairsObj[related.file['@id']]) {
-                                    pairsObj[related.file['@id']][file.paired_end + ''] = file;
+                                // Handle if related_files.file is embedded obj w/ @id or if is link (an @id itself).
+                                var relatedFileID = (related.file && related.file['@id']) || related.file;
+                                if (pairsObj[relatedFileID]) {
+                                    pairsObj[relatedFileID][file.paired_end + ''] = file;
                                 } else {
                                     file.unpaired = true; // Mark file as unpaired
                                 }
