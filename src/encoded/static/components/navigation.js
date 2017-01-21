@@ -15,30 +15,51 @@ var Navigation = module.exports = React.createClass({
     statics : {
 
         /** May be bound to access this.props.href (if available) as fallback */
-        getWindowUrl : function(mounted){
-            var href;
-            if (this && this.props && this.props.href) {
-                href = url.parse(this.props.href);
-            }
-            if (mounted && typeof window === 'object' && window && typeof window.location !== 'undefined'){
-                href = window.location;
-            }
+        getWindowPath : function(mounted){
+            var href = Navigation.getWindowLocation();
             if (!href) return null;
             return (href.pathname || '/') + (href.search || '') + (href.hash || '');
         },
 
-        /** Can be bound to access this.props.href for getWindowUrl (if available) */
+        getWindowURL : function(mounted){
+            var href = Navigation.getWindowLocation();
+            return href.href;
+        },
+
+        getWindowLocation : function(mounted){
+            if (this && this.props && this.props.href) {
+                return url.parse(this.props.href);
+            }
+            if (mounted && typeof window === 'object' && window && typeof window.location !== 'undefined'){
+                return window.location;
+            }
+            return null;
+        },
+
+        isMenuItemActive : function(action, mounted){
+            return (
+                (typeof action.active === 'function' && action.active(Navigation.getWindowPath.call(this, mounted))) ||
+                (Navigation.getMenuItemURL(action, mounted) === Navigation.getWindowPath.call(this, mounted))
+            );
+        },
+
+        getMenuItemURL : function(action, mounted = false){
+            if (typeof action.url === 'string') return action.url;
+            if (typeof action.url === 'function') return action.url(Navigation.getWindowLocation.call(this, mounted));
+            if (typeof action.href === 'string') return action.href;
+            if (typeof action.href === 'function') return action.href(Navigation.getWindowLocation.call(this, mounted));
+            return '#';
+        },
+
+        /** Can be bound to access this.props.href for getWindowPath (if available) */
         buildMenuItem : function(action, mounted, extraProps){
             return (
                 <MenuItem
                     key={action.id}
                     id={action.sid || action.id}
-                    href={action.url || action.href || '#'}
+                    href={Navigation.getMenuItemURL(action, mounted)}
                     className="global-entry"
-                    active={
-                        (action.url && action.url === Navigation.getWindowUrl.call(this, mounted)) ||
-                        (action.href && action.href === Navigation.getWindowUrl.call(this, mounted))
-                    }
+                    active={Navigation.isMenuItemActive.call(this, action, mounted)}
                     {...extraProps}
                 >
                     {action.title}
@@ -46,7 +67,7 @@ var Navigation = module.exports = React.createClass({
             );
         },
 
-        /** Can be bound to access this.props.href for getWindowUrl (if available) */
+        /** Can be bound to access this.props.href for getWindowPath (if available) */
         buildDropdownMenu : function(action, mounted){
             if (action.children){
                 return (
@@ -56,11 +77,13 @@ var Navigation = module.exports = React.createClass({
                 );
             } else {
                 return (
-                    <NavItem key={action.id} id={action.sid || action.id} href={action.url || action.href || '#'} active={
-                        (action.url && action.url === Navigation.getWindowUrl.call(this, mounted)) ||
-                        (action.href && action.href === Navigation.getWindowUrl.call(this, mounted))
-                    }>
-                        {action.title}
+                    <NavItem 
+                        key={action.id}
+                        id={action.sid || action.id}
+                        href={Navigation.getMenuItemURL(action, mounted)}
+                        active={Navigation.isMenuItemActive.call(this, action, mounted)}
+                    >
+                            {action.title}
                     </NavItem>
                 );
             }
@@ -214,7 +237,13 @@ var Navigation = module.exports = React.createClass({
                             </Navbar.Toggle>
                         </Navbar.Header>
                         <Navbar.Collapse>
-                            <Nav>{ this.context.listActionsFor('global_sections').map((a)=> Navigation.buildDropdownMenu.call(this, a, this.state.mounted) ) }</Nav>
+                            <Nav>
+                            { 
+                                this.context.listActionsFor('global_sections').map((a)=> 
+                                    Navigation.buildDropdownMenu.call(this, a, this.state.mounted)
+                                ) 
+                            }
+                            </Nav>
                             <UserActions mounted={this.state.mounted} closeMobileMenu={this.closeMobileMenu} session={this.props.session} />
                             {/* REMOVE SEARCH FOR NOW: <Search href={this.props.href} /> */}
                         </Navbar.Collapse>

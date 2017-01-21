@@ -18,13 +18,30 @@ var { ajaxLoad, ajaxPromise, JWT, console, responsiveGridState, isServerSide } =
 var Alerts = require('./alerts');
 var jwt = require('jsonwebtoken');
 var { FacetCharts } = require('./facetcharts');
+var { hrefToFilters, filtersToHref, convertExpSetFiltersTerms } = require('../components/facetlist');
 
 var dispatch_dict = {}; //used to store value for simultaneous dispatch
 
 var portal = {
     portal_title: '4DN Data Portal',
     global_sections: [
-        {id: 'browse', sid:'sBrowse', title: 'Browse', url: '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all'},
+        {
+            id: 'browse',
+            sid:'sBrowse',
+            title: 'Browse',
+            //url: '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all',
+            url : function(currentUrlParts){
+                if (!currentUrlParts) return '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all'; // Default/fallback
+                return filtersToHref(
+                    store.getState().expSetFilters,
+                    currentUrlParts.protocol + '//' + currentUrlParts.host + '/browse/'
+                );
+            },
+            active : function(currentWindowPath){
+                if (currentWindowPath && currentWindowPath.indexOf('/browse/') > -1) return true;
+                return false;
+            }
+        },
         {id: 'help', sid:'sHelp', title: 'Help', children: [
             {id: 'gettingstarted', title: 'Getting started', url: '/help'},
             {id: 'metadatastructure', title: 'Metadata structure', url: '/help#metadata-structure'},
@@ -85,6 +102,7 @@ var App = React.createClass({
     },
 
     getInitialState: function() {
+        console.log('APP FILTERS', hrefToFilters(this.props.href));
         // Todo: Migrate session & user_actions to redux store?
         var session = false;
         var user_actions = [];
@@ -576,9 +594,11 @@ var App = React.createClass({
                 } else {
                     window.history.pushState(window.state, '', href + fragment);
                 }
-                store.dispatch({
-                    type: {'href':href + fragment}
-                });
+                if (!options.skipUpdateHref) {
+                    store.dispatch({
+                        type: {'href':href + fragment}
+                    });
+                }
                 return null;
             }
 
@@ -706,7 +726,11 @@ var App = React.createClass({
         }
 
         if (setupRequest.call(this, href)){
-            return doRequest.call(this, true);
+            var request = doRequest.call(this, true);
+            if (request === null){
+                if (typeof callback === 'function') callback();
+            }
+            return request;
         } else {
             return null; // Was handled by setupRequest (returns false)
         }
@@ -890,6 +914,9 @@ var App = React.createClass({
                     <script data-prop-name="alerts" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: jsonScriptEscape(JSON.stringify(this.props.alerts))
                     }}></script>
+                    <script data-prop-name="expSetFilters" type="application/ld+json" dangerouslySetInnerHTML={{
+                        __html: jsonScriptEscape(JSON.stringify(convertExpSetFiltersTerms(this.props.expSetFilters, 'array')))
+                    }}></script>
                     <div id="slot-application">
                         <div id="application" className={appClass}>
                             <div className="loading-spinner"></div>
@@ -901,7 +928,7 @@ var App = React.createClass({
                                         context={this.props.context}
                                         expSetFilters={this.props.expSetFilters}
                                         navigate={this.navigate}
-                                        debug
+                                        
                                     />
                                     <Alerts alerts={this.props.alerts} />
                                     { content }

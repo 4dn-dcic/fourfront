@@ -885,7 +885,7 @@ var SunBurst = React.createClass({
                             d3.select(r).datum(_.extend({}, node));
                         }
 
-                        if (node.depth < 3) console.log('PATH',node);
+                        //if (node.depth < 3) console.log('PATH',node);
                     }}
                     d={_this.generateRectPath(node)}
                     fillRule="evenodd"

@@ -2,6 +2,7 @@
 // Entry point for browser, compiled into bundle[.chunkHash].js.
 require('./libs/react-patches');
 var React = require('react');
+var _ = require('underscore');
 var ReactDOM = require('react-dom')
 var ReactMount = require('react-dom/lib/ReactMount');
 ReactMount.allowFullPageRender = true;
@@ -11,6 +12,7 @@ var domready = require('domready');
 var store = require('./store');
 var { Provider, connect } = require('react-redux');
 var { JWT } = require('./components/objectutils');
+var convertExpSetFiltersTerms = require('./components/facetlist').convertExpSetFiltersTerms;
 
 
 /** 
@@ -57,9 +59,15 @@ if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER && !
 
     if (reloadIfBadUserInfo(true)) return;
 
+    var expSetFiltersPropContainer = App.getRenderedPropValues(document, ['expSetFilters'])
+
     store.dispatch({
         // Update Redux store from Redux store props that've been rendered into <script data-prop-name={ propName }> elems server-side
-        type: App.getRenderedProps(document, Object.keys(store.reducers))
+        type: _.extend(
+                App.getRenderedProps(document, Object.keys(store.reducers)),
+                // Convert Arrays back to Sets (which don't work well w. JSON.stringify)
+                { 'expSetFilters' : convertExpSetFiltersTerms(expSetFiltersPropContainer.expSetFilters, 'set') }
+            )
     });
 
     var server_stats = require('querystring').parse(window.stats_cookie);

@@ -71,7 +71,8 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         targetFiles : React.PropTypes.instanceOf(Set),
         rowNumber : React.PropTypes.number,
         facets : React.PropTypes.array,
-        selectAllFilesInitially : React.PropTypes.bool
+        selectAllFilesInitially : React.PropTypes.bool,
+        useAjax : React.PropTypes.bool
     },
 
     getInitialState : function(){
@@ -207,6 +208,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                     replicateExpsArray={this.props.replicateExpsArray}
                     experimentSetType={this.props.experimentSetType}
                     parentController={this}
+                    useAjax={this.props.useAjax}
                 />
             );
         }
@@ -440,13 +442,14 @@ var ResultTable = browse.ResultTable = React.createClass({
 
     propTypes : {
         // Props' type validation based on contents of this.props during render.
-        searchBase      : React.PropTypes.string,
+        href            : React.PropTypes.string,
         context         : React.PropTypes.object.isRequired,
         expSetFilters   : React.PropTypes.object,
         fileFormats     : React.PropTypes.array,
         fileStats       : React.PropTypes.object,
         targetFiles     : React.PropTypes.instanceOf(Set),
-        onChange        : React.PropTypes.func
+        onChange        : React.PropTypes.func,
+        useAjax         : React.PropTypes.bool
     },
 
     getInitialState: function(){
@@ -455,7 +458,7 @@ var ResultTable = browse.ResultTable = React.createClass({
             sortReverse: false,
             overflowingRight : false,
             // We need to get the below outta state once graph-ql is in; temporarily stored in state for performance.
-            passedExperiments : ExperimentsTable.getPassedExperiments(
+            passedExperiments : this.props.useAjax ? null : ExperimentsTable.getPassedExperiments(
                 this.props.context['@graph'],
                 this.props.expSetFilters,
                 'missing-facets',
@@ -468,7 +471,7 @@ var ResultTable = browse.ResultTable = React.createClass({
     getDefaultProps: function() {
         // 'restrictions' object migrated to facetlist.js > FacetList
         return {
-            'searchBase': '',
+            'href': '/browse/',
             'debug' : false
         };
     },
@@ -483,13 +486,15 @@ var ResultTable = browse.ResultTable = React.createClass({
         var newState = {};
 
         if (this.props.expSetFilters !== newProps.expSetFilters || this.props.context !== newProps.context){
-            newState.passedExperiments = ExperimentsTable.getPassedExperiments(
-                newProps.context['@graph'],
-                newProps.expSetFilters,
-                'missing-facets',
-                newProps.context.facets,
-                true
-            );
+            if (!this.props.useAjax){
+                newState.passedExperiments = ExperimentsTable.getPassedExperiments(
+                    newProps.context['@graph'],
+                    newProps.expSetFilters,
+                    'missing-facets',
+                    newProps.context.facets,
+                    true
+                );
+            }
         }
 
         if (Object.keys(newState).length > 0){
@@ -498,6 +503,7 @@ var ResultTable = browse.ResultTable = React.createClass({
     },
 
     shouldComponentUpdate : function(nextProps, nextState){
+        if (this.props.context !== nextProps.context) return true;
         if (this.state.passedExperiments !== nextState.passedExperiments) return true;
         if (this.state.sortColumn !== nextState.sortColumn) return true;
         if (this.state.sortReverse !== nextState.sortReverse) return true;
@@ -582,92 +588,107 @@ var ResultTable = browse.ResultTable = React.createClass({
             .value();
     },
 
-    formatExperimentSetListings : function(passExperiments, facets = null){
-        // use first experiment set to grap type (all types are the same in any given graph)
+    getColumnValues : function(experiment_set){
+        var experimentArray = experiment_set.experiments_in_set;
         var columnTemplate = this.getTemplate('column');
-        var addInfoTemplate = this.getTemplate('additional-info');
+        var columns = {};
+        var firstExp = experimentArray[0]; // use only for replicates
+        var accession = experiment_set.accession ? experiment_set.accession : "Experiment Set";
 
-        var resultListings = [],
-            resultCount = 0;
-
-        if (facets === null){
-            facets = FacetList.adjustedFacets(this.props.context.facets);
+        // Experiment Set Row Columns
+        for (var i=0; i<Object.keys(columnTemplate).length;i++) {
+            if(Object.keys(columnTemplate)[i] === 'Exps'){
+                columns[Object.keys(columnTemplate)[i]] = experimentArray.length;
+                continue;
+            }else if(Object.keys(columnTemplate)[i] === 'Accession'){
+                columns[Object.keys(columnTemplate)[i]] = accession;
+                continue;
+            }
+            var splitFilters = columnTemplate[Object.keys(columnTemplate)[i]].split('.');
+            var valueProbe = firstExp;
+            for (var j=0; j<splitFilters.length;j++){
+                valueProbe = Array.isArray(valueProbe) ? valueProbe[0][splitFilters[j]] : valueProbe[splitFilters[j]];
+            }
+            columns[Object.keys(columnTemplate)[i]] = valueProbe;
         }
 
-        this.props.context['@graph'].map(function (result) {
-            var experimentArray = result.experiments_in_set;
-            if(experimentArray.length == 0){
-                return; // ignore if no expts in the expt set
-            }
+        return columns;
+    },
 
-            var accession = result.accession ? result.accession : "Experiment Set";
-            var intersection = new Set(experimentArray.filter(x => passExperiments.has(x)));
-            var columns = {};
-            var addInfo = {};
-            var firstExp = experimentArray[0]; // use only for replicates
-
-            // Experiment Set Row Columns
-            for (var i=0; i<Object.keys(columnTemplate).length;i++) {
-                if(Object.keys(columnTemplate)[i] === 'Exps'){
-                    columns[Object.keys(columnTemplate)[i]] = experimentArray.length;
-                    continue;
-                }else if(Object.keys(columnTemplate)[i] === 'Accession'){
-                    columns[Object.keys(columnTemplate)[i]] = accession;
-                    continue;
-                }
-                var splitFilters = columnTemplate[Object.keys(columnTemplate)[i]].split('.');
-                var valueProbe = firstExp;
-                for (var j=0; j<splitFilters.length;j++){
-                    valueProbe = Array.isArray(valueProbe) ? valueProbe[0][splitFilters[j]] : valueProbe[splitFilters[j]];
-                }
-                columns[Object.keys(columnTemplate)[i]] = valueProbe;
+    getAdditionaInfoSection : function(firstExp){
+        // Experiment Set Row Add'l Info (Lab, etc.)
+        var addInfoTemplate = this.getTemplate('additional-info');
+        var addInfo = {};
+        for (var i=0; i<Object.keys(addInfoTemplate).length;i++){
+            var splitFilters = addInfoTemplate[Object.keys(addInfoTemplate)[i]].split('.');
+            var valueProbe = firstExp;
+            for (var j=0; j<splitFilters.length;j++){
+                valueProbe = Array.isArray(valueProbe) ? valueProbe[0][splitFilters[j]] : valueProbe[splitFilters[j]];
             }
+            addInfo[Object.keys(addInfoTemplate)[i]] = valueProbe;
+        }
 
-            // Experiment Set Row Add'l Info (Lab, etc.)
-            for (var i=0; i<Object.keys(addInfoTemplate).length;i++){
-                var splitFilters = addInfoTemplate[Object.keys(addInfoTemplate)[i]].split('.');
-                var valueProbe = firstExp;
-                for (var j=0; j<splitFilters.length;j++){
-                    valueProbe = Array.isArray(valueProbe) ? valueProbe[0][splitFilters[j]] : valueProbe[splitFilters[j]];
-                }
-                addInfo[Object.keys(addInfoTemplate)[i]] = valueProbe;
-            }
+        return addInfo;
+    },
 
-            if(intersection.size > 0){
-                var keyVal = "";
-                if (this.state.sortColumn){
-                    keyVal = columns[this.state.sortColumn];
-                }
-                resultListings.push(
-                    <ExperimentSetRow
-                        ref={(r)=>{
-                            // Cache component instance.
-                            this.experimentSetRows[result['@id']] = r;
-                        }}
-                        addInfo={addInfo}
-                        description={result.description}
-                        columns={columns}
-                        expSetFilters={this.props.expSetFilters}
-                        experimentSetType={result.experimentset_type}
-                        selectAllFilesInitially={true}
-                        targetFiles={this.props.targetFiles}
-                        href={result['@id']}
-                        experimentArray={experimentArray}
-                        replicateExpsArray={result.replicate_exps}
-                        passExperiments={intersection}
-                        key={result['@id']}
-                        data-key={result['@id']}
-                        rowNumber={resultCount++}
-                        facets={facets}
-                        fileStats={this.props.fileStats}
-                    />
-                );
-            }
-        }.bind(this));
+    formatExperimentSetListings : function(facets = null){
+
+        if (!Array.isArray(this.props.context['@graph']) || this.props.context['@graph'].length === 0) return null;
+        
+        var resultCount = 0;
+
+        function buildRowComponent(experiment_set, passExps = null){
+
+            var columns = this.getColumnValues(experiment_set);
+            var addInfo = this.getAdditionaInfoSection(experiment_set.experiments_in_set[0]);
+
+            return <ExperimentSetRow
+                    ref={(r)=>{
+                        // Cache component instance.
+                        this.experimentSetRows[experiment_set['@id']] = r;
+                    }}
+                    addInfo={addInfo}
+                    description={experiment_set.description}
+                    columns={columns}
+                    expSetFilters={this.props.expSetFilters}
+                    experimentSetType={experiment_set.experimentset_type}
+                    selectAllFilesInitially={true}
+                    targetFiles={this.props.targetFiles}
+                    href={experiment_set['@id']}
+                    experimentArray={experiment_set.experiments_in_set}
+                    replicateExpsArray={experiment_set.replicate_exps}
+                    passExperiments={passExps || experiment_set.experiments_in_set}
+                    key={experiment_set['@id']}
+                    data-key={experiment_set['@id']}
+                    rowNumber={resultCount++}
+                    facets={facets || FacetList.adjustedFacets(this.props.context.facets)}
+                    fileStats={this.props.fileStats}
+                    useAjax={this.props.useAjax}
+                />;
+        }
+
+
+        if (this.props.useAjax){
+            return this.props.context['@graph'].map((expSet) => buildRowComponent.call(this, expSet));
+        }
+        
+        var resultListings = this.props.context['@graph']
+            .filter(function(expSet){ return expSet.experiments_in_set.length > 0; })
+            .map(function(expSet){
+                return { 
+                    'intersection' : new Set(experiment_set.experiments_in_set.filter(x => this.state.passExperiments.has(x))),
+                    'set' : expSet
+                };
+            })
+            .filter(function(expSetContainer){
+                return expSetContainer.intersection.size > 0;
+            })
+            .map((expSetContainer) => buildRowComponent.call(this, expSetContainer.set, expSetContainer.intersection));
+        
 
         // Sort
         if(this.state.sortColumn){
-            resultListings.sort(function(a,b){
+            resultListings.sort((a,b)=>{
                 a = a.key.split('/')[0];
                 b = b.key.split('/')[0];
                 if (this.state.sortReverse) {
@@ -685,7 +706,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                     else if (a > b) return 1;
                     else return 0;
                 }
-            }.bind(this));
+            });
         }
 
         if (resultCount === 0) return null;
@@ -694,7 +715,7 @@ var ResultTable = browse.ResultTable = React.createClass({
 
     renderTable : function(){
         if (this.props.debug) console.log('Rendering ResultTable.');
-        var formattedExperimentSetListings = this.formatExperimentSetListings(this.state.passedExperiments);
+        var formattedExperimentSetListings = this.formatExperimentSetListings();
         if (!formattedExperimentSetListings) return null;
 
         this.experimentSetRows = {}; // ExperimentSetRow instances stored here, keyed by @id, to get selectFiles from (?).
@@ -738,10 +759,16 @@ var ResultTable = browse.ResultTable = React.createClass({
                             experimentSetListJSON={this.props.context['@graph']}
                             orientation="vertical"
                             expSetFilters={this.props.expSetFilters}
+                            browseFilters={{
+                                filters : this.props.context.filters || null,
+                                clear_filters : this.props.context.clear_filters || null
+                            }}
                             facets={facets}
-                            onFilter={this.onFilter}
                             ignoredFilters={ignoredFilters}
                             className="with-header-bg"
+                            href={this.props.href}
+                            navigate={this.props.navigate}
+                            useAjax={true}
                         />
                     </div>
                     :
@@ -750,13 +777,6 @@ var ResultTable = browse.ResultTable = React.createClass({
                 { this.renderTable() }
             </div>
         );
-    },
-
-    onFilter: function(e) {
-        var search = e.currentTarget.getAttribute('href');
-        this.props.onChange(search);
-        e.stopPropagation();
-        e.preventDefault();
     }
 });
 
@@ -907,6 +927,9 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
                     context={this.props.context}
                     expSetFilters={this.props.expSetFilters}
                     session={this.props.session}
+                    href={this.props.href}
+                    navigate={this.props.navigate}
+                    useAjax={this.props.useAjax}
                 />
 
             </div>
@@ -928,6 +951,7 @@ var Browse = browse.Browse = React.createClass({
         'expSetFilters' : React.PropTypes.object,
         'session' : React.PropTypes.bool,
         'schemas' : React.PropTypes.object,
+        'navigate' : React.PropTypes.func,
     },
 
     shouldComponentUpdate : function(nextProps, nextState){
@@ -976,8 +1000,10 @@ var Browse = browse.Browse = React.createClass({
                     {...this.props}
                     key="controlsAndResults"
                     fileFormats={fileFormats}
-                    searchBase={searchBase}
+                    href={this.props.href || this.context.location_href}
                     onChange={this.context.navigate}
+                    navigate={this.props.navigate || this.context.navigate}
+                    useAjax={true}
                 />
 
             </div>

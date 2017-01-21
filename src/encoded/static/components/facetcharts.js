@@ -73,7 +73,6 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         /** Not used/necessary, keeping for future if needed. */
         isBrowserMSEdge : function(){
             if (isServerSide()) return false;
-            console.log(document.documentElement.className);
             if (document.documentElement.className.indexOf('no-uaEdge') > -1) return false;
             if (document.documentElement.className.indexOf('uaEdge') > -1) return true;
             return true;

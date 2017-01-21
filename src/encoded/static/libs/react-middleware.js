@@ -9,13 +9,16 @@ var store = require('../store');
 var { Provider, connect } = require('react-redux');
 var { JWT } = require('../components/objectutils');
 var Alerts = require('../components/alerts');
+var hrefToFilters = require('../components/facetlist').hrefToFilters;
 
 var render = function (Component, body, res) {
     //var start = process.hrtime();
+    var context = JSON.parse(body);
     var disp_dict = {
-        'context': JSON.parse(body),
-        'href':res.getHeader('X-Request-URL') || context['@id'],
-        'inline':inline
+        'context': context,
+        'href': res.getHeader('X-Request-URL') || context['@id'],
+        'inline': inline,
+        'expSetFilters' : hrefToFilters(res.getHeader('X-Request-URL') || context['@id'])
     };
 
     // Subprocess-middleware re-uses process on prod. Might have left-over data from prev request. 
@@ -53,7 +56,7 @@ var render = function (Component, body, res) {
         markup = ReactDOMServer.renderToString(<Provider store={store}><UseComponent sessionMayBeSet={sessionMayBeSet} /></Provider>);
 
     } catch (err) {
-        var context = {
+        context = {
             '@type': ['RenderingError', 'error'],
             status: 'error',
             code: 500,
