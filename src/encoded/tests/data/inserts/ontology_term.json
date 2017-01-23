@@ -82,5 +82,51 @@
         "source_ontology": "530026bc-8535-4448-903e-854af460b254",
         "term_url": "http://purl.obolibrary.org/obo/IAO_0000118",
         "namespace": "http://purl.obolibrary.org/obo"
+    },
+    {
+        "uuid": "111118bc-8535-4448-903e-854af460a233",
+        "term_name": "germ layer",
+        "term_id": "UBERON:0000923",
+        "source_ontology": "530016bc-8535-4448-903e-854af460b254",
+        "term_url": "http://purl.obolibrary.org/obo/UBERON_0000923",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "definition": "A layer of cells produced during the process of gastrulation during the early development of the animal embryo, which is distinct from other such layers of cells, as an early step of cell differentiation. The three types of germ layers are the endoderm, ectoderm, and mesoderm.",
+        "synonyms": ["embryonic germ layer", "germinal layer", "primary germ layer"]
+    },
+    {
+        "uuid": "111119bc-8535-4448-903e-854af460a233",
+        "term_name": "ectoderm",
+        "term_id": "UBERON:0000924",
+        "source_ontology": "530016bc-8535-4448-903e-854af460b254",
+        "term_url": "http://purl.obolibrary.org/obo/UBERON_0000924",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "definition": "Primary germ layer that is the outer of the embryo's three germ layers and gives rise to epidermis and neural tissue.",
+        "is_slim_for": "developmental",
+        "synonyms": ["embryonic ectoderm"],
+        "parents": ["111118bc-8535-4448-903e-854af460a233"]
+    },
+    {
+        "uuid": "111120bc-8535-4448-903e-854af460a233",
+        "term_name": "mesoderm",
+        "term_id": "UBERON:0000926",
+        "source_ontology": "530016bc-8535-4448-903e-854af460b254",
+        "term_url": "http://purl.obolibrary.org/obo/UBERON_0000926",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "definition": "The middle germ layer of the embryo, between the endoderm and ectoderm.",
+        "is_slim_for": "developmental",
+        "synonyms": ["entire mesoderm", "embryonic mesoderm", "mesodermal mantle"],
+        "parents": ["111118bc-8535-4448-903e-854af460a233"]
+    },
+    {
+        "uuid": "111121bc-8535-4448-903e-854af460a233",
+        "term_name": "endoderm",
+        "term_id": "UBERON:0000925",
+        "source_ontology": "530016bc-8535-4448-903e-854af460b254",
+        "term_url": "http://purl.obolibrary.org/obo/UBERON_0000925",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "definition": "Primary germ layer that lies remote from the surface of the embryo and gives rise to internal tissues such as gut.",
+        "is_slim_for": "developmental",
+        "synonyms": ["entoderm"],
+        "parents": ["111118bc-8535-4448-903e-854af460a233"]
     }
 ]

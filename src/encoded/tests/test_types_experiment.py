@@ -1,4 +1,5 @@
 import pytest
+from encoded.types.experiment import Experiment, ExperimentHiC
 pytestmark = pytest.mark.working
 '''Has tests for both experiment.py and experiment_set.py'''
 
@@ -45,6 +46,14 @@ def test_calculated_experiment_summary(testapp, experiment, mboI):
     summary = 'micro-C on GM12878 with MboI'
     res = testapp.patch_json(experiment['@id'], {'digestion_enzyme': mboI['@id']}, status=200)
     assert res.json['@graph'][0]['experiment_summary'] == summary
+
+
+# tests for Experiment class methodss
+# def test_generate_mapid(registry, experiment_data):
+#    uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
+#    etype = 'micro-C'
+#    my_expt = ExperimentHiC.create(registry, uuid, experiment_data)
+#    assert my_expt.generate_mapid(etype, suffnum) == 'ExperimentHiC_1'
 
 
 # test for experiment_set_replicate _update function
