@@ -10,9 +10,8 @@ ReactMount.allowFullPageRender = true;
 var App = require('./components');
 var domready = require('domready');
 var store = require('./store');
-var { Provider, connect } = require('react-redux');
-var { JWT } = require('./components/objectutils');
-var convertExpSetFiltersTerms = require('./components/facetlist').convertExpSetFiltersTerms;
+var { Provider, connect } = require('react-redux')
+var { JWT, expFilters } = require('./components/util');
 
 
 /** 
@@ -66,7 +65,7 @@ if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER && !
         type: _.extend(
                 App.getRenderedProps(document, Object.keys(store.reducers)),
                 // Convert Arrays back to Sets (which don't work well w. JSON.stringify)
-                { 'expSetFilters' : convertExpSetFiltersTerms(expSetFiltersPropContainer.expSetFilters, 'set') }
+                { 'expSetFilters' : expFilters.convertExpSetFiltersTerms(expSetFiltersPropContainer.expSetFilters, 'set') }
             )
     });
 

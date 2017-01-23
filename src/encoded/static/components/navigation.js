@@ -5,7 +5,7 @@ var Login = require('./login');
 var { Navbars, Navbar, Nav, NavItem, NavDropdown, MenuItem } = require('react-bootstrap');
 var _ = require('underscore');
 var store = require('../store');
-var { responsiveGridState, JWT, console } = require('./objectutils');
+var { JWT, console, layout } = require('./util');
 var TestWarning = require('./testwarning');
 var productionHost = require('./globals').productionHost;
 
@@ -16,13 +16,13 @@ var Navigation = module.exports = React.createClass({
 
         /** May be bound to access this.props.href (if available) as fallback */
         getWindowPath : function(mounted){
-            var href = Navigation.getWindowLocation();
+            var href = Navigation.getWindowLocation.call(this, mounted);
             if (!href) return null;
             return (href.pathname || '/') + (href.search || '') + (href.hash || '');
         },
 
         getWindowURL : function(mounted){
-            var href = Navigation.getWindowLocation();
+            var href = Navigation.getWindowLocation.call(this, mounted);
             return href.href;
         },
 
@@ -133,7 +133,7 @@ var Navigation = module.exports = React.createClass({
             lastScrollTop = document.body.scrollTop;
 
             if (
-                ['xs','sm'].indexOf(responsiveGridState()) === -1 && // Fixed nav takes effect at medium grid breakpoint or wider.
+                ['xs','sm'].indexOf(layout.responsiveGridState()) === -1 && // Fixed nav takes effect at medium grid breakpoint or wider.
                 (
                     (document.body.scrollTop > 20 && scrollVector >= 0) ||
                     (document.body.scrollTop > 80)
@@ -159,7 +159,7 @@ var Navigation = module.exports = React.createClass({
             var navBarBrandImgContainer = navBarBrandImg.parentNode;
             var navBarBrand = navBarBrandImgContainer.parentNode.parentNode;
             navBarBrand.style.width = ''; // Clear any earlier width
-            if (['xs','sm'].indexOf(responsiveGridState()) !== -1) return; // If mobile / non-fixed nav width
+            if (['xs','sm'].indexOf(layout.responsiveGridState()) !== -1) return; // If mobile / non-fixed nav width
             //navBarBrandImgContainer.style.width = navBarBrandImgContainer.offsetWidth + 'px'; // Enable to fix width of logo to its large size.
             navBarBrand.style.width = navBarBrand.offsetWidth + 'px';
         };

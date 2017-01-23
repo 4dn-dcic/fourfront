@@ -10,7 +10,6 @@ require('./home');
 require('./help');
 require('./about');
 require('./item');
-require('./objectutils');
 require('./facetlist');
 require('./experiment-set-view');
 require('./user');

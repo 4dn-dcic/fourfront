@@ -1,6 +1,6 @@
 var { createStore, combineReducers } = require('redux');
 var _ = require('underscore');
-var { JWT, isServerSide } = require('./components/objectutils');
+var { JWT, isServerSide } = require('./components/util');
 
 // Create a redux store to manage state for the whole application
 

@@ -19,7 +19,7 @@ var Alerts = module.exports = React.createClass({
             });
         },
         // Common alert definitions
-        LoggedOut : {"title" : "Logged Out", "message" : "You have been logged out due to an expired session."}
+        LoggedOut : {"title" : "Logged Out", "message" : "You have been logged out due to an expired session.", style : 'danger'}
     },
 
     getInitialState : function(){ 

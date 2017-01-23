@@ -4,7 +4,7 @@ var globals = require('./globals');
 var Panel = require('react-bootstrap').Panel;
 var Table = require('./collection').Table;
 var { AuditIndicators, AuditDetail, AuditMixin } = require('./audit');
-var { ajaxPromise } = require('./objectutils');
+var { console } = require('./util');
 
 var Fallback = module.exports.Fallback = React.createClass({
     contextTypes: {

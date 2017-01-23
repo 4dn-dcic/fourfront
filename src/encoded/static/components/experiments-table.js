@@ -4,7 +4,7 @@ var React = require('react');
 var { Table, Checkbox, Collapse } = require('react-bootstrap');
 var _ = require('underscore');
 var FacetList = require('./facetlist'); // Only used for statics.
-var { isServerSide, console } = require('./objectutils');
+var { expFxn, expFilters, console, isServerSide } = require('./util');
 
 /**
  * To be used within Experiments Set View/Page, or
@@ -99,8 +99,8 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 // another page w/ filters enabled (i.e. browse) and deselect own 'static'/single term, it isn't empty.
                 ignoredFilters = FacetList.findIgnoredFiltersByStaticTerms(allExperiments, filters);
             }
-            if (useSet) return FacetList.siftExperiments(allExperiments, filters, ignoredFilters); // Set
-            else return [...FacetList.siftExperiments(allExperiments, filters, ignoredFilters)]; // Convert to array
+            if (useSet) return expFilters.siftExperimentsClientSide(allExperiments, filters, ignoredFilters); // Set
+            else return [...expFilters.siftExperimentsClientSide(allExperiments, filters, ignoredFilters)]; // Convert to array
         },
 
         totalExperimentsCount : function(experimentArray = null){
@@ -526,253 +526,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                     </div>
                 );
             }
-        }),
-
-        funcs : {
-
-            listEmptyExperiments : function(experiments){
-                return _.filter(experiments, function(exp){
-                    if (Array.isArray(exp.files) && exp.files.length > 0) return false;
-                    else if (Array.isArray(exp.filesets) && exp.filesets.length > 0){
-                        for (var i; i < exp.filesets.length; i++){
-                            if (Array.isArray(exp.filesets[i].files_in_set) && exp.filesets[i].files_in_set.length > 0){
-                                return false;
-                            }
-                        }
-                        return true;
-                    }
-                    else return true;
-                });
-            },
-
-            fileCountFromExperiments : function(experiments){
-                return _.reduce(experiments.map(ExperimentsTable.funcs.fileCount), function(r,expFileCount,i){
-                    return r + expFileCount;
-                }, 0);
-            },
-
-            /* NOT SORTED */
-            listAllUnpairedFiles : function(experiments){
-                return _.filter(
-                    _.flatten(
-                        ExperimentsTable.funcs.findUnpairedFilesPerExperiment(experiments),
-                        true
-                    ),
-                    function(file){ return typeof file !== 'undefined'; }
-                );
-            },
-
-            /* NOT SORTED */
-            listAllFilePairs : function(experiments){
-                return (
-                    _.flatten(
-                        _.filter(
-                            _.pluck(
-                                ExperimentsTable.funcs.groupFilesByPairsForEachExperiment(experiments),
-                                'file_pairs'
-                            ),
-                            function(file){ return typeof file !== 'undefined'; }
-                        ),
-                        true
-                    )
-                )
-            },
-
-            /** Grab all experiments from experiment_sets, and save non-circular reference to parent experiment_set on experiment. */
-            listAllExperimentsFromExperimentSets : function(experiment_sets){
-                var uniqExpAccessions = {};
-                return _(experiment_sets).chain()
-                    .map(function(set){ 
-                        return set.experiments_in_set.map(function(exp){
-                            // Make sure we return new exp & set objects instead of mutating existing ones.
-                            var cExp = _.clone(exp);
-                            var cSet = _.clone(set);
-                            delete cSet.experiments_in_set;
-                            cExp.experiment_sets = [cSet];
-                            return cExp;
-                        }); 
-                    })
-                    .flatten(true)
-                    .filter(function(exp){
-                        if (typeof uniqExpAccessions[exp.accession] !== 'undefined'){
-                            // Already have exp with same accession; keep 1 instance of it but combine their experiment_sets.
-                            uniqExpAccessions[exp.accession].experiment_sets = uniqExpAccessions[exp.accession].experiment_sets.concat(exp.experiment_sets);
-                            return false;
-                        } else {
-                            uniqExpAccessions[exp.accession] = exp;
-                            return true;
-                        }
-                    })
-                    .value();
-                //return _.flatten(experiment_sets.map(function(set){ return set.experiments_in_set }), true);
-            },
-
-            /** 
-             *  Partial Funcs (probably don't use these unless composing a function)
-             */
-
-            combineWithReplicateNumbers : function(experimentsWithReplicateNums, experimentsInSet){
-                if (!Array.isArray(experimentsWithReplicateNums)) return false;
-                return _(experimentsWithReplicateNums).chain()
-                    .map(function(r){ 
-                        return {
-                            'tec_rep_no' : r.tec_rep_no || null,
-                            'bio_rep_no' : r.bio_rep_no || null,
-                            '@id' : r.replicate_exp && r.replicate_exp['@id'] || null
-                        };
-                    })
-                    .zip(experimentsInSet) // 'replicate_exps' and 'experiments_in_set' are delivered in same order from backend, so can .zip (linear) vs .map -> .findWhere  (nested loop).
-                    .map(function(r){
-                        r[1].biosample.bio_rep_no = r[0].bio_rep_no; // Copy over bio_rep_no to biosample to ensure sorting.
-                        return _.extend(r[0], r[1]);
-                    })
-                    .value()
-            },
-
-            findUnpairedFiles : function(files_in_experiment){
-                return _.reduce(files_in_experiment, function(unpairedFiles, file, files){
-                    if (!Array.isArray(file.related_files) || typeof file.paired_end == 'undefined') {
-                        unpairedFiles.push(file);
-                    }
-                    return unpairedFiles;
-                }, []);
-            },
-
-            findUnpairedFilesPerExperiment : function(experiments){
-                return experiments.map(function(exp){
-                    if (Array.isArray(exp.files)){
-                        return ExperimentsTable.funcs.findUnpairedFiles(exp.files);
-                    } else if (
-                        Array.isArray(exp.filesets) && 
-                        exp.filesets.length > 0 && 
-                        Array.isArray(exp.filesets[0].files_in_set)
-                    ){
-                        return ExperimentsTable.funcs.findUnpairedFiles(
-                            _.flatten(
-                                _.pluck(exp.filesets, 'files_in_set'),
-                                true
-                            )
-                        );
-                    }
-                });
-            },
-
-            fileCount : function(experiment){
-                if (Array.isArray(experiment.files)) return experiment.files.length;
-                if (Array.isArray(experiment.filesets)) return _.reduce(experiment.filesets, function(r,fs){
-                    return r + (fs.files_in_set || []).length;
-                }, 0);
-                return 0;
-            },
-
-            allFilesFromFileSetsInExperiment : function(experiment){
-                if (Array.isArray(experiment.filesets)){
-                    return _(experiment.filesets).chain()
-                        .pluck('files_in_set')
-                        .filter(function(files_in_set){ return typeof files_in_set !== 'undefined'; })
-                        .flatten(true)
-                        .value();
-                }
-                return [];
-            },
-
-            allFilesFromExperiment : function(experiment){
-                return (experiment.files || []).concat(
-                    ExperimentsTable.funcs.allFilesFromFileSetsInExperiment(experiment)
-                );
-            },
-
-            groupFilesByPairs : function(files_in_experiment){
-                // Add 'file_pairs' property containing array of arrays of paired files to each experiment.
-                return _(files_in_experiment).chain()
-                    .sortBy(function(file){ return parseInt(file.paired_end) }) // Bring files w/ paired_end == 1 to top of list.
-                    .reduce(function(pairsObj, file, files){
-                        // Group via { 'file_paired_end_1_ID' : { '1' : file_paired_end_1, '2' : file_paired_end_2,...} }
-                        if (parseInt(file.paired_end) === 1){
-                            pairsObj[file['@id']] = { '1' : file };
-                        } else if (Array.isArray(file.related_files)) {
-                            _.each(file.related_files, function(related){
-                                if (pairsObj[related.file]) {
-                                    pairsObj[related.file][file.paired_end + ''] = file;
-                                } else {
-                                    file.unpaired = true; // Mark file as unpaired
-                                }
-                            });
-                        } else {
-                            file.unpaired = true; // Mark file as unpaired
-                        }
-                        return pairsObj;
-                    }, { })
-                    .values()
-                    .map(function(filePairObj){
-                        return _(filePairObj).chain()
-                            .pairs()
-                            .sortBy (function(fp){ return parseInt(fp[0]); })
-                            .map    (function(fp){ return fp[1]; })
-                            .value();
-                    })
-                    .value(); // [[file1,file2,file3,...],[file1,file2,file3,file4,...],...]
-            },
-
-            groupFilesByPairsForEachExperiment: function(experiments){
-                return experiments.map(function(exp){
-                    var file_pairs;
-                    if (Array.isArray(exp.files)){
-                        file_pairs = ExperimentsTable.funcs.groupFilesByPairs(exp.files);
-                    } else if (
-                        Array.isArray(exp.filesets) && 
-                        exp.filesets.length > 0 && 
-                        Array.isArray(exp.filesets[0].files_in_set)
-                    ){
-                        file_pairs = ExperimentsTable.funcs.groupFilesByPairs(
-                            ExperimentsTable.funcs.allFilesFromFileSetsInExperiment(exp)
-                        );
-                    }
-
-                    if (Array.isArray(file_pairs) && file_pairs.length > 0) exp.file_pairs = file_pairs;
-                    return exp;
-                });
-            },
-
-            flattenFileSetsToFilesIfNoFilesOnExperiment : function(experiment){
-                if (Array.isArray(experiment.files)) return experiment;
-                if (!Array.isArray(experiment.filesets) || experiment.filesets.length === 0 || !Array.isArray(experiment.filesets[0].files_in_set)) return experiment;
-                experiment.files = _.flatten(
-                    _.pluck(experiment.filesets, 'files_in_set'),
-                    true
-                );
-                return experiment;
-            },
-
-            flattenFileSetsToFilesIfNoFilesForEachExperiment : function(experiments){
-                return experiments.map(ExperimentsTable.funcs.flattenFileSetsToFilesIfNoFilesOnExperiment);
-            },
-
-            groupExperimentsByBiosampleRepNo : function(experiments){
-                return _(experiments).chain()
-                    .groupBy(function(exp){
-                        return exp.biosample.bio_rep_no;
-                    })          // Creates { '1' : [expObjWBiosample1-1, expObjWBiosample1-2, ...], '2' : [expObjWBiosample2-1, expObjWBiosample2-2, ...], ... }
-                    .pairs()    // Creates [['1', [expObjWBiosample1-1, expObjWBiosample1-2]], ['2', [expObjWBiosample2-1, expObjWBiosample2-2]], ...]
-                    .sortBy(function(expSet){ return parseInt(expSet[0]); }) // Sort outer list (biosamples) by bio_rep_no
-                    .map(function(expSet){ // Creates [[expObjWBiosample1-1, expObjWBiosample1-2], [expObjWBiosample2-1, expObjWBiosample2-2], ...]
-                        return _.sortBy(expSet[1], 'tec_rep_no'); // Sort inner list (experiments) by tec_rep_no
-                    })
-                    .value();
-            },
-
-            groupExperimentsByBiosample : function(experiments){
-                return _(experiments).chain()
-                    .groupBy(function(exp){
-                        return exp.biosample['@id'];
-                    })
-                    .pairs()
-                    .sortBy(function(expSet){ return expSet[0]; }) // Sort outer list (biosamples) by biosample id
-                    .map(function(expSet){ return expSet[1]; }) // Creates [[expObjWBiosample1-1, expObjWBiosample1-2], [expObjWBiosample2-1, expObjWBiosample2-2], ...]
-                    .value();
-            }
-
-        }
+        })
 
     },
 
@@ -980,7 +734,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 stripe={this.cache.oddExpRow}
                 id={(exp.bio_rep_no && exp.tec_rep_no) ? 'exp-' + exp.bio_rep_no + '-' + exp.tec_rep_no : exp.accession || exp['@id']}
             >
-                <ExperimentsTable.StackedBlock.Name relativePosition={ExperimentsTable.funcs.fileCount(exp) > 6}>
+                <ExperimentsTable.StackedBlock.Name relativePosition={expFxn.fileCount(exp) > 6}>
                     <a href={ exp['@id'] || '#' } className="name-title mono-text">{ exp.accession }</a>
                 </ExperimentsTable.StackedBlock.Name>
                 <ExperimentsTable.StackedBlock.List 
@@ -1055,7 +809,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             >
                 <ExperimentsTable.StackedBlock.Name
                     relativePosition={
-                        expsWithBiosample.length > 3 || ExperimentsTable.funcs.fileCountFromExperiments(expsWithBiosample) > 6
+                        expsWithBiosample.length > 3 || expFxn.fileCountFromExperiments(expsWithBiosample) > 6
                     }
                 >
                     <a href={ expsWithBiosample[0].biosample['@id'] || '#' } className="name-title mono-text">
@@ -1075,7 +829,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                                     _.flatten(_.pluck(expsWithBiosample.slice(3), 'file_pairs'), true).length +
                                     ' File Pairs'
                                     :
-                                    ExperimentsTable.funcs.fileCountFromExperiments(expsWithBiosample.slice(3)) + 
+                                    expFxn.fileCountFromExperiments(expsWithBiosample.slice(3)) + 
                                     ' Files'
                             )
                             :
@@ -1129,9 +883,9 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
             var experimentsGroupedByBiosample = _.compose(
                 this.renderRootStackedBlockListOfBiosamplesWithExperiments,
-                ExperimentsTable.funcs.groupExperimentsByBiosampleRepNo,
-                ExperimentsTable.funcs.groupFilesByPairsForEachExperiment,
-                ExperimentsTable.funcs.combineWithReplicateNumbers
+                expFxn.groupExperimentsByBiosampleRepNo,
+                expFxn.groupFilesByPairsForEachExperiment,
+                expFxn.combineWithReplicateNumbers
             );
             
             return (
@@ -1144,8 +898,8 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         default : function(){
             var experimentsGroupedByBiosample = _.compose(
                 this.renderRootStackedBlockListOfBiosamplesWithExperiments,
-                ExperimentsTable.funcs.groupExperimentsByBiosample,
-                ExperimentsTable.funcs.flattenFileSetsToFilesIfNoFilesForEachExperiment
+                expFxn.groupExperimentsByBiosample,
+                expFxn.flattenFileSetsToFilesIfNoFilesForEachExperiment
             );
 
             return (

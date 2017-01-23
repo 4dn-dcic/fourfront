@@ -254,20 +254,30 @@
         path {
             stroke: #fff;
             transition: opacity 1s;
+            opacity : 1;
             position: relative;
             &.removing {
                 opacity : 0 !important;
                 z-index: -1;
                 transition: opacity .75s !important;
             }
+            &.root-node {
+                fill: #eee !important;
+            }
+            &.filtered-out {
+                opacity : 0.1 !important;
+                transition: opacity 1s !important;
+            }
         }
 
         svg g.group-container:hover path {
             transition: opacity 0.25s;
-            opacity: 0.4;
-            &.hover, 
-            &:hover {
+            opacity: 0.5;
+            &.hover, &:hover {
                 opacity: 1;
+                &.filtered-out {
+                    opacity : 0.75 !important;
+                }
             }
         }
 

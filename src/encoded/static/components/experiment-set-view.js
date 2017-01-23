@@ -7,7 +7,7 @@ var { ExperimentsTable } = require('./experiments-table');
 var _ = require('underscore');
 var { SubIPanel, DescriptorField, tipsFromSchema } = require('./item');
 var FacetList = require('./facetlist');
-var { ajaxLoad, DateUtility, console, getNestedProperty } = require('./objectutils');
+var { ajax, console, DateUtility } = require('./util');
 var FormattedInfoBlock = require('./formatted-info-block');
 var { FlexibleDescriptionBox } = require('./experiment-common');
 

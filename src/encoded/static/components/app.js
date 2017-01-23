@@ -14,13 +14,14 @@ var store = require('../store');
 var browse = require('./browse');
 var origin = require('../libs/origin');
 var serialize = require('form-serialize');
-var { ajaxLoad, ajaxPromise, JWT, console, responsiveGridState, isServerSide } = require('./objectutils');
+var { expFilters, ajax, JWT, console, isServerSide } = require('./util');
 var Alerts = require('./alerts');
 var jwt = require('jsonwebtoken');
 var { FacetCharts } = require('./facetcharts');
-var { hrefToFilters, filtersToHref, convertExpSetFiltersTerms } = require('../components/facetlist');
 
 var dispatch_dict = {}; //used to store value for simultaneous dispatch
+
+if (!isServerSide()) console.log(ajax);
 
 var portal = {
     portal_title: '4DN Data Portal',
@@ -32,7 +33,7 @@ var portal = {
             //url: '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all',
             url : function(currentUrlParts){
                 if (!currentUrlParts) return '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all'; // Default/fallback
-                return filtersToHref(
+                return expFilters.filtersToHref(
                     store.getState().expSetFilters,
                     currentUrlParts.protocol + '//' + currentUrlParts.host + '/browse/'
                 );
@@ -102,7 +103,7 @@ var App = React.createClass({
     },
 
     getInitialState: function() {
-        console.log('APP FILTERS', hrefToFilters(this.props.href));
+        console.log('APP FILTERS', expFilters.hrefToFilters(this.props.href));
         // Todo: Migrate session & user_actions to redux store?
         var session = false;
         var user_actions = [];
@@ -122,6 +123,8 @@ var App = React.createClass({
         if (user_info && typeof user_info.user_actions !== 'undefined' && Array.isArray(user_info.user_actions)){
             user_actions = user_info.user_actions;
         }
+
+        expFilters.navigate = this.navigate;
 
        console.log("App Initial State: ", session, user_actions);
 
@@ -222,7 +225,7 @@ var App = React.createClass({
             if (typeof callback === 'function') callback(this.state.schemas);
             return this.state.schemas;
         }
-        ajaxPromise('/profiles/?format=json').then(data => {
+        ajax.promise('/profiles/?format=json').then(data => {
             if (this.contentTypeIsJSON(data)){
                 this.setState({
                     schemas: data
@@ -373,7 +376,7 @@ var App = React.createClass({
             url = url.slice(0, url_hash);
         }
         var data = options.body ? options.body : null;
-        var request = ajaxPromise(url, http_method, headers, data, options.cache === false ? false : true);
+        var request = ajax.promise(url, http_method, headers, data, options.cache === false ? false : true);
         request.xhr_begin = 1 * new Date();
         request.then(response => {
             request.xhr_end = 1 * new Date();
@@ -605,7 +608,7 @@ var App = React.createClass({
             var request = this.fetch(
                 href,
                 {
-                    'headers': {}, // Filled in by ajaxPromise
+                    'headers': {}, // Filled in by ajax.promise
                     'cache' : options.cache === false ? false : true
                 }
             );
@@ -915,7 +918,7 @@ var App = React.createClass({
                         __html: jsonScriptEscape(JSON.stringify(this.props.alerts))
                     }}></script>
                     <script data-prop-name="expSetFilters" type="application/ld+json" dangerouslySetInnerHTML={{
-                        __html: jsonScriptEscape(JSON.stringify(convertExpSetFiltersTerms(this.props.expSetFilters, 'array')))
+                        __html: jsonScriptEscape(JSON.stringify(expFilters.convertExpSetFiltersTerms(this.props.expSetFilters, 'array')))
                     }}></script>
                     <div id="slot-application">
                         <div id="application" className={appClass}>

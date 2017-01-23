@@ -3,7 +3,7 @@ var url = require('url');
 var queryString = require('query-string');
 var _ = require('underscore');
 var store = require('../store');
-var { ajaxLoad, getNestedProperty, flattenArrays, console, isServerSide } = require('./objectutils');
+var { ajax, console, object, isServerSide, expFilters } = require('./util');
 var { util } = require('./viz/common');
 
 
@@ -63,17 +63,6 @@ var ExpTerm = React.createClass({
                 return true;
             }
             return false;
-        },
-
-        expSetFiltersToURLQuery : function(expSetFilters = null){
-            if (!expSetFilters) expSetFilters = store.getState().expSetFilters;
-            return _.pairs(expSetFilters).map(function(filterPair){
-                var field = filterPair[0];
-                var terms = [...filterPair[1]]; // Set to Array
-                return terms.map(function(t){
-                    return field + '=' + encodeURIComponent(t).replace(/%20/g, '+');
-                }).join('&');
-            }).join('&');
         },
 
         /**
@@ -139,7 +128,7 @@ var ExpTerm = React.createClass({
              * are un-standardized, so run them through standardizeFieldKey() before
              * checking if in expSetFilters (e.g. as in ExpTerm.isSelected() ).
              */
-            var termMatchExps = FacetList.siftExperiments(
+            var termMatchExps = expFilters.siftExperimentsClientSide(
                 this.props.experimentSetListJSON,
                 this.props.expSetFilters,
                 this.props.ignoredFilters,
@@ -168,7 +157,7 @@ var ExpTerm = React.createClass({
         ){
 
             if (!this.props.useAjax){
-                var termMatchExps = FacetList.siftExperiments(
+                var termMatchExps = expFilters.siftExperimentsClientSide(
                     newProps.experimentSetListJSON || this.props.experimentSetListJSON,
                     newProps.expSetFilters || this.props.expSetFilters,
                     newProps.ignoredFilters || this.props.ignoredFilters,
@@ -309,7 +298,7 @@ var Facet = React.createClass({
 
     render: function() {
         var facet = this.props.facet;
-        var standardizedFieldKey = FacetList.Facet.ExpTerm.standardizeFieldKey(facet.field, this.props.experimentsOrSets);
+        var standardizedFieldKey = expFilters.standardizeFieldKey(facet.field, this.props.experimentsOrSets);
         var selected = this.isSelected();
         if (this.isStatic()){ 
             // Only one term
@@ -413,80 +402,6 @@ var FacetList = module.exports = React.createClass({
         // Include sub-components as static (sub-)properties of main FacetList
         Facet : Facet,
 
-        /** Return URL without any queries or hash, ending at pathname. Add hardcoded stuff for /browse/ or /search/ endpoints. */
-        baseHref : function(currentHref = '/browse/'){
-            var urlParts = url.parse(currentHref, true);
-            var baseHref = urlParts.protocol + '//' + urlParts.host + urlParts.pathname;
-            var baseQuery = [];
-            if (urlParts.pathname.indexOf('/browse/') > -1){
-                if (typeof urlParts.query.type !== 'string') baseQuery.push(['type','ExperimentSetReplicate']);
-                else baseQuery.push(['type', urlParts.query.type]);
-                if (typeof urlParts.query.experimentset_type !== 'string') baseQuery.push(['experimentset_type','replicate']);
-                else baseQuery.push(['experimentset_type', urlParts.query.experimentset_type]);
-            } else if (urlParts.pathname.indexOf('/search/') > -1){
-                if (typeof urlParts.query.type !== 'string') baseQuery.push(['type','Item']);
-                else baseQuery.push(['type', urlParts.query.type]);
-            }
-
-            return baseHref + (baseQuery.length > 0 ? '?' + baseQuery.map(function(queryPair){ return queryPair[0] + '=' + queryPair[1]; }).join('&') : '');
-        },
-
-        /**
-         * Convert expSetFilters to a URL, given a current URL whose path is used to append arguments to (e.g. http://hostname.com/browse/  or http://hostname.com/search/).
-         * 
-         * @param {Object} expSetFilters - Filters as stored in Redux, keyed by facet field containing Set of term keys.
-         */
-        filtersToHref : function(expSetFilters, currentHref, page = 1, limit = 25){
-            var baseHref = FacetList.baseHref(currentHref);
-
-            // Include a '?' or '&' if needed.
-            var suffix = ['?','&'].indexOf(baseHref.charAt(baseHref.length - 1)) > -1 ? // Is last character a '&' or '?' ?
-                '' : (
-                    baseHref.match(/\?./) ? 
-                    '&' : '?'
-                );
-
-            var filterQuery = ExpTerm.expSetFiltersToURLQuery(expSetFilters);
-
-            return baseHref + suffix + 'limit=' + limit + '&from=' + ((page - 1) * limit) + (filterQuery.length > 0 ? '&' + filterQuery : '');
-        },
-
-        /** Parse href to return an expSetFilters object. */
-        hrefToFilters : function(href, contextFilters = null){
-            return _(url.parse(href, true).query).chain()
-                .pairs() // Object to [key, val] pairs.
-                .filter(function(queryPair){ // Get only facet fields query args.
-                    if (['type', 'experimentset_type'].indexOf(queryPair[0]) > -1) return false; // Exclude these for now.
-                    if (contextFilters && _.findWhere(contextFilters,  {'field' : queryPair[0]})) return true; // See if in context.filters, if is available.
-
-                    // These happen to all start w/ 'experiments_in_set.' currently.
-                    if (queryPair[0].indexOf('experiments_in_set.') > -1) return true;
-                    return false;
-                })
-                .map(function(queryPair){ // Convert term(s) to Sets
-                    if (Array.isArray(queryPair[1])) return [  queryPair[0], new Set(queryPair[1])  ];
-                    else return [  queryPair[0], new Set([queryPair[1]])  ];
-                })
-                .object() // Pairs back to object. We have expSetFilters now.
-                .value();
-
-        },
-
-        /** @param {string} [to='array'] - One of 'array' or 'set' for what to convert expSetFilter's terms to. */
-        convertExpSetFiltersTerms : function(expSetFilters, to = 'array'){
-            return _(expSetFilters).chain()
-                .pairs()
-                .map(function(pair){
-                    if (to === 'array'){
-                        return [pair[0], [...pair[1]]];
-                    } else if (to === 'set'){
-                        return [pair[0], new Set(pair[1])];
-                    }
-                })
-                .object()
-                .value();
-        },
-
         /** 
          * Highlights all terms on document (changes background color) of given field,term.
          * @param {string} field - Field, in object dot notation.
@@ -523,9 +438,16 @@ var FacetList = module.exports = React.createClass({
             }
 
             util.requestAnimationFrame(function(){
-                _.each(document.querySelectorAll('[data-field' + (field ? '="' + field + '"' : '') + ']'), function(fieldContainerElement){
-                    setHighlightClass(fieldContainerElement, color.length === 0);
+
+                _.each(document.querySelectorAll('[data-field]'), function(fieldContainerElement){
+                    setHighlightClass(fieldContainerElement, true);
                 });
+
+                if (color.length > 0){
+                    _.each(document.querySelectorAll('[data-field' + (field ? '="' + field + '"' : '') + ']'), function(fieldContainerElement){
+                        setHighlightClass(fieldContainerElement, color.length === 0);
+                    });
+                }
 
                 // unhighlight previously selected terms, if any.
                 _.each(document.querySelectorAll('[data-term]'), function(termElement){
@@ -548,61 +470,7 @@ var FacetList = module.exports = React.createClass({
             return FacetList.highlightTerm.call(this, field, null, '');
         },
 
-        /**
-         * Given a field/term, add or remove filter from expSetFilters (in redux store) within context of current state of filters.
-         * @param {string} field - Field, in object dot notation.
-         * @param {string} term - Term to add/remove from active filters.
-         * @param {string} [experimentsOrSets='experiments'] - Informs whether we're standardizing field to experiments_in_set or not. Defaults to 'experiments'.
-         * @param {Object} [currentFilters] - The expSetFilters object that term is being added or removed from; if not provided it grabs state from redux store.
-         * @param {function} [callback] - Callback function to call after updating redux store.
-         * @param {boolean} [returnInsteadOfSave=false] - Whether to return a new updated expSetFilters object representing would-be changed state INSTEAD of updating redux store. Useful for doing a batched update.
-         */
-        changeFilter: function(field, term, experimentsOrSets = 'experiments', currentFilters = null, callback = null, returnInsteadOfSave = false) {
-
-            if (!currentFilters){
-                currentFilters = store.getState().expSetFilters;
-            }
-
-            // store currently selected filters as a dict of sets
-            var tempObj = {};
-            var newObj = {};
-
-            // standardize on field naming convention for expSetFilters before they hit the redux store.
-            field = FacetList.Facet.ExpTerm.standardizeFieldKey(field, experimentsOrSets);
-
-            var expSet = currentFilters[field] ? new Set(currentFilters[field]) : new Set();
-            if(expSet.has(term)){
-                // term is already present, so delete it
-                expSet.delete(term);
-            }else{
-                expSet.add(term);
-            }
-            if(expSet.size > 0){
-                tempObj[field] = expSet;
-                newObj = Object.assign({}, currentFilters, tempObj);
-            }else{ //remove key if set is empty
-                newObj = Object.assign({}, currentFilters);
-                delete newObj[field];
-            }
-
-            if (returnInsteadOfSave){
-                return newObj;
-            } else {
-                FacetList.saveChangedFilters(newObj);
-                if (typeof callback === 'function') setTimeout(callback, 0);
-            }
-        },
         
-        /**
-         * Quickhand method to update expSetFilters in redux store.
-         * Before calling, make sure expSetFilters is a new or cloned object (not props.expSetFilters) for Redux to recognize that it has changed.
-         */
-        saveChangedFilters : function(expSetFilters){
-            store.dispatch({
-                type : {'expSetFilters' : expSetFilters}
-            });
-        },
-
         /**
          * Adds a restrictions property to each facet from restrictions object and uses it to filter terms.
          * 
@@ -719,7 +587,7 @@ var FacetList = module.exports = React.createClass({
                 // Loop through experiments to find all terms and counts per term.
                 for (var i = 0; i < exps.length; i++){
 
-                    var facetTerm = getNestedProperty(exps[i], fieldHierarchyLevels);
+                    var facetTerm = object.getNestedProperty(exps[i], fieldHierarchyLevels);
 
                     if (Array.isArray(facetTerm)) {
                         for (var j = 0; j < facetTerm.length; j++){
@@ -797,10 +665,10 @@ var FacetList = module.exports = React.createClass({
 
                 // Unique terms in all experiments per filter
                 if (
-                    flattenArrays(
+                    _.flatten(
                         // getNestedProperty returns array(s) if property is nested within array(s), so we needa flatten to get list of terms.
                         experimentArray.map((experiment, j)=>{
-                            var termVal = getNestedProperty(
+                            var termVal = object.getNestedProperty(
                                 experiment,
                                 ExpTerm.standardizeFieldKey(selectedFacet, expsOrSets, true)
                             );
@@ -1034,7 +902,7 @@ var FacetList = module.exports = React.createClass({
 
     loadFacets : function(callback = null){
         var facetType = (this.props.experimentsOrSets == 'sets' ? 'ExperimentSet' : 'Experiment');
-        ajaxLoad('/facets?type=' + facetType + '&format=json', function(r){
+        ajax.load('/facets?type=' + facetType + '&format=json', function(r){
             this.facets = this.filterFacets(r);
             if (this.props.debug) console.log('Loaded Facet List via AJAX.');
             if (typeof callback == 'function') callback();
@@ -1067,54 +935,25 @@ var FacetList = module.exports = React.createClass({
 
     clearFilters: function(e) {
         e.preventDefault();
-        setTimeout(function(){
-            store.dispatch({
-                type : {'expSetFilters' : {}}
-            });
-        }, 0);
+        //e.target.innerHTML = '<i class="icon icon-spin icon-circle-o-notch"></i>';
+        setTimeout(()=> expFilters.saveChangedFilters({}, this.props.useAjax, this.props.href) , 0);
     },
 
     changeFilter: function(field, term, callback) {
-
-        var newExpSetFilters = FacetList.changeFilter(field, term, this.props.experimentsOrSets, this.props.expSetFilters, null, true);
-
-        if (this.props.useAjax) {
-
-            var newHref = FacetList.filtersToHref(
-                newExpSetFilters,
-                this.props.href
-            );
-            ajaxLoad(newHref, (newContext)=>{
-
-                function updateRedux(){
-                    store.dispatch({
-                        type: { 
-                            'context' : newContext,
-                            'expSetFilters' : newExpSetFilters,
-                            'href' : newHref
-                        }
-                    });
-                }
-                
-                if (typeof this.props.navigate === 'function'){
-                    this.props.navigate(newHref, { skipRequest : true, skipUpdatHref : true }, ()=>{
-                        updateRedux();
-                        if (typeof callback === 'function') callback();
-                    });
-                } else{
-                    updateRedux();
-                    if (typeof callback === 'function') callback();
-                }
-
-            });
-        } else {
-            FacetList.saveChangedFilters(newExpSetFilters);
-        }
-
+        return expFilters.changeFilter(
+            field,
+            term,
+            this.props.experimentsOrSets,
+            this.props.expSetFilters,
+            callback,
+            false,      // Only return new expSetFilters vs saving them == set to false
+            this.props.useAjax,
+            this.props.href
+        );
     },
 
     searchQueryTerms : function(){
-        var urlPath = this.props.urlPath || this.props.context && this.props.context['@id'] ? this.props.context['@id'] : null;
+        var urlPath = this.props.urlPath || this.props.href || this.props.context && this.props.context['@id'] ? this.props.context['@id'] : null;
         if (!urlPath) return null;
         var searchQuery = urlPath && url.parse(urlPath).search;
         if (!searchQuery) return null;
@@ -1188,7 +1027,7 @@ var FacetList = module.exports = React.createClass({
                 }>
                     <div className="row facets-header">
                         <div className="col-xs-6 facets-title-column">
-                            <i className="icon icon-fw icon-sort-amount-desc"></i>
+                            <i className="icon icon-fw icon-filter"></i>
                             &nbsp;
                             <h4 className="facets-title">{ this.props.title }</h4>
                         </div>

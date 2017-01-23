@@ -7,7 +7,7 @@ var announcements_data = require('../data/announcements_data');
 var Collapse = require('react-bootstrap').Collapse;
 var store = require('../store');
 var globals = require('./globals');
-var { ajaxLoad, console } = require('./objectutils');
+var { console } = require('./util');
 
 /* ****************
 New homepage

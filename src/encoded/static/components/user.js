@@ -8,7 +8,7 @@ var globals = require('./globals');
 var store = require('../store');
 var { Modal, Alert } = require('react-bootstrap');
 var { ItemStore } = require('./lib/store');
-var { ajaxLoad, DateUtility, console, JWT } = require('./objectutils');
+var { ajax, JWT, console, DateUtility } = require('./util');
 var FormattedInfoBlock = require('./formatted-info-block');
 var _ = require('underscore');
 var { EditableField, FieldSet } = require('./forms');
@@ -592,7 +592,7 @@ var ImpersonateUserForm = React.createClass({
         if(userInfo){
             reqHeaders['Authorization'] = 'Bearer '+idToken;
         }
-        ajaxLoad(url, callbackFxn, 'POST', fallbackFxn, jsonData, reqHeaders);
+        ajax.load(url, callbackFxn, 'POST', fallbackFxn, jsonData, reqHeaders);
     }
 });
 globals.content_views.register(ImpersonateUserForm, 'Portal', 'impersonate-user');

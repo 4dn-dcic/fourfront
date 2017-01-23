@@ -2,7 +2,7 @@
 
 var React = require('react');
 var _ = require('underscore');
-var { ajaxLoad, isServerSide, console } = require('./objectutils');
+var { ajax, console, isServerSide } = require('./util');
 
 /**
  * Optional container of FormattedInfoBlocks, wrapping them in a <UL> and <LI> elements.
@@ -35,7 +35,7 @@ var FormattedInfoBlockList = React.createClass({
             endpoints.forEach(function(endpoint, i){
 
                 console.log('Obtaining ' + propertyName + '[' + i + '] via AJAX from ' + endpoint);
-                ajaxLoad(endpoint + '?format=json&frame=embedded', function(result){
+                ajax.load(endpoint + '?format=json&frame=embedded', function(result){
                     results[i] = result;
                     console.log('Obtained ' + propertyName + '[' + i + '] via AJAX.');
                     if (results.length == endpoints.length){
@@ -199,7 +199,7 @@ var FormattedInfoBlock = module.exports = React.createClass({
          */
         ajaxPropertyDetails : function(endpoint, propertyName, callback = null){
             console.info('Obtaining details_' + propertyName + ' via AJAX.');
-            ajaxLoad(endpoint + '?format=json&frame=embedded', function(result){
+            ajax.load(endpoint + '?format=json&frame=embedded', function(result){
                 var newStateAddition = {};
                 newStateAddition['details_' + propertyName] = result;
                 this.setState(newStateAddition, ()=>{

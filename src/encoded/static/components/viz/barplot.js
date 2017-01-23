@@ -3,9 +3,8 @@
 var React = require('react');
 var _ = require('underscore');
 var d3 = require('d3');
-var expFuncs = require('../experiments-table').ExperimentsTable.funcs;
 var { ChartBreadcrumbs, util } = require('./common');
-var { console, isServerSide, getNestedProperty } = require('../objectutils');
+var { console, object, isServerSide, expFxn } = require('../util');
 
 
 var BarPlot = React.createClass({
@@ -27,7 +26,7 @@ var BarPlot = React.createClass({
             function updateFieldCounts(exp){
 
                 function count(f){
-                    var term = getNestedProperty(exp, f.field.replace('experiments_in_set.',''));
+                    var term = object.getNestedProperty(exp, f.field.replace('experiments_in_set.',''));
                     if (typeof f.terms[term] === 'number'){
                         f.terms[term]++;
                     } else {
@@ -41,7 +40,7 @@ var BarPlot = React.createClass({
         
             // Handle experiment_sets as well, just in case.
             if (experimentsOrSets === 'experiments') experiments.forEach(updateFieldCounts);
-            else expFuncs.listAllExperimentsFromExperimentSets(experiments).forEach(updateFieldCounts);     
+            else expFxn.listAllExperimentsFromExperimentSets(experiments).forEach(updateFieldCounts);     
 
             return fields;
         },

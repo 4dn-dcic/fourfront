@@ -10,7 +10,7 @@ jest.dontMock('underscore');
 
 
 describe('Testing experiments-table.js', function() {
-    var React, ExperimentsTable, testExperimentsTable, TestUtils, FetchContext, context, schemas, _, ExperimentsTableWrapper;
+    var React, ExperimentsTable, expFuncs, testExperimentsTable, TestUtils, FetchContext, context, schemas, _, ExperimentsTableWrapper;
 
     beforeEach(function() {
         React = require('react');
@@ -19,6 +19,7 @@ describe('Testing experiments-table.js', function() {
         ExperimentsTable = require('../experiments-table').ExperimentsTable;
         context = require('../testdata/experiment_set/replicate_4DNESC5JYZPZ');
         schemas = require('../testdata/schemas');
+        expFuncs = require('../util').expFxn;
 
         ExperimentsTableWrapper = React.createClass({
 
@@ -172,7 +173,7 @@ describe('Testing experiments-table.js', function() {
                 return sBlock.className.split(' ').indexOf('file') > -1;
             }).length
         ).toEqual(
-            ExperimentsTable.funcs.fileCountFromExperiments(context.experiments_in_set)
+            expFuncs.fileCountFromExperiments(context.experiments_in_set)
         );
 
     });

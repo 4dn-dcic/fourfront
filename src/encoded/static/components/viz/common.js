@@ -2,7 +2,7 @@
 
 var React = require('react');
 var _ = require('underscore');
-var { console, isServerSide } = require('../objectutils');
+var { console, isServerSide } = require('../util');
 
 module.exports.ChartBreadcrumbs = React.createClass({
 

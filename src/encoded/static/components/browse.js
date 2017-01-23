@@ -2,14 +2,15 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 var url = require('url');
+var querystring = require('querystring');
 var _ = require('underscore');
 var globals = require('./globals');
 var browse = module.exports;
-var { MenuItem, DropdownButton, ButtonToolbar, Table, Checkbox, Button, Panel } = require('react-bootstrap');
+var { MenuItem, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel } = require('react-bootstrap');
 var store = require('../store');
 var FacetList = require('./facetlist');
 var { ExperimentsTable, getFileDetailContainer } = require('./experiments-table');
-var { isServerSide } = require('./objectutils');
+var { isServerSide, expFxn, expFilters } = require('./util');
 var { AuditIndicators, AuditDetail, AuditMixin } = require('./audit');
 var { FlexibleDescriptionBox } = require('./experiment-common');
 
@@ -106,8 +107,8 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
     pairsAndFiles : function(){
         // Combine file pairs and unpaired files into one array. [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
         // Length will be file_pairs.length + unpaired_files.length, e.g. files other than first file in a pair are not counted.
-        return ExperimentsTable.funcs.listAllFilePairs(this.props.experimentArray).concat(
-            ExperimentsTable.funcs.listAllUnpairedFiles(this.props.experimentArray)
+        return expFxn.listAllFilePairs(this.props.experimentArray).concat(
+            expFxn.listAllUnpairedFiles(this.props.experimentArray)
         ); // (can always _.flatten() this or map out first file per pair, e.g. for targetFiles below)
     },
 
@@ -442,37 +443,63 @@ var ResultTable = browse.ResultTable = React.createClass({
 
     propTypes : {
         // Props' type validation based on contents of this.props during render.
-        href            : React.PropTypes.string,
+        href            : React.PropTypes.string.isRequired,
         context         : React.PropTypes.object.isRequired,
-        expSetFilters   : React.PropTypes.object,
+        expSetFilters   : React.PropTypes.object.isRequired,
         fileFormats     : React.PropTypes.array,
         fileStats       : React.PropTypes.object,
         targetFiles     : React.PropTypes.instanceOf(Set),
         onChange        : React.PropTypes.func,
-        useAjax         : React.PropTypes.bool
+        useAjax         : React.PropTypes.bool,
+        navigate        : React.PropTypes.func.isRequired
+    },
+
+    getPageAndLimitFromURL : function(href){
+        // Grab limit & page (via '(from / limit) + 1 ) from URL, if available.
+        var urlParts = url.parse(href, true);
+        var limit = parseInt(urlParts.query.limit || expFilters.getLimit() || 25);
+        var from  = parseInt(urlParts.query.from  || 0);
+        if (isNaN(limit)) limit = 25;
+        if (isNaN(from)) from = 0;
+        
+        return {
+            'page' : (from / limit) + 1,
+            'limit' : limit
+        }
     },
 
     getInitialState: function(){
-        return {
+        // Grab limit & page (via '(from' / 'limit') + 1 ) from URL, if available.
+        var pageAndLimit = this.getPageAndLimitFromURL(this.props.href);
+
+        // Have expFilters use our state.limit, until another component overrides.
+        expFilters.getLimit = function(){
+            return (this && this.state && this.state.limit) || 25;
+        }.bind(this);
+        
+        return _.extend({
             sortColumn: null,
             sortReverse: false,
             overflowingRight : false,
             // We need to get the below outta state once graph-ql is in; temporarily stored in state for performance.
-            passedExperiments : this.props.useAjax ? null : ExperimentsTable.getPassedExperiments(
-                this.props.context['@graph'],
-                this.props.expSetFilters,
-                'missing-facets',
-                this.props.context.facets,
-                true
-            )
-        }
+            passedExperiments : 
+                this.props.useAjax ? null :
+                    ExperimentsTable.getPassedExperiments(
+                        this.props.context['@graph'],
+                        this.props.expSetFilters,
+                        'missing-facets',
+                        this.props.context.facets,
+                        true
+                    )
+        }, this.getPageAndLimitFromURL(this.props.href));
     },
 
     getDefaultProps: function() {
         // 'restrictions' object migrated to facetlist.js > FacetList
         return {
             'href': '/browse/',
-            'debug' : false
+            'debug' : false,
+            'useAjax' : true
         };
     },
 
@@ -485,6 +512,7 @@ var ResultTable = browse.ResultTable = React.createClass({
     componentWillReceiveProps : function(newProps){
         var newState = {};
 
+        // Update visible experiments via client-side filtering IF not using ajax.
         if (this.props.expSetFilters !== newProps.expSetFilters || this.props.context !== newProps.context){
             if (!this.props.useAjax){
                 newState.passedExperiments = ExperimentsTable.getPassedExperiments(
@@ -497,13 +525,100 @@ var ResultTable = browse.ResultTable = React.createClass({
             }
         }
 
+        // Update page re: href.
+        if (this.props.href !== newProps.href){
+            var pageAndLimit = this.getPageAndLimitFromURL(newProps.href);
+            if (pageAndLimit.page !== this.state.page) newState.page = pageAndLimit.page;
+            if (pageAndLimit.limit !== this.state.limit) newState.limit = pageAndLimit.limit;
+        }
+
         if (Object.keys(newState).length > 0){
             this.setState(newState);
         }
     },
 
+    changePage : _.throttle(function(page = null){
+        
+        if (typeof this.props.navigate !== 'function') throw new Error("Browse doesn't have props.navigate()");
+        if (typeof this.props.href !== 'string') throw new Error("Browse doesn't have props.href.");
+
+        page = Math.min( // Correct page, so don't go past # available or under 1.
+            Math.max(page, 1),
+            Math.ceil(this.props.context.total / this.state.limit)
+        );
+
+        var urlParts = url.parse(this.props.href, true);
+        var previousFrom = parseInt(urlParts.query.from || 0);
+
+        if ( // Check page from URL and state to see if same and if so, cancel navigation.
+            page === this.state.page && 
+            page === Math.ceil(previousFrom / this.state.limit) + 1
+        ){
+            console.warn("Already on page " + page);
+            return;
+        }
+
+        if (typeof urlParts.query.limit === 'number'){
+            urlParts.query.from = (urlParts.query.limit * (page - 1)) + '';
+        } else {
+            urlParts.query.from = (expFilters.getLimit() * (page - 1)) + '';
+        }
+        urlParts.search = '?' + querystring.stringify(urlParts.query);
+        this.setState({ 'changingPage' : true }, ()=>{
+            this.props.navigate(
+                url.format(urlParts),
+                { 'replace' : true },
+                ()=>{
+                    this.setState({ 
+                        'changingPage' : false,
+                        'page' : page
+                    }
+                );
+            });
+        });
+    }, 250),
+
+    changeLimit : _.throttle(function(limit = 25){
+        
+        if (typeof this.props.navigate !== 'function') throw new Error("Browse doesn't have props.navigate()");
+        if (typeof this.props.href !== 'string') throw new Error("Browse doesn't have props.href.");
+
+        var urlParts = url.parse(this.props.href, true);
+        var previousLimit = parseInt(urlParts.query.limit || 25);
+        var previousFrom = parseInt(urlParts.query.from || 0);
+        var previousPage = parseInt(Math.ceil(urlParts.query.from / previousLimit)) + 1;
+
+        if ( // Check page from URL and state to see if same and if so, cancel navigation.
+            limit === this.state.limit &&
+            limit === previousLimit
+        ){
+            console.warn("Already have limit " + limit);
+            return;
+        }
+
+        urlParts.query.limit = limit + '';
+        urlParts.query.from = parseInt(Math.max(Math.floor(previousFrom / limit), 0) * limit);
+        urlParts.search = '?' + querystring.stringify(urlParts.query);
+        var newHref = url.format(urlParts);
+
+        this.setState({ 'changingPage' : true }, ()=>{
+            this.props.navigate(
+                newHref,
+                { 'replace' : true },
+                ()=>{
+                    this.setState({ 
+                        'changingPage' : false,
+                        'limit' : limit,
+                    }
+                );
+            });
+        });
+    }, 250),
+
     shouldComponentUpdate : function(nextProps, nextState){
         if (this.props.context !== nextProps.context) return true;
+        if (this.state.page !== nextState.page) return true;
+        if (this.state.changingPage !== nextState.changingPage) return true;
         if (this.state.passedExperiments !== nextState.passedExperiments) return true;
         if (this.state.sortColumn !== nextState.sortColumn) return true;
         if (this.state.sortReverse !== nextState.sortReverse) return true;
@@ -657,7 +772,8 @@ var ResultTable = browse.ResultTable = React.createClass({
                     href={experiment_set['@id']}
                     experimentArray={experiment_set.experiments_in_set}
                     replicateExpsArray={experiment_set.replicate_exps}
-                    passExperiments={passExps || experiment_set.experiments_in_set}
+                    passExperiments={passExps || new Set(experiment_set.experiments_in_set) }
+                    sort-value={this.state.sortColumn ? columns[this.state.sortColumn] : experiment_set['@id']}
                     key={experiment_set['@id']}
                     data-key={experiment_set['@id']}
                     rowNumber={resultCount++}
@@ -667,50 +783,46 @@ var ResultTable = browse.ResultTable = React.createClass({
                 />;
         }
 
+        var sortFxn = function(a,b){
+            a = a.props['sort-value'];
+            b = b.props['sort-value'];
+            if (this.state.sortReverse) {
+                var b2 = b;
+                b = a;
+                a = b2;
+            }
+            if(!isNaN(a)){
+                return (a - b);
+            } else {
+                //return(a.localeCompare(b));
+                // Above doesn't assign consistently right values to letters/numbers, e.g. sometimes an int > a letter
+                // Not sure how important.
+                if (a < b) return -1;
+                else if (a > b) return 1;
+                else return 0;
+            }
+        }.bind(this);
+
 
         if (this.props.useAjax){
-            return this.props.context['@graph'].map((expSet) => buildRowComponent.call(this, expSet));
+            return this.props.context['@graph']
+                .map((expSet) => buildRowComponent.call(this, expSet))
+                .sort(sortFxn);
+        } else {
+            return this.props.context['@graph']
+                .filter(function(expSet){ return expSet.experiments_in_set.length > 0; })
+                .map(function(expSet){
+                    return { 
+                        'intersection' : new Set(experiment_set.experiments_in_set.filter(x => this.state.passExperiments.has(x))),
+                        'set' : expSet
+                    };
+                })
+                .filter(function(expSetContainer){
+                    return expSetContainer.intersection.size > 0;
+                })
+                .map((expSetContainer) => buildRowComponent.call(this, expSetContainer.set, expSetContainer.intersection))
+                .sort(sortFxn);
         }
-        
-        var resultListings = this.props.context['@graph']
-            .filter(function(expSet){ return expSet.experiments_in_set.length > 0; })
-            .map(function(expSet){
-                return { 
-                    'intersection' : new Set(experiment_set.experiments_in_set.filter(x => this.state.passExperiments.has(x))),
-                    'set' : expSet
-                };
-            })
-            .filter(function(expSetContainer){
-                return expSetContainer.intersection.size > 0;
-            })
-            .map((expSetContainer) => buildRowComponent.call(this, expSetContainer.set, expSetContainer.intersection));
-        
-
-        // Sort
-        if(this.state.sortColumn){
-            resultListings.sort((a,b)=>{
-                a = a.key.split('/')[0];
-                b = b.key.split('/')[0];
-                if (this.state.sortReverse) {
-                    var b2 = b;
-                    b = a;
-                    a = b2;
-                }
-                if(!isNaN(a)){
-                    return (a - b);
-                } else {
-                    //return(a.localeCompare(b));
-                    // Above doesn't assign consistently right values to letters/numbers, e.g. sometimes an int > a letter
-                    // Not sure how important.
-                    if (a < b) return -1;
-                    else if (a > b) return 1;
-                    else return 0;
-                }
-            });
-        }
-
-        if (resultCount === 0) return null;
-        return resultListings;
     },
 
     renderTable : function(){
@@ -719,6 +831,12 @@ var ResultTable = browse.ResultTable = React.createClass({
         if (!formattedExperimentSetListings) return null;
 
         this.experimentSetRows = {}; // ExperimentSetRow instances stored here, keyed by @id, to get selectFiles from (?).
+        var maxPage = Math.ceil(this.props.context.total / this.state.limit);
+
+        var handleLimitSelect = function(eventKey, e){
+            e.target.blur();
+            return this.changeLimit(eventKey);
+        }.bind(this);
 
         return (
             <div className={
@@ -726,9 +844,50 @@ var ResultTable = browse.ResultTable = React.createClass({
                 (this.state.overflowingRight ? " overflowing" : "")
             }>
 
-                <h5 className='browse-title'>
-                    Showing {formattedExperimentSetListings.length} of {this.totalResultCount()} experiment sets.
-                </h5>
+
+                <div className="row above-chart-row">
+                    <div className="col-sm-6 col-xs-12">
+                        <h5 className='browse-title'>
+                            Showing {formattedExperimentSetListings.length} of { this.props.context.total } experiment sets.
+                        </h5>
+                    </div>
+                    <div className="col-sm-6 col-xs-12">
+                        
+                        <ButtonToolbar className="pull-right">
+                            
+                                <DropdownButton title={
+                                    <span className="text-small">
+                                        <i className="icon icon-list icon-fw" style={{ fontSize: '0.825rem' }}></i> Show {this.state.limit}
+                                    </span>
+                                } id="bg-nested-dropdown">
+                                    <MenuItem eventKey={10} onSelect={handleLimitSelect}>Show 10</MenuItem>
+                                    <MenuItem eventKey={25} onSelect={handleLimitSelect}>Show 25</MenuItem>
+                                    <MenuItem eventKey={50} onSelect={handleLimitSelect}>Show 50</MenuItem>
+                                    <MenuItem eventKey={100} onSelect={handleLimitSelect}>Show 100</MenuItem>
+                                    <MenuItem eventKey={250} onSelect={handleLimitSelect}>Show 250</MenuItem>
+                                </DropdownButton>
+                            
+                            <ButtonGroup>
+                                
+                                <Button disabled={this.state.changingPage || this.state.page === 1} onClick={this.state.changingPage === true ? null : (e)=>{
+                                    this.changePage(this.state.page - 1);
+                                }}><i className="icon icon-angle-left icon-fw"></i></Button>
+                            
+                                <Button disabled style={{ minWidth : 120 }}>
+                                    { this.state.changingPage === true ? 
+                                        <i className="icon icon-spin icon-circle-o-notch" style={{ opacity : 0.5 }}></i>
+                                        : 'Page ' + this.state.page + ' of ' + maxPage
+                                    }
+                                </Button>
+                            
+                                <Button disabled={this.state.changingPage || this.state.page === maxPage} onClick={this.state.changingPage === true ? null : (e)=>{
+                                    this.changePage(this.state.page + 1);
+                                }}><i className="icon icon-angle-right icon-fw"></i></Button>
+                                
+                            </ButtonGroup>
+                        </ButtonToolbar>
+                    </div>
+                </div>
 
                 <div className="expset-table-container" ref="expSetTableContainer">
                     <Table className="expset-table expsets-table" condensed id="result-table">
