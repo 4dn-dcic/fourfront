@@ -1,5 +1,5 @@
 import pytest
-from encoded.types.experiment import Experiment, ExperimentHiC
+# from encoded.types.experiment import Experiment, ExperimentHiC
 pytestmark = pytest.mark.working
 '''Has tests for both experiment.py and experiment_set.py'''
 
