@@ -135,11 +135,6 @@ def test_file_post_fastq_related(testapp, fastq_json, fastq_related_file):
                                    'relationship_type': 'parent of'}]
 
 
-def test_file_post_related(testapp, related_files):
-    for f, r in related_files:
-        pass
-
-
 def test_external_creds(mocker):
     mock_boto = mocker.patch('encoded.types.file.boto', autospec=True)
 
@@ -159,7 +154,7 @@ def test_create_file_request_proper_s3_resource(registry, fastq_json, mocker):
     external_creds = mocker.patch('encoded.types.file.external_creds')
     # don't actually create this bad boy
     mocker.patch('encoded.types.base.Item.create')
-    my_file = FileFastq.create(registry, '1234567', fastq_json)
+    FileFastq.create(registry, '1234567', fastq_json)
     # check that we would have called aws
     expected_s3_key = "1234567/%s.fastq.gz" % (fastq_json['accession'])
     external_creds.assert_called_once_with('test-bucket', expected_s3_key,
