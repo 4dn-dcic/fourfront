@@ -38,3 +38,29 @@ class QualityMetricFastqc(QualityMetric):
     item_type = 'quality_metric_fastqc'
     schema = load_schema('encoded:schemas/quality_metric_fastqc.json')
     embedded = QualityMetric.embedded
+
+@collection(
+    name='quality-metrics-bamqc',
+    properties={
+        'title': 'BamQC Quality Metrics',
+        'description': 'Listing of BamQC Quality Metrics',
+    })
+class QualityMetricBamqc(QualityMetric):
+    """Subclass of quality matrics for bam files."""
+
+    item_type = 'quality_metric_bamqc'
+    schema = load_schema('encoded:schemas/quality_metric_bamqc.json')
+    embedded = QualityMetric.embedded
+
+@collection(
+    name='quality-metrics-pairsqc',
+    properties={
+        'title': 'PairsQC Quality Metrics',
+        'description': 'Listing of PairsQC Quality Metrics',
+    })
+class QualityMetricPairsqc(QualityMetric):
+    """Subclass of quality matrics for pairs files."""
+
+    item_type = 'quality_metric_pairsqc'
+    schema = load_schema('encoded:schemas/quality_metric_pairsqc.json')
+    embedded = QualityMetric.embedded

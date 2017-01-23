@@ -40,6 +40,9 @@ ORDER = [
     'treatment_rnai',
     'treatment_chemical',
     'biosample',
+    'quality_metric_fastqc',
+    'quality_metric_bamqc',
+    'quality_metric_pairsqc',
     'file_fastq',
     'file_fasta',
     'file_processed',
@@ -54,7 +57,6 @@ ORDER = [
     'analysis_step',
     'workflow',
     'workflow_mapping',
-    'workflow_run',
     'workflow_run_sbg'
 ]
 
