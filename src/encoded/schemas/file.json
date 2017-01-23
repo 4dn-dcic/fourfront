@@ -134,13 +134,6 @@
                 }
             }
         },
-        "quality_metric": {
-            "title": "QC Metric",
-            "description": "A particular QC metric associated with this flag.",
-            "type": "string",
-            "exclude_from": "submit4dn",
-            "linkTo": "QualityMetric"
-        },
         "restricted": {
             "title": "Restricted file",
             "exclude_from": "submit4dn",

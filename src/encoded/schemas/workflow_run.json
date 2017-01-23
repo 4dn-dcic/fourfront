@@ -79,6 +79,30 @@
                 }
             }
         },
+        "output_quality_metrics": {
+            "title" : "Output quality metrics",
+            "description": "All quality metric objects that are outputs of the workflow run",
+            "type": "array",
+            "items": {
+                "title": "Output quality metric",
+                "description": "output quality metric object",
+                "type": "object",
+                "additionalProperties": false,
+                "properties":{
+                    "name": {
+                        "title": "Name (type) of quality metric",
+                        "description": "quality metric identifier",
+                        "type": "string"
+                    },
+                    "value": {
+                        "title": "Link to quality metric object",
+                        "description": "a specific quality metric object",
+                        "type": "string",
+                        "LinkTo": "QualityMetric"
+                    }
+                }
+            }
+        },
         "parameters": {
             "title": "parameters",
             "description": "Parameters of the workflow run",
