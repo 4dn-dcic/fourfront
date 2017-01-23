@@ -9,30 +9,42 @@
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
-        { "$ref": "mixins.json#/submitted" },
-        { "$ref": "mixins.json#/status" }
+        { "$ref": "mixins.json#/submitted" }
     ],
     "properties": {
         "schema_version": {
             "default": "1"
+        },
+        "status": {
+            "title": "Status",
+            "type": "string",
+            "default": "current",
+            "permission": "import_items",
+            "enum": [
+                "current",
+                "revoked",
+                "deleted",
+                "inactive"
+            ]
         },
         "name": {
             "title": "Name",
             "description": "A short unique name for the lab, use lower cased and hyphen delimited PI name and lab(e.g. john-doe-lab).",
             "type": "string",
             "pattern": "^[a-z0-9\\-]+lab$",
-            "uniqueKey": "lab:name"
+            "uniqueKey": "lab:name",
+            "permission": "import_items"
         },
         "title": {
             "title": "Title",
             "description": "A unique name for lab & affiliation use PI's first & last name, Lab, comma, and institute label. (e.g. John Doe Lab, UNI).",
             "type": "string",
-            "uniqueKey": "lab:name"
+            "uniqueKey": "lab:name",
+            "permission": "import_items"
         },
         "pi": {
             "title": "P.I.",
             "description": "Principle Investigator of the lab.",
-            "comment": "See user.json for available identifiers.",
             "type": "string",
             "linkTo": "User"
         },
@@ -45,7 +57,6 @@
             "items": {
                 "title": "Grant",
                 "description": "A grant associated with the lab.",
-                "comment": "See award.json for available identifiers.",
                 "type": "string",
                 "linkTo": "Award"
             }
@@ -119,12 +130,5 @@
             "type": "string",
             "format": "uri"
         }
-    },
-    "boost_values": {
-        "pi": 1.0,
-        "name":1.0,
-        "awards.title":1.0,
-        "institute_name": 1.0,
-        "institute_label": 1.0
     }
 }

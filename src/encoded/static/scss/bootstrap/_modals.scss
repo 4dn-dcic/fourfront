@@ -16,7 +16,6 @@
 .modal {
   display: none;
   overflow: auto;
-  overflow-y: scroll;
   position: fixed;
   top: 0;
   right: 0;
@@ -65,7 +64,8 @@
   bottom: 0;
   left: 0;
   z-index: $zindex-modal-background;
-  background-color: $modal-backdrop-bg;
+  @include gradient-radial-modal-bg;
+  
   // Fade for backdrop
   &.fade { @include opacity(0); }
   &.in { @include opacity($modal-backdrop-opacity); }
@@ -87,6 +87,14 @@
 .modal-title {
   margin: 0;
   line-height: $modal-title-line-height;
+}
+
+h1.modal-title, h2.modal-title {
+  font-weight: 300;
+}
+
+h5.modal-title, h4.modal-title, h3.modal-title {
+  font-weight: 600;
 }
 
 // Modal body

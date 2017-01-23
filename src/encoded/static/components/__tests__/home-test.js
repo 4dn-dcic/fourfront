@@ -11,15 +11,31 @@ jest.autoMockOff();
 jest.dontMock('react');
 jest.dontMock('underscore');
 
-describe('Testing item.js', function() {
-    var React, HomePage, testItem, TestUtils, page, data, _, banners, Wrapper;
+describe('Testing home.js', function() {
+    var React, HomePage, testItem, TestUtils, page, data, _, banners, Wrapper, statics;
 
     beforeEach(function() {
         React = require('react');
-        TestUtils = require('react/lib/ReactTestUtils');
+        TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
         HomePage = require('../home');
+        statics = require('../../data/statics'); // Maybe keep version of statics.js and put into /testdata/
         Wrapper = React.createClass({
+            childContextTypes: {
+                fetch: React.PropTypes.func
+            },
+
+            // Retrieve current React context
+            getChildContext: function() {
+                return {
+                    fetch: this.fetch
+                };
+            },
+
+            fetch: function(url, options) {
+                return null;
+            },
+
             render: function() {
                 return (
                     <div>{this.props.children}</div>
@@ -28,7 +44,7 @@ describe('Testing item.js', function() {
         });
         page = TestUtils.renderIntoDocument(
             <Wrapper>
-                <HomePage />
+                <HomePage context={{ 'content' : statics }} />
             </Wrapper>
         );
     });
@@ -38,8 +54,8 @@ describe('Testing item.js', function() {
         var bannerEntries = TestUtils.scryRenderedDOMComponentsWithClass(page, 'banner-entry');
         expect(banners.length).toEqual(1);
         expect(bannerEntries.length).toEqual(3);
-        expect(bannerEntries[0].getAttribute('href')).toEqual('/browse/?type=ExperimentSet&experimentset_type=biological+replicates');
-        expect(bannerEntries[1].getAttribute('href')).toEqual('/browse/?type=ExperimentSet&experimentset_type=biological+replicates');
+        expect(bannerEntries[0].getAttribute('href')).toEqual('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all');
+        expect(bannerEntries[1].getAttribute('href')).toEqual('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all');
         expect(bannerEntries[2].getAttribute('href')).toEqual('/search/?type=Biosource');
     });
 

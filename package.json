@@ -6,12 +6,13 @@
     "test": "jest",
     "build": "gulp build",
     "build-quick": "gulp build-quick",
-    "dev": "gulp dev"
+    "dev": "gulp dev",
+    "dev-uglified" : "gulp dev-uglified"
   },
   "author": "",
   "license": "MIT",
   "files": [],
-  "repository": "hms-dbmi/fourfront",
+  "repository": "4dn-dcic/fourfront",
   "jest": {
     "rootDir": "src/encoded/static",
     "setupFiles": [
@@ -39,35 +40,38 @@
     "jest-cli": "^12.0.1",
     "jsdom": "^8.4.0",
     "json-loader": "^0.5.4",
+    "sinon" : "^1.17.6",
     "string-replace-loader": "^1.0.0",
-    "webpack": "^1.13.0"
+    "webpack": "^1.13.3"
   },
   "dependencies": {
+    "auth0-lock": "^10.4.0",
     "babel-polyfill": "^6.7.4",
     "brace": "^0.3.0",
     "ckeditor": "file:node_shims/ckeditor",
+    "classnames": "^2.2.5",
     "color": "^0.10.1",
-    "cookie-monster": "0.0.7",
     "d3": "^3.4.6",
     "dagre-d3": "git+https://github.com/ENCODE-DCC/dagre-d3.git#compound-nodes",
     "domready": "^0.3.0",
     "form-serialize": "^0.6.0",
     "google-analytics": "file:node_shims/google-analytics",
     "immutable": "^3.7.5",
+    "js-md5" : "^0.4.1",
+    "jsonwebtoken": "^7.1.9",
     "marked": "^0.3.3",
-    "moment": "^2.8.2",
+    "moment": "^2.15.2",
     "query-string": "^4.1.0",
-    "react": "^15.3.1",
-    "react-dom": "^15.3.1",
-    "react-bootstrap": "^0.30.3",
-    "redux": "^3.5.2",
+    "react": "^15.3.2",
+    "react-bootstrap": "^0.30.7",
+    "react-cookie" : "^0.4.8",
+    "react-dom": "^15.3.2",
     "react-redux": "^4.4.5",
-    "classnames": "^2.2.5",
-    "react-forms": "2.0.0-beta33",
+    "redux": "^3.5.2",
     "scriptjs": "^2.5.7",
     "source-map-support": "^0.2.7",
     "subprocess-middleware": "^0.1.0",
     "underscore": "^1.8.3",
-    "whatwg-fetch": "git+https://github.com/lrowe/fetch.git#bf5d58b738fb2ed6d60791b944d36075fee8604a"
+    "xhr2": "^0.1.3"
   }
 }

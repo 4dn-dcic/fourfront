@@ -3,25 +3,27 @@
     "id": "/profiles/quality_metric_flag.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["flag"],
+    "required": ["flag", "award", "lab"],
     "additionalProperties": false,
     "identifyingProperties": ["uuid"],
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/status" },
+        { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/attachment" }
    ],
     "properties": {
         "schema_version": {
-            "hidden comment": "Bump the default in the subclasses."
+            "default": "1"
         },
         "flag": {
             "title": "Flag",
             "description": "A flag that may indicate an issue with an experiment",
             "type": "string",
-            "comment": "Can be associated with a specific quality metric that generates the flag",
+            "internal_comment": "Can be associated with a specific quality metric that generates the flag",
             "enum": [
                 "FASTQC WARNING",
                 "ALIGNMENT WARNING",

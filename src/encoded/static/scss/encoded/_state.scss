@@ -1,11 +1,3 @@
-/* top padding for small screens */
-#content {
-    padding-top: 0;
-
-    @media (min-width: $screen-md-min) {
-        padding-top: 75px;
-    }
-}
 
 // make footer look good on larger screens
 // and activate sticky footer

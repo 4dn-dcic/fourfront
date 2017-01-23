@@ -4,7 +4,7 @@
     "id": "/profiles/treatment_chemical.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["chemical"],
+    "required": ["chemical", "lab", "award"],
     "identifyingProperties": ["uuid","aliases"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -14,7 +14,6 @@
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/attribution" },
-        { "$ref": "mixins.json#/submitted"},
         { "$ref": "mixins.json#/references" },
         { "$ref": "mixins.json#/notes" },
         { "$ref": "mixins.json#/submitted" },
@@ -27,7 +26,7 @@
         "chemical": {
             "title": "Drug or Chemical",
             "type": "string",
-            "comment": "restricted to chEBI terms - validate against IDs?"
+            "internal_comment": "restricted to chEBI terms - validate against IDs?"
         },
         "concentration": {
             "title": "Concentration",
@@ -65,9 +64,8 @@
             ]
         },
         "temperature": {
-            "title": "Temperature",
-            "type": "number",
-            "comment": "degrees Centigrade"
+            "title": "Temperature (°C)",
+            "type": "number"
         }
     }
 }

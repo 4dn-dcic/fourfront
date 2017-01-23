@@ -4,6 +4,7 @@
     "id": "/profiles/target.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
+    "required": ["award", "lab"],
     "identifyingProperties": ["uuid", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -11,8 +12,8 @@
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/notes" },
-        { "$ref": "mixins.json#/status"},
-        { "$ref": "mixins.json#/submitted"},
+        { "$ref": "mixins.json#/status"} ,
+        { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/references" },
         { "$ref": "mixins.json#/dbxrefs" }
@@ -33,8 +34,7 @@
             "items": {
                 "title": "Gene",
                 "description": "Gene symbol for targeted gene",
-                "comment": "will want to have validation against authority gene name databases",
-                "comment": "and link to the external resource",
+                "internal_comment": "will want to have validation against authority gene name databases, and link to the external resource",
                 "type": "string"
             }
         },

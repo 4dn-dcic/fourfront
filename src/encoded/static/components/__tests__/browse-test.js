@@ -21,7 +21,7 @@ describe('Testing browse.js for experiment set browser', function() {
     beforeEach(function() {
         React = require('react');
         var { Provider, connect } = require('react-redux');
-        TestUtils = require('react/lib/ReactTestUtils');
+        TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
         Browse = require('../browse').Browse;
         context = require('../testdata/browse/context');
@@ -39,7 +39,7 @@ describe('Testing browse.js for experiment set browser', function() {
             },
             getChildContext: function() {
                 return {
-                    location_href: "http://localhost:8000/browse/?type=ExperimentSet&experimentset_type=biological+replicates",
+                    location_href: "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate",
                     navigate: function(){return;}
                 };
             },
@@ -57,16 +57,17 @@ describe('Testing browse.js for experiment set browser', function() {
         );
     });
 
-    it('has 3 passing entries (experiment sets or experiments)', function() {
+    it('has 1 passing entry (an experiment set)', function() {
         var passEntries = TestUtils.scryRenderedDOMComponentsWithClass(page, 'expset-entry-passed');
-        expect(passEntries.length).toEqual(3);
+        expect(passEntries.length).toEqual(1);
     });
 
     it('filters correctly when filters are clicked', function() {
-        var expFilters = TestUtils.scryRenderedDOMComponentsWithClass(page, 'expterm');
+        var expFilters = TestUtils.scryRenderedDOMComponentsWithClass(page, 'term');
         expect(expFilters.length).toEqual(12);
         TestUtils.Simulate.click(expFilters[0]);
-        var selectedExpFilters = TestUtils.scryRenderedDOMComponentsWithClass(page, 'expterm-selected');
+        jest.runAllTimers(); // Click handler has been wrapped in setTimeout (to incr. UI responsiveness) so must wait for it before proceeding.
+        var selectedExpFilters = TestUtils.scryRenderedDOMComponentsWithClass(page, 'term selected');
         expect(selectedExpFilters.length).toEqual(1);
     });
 

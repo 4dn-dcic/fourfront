@@ -1,16 +1,10 @@
 'use strict';
 var React = require('react');
-var collection = require('./collection');
-var fetched = require('./fetched');
 var globals = require('./globals');
-var audit = require('./audit');
-var _ = require('underscore');
 var Panel = require('react-bootstrap').Panel;
-var AuditIndicators = audit.AuditIndicators;
-var AuditDetail = audit.AuditDetail;
-var AuditMixin = audit.AuditMixin;
-var Table = collection.Table;
-var ErrorPage = require('./error');
+var Table = require('./collection').Table;
+var { AuditIndicators, AuditDetail, AuditMixin } = require('./audit');
+var { ajaxPromise } = require('./objectutils');
 
 var Fallback = module.exports.Fallback = React.createClass({
     contextTypes: {
@@ -39,23 +33,15 @@ var Fallback = module.exports.Fallback = React.createClass({
     }
 });
 
-var ItemLoader = React.createClass({
-    mixins: [AuditMixin],
-    render: function() {
-        return (
-            <fetched.FetchedData>
-                <fetched.Param name="schemas" url="/profiles/" />
-                <Item context={this.props.context} />
-            </fetched.FetchedData>
-        );
-    }
-});
-
 var Item = React.createClass({
+    mixins: [AuditMixin],
+    contextTypes: {
+        schemas: React.PropTypes.object
+    },
+
     render: function() {
         var context = this.props.context;
         var itemClass = globals.itemClass(context, 'view-item');
-        var title = globals.listing_titles.lookup(context)({context: context});
         var IPanel = globals.panel_views.lookup(context);
         // Make string of alternate accessions
         return (
@@ -68,15 +54,13 @@ var Item = React.createClass({
                     </div>
                 </header>
                 <AuditDetail context={context} key="biosample-audit" />
-                <div className="row item-row">
-                     <IPanel {...this.props}/>
-                </div>
+                <IPanel {...this.props} />
             </div>
         );
     }
 });
 
-globals.content_views.register(ItemLoader, 'Item');
+globals.content_views.register(Item, 'Item');
 
 
 // Also use this view as a fallback for anything we haven't registered
@@ -87,34 +71,29 @@ globals.content_views.fallback = function () {
 
 var IPanel = module.exports.IPanel = React.createClass({
     render: function() {
-        var schemas = this.props.schemas;
+        var schemas = this.props.schemas || {};
         var context = this.props.context;
-        var itemClass = globals.itemClass(context, 'view-detail panel');
+        //var itemClass = globals.itemClass(context, 'view-detail panel');
         var title = globals.listing_titles.lookup(context)({context: context});
         var sortKeys = Object.keys(context).sort();
         var tips = tipsFromSchema(schemas, context);
+
+
         return (
             <Panel className="data-display panel-body-with-header">
-                <div className="flexrow">
-                    <div className="flexcol-sm-6">
-                        <div className="flexcol-heading experiment-heading"><h5>{title}</h5></div>
-                        <dl className="key-value">
-                            {sortKeys.map(function(ikey, idx){
-                                return (
-                                    <div key={ikey} data-test="term-name">
-                                        {formKey(tips,ikey)}
-                                        <dd>{formValue(schemas,context[ikey])}</dd>
-                                    </div>
-                                );
-                            })}
-                        </dl>
-                    </div>
+                <div className="flexcol-heading experiment-heading">
+                    <h4>{ title }</h4>
                 </div>
+                <dl className="key-value">
+                    {sortKeys.map((ikey, idx) =>
+                        <div key={ikey} data-test="term-name">
+                            {formKey(tips,ikey)}
+                            <dd>{formValue(schemas,context[ikey])}</dd>
+                        </div>
+                    )}
+                </dl>
             </Panel>
         );
-        // return (
-        //         <Panel>BasicPanel</Panel>
-        // );
     }
 });
 
@@ -203,7 +182,7 @@ var FetchedRelatedItems = React.createClass({
     },
 
     render: function() {
-        var {Component, context, title, url, ...props} = this.props;
+        var {Component, context, title, url, props} = this.props;
         if (context === undefined) return null;
         var items = context['@graph'];
         if (!items.length) return null;
@@ -211,53 +190,33 @@ var FetchedRelatedItems = React.createClass({
         return (
             <Component {...props} title={title} context={context} total={context.total} items={items} url={url} showControls={false} />
         );
-    },
+    }
 
 });
 
-
-var RelatedItems = module.exports.RelatedItems = React.createClass({
-    getDefaultProps: function() {
-        return {limit: 5};
-    },
-
-    render: function() {
-        var url = this.props.url + '&status!=deleted&status!=revoked&status!=replaced';
-        var limited_url = url + '&limit=' + this.props.limit;
-        var unlimited_url = url + '&limit=all';
-        return (
-            <fetched.FetchedData>
-                <fetched.Param name="context" url={limited_url} />
-                <FetchedRelatedItems {...this.props} url={unlimited_url} />
-            </fetched.FetchedData>
-        );
-    },
-});
+// **** Deprecated when fetch was removed.
+//
+// var RelatedItems = module.exports.RelatedItems = React.createClass({
+//     getDefaultProps: function() {
+//         return {limit: 5};
+//     },
+//
+//     render: function() {
+//         var url = this.props.url + '&status!=deleted&status!=revoked&status!=replaced';
+//         var limited_url = url + '&limit=' + this.props.limit;
+//         var unlimited_url = url + '&limit=all';
+//         return (
+//             <fetched.FetchedData>
+//                 <fetched.Param name="context" url={limited_url} />
+//                 <FetchedRelatedItems {...this.props} url={unlimited_url} />
+//             </fetched.FetchedData>
+//         );
+//     },
+// });
 
 // ******* Refined item.js code below... *******
 
-// Formats the correct display for each metadata field
-var formValue = function (schemas, item) {
-    var toReturn = [];
-    if(Array.isArray(item)) {
-        for (var i=0; i < item.length; i++){
-            toReturn.push(formValue(schemas, item[i]));
-        }
-    }else if (typeof item === 'object') {
-        toReturn.push(<SubIPanel schemas={schemas} content={item}/>);
-    }else{
-        if (typeof item === 'string' && item.charAt(0) === '/') {
-            toReturn.push(<a key={item} href={item}>{item}</a>)
-        }else{
-            toReturn.push(item);
-        }
-    }
-    return(
-        <div>{toReturn}</div>
-    );
-};
-
-var SubIPanel = React.createClass({
+var SubIPanel = module.exports.SubIPanel = React.createClass({
     getInitialState: function() {
     	return {isOpen: false};
     },
@@ -300,32 +259,34 @@ var Subview = React.createClass({
         var sortKeys = Object.keys(item).sort();
         return(
             <div className="flexcol-sm-6 subview">
-              <Panel className="sub-panel data-display panel-body-with-header">
-                  <div className="flexrow">
-                      <div className="flexcol-sm-6">
-                          <div className="flexcol-heading experiment-heading"><h5>{title}</h5></div>
-                          <dl className="key-value sub-descriptions">
-                              {sortKeys.map(function(ikey, idx){
-                                  return (
-                                    <div className="sub-entry" key={ikey} data-test="term-name">
-                                      {formKey(tips,ikey)}
-                                      <dd>{formValue(schemas, item[ikey])}</dd>
-                                    </div>
-                                  );
-                              })}
-                          </dl>
-                      </div>
-                  </div>
-              </Panel>
+                <Panel className="sub-panel data-display panel-body-with-header">
+                    <div className="flexrow">
+                        <div className="flexcol-sm-6">
+                            <div className="flexcol-heading experiment-heading">
+                                <h5>{title}</h5>
+                            </div>
+                            <dl className="key-value sub-descriptions">
+                                {sortKeys.map(function(ikey, idx){
+                                    return (
+                                        <div className="sub-entry" key={ikey} data-test="term-name">
+                                        {formKey(tips,ikey)}
+                                        <dd>{formValue(schemas, item[ikey])}</dd>
+                                        </div>
+                                    );
+                                })}
+                            </dl>
+                        </div>
+                    </div>
+                </Panel>
             </div>
         );
     }
 });
 
 //Return the properties dictionary from a schema for use as tooltips
-var tipsFromSchema = function(schemas, content){
+var tipsFromSchema = module.exports.tipsFromSchema = function(schemas, content){
     var tips = {};
-    if(content['@type']){
+    if(content['@type'] && typeof schemas === 'object' && schemas !== null){
         var type = content['@type'][0];
         if(schemas[type]){
             tips = schemas[type]['properties'];
@@ -333,6 +294,8 @@ var tipsFromSchema = function(schemas, content){
     }
     return tips;
 };
+
+// Formats the correct display for each metadata field
 
 var formKey =  function(tips, key){
     var tooltip = '';
@@ -347,9 +310,30 @@ var formKey =  function(tips, key){
     );
 };
 
+var formValue = function (schemas, item) {
+    var toReturn = [];
+    if(Array.isArray(item)) {
+        for (var i=0; i < item.length; i++){
+            toReturn.push(formValue(schemas, item[i]));
+        }
+    }else if (typeof item === 'object') {
+        toReturn.push(<SubIPanel schemas={schemas} content={item}/>);
+    }else{
+        if (typeof item === 'string' && item.charAt(0) === '/') {
+            toReturn.push(<a key={item} href={item}>{item}</a>);
+        }else{
+            toReturn.push(item);
+        }
+    }
+    return(
+        <div>{toReturn}</div>
+    );
+};
+
+
 // Display the item field with a tooltip showing the field description from
 // schema, if available
-var DescriptorField = React.createClass({
+var DescriptorField = module.exports.DescriptorField = React.createClass({
     propTypes: {
         field: React.PropTypes.string.isRequired,
         description: React.PropTypes.string.isRequired

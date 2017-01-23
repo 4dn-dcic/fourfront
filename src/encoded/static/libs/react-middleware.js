@@ -7,18 +7,8 @@ var fs = require('fs');
 var inline = fs.readFileSync(__dirname + '/../build/inline.js').toString();
 var store = require('../store');
 var { Provider, connect } = require('react-redux');
-
-function mapStateToProps(store) {
-   return {
-       href: store.href,
-       context: store.context,
-       inline: store.inline,
-       session_cookie: store.session_cookie,
-       contextRequest: store.contextRequest,
-       slow: store.slow,
-       expSetFilters: store.expSetFilters
-   };
-}
+var { JWT } = require('../components/objectutils');
+var Alerts = require('../components/alerts');
 
 var render = function (Component, body, res) {
     //var start = process.hrtime();
@@ -27,14 +17,40 @@ var render = function (Component, body, res) {
         'href':res.getHeader('X-Request-URL') || context['@id'],
         'inline':inline
     };
+
+    // Subprocess-middleware re-uses process on prod. Might have left-over data from prev request. 
+    // JWT 'localStorage' uses 'dummyStorage' plain object on server-side
+    JWT.remove(); 
+    // Grab JWT token if available to inform session
+    var jwtToken = res.getHeader('X-Request-JWT'); // Only returned if successfully authenticated
+    var sessionMayBeSet = false;
+    var userInfo = null;
+    if (JWT.maybeValid(jwtToken)){
+        sessionMayBeSet = true;
+        userInfo = JSON.parse(res.getHeader('X-User-Info'));
+        if (userInfo){
+            JWT.saveUserInfoLocalStorage(userInfo);
+        }
+        //res.removeHeader('X-User-Info');
+        //res.removeHeader('X-Request-JWT');
+    } else if (
+        /* (disp_dict.context.code === 403 || res.statusCode === 403) && */ 
+        // Sometimes a different statusCode is returned (e.g. 404 if no search/browse result)
+        (jwtToken === 'expired' || disp_dict.context.detail === "Bad or expired token.")
+    ){
+        sessionMayBeSet = false;
+        disp_dict.alerts = [Alerts.LoggedOut];
+    }
+    // End JWT token grabbing
+
     store.dispatch({
         type: disp_dict
     });
     var markup;
     var UseComponent;
     try {
-        UseComponent = connect(mapStateToProps)(Component);
-        markup = ReactDOMServer.renderToString(<Provider store={store}><UseComponent /></Provider>);
+        UseComponent = connect(store.mapStateToProps)(Component);
+        markup = ReactDOMServer.renderToString(<Provider store={store}><UseComponent sessionMayBeSet={sessionMayBeSet} /></Provider>);
 
     } catch (err) {
         var context = {
@@ -54,7 +70,7 @@ var render = function (Component, body, res) {
         });
         // To debug in browser, pause on caught exceptions:
         res.statusCode = 500;
-        UseComponent = connect(mapStateToProps)(Component);
+        UseComponent = connect(store.mapStateToProps)(Component);
         markup = ReactDOMServer.renderToString(<Provider store={store}><UseComponent /></Provider>);
     }
     res.setHeader('Content-Type', 'text/html; charset=utf-8');

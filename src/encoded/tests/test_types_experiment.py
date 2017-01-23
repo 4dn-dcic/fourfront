@@ -1,100 +1,81 @@
 import pytest
-
-@pytest.fixture
-def base_experiment(testapp, lab, award):
-    item = {
-        'award': award['uuid'],
-        'lab': lab['uuid'],
-        'status': 'uploaded'
-    }
-    return testapp.post_json('/experiment', item, status=201).json['@graph'][0]
-
-@pytest.fixture
-def base_experimend(testapp, lab, award):
-    item = {
-        'award': award['uuid'],
-        'lab': lab['uuid'],
-        'status': 'uploaded'
-    }
-    return testapp.post_json('/experiment_hic', item, status=201).json['@graph'][0]
+pytestmark = pytest.mark.working
+'''Has tests for both experiment.py and experiment_set.py'''
 
 
-def test_isogenic_replicate_type(testapp, base_experiment, donor_1, donor_2,biosample_1, biosample_2, library_1, library_2, replicate_1_1, replicate_2_1 ):
-    testapp.patch_json(donor_1['@id'], {'age_units': 'year', 'age': '55' })
-    testapp.patch_json(donor_1['@id'], {'sex': 'female' })
-    testapp.patch_json(biosample_1['@id'], {'donor': donor_1['@id']})
-    testapp.patch_json(biosample_2['@id'], {'donor': donor_1['@id']})
-    testapp.patch_json(library_1['@id'], {'biosample': biosample_1['@id']})
-    testapp.patch_json(library_2['@id'], {'biosample': biosample_2['@id']})
-    testapp.patch_json(replicate_1_1['@id'], {'library': library_1['@id']})
-    testapp.patch_json(replicate_2_1['@id'], {'library': library_2['@id']})
-    testapp.patch_json(base_experiment['@id'], {'replicates': [replicate_1_1['@id'], replicate_2_1['@id']]})
-    res = testapp.get(base_experiment['@id']+'@@index-data')
-    assert res.json['object']['replication_type']=='isogenic'
+def test_experiment_update_experiment_relation(testapp, base_experiment, experiment):
+    relation = [{'relationship_type': 'controlled by',
+                 'experiment': experiment['@id']}]
+    res = testapp.patch_json(base_experiment['@id'], {'experiment_relation': relation})
+    assert res.json['@graph'][0]['experiment_relation'] == relation
 
-def test_anisogenic_replicate_type_sex_age_matched(testapp, base_experiment, donor_1, donor_2,biosample_1, biosample_2, library_1, library_2, replicate_1_1, replicate_2_1 ):
-    testapp.patch_json(donor_1['@id'], {'age_units': 'year', 'age': '55' })
-    testapp.patch_json(donor_2['@id'], {'age_units': 'year', 'age': '55' })
-    testapp.patch_json(donor_1['@id'], {'sex': 'female' })
-    testapp.patch_json(donor_2['@id'], {'sex': 'female' })
-    testapp.patch_json(biosample_1['@id'], {'donor': donor_1['@id']})
-    testapp.patch_json(biosample_2['@id'], {'donor': donor_2['@id']})
+    # patching an experiement should also update the related experiement
+    exp_res = testapp.get(experiment['@id'])
 
-    testapp.patch_json(library_1['@id'], {'biosample': biosample_1['@id']})
-    testapp.patch_json(library_2['@id'], {'biosample': biosample_2['@id']})
-    testapp.patch_json(replicate_1_1['@id'], {'library': library_1['@id']})
-    testapp.patch_json(replicate_2_1['@id'], {'library': library_2['@id']})
-    testapp.patch_json(base_experiment['@id'], {'replicates': [replicate_1_1['@id'], replicate_2_1['@id']]})
-    res = testapp.get(base_experiment['@id']+'@@index-data')
-    assert res.json['object']['replication_type']=='anisogenic, sex-matched and age-matched'
+    exp_relation = [{'relationship_type': 'control for',
+                     'experiment': base_experiment['@id']}]
+    assert exp_res.json['experiment_relation'] == exp_relation
 
-def test_anisogenic_replicate_type_sex_matched(testapp, base_experiment, donor_1, donor_2,biosample_1, biosample_2, library_1, library_2, replicate_1_1, replicate_2_1 ):
-    testapp.patch_json(donor_1['@id'], {'age_units': 'year', 'age': '15' })
-    testapp.patch_json(donor_2['@id'], {'age_units': 'year', 'age': '55' })
-    testapp.patch_json(donor_1['@id'], {'sex': 'female' })
-    testapp.patch_json(donor_2['@id'], {'sex': 'female' })
-    testapp.patch_json(biosample_1['@id'], {'donor': donor_1['@id']})
-    testapp.patch_json(biosample_2['@id'], {'donor': donor_2['@id']})
 
-    testapp.patch_json(library_1['@id'], {'biosample': biosample_1['@id']})
-    testapp.patch_json(library_2['@id'], {'biosample': biosample_2['@id']})
-    testapp.patch_json(replicate_1_1['@id'], {'library': library_1['@id']})
-    testapp.patch_json(replicate_2_1['@id'], {'library': library_2['@id']})
-    testapp.patch_json(base_experiment['@id'], {'replicates': [replicate_1_1['@id'], replicate_2_1['@id']]})
-    res = testapp.get(base_experiment['@id']+'@@index-data')
-    assert res.json['object']['replication_type']=='anisogenic, sex-matched'
+def test_experiment_update_hic_sop_mapping_added_on_submit(testapp, experiment_data, sop_map_data):
+    res_sop = testapp.post_json('/sop_map', sop_map_data, status=201)
+    res_exp = testapp.post_json('/experiment_hi_c', experiment_data)
+    assert 'sop_mapping' in res_exp.json['@graph'][0]
+    assert res_exp.json['@graph'][0]['sop_mapping']['has_sop'] == "Yes"
+    assert res_exp.json['@graph'][0]['sop_mapping']['sop_map'] == res_sop.json['@graph'][0]['@id']
 
-def test_anisogenic_replicate_type_age_matched(testapp, base_experiment, donor_1, donor_2,biosample_1, biosample_2, library_1, library_2, replicate_1_1, replicate_2_1 ):
-    testapp.patch_json(donor_1['@id'], {'age_units': 'year', 'age': '55' })
-    testapp.patch_json(donor_2['@id'], {'age_units': 'year', 'age': '55' })
-    testapp.patch_json(donor_1['@id'], {'sex': 'female' })
-    testapp.patch_json(donor_2['@id'], {'sex': 'mixed' })
-    testapp.patch_json(biosample_1['@id'], {'donor': donor_1['@id']})
-    testapp.patch_json(biosample_2['@id'], {'donor': donor_2['@id']})
 
-    testapp.patch_json(library_1['@id'], {'biosample': biosample_1['@id']})
-    testapp.patch_json(library_2['@id'], {'biosample': biosample_2['@id']})
-    testapp.patch_json(replicate_1_1['@id'], {'library': library_1['@id']})
-    testapp.patch_json(replicate_2_1['@id'], {'library': library_2['@id']})
-    testapp.patch_json(base_experiment['@id'], {'replicates': [replicate_1_1['@id'], replicate_2_1['@id']]})
-    res = testapp.get(base_experiment['@id']+'@@index-data')
-    assert res.json['object']['replication_type']=='anisogenic, age-matched'
+def test_experiment_update_hic_sop_mapping_has_map_is_no(testapp, experiment_data):
+    experiment_data['experiment_type'] = 'DNase Hi-C'
+    res_exp = testapp.post_json('/experiment_hi_c', experiment_data)
+    assert 'sop_mapping' in res_exp.json['@graph'][0]
+    assert res_exp.json['@graph'][0]['sop_mapping']['has_sop'] == "No"
 
-def test_anisogenic_replicate_type(testapp, base_experiment, donor_1, donor_2,biosample_1, biosample_2, library_1, library_2, replicate_1_1, replicate_2_1 ):
-    testapp.patch_json(donor_1['@id'], {'age': 'unknown' })
-    testapp.patch_json(donor_2['@id'], {'age_units': 'year', 'age': '55' })
-    testapp.patch_json(donor_1['@id'], {'sex': 'female' })
-    testapp.patch_json(donor_2['@id'], {'sex': 'unknown' })
-    testapp.patch_json(biosample_1['@id'], {'donor': donor_1['@id']})
-    testapp.patch_json(biosample_2['@id'], {'donor': donor_2['@id']})
 
-    testapp.patch_json(library_1['@id'], {'biosample': biosample_1['@id']})
-    testapp.patch_json(library_2['@id'], {'biosample': biosample_2['@id']})
-    testapp.patch_json(replicate_1_1['@id'], {'library': library_1['@id']})
-    testapp.patch_json(replicate_2_1['@id'], {'library': library_2['@id']})
-    testapp.patch_json(base_experiment['@id'], {'replicates': [replicate_1_1['@id'], replicate_2_1['@id']]})
-    res = testapp.get(base_experiment['@id']+'@@index-data')
-    assert res.json['object']['replication_type']=='anisogenic'
+def test_experiment_update_hic_sop_map_not_added_when_already_present(testapp, experiment_data):
+    experiment_data['sop_mapping'] = {}
+    experiment_data['sop_mapping']['has_sop'] = 'No'
+    res = testapp.post_json('/experiment_hi_c', experiment_data)
+    assert 'sop_mapping' in res.json['@graph'][0]
+    assert res.json['@graph'][0]['sop_mapping']['has_sop'] == "No"
+    assert 'sop_map' not in res.json['@graph'][0]['sop_mapping']
 
-def test_experimend_update_experiment_relation(testapp, base_experimend):
-    print(base_experimend)
+
+def test_calculated_experiment_summary(testapp, experiment, mboI):
+    summary = 'micro-C on GM12878 with MboI'
+    res = testapp.patch_json(experiment['@id'], {'digestion_enzyme': mboI['@id']}, status=200)
+    assert res.json['@graph'][0]['experiment_summary'] == summary
+
+
+# test for experiment_set_replicate _update function
+def test_experiment_set_replicate_update_adds_experiments_in_set(testapp, experiment, replicate_experiment_set):
+    assert not replicate_experiment_set['experiments_in_set']
+    res = testapp.patch_json(
+        replicate_experiment_set['@id'],
+        {'replicate_exps':
+            [{'replicate_exp': experiment['@id'], 'bio_rep_no': 1, 'tec_rep_no': 1}]},
+        status=200)
+    assert experiment['@id'] in res.json['@graph'][0]['experiments_in_set']
+
+
+# tests for the experiment_sets calculated property
+def test_calculated_experiment_sets_for_custom_experiment_set(testapp, experiment, custom_experiment_set):
+    assert not experiment['experiment_sets']
+    res = testapp.patch_json(custom_experiment_set['@id'], {'experiments_in_set': [experiment['@id']]}, status=200)
+    print(res)
+    expt_res = testapp.get(experiment['@id'])
+    print(expt_res)
+    assert '/experiment_set/' + custom_experiment_set['uuid'] in expt_res.json['experiment_sets']
+
+
+def test_calculated_experiment_sets_for_replicate_experiment_set(testapp, experiment, replicate_experiment_set):
+    assert not experiment['experiment_sets']
+    res = testapp.patch_json(
+        replicate_experiment_set['@id'],
+        {'replicate_exps':
+            [{'replicate_exp': experiment['@id'], 'bio_rep_no': 1, 'tec_rep_no': 1}]},
+        status=200)
+    print(res)
+    expt_res = testapp.get(experiment['@id'])
+    print(expt_res)
+    assert '/experiment_set_replicate/' + replicate_experiment_set['uuid'] in expt_res.json['experiment_sets']

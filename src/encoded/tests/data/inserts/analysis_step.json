@@ -1,37 +1,59 @@
 [
     {
-        "name": "star_step",
-        "version": 7,
-        "title": "STAR run",
-        "description": "Step to Run STAR (Spliced Transcript Alignment to a Reference) aligns short and long RNA-seq reads to a reference genome using uncompressed suffix arrays.",
-        "cwl_pointer": "http:fake/path/to/step.cwl",
+        "name": "hictool_fastq2bam",
+        "version": "1",
+        "title": "hictool_fastq2bam",
+        "description": "Alignment according to the GITAR pipeline",
+        "cwl_pointer": "",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
         "analysis_step_types": ["alignment"],
-        "software_used": "0afb6080-1c08-11e4-8c21-0800200c9a66",
-        "input_file_info":
-            [
-                {"input_file_type": "reads", "input_file_format": "fastq"},
-                {"input_file_type": "genome index", "input_file_format": "bai"}
-            ],
-        "output_file_info": [{"output_file_type": "unfiltered alignments", "output_file_format": "bam"}],
-        "step_parameters":
-            [
-                {"parameter": "--runThreadN", "description": "number of threads"},
-                {"parameter": "--genomeDir", "description": "path to the index files"},
-                {"parameter": "--readFilesIn", "description": "path to the read files"}
-            ],
-        "qa_stats_generated": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
-        "uuid": "0afb6080-1c08-11e4-8c21-0800200c9a44"
+        "software_used": "7868f960-50ac-11e4-916c-0800200c9a66",
+        "input_file_info": [{"input_file_type": "reads", "input_file_format": "fastq"},{"input_file_type": "reads", "input_file_format": "fastq"},{"input_file_type": "genome index", "input_file_format": "tgz"} ],
+        "output_file_info": [{"output_file_type": "alignments", "output_file_format": "bam"},{"output_file_type": "alignments", "output_file_format": "bam"},{"output_file_type": "alignments", "output_file_format": "bam"}],
+        "uuid": "d3b03a23-49e5-4c33-afab-9ec90d65faf3"
     },
     {
-        "name": "filter_step",
-        "version": 1,
-        "title": "filter",
-        "description": "Dummy filter",
-        "cwl_pointer": "http:fake/path/to/filter.cwl",
-        "analysis_step_types": ["filtering"],
+        "name": "hictool_bam2hdf5",
+        "version": "1",
+        "title": "hictool_bam2hdf5",
+        "description": "Converting bam to hdf5 according to the GITAR pipeline",
+        "cwl_pointer": "",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "analysis_step_types": ["file format conversion"],
         "software_used": "7868f960-50ac-11e4-916c-0800200c9a66",
-        "input_file_info": [{"input_file_type": "unfiltered alignments", "input_file_format": "bam"}],
-        "output_file_info": [{"output_file_type": "alignments", "output_file_format": "bam"}],
-        "uuid": "0bdb6080-1c08-11e4-8c21-0800200c9a44"
+        "input_file_info": [{"input_file_type": "alignments", "input_file_format": "bam"},{"input_file_type": "alignments", "input_file_format": "bam"},{"input_file_type": "restriction enzyme site regions", "input_file_format": "bed"} ],
+        "output_file_info": [{"output_file_type": "intermediate", "output_file_format": "hdf5"}],
+        "uuid": "80c7771e-49e5-4c33-afab-9ec90d65faf3"
+    },
+    {
+        "name": "hictool_hdf52matrix",
+        "version": "1",
+        "title": "hictool_hdf52matrix",
+        "description": "Contact (unnormalized and normalized) matrix creation according to the GITAR pipeline",
+        "cwl_pointer": "",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "analysis_step_types": ["normalization"],
+        "software_used": "7868f960-50ac-11e4-916c-0800200c9a66",
+        "input_file_info": [{"input_file_type": "intermediate", "input_file_format": "hdf5"},{"input_file_type": "intermediate", "input_file_format": "hdf5"},{"input_file_type": "intermediate", "input_file_format": "hdf5"},{"input_file_type": "chromosome size", "input_file_format": "txt"} ],
+        "output_file_info": [{"output_file_type": "contact matrix", "output_file_format": "txt"},{"output_file_type": "contact matrix", "output_file_format": "txt"},{"output_file_type": "contact matrix", "output_file_format": "txt"},{"output_file_type": "contact matrix", "output_file_format": "txt"},{"output_file_type": "contact matrix", "output_file_format": "txt"}],
+        "step_parameters": [{"parameter": "chromosome","description": "chromosome"},{"parameter": "contact_matrix_binsize","description": "Contact matrix binsize", "default_value": "50000"}],
+        "uuid": "a937f407-49e5-4c33-afab-9ec90d65faf3"
+    },
+    {
+        "name": "FastQC",
+        "version": "1",
+        "title": "FastQC",
+        "description": "FastQC QC for fastq files",
+        "cwl_pointer": "",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "analysis_step_types": ["QC calculation"],
+        "software_used": "7868f960-50ac-11e4-916c-0800200c9a66",
+        "input_file_info": [{"input_file_type": "reads", "input_file_format": "fastq"} ],
+        "output_file_info": [{"output_file_type": "QC report", "output_file_format": "zip"}],
+        "uuid": "f7b8cd87-49e5-4c33-afab-9ec90d65faf3"
     }
 ]

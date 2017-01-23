@@ -27,17 +27,21 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
 
     item_type = 'biosample'
     schema = load_schema('encoded:schemas/biosample.json')
-    name_key = 'accession'
+    #name_key = 'accession'
     embedded = [
-        'biosource',
+        'biosource.uuid',
+        'biosource.biosource_type',
         'biosource.individual',
-        'biosource.individual.organism',
+        'biosource.individual.organism.name',
         'biosource.biosource_vendor',
         'references',
         'biosample_protocols',
         'treatments',
-        'modifications'
+        'modifications',
+        'modifications.modified_regions',
+        'cell_culture_details'
     ]
+    name_key = 'accession'
 
     @calculated_property(schema={
         "title": "Modifications summary",
@@ -54,6 +58,18 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
                 return ret_str[:-5]
             else:
                 return 'None'
+        return 'None'
+
+    @calculated_property(schema={
+        "title": "Modifications summary short",
+        "description": "Shorter summary of any modifications on the biosample for tables.",
+        "type": "string",
+    })
+    def modifications_summary_short(self, request, modifications=None):
+        if modifications:
+            # use only the first modification
+            mod_props = request.embed(modifications[0], '@@object')
+            return mod_props['modification_name_short']
         return 'None'
 
     @calculated_property(schema={
@@ -94,9 +110,9 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         # update self first to ensure 'biosample_relation' are stored in self.properties
         super(Biosample, self)._update(properties, sheets)
         DicRefRelation = {
-             "derived from": "parent of",
-             "parent of": "derived from"
-             }
+            "derived from": "parent of",
+            "parent of": "derived from"
+        }
         acc = str(self.uuid)
         if 'biosample_relation' in properties.keys():
             for relation in properties["biosample_relation"]:

@@ -2,36 +2,175 @@
 var React = require('react');
 var url = require('url');
 var Login = require('./login');
-var {Navbars, Navbar, Nav, NavItem} = require('../libs/bootstrap/navbar');
-var {DropdownMenu} = require('../libs/bootstrap/dropdown-menu');
-var productionHost = require('./globals').productionHost;
+var { Navbars, Navbar, Nav, NavItem, NavDropdown, MenuItem } = require('react-bootstrap');
 var _ = require('underscore');
+var store = require('../store');
+var { responsiveGridState, JWT, console } = require('./objectutils');
+var TestWarning = require('./testwarning');
+var productionHost = require('./globals').productionHost;
 
 
 var Navigation = module.exports = React.createClass({
-    mixins: [Navbars],
+
+    statics : {
+
+        /** May be bound to access this.props.href (if available) as fallback */
+        getWindowUrl : function(mounted){
+            var href;
+            if (this && this.props && this.props.href) {
+                href = url.parse(this.props.href);
+            }
+            if (mounted && typeof window === 'object' && window && typeof window.location !== 'undefined'){
+                href = window.location;
+            }
+            if (!href) return null;
+            return (href.pathname || '/') + (href.search || '') + (href.hash || '');
+        },
+
+        /** Can be bound to access this.props.href for getWindowUrl (if available) */
+        buildMenuItem : function(action, mounted, extraProps){
+            return (
+                <MenuItem
+                    key={action.id}
+                    id={action.sid || action.id}
+                    href={action.url || action.href || '#'}
+                    className="global-entry"
+                    active={
+                        (action.url && action.url === Navigation.getWindowUrl.call(this, mounted)) ||
+                        (action.href && action.href === Navigation.getWindowUrl.call(this, mounted))
+                    }
+                    {...extraProps}
+                >
+                    {action.title}
+                </MenuItem>
+            );
+        },
+
+        /** Can be bound to access this.props.href for getWindowUrl (if available) */
+        buildDropdownMenu : function(action, mounted){
+            if (action.children){
+                return (
+                    <NavDropdown key={action.id} id={action.sid || action.id} label={action.id} title={action.title}>
+                        {action.children.map((a) => Navigation.buildMenuItem(a, mounted) )}
+                    </NavDropdown>
+                );
+            } else {
+                return (
+                    <NavItem key={action.id} id={action.sid || action.id} href={action.url || action.href || '#'} active={
+                        (action.url && action.url === Navigation.getWindowUrl.call(this, mounted)) ||
+                        (action.href && action.href === Navigation.getWindowUrl.call(this, mounted))
+                    }>
+                        {action.title}
+                    </NavItem>
+                );
+            }
+        }
+    },
+
+    propTypes : {
+        href : React.PropTypes.string,
+        session : React.PropTypes.bool
+    },
 
     contextTypes: {
-        location_href: React.PropTypes.string,
-        portal: React.PropTypes.object
+        portal: React.PropTypes.object,
+        listActionsFor : React.PropTypes.func
     },
 
     getInitialState: function() {
         return {
-            testWarning: false
+            testWarning: this.props.visible || !productionHost[url.parse(this.props.href).hostname] || false,
+            mounted : false,
+            mobileDropdownOpen : false,
+            scrolledPastTop : false,
+            navInitialized : false
         };
     },
 
-    getInitialState: function() {
-        return {
-            testWarning: !productionHost[url.parse(this.context.location_href).hostname]
-        };
+    componentDidMount : function(){
+        this.setState({ mounted : true });
+        this.setupScrollHandler();
     },
 
-    handleClick: function(e) {
-        e.preventDefault();
-        e.stopPropagation();
+    setupScrollHandler : function(){
+        if (!(typeof window !== 'undefined' && window && document && document.body && typeof document.body.scrollTop !== 'undefined')){
+            return null;
+        }
 
+        var lastScrollTop = 0;
+
+        // We add as property of class instance so we can remove event listener on unmount, for example.
+        this.throttledScrollHandler = _.throttle((e) => {
+            var stateChange = {};
+            if (!this.state.navInitialized){
+                stateChange.navInitialized = true;
+            }
+            
+            var scrollVector = document.body.scrollTop - lastScrollTop;
+            lastScrollTop = document.body.scrollTop;
+
+            if (
+                ['xs','sm'].indexOf(responsiveGridState()) === -1 && // Fixed nav takes effect at medium grid breakpoint or wider.
+                (
+                    (document.body.scrollTop > 20 && scrollVector >= 0) ||
+                    (document.body.scrollTop > 80)
+                )
+            ){
+                if (!this.state.scrolledPastTop){
+                    stateChange.scrolledPastTop = true;
+                    this.setState(stateChange);
+                }
+            } else {
+                if (this.state.scrolledPastTop){
+                    stateChange.scrolledPastTop = false;
+                    this.setState(stateChange);
+                }
+            }
+        }, 100);
+
+        // Save logo/brand element's 'full width' before any height transitions.
+        // Ideally wait until logo/brand image has loaded before doing so.
+        var navBarBrandImg = document.getElementsByClassName('navbar-logo-image')[0];
+
+        function saveWidth(){
+            var navBarBrandImgContainer = navBarBrandImg.parentNode;
+            var navBarBrand = navBarBrandImgContainer.parentNode.parentNode;
+            navBarBrand.style.width = ''; // Clear any earlier width
+            if (['xs','sm'].indexOf(responsiveGridState()) !== -1) return; // If mobile / non-fixed nav width
+            //navBarBrandImgContainer.style.width = navBarBrandImgContainer.offsetWidth + 'px'; // Enable to fix width of logo to its large size.
+            navBarBrand.style.width = navBarBrand.offsetWidth + 'px';
+        };
+
+         this.throttledResizeHandler = _.throttle(saveWidth, 300);
+
+        navBarBrandImg.addEventListener('load', saveWidth);
+        // Execute anyway in case image is loaded, in addition to the 1 time on-img-load if any (some browsers do not support img load event; it's not part of W3 spec).
+        // Alternatively we can define width in stylesheet (e.g. 200px)
+        saveWidth();
+
+        window.addEventListener("scroll", this.throttledScrollHandler);
+        window.addEventListener("resize", this.throttledResizeHandler);
+        setTimeout(this.throttledScrollHandler, 100, null, { 'navInitialized' : true });
+    },
+
+    componentWillUnmount : function(){
+        // Unbind events | probably not needed but lets be safe & cleanup.
+        window.removeEventListener("resize", this.throttledResizeHandler);
+        window.removeEventListener("scroll", this.throttledScrollHandler);
+        delete this.throttledResizeHandler;
+        delete this.throttledScrollHandler;
+    },
+
+    closeMobileMenu : function(){
+        if (this.state.mobileDropdownOpen) this.setState({ mobileDropdownOpen : false });
+    },
+
+    closeDropdowns : function(){
+        if (!this.state.mounted) return;
+        //this.
+    },
+
+    hideTestWarning: function(e) {
         // Remove the warning banner because the user clicked the close icon
         this.setState({testWarning: false});
 
@@ -46,93 +185,51 @@ var Navigation = module.exports = React.createClass({
 
     render: function() {
         var portal = this.context.portal;
-        var img = <img src="/static/img/4dn_logo.svg" height= "70px" width="238px" className="nav-img"/>
+
+        var navClass = "navbar-container";
+        if (this.state.testWarning) navClass += ' test-warning-visible';
+        if (this.state.navInitialized) navClass += ' nav-initialized';
+        if (this.state.scrolledPastTop) {
+            navClass += " scrolled-past-top";
+        } else {
+            navClass += " scrolled-at-top";
+        }
+
         return (
-            <div id="navbar" className="navbar navbar-fixed-top navbar-inverse">
-                <div className="container">
-                    <Navbar brand={img} brandlink="/" label="main" navClasses="navbar-main" navID="navbar-icon">
-                        <GlobalSections />
-                        <UserActions />
-                        {/* REMOVE SEARCH FOR NOW: <Search />*/}
+            <div className={navClass}>
+                <div id="top-nav" className="navbar-fixed-top">
+                    <TestWarning visible={this.state.testWarning} setHidden={this.hideTestWarning} />
+                    <Navbar fixedTop={false /* Instead we make the navbar container fixed */} label="main" className="navbar-main" id="navbar-icon" onToggle={(open)=>{
+                        this.setState({ mobileDropdownOpen : open });
+                    }} expanded={this.state.mobileDropdownOpen}>
+                        <Navbar.Header>
+                            <Navbar.Brand>
+                                <NavItem href="/">
+                                    <span className="img-container"><img src="/static/img/4dn_icon.svg" className="navbar-logo-image"/></span>
+                                    <span className="navbar-title">Data Portal</span>
+                                </NavItem>
+                            </Navbar.Brand>
+                            <Navbar.Toggle>
+                                <i className="icon icon-bars icon-fw"></i>
+                            </Navbar.Toggle>
+                        </Navbar.Header>
+                        <Navbar.Collapse>
+                            <Nav>{ this.context.listActionsFor('global_sections').map((a)=> Navigation.buildDropdownMenu.call(this, a, this.state.mounted) ) }</Nav>
+                            <UserActions mounted={this.state.mounted} closeMobileMenu={this.closeMobileMenu} session={this.props.session} />
+                            {/* REMOVE SEARCH FOR NOW: <Search href={this.props.href} /> */}
+                        </Navbar.Collapse>
                     </Navbar>
                 </div>
-                {this.state.testWarning ?
-                    <div className="test-warning">
-                        <div className="container">
-                            <p>
-                                The data displayed on this page is not official and only for testing purposes.
-                                <a href="#" className="test-warning-close icon icon-times-circle-o" onClick={this.handleClick}></a>
-                            </p>
-                        </div>
-                    </div>
-                : null}
             </div>
         );
     }
 });
 
 
-// Main navigation menus
-var GlobalSections = React.createClass({
-    contextTypes: {
-        listActionsFor: React.PropTypes.func,
-    },
-    render: function() {
-        var actions = this.context.listActionsFor('global_sections').map(action => {
-            return (
-                <NavItem key={action.id} dropdownId={action.id} dropdownTitle={action.title} dropdownSId={action.sid} dropdownLink={action.url ? action.url : null}>
-                    {action.children ?
-                        <DropdownMenu label={action.id}>
-                            {action.children.map(function(action){
-                                return(
-                                    <a href={action.url || ''} key={action.id} className="global-entry">
-                                        {action.title}
-                                    </a>
-                                );
-                            })}
-                        </DropdownMenu>
-                    : null}
-                </NavItem>
-            );
-        });
-        return <Nav>{actions}</Nav>;
-    }
-});
-
-
-// Context actions: mainly for editing the current object
-var ContextActions = React.createClass({
-    contextTypes: {
-        listActionsFor: React.PropTypes.func
-    },
-
-    render: function() {
-        var actions = this.context.listActionsFor('context').map(function(action) {
-            return (
-                <div key={action.name} >
-                    <a href={action.href} className="global-entry">
-                        <i className="icon icon-pencil"></i> {action.title}
-                    </a>
-                </div>
-            );
-        });
-
-        if (actions.length === 0) {
-            // No actions
-            return(<a href="#" className="invis"/>);
-        }
-
-        return (<div className="custom-entry">{actions}</div>);
-    }
-});
-
 var Search = React.createClass({
-    contextTypes: {
-        location_href: React.PropTypes.string
-    },
 
     render: function() {
-        var id = url.parse(this.context.location_href, true);
+        var id = url.parse(this.props.href, true);
         var searchTerm = id.query['searchTerm'] || '';
         return (
             <form className="navbar-form navbar-right" action="/search/">
@@ -145,69 +242,69 @@ var Search = React.createClass({
 
 
 var UserActions = React.createClass({
+
+    propTypes : {
+        session: React.PropTypes.bool
+    },
+
     contextTypes: {
-        listActionsFor: React.PropTypes.func,
-        session_properties: React.PropTypes.object
+        listActionsFor: React.PropTypes.func
     },
 
     render: function() {
-        var session_properties = this.context.session_properties;
-        var actions = this.context.listActionsFor('user_section').map(function (action) {
+        var session = this.props.session;
+        var acctTitle = "Account";
+
+        if (session){
+            var userDetails = JWT.getUserDetails();
+            if (userDetails && typeof userDetails.first_name === 'string' && userDetails.first_name.length > 0) {
+                acctTitle = userDetails.first_name;
+            }
+        }
+        
+        acctTitle = (
+            <span>
+                <i title={session ? "Signed In" : null} className={"icon icon-user" + (session ? "" : "-o")}></i>&nbsp; { acctTitle }
+            </span>
+        );
+
+        var actions = [];
+        this.context.listActionsFor('user_section').forEach((action) => {
             if (action.id === "login"){
-                return(<Login key={action.id} />);
-            }else if (action.id === "accountactions"){
+                actions.push(<Login key={action.id} navCloseMobileMenu={this.props.closeMobileMenu} />);
+            } else if (action.id === "accountactions"){
                 // link to registration page if logged out or account actions if logged in
-                if (!session_properties['auth.userid']) {
-                    return(
-                        <a href={action.url || ''} key={action.id} className="global-entry">
-                            {action.title}
-                        </a>
-                    );
-                }else{
-                    return(<AccountActions key={action.id} />);
+                if (!session) {
+                    actions.push(Navigation.buildMenuItem.call(this, action, this.props.mounted));
+                } else {
+                    // Account Actions
+                    actions = actions.concat(this.context.listActionsFor('user').map((action, idx) => {
+                        return Navigation.buildMenuItem.call(this, action, this.props.mounted, {"data-no-cache" : true});
+                    }));
                 }
-            }else if (action.id === "contextactions") {
-                return(<ContextActions key={action.id} />);
+            } else if (action.id === "contextactions") {
+                // Context Actions
+                actions = actions.concat(this.context.listActionsFor('context').map((action) => {
+                    return Navigation.buildMenuItem.call(
+                        this,
+                        _.extend(_.clone(action), { title : <span><i className="icon icon-pencil"></i> {action.title}</span> }),
+                        this.props.mounted
+                    );
+                }));
             }
         });
+
         return (
-                <Nav right={true} acct={true}>
-                    <NavItem dropdownId="context" dropdownTitle='Account'>
-                        <DropdownMenu label="context">
-                            {actions}
-                        </DropdownMenu>
-                    </NavItem>
-                </Nav>
+            <Nav className="navbar-acct" pullRight>
+                <NavDropdown id="context" label="context" title={acctTitle} >
+                    { actions }
+                </NavDropdown>
+            </Nav>
         );
     }
 });
 
-var AccountActions = React.createClass({
-    contextTypes: {
-        listActionsFor: React.PropTypes.func,
-        session_properties: React.PropTypes.object
-    },
 
-    render: function() {
-        var session_properties = this.context.session_properties;
-        if (!session_properties['auth.userid']) {
-            // Logged out, so no user menu at all
-            return(<a href="#" className="invis"/>);
-        }
-        var actions = this.context.listActionsFor('user').map(function (action) {
-            return (
-                <div key={action.id} >
-                    <a href={action.href || ''} data-bypass={action.bypass} data-trigger={action.trigger} className="global-entry">
-                        {action.title}
-                    </a>
-                </div>
-            );
-        });
-        return (
-            <div className="custom-entry">{actions}</div>
-        );
-    }
-});
 
 // Display breadcrumbs with contents given in 'crumbs' object.
 // Each crumb in the crumbs array: {

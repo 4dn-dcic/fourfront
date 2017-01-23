@@ -6,12 +6,9 @@ from snovault import (
     collection,
     load_schema,
 )
-# from pyramid.security import Authenticated
 from .base import (
     Item
-    # paths_filtered_by_status,
 )
-
 
 @abstract_collection(
     name='experiments',
@@ -21,17 +18,53 @@ from .base import (
         'description': 'Listing of all types of experiments.',
     })
 class Experiment(Item):
-    """The main expeperiment class."""
+    """The main experiment class."""
 
     base_types = ['Experiment'] + Item.base_types
     embedded = ["protocol", "protocol_variation", "lab", "award", "biosample",
                 "biosample.biosource", "biosample.modifications",
-                "biosample.treatments", "biosample.biosource.individual.organism"]
+                "biosample.treatments", "biosample.biosource.individual.organism",
+                "experiment_sets"]
     name_key = 'accession'
 
+    def generate_mapid(self, experiment_type, num):
+        delim = '_'
+        mapid = str(type(self).__name__)
+        mapid = mapid + delim + ''.join(experiment_type.split())
+        return mapid + delim + str(num)
+
+    def find_current_sop_map(self, experiment_type):
+        maps = []
+        suffnum = 1
+        mapid = self.generate_mapid(experiment_type, suffnum)
+        sop_coll = self.registry['collections']['SopMap']
+        if sop_coll is not None:
+            while(True):
+                m = sop_coll.get(mapid)
+                if not m:
+                    break
+                maps.append(m)
+                suffnum += 1
+                mapid = self.generate_mapid(experiment_type, suffnum)
+
+        if len(maps) > 0:
+            return maps[-1]
+        return None
+
     def _update(self, properties, sheets=None):
+        # if the sop_mapping field is not present see if it should be
+        if 'sop_mapping' not in properties.keys():
+            sopmap = self.find_current_sop_map(properties['experiment_type'])
+            properties['sop_mapping'] = {}
+            if sopmap is not None:
+                sop_mapping = str(sopmap.uuid)
+                properties['sop_mapping']['sop_map'] = sop_mapping
+                properties['sop_mapping']['has_sop'] = "Yes"
+            else:
+                properties['sop_mapping']['has_sop'] = "No"
         # update self first to ensure 'experiment_relation' are stored in self.properties
         super(Experiment, self)._update(properties, sheets)
+
         DicRefRelation = {
             "controlled by": "control for",
             "derived from": "source for",
@@ -62,60 +95,35 @@ class Experiment(Item):
                         target_exp.properties['experiment_relation'].append(relationship_entry)
                         target_exp.update(target_exp.properties)
 
-        # this part is for experiment_set
-        if 'experiment_sets' in properties.keys():
-            for exp_set in properties['experiment_sets']:
-                target_exp_set = self.collection.get(exp_set)
-                # look at the experiments inside the set
-                if acc in target_exp_set.properties["experiments_in_set"]:
-                    break
-                else:
-                    # incase it is not in the list of files
-                    target_exp_set.properties["experiments_in_set"].append(acc)
-                    target_exp_set.update(target_exp_set.properties)
-
-
-@collection(
-    name='experiment-sets',
-    unique_key='uuid',
-    properties={
-        'title': 'Experiment Sets',
-        'description': 'Listing Experiment Sets',
+    @calculated_property(schema={
+        "title": "Experiment Sets",
+        "description": "Experiment Sets to which this experiment belongs.",
+        "type": "array",
+        "items": {
+            "title": "Experiment Set",
+            "type": "string",
+            "linkTo": "ExperimentSet"
+        }
     })
-class ExperimentSet(Item):
-    """The experiment class for Hi-C experiments."""
-
-    item_type = 'experiment_set'
-    schema = load_schema('encoded:schemas/experiment_set.json')
-    name_key = "uuid"
-    embedded = ["experiments_in_set", "experiments_in_set.protocol", "experiments_in_set.protocol_variation",
-                "experiments_in_set.lab", "experiments_in_set.award", "experiments_in_set.biosample",
-                "experiments_in_set.biosample.biosource", "experiments_in_set.biosample.modifications",
-                "experiments_in_set.biosample.treatments", "experiments_in_set.biosample.biosource.individual.organism",
-                "experiments_in_set.files", "experiments_in_set.filesets",  "experiments_in_set.filesets.files_in_set", "experiments_in_set.digestion_enzyme"]
-
-    def _update(self, properties, sheets=None):
-        # update self first
-        super(ExperimentSet, self)._update(properties, sheets)
-        esacc = str(self.uuid)
-        if "experiments_in_set" in properties.keys():
-            for each_exp in properties["experiments_in_set"]:
-                target_exp = self.collection.get(each_exp)
-                # are there any experiment sets in the experiment
-                if 'experiment_sets' not in target_exp.properties.keys():
-                    target_exp.properties.update({'experiment_sets': [esacc, ]})
-                    target_exp.update(target_exp.properties)
-                else:
-                    # incase file already has the fileset_type
-                    if esacc in target_exp.properties['experiment_sets']:
-                        break
-                    else:
-                        target_exp.properties['experiment_sets'].append(esacc)
-                        target_exp.update(target_exp.properties)
+    def experiment_sets(self, request):
+        exp_set_coll = list(self.registry['collections']['ExperimentSet'])
+        exp_set_coll.extend(list(self.registry['collections']['ExperimentSetReplicate']))
+        sets = []
+        for uuid in exp_set_coll:
+            eset = self.collection.get(uuid)
+            for exp in eset.properties['experiments_in_set']:
+                if str(exp) == str(self.uuid):
+                    ty = eset.properties['experimentset_type']
+                    prefix = '/experiment_set/'
+                    if ty == 'replicate':
+                        prefix = '/experiment_set_replicate/'
+                    s = prefix + str(uuid)
+                    sets.append(s)
+        return list(set(sets))
 
 
 @collection(
-    name='experiments-hic',
+    name='experiments-hi-c',
     unique_key='accession',
     properties={
         'title': 'Experiments Hi-C',
@@ -124,9 +132,10 @@ class ExperimentSet(Item):
 class ExperimentHiC(Experiment):
     """The experiment class for Hi-C experiments."""
 
-    item_type = 'experiment_hic'
-    schema = load_schema('encoded:schemas/experiment_hic.json')
+    item_type = 'experiment_hi_c'
+    schema = load_schema('encoded:schemas/experiment_hi_c.json')
     embedded = Experiment.embedded + ["digestion_enzyme", "submitted_by"]
+    name_key = 'accession'
 
     @calculated_property(schema={
         "title": "Experiment summary",
@@ -147,7 +156,7 @@ class ExperimentHiC(Experiment):
 
 
 @collection(
-    name='experiments-capture-hic',
+    name='experiments-capture-c',
     unique_key='accession',
     properties={
         'title': 'Experiments Capture Hi-C',
@@ -157,7 +166,12 @@ class ExperimentCaptureC(Experiment):
     """The experiment class for Capture Hi-C experiments."""
     item_type = 'experiment_capture_c'
     schema = load_schema('encoded:schemas/experiment_capture_c.json')
-    embedded = Experiment.embedded + ["digestion_enzyme", "submitted_by"]
+    embedded = Experiment.embedded + ["digestion_enzyme",
+                                      "submitted_by",
+                                      "targeted_regions",
+                                      "targeted_regions.target",
+                                      "targeted_regions.oligo_file"]
+    name_key = 'accession'
 
     @calculated_property(schema={
         "title": "Experiment summary",
@@ -174,4 +188,34 @@ class ExperimentCaptureC(Experiment):
             de_props = request.embed(digestion_enzyme, '@@object')
             de_name = de_props['name']
             sum_str += (' with ' + de_name)
+        return sum_str
+
+
+@collection(
+    name='experiments-repliseq',
+    unique_key='accession',
+    properties={
+        'title': 'Experiments Repliseq',
+        'description': 'Listing of Repliseq Experiments',
+    })
+class ExperimentRepliseq(Experiment):
+    """The experiment class for Repliseq experiments."""
+    item_type = 'experiment_repliseq'
+    schema = load_schema('encoded:schemas/experiment_repliseq.json')
+    embedded = Experiment.embedded + ["submitted_by"]
+    name_key = 'accession'
+
+    @calculated_property(schema={
+        "title": "Experiment summary",
+        "description": "Summary of the experiment, including type, enzyme and biosource.",
+        "type": "string",
+    })
+    def experiment_summary(self, request, experiment_type='Undefined', cell_cycle_stage=None, biosample=None):
+        sum_str = experiment_type
+        if biosample:
+            biosamp_props = request.embed(biosample, '@@object')
+            biosource = biosamp_props['biosource_summary']
+            sum_str += (' on ' + biosource)
+        if cell_cycle_stage:
+            sum_str += (' at ' + cell_cycle_stage)
         return sum_str

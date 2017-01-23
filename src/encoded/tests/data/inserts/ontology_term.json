@@ -1,0 +1,37 @@
+[
+    {
+        "uuid": "530036bc-8535-4448-903e-854af460b254",
+        "preferred_name": "GM12878",
+        "term_name": "GM12878",
+        "term_id": "EFO:0002784",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "term_url": "http://www.ebi.ac.uk/efo/EFO_0002784"
+    },
+    {
+        "uuid": "530046bc-8535-4448-903e-854af460b254",
+        "preferred_name": "skin",
+        "term_name": "skin of body",
+        "term_id": "UBERON:0002097",
+        "source_ontology": "530016bc-8535-4448-903e-854af460b254",
+        "term_url": "http://purl.obolibrary.org/obo/UBERON_0002097",
+        "synonyms": ["skin organ", "entire skin"],
+        "parents": ["530056bc-8535-4448-903e-854af460b254"]
+    },
+    {
+        "uuid": "530056bc-8535-4448-903e-854af460b254",
+        "preferred_name": "integument",
+        "term_name": "integument",
+        "term_id": "UBERON:0002199",
+        "source_ontology": "530016bc-8535-4448-903e-854af460b254",
+        "term_url": "http://purl.obolibrary.org/obo/UBERON_0002199"
+    },
+    {
+        "uuid": "530056bc-8535-4448-903e-854af460a233",
+        "term_name": "has_exact_synonym",
+        "term_id": "OBO:hasExactSynonym",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "term_url": "http://www.geneontology.org/formats/oboInOwl#hasExactSynonym",
+        "definition": "An alias in which the alias exhibits true synonymy. Example: ornithine cycle is an exact synonym of urea cycle.",
+        "namespace": "http://www.geneontology.org/formats/oboInOwl"
+    }
+]

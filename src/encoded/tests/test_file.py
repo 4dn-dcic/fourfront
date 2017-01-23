@@ -65,6 +65,41 @@ def test_file_post_all(testapp, all_file_jsons):
 
 
 @pytest.fixture
+def fastq_uploading(fastq_json):
+    fastq_json['status'] = 'uploading'
+    return fastq_json
+
+
+def test_files_get_s3_with_no_filename_posted(testapp, fastq_uploading):
+    fastq_uploading.pop('filename')
+    res = testapp.post_json('/file_fastq', fastq_uploading, status=201)
+    resobj = res.json['@graph'][0]
+
+    # 307 is redirect to s3 using auto generated download url
+    fastq_res = testapp.get('{href}'
+                            .format(**res.json['@graph'][0]),
+                            status=307)
+
+
+def test_files_get_s3_with_no_filename_patched(testapp, fastq_uploading,
+                                               fastq_json):
+    fastq_uploading.pop('filename')
+    res = testapp.post_json('/file_fastq', fastq_json, status=201)
+    resobj = res.json['@graph'][0]
+
+    props = {'uuid': resobj['uuid'],
+             'status': 'uploading'}
+
+    patched = testapp.patch_json('/file_fastq/{uuid}'
+                                 .format(**props), props)
+
+    # 307 is redirect to s3 using auto generated download url
+    fastq_res = testapp.get('{href}'
+                            .format(**res.json['@graph'][0]),
+                            status=307)
+
+
+@pytest.fixture
 def file(testapp, award, experiment, lab):
 
     item = {

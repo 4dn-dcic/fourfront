@@ -3,10 +3,9 @@
         "accession":"4DNFI067APA1",
         "notes": "sample dcic notes",
         "lab": "4dn-dcic-lab",
-        "submitted_by": "admin@admin.com",
+        "submitted_by": "4dndcic@gmail.com",
         "award": "1U01CA200059-01",
         "file_format":"fasta",
-        "experiments":["4DNEX067APT1", "4DNEX067APU1"],
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65fadd",
         "status": "uploaded",
         "filename": "test_fasta1"
@@ -18,8 +17,6 @@
         "submitted_by": "wrangler@wrangler.com",
         "award": "1U01CA200059-01",
         "file_format":"fasta",
-        "filesets":["4DNFS40D5WL1"],
-        "experiments":["4DNEX067APT1"],
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65fafa",
         "status": "released",
         "filename": "test_fasta2"

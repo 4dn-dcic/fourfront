@@ -1,0 +1,93 @@
+{
+    "title": "Experiment set for Replicate experiments",
+    "description": "Schema for submitting metadata for an experiment set.",
+    "id": "/profiles/experiment_set_replicate.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": [ "award", "lab", "description"],
+    "identifyingProperties": ["uuid", "aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/accession" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/status" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/documents" },
+        { "$ref": "experiment_set.json#/properties" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "accession": {
+            "accessionType": "ES"
+        },
+        "experimentset_type": {
+            "default" : "replicate"
+        },
+        "replicate_exps": {
+            "title": "Set of replicate experiments",
+            "description": "Replicate experiments with biological and technical replication numbers.",
+            "type": "array",
+            "default": [],
+            "exclude_from": "submit4dn",
+            "uniqueItems": true,
+            "items": {
+                "title": "Replicate experiment",
+                "type": "object",
+                "required": ["replicate_exp", "bio_rep_no", "tec_rep_no"],
+                "additionalProperties": false,
+                "properties": {
+                    "replicate_exp":{
+                            "title": "Experiment",
+                            "type": "string",
+                            "linkTo": "Experiment"
+                    },
+                    "bio_rep_no":{
+                            "title": "Biological replicate number",
+                            "description": "Biological replicate identifier for the experiment in an experiment set",
+                            "type": "integer"
+                    },
+                    "tec_rep_no":{
+                            "title": "Technical replicate number",
+                            "description": "Technical replicate identifier for the experiment in a biological replicate group",
+                            "type": "integer"
+                    }
+                }
+            }
+        }
+    },
+    "facets": {
+        "experimentset_type": {
+            "title": "Experiment set type"
+        },
+        "experiments_in_set.award.project": {
+            "title": "Project"
+        },
+        "experiments_in_set.biosample.biosource.individual.organism.name": {
+            "title": "Organism"
+        },
+        "experiments_in_set.biosample.biosource.biosource_type": {
+            "title": "Biosource type"
+        },
+        "experiments_in_set.biosample.biosource_summary": {
+            "title": "Biosource"
+        },
+        "experiments_in_set.digestion_enzyme.name": {
+            "title": "Enzyme"
+        },
+        "experiments_in_set.biosample.modifications_summary": {
+            "title": "Modifications"
+        },
+        "experiments_in_set.biosample.treatments_summary": {
+            "title": "Treatments"
+        },
+        "experiments_in_set.lab.title": {
+            "title": "Lab"
+        }
+    }
+}

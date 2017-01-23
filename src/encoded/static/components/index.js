@@ -10,13 +10,17 @@ require('./home');
 require('./help');
 require('./about');
 require('./item');
+require('./objectutils');
+require('./facetlist');
+require('./experiment-set-view');
 require('./user');
-require('./mixins');
 require('./statuslabel');
 require('./navigation');
 require('./inputs');
 require('./schema');
 require('./search');
+require('./experiments-table');
 require('./browse');
+require('./testwarning');
 
 module.exports = require('./app');

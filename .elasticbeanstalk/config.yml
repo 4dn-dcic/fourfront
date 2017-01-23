@@ -5,10 +5,11 @@ branch-defaults:
   master:
     environment: 4dn-web-dev
   production:
-    environment: 4dn-prod
+    environment: 4dnweb-prod
 global:
   application_name: 4dn-web
+  default_ec2_keyname: 4dn-encode
   default_platform: Python 3.4
   default_region: us-east-1
-  profile: eb-cli
+  profile: null
   sc: git

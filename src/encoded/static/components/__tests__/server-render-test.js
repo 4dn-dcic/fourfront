@@ -13,21 +13,45 @@ describe("Server rendering", function () {
     var ReactDOMServer;
     var document;
     var store;
+    var statics = require('../../data/statics');
     var fetch;
+    var sinon;
+    var server;
     var home_url = "http://localhost/";
     var home = {
         "@id": "/",
-        "@type": ["Portal"],
+        "@type": ["HomePage", "StaticPage", "Portal"],
         "portal_title": "4DN Data Portal",
-        "title": "Home"
+        "title": "Home",
+        "content" : statics
     };
+    
+
+    beforeAll(function(){
+        
+        sinon = require('sinon');
+        server = sinon.fakeServer.create();
+
+        server.respondWith(
+            "GET",
+            '/profiles/?format=json',
+            [
+                200, 
+                { "Content-Type" : "application/json" },
+                '<html></html>' // Don't actually need content JSON here for test. Just to silence loadSchemas XHR request error (no XHR avail in test)
+            ]
+        );
+    });
+
+    afterAll(function(){
+        server.restore();
+    });
 
     beforeEach(function () {
         require('../../libs/react-patches');
         React = require('react');
         ReactDOM = require('react-dom');
         ReactDOMServer = require('react-dom/server');
-        fetch = require('whatwg-fetch');
         App = require('..');
         store = require('../../store');
         // test dispatching some values to store
@@ -35,7 +59,6 @@ describe("Server rendering", function () {
             'href':home_url,
             'context':home,
             'inline':'',
-            'session_cookie':'',
             'contextRequest':{},
             'slow':false
         };
@@ -62,6 +85,7 @@ describe("Server rendering", function () {
     it("mounts the application over the rendered html", function () {
         var props = store.getState();
         var app = ReactDOM.render(<App {...props} />, document);
+        app.loadSchemas = jest.fn(); // Mock func which launches XHR request
         expect(ReactDOM.findDOMNode(app)).toBe(document.documentElement);
     });
 });

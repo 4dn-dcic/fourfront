@@ -47,6 +47,7 @@ def static_resources(config):
     config.add_static_view('static', 'static', cache_max_age=STATIC_MAX_AGE)
     config.add_static_view('profiles', 'schemas', cache_max_age=STATIC_MAX_AGE)
 
+    # Favicon
     favicon_path = '/static/img/favicon.ico'
     if config.route_prefix:
         favicon_path = '/%s%s' % (config.route_prefix, favicon_path)
@@ -59,6 +60,27 @@ def static_resources(config):
         return response
 
     config.add_view(favicon, route_name='favicon.ico')
+
+    # Robots.txt
+    robots_txt_path = None
+    if config.registry.settings.get('testing') in [True, 'true', 'True']:
+        robots_txt_path = '/static/dev-robots.txt'
+    else:
+        robots_txt_path = '/static/robots.txt'
+
+    if config.route_prefix:
+        robots_txt_path = '/%s%s' % (config.route_prefix, robots_txt_path)
+
+    config.add_route('robots.txt-conditional', '/robots.txt')
+
+    def robots_txt(request):
+        subreq = request.copy()
+        subreq.path_info = robots_txt_path
+        response = request.invoke_subrequest(subreq)
+        return response
+
+    config.add_view(robots_txt, route_name='robots.txt-conditional')
+
 
 
 def changelogs(config):
@@ -186,16 +208,18 @@ def app_version(config):
     import subprocess
     if not config.registry.settings.get('snovault.app_version'):
         # we update version as part of deployment process `deploy_beanstalk.py`
-        # but if we didn't get it from git
-        try:
-            version = subprocess.check_output(
-                ['git', '-C', os.path.dirname(__file__), 'describe']).decode('utf-8').strip()
-            diff = subprocess.check_output(
-                ['git', '-C', os.path.dirname(__file__), 'diff', '--no-ext-diff'])
-            if diff:
-                version += '-patch' + hashlib.sha1(diff).hexdigest()[:7]
-        except:
-            version = "test"
+        # but if we didn't check env then git
+        version = os.environ.get("ENCODED_VERSION")
+        if not version:
+            try:
+                version = subprocess.check_output(
+                    ['git', '-C', os.path.dirname(__file__), 'describe']).decode('utf-8').strip()
+                diff = subprocess.check_output(
+                    ['git', '-C', os.path.dirname(__file__), 'diff', '--no-ext-diff'])
+                if diff:
+                    version += '-patch' + hashlib.sha1(diff).hexdigest()[:7]
+            except:
+                version = "test"
 
         config.registry.settings['snovault.app_version'] = version
 
@@ -203,21 +227,16 @@ def app_version(config):
 def main(global_config, **local_config):
     """ This function returns a Pyramid WSGI application.
     """
+
     settings = global_config
     settings.update(local_config)
 
     settings['snovault.jsonld.namespaces'] = json_asset('encoded:schemas/namespaces.json')
     settings['snovault.jsonld.terms_namespace'] = 'https://www.encodeproject.org/terms/'
     settings['snovault.jsonld.terms_prefix'] = 'encode'
-    # settings['snovault.elasticsearch.index'] = 'snovault'
-    # hostname_command = settings.get('hostname_command', '').strip()
-    # if hostname_command:
-    #    hostname = subprocess.check_output(hostname_command, shell=True).strip()
-
-    # simple database auth
-    # authz_policy = ACLAuthorizationPolicy()
-
-    # config = Configurator(settings=settings, authorization_policy=authz_policy)
+    # set auth0 keys
+    settings['auth0.secret'] = os.environ.get("Auth0Secret")
+    settings['auth0.client'] = os.environ.get("Auth0Client")
     config = Configurator(settings=settings)
 
     from snovault.elasticsearch import APP_FACTORY
@@ -229,7 +248,6 @@ def main(global_config, **local_config):
     # Override default authz policy set by pyramid_multiauth
     config.set_authorization_policy(LocalRolesAuthorizationPolicy())
     config.include(session)
-    #config.include('.persona')
 
     config.include(configure_dbsession)
     config.include('snovault')

@@ -1,3 +1,4 @@
+import os
 from pyramid.decorator import reify
 from snovault import (
     Root,
@@ -15,7 +16,53 @@ from pyramid.security import (
 
 
 def includeme(config):
+    config.include(static_pages)
     config.scan(__name__)
+
+
+cachedFileContents = {} # Should we cache in RAM like this (?), let perform file I/O, or something else?
+
+def getStaticFileContent(filename, directory, contentFilesLocation):
+    cachedName = directory + '/' + filename.split('.')[0]
+    output = cachedFileContents.get(cachedName)
+    if output:
+        #print("\n\n\nGot cached output for " + filename)     # Works
+        return output
+    file = open(contentFilesLocation + '/' + filename)
+    output = file.read()
+    file.close()
+    cachedFileContents[cachedName] = output
+    return output
+
+def static_pages(config):
+    '''Setup static routes & content from static files (HTML or TODO: Markdown)'''
+    config.add_route('static-page', '/{page:(help|about|home)}') # TODO: put array of static pages into ini or yaml file?
+    def static_page(request):
+
+        page = request.matchdict.get('page','none')
+        content = None
+        try:
+            contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
+            contentFilesLocation += "/static/data/"     # Where the static files be stored.
+            contentFilesLocation += page
+            content = { fn.split('.')[0] : getStaticFileContent(fn, page, contentFilesLocation) for fn in os.listdir(contentFilesLocation) if os.path.isfile(contentFilesLocation + '/' + fn) }
+        except FileNotFoundError as e:
+            print("No files found for static page: \"" + page + "\"")
+
+        return { # Dummy-like 'context' JSON response 
+            "title" : request.matchdict.get('page','').capitalize(),
+            "notification" : "success",
+            "@type" : [
+                request.matchdict.get('page','').capitalize() + "Page", # e.g. AboutPage
+                "StaticPage",
+                "Portal"
+            ],
+            "@context" : "/" + request.matchdict.get('page','static-pages'),
+            "@id" : "/" + request.matchdict.get('page',''),
+            "content" : content
+        }
+
+    config.add_view(static_page, route_name='static-page')
 
 
 def acl_from_settings(settings):
@@ -47,7 +94,7 @@ def acl_from_settings(settings):
 class EncodedRoot(Root):
     properties = {
         'title': 'Home',
-        'portal_title': 'ENCODE',
+        'portal_title': '4DN Data Portal',
     }
 
     @reify
@@ -79,6 +126,27 @@ class EncodedRoot(Root):
 
     def get_by_uuid(self, uuid, default=None):
         return self.connection.get_by_uuid(uuid, default)
+
+    def jsonld_context(self):
+        '''Inherits from '@context' calculated property of Resource in snovault/resources.py'''
+        return '/home'
+
+    def jsonld_type(self):
+        '''Inherits from '@type' calculated property of Root in snovault/resources.py'''
+        return ['HomePage', 'StaticPage'] + super(EncodedRoot, self).jsonld_type()
+
+    @calculated_property(schema={
+        "title": "Static Page Content",
+        "type": "object",
+    })
+    def content(self):
+        try:
+            contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
+            contentFilesLocation += "/static/data/home" # Where the static files be stored. TODO: Put in .ini file
+            return { fn.split('.')[0] : getStaticFileContent(fn, 'home', contentFilesLocation) for fn in os.listdir(contentFilesLocation) if os.path.isfile(contentFilesLocation + '/' + fn) }
+        except FileNotFoundError as e:
+            print("No content files found for Root object (aka Home, '/').")
+            return {}
 
     @calculated_property(schema={
         "title": "Application version",

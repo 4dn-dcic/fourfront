@@ -19,47 +19,19 @@ def includeme(config):
 
 
 @collection(
-    name='labs',
-    unique_key='lab:name',
+    name='analysis-steps',
+    unique_key='analysis_step:name',
     properties={
-        'title': 'Labs',
-        'description': 'Listing of 4D Nucleome labs',
+        'title': 'AnalysisSteps',
+        'description': 'Listing of analysis steps for 4DN analyses',
     })
-class Lab(Item):
-    """Lab class."""
+class AnalysisStep(Item):
+    """The AnalysisStep class that descrbes a step in a workflow."""
 
-    item_type = 'lab'
-    schema = load_schema('encoded:schemas/lab.json')
+    item_type = 'analysis_step'
     name_key = 'name'
-    embedded = ['awards']
-
-
-@collection(
-    name='protocols',
-    properties={
-        'title': 'Protocols',
-        'description': 'Listing of protocols',
-    })
-class Protocol(Item):
-    """Protocol class."""
-
-    base_types = ['Protocol'] + Item.base_types
-    item_type = 'protocol'
-    schema = load_schema('encoded:schemas/protocol.json')
-
-
-@collection(
-    name='biosample-cell-culture',
-    properties={
-        'title': 'Biosample Cell Culture Information',
-        'description': 'Listing Biosample Cell Culture Information',
-    })
-class BiosampleCellCulture(Item):
-    """Cell culture details for Biosample."""
-
-    base_types = ['BiosampleCellCulture'] + Item.base_types
-    item_type = 'biosample_cell_culture'
-    schema = load_schema('encoded:schemas/biosample_cell_culture.json')
+    schema = load_schema('encoded:schemas/analysis_step.json')
+    embedded = ['software_used', 'qa_stats_generated']
 
 
 @collection(
@@ -79,48 +51,29 @@ class Award(Item):
 
 
 @collection(
-    name='organisms',
-    unique_key='organism:name',
+    name='biosample-cell-cultures',
     properties={
-        'title': 'Organisms',
-        'description': 'Listing of all registered organisms',
+        'title': 'Biosample Cell Culture Information',
+        'description': 'Listing Biosample Cell Culture Information',
     })
-class Organism(Item):
-    """Organism class."""
+class BiosampleCellCulture(Item):
+    """Cell culture details for Biosample."""
 
-    item_type = 'organism'
-    schema = load_schema('encoded:schemas/organism.json')
-    name_key = 'name'
+    item_type = 'biosample_cell_culture'
+    schema = load_schema('encoded:schemas/biosample_cell_culture.json')
 
 
 @collection(
-    name='publications',
-    unique_key='publication:identifier',
+    name='constructs',
     properties={
-        'title': 'Publications',
-        'description': 'Publication pages',
+        'title': 'Constructs',
+        'description': 'Listing of Constructs',
     })
-class Publication(Item):
-    """Publication class."""
+class Construct(Item):
+    """Construct class."""
 
-    item_type = 'publication'
-    schema = load_schema('encoded:schemas/publication.json')
-    # embedded = ['datasets']
-
-    def unique_keys(self, properties):
-        """unique keys."""
-        keys = super(Publication, self).unique_keys(properties)
-        if properties.get('identifiers'):
-            keys.setdefault('alias', []).extend(properties['identifiers'])
-        return keys
-
-    @calculated_property(condition='date_published', schema={
-        "title": "Publication year",
-        "type": "string",
-    })
-    def publication_year(self, date_published):
-        """publication year."""
-        return date_published.partition(' ')[0]
+    item_type = 'construct'
+    schema = load_schema('encoded:schemas/construct.json')
 
 
 @collection(
@@ -154,56 +107,16 @@ class Enzyme(Item):
 
 
 @collection(
-    name='biosources',
-    unique_key='accession',
+    name='genomic-regions',
     properties={
-        'title': 'Biosources',
-        'description': 'Cell lines and tissues used for biosamples',
+        'title': 'Genomic Regions',
+        'description': 'Listing of genomic regions',
     })
-class Biosource(Item):
-    """Biosource class."""
+class GenomicRegion(Item):
+    """The GenomicRegion class that describes a region of a genome."""
 
-    item_type = 'biosource'
-    name_key = 'accession'
-    schema = load_schema('encoded:schemas/biosource.json')
-    embedded = ["individual", "individual.organism"]
-
-    @calculated_property(schema={
-        "title": "Biosource name",
-        "description": "Specific name of the biosource.",
-        "type": "string",
-    })
-    def biosource_name(self, request, biosource_type, individual=None, cell_line=None, tissue=None):
-        if biosource_type == "tissue":
-            if tissue:
-                return tissue
-        elif biosource_type == "immortalized cell line":
-            if cell_line:
-                return cell_line
-        elif biosource_type == "primary cell":
-            if cell_line:
-                return cell_line
-        elif biosource_type == "whole organisms":
-            if individual:
-                individual_props = request.embed(individual, '@@object')
-                organism = individual_props['organism']
-                organism_props = request.embed(organism, '@@object')
-                organism_name = organism_props['name']
-                return "whole " + organism_name
-        return biosource_type
-
-
-@collection(
-    name='constructs',
-    properties={
-        'title': 'Constructs',
-        'description': 'Listing of Constructs',
-    })
-class Construct(Item):
-    """Construct class."""
-
-    item_type = 'construct'
-    schema = load_schema('encoded:schemas/construct.json')
+    item_type = 'genomic_region'
+    schema = load_schema('encoded:schemas/genomic_region.json')
 
 
 @collection(
@@ -232,9 +145,50 @@ class Modification(Item):
             return modification_type
         return "None"
 
+    @calculated_property(schema={
+        "title": "Modification name short",
+        "description": "Shorter version of modification name for display on tables.",
+        "type": "string",
+    })
+    def modification_name_short(self, request, modification_type=None, target_of_mod=None):
+        if modification_type and target_of_mod:
+            target = request.embed(target_of_mod, '@@object')
+            return modification_type + " for " + target['target_summary_short']
+        elif modification_type:
+            return modification_type
+        return "None"
+
 
 @collection(
-    name='quality_metric_flags',
+    name='organisms',
+    unique_key='organism:name',
+    properties={
+        'title': 'Organisms',
+        'description': 'Listing of all registered organisms',
+    })
+class Organism(Item):
+    """Organism class."""
+
+    item_type = 'organism'
+    schema = load_schema('encoded:schemas/organism.json')
+    name_key = 'name'
+
+
+@collection(
+    name='protocols',
+    properties={
+        'title': 'Protocols',
+        'description': 'Listing of protocols',
+    })
+class Protocol(Item):
+    """Protocol class."""
+
+    item_type = 'protocol'
+    schema = load_schema('encoded:schemas/protocol.json')
+
+
+@collection(
+    name='quality-metric-flags',
     properties={
         'title': 'Quality Metric Flags'
     })
@@ -244,61 +198,6 @@ class QualityMetricFlag(Item):
     item_type = 'quality_metric_flag'
     schema = load_schema('encoded:schemas/quality_metric_flag.json')
     embedded = ['quality_metrics']
-
-
-@collection(
-    name='analysis_steps',
-    properties={
-        'title': 'AnalysisSteps',
-        'description': 'Listing of analysis steps for 4DN analyses',
-    })
-class AnalysisStep(Item):
-    """The AnalysisStep class that descrbes a step in a workflow."""
-
-    item_type = 'analysis_step'
-    schema = load_schema('encoded:schemas/analysis_step.json')
-    embedded = ['software_used', 'qa_stats_generated']
-
-
-@collection(
-    name='tasks',
-    properties={
-        'title': 'Tasks',
-        'description': 'Listing of runs of analysis steps for 4DN analyses',
-    })
-class Task(Item):
-    """The Task class that descrbes a run of an analysis step."""
-
-    item_type = 'task'
-    schema = load_schema('encoded:schemas/task.json')
-    embedded = ['analysis_step']
-
-
-@collection(
-    name='workflows',
-    properties={
-        'title': 'Workflows',
-        'description': 'Listing of 4DN analysis workflows',
-    })
-class Workflow(Item):
-    """The Workflow class that describes a workflow and steps in it."""
-
-    item_type = 'workflow'
-    schema = load_schema('encoded:schemas/workflow.json')
-
-
-@collection(
-    name='workflow_runs',
-    properties={
-        'title': 'Workflow Runs',
-        'description': 'Listing of executions of 4DN analysis workflows',
-    })
-class WorkflowRun(Item):
-    """The WorkflowRun class that describes execution of a workflow and tasks in it."""
-
-    item_type = 'workflow_run'
-    schema = load_schema('encoded:schemas/workflow_run.json')
-    embedded = ['workflow', 'tasks']
 
 
 @collection(
@@ -336,36 +235,16 @@ class Target(Item):
             return value
         return "no target"
 
-
-@collection(
-    name='genomic_regions',
-    properties={
-        'title': 'Genomic Regions',
-        'description': 'Listing of genomic regions',
-    })
-class GenomicRegion(Item):
-    """The GenomicRegion class that describes a region of a genome."""
-
-    item_type = 'genomic_region'
-    schema = load_schema('encoded:schemas/genomic_region.json')
-
     @calculated_property(schema={
-        "title": "Region",
-        "description": "Assembly:chromosome:start-end.",
+        "title": "Target summary short",
+        "description": "Shortened version of target summary.",
         "type": "string",
     })
-    def region(self, request, genome_assembly, chromosome=None):
-            # if biosource_type == "tissue":
-            #     if tissue:
-            #         return tissue
-            # elif biosource_type == "immortalized cell line":
-            #     if cell_line:
-            #         return cell_line
-            # elif biosource_type == "whole organisms":
-            #     if individual:
-            #         individual_props = request.embed(individual, '@@object')
-            #         organism = individual_props['organism']
-            #         organism_props = request.embed(organism, '@@object')
-            #         organism_name = organism_props['name']
-            #         return "Whole " + organism_name
-            return None
+    def target_summary_short(self, request, targeted_genes=None, description=None):
+        if targeted_genes:
+            value = ""
+            value += ' and '.join(targeted_genes)
+            return value
+        elif description:
+            return description
+        return "no target"

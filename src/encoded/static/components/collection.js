@@ -2,7 +2,6 @@
 var React = require('react');
 var url = require('url');
 var globals = require('./globals');
-var parseAndLogError = require('./mixins').parseAndLogError;
 var StickyHeader = require('./StickyHeader');
 
 
@@ -90,6 +89,14 @@ var lookup_column = function (result, column) {
                 return (
                     <td key={index}><a href={row.item['@id']}>{cell.value}</a></td>
                 );
+            // hardcode pmid link activity. TODO make more generic?
+            } else if (typeof cell.value === 'string' && cell.value.slice(0,5) === "PMID:") {
+                if (cell.value.length > 5){
+                    var pmid_link = 'http://www.ncbi.nlm.nih.gov/pubmed/' + cell.value.slice(5);
+                    return (
+                        <td key={index}><a href={pmid_link}>{cell.value}</a></td>
+                    );
+                }
             }
             return (
                 <td key={index}>{cell.value}</td>
@@ -103,7 +110,8 @@ var lookup_column = function (result, column) {
     var Table = module.exports.Table = React.createClass({
         contextTypes: {
             fetch: React.PropTypes.func,
-            location_href: React.PropTypes.string
+            location_href: React.PropTypes.string,
+            contentTypeIsJSON: React.PropTypes.func
         },
 
 
@@ -120,14 +128,6 @@ var lookup_column = function (result, column) {
             state.data = new Data([]);  // Tables may be long so render empty first
             state.communicating = true;
             return state;
-        },
-
-        componentDidMount: function() {
-            this._isMounted = true;
-        },
-
-        componentWillUnmount: function() {
-            this._isMounted = false;
         },
 
         componentWillReceiveProps: function (nextProps, nextContext) {
@@ -169,21 +169,21 @@ var lookup_column = function (result, column) {
         },
 
         guessColumns: function (props) {
-            var column_list = props.columns || props.context.columns;
             var columns = [];
-            if (!column_list || Object.keys(column_list).length === 0) {
-                for (var key in props.context['@graph'][0]) {
-                    if (key.slice(0, 1) != '@' && key.search(/(uuid|_no|accession)/) == -1) {
+            // Get columns right from results. Selective embedding defines cols used
+            // Use the first obj in the collection to find columns
+            for (var key in props.context['@graph'][0]) {
+                // exclude special fields explicitly from being columns
+                if (key.slice(0, 1) != '@' && key.search(/(uuid|_no|accession)/) == -1) {
+                    // Do not use fields with obj vals as columns
+                    if (typeof props.context['@graph'][0][key] !== 'object'){
                         columns.push(key);
                     }
                 }
-                columns.sort();
-                columns.unshift('@id');
-            } else {
-                for(var column in column_list) {
-                    columns.push(column);
-                }
             }
+            // sort alphabetically for now. maybe sort by boost values of fields later?
+            columns.sort();
+            columns.unshift('@id');
             if(this._isMounted){
                 this.setState({columns: columns});
             }
@@ -201,7 +201,6 @@ var lookup_column = function (result, column) {
                     //    return factory({context: item, column: column});
                     //};
                     var value = lookup_column(item, column);
-                    console.log(value);
                     if (column == '@id') {
                         factory = globals.listing_titles.lookup(item);
                         value = factory({context: item});
@@ -242,21 +241,22 @@ var lookup_column = function (result, column) {
             var context = props.context;
             var communicating;
             var request = this.state.allRequest;
-            if (request) request.abort();
+            if (request && typeof request.abort == 'function') request.abort();
             var self = this;
             if (context.all) {
                 communicating = true;
                 request = this.context.fetch(context.all, {
-                    headers: {'Accept': 'application/json'}
+                    headers: {'Accept': 'application/json',
+                        'Content-Type': 'application/json'}
                 });
                 request.then(response => {
-                    if (!response.ok) throw response;
-                    return response.json();
+                    if (!this.context.contentTypeIsJSON(response)) throw response;
+                    return response;
                 })
                 .then(data => {
                     self.extractData({context: data});
                     self.setState({communicating: false});
-                }, parseAndLogError.bind(undefined, 'allRequest'));
+                });
                 this.setState({
                     allRequest: request,
                     communicating: true
@@ -375,6 +375,7 @@ var lookup_column = function (result, column) {
                 communicating: this.fetchAll(this.props),
                 mounted: true,
             });
+            this._isMounted = true;
         },
 
         handleClickHeader: function (event) {
@@ -432,11 +433,12 @@ var lookup_column = function (result, column) {
         },
 
         componentWillUnmount: function () {
+            this._isMounted = false;
             if (typeof this.submitTimer != 'undefined') {
                 clearTimeout(this.submitTimer);
             }
             var request = this.state.allRequest;
-            if (request) request.abort();
+            if (request && typeof request.abort === 'function') request.abort();
         }
 
     });

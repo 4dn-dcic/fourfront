@@ -1,8 +1,46 @@
-.box {
-    padding: 10px;
-    border: 1px #ccc solid;
-    border-radius: 3px;
-    overflow-x: auto;
+
+.facets-container {
+    padding-top: 0;
+    padding-bottom: 2px;
+    padding-left: ($grid-gutter-width / 2);
+    padding-right: ($grid-gutter-width / 2);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+    //border-radius: 3px;
+
+    .facets-header {
+        padding-top: ($grid-gutter-width / 2);
+        padding-bottom: ($grid-gutter-width / 2);
+        border-bottom: 1px solid #eee;
+        border-top-left-radius: inherit;
+        border-top-right-radius: inherit;
+        color: #111;
+        .facets-title-column {  top : -1px; }
+        .facets-title {
+            font-weight: 300;
+            margin: 0;
+            line-height: inherit;
+            color: inherit;
+            display: inline;
+        }
+    }
+
+    &.with-header-bg .facets-header {
+        background-color: #388a92;
+        border-top: inherit;
+        border-left: inherit;
+        border-right: inherit;
+        border-bottom: none;
+        color: #fff;
+        height: 46px;
+
+        &.row {
+            margin-left: ($grid-gutter-width / -2) - 1;
+            margin-right: ($grid-gutter-width / -2) - 1;
+            margin-top: -1px;
+        }
+    }
+
 }
 
 @media screen and (max-width: $screen-sm-min) {
@@ -40,12 +78,20 @@
 }
 
 .clear-filters-control {
-    margin: 2px 10px 2px 10px;
+    margin: 1px 0;
     text-align: right;
     font-size: 0.9rem;
-    > a{
+    opacity: 1;
+    transition: opacity .25s;
+    position: relative;
+    > a:not(.btn) {
         color: #999999;
         text-decoration: none;
+    }
+    &.placeholder {
+        opacity : 0;
+        visibility: visible !important;
+        z-index: -10;
     }
 }
 
@@ -55,60 +101,189 @@
     margin-top: 5px;
 }
 
-.facets h5 {
-    margin: 2px 0;
-}
-
 .facet {
-    margin-bottom: 7px;
     overflow: hidden;
-}
+    padding-top: 9px;
+    padding-bottom: 8px;
 
-.facet:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-    margin-bottom: 17px;
-}
-
-.facet-list { margin: 0; }
-
-.facet-list li {
-    padding: 3px 10px 3px 0px;
-    margin-bottom: 1px;
-    position: relative;
-    @include font-size(0.9);
-    line-height: 1;
-    i {
-        line-height: 14px;
+    &.row {
+        // .row not for inner columns, used for margin offset
+        padding-left : 10px;
+        padding-right : 10px;
     }
-}
 
-.facet-list #selected {
-    background-color: #21c49e;
-}
+    &:not(:last-child) {
+        border-bottom: 1px solid #f4f4f4;
+    }
 
-.facet-list a#selected {
-    text-decoration: none;
-    color: #000000;
-}
-
-
-.facet-list li {
-    > a{
-        text-decoration: none;
-        margin-left: 20px;
-        display: block;
-        color: #999999;
-        &:hover{
-            color: #000000;
+    &:last-child {
+        margin-bottom: 0;
+        &.static {
+            margin-bottom: -2px;
         }
     }
-}
 
-.facet-item {
-    display:inline-block;
-    overflow: hidden;
-    max-width: 150px;
+    h5.facet-title {
+        margin: 0 0 3px;
+        font-weight: 500;
+        line-height: inherit;
+        @include font-size(0.925);
+    }
+
+    &.static {
+        padding-bottom: 5px; // Extra 2px + account for margin-bottom: 5px in .facet-title/.facet-item
+    }
+
+    &:not(.static) {
+        h5.facet-title {
+            margin : -2px 0 9px;
+            padding: 0 0 8px;
+            border-bottom: 1px solid #f8f8f8;
+            cursor: pointer;
+        }
+        &.closed h5.facet-title {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+    }
+
+    // Will have .facet-static-row if only one term -OR- .facet-list if multiple.
+    // Contents have same/similar classes (representing content) but must be styled differently.
+
+    .facet-static-row {
+
+        .facet-title,
+        .facet-item {
+            display: inline-block;
+            margin-bottom: 5px;
+            width: 50%;
+        }
+
+        .facet-title {
+            padding-right: 10px;
+            margin-top: 0;
+            float: left;
+            min-width: 33%;
+
+            &:after{
+                content : "";
+            }
+        }
+
+        .facet-item {
+            padding-left: 12px;
+            padding-left: 12.5px;
+            vertical-align: top;
+            float: right;
+            text-align: right;
+            @include font-size(0.925);
+            @include no-user-select();
+
+            span {
+                cursor: pointer;
+                i.icon {
+                    font-size: .5rem;
+                    vertical-align: text-top;
+                    line-height: 1.15rem;
+                    opacity: 0.33;
+                    width: 25px;
+                    margin-left: -25px;
+                }
+            }
+
+            span:hover {
+                text-shadow: 0 0 0;
+                i.icon { 
+                    opacity: 0.5;
+                }
+            }
+
+            &.selected span i.icon {
+                opacity: 1 !important;
+                color : #248bac;
+                font-size: 0.825rem;
+            }
+
+            &.filtering span i.icon {
+                opacity: 0.33 !important;
+                color : #888 !important;
+                font-size: 0.825rem;
+            }
+
+        }
+    }
+
+    &.all-single-term {
+        .facet-item {
+            text-align: left;
+            width: 50%;
+        }
+    }
+
+    .facet-list { 
+        margin: 0;
+    
+        li {
+            margin-bottom: 1px;
+            position: relative;
+            @include font-size(0.875);
+            line-height: 1rem;
+
+            i {
+                line-height: 14px;
+            }
+
+            > a {
+                border-radius: 3px;
+                padding: 4px 3px 1px 24px;
+                text-decoration: none;
+                display: block;
+                position: relative;
+                color: #888;
+
+                i.icon.icon-circle-o-notch { opacity: 0.33; }
+
+                &:hover{
+                    color: #000000;
+                    background-color: #f1f7f9;
+                }
+                &.selected {
+                    text-decoration: none;
+                    color: #f8f8f8;
+                    background-color: #248bac;
+                }
+                &.selected:hover {
+                    color: #fff;
+                    .facet-item, .facet-count {
+                        text-shadow: 0px 0px 0px #fff;
+                    }
+                }
+
+                .facet-count {
+                    position: absolute;
+                    right: 0;
+                    padding-right: inherit;
+                }
+
+            }
+
+            .facet-item {
+                display:inline-block;
+                overflow: hidden;
+                margin-right: 30px;
+            }
+
+        }
+    }
+
+    /* .facet */
+    /* Capitalize facet terms belonging to certain 'safe-to-capitalize' facets */
+    &[data-field="experiments_in_set.biosample.biosource.individual.organism.name"] .term,
+    &[data-field="experiments_in_set.biosample.biosource.biosource_type"] .term,
+    &[data-field="experiments_in_set.biosample.biosource_summary"] .term {
+        text-transform: capitalize;
+    }
 }
 
 .facet-entry {
@@ -123,11 +298,11 @@
     }
 }
 
-.facet-entry-container#selected{
-    background-color: #21c49e;
+.facet-entry-container.selected{
+    background-color: #87c487;
 }
 
-.facet-entry a#selected{
+.facet-entry a.selected{
     color: #000000 !important;
 }
 
@@ -279,9 +454,9 @@ div.meta-status {
     overflow: hidden;
 
     li {
-        margin-top: 10px;
+        margin-top: 7px;
         border-bottom: 1px solid #E8E8E8;
-        margin-bottom: 10px;
+        margin-bottom: 7px;
         @include font-size(0.9);
 
         &:first {
@@ -349,5 +524,5 @@ div.meta-status {
 }
 
 .facet-selector{
-    margin-left: -17px;
+    margin-left: -20px;
 }

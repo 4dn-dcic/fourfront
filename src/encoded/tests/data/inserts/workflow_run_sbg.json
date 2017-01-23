@@ -1,0 +1,38 @@
+[
+{
+    "uuid": "d8a60edf-49e5-4c33-afab-9ec90d656666",
+    "award": "1U01CA200059-01",
+    "lab": "4dn-dcic-lab",
+    "output_files": [
+        {
+            "workflow_argument_name": "report_zip",
+            "value": "fbdbe727-49e5-4c33-afab-9ec90d65faf3"
+        }
+    ],
+    "parameters": [
+        {
+            "workflow_argument_name": "adapters_file",
+            "value": ""
+        },
+        {
+            "workflow_argument_name": "limits_file",
+            "value": ""
+        },
+        {
+            "workflow_argument_name": "contaminants_file",
+            "value": ""
+        }
+    ],
+    "input_files": [
+        {
+            "workflow_argument_name": "input_file",
+            "value": "46e82a90-49e5-4c33-afab-9ec90d65faa1"
+        }
+    ],
+    "workflow": "c7a60edf-49e5-4c33-afab-9ec90d65faf3",
+    "sbg_task_id": "laeryacil3ryal3w8ca3w7lr8c",
+    "sbg_mounted_volume_ids": ["alsieralerybva","aliw3urycba","alerbcyaliuw","il2eybcilryubv","aliruycoba83","aliwurc3byca","alw3r8ycaw3by"],
+    "sbg_import_ids": ["aklerybacicy","aliw3r8ybcar","alirybal3w8"],
+    "sbg_export_ids": ["aliuerybca38y","alir3ybac3","laiw3rycbawiyca","awrucbaiw3"]
+}
+]

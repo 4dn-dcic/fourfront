@@ -4,11 +4,12 @@
     "id": "/profiles/experiment_set.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": [ "award", "lab"],
+    "required": [ "award", "lab", "description"],
     "identifyingProperties": ["uuid", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/accession" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/status" },
@@ -19,17 +20,20 @@
     ],
     "properties": {
         "schema_version": {
-            "hidden comment": "Bump the default in the subclasses."
+            "default": "1"
+        },
+        "accession": {
+            "accessionType": "ES"
         },
         "experiments_in_set": {
             "title": "Set of experiments",
             "description": "List of experiments to be associatedas a set.",
             "type": "array",
+            "exclude_from": "submit4dn",
             "default": [],
             "uniqueItems": true,
             "items": {
                 "title": "Experiment",
-                "comment": "use accessions for identifiers.",
                 "type": "string",
                 "linkTo": "Experiment"
             }
@@ -38,13 +42,11 @@
             "title": "Experiment Set type",
             "description": "The categorization of the set of experiments.",
             "type": "string",
+            "default": "custom",
+            "exclude_from": "submit4dn",
             "enum" : [
-              "unspecified",
-              "replicates",
-              "biological replicates",
-              "technical repllicates",
-              "analysis set",
-              "publication"
+              "custom",
+              "replicate"
             ]
         },
         "description": {
@@ -81,17 +83,6 @@
         },
         "experiments_in_set.lab.title": {
             "title": "Lab"
-        }
-    },
-    "columns": {
-        "experimentset_type": {
-            "title": "Experiment set type"
-        },
-        "description": {
-            "title": "Description"
-        },
-        "experiments_in_set": {
-            "title": "Experiments"
         }
     }
 }

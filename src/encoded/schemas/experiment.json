@@ -1,19 +1,17 @@
 {
     "title": "Experiment",
     "description": "Schema for submitting metadata for an assay.",
-    "comment": "Experiment is the main organizing object for metadata on a single assay, it's associated protocols, files and subsequent analyses.",
     "id": "/profiles/experiment.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["experiment_type", "biosample", "award", "lab"],
     "identifyingProperties": ["uuid", "accession" , "aliases"],
     "additionalProperties": false,
-    "mixinProperties": [
-    ],
+    "dependencies": {
+      "biosample_quantity": ["biosample_quantity_units"],
+      "biosample_quantity_units": ["biosample_quantity"]
+    },
     "properties": {
-        "schema_version": {
-            "default": "1"
-        },
         "status": {
             "title": "Status",
             "type": "string",
@@ -41,7 +39,7 @@
         "experiment_type": {
             "type": "string",
             "description": "A controlled term specifying the type of experiment.",
-            "comment":"required ontology term that is entered in each specific experiment_*"
+            "internal_comment":"should be ontology term?"
         },
         "protocol": {
             "title": "Reference Protocol",
@@ -94,6 +92,23 @@
             "type": "string",
             "linkTo": "Biosample"
         },
+        "biosample_quantity": {
+            "title": "Biological Sample Quantity",
+            "description": "The amount of starting Biological sample going into the experiment",
+            "type": "number"
+        },
+        "biosample_quantity_units": {
+            "title": "Quantity Units",
+            "description": "The units that go along with the biological sample quantity",
+            "type": "string",
+            "enum": [
+                "g",
+                "mg",
+                "μg",
+                "ml",
+                "cells"
+            ]
+        },
         "files": {
             "title": "Data files",
             "description": "Information about the data files associated with the experiment.",
@@ -109,6 +124,7 @@
             "title": "Sets of Metadata on Data files",
             "description": "Information about a set of data files associated with the experiment.",
             "type": "array",
+            "exclude_from": "submit4dn",
             "items": {
                 "title": "Fileset",
                 "description": "Metadata on a set of files.",
@@ -116,28 +132,23 @@
                 "linkTo": "FileSet"
             }
         },
-        "experiment_sets": {
-            "title": "Experiment Sets",
-            "description": "Experiment Sets that are associated with this experiment.",
-            "type": "array",
-            "uniqueItems": true,
-            "items": {
-                "title": "Experiment Set",
-                "description": "An experiment set that is associated wtih this experiment.",
-                "type": "string",
-                "linkTo": "ExperimentSet"
-            }
-        },
         "quality_metric_flags": {
             "title": "Quality Metric Flags",
             "description": "Flags and associated info for flagging experiments with possible issues",
             "type": "array",
+            "exclude_from": "submit4dn",
             "items": {
                 "title": "Flag",
                 "description": "A flag for this experiment with link to associated QC info.",
                 "type": "string",
                 "linkTo": "QualityMetricFlag"
-            }
+                }
+        },
+        "follows_sop": {
+            "title": "Follows SOP",
+            "description": "Flag to indicate if the 4DN SOP for the selected type of experiment was followed - Yes or No",
+            "type": "string",
+            "enum": ["Yes", "No"]
         }
     }
 }

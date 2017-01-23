@@ -5,35 +5,43 @@ var webpack = require('webpack');
 
 gulp.task('default', ['webpack', 'watch']);
 gulp.task('dev', ['default']);
+gulp.task('dev-uglified', ['set-quick-uglified','default']);
 gulp.task('build', ['set-production', 'webpack']);
 gulp.task('build-quick', ['set-quick', 'webpack']);
 
 gulp.task('set-production', [], function () {
-  process.env.NODE_ENV = 'production';
+    process.env.NODE_ENV = 'production';
 });
 
 gulp.task('set-quick', [], function () {
-  process.env.NODE_ENV = 'quick';
+    process.env.NODE_ENV = 'quick';
+});
+
+gulp.task('set-quick-uglified', [], function () {
+    process.env.NODE_ENV = 'quick-uglified';
 });
 
 var webpackOnBuild = function (done) {
-  return function (err, stats) {
-    if (err) {
-      throw new gutil.PluginError("webpack", err);
-    }
-    gutil.log("[webpack]", stats.toString({
-      colors: true
-    }));
-    if (done) { done(err); }
-  };
+    var start = Date.now();
+    return function (err, stats) {
+        if (err) {
+            throw new gutil.PluginError("webpack", err);
+        }
+        gutil.log("[webpack]", stats.toString({
+            colors: true
+        }));
+        var end = Date.now();
+        gutil.log("Build Completed, running for " + ((end - start)/1000)) + 's';
+        if (done) { done(err); }
+    };
 };
 
 gulp.task('webpack', [], function (cb) {
-  var webpackConfig = require('./webpack.config.js');
-  webpack(webpackConfig).run(webpackOnBuild(cb));
+    var webpackConfig = require('./webpack.config.js');
+    webpack(webpackConfig).run(webpackOnBuild(cb));
 });
 
 gulp.task('watch', [], function (cb) {
-  var webpackConfig = require('./webpack.config.js');
-  webpack(webpackConfig).watch(300, webpackOnBuild());
+    var webpackConfig = require('./webpack.config.js');
+    webpack(webpackConfig).watch(300, webpackOnBuild());
 });

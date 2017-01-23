@@ -9,8 +9,7 @@ from snovault import (
 )
 from snovault.schema_utils import schema_validator
 from .base import (
-    Item,
-    paths_filtered_by_status,
+    Item
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -19,7 +18,6 @@ from pyramid.httpexceptions import (
 )
 from pyramid.response import Response
 from pyramid.settings import asbool
-from pyramid.traversal import traverse
 from pyramid.view import view_config
 from urllib.parse import (
     parse_qs,
@@ -29,7 +27,7 @@ import boto
 import datetime
 import json
 import pytz
-import time
+from netaddr.core import AddrFormatError
 
 
 def show_upload_credentials(request=None, context=None, status=None):
@@ -38,28 +36,35 @@ def show_upload_credentials(request=None, context=None, status=None):
     return request.has_permission('edit', context)
 
 
-def external_creds(bucket, key, name, profile_name=None):
-    policy = {
-        'Version': '2012-10-17',
-        'Statement': [
-            {
-                'Effect': 'Allow',
-                'Action': 's3:PutObject',
-                'Resource': 'arn:aws:s3:::{bucket}/{key}'.format(bucket=bucket, key=key),
-            }
-        ]
-    }
-    boto.set_stream_logger('boto')
-    conn = boto.connect_sts(profile_name=profile_name)
-    token = conn.get_federation_token(name, policy=json.dumps(policy))
-    # 'access_key' 'secret_key' 'expiration' 'session_token'
-    credentials = token.credentials.to_dict()
-    credentials.update({
-        'upload_url': 's3://{bucket}/{key}'.format(bucket=bucket, key=key),
-        'federated_user_arn': token.federated_user_arn,
-        'federated_user_id': token.federated_user_id,
-        'request_id': token.request_id,
-    })
+def external_creds(bucket, key, name=None, profile_name=None):
+    '''
+    if name is None, we want the link to s3 but no need to generate
+    an access token.  This is useful for linking metadata to files that
+    already exist on s3.
+    '''
+    credentials = {}
+    if name is not None:
+        policy = {
+            'Version': '2012-10-17',
+            'Statement': [
+                {
+                    'Effect': 'Allow',
+                    'Action': 's3:PutObject',
+                    'Resource': 'arn:aws:s3:::{bucket}/{key}'.format(bucket=bucket, key=key),
+                }
+            ]
+        }
+        boto.set_stream_logger('boto')
+        conn = boto.connect_sts(profile_name=profile_name)
+        token = conn.get_federation_token(name, policy=json.dumps(policy))
+        # 'access_key' 'secret_key' 'expiration' 'session_token'
+        credentials = token.credentials.to_dict()
+        credentials.update({
+            'upload_url': 's3://{bucket}/{key}'.format(bucket=bucket, key=key),
+            'federated_user_arn': token.federated_user_arn,
+            'federated_user_id': token.federated_user_id,
+            'request_id': token.request_id,
+        })
     return {
         'service': 's3',
         'bucket': bucket,
@@ -94,28 +99,8 @@ class FileSet(Item):
     """Collection of files stored under fileset."""
 
     item_type = 'file_set'
-    base_types = ['FileSet'] + Item.base_types
     schema = load_schema('encoded:schemas/file_set.json')
     name_key = 'accession'
-
-    def _update(self, properties, sheets=None):
-        # update self first
-        super(FileSet, self)._update(properties, sheets)
-        fsacc = str(self.uuid)
-        if 'files_in_set' in properties.keys():
-            for eachfile in properties["files_in_set"]:
-                target_file = self.collection.get(eachfile)
-                # is there any fileset in the file
-                if 'filesets' not in target_file.properties.keys():
-                    target_file.properties.update({'filesets': [fsacc, ]})
-                    target_file.update(target_file.properties)
-                else:
-                    # incase file already has the fileset_type
-                    if fsacc in target_file.properties['filesets']:
-                        break
-                    else:
-                        target_file.properties['filesets'].append(fsacc)
-                        target_file.update(target_file.properties)
 
 
 @abstract_collection(
@@ -136,6 +121,13 @@ class File(Item):
     def _update(self, properties, sheets=None):
         if not properties:
             return
+
+        # ensure we always have s3 links setup
+        sheets = {} if sheets is None else sheets.copy()
+        uuid = properties.get('uuid', False)
+        if not sheets.get('external', False) and uuid:
+            sheets['external'] = self.build_external_creds(self.registry, uuid, properties)
+
         # update self first to ensure 'related_files' are stored in self.properties
         super(File, self)._update(properties, sheets)
         DicRefRelation = {
@@ -173,17 +165,6 @@ class File(Item):
                         # make data for new related_files
                         target_fl.properties['related_files'].append(relationship_entry)
                         target_fl.update(target_fl.properties)
-        # this part is for fileset
-        if 'filesets' in properties.keys():
-            for fileset in properties['filesets']:
-                target_fileset = self.collection.get(fileset)
-                # look at the files inside the set
-                if acc in target_fileset.properties["files_in_set"]:
-                    break
-                else:
-                    # incase it is not in the list of files
-                    target_fileset.properties["files_in_set"].append(acc)
-                    target_fileset.update(target_fileset.properties)
 
     @property
     def __name__(self):
@@ -235,28 +216,36 @@ class File(Item):
         else:
             return file_format + ' ' + file_format_type
 
+
+    @classmethod
+    def build_external_creds(cls, registry, uuid, properties):
+        bucket = registry.settings['file_upload_bucket']
+        mapping = cls.schema['file_format_file_extension']
+        file_extension = mapping[properties['file_format']]
+        key = '{uuid}/{accession}{file_extension}'.format(
+            file_extension=file_extension, uuid=uuid,
+            accession=properties.get('accession'))
+
+        # remove the path from the file name and only take first 32 chars
+        fname = properties.get('filename')
+        name = None
+        if fname:
+            name = fname.split('/')[-1][:32]
+
+        profile_name = registry.settings.get('file_upload_profile_name')
+        return external_creds(bucket, key, name, profile_name)
+
+
     @classmethod
     def create(cls, registry, uuid, properties, sheets=None):
         if properties.get('status') == 'uploading':
             sheets = {} if sheets is None else sheets.copy()
-
-            bucket = registry.settings['file_upload_bucket']
-            mapping = cls.schema['file_format_file_extension']
-            file_extension = mapping[properties['file_format']]
-            key = '{uuid}/{accession}{file_extension}'.format(
-                file_extension=file_extension, uuid=uuid, **properties)
-
-            # remove the path from the file name and only take first 32 chars
-            fname = properties.get('filename')
-            if fname:
-                name = fname.split('/')[-1][:32]
-                profile_name = registry.settings.get('file_upload_profile_name')
-                sheets['external'] = external_creds(bucket, key, name, profile_name)
+            sheets['external'] = cls.build_external_creds(registry, uuid, properties) 
         return super(File, cls).create(registry, uuid, properties, sheets)
 
 
 @collection(
-    name='file-fastq',
+    name='files-fastq',
     unique_key='accession',
     properties={
         'title': 'FASTQ Files',
@@ -267,10 +256,11 @@ class FileFastq(File):
     item_type = 'file_fastq'
     schema = load_schema('encoded:schemas/file_fastq.json')
     embedded = File.embedded
+    name_key = 'accession'
 
 
 @collection(
-    name='file-fasta',
+    name='files-fasta',
     unique_key='accession',
     properties={
         'title': 'FASTA Files',
@@ -281,6 +271,37 @@ class FileFasta(File):
     item_type = 'file_fasta'
     schema = load_schema('encoded:schemas/file_fasta.json')
     embedded = File.embedded
+    name_key = 'accession'
+
+
+@collection(
+    name='files-processed',
+    unique_key='accession',
+    properties={
+        'title': 'Processed Files',
+        'description': 'Listing of Processed Files',
+    })
+class FileProcessed(File):
+    """Collection for individual processed files."""
+    item_type = 'file_processed'
+    schema = load_schema('encoded:schemas/file_processed.json')
+    embedded = File.embedded
+    name_key = 'accession'
+
+
+@collection(
+    name='files-reference',
+    unique_key='accession',
+    properties={
+        'title': 'Refenrence Files',
+        'description': 'Listing of Reference Files',
+    })
+class FileReference(File):
+    """Collection for individual reference files."""
+    item_type = 'file_reference'
+    schema = load_schema('encoded:schemas/file_reference.json')
+    embedded = File.embedded
+    name_key = 'accession'
 
 
 @view_config(name='upload', context=File, request_method='GET',
@@ -328,11 +349,13 @@ def post_upload(context, request):
         raise ValueError(external.get('service'))
 
     # remove the path from the file name and only take first 32 chars
-    name = properties.get('filename').split('/')[-1][:32]
+    name = None
+    if properties.get('filename'):
+        name = properties.get('filename').split('/')[-1][:32]
     profile_name = request.registry.settings.get('file_upload_profile_name')
     creds = external_creds(bucket, key, name, profile_name)
     # in case we haven't uploaded a file before
-    context.propsheets['external'] = external_creds(bucket, key, name, profile_name)
+    context.propsheets['external'] = creds
 
     new_properties = None
     if properties['status'] == 'upload failed':
@@ -368,10 +391,17 @@ def download(context, request):
 
     proxy = asbool(request.params.get('proxy')) or 'Origin' in request.headers
 
-    use_download_proxy = request.client_addr not in request.registry['aws_ipset']
+    try:
+        use_download_proxy = request.client_addr not in request.registry['aws_ipset']
+    except TypeError:
+        # this fails in testing due to testapp not having ip
+        use_download_proxy = False
 
     external = context.propsheets.get('external', {})
-    if external.get('service') == 's3':
+    if not external:
+        profile_name = request.registry.settings.get('file_upload_profile_name')
+        sheets['external'] = external_creds(bucket, key, name, profile_name)
+    elif external.get('service') == 's3':
         conn = boto.connect_s3()
         location = conn.generate_url(
             36*60*60, request.method, external['bucket'], external['key'],

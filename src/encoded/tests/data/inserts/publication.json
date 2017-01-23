@@ -1,21 +1,35 @@
 [
     {
-        "title": "An integrated encyclopedia of DNA elements in the human genome",
-        "abstract": "The human genome encodes the blueprint of life, but the function of the vast majority of its nearly three billion bases is unknown. The Encyclopedia of DNA Elements (ENCODE) project has systematically mapped regions of transcription, transcription factor association, chromatin structure and histone modification. These data enabled us to assign biochemical functions for 80% of the genome, in particular outside of the well-studied protein-coding regions. Many discovered candidate regulatory elements are physically associated with one another and with expressed genes, providing new insights into the mechanisms of gene regulation. The newly identified elements also show a statistical correspondence to sequence variants linked to human disease, and can thereby guide interpretation of this variation. Overall, the project provides new insights into the organization and regulation of our genes and genome, and is an expansive resource of functional annotations for biomedical research.",
-        "authors": "ENCODE Project Consortium, Bernstein BE, Birney E, Dunham I, Green ED, Gunter C, Snyder M.",
-        "journal": "Nature",
-        "date_published": "2012 Sep 6",
-        "identifiers": ["PMID:22955616", "PMCID:PMC3439153"],
-        "volume": "489",
-        "issue": "7414",
-        "page": "57-74",
-        "status": "published",
-        "published_by": ["ENCODE"],
+        "ID": "PMID:22955616",
+        "status": "current",
+        "published_by": "4DN",
         "categories": ["integrative analysis"],
-        "data_used": "ENCODE main paper",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
         "uuid": "52e85c70-fe2d-11e3-9191-0800200c9a66",
-        "experiment_sets_in_pub":["431106bc-8535-4448-903e-854af460b260"]
+        "exp_sets_prod_in_pub":["431106bc-8535-4448-903e-854af460b260"]
+    },
+    {
+        "ID": "doi:10.1093/cercor/bhs015",
+        "status": "current",
+        "published_by": "External",
+        "categories": ["integrative analysis"],
+        "award": "1U01CA200059-01",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "uuid": "52e85c70-fe2d-11e3-9191-0800200c9a67"
+    },
+    {
+        "ID": "doi:10.1101/083410",
+        "status": "current",
+        "published_by": "External",
+        "categories": ["integrative analysis"],
+        "award": "1U01CA200059-01",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "uuid": "52e85c70-fe2d-11e3-9191-0800200c9a68"
     }
 ]

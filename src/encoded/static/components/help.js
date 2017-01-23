@@ -1,36 +1,60 @@
 // Render a simple static help page
 
 var React = require('react');
-var statics = require('../data/statics');
 var Button = require('react-bootstrap').Button;
+var globals = require('./globals');
 
 var HelpPage = module.exports = React.createClass({
+
+    propTypes : {
+        context : React.PropTypes.shape({
+            "content" : React.PropTypes.shape({
+                "gettingStarted" : React.PropTypes.string,
+                "metadataStructure1" : React.PropTypes.string,
+                "metadataStructure2" : React.PropTypes.string,
+                "restAPI" : React.PropTypes.string
+            }).isRequired
+        }).isRequired
+    },
+
+    getDefaultProps : function(){
+        return {
+            "context" : { "content" : {} }
+        }
+    },
+
     // TODO: fix ugly hack, wherein I set id in the h3 above actual spot because the usual way of doing anchors cut off entries
     render: function() {
+        var c = this.props.context.content;
         return(
             <div className="static-page">
+
+                <h1 className="page-title">Help</h1>
+
                 <div className="help-entry">
-                    <h3 id="metadata-structure" className="fourDN-section-title">Getting started</h3>
-                    <p className="fourDN-content" dangerouslySetInnerHTML={{__html: statics.gettingStarted}}></p>
+                    <h3 id="metadata-structure" className="fourDN-header">Getting Started</h3>
+                    <p className="fourDN-content text-justify" dangerouslySetInnerHTML={{__html: c.gettingStarted}}></p>
                 </div>
                 <div className="help-entry">
-                    <h3 className="fourDN-section-title">Metadata structure</h3>
-                    <p className="fourDN-content" dangerouslySetInnerHTML={{__html: statics.metadataStructure1}}></p>
+                    <h3 className="fourDN-header">Metadata Structure</h3>
+                    <p className="fourDN-content text-justify" dangerouslySetInnerHTML={{__html: c.metadataStructure1}}></p>
                     <SlideCarousel />
-                    <p className="fourDN-content" id="data-submission" dangerouslySetInnerHTML={{__html: statics.metadataStructure2}}></p>
+                    <p className="fourDN-content text-justify" id="data-submission" dangerouslySetInnerHTML={{__html: c.metadataStructure2}}></p>
                 </div>
                 <div className="help-entry">
-                    <h3 id="rest-api" className="fourDN-section-title">Data submission via spreadsheet</h3>
-                    <p className="fourDN-content" dangerouslySetInnerHTML={{__html: statics.submissionXLS}}></p>
+                    <h3 id="rest-api" className="fourDN-header">Data Submission via Spreadsheet</h3>
+                    <p className="fourDN-content text-justify" dangerouslySetInnerHTML={{__html: c.submissionXLS}}></p>
                 </div>
                 <div className="help-entry">
-                    <h3 className="fourDN-section-title">REST API</h3>
-                    <p className="fourDN-content" dangerouslySetInnerHTML={{__html: statics.restAPI}}></p>
+                    <h3 className="fourDN-header">REST API</h3>
+                    <p className="fourDN-content text-justify" dangerouslySetInnerHTML={{__html: c.restAPI}}></p>
                 </div>
             </div>
         );
     }
 });
+
+globals.content_views.register(HelpPage, 'HelpPage');
 
 var SlideCarousel = React.createClass({
     getInitialState() {

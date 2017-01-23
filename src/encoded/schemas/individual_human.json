@@ -1,9 +1,10 @@
 {
     "title": "Human Individual",
-    "description": "DEL REF Schema for submitting a human individual.",
+    "description": "Schema for submitting a human individual.",
     "id": "/profiles/individual_human.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
+    "required": ["award", "lab"],
     "identifyingProperties": ["uuid", "accession", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -22,6 +23,9 @@
       "age": ["age_units"]
     },
     "properties": {
+        "schema_version": {
+            "default": "1"
+        },
         "ethnicity": {
             "title": "Ethnicity",
             "type": "string"
@@ -45,6 +49,7 @@
         },
         "organism": {
             "default": "7745b647-ff15-4ff3-9ced-b897d4e2983c",
+            "exclude_from": "submit4dn",
             "linkEnum": ["7745b647-ff15-4ff3-9ced-b897d4e2983c"]
         },
         "dbxrefs": {

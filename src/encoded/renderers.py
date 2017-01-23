@@ -7,6 +7,7 @@ from pyramid.httpexceptions import (
     HTTPMovedPermanently,
     HTTPPreconditionFailed,
     HTTPUnauthorized,
+    HTTPForbidden,
     HTTPUnsupportedMediaType,
 )
 from pyramid.security import forget
@@ -25,6 +26,7 @@ import logging
 import os
 import psutil
 import time
+import json
 
 
 log = logging.getLogger(__name__)
@@ -86,12 +88,47 @@ def security_tween_factory(handler, registry):
                 detail = 'X-If-Match-User does not match'
                 raise HTTPPreconditionFailed(detail)
 
-        # wget may only send credentials following a challenge response.
-        auth_challenge = asbool(request.headers.get('X-Auth-Challenge', False))
-        if auth_challenge or request.authorization is not None:
+        # Check if user logged in via Auth0 and set headers accordingly to inform React 
+        # server-side/client-side render & App.prototype.navigate() request response handling
+        if hasattr(request, 'auth0_expired'):
+
+            if not request.auth0_expired:
+                login = request.authenticated_userid
+                if login:
+                    authtype, email = login.split('.', 1)
+                    if (authtype == 'auth0' and request.content_type != 'application/json'):
+                        # If successfully authenticated by Auth0, add JWT token and basic user details to response headers for server-side React to consume.
+                        # Do not add if returning JSON, as will bypass server-side React which will be unable to unset/delete them before sending response.
+                        response = handler(request)
+                        response.headers['X-Request-JWT'] = request.cookies.get('jwtToken','')
+                        response.headers['X-User-Info'] = json.dumps(request.user_info)
+                    elif authtype != 'auth0' and request.content_type != 'application/json':
+                        response = handler(request)
+                        response.headers['X-Request-JWT'] = "null"
+
+            elif request.auth0_expired:
+                # Inform libs/react-middleware.js of expired token to set logout state in front-end in response to
+                # either doc request or xhr request & set appropriate alerts
+                if request.is_xhr or request.content_type == 'application/json':
+                    # Do not change HTTPForbidden error detail ("Bad or expired token.") below unless want bad things to happen on the front-end 
+                    # (or find/replace in /src/encoded/static accordingly, incl browser.js & components/app.js).
+                    # Could also remove this raise HTTPForbidden when all browsers consistently support XMLHttpRequest.getResponseHeaders() (a living standard)
+                    # to ID an expired token using X-Request-JWT header set below.
+                    raise HTTPForbidden("Bad or expired token.")
+                response = handler(request)
+                response.headers['X-Request-JWT'] = "expired"
+                # Especially for initial document requests by browser, unset jwtToken cookie so initial client-side
+                # React render has App(instance).state.session = false (synced w/ server-side)
+                response.set_cookie(name='jwtToken', value=None, max_age=0,path='/')
+                response.status_code = 403
+
+        # Older stuff (pre-Auth0)
+        elif request.authorization is not None or asbool(request.headers.get('X-Auth-Challenge', False)):
             login = request.authenticated_userid
-            if login is None:
-                raise HTTPUnauthorized(headerlist=forget(request))
+            if not login:
+                # wget may only send credentials following a challenge response.
+                raise HTTPForbidden(title="No Access")
+
 
         if request.method in ('GET', 'HEAD'):
             return handler(request)
@@ -100,21 +137,19 @@ def security_tween_factory(handler, registry):
             detail = "%s is not 'application/json'" % request.content_type
             raise HTTPUnsupportedMediaType(detail)
 
-        token = request.headers.get('X-CSRF-Token')
-        if token is not None:
-            # Avoid dirtying the session and adding a Set-Cookie header
-            # XXX Should consider if this is a good idea or not and timeouts
-            if token == dict.get(request.session, '_csrft_', None):
-                return handler(request)
-            raise CSRFTokenError('Incorrect CSRF token')
+        #token = request.headers.get('X-CSRF-Token')
+        #if token is not None:
+        #    # Avoid dirtying the session and adding a Set-Cookie header
+        #    # XXX Should consider if this is a good idea or not and timeouts
+        #    if token == dict.get(request.session, '_csrft_', None):
+        #        return handler(request)
+        #    raise CSRFTokenError('Incorrect CSRF token')
 
         return handler(request)
 
-        if login is None:
-            login = request.authenticated_userid
         if login is not None:
             namespace, userid = login.split('.', 1)
-            if namespace not in ('mailto', 'persona'):
+            if namespace not in ('mailto', 'auth0'):
                 return handler(request)
         raise CSRFTokenError('Missing CSRF token')
 
@@ -133,8 +168,8 @@ def normalize_cookie_tween_factory(handler, registry):
             return handler(request)
 
         session = request.session
-        if session or session._cookie_name not in request.cookies:
-            return handler(request)
+        #if session or session._cookie_name not in request.cookies:
+        #    return handler(request)
 
         response = handler(request)
         existing = response.headers.getall('Set-Cookie')
@@ -271,7 +306,7 @@ page_or_json = SubprocessTween(
     should_transform=should_transform,
     after_transform=after_transform,
     reload_process=reload_process,
-    args=['node', resource_filename(__name__, 'static/build/renderer.js')],
+    args=['node', resource_filename(__name__, 'static/server.js')],
     env=node_env,
 )
 

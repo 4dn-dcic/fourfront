@@ -1,18 +1,22 @@
-
 ========================
-Fourfront Metadata Database
+ Fourfront Metadata Database
 ========================
- 
 
 |Build status|_
 
-.. |Build status| image:: https://travis-ci.org/hms-dbmi/fourfront.png?branch=master
-.. _Build status: https://travis-ci.org/hms-dbmi/fourfront
+.. |Build status| image:: https://travis-ci.org/4dn-dcic/fourfront.png?branch=master
+.. _Build status: https://travis-ci.org/4dn-dcic/fourfront
 
 |Coverage|_
 
-.. |Coverage| image:: https://coveralls.io/repos/github/hms-dbmi/fourfront/badge.svg?branch=master
-.. _Coverage: https://coveralls.io/github/hms-dbmi/fourfront?branch=master
+.. |Coverage| image:: https://coveralls.io/repos/github/4dn-dcic/fourfront/badge.svg?branch=master
+.. _Coverage: https://coveralls.io/github/4dn-dcic/fourfront?branch=master
+
+|Quality|_
+
+.. |Quality| image:: https://api.codacy.com/project/badge/Grade/f5fc54006b4740b5800e83eb2aeeeb43    
+.. _Quality: https://www.codacy.com/app/4dn/fourfront?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=4dn-dcic/fourfront&amp;utm_campaign=Badge_Grade
+
 
 This is a fork from `ENCODE-DCC/encoded <https://github.com/ENCODE-DCC/encoded>`_ .  We are working to modularize the project and adapted to our needs for the 4D Nucleome project.
 
@@ -40,13 +44,13 @@ Step 3: Run buildout::
     $ python3 bootstrap.py --buildout-version 2.4.1 --setuptools-version 18.1
     $ bin/buildout
 
-    NOTE:  
-    If you have issues with postgres or the python interface to it (psycogpg2) you probably need to install postgresql 
+    NOTE:
+    If you have issues with postgres or the python interface to it (psycogpg2) you probably need to install postgresql
     via homebrew (as above)
     If you have issues with Pillow you may need to install new xcode command line tools:
     - First update Xcode from AppStore (reboot)
-    $ xcode-select install 
-    
+    $ xcode-select install
+
 
 
 If you wish to completely rebuild the application, or have updated dependencies:
@@ -78,12 +82,12 @@ Running tests
 =============
 
 To run specific tests locally::
-    
+
     $ bin/test -k test_name
-    
+
 To run with a debugger::
-    
-    $ bin/test --pdb 
+
+    $ bin/test --pdb
 
 Specific tests to run locally for schema changes::
 

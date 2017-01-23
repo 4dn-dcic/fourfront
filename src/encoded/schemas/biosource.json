@@ -4,7 +4,7 @@
     "id": "/profiles/biosource.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["biosource_type"],
+    "required": ["biosource_type", "award", "lab"],
     "identifyingProperties": ["uuid", "accession", "aliases"],
     "additionalProperties": false,
     "mixinProperties": [
@@ -14,7 +14,6 @@
         { "$ref": "mixins.json#/status" },
         { "$ref": "mixins.json#/accession" },
         { "$ref": "mixins.json#/attribution" },
-        { "$ref": "mixins.json#/submitted"},
         { "$ref": "mixins.json#/references" },
         { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/notes" }
@@ -48,21 +47,61 @@
           },
           "individual": {
               "title": "Individual",
-              "description": "Information on donor or individual mouse or other organism.",
-              "comment": "For human biosamples, see human_individual.json for available identifiers.",
+              "description": "Source of the biological material, donor.",
+              "comment": "See Individual sheet or collection for existing items",
               "type": "string",
               "linkTo": "Individual"
+          },
+          "modifications": {
+              "title": "Stable genomic modifications",
+              "description": "Expression or targeting vectors stably transfected to generate Crispr'ed or other genomic modification",
+              "type": "array",
+              "default": [],
+              "uniqueItems": true,
+              "items": {
+                  "title": "Modifications",
+                  "description": "A single stable genomic modification of the biosource.",
+                  "type":  "string",
+                  "linkTo": "Modification"
+              }
           },
           "cell_line": {
               "title": "Cell line name",
               "description": "Ontology term for the cell line used.",
               "type":  "string",
-              "comment": "enforce EFO ontology term for a cell line?"
+              "enum": [
+                  "H1-hESC",
+                  "GM12878",
+                  "IMR-90",
+                  "HFF-hTERT",
+                  "F121-9-CASTx129",
+                  "K562",
+                  "RPE-hTERT",
+                  "HEK293",
+                  "HAP-1",
+                  "U2OS",
+                  "WTC-11",
+                  "H9",
+                  "F123-CASTx129",
+                  "CC-2551",
+                  "CH12-LX",
+                  "KBM-7",
+                  "192627",
+                  "CC-2517",
+                  "HeLa-S3"
+              ]
+          },
+          "cell_line_termid": {
+              "title": "Cell Line Term ID",
+              "description": "EFO term ID for cell line",
+              "type": "string",
+              "permission": "import_items"
           },
           "cell_line_tier": {
               "title": "Cell line tier",
               "description": "Tier into which the cell line has been classified",
               "type": "string",
+              "permission": "import_items",
               "enum": [
                   "Tier 1",
                   "Tier 2",
@@ -72,8 +111,7 @@
           "tissue": {
               "title": "Tissue name",
               "description": "Anatomy (UBERON) Ontology term for the tissue used.",
-              "type":  "string",
-              "comment": "enforce UBERON ontology term for a tissue type?"
+              "type":  "string"
           },
           "biosource_vendor": {
                 "title": "Biosource Vendor",
@@ -105,28 +143,5 @@
               "title": "Organism"
           }
 
-      },
-      "columns": {
-          "biosource_type": {
-              "title": "Biosource type"
-          },
-          "biosource_name": {
-              "title": "Biosource"
-          },
-          "individual.organism.name": {
-              "title": "Organism"
-          },
-          "description":{
-              "title": "Description"
-          },
-          "accession":{
-              "title": "Accession"
-          },
-          "title":{
-              "title": "Title"
-          },
-          "name":{
-              "title": "Name"
-          }
       }
 }

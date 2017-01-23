@@ -4,7 +4,7 @@
     "id": "/profiles/workflow.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["title", "workflow_type"],
+    "required": ["title", "name", "workflow_type", "award", "lab"],
     "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases", "accession"],
     "mixinProperties": [
@@ -12,11 +12,11 @@
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/uuid" },
         { "$ref": "mixins.json#/status" },
-        { "$ref": "mixins.json#/submitted"},
+        { "$ref": "mixins.json#/submitted" },
         { "$ref": "mixins.json#/documents" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/accession" },
-        { "$ref": "mixins.json#/notes"}
+        { "$ref": "mixins.json#/notes" }
     ],
     "properties": {
         "schema_version": {
@@ -28,6 +28,11 @@
         "title": {
             "title": "Title",
             "description": "The preferred viewable name of the workflow.",
+            "type": "string"
+        },
+        "name": {
+            "title": "Name",
+            "description": "The name of the workflow used by either SBG or Tibanna.",
             "type": "string"
         },
         "description": {
@@ -42,13 +47,90 @@
                 "Hi-C data analysis",
                 "Image processing",
                 "Visualization processing",
+                "Data QC",
                 "Other"
             ]
+        },
+        "workflow_diagram": {
+            "title": "Workflow diagram",
+            "description": "Image of workflow diagram",
+            "type": "string"
         },
         "cwl_pointer": {
             "title": "CWL Path",
             "description": "Path to the CWL file for the workflow - URL or directory path",
             "type": "string"
+        },
+        "arguments": {
+            "title": "Workflow arguments",
+            "description": "arguments of the workflow.",
+            "type": "array",
+            "items": {
+                "title": "argument",
+                "description": "An argument of the workflow.",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "workflow_argument_name": {
+                        "title": "Workflow argument name",
+                        "description": "the name of the argument of the workflow",
+                        "type": "string"
+                    },
+                    "argument_type":{
+                        "title": "Workflow argument type",
+                        "description": "type of the argument",
+                        "type": "string",
+                        "enum" : [
+                            "",
+                            "Input file",
+                            "Output file",
+                            "parameter"
+                        ]
+                    },
+                    "description": {
+                        "title": "description",
+                        "description": "description of the argument",
+                        "type": "string"
+                    },
+                    "argument_mapping": {
+                        "title": "Argument Mappings",
+                        "internal_comment": "same workflow argument can be passed to multiple steps",
+                        "description": "argument mapping between workflow and steps",
+                        "type": "array",
+                        "items": {
+                            "title" : "Argument Mapping",
+                            "type": "object",
+                            "additionalProperties": false,
+                            "properties": {
+                                "workflow_step": {
+                                    "title": "Corresponding workflow step",
+                                    "description": "the step of the workflow that takes the input file",
+                                    "type": "string",
+                                    "linkTo": "AnalysisStep",
+                                    "internal_comment": "the same analysis step may appear multiple times"
+                                },
+                                "step_argument_name": {
+                                    "title": "Step argument name",
+                                    "description": "the name of the argument of the step that corresponds to the workflow argument",
+                                    "type": "string"
+                                },
+                                "step_argument_type": {
+                                    "title": "Step argument type",
+                                    "description": "type of the argument of the step",
+                                    "type": "string",
+                                    "enum": [
+                                        "Input file",
+                                        "Output file",
+                                        "parameter",
+                                        "Input file or parameter",
+                                        "Output file or parameter"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         },
         "workflow_steps": {
             "title": "Workflow Steps",
@@ -66,16 +148,10 @@
                         "type": "string",
                         "linkTo": "AnalysisStep"
                     },
-                    "parents": {
-                        "title": "Step parents",
-                        "description": "The analysis step(s) that directly preceed the step in the workflow",
-                        "type": "array",
-                        "items": {
-                            "title": "Parent Step",
-                            "description": "An analysis step that immediately preceeds this step.",
-                            "type": "string",
-                            "linkTo": "AnalysisStep"
-                        }
+                    "step_name": {
+                        "title": "Workflow Step",
+                        "description": "A step in the workflow.",
+                        "type": "string"
                     }
                 }
             }
