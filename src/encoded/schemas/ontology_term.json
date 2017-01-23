@@ -109,7 +109,7 @@
             "title": "Slim Branch",
             "description": "If the term is a slim term the value is the slot that the slim is for",
             "type": "string",
-            "enum": ["developmental", "organ", "system"]
+            "enum": ["developmental", "organ", "system", "assay"]
         }
     }
 }

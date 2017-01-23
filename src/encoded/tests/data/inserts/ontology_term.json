@@ -128,5 +128,39 @@
         "is_slim_for": "developmental",
         "synonyms": ["entoderm"],
         "parents": ["111118bc-8535-4448-903e-854af460a233"]
+    },
+    {
+        "uuid": "111122bc-8535-4448-903e-854af460a233",
+        "preferred_name": "3D chromatin structure",
+        "term_name": "chromosome conformation identification objective",
+        "term_id": "OBI:0001917",
+        "source_ontology": "530026bc-8535-4448-903e-854af460b254",
+        "term_url": "http://purl.obolibrary.org/obo/OBI_0001917",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "definition": "A molecular feature identification objective that aims to determine spatial organization of chromatin.",
+        "is_slim_for": "assay"
+    },
+    {
+        "uuid": "111123bc-8535-4448-903e-854af460a233",
+        "preferred_name": "Replication timing",
+        "term_name": "DNA replication identification objective",
+        "term_id": "OBI:0001917",
+        "source_ontology": "530026bc-8535-4448-903e-854af460b254",
+        "term_url": "http://purl.obolibrary.org/obo/OBI_0001916",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "definition": "A molecular feature identification objective that aims to examine charateristics of DNA replication, such as replication time.",
+        "is_slim_for": "assay"
+    },
+    {
+        "uuid": "111124bc-8535-4448-903e-854af460a233",
+        "preferred_name": "Imaging",
+        "term_name": "imaging assay",
+        "term_id": "OBI:0000185",
+        "source_ontology": "530026bc-8535-4448-903e-854af460b254",
+        "term_url": "http://purl.obolibrary.org/obo/OBI_0000185",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "definition": "An imaging assay is an assay to produce a picture of an entity.",
+        "is_slim_for": "assay"
     }
+
 ]
