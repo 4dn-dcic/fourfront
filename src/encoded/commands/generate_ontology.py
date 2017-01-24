@@ -1,3 +1,5 @@
+import os
+import argparse
 import json
 from rdflib.collection import Collection
 from owltools import (
@@ -10,6 +12,12 @@ from owltools import (
     IntersectionOf,
     OnProperty
 )
+from Submit4DN.wranglertools.fdnDCIC import (
+    FDN_Key,
+    FDN_Connection,
+    get_FDN
+)
+
 
 EPILOG = __doc__
 
@@ -394,6 +402,72 @@ def getTermStructure():
     }
 
 
+def get_ontologies(connection, ont_list):
+    '''return list of ontology jsons retrieved from server'''
+    ontologies = []
+    if ont_list == 'all':
+        ontologies = get_FDN(None, connection, None, 'ontologys')['@graph']
+    else:
+        ontologies = [get_FDN('ontologys/' + ontology, connection) for ontology in ont_list]
+
+    # removing item not found cases with reporting
+    for i, ontology in enumerate(ontologies):
+        if 'Ontology' not in ontology['@type']:
+            # place to set up logging
+            print(ontology)
+            ontologies.pop(i)
+    return ontologies
+
+
+def connect2server(keyfile, keyname):
+    '''Sets up credentials for accessing the server.  Generates a key using info
+       from the named keyname in the keyfile and checks that the server can be
+       reached with that key'''
+    key = FDN_Key(keyfile, keyname)
+    connection = FDN_Connection(key)
+    print("Running on:       {server}".format(server=connection.server))
+    # test connection
+    if connection.check:
+        return connection
+    print("CONNECTION ERROR: Please check your keys.")
+    return None
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Process specified Ontologies and create OntologyTerm inserts for updates",
+        epilog=EPILOG,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument('--ontologies',
+                        nargs='+',
+                        default='all',
+                        help="Names of ontologies to process - eg. UBERON, OBI, EFO; \
+                        all retrieves all ontologies that exist in db")
+    parser.add_argument('--key',
+                        default='default',
+                        help="The keypair identifier from the keyfile.  \
+                        Default is --key=default")
+    parser.add_argument('--keyfile',
+                        default=os.path.expanduser("~/keypairs.json"),
+                        help="The keypair file.  Default is --keyfile=%s" %
+                             (os.path.expanduser("~/keypairs.json")))
+    return parser.parse_args()
+
+
+def new_main():
+    ''' Downloads latest Ontology OWL files for Ontologies in the database
+        and Updates Terms by generating json inserts
+
+        WORK IN PROGRESS
+    '''
+    args = parse_args()
+    connection = connect2server(args.keyfile, args.key)
+
+    ontologies = get_ontologies(connection, args.ontologies)
+    print(ontologies)
+
+
 def main():
     ''' Downloads UBERON, EFO and OBI ontologies and create a JSON file '''
 
@@ -539,4 +613,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    new_main()
