@@ -26,16 +26,6 @@
             "title": "Enzyme Name",
             "description": "The name of the digestion enzyme.",
             "type": "string",
-            "enum": [
-              "HindIII",
-              "DpnII",
-              "NcoI_MspI_BspHI",
-              "NcoI",
-              "MboI",
-              "DNaseI",
-              "MNase",
-              "MspI"
-            ],
             "uniqueKey": "enzyme:name"
         },
         "description": {
