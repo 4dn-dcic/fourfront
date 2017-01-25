@@ -37,25 +37,13 @@ var ExpTerm = React.createClass({
             return numPassed;
         },
 
-        standardizeFieldKey : function(field, expsOrSets = 'sets', reverse = false){
-            if (expsOrSets === 'experiments' && field !== 'experimentset_type'){
-                // ToDo: arrays of expSet- and exp- exclusive fields
-                if (reverse){
-                    return field.replace('experiments_in_set.', '');
-                }
-                return 'experiments_in_set.' + field;
-            } else {
-                return field;
-            }
-        },
-
         /* Use as a mixin (i.e. func.call(this, termKey, facetField, expsOrSets) ) in components with access to this.props.expSetFilters */
         isSelected : function(
             termKey     = (this.state.term || this.props.term || {key:null}).key,
             facetField  = (this.state.facet || this.props.facet || {field:null}).field,
             expsOrSets  = this.props.experimentsOrSets || 'sets'
         ){
-            var standardizedFieldKey = ExpTerm.standardizeFieldKey(facetField, expsOrSets);
+            var standardizedFieldKey = Filters.standardizeFieldKey(facetField, expsOrSets);
             if (
                 this.props.expSetFilters[standardizedFieldKey] && 
                 this.props.expSetFilters[standardizedFieldKey].has(termKey)
@@ -63,31 +51,7 @@ var ExpTerm = React.createClass({
                 return true;
             }
             return false;
-        },
-
-        /**
-         * TODO: Make this function work INDEPENDENTLY OF HREF.
-         * 
-         * @param {string} term - Term key
-         * @param {string} field - Facet field key, in object dot notation.
-         * @param {Object} contextFilters - Active filters as returned from back-end.
-         * @param {string} currentHref - Base URL (current location) with active filters.
-         * @param {Object} expSetFilters - Filters as stored in Redux, keyed by facet field containing Set of term keys.
-         */
-        getHrefDeprecated : function(term, field, contextFilters, currentHref, expSetFilters = null){
-            console.log(ExpTerm.expSetFiltersToURLQuery(expSetFilters));
-            // If selected, grab URL to remove it.
-            for (var filter in contextFilters) {
-                if (contextFilters[filter].field === field && contextFilters[filter].term === term) {
-                    console.log('REMOVING', contextFilters[filter]);
-                    return contextFilters[filter].remove;
-                }
-            }
-            // Else grab URL to add it.
-            var suffix = ['?','&'].indexOf(currentHref.charAt(currentHref.length - 1)) > -1 ? '' :
-                (currentHref.match(/\?./) ? '&' : '?');
-            return currentHref + suffix + field + '=' + encodeURIComponent(term).replace(/%20/g, '+');
-        },
+        }
 
     },
 
@@ -179,7 +143,7 @@ var ExpTerm = React.createClass({
 
     // Correct field to match that of browse page (ExpSet)
     standardizeFieldKey : function(field = this.props.facet.field, reverse = false){
-        return ExpTerm.standardizeFieldKey(field, this.props.experimentsOrSets, reverse);
+        return Filters.standardizeFieldKey(field, this.props.experimentsOrSets, reverse);
     },
 
     // find number of experiments or experiment sets
@@ -451,6 +415,7 @@ var FacetList = module.exports = React.createClass({
 
                 // unhighlight previously selected terms, if any.
                 _.each(document.querySelectorAll('[data-term]'), function(termElement){
+                    if (field && termElement.getAttribute('data-field') === field) return; // Skip, we need to leave as highlighted as also our field container.
                     var isSVG = setHighlightClass(termElement, true);
                     if (!isSVG && termElement.className.indexOf('no-highlight-color') === -1) termElement.style.backgroundColor = '';
                 });
@@ -670,7 +635,7 @@ var FacetList = module.exports = React.createClass({
                         experimentArray.map((experiment, j)=>{
                             var termVal = object.getNestedProperty(
                                 experiment,
-                                ExpTerm.standardizeFieldKey(selectedFacet, expsOrSets, true)
+                                Filters.standardizeFieldKey(selectedFacet, expsOrSets, true)
                             );
                             if (Array.isArray(termVal)){ // Only include terms by which we're filtering
                                 return termVal.filter((term) => expSetFilters[selectedFacet].has(term));

@@ -95,15 +95,11 @@ var BarPlot = React.createClass({
                 .object()
                 .value();
 
-            console.log('FIELDTERMS1', field);
-
             experiments.forEach(function(exp){
                 var topLevelFieldTerm = object.getNestedProperty(exp, field.field.replace('experiments_in_set.',''));
                 var nextLevelFieldTerm = object.getNestedProperty(exp, field.childField.field.replace('experiments_in_set.',''));
                 BarPlot.countFieldTermForExperiment(field.terms[topLevelFieldTerm], nextLevelFieldTerm);
             });
-
-            console.log('FIELDTERMS2', field);
 
             if (Array.isArray(fields)){
                 fields[fieldIndex] = field; // Probably not needed as field already simply references fields[fieldIndex];
@@ -154,6 +150,9 @@ var BarPlot = React.createClass({
         ){
             var topIndex = BarPlot.firstPopulatedFieldIndex(fields);
             var numberOfTerms = _.keys(fields[topIndex].terms).length;
+            var largestExpCountForATerm = _.reduce(fields[topIndex].terms, function(m,t){
+                return Math.max(m, typeof t === 'number' ? t : t.total);
+            }, 0);
 
             var insetDims = {
                 width  : Math.max(availWidth  - styleOpts.offset.left   - styleOpts.offset.right, 0),
@@ -172,7 +171,11 @@ var BarPlot = React.createClass({
                         var termCount = term[1];
                         var childBars = null;
                         if (typeof term[1] === 'object') termCount = term[1].total;
-                        var barHeight = (termCount / fieldObj.total) * outerDims.height;
+                        var barHeight = (
+                            termCount / (
+                                parent ? fieldObj.total : largestExpCountForATerm
+                            )
+                        ) * outerDims.height;
                         var barNode = {
                             'name' : termKey,
                             'term' : termKey,
@@ -198,11 +201,13 @@ var BarPlot = React.createClass({
                     .value()
             }
 
-            return {
+            var barData = {
                 'fieldIndex' : topIndex,
                 'bars' : genBarData(fields[topIndex], insetDims),
                 'fields' : fields
             };
+
+            return barData;
         },
 
         /** Get default style options for chart. Should suffice most of the time. */
@@ -525,7 +530,7 @@ var BarPlot = React.createClass({
                         )
                     }
                     data-term={d.term}
-                    data-field={Array.isArray(d.bars) && d.bars.length > 1 ? d.bars[0].field : null}
+                    data-field={Array.isArray(d.bars) && d.bars.length > 0 ? d.bars[0].field : null}
                     key={"bar-" + d.term}
                     style={barStyle.call(this)}
                     ref={(r) => {

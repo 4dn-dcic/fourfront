@@ -189,13 +189,13 @@
             transition: opacity 0.5s, height .75s, width .75s;
 
             &:first-of-type {
-                border-top-left-radius: 5px;
-                border-top-right-radius: 5px;
+                border-top-left-radius: 3px;
+                border-top-right-radius: 3px;
             }
 
             &:last-of-type {
-                border-bottom-left-radius: 5px;
-                border-bottom-right-radius: 5px;
+                border-bottom-left-radius: 3px;
+                border-bottom-right-radius: 3px;
             }
         }
 
@@ -257,7 +257,8 @@
         .bar-part {
             opacity: 1;
             &.multiple-parts {
-                opacity : 0.4;
+                opacity : 0;
+                border-radius: 0;
                 &.highlight {
                     opacity : 1;
                 }
