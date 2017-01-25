@@ -7,7 +7,7 @@ var querystring = require('querystring');
 var d3 = require('d3');
 var SunBurstChart = require('./viz/sunburst');
 var BarPlotChart = require('./viz/barplot');
-var { expFxn, expFilters, ajax, console, layout, isServerSide } = require('./util');
+var { expFxn, Filters, ajax, console, layout, isServerSide } = require('./util');
 var FacetList = require('./facetlist');
 var { ChartBreadcrumbs, vizUtil } = require('./viz/common');
 
@@ -362,7 +362,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         });
     },
 
-    getFilteredContextHref : function(props = this.props){ return expFilters.filtersToHref(props.filters, props.href, 0, 'all', '/browse/'); },
+    getFilteredContextHref : function(props = this.props){ return Filters.filtersToHref(props.filters, props.href, 0, 'all', '/browse/'); },
 
     getFieldsRequiredURLQueryPart : function(){
         return this.props.fieldsToFetch.map(function(fieldToIncludeInResult){
@@ -406,7 +406,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                     }
                     for (i = 0; i < sequenceArray.length; i++){
                         if (typeof sequenceArray[i].data.field !== 'string' || typeof sequenceArray[i].data.term !== 'string') continue;
-                        newFilters = expFilters.changeFilter(
+                        newFilters = Filters.changeFilter(
                             sequenceArray[i].data.field,
                             sequenceArray[i].data.term,
                             'sets',
@@ -419,16 +419,16 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                     // Remove node's term from filter, as well as any childrens' filters (recursively), if set.
                     (function removeOwnAndChildrensTermsIfSet(n){
                         if (typeof newFilters[n.data.field] !== 'undefined' && newFilters[n.data.field].has(n.data.term)){
-                            newFilters = expFilters.changeFilter(n.data.field, n.data.term, 'sets', newFilters, null, true);
+                            newFilters = Filters.changeFilter(n.data.field, n.data.term, 'sets', newFilters, null, true);
                         }
                         if (Array.isArray(n.children) && n.children.length > 0) n.children.forEach(removeOwnAndChildrensTermsIfSet);
                     })(node);
                 }
 
-                expFilters.saveChangedFilters(newFilters, true, this.props.href);
+                Filters.saveChangedFilters(newFilters, true, this.props.href);
             } else {
                 // If not a tree, adjust filter re: node's term.
-                expFilters.changeFilter(node.data.field, node.data.term, 'sets', this.props.expSetFilters, null, false, true, this.props.href);
+                Filters.changeFilter(node.data.field, node.data.term, 'sets', this.props.expSetFilters, null, false, true, this.props.href);
             }
         }
 
@@ -437,7 +437,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             function getNavUrl(){
                 var hrefParts = url.parse(this.props.href);
                 var reqParts = url.parse(this.props.requestURLBase, true);
-                var query = _.extend({}, reqParts.query, { 'limit' : expFilters.getLimit() || 25 });
+                var query = _.extend({}, reqParts.query, { 'limit' : Filters.getLimit() || 25 });
                 return hrefParts.protocol + "//" + hrefParts.host + reqParts.pathname + '?' + querystring.stringify(query);
             }
 

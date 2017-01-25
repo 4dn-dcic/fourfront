@@ -10,7 +10,7 @@ var { MenuItem, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, But
 var store = require('../store');
 var FacetList = require('./facetlist');
 var { ExperimentsTable, getFileDetailContainer } = require('./experiments-table');
-var { isServerSide, expFxn, expFilters } = require('./util');
+var { isServerSide, expFxn, Filters } = require('./util');
 var { AuditIndicators, AuditDetail, AuditMixin } = require('./audit');
 var { FlexibleDescriptionBox } = require('./experiment-common');
 
@@ -457,7 +457,7 @@ var ResultTable = browse.ResultTable = React.createClass({
     getPageAndLimitFromURL : function(href){
         // Grab limit & page (via '(from / limit) + 1 ) from URL, if available.
         var urlParts = url.parse(href, true);
-        var limit = parseInt(urlParts.query.limit || expFilters.getLimit() || 25);
+        var limit = parseInt(urlParts.query.limit || Filters.getLimit() || 25);
         var from  = parseInt(urlParts.query.from  || 0);
         if (isNaN(limit)) limit = 25;
         if (isNaN(from)) from = 0;
@@ -472,8 +472,8 @@ var ResultTable = browse.ResultTable = React.createClass({
         // Grab limit & page (via '(from' / 'limit') + 1 ) from URL, if available.
         var pageAndLimit = this.getPageAndLimitFromURL(this.props.href);
 
-        // Have expFilters use our state.limit, until another component overrides.
-        expFilters.getLimit = function(){
+        // Have Filters use our state.limit, until another component overrides.
+        Filters.getLimit = function(){
             return (this && this.state && this.state.limit) || 25;
         }.bind(this);
         
@@ -561,7 +561,7 @@ var ResultTable = browse.ResultTable = React.createClass({
         if (typeof urlParts.query.limit === 'number'){
             urlParts.query.from = (urlParts.query.limit * (page - 1)) + '';
         } else {
-            urlParts.query.from = (expFilters.getLimit() * (page - 1)) + '';
+            urlParts.query.from = (Filters.getLimit() * (page - 1)) + '';
         }
         urlParts.search = '?' + querystring.stringify(urlParts.query);
         this.setState({ 'changingPage' : true }, ()=>{

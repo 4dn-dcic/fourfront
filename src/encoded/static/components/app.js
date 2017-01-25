@@ -14,7 +14,7 @@ var store = require('../store');
 var browse = require('./browse');
 var origin = require('../libs/origin');
 var serialize = require('form-serialize');
-var { expFilters, ajax, JWT, console, isServerSide } = require('./util');
+var { Filters, ajax, JWT, console, isServerSide } = require('./util');
 var Alerts = require('./alerts');
 var jwt = require('jsonwebtoken');
 var { FacetCharts } = require('./facetcharts');
@@ -33,7 +33,7 @@ var portal = {
             //url: '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all',
             url : function(currentUrlParts){
                 if (!currentUrlParts) return '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all'; // Default/fallback
-                return expFilters.filtersToHref(
+                return Filters.filtersToHref(
                     store.getState().expSetFilters,
                     currentUrlParts.protocol + '//' + currentUrlParts.host + '/browse/'
                 );
@@ -103,7 +103,7 @@ var App = React.createClass({
     },
 
     getInitialState: function() {
-        console.log('APP FILTERS', expFilters.hrefToFilters(this.props.href));
+        console.log('APP FILTERS', Filters.hrefToFilters(this.props.href));
         // Todo: Migrate session & user_actions to redux store?
         var session = false;
         var user_actions = [];
@@ -124,7 +124,7 @@ var App = React.createClass({
             user_actions = user_info.user_actions;
         }
 
-        expFilters.navigate = this.navigate;
+        Filters.navigate = this.navigate;
 
        console.log("App Initial State: ", session, user_actions);
 
@@ -918,7 +918,7 @@ var App = React.createClass({
                         __html: jsonScriptEscape(JSON.stringify(this.props.alerts))
                     }}></script>
                     <script data-prop-name="expSetFilters" type="application/ld+json" dangerouslySetInnerHTML={{
-                        __html: jsonScriptEscape(JSON.stringify(expFilters.convertExpSetFiltersTerms(this.props.expSetFilters, 'array')))
+                        __html: jsonScriptEscape(JSON.stringify(Filters.convertExpSetFiltersTerms(this.props.expSetFilters, 'array')))
                     }}></script>
                     <div id="slot-application">
                         <div id="application" className={appClass}>

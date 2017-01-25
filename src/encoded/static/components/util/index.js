@@ -25,7 +25,7 @@ module.exports.JWT          = require('./json-web-token');
 module.exports.DateUtility  = require('./date-utility');
 
 module.exports.expFxn       = require('./experiments-transforms');
-module.exports.expFilters   = require('./experiments-filters');
+module.exports.Filters      = require('./experiments-filters');
 
 // Misc functions are top-level
 var misc                    = require('./misc');

@@ -4,7 +4,7 @@ var React = require('react');
 var { Table, Checkbox, Collapse } = require('react-bootstrap');
 var _ = require('underscore');
 var FacetList = require('./facetlist'); // Only used for statics.
-var { expFxn, expFilters, console, isServerSide } = require('./util');
+var { expFxn, Filters, console, isServerSide } = require('./util');
 
 /**
  * To be used within Experiments Set View/Page, or
@@ -99,8 +99,8 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 // another page w/ filters enabled (i.e. browse) and deselect own 'static'/single term, it isn't empty.
                 ignoredFilters = FacetList.findIgnoredFiltersByStaticTerms(allExperiments, filters);
             }
-            if (useSet) return expFilters.siftExperimentsClientSide(allExperiments, filters, ignoredFilters); // Set
-            else return [...expFilters.siftExperimentsClientSide(allExperiments, filters, ignoredFilters)]; // Convert to array
+            if (useSet) return Filters.siftExperimentsClientSide(allExperiments, filters, ignoredFilters); // Set
+            else return [...Filters.siftExperimentsClientSide(allExperiments, filters, ignoredFilters)]; // Convert to array
         },
 
         totalExperimentsCount : function(experimentArray = null){

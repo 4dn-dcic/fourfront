@@ -3,7 +3,7 @@ var url = require('url');
 var queryString = require('query-string');
 var _ = require('underscore');
 var store = require('../store');
-var { ajax, console, object, isServerSide, expFilters } = require('./util');
+var { ajax, console, object, isServerSide, Filters } = require('./util');
 var { vizUtil } = require('./viz/common');
 
 
@@ -128,7 +128,7 @@ var ExpTerm = React.createClass({
              * are un-standardized, so run them through standardizeFieldKey() before
              * checking if in expSetFilters (e.g. as in ExpTerm.isSelected() ).
              */
-            var termMatchExps = expFilters.siftExperimentsClientSide(
+            var termMatchExps = Filters.siftExperimentsClientSide(
                 this.props.experimentSetListJSON,
                 this.props.expSetFilters,
                 this.props.ignoredFilters,
@@ -157,7 +157,7 @@ var ExpTerm = React.createClass({
         ){
 
             if (!this.props.useAjax){
-                var termMatchExps = expFilters.siftExperimentsClientSide(
+                var termMatchExps = Filters.siftExperimentsClientSide(
                     newProps.experimentSetListJSON || this.props.experimentSetListJSON,
                     newProps.expSetFilters || this.props.expSetFilters,
                     newProps.ignoredFilters || this.props.ignoredFilters,
@@ -298,7 +298,7 @@ var Facet = React.createClass({
 
     render: function() {
         var facet = this.props.facet;
-        var standardizedFieldKey = expFilters.standardizeFieldKey(facet.field, this.props.experimentsOrSets);
+        var standardizedFieldKey = Filters.standardizeFieldKey(facet.field, this.props.experimentsOrSets);
         var selected = this.isSelected();
         if (this.isStatic()){ 
             // Only one term
@@ -936,11 +936,11 @@ var FacetList = module.exports = React.createClass({
     clearFilters: function(e) {
         e.preventDefault();
         //e.target.innerHTML = '<i class="icon icon-spin icon-circle-o-notch"></i>';
-        setTimeout(()=> expFilters.saveChangedFilters({}, this.props.useAjax, this.props.href) , 0);
+        setTimeout(()=> Filters.saveChangedFilters({}, this.props.useAjax, this.props.href) , 0);
     },
 
     changeFilter: function(field, term, callback) {
-        return expFilters.changeFilter(
+        return Filters.changeFilter(
             field,
             term,
             this.props.experimentsOrSets,
