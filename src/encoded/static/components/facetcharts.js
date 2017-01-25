@@ -135,8 +135,8 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             'selectedNodes'         : [],   // expSetFilters, but with nodes (for colors, etc.) for breadcrumbs,
             'fetching'              : false,
             'chartFieldsBarPlot'    : [
-                { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
                 { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
+                { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
                 { title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
             ],
             'chartFieldsHierarchy'  : [
@@ -148,7 +148,6 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                     }
                 },
                 { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
-                { title : "Biosample", field : 'experiments_in_set.biosample.biosource_summary' },
                 { 
                     title : "Digestion Enzyme",
                     field : 'experiments_in_set.digestion_enzyme.name',
@@ -156,6 +155,8 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                         return 'Enzyme ' + val;
                     } 
                 },
+                { title : "Biosample", field : 'experiments_in_set.biosample.biosource_summary' },
+                
                 { title : "Experiment Summary", field : "experiments_in_set.experiment_summary" },
                 {
                     title: "Experiment Accession",

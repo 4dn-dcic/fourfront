@@ -130,10 +130,10 @@ var util = module.exports.vizUtil = {
     },
 
     requestAnimationFrame : function(cb){
-        if (!isServerSide() && typeof window !== undefined){
-            if (typeof window.requestAnimationFrame !== undefined) return window.requestAnimationFrame(cb);
-            if (typeof window.webkitRequestAnimationFrame !== undefined) return window.requestAnimationFrame(cb);
-            if (typeof window.mozRequestAnimationFrame !== undefined) return window.requestAnimationFrame(cb);
+        if (!isServerSide() && typeof window !== 'undefined'){
+            if (typeof window.requestAnimationFrame !== 'undefined') return window.requestAnimationFrame(cb);
+            if (typeof window.webkitRequestAnimationFrame !== 'undefined') return window.requestAnimationFrame(cb);
+            if (typeof window.mozRequestAnimationFrame !== 'undefined') return window.requestAnimationFrame(cb);
         }
         return setTimeout(cb, 0);
     },
@@ -157,6 +157,7 @@ var util = module.exports.vizUtil = {
         } else if (
             nodeDatum.field === 'experiments_in_set.accession' || 
             nodeDatum.field === 'experiments_in_set.experiment_summary' ||
+            nodeDatum.field === 'experiments_in_set.digestion_enzyme.name' ||
             nodeDatum.field === 'experiments_in_set.biosample.biosource_summary'
         ){
 
@@ -167,7 +168,7 @@ var util = module.exports.vizUtil = {
             // Use a variant of parent node's color
             if (node.parent) {
                 var color = null;
-                if (nodeDatum.field === 'experiments_in_set.experiment_summary'){
+                if (nodeDatum.field === 'experiments_in_set.experiment_summary' || nodeDatum.field === 'experiments_in_set.digestion_enzyme.name'){
                     color = d3.interpolateRgb(
                         util.colorForNode(node.parent, predefinedColors),
                         util.stringToColor(nodeName)

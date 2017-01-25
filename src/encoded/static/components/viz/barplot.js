@@ -203,8 +203,9 @@ var BarPlot = React.createClass({
 
             var barData = {
                 'fieldIndex' : topIndex,
-                'bars' : genBarData(fields[topIndex], insetDims),
-                'fields' : fields
+                'bars'       : genBarData(fields[topIndex], insetDims),
+                'fields'     : fields,
+                'maxY'       : largestExpCountForATerm
             };
 
             return barData;
