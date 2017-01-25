@@ -1,8 +1,10 @@
 import os
+import sys
 import argparse
 import json
 from rdflib.collection import Collection
-from owltools import (
+from encoded.commands.owltools import (
+    # from owltools import (
     Namespace,
     Owler,
     splitNameFromNamespace,
@@ -402,6 +404,48 @@ def getTermStructure():
     }
 
 
+def process_blank_node(class_, data, terms):
+    for object_ in data.rdfGraph.objects(class_, subClassOf):
+        # direct parents of blank nodes
+        if not isBlankNode(object_):
+            # we have a resource
+            pass
+
+
+def add_slim_to_term(term, slim_terms):
+    '''Checks the list of ancestor terms to see if any are slim_terms
+        and if so adds the slim_term to the term in slim_term slot
+
+        for now checking both closure and closure_with_develops_from
+        but consider having only single 'ancestor' list
+    '''
+    slimterms2add = {}
+    for slimterm in slim_terms:
+        if slimterm['term_id'] in term['closure']:
+            slimterms2add[slimterm['term_id']] = slimterm
+        if slimterm['term_id'] in term['closure_with_develops_from']:
+            slimterms2add[slimterm['term_id']] = slimterm
+    term['slim_terms'] = slimterms2add.values()
+    return term
+
+
+def get_slim_terms(connection):
+    '''Retrieves ontology_term jsons for those terms that have 'is_slim_for'
+        field populated
+    '''
+    # currently need to hard code the categories of slims but once the accessibility
+    # to search will all will add parameters to retrieve all or just the terms in the
+    # categories passed as a list
+    slim_categories = ['developmental', 'assay', 'organ', 'system']
+    search_suffix = 'search/?type=OntologyTerm&is_slim_for='
+    slim_terms = []
+    for cat in slim_categories:
+        terms = get_FDN(None, connection, None, search_suffix + cat)['@graph']
+        if terms is not None:
+            slim_terms.extend(terms)
+    return slim_terms
+
+
 def get_ontologies(connection, ont_list):
     '''return list of ontology jsons retrieved from server'''
     ontologies = []
@@ -433,7 +477,7 @@ def connect2server(keyfile, keyname):
     return None
 
 
-def parse_args():
+def parse_args(args):
     parser = argparse.ArgumentParser(
         description="Process specified Ontologies and create OntologyTerm inserts for updates",
         epilog=EPILOG,
@@ -452,20 +496,32 @@ def parse_args():
                         default=os.path.expanduser("~/keypairs.json"),
                         help="The keypair file.  Default is --keyfile=%s" %
                              (os.path.expanduser("~/keypairs.json")))
-    return parser.parse_args()
+    return parser.parse_args(args)
 
 
 def new_main():
     ''' Downloads latest Ontology OWL files for Ontologies in the database
         and Updates Terms by generating json inserts
 
-        WORK IN PROGRESS
+        VERY MUCH A WORK IN PROGRESS
     '''
-    args = parse_args()
+    # setup
+    args = parse_args(sys.argv[1:])  # to facilitate testing
     connection = connect2server(args.keyfile, args.key)
 
     ontologies = get_ontologies(connection, args.ontologies)
-    print(ontologies)
+    # print(ontologies)
+    slim_terms = get_slim_terms(connection)
+    # print(slim_terms)
+
+    # start iteratively downloading and processing ontologies
+    terms = {}
+    for ontology in ontologies:
+        if ontology['download_url'] is not None:
+            print(ontology['download_url'])
+            data = Owler(ontology['download_url'])
+            for class_ in data.allclasses:
+                pass
 
 
 def main():
