@@ -4,6 +4,10 @@ var _ = require('underscore');
 
 var f = module.exports = {
 
+    /** 
+     * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set. 
+     * @returns {Object[]} - List of experiments without files.
+     */
     listEmptyExperiments : function(experiments){
         return _.filter(experiments, function(exp){
             if (Array.isArray(exp.files) && exp.files.length > 0) return false;
@@ -19,13 +23,22 @@ var f = module.exports = {
         });
     },
 
+    /** 
+     * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set. 
+     * @returns {number} - Count of files from all experiments.
+     */
     fileCountFromExperiments : function(experiments){
         return _.reduce(experiments.map(f.fileCount), function(r,expFileCount,i){
             return r + expFileCount;
         }, 0);
     },
 
-    /* NOT SORTED */
+    /**
+     * NOT SORTED
+     * 
+     * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set. 
+     * @returns {Object[]} - All files from experiments without a pair.
+     */
     listAllUnpairedFiles : function(experiments){
         return _.filter(
             _.flatten(
@@ -36,7 +49,12 @@ var f = module.exports = {
         );
     },
 
-    /* NOT SORTED */
+    /**
+     * NOT SORTED
+     * 
+     * @param   {Object[]} experiments - List of experiments, e.g. from experiments_in_set. 
+     * @returns {Object[][]} - All files with relations from experiments grouped into arrays of pairs (or other multiple).
+     */
     listAllFilePairs : function(experiments){
         return (
             _.flatten(
@@ -52,7 +70,12 @@ var f = module.exports = {
         )
     },
 
-    /** Grab all experiments from experiment_sets, and save non-circular reference to parent experiment_set on experiment. */
+    /** 
+     * Grab all experiments from experiment_sets, and save non-circular reference to parent experiment_set on experiment.
+     * 
+     * @param   {Object[]} experiment_sets - List of experiment_sets, e.g. from a /browse/ request result's context['@graph']. 
+     * @returns {Object[]} - List of experiments from all experiments_sets, each with an updated 'experiment_sets' property
+     */
     listAllExperimentsFromExperimentSets : function(experiment_sets){
         var uniqExpAccessions = {};
         return _(experiment_sets).chain()

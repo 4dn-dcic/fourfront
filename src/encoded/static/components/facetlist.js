@@ -4,7 +4,7 @@ var queryString = require('query-string');
 var _ = require('underscore');
 var store = require('../store');
 var { ajax, console, object, isServerSide, expFilters } = require('./util');
-var { util } = require('./viz/common');
+var { vizUtil } = require('./viz/common');
 
 
 /**
@@ -437,7 +437,7 @@ var FacetList = module.exports = React.createClass({
                 return isSVG;
             }
 
-            util.requestAnimationFrame(function(){
+            vizUtil.requestAnimationFrame(function(){
 
                 _.each(document.querySelectorAll('[data-field]'), function(fieldContainerElement){
                     setHighlightClass(fieldContainerElement, true);

@@ -3,7 +3,7 @@
 var React = require('react');
 var _ = require('underscore');
 var d3 = require('d3');
-var { ChartBreadcrumbs, util } = require('./common');
+var { ChartBreadcrumbs, vizUtil } = require('./common');
 var { console, object, isServerSide, expFxn } = require('../util');
 
 
@@ -18,31 +18,121 @@ var BarPlot = React.createClass({
         ){
 
             // Add terms and total for each field.
-            fields = fields.map(function(f){ return _.extend({}, f, {
-                'terms' : {},
-                'total' : 0
-            }); });
-
-            function updateFieldCounts(exp){
-
-                function count(f){
-                    var term = object.getNestedProperty(exp, f.field.replace('experiments_in_set.',''));
-                    if (typeof f.terms[term] === 'number'){
-                        f.terms[term]++;
-                    } else {
-                        f.terms[term] = 1;
-                    }
-                    f.total++;
-                }
-
-                fields.forEach(count);
-            }
+            fields = fields.map(function(f){ 
+                return _.extend({}, f, {
+                    'terms' : {},
+                    'total' : 0
+                });
+            });
         
             // Handle experiment_sets as well, just in case.
-            if (experimentsOrSets === 'experiments') experiments.forEach(updateFieldCounts);
-            else expFxn.listAllExperimentsFromExperimentSets(experiments).forEach(updateFieldCounts);     
+            if (experimentsOrSets === 'experiments') experiments.forEach(BarPlot.countFieldsTermsForExperiment.bind(this, fields));
+            else expFxn.listAllExperimentsFromExperimentSets(experiments).forEach(BarPlot.countFieldsTermsForExperiment.bind(this, fields));
+
+            //return fields;
+            return BarPlot.partitionFields(fields, experiments);
+        },
+
+        /**
+         * @param {Object} fieldObj - A field object with present but incomplete 'terms' & 'total'.
+         * @param {string|string[]} term - A string or array of strings denoting terms. If multiple terms are passed, then field must have fields as terms (with incomplete 'terms' & 'total') object.
+         */
+        countFieldTermForExperiment : function(fieldObj, term, updateTotal = true){
+            var termsCont = fieldObj.terms;
+            if (Array.isArray(term)){
+                if (term.length === 1) term = term[0];
+                else {
+                    var i = 0;
+                    while (i < term.length - 1){
+                        termsCont = termsCont[term[i]].terms;
+                        if (typeof termsCont === 'undefined') return;
+                        i++;
+                    }
+                    term = term[i];
+                }
+            }
+            if (typeof termsCont[term] === 'number'){
+                termsCont[term]++;
+            } else {
+                termsCont[term] = 1;
+            }
+            if (updateTotal) fieldObj.total++;
+        },
+
+        countFieldsTermsForExperiment : function(fields, exp){
+            _.forEach(fields, function(f){ 
+                var term = object.getNestedProperty(exp, f.field.replace('experiments_in_set.',''));
+                BarPlot.countFieldTermForExperiment(f, term);
+            });
+        },
+
+        combinedFieldTermsForExperiments : function(fields, experiments){
+            var field;
+            var fieldIndex;
+            if (Array.isArray(fields)){ // Fields can be array or single field.
+                fieldIndex = _.findIndex(fields, function(f){ return typeof f.childField !== 'undefined' });
+                field = fields[fieldIndex];
+            } else {
+                field = fields;
+            }
+
+            var fieldNames = _.pluck([field, field.childField], 'field');
+            field.terms = _(field.terms).chain()
+                .clone()
+                .pairs()
+                .map(function(term){
+                    return [ 
+                        term[0],
+                        { 
+                            'field' : field.childField.field, 
+                            'cachedTotal' : term[1],
+                            'total' : 0,
+                            'term' : term[0],
+                            'terms' : {} 
+                        } 
+                    ];
+                })
+                .object()
+                .value();
+
+            console.log('FIELDTERMS1', field);
+
+            experiments.forEach(function(exp){
+                var topLevelFieldTerm = object.getNestedProperty(exp, field.field.replace('experiments_in_set.',''));
+                var nextLevelFieldTerm = object.getNestedProperty(exp, field.childField.field.replace('experiments_in_set.',''));
+                BarPlot.countFieldTermForExperiment(field.terms[topLevelFieldTerm], nextLevelFieldTerm);
+            });
+
+            console.log('FIELDTERMS2', field);
+
+            if (Array.isArray(fields)){
+                fields[fieldIndex] = field; // Probably not needed as field already simply references fields[fieldIndex];
+            }
 
             return fields;
+
+        },
+
+        partitionFields : function(fields, experiments){
+            var topIndex = BarPlot.firstPopulatedFieldIndex(fields);
+            if ((topIndex + 1) >= fields.length) return fields; // Cancel
+            
+            var nextIndex = BarPlot.firstPopulatedFieldIndex(fields, topIndex + 1);
+            fields[topIndex].childField = fields[nextIndex];
+            return BarPlot.combinedFieldTermsForExperiments(fields, experiments);
+        },
+
+        firstPopulatedFieldIndex : function(fields, start = 0){
+            var topIndex = start;
+            var numberOfTerms;
+
+            // Go down list of fields until select field to display which has more than 1 term, or until last field.
+            while (topIndex + 1 < fields.length){
+                numberOfTerms = _.keys(fields[topIndex].terms).length;
+                if (numberOfTerms > 1) break;
+                topIndex++;
+            }
+            return topIndex;
         },
 
         /** 
@@ -62,15 +152,8 @@ var BarPlot = React.createClass({
             availHeight = 400,
             styleOpts = BarPlot.getDefaultStyleOpts()
         ){
-            var topIndex = 0;
-            var numberOfTerms;
-
-            // Go down list of fields until select field to display which has more than 1 term, or until last field.
-            while (topIndex + 1 < fields.length){
-                numberOfTerms = _.keys(fields[topIndex].terms).length;
-                if (numberOfTerms > 1) break;
-                topIndex++;
-            }
+            var topIndex = BarPlot.firstPopulatedFieldIndex(fields);
+            var numberOfTerms = _.keys(fields[topIndex].terms).length;
 
             var insetDims = {
                 width  : Math.max(availWidth  - styleOpts.offset.left   - styleOpts.offset.right, 0),
@@ -81,26 +164,43 @@ var BarPlot = React.createClass({
             var barXCoords = d3.range(0, insetDims.width, availWidthPerBar);
             var barWidth = Math.min(Math.abs(availWidthPerBar - styleOpts.gap), styleOpts.maxBarWidth);
 
-            return {
-                'fieldIndex' : topIndex,
-                'bars' : _(fields[topIndex].terms).chain()
+            function genBarData(fieldObj, outerDims = insetDims, parent = null){
+                return _(fieldObj.terms).chain()
                     .pairs()
                     .map(function(term, i){
-                        return {
-                            'name' : term[0],
-                            'term' : term[0],
-                            'count' : term[1],
+                        var termKey = term[0];
+                        var termCount = term[1];
+                        var childBars = null;
+                        if (typeof term[1] === 'object') termCount = term[1].total;
+                        var barHeight = (termCount / fieldObj.total) * outerDims.height;
+                        var barNode = {
+                            'name' : termKey,
+                            'term' : termKey,
+                            'count' : termCount,
+                            'field' : fieldObj.field,
                             'attr' : {
                                 'width' : barWidth,
-                                'height' : (term[1] / fields[topIndex].total) * insetDims.height
+                                'height' : barHeight
                             }
                         };
+                        if (typeof term[1] === 'object') {
+                            barNode.bars = genBarData(term[1], { 'height' : barHeight }, barNode);
+                        }
+                        if (parent){
+                            barNode.parent = parent;
+                        }
+                        return barNode;
                     })
                     .sortBy(function(d){ return -d.attr.height; })
                     .forEach(function(d,i){
                         d.attr.x = barXCoords[i];
                     })
-                    .value(),
+                    .value()
+            }
+
+            return {
+                'fieldIndex' : topIndex,
+                'bars' : genBarData(fields[topIndex], insetDims),
                 'fields' : fields
             };
         },
@@ -137,6 +237,9 @@ var BarPlot = React.createClass({
         'fields'        : React.PropTypes.array,
         'styleOptions'  : React.PropTypes.shape({
             'gap'           : React.PropTypes.number,
+            'maxBarWidth'   : React.PropTypes.number,
+            'labelRotation' : React.PropTypes.oneOf([React.PropTypes.number, React.PropTypes.string]),
+            'labelWidth'    : React.PropTypes.oneOf([React.PropTypes.number, React.PropTypes.string]),
             'offset'        : React.PropTypes.shape({
                 'top'           : React.PropTypes.number,
                 'bottom'        : React.PropTypes.number,
@@ -152,30 +255,13 @@ var BarPlot = React.createClass({
     getDefaultProps : function(){
   	    return {
             experiments : [],
-            fields : [
-      	        { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
-                { title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
-            ],
+            fields : [],
             styleOptions : null, // Can use to override default margins/style stuff.
-            colorForNode : function(node){ return util.stringToColor((node.data || node).name); } // Default color determinator
+            colorForNode : function(node){ return vizUtil.stringToColor((node.data || node).name); } // Default color determinator
         };
     },
 
-    styleOptions : function(){
-        if (!this.props.styleOptions) return BarPlot.getDefaultStyleOpts();
-        else {
-            var styleOpts = BarPlot.getDefaultStyleOpts();
-            Object.keys(styleOpts).forEach((styleProp) => {
-                if (typeof this.props.styleOptions[styleProp] === 'undefined') return;
-                if (typeof this.props.styleOptions[styleProp] === 'object' && this.props.styleOptions[styleProp]){
-                    _.extend(styleOpts[styleProp], this.props.styleOptions[styleProp]);
-                } else {
-                    styleOpts[styleProp] = this.props.styleOptions[styleProp];
-                }
-            });
-            return styleOpts;
-        }
-    },
+    styleOptions : function(){ return vizUtil.extendStyleOptions(this.props.styleOptions, BarPlot.getDefaultStyleOpts()); },
   
     width : function(){
         if (this.props.width) return this.props.width;
@@ -286,7 +372,7 @@ var BarPlot = React.createClass({
                         // 'Default' (no transitioning) style
                         xyCoords = [d.attr.x, 0];
                     }
-                    return util.style.translate3d.apply(this, xyCoords);
+                    return vizUtil.style.translate3d.apply(this, xyCoords);
                 }
 
                 function barStyle(){
@@ -416,16 +502,18 @@ var BarPlot = React.createClass({
                 // Position bar's x coord via translate3d CSS property for CSS3 transitioning.
                 if ((d.removing || !d.existing) && transitioning){
                     style.opacity = 0;
-                    style.transform = util.style.translate3d(d.attr.x, Math.max(d.attr.height / 5, 10) + 10, 0);
+                    style.transform = vizUtil.style.translate3d(d.attr.x, Math.max(d.attr.height / 5, 10) + 10, 0);
                 } else {
                     // 'Default' (no transitioning) style
                     style.opacity = 1;
-                    style.transform = util.style.translate3d(d.attr.x,0,0);
+                    style.transform = vizUtil.style.translate3d(d.attr.x,0,0);
                 }
                 style.left = styleOpts.offset.left;
                 style.bottom = styleOpts.offset.bottom;
                 return style;
             }
+
+            var barParts = Array.isArray(d.bars) ? d.bars.map(this.renderParts.barPart.bind(this)) : this.renderParts.barPart.call(this, d);
 
             return (
                 <div
@@ -437,6 +525,7 @@ var BarPlot = React.createClass({
                         )
                     }
                     data-term={d.term}
+                    data-field={Array.isArray(d.bars) && d.bars.length > 1 ? d.bars[0].field : null}
                     key={"bar-" + d.term}
                     style={barStyle.call(this)}
                     ref={(r) => {
@@ -450,17 +539,30 @@ var BarPlot = React.createClass({
                     <span className="bar-top-label" key="text-label">
                         { d.count }
                     </span>
-                    <div
-                        className="bar-part"
-                        style={{
-                            //top : rectY.call(this),
-                            height : d.attr.height,
-                            width: d.attr.width,
-                            backgroundColor : this.props.colorForNode(d)
-                        }}
-                        data-target-height={d.attr.height}
-                        key="rect1"
-                    ></div>
+                    { barParts }
+                </div>
+            );
+        },
+
+        barPart : function(d){
+            
+            var color = this.props.colorForNode(d);
+
+            return (
+                <div
+                    className={"bar-part no-highlight-color" + (d.parent ? ' multiple-parts' : '')}
+                    style={{
+                        //top : rectY.call(this),
+                        height : d.attr.height,
+                        width: d.attr.width,
+                        backgroundColor : color
+                    }}
+                    data-color={color}
+                    data-target-height={d.attr.height}
+                    key={'bar-part-' + (d.parent ? d.parent.term + '~' + d.term : d.term)}
+                    data-term={d.parent ? d.term : null}
+                >
+
                 </div>
             );
         },
@@ -496,7 +598,7 @@ var BarPlot = React.createClass({
                                 data-term={bar.term}
                                 className="y-axis-label no-highlight-color"
                                 style={{
-                                    transform : util.style.translate3d(bar.attr.x, 0, 0),
+                                    transform : vizUtil.style.translate3d(bar.attr.x, 0, 0),
                                     width : bar.attr.width,
                                     opacity : _this.state.transitioning && (bar.removing || !bar.existing) ? 0 : ''
                                 }}
@@ -510,7 +612,7 @@ var BarPlot = React.createClass({
                                         )
                                         - ((bar.attr.width / (90 / bar.attr.width) ))
                                     ),
-                                    transform : util.style.rotate3d(
+                                    transform : vizUtil.style.rotate3d(
                                         typeof styleOpts.labelRotation === 'number' ? 
                                             styleOpts.labelRotation : 
                                                 -(90 / (bar.attr.width * .1)), // If not set, rotate so 1 line will fit.
@@ -551,10 +653,14 @@ var BarPlot = React.createClass({
             this.styleOptions()
         );
 
+        console.log('BARDATA', barData);
+
         // Bars from current dataset/filters only.
         var currentBars = barData.bars.map((d)=>{
             // Determine whether bar existed before, for this.renderParts.bar render func.
-            return _.extend(d, { 'existing' : typeof this.pastBars[d.term] !== 'undefined' && this.pastBars[d.term] !== null })
+            return _.extend(d, { 
+                'existing' : typeof this.pastBars[d.term] !== 'undefined' && this.pastBars[d.term] !== null
+            })
         });
 
         var allBars = currentBars; // All bars -- current (from barData) and those which now need to be removed if transitioning (see block below).

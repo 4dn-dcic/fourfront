@@ -9,10 +9,7 @@ var SunBurstChart = require('./viz/sunburst');
 var BarPlotChart = require('./viz/barplot');
 var { expFxn, expFilters, ajax, console, layout, isServerSide } = require('./util');
 var FacetList = require('./facetlist');
-var { ChartBreadcrumbs, util } = require('./viz/common');
-
-
-var colorCache = {}; // We cache generated colors into here to re-use and speed up.
+var { ChartBreadcrumbs, vizUtil } = require('./viz/common');
 
 /**
  * @callback showFunc
@@ -76,64 +73,6 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             if (document.documentElement.className.indexOf('uaEdge') > -1) return true;
             return true;
         },
-
-        colorForNode : function(node, predefinedColors){
-            var nodeDatum = node.data || node; // So can process on d3-gen'd/wrapped elements as well as plain datums.
-
-            if (nodeDatum.color){
-                return nodeDatum.color;
-            }
-
-            // Normalize name to lower case (as capitalization etc may change in future)
-            var nodeName = nodeDatum.name.toLowerCase();
-
-            if (typeof predefinedColors[nodeName] !== 'undefined'){
-                return predefinedColors[nodeName];
-            } else if (typeof colorCache[nodeName] !== 'undefined') {
-                return colorCache[nodeName]; // Previously calc'd color
-            } else if (
-                nodeDatum.field === 'experiments_in_set.accession' || 
-                nodeDatum.field === 'experiments_in_set.experiment_summary' ||
-                nodeDatum.field === 'experiments_in_set.biosample.biosource_summary'
-            ){
-
-                //if (node.data.field === 'experiments_in_set.accession'){
-                //    return '#bbb';
-                //}
-
-                // Use a variant of parent node's color
-                if (node.parent) {
-                    var color;
-                    if (nodeDatum.field === 'experiments_in_set.experiment_summary'){
-                        color = d3.interpolateRgb(
-                            FacetCharts.colorForNode(node.parent, predefinedColors),
-                            util.stringToColor(nodeName)
-                        )(.4);
-                    } else if (nodeDatum.field === 'experiments_in_set.biosample.biosource_summary'){
-                        color = d3.interpolateRgb(
-                            FacetCharts.colorForNode(node.parent, predefinedColors),
-                            d3.color(util.stringToColor(nodeName)).darker(
-                                0.5 + (
-                                    (2 * (node.parent.children.indexOf(node) + 1)) / node.parent.children.length
-                                )
-                            )
-                        )(.3);
-                    } else if (nodeDatum.field === 'experiments_in_set.accession') {
-                        // color = d3.color(this.colorForNode(node.parent)).brighter(0.7);
-                        color = d3.interpolateRgb(
-                            FacetCharts.colorForNode(node.parent, predefinedColors),
-                            d3.color("#ddd")
-                        )(.8);
-                    }
-                    colorCache[nodeName] = color;
-                    return color;
-                }
-            }
-
-            // Fallback
-            colorCache[nodeName] = util.stringToColor(nodeName);
-            return colorCache[nodeName];
-        },
         
     },
     
@@ -164,7 +103,8 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 'experiments_in_set.biosample.biosource.biosource_name',
                 'experiments_in_set.biosample.biosource.biosource_type',
                 'experiments_in_set.biosample.biosource.individual.organism.name',
-                'experiments_in_set.biosample.biosource.individual.organism.scientific_name'
+                'experiments_in_set.biosample.biosource.individual.organism.scientific_name',
+                'experiments_in_set.digestion_enzyme.name'
             ],
             'colors' : { // Keys should be all lowercase
                 "human (homo sapiens)" : "rgb(218, 112, 6)",
@@ -180,8 +120,8 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                     {'xs' : 12, 'sm' : 6,  'md' : 8, 'lg' : 9}
                 ],
                 'large' : [
-                    {'xs' : 12, 'sm' : 12, 'md' : 6, 'lg' : 6},
-                    {'xs' : 12, 'sm' : 12, 'md' : 6, 'lg' : 6}
+                    {'xs' : 12, 'sm' : 12, 'md' : 4, 'lg' : 3},
+                    {'xs' : 12, 'sm' : 12, 'md' : 8, 'lg' : 9}
                 ]
             }
         };
@@ -189,24 +129,42 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
     getInitialState : function(){
         return {
-            'experiments' : null, //FacetCharts.getExperimentsFromContext(this.props.context),
-            'filteredExperiments' : null,
-            'mounted' : false,
-            'selectedNodes' : [], // expSetFilters, but with nodes (for colors, etc.) for breadcrumbs
-            'chartFieldsHierarchy' : [
+            'experiments'           : null, //FacetCharts.getExperimentsFromContext(this.props.context),
+            'filteredExperiments'   : null,
+            'mounted'               : false,
+            'selectedNodes'         : [],   // expSetFilters, but with nodes (for colors, etc.) for breadcrumbs,
+            'fetching'              : false,
+            'chartFieldsBarPlot'    : [
+                { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
+                { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
+                { title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
+            ],
+            'chartFieldsHierarchy'  : [
                 { 
                     field : 'experiments_in_set.biosample.biosource.individual.organism.name',
-                    description : "Primary Organism",
+                    title : "Primary Organism",
                     name : function(val, id, exps, filteredExps){
                         return val.charAt(0).toUpperCase() + val.slice(1);
                     }
                 },
-                { field : 'experiments_in_set.biosample.biosource.biosource_type', description : "Biosource Type" },
-                { field : 'experiments_in_set.biosample.biosource_summary', description: "Biosample" },
-                { field : 'experiments_in_set.experiment_summary', description: "Experiment Summary" },
+                { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
+                { title : "Biosample", field : 'experiments_in_set.biosample.biosource_summary' },
+                { 
+                    title : "Digestion Enzyme",
+                    field : 'experiments_in_set.digestion_enzyme.name',
+                    description : function(val, id, exps, filteredExps, exp){
+                        return 'Enzyme ' + val;
+                    } 
+                },
+                { title : "Experiment Summary", field : "experiments_in_set.experiment_summary" },
                 {
+                    title: "Experiment Accession",
                     field : 'experiments_in_set.accession',
-                    description: "Experiment Accession",
+                    size : function(val, id, exps, filteredExps, exp){
+                        return (!filteredExps || (filteredExps && filteredExps[exp.accession]) ?
+                            1 : 0.33
+                        );
+                    },
                     fallbackSize : function(val, id, exps, filteredExps, exp){
                         return filteredExps && filteredExps[exp.accession] ? 1 : (filteredExps ? 0 : 1);
                     },
@@ -215,9 +173,9 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                         return expFxn.allFilesFromExperiment(exp).map(function(f,i,a){
                             return {
                                 'name' : f.accession,
-                                'size' : (!filteredExps || (filteredExps && filteredExps[exp.accession]) ?
-                                    1 : 0.25
-                                ),
+                                //'size' : (!filteredExps || (filteredExps && filteredExps[exp.accession]) ?
+                                //    1 : 0.33
+                                //),
                                 'description' : 'File ' + f.accession,
                                 'color' : '#ccc',
                                 'id' : id + '-' + f.accession,
@@ -244,24 +202,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         if (this.props.ajax && this.state.experiments === null){
 
             if (this.props.debug) console.log('FacetCharts - fetching all experiments from ' + this.props.requestURLBase);
-            var filtersSet = _.keys(this.props.expSetFilters).length > 0;
-
-            ajax.load(
-                this.props.requestURLBase + this.getFieldsRequiredURLQueryPart(), 
-                (res) => {
-                    if (this.props.debug) console.log('FacetCharts - received all exps via AJAX:', res);
-                    var newState = {
-                        'experiments' : expFxn.listAllExperimentsFromExperimentSets(res['@graph'])
-                    };
-                    if (!filtersSet) { 
-                        newState.filteredExperiments = null;
-                        newState.mounted = true; // Else we wait for filteredExps to finish being fetched.
-                    }
-                    this.setState(newState);
-                }
-            );
-
-            if (filtersSet) this.fetchAndSetFilteredExperiments(this.props, { 'mounted' : true });
+            this.fetchUnfilteredAndFilteredExperiments(this.props, { 'mounted' : true });
 
         } else {
             this.setState({ 'mounted' : true });
@@ -354,6 +295,8 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             // Unset filtered experiments if no filters.
             if (_.keys(nextProps.expSetFilters).length === 0 && Array.isArray(this.state.experiments)){
                 newState.filteredExperiments = null;
+            } else {
+                newState.fetching = true;
             }
             
         }
@@ -362,47 +305,52 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
     },
 
     componentDidUpdate: function(pastProps, pastState){
-        if (pastProps.expSetFilters !== this.props.expSetFilters || !_.isEqual(pastProps.expSetFilters, this.props.expSetFilters)){
+
+        if (pastProps.requestURLBase !== this.props.requestURLBase) {
+            this.fetchUnfilteredAndFilteredExperiments(this.props, { 'fetching' : false });
+        } else if (pastProps.expSetFilters !== this.props.expSetFilters || !_.isEqual(pastProps.expSetFilters, this.props.expSetFilters)){
             if (_.keys(this.props.expSetFilters).length > 0){
-                this.fetchAndSetFilteredExperiments();
+                this.fetchAndSetFilteredExperiments(this.props, { 'fetching' : false });
+            } else {
+                // @see componentWillReceiveProps (set state.filteredExperiments = null)
             }
         }
     },
 
-    /**
-     * Run experiments through this function before passing to a Chart component.
-     * It filters experiments if any filters are set (will become deprecated eventually),
-     * as well as handles transform to different data structure or format, if needed for chart.
-     */
-    transformData : function(
-        toFormat = null,
-        experiments = this.state.experiments,
-        filteredExperiments = this.state.filteredExperiments,
-        filters = this.props.expSetFilters
-    ){
+    fetchUnfilteredAndFilteredExperiments : function(props, extraState = {}){
+        var filtersSet = _.keys(this.props.expSetFilters).length > 0;
+        var experiments, filteredExperiments = null;
 
-        if (!Array.isArray(experiments)){
-            return null;
-        }
+        var cb = _.after(filtersSet ? 2 : 1, function(){
+            this.setState(_.extend({ 
+                'experiments' : experiments,
+                'filteredExperiments' : filteredExperiments
+            }, extraState));
+        }.bind(this));
 
-        // ToDo: replace w/ AJAX (& state)
-        // We have locally-set filters. Filter experiments before transforming. Will become deprecated w/ GraphQL update(s).
-        //var filteredExps = ( filters && Object.keys(filters).length > 0 ) ?
-        //        [...expFilters.siftExperimentsClientSide(experiments, filters)] :
-        //        experiments;
+        ajax.load(props.requestURLBase + this.getFieldsRequiredURLQueryPart(), (allExpsContext)=>{
+            experiments = expFxn.listAllExperimentsFromExperimentSets(allExpsContext['@graph']);
+            cb();
+        });
 
-        if (toFormat === 'tree') return SunBurstChart.transformDataForChart(
-            experiments,
-            filteredExperiments,
-            this.state.chartFieldsHierarchy
-        );
-        else {
-            return filteredExperiments || experiments;
+        if (filtersSet){
+            ajax.load(this.getFilteredContextHref(props) + this.getFieldsRequiredURLQueryPart(), (filteredContext)=>{
+                filteredExperiments = expFxn.listAllExperimentsFromExperimentSets(filteredContext['@graph']);
+                cb();
+            });
         }
 
     },
 
-    colorForNode : function(node){ return FacetCharts.colorForNode(node, this.props.colors); },
+    fetchAndSetUnfilteredExperiments : function(props = this.props, extraState = {}){
+        ajax.load(props.requestURLBase + this.getFieldsRequiredURLQueryPart(), (allExpsContext)=>{
+            this.setState(
+                _.extend(extraState, {
+                    'experiments' : expFxn.listAllExperimentsFromExperimentSets(allExpsContext['@graph'])
+                })
+            );
+        });
+    },
 
     fetchAndSetFilteredExperiments : function(props = this.props, extraState = {}){
         ajax.load(this.getFilteredContextHref(props) + this.getFieldsRequiredURLQueryPart(), (filteredContext)=>{
@@ -421,6 +369,8 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             return '&field=' + fieldToIncludeInResult;
         }).join('');
     },
+
+    colorForNode : function(node){ return vizUtil.colorForNode(node, this.props.colors); },
 
     handleVisualNodeClickToUpdateFilters : _.throttle(function(node){
 
@@ -543,7 +493,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             }).join(' ');
         }
 
-        var height = show === 'small' ? 360 : this.width();
+        var height = show === 'small' ? 300 : 450;
 
         FacetList.unhighlightTerms();
 
@@ -567,10 +517,12 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 <div className="row facet-chart-row-1" key="facet-chart-row-1" height={height}>
                     <div className={genChartColClassName(1)} key="facet-chart-row-1-chart-1">
                         <SunBurstChart
-                            data={this.transformData('tree')}
+                            experiments={this.state.experiments}
                             filteredExperiments={this.state.filteredExperiments}
                             height={height}
+                            width={this.width(0) - 20}
                             fields={this.state.chartFieldsHierarchy}
+                            maxFieldDepthIndex={3}
                             breadcrumbs={() => this.refs.breadcrumbs}
                             descriptionElement={() => this.refs.description}
                             handleClick={this.handleVisualNodeClickToUpdateFilters}
@@ -582,9 +534,10 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                     </div>
                     <div className={genChartColClassName(2)} key="facet-chart-row-1-chart-2">
                         <BarPlotChart 
-                            experiments={this.transformData(null, this.state.filteredExperiments || this.state.experiments)}
+                            experiments={this.state.filteredExperiments || this.state.experiments}
                             width={this.width(1) - 20}
                             height={height}
+                            fields={this.state.chartFieldsBarPlot}
                             colorForNode={this.colorForNode}
                         />
                     </div>

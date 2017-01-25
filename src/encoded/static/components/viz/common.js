@@ -2,6 +2,7 @@
 
 var React = require('react');
 var _ = require('underscore');
+var d3 = require('d3');
 var { console, isServerSide } = require('../util');
 
 module.exports.ChartBreadcrumbs = React.createClass({
@@ -110,7 +111,9 @@ module.exports.SVGFilters = React.createClass({
     }
 });
 
-var util = {
+
+
+var util = module.exports.vizUtil = {
 
     // Taken from http://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript
     stringToColor : function(str) {
@@ -133,6 +136,89 @@ var util = {
             if (typeof window.mozRequestAnimationFrame !== undefined) return window.requestAnimationFrame(cb);
         }
         return setTimeout(cb, 0);
+    },
+
+    colorCache : {}, // We cache generated colors into here to re-use and speed up.
+
+    colorForNode : function(node, predefinedColors){
+        var nodeDatum = node.data || node; // So can process on d3-gen'd/wrapped elements as well as plain datums.
+
+        if (nodeDatum.color){
+            return nodeDatum.color;
+        }
+
+        // Normalize name to lower case (as capitalization etc may change in future)
+        var nodeName = nodeDatum.name.toLowerCase();
+
+        if (typeof predefinedColors[nodeName] !== 'undefined'){
+            return predefinedColors[nodeName];
+        } else if (typeof util.colorCache[nodeName] !== 'undefined') {
+            return util.colorCache[nodeName]; // Previously calc'd color
+        } else if (
+            nodeDatum.field === 'experiments_in_set.accession' || 
+            nodeDatum.field === 'experiments_in_set.experiment_summary' ||
+            nodeDatum.field === 'experiments_in_set.biosample.biosource_summary'
+        ){
+
+            //if (node.data.field === 'experiments_in_set.accession'){
+            //    return '#bbb';
+            //}
+
+            // Use a variant of parent node's color
+            if (node.parent) {
+                var color = null;
+                if (nodeDatum.field === 'experiments_in_set.experiment_summary'){
+                    color = d3.interpolateRgb(
+                        util.colorForNode(node.parent, predefinedColors),
+                        util.stringToColor(nodeName)
+                    )(.4);
+                } else if (nodeDatum.field === 'experiments_in_set.biosample.biosource_summary' && Array.isArray(node.parent.children)){
+                    color = d3.interpolateRgb(
+                        util.colorForNode(node.parent, predefinedColors),
+                        d3.color(util.stringToColor(nodeName)).darker(
+                            0.5 + (
+                                (2 * (node.parent.children.indexOf(node) + 1)) / node.parent.children.length
+                            )
+                        )
+                    )(.3);
+                } else if (nodeDatum.field === 'experiments_in_set.accession') {
+                    // color = d3.color(this.colorForNode(node.parent)).brighter(0.7);
+                    color = d3.interpolateRgb(
+                        util.colorForNode(node.parent, predefinedColors),
+                        d3.color("#ddd")
+                    )(.8);
+                }
+                
+                if (color) {
+                    util.colorCache[nodeName] = color;
+                    return color;
+                }
+            }
+        }
+
+        // Fallback
+        util.colorCache[nodeName] = util.stringToColor(nodeName);
+        return util.colorCache[nodeName];
+    },
+
+    extendStyleOptions : function(propsStyleOpts, defaultStyleOpts){
+        if (!defaultStyleOpts) throw new Error("No default style options provided.");
+        if (!propsStyleOpts) return defaultStyleOpts;
+        else {
+            Object.keys(defaultStyleOpts).forEach((styleProp) => {
+                if (typeof propsStyleOpts[styleProp] === 'undefined') return;
+                if (typeof propsStyleOpts[styleProp] === 'object' && propsStyleOpts[styleProp]){
+                    _.extend(defaultStyleOpts[styleProp], propsStyleOpts[styleProp]);
+                } else {
+                    defaultStyleOpts[styleProp] = propsStyleOpts[styleProp];
+                }
+            });
+            return defaultStyleOpts;
+        }
+    },
+
+    getCommonDefaultStyleOpts : function(){
+        // TODO
     },
 
     style : {
@@ -200,5 +286,3 @@ var util = {
     }
 
 };
-
-module.exports.util = util;

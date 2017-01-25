@@ -6,13 +6,28 @@ var _ = require('underscore');
  * A directory of methods and maybe a mini-component or two for common use.
  */
 
-module.exports = _.extend({
-    'object'        : require('./object'),          // Transforms, manipulations, parsers, etc. re: objects.
-    'layout'        : require('./layout'),          // Layout utilities
-    'ajax'          : require('./ajax'),            // Self-explanatory. Make AJAX requests with these functions.
-    'console'       : require('./console'),         // Patches over browser window's console and disables logging (e.g. console.log) on production. Just import from component.
-    'JWT'           : require('./json-web-token'),  // Functions related to JWT encoding/decoding/storage. Prevent name interference with 'jwt' NPM package
-    'DateUtility'   : require('./date'),            // Use momentjs to parse and localize datetime. Has useful React component - DateUtility.LocalizedTime - which shows time in user's timezone after mount.
-    'expFxn'        : require('./experiments-transforms'),
-    'expFilters'    : require('./experiments-filters')
-}, require('./misc')); // Add misc functions to root.
+/** Transforms, manipulations, parsers, etc. re: objects. **/
+module.exports.object       = require('./object');
+
+/** Layout utilities */
+module.exports.layout       = require('./layout');
+
+/** Self-explanatory. Make AJAX requests with these functions. */
+module.exports.ajax         = require('./ajax');
+
+/** Patches over browser window's console and disables logging (e.g. console.log) on production. Just import from this module to patch. */
+module.exports.console      = require('./patched-console');
+
+/** Functions related to JWT encoding/decoding/storage. Prevent name interference with 'jwt' NPM package */
+module.exports.JWT          = require('./json-web-token');
+
+/** Use momentjs to parse and localize datetime. Has useful React component - DateUtility.LocalizedTime - which shows time in user's timezone after mount. */
+module.exports.DateUtility  = require('./date-utility');
+
+module.exports.expFxn       = require('./experiments-transforms');
+module.exports.expFilters   = require('./experiments-filters');
+
+// Misc functions are top-level
+var misc                    = require('./misc');
+module.exports.isServerSide = misc.isServerSide;
+
