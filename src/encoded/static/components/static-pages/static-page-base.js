@@ -2,13 +2,15 @@
 
 var React = require('react');
 var _ = require('underscore');
-var marked = require('marked');
+//var marked = require('marked');
+var Markdown = require('markdown-to-jsx');
+var globals = require('./../globals');
 
 /** 
  * These are a set of 'mixin' functions which can be used directly on Static Page components. 
  * Simply reference the component method to the relevant method below in React.createClass(..) 
  */
-var StaticPageMethods = module.exports = {
+var StaticPageBase = module.exports = {
 
     getDefaultProps : function(){
         return {
@@ -36,23 +38,25 @@ var StaticPageMethods = module.exports = {
                 return a.order - b.order;
             })
             .map(function(contentPair){
-                var content = contentPair[1];
-                if (content.filetype.toLowerCase() === 'md') content = StaticPageMethods.parseMarkdownContent(content);
-                return renderMethod(contentPair[0] /* = key for section */, content);
+                //var content = contentPair[1];
+                //if (content.filetype.toLowerCase() === 'md') {
+                //    content = StaticPageBase.parseMarkdownContent(content);
+                //}
+                return renderMethod(contentPair[0] /* = key for section */, contentPair[1] /* = content */);
             })
             .value();
     },
-
+    /*
     parseMarkdownContent : function(content){
         content.content = marked(content.content, {
             gfm : true,
             tables : true,
             breaks : true
         });
+        content.filetype = "html"; // Adjust after parsing, just in case.
         return content;
-        //return marked(content);
     },
-
+    */
     // TODO: fix ugly hack, wherein I set id in the h3 above actual spot because the usual way of doing anchors cut off entries
     render: function() {
         var c = this.props.context.content;
@@ -67,17 +71,24 @@ var StaticPageMethods = module.exports = {
     Entry : {
 
         renderEntryContent : function(baseClassName){
-            var content = (this.props.content && this.props.content.content) || null;
+            var content  = (this.props.content && this.props.content.content)  || null;
+            var filetype = (this.props.content && this.props.content.filetype) || null;
             if (!content) return null;
             var placeholder = false;
             if (content.slice(0,12) === 'placeholder:'){
                 placeholder = true;
-                content = this.replacePlaceholder(content.slice(12).trim());
+                content = this.replacePlaceholder(content.slice(12).trim().replace(/\s/g,'')); // Remove all whitespace to help reduce any typo errors.
             }
 
             var className = "fourDN-content" + (baseClassName? ' ' + baseClassName : '');
             if (placeholder){
                 return <div className={className}>{ content }</div>;
+            } else if (filetype === 'md'){
+                return (
+                    <div className={className}>
+                        { Markdown.compiler(content) }
+                    </div>
+                );
             } else {
                 return <div className={className} dangerouslySetInnerHTML={{__html: content }}></div>;
             }
@@ -99,3 +110,52 @@ var StaticPageMethods = module.exports = {
     }
 
 };
+
+var StaticPageExample = React.createClass({
+
+    statics : {
+
+        Entry : React.createClass({
+
+            getDefaultProps : function(){
+                return {
+                    'section'   : null,
+                    'content'   : null,
+                    'entryType' : 'help',
+                    'className' : null
+                };
+            },
+
+            replacePlaceholder : function(placeholderString){
+                return content;
+            },
+
+            renderEntryContent : StaticPageBase.Entry.renderEntryContent,
+            render : StaticPageBase.Entry.render
+        })
+
+    },
+
+    propTypes : {
+        context : React.PropTypes.shape({
+            "title" : React.PropTypes.string,
+            "content" : React.PropTypes.shape({
+                "sectionID1" : React.PropTypes.object,
+                "sectionID2" : React.PropTypes.object,
+                "sectionID3" : React.PropTypes.object,
+                "sectionIDFour" : React.PropTypes.object
+            }).isRequired
+        }).isRequired
+    },
+
+    entryRenderFxn : function(key, content){
+        return <StaticPageExample.Entry key={key} section={key} content={content} />;
+    },
+
+    /** Use common funcs for rendering body. Create own for more custom behavior/layouts, using these funcs as base. */
+    getDefaultProps : StaticPageBase.getDefaultProps,
+    renderSections  : StaticPageBase.renderSections,
+    render          : StaticPageBase.render
+});
+
+globals.content_views.register(StaticPageExample, 'StaticPage');

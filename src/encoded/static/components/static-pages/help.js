@@ -22,8 +22,8 @@ var HelpPage = module.exports = React.createClass({
             },
 
             replacePlaceholder : function(placeholderString){
-                if (placeholderString === '<SlideCarousel />') return <SlideCarousel />;
-                return content;
+                if (placeholderString === '<SlideCarousel/>') return <SlideCarousel />;
+                return placeholderString;
             },
 
             renderEntryContent : StaticPageBase.Entry.renderEntryContent,

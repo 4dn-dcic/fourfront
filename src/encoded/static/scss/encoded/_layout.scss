@@ -1060,18 +1060,22 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	line-height: 130%;
 	font-size: 1.375rem;
 
-	> h2 {
+	> h2, > div > h2 {
 		font-weight: 400;
 		margin: 30px 0;
 	}
 
-	> h3 {
+	> h3, > div > h3 {
 		margin-top: 25px;
     	margin-bottom: 15px;
 	}
 
-	> h4 {
+	> h4, > div > h4 {
 		margin-top: 20px;
+	}
+
+	img {
+		max-width: 100%;
 	}
 
 }
