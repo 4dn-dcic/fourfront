@@ -32,6 +32,15 @@
 .static-page {
 	width: 75%;
 	margin: 0;
+	&.row {
+		width: auto;
+		> div > .page-title + .help-entry:first-of-type {
+			margin-top: 35px;
+		}
+		> div > .help-entry:first-child {
+			margin-top: 5px;
+		}
+	}
 }
 
 .page-container,
@@ -67,6 +76,14 @@ h1.page-title {
 	font-weight: 200;
 	margin-top: 32px;
 	margin-bottom: 32px;
+
+	.row > & {
+		margin-top: 0px; // Assuming 35px margin bottom on page sub-container
+	}
+
+	.row > div > & {
+		margin-top: 0px;
+	}
 
 	.subtitle {
 		/* Subtitles which are part of the title, e.g. Experiment Set <.subtitle>4324ADADF</.subtitle> */

@@ -28,7 +28,7 @@
         },
 
         "help/submitting" : {
-            "title"     : "Submitting Metadata and Data files to the 4DN-DCIC",
+            "title"     : "Submitting Metadata and Data files to 4DN-DCIC",
             "directory" : "/docs/public/metadata-submission",
             "filetype"  : "markdown",
             "sections"  : [

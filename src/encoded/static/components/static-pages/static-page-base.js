@@ -2,8 +2,8 @@
 
 var React = require('react');
 var _ = require('underscore');
-//var marked = require('marked');
 var Markdown = require('markdown-to-jsx');
+//var TableOfContents = require('./table-contents');
 var globals = require('./../globals');
 
 /** 
@@ -17,20 +17,29 @@ var StaticPageBase = module.exports = {
             "context" : {
                 "title" : "Page Title",
                 "content" : {
-                    "sectionNameID" : {
-                        "order"     : 0,
-                        "title"     : "Section Title",
-                        "content"   : "<h2>Hello World</h2>",
-                        "filetype"  : "html"
+                    "sectionNameID1" : {
+                        "order"      : 0,
+                        "title"      : "Section Title 1",
+                        "content"    : "<h2>Hello</h2>",
+                        "filetype"   : "html"
+                    },
+                    "sectionNameID2" : {
+                        "order"      : 1,
+                        "title"      : "Section Title 2",
+                        "content"    : "<h2>World</h2>",
+                        "filetype"   : "html"
                     }
                 }
             }
         };
     },
 
+    sortedSections : function(){
+        if (!this.props.context || !this.props.context.content) return null;
+    },
+
     renderSections : function(renderMethod){
         if (!this.props.context || !this.props.context.content) return null;
-        var _this = this;
         return _(this.props.context.content).chain()
             .pairs()
             .sort(function(a,b){
@@ -58,15 +67,46 @@ var StaticPageBase = module.exports = {
     },
     */
     // TODO: fix ugly hack, wherein I set id in the h3 above actual spot because the usual way of doing anchors cut off entries
-    render: function() {
-        var c = this.props.context.content;
-        return(
-            <div className="static-page">
-                <h1 className="page-title">{ this.props.context.title || 'Home' }</h1>
-                { this.renderSections(this.entryRenderFxn)}
-            </div>
-        );
+    render: {
+        simple : function() {
+            return (
+                <StaticPageBase.Wrapper title={this.props.context.title}>
+                    { this.renderSections(this.entryRenderFxn) }
+                </StaticPageBase.Wrapper>
+            );
+        },
+
+        withTableOfContents : function(){
+            return (
+                <StaticPageBase.Wrapper title={this.props.context.title}>
+                    { this.renderSections(this.entryRenderFxn) }
+                </StaticPageBase.Wrapper>
+            );
+        },
     },
+
+    Wrapper : React.createClass({
+
+        getDefaultProps : function(){
+            return {
+                'contentColSize' : 9
+            };
+        },
+
+        render : function(){
+            
+            var mainColClassName = "col-xs-12 col-sm-12 col-lg-" + this.props.contentColSize;
+
+            return(
+                <div className="static-page row">
+                    <div className={mainColClassName}>
+                        <h1 className="page-title">{ this.props.title }</h1>
+                        { this.props.children }
+                    </div>
+                </div>
+            );
+        }
+    }),
 
     Entry : {
 
@@ -155,7 +195,7 @@ var StaticPageExample = React.createClass({
     /** Use common funcs for rendering body. Create own for more custom behavior/layouts, using these funcs as base. */
     getDefaultProps : StaticPageBase.getDefaultProps,
     renderSections  : StaticPageBase.renderSections,
-    render          : StaticPageBase.render
+    render          : StaticPageBase.render.simple
 });
 
 globals.content_views.register(StaticPageExample, 'StaticPage');
