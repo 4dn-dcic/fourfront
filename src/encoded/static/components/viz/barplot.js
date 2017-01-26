@@ -516,6 +516,7 @@ var BarPlot = React.createClass({
                 }
                 style.left = styleOpts.offset.left;
                 style.bottom = styleOpts.offset.bottom;
+                style.width = d.attr.width;
                 return style;
             }
 

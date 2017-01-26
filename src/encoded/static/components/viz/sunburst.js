@@ -391,6 +391,8 @@ var SunBurst = React.createClass({
         var sequenceArray = SunBurst.getAncestors(d);
         d = d.data || d;
 
+        if (d.field && d.term) highlightTerm(d.field, d.term, this.props.colorForNode(d));
+
         var expCount = d.active || d.experiments || null;
         var expSetCount = d.experiment_sets || null;
 
@@ -427,7 +429,6 @@ var SunBurst = React.createClass({
             .classed("hover", true);
 
         if (this.props.breadcrumbs !== false) this.updateBreadcrumbs(sequenceArray);
-        if (d.field && d.term) highlightTerm(d.field, d.term, this.props.colorForNode(d));
     },
 
     // Restore everything to full opacity when moving off the visualization.
@@ -859,7 +860,7 @@ var SunBurst = React.createClass({
                     d={_this.generateRectPath(node)}
                     fillRule="evenodd"
                     className={className + (removing ? ' removing' : (!existing ? ' adding' : ''))}
-                    onMouseOver={node.depth > 0 ? (e)=>{ e.persist(); _this.throttledMouseOverHandler(e); } : null }
+                    onMouseOver={node.depth > 0 ? _this.mouseoverHandle : null }
                     onMouseEnter={ node.depth === 0 ? _this.mouseleave : null }
                     onMouseLeave={node.depth > 0 ? function(e){ unhighlightTerms(e.target.__data__.data.field); } : null}
                     onClick={clickable ? (e) => _this.props.handleClick(e.target.__data__) : null}

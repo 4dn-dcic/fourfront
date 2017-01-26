@@ -135,8 +135,8 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             'selectedNodes'         : [],   // expSetFilters, but with nodes (for colors, etc.) for breadcrumbs,
             'fetching'              : false,
             'chartFieldsBarPlot'    : [
-                { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
                 { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
+                { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
                 { title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
             ],
             'chartFieldsHierarchy'  : [
@@ -148,6 +148,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                     }
                 },
                 { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
+                { title : "Biosample", field : 'experiments_in_set.biosample.biosource_summary' },
                 { 
                     title : "Digestion Enzyme",
                     field : 'experiments_in_set.digestion_enzyme.name',
@@ -155,17 +156,15 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                         return 'Enzyme ' + val;
                     } 
                 },
-                { title : "Biosample", field : 'experiments_in_set.biosample.biosource_summary' },
-                
                 { title : "Experiment Summary", field : "experiments_in_set.experiment_summary" },
                 {
                     title: "Experiment Accession",
                     field : 'experiments_in_set.accession',
-                    size : function(val, id, exps, filteredExps, exp){
-                        return (!filteredExps || (filteredExps && filteredExps[exp.accession]) ?
-                            1 : 0.33
-                        );
-                    },
+                    //size : function(val, id, exps, filteredExps, exp){
+                    //    return (!filteredExps || (filteredExps && filteredExps[exp.accession]) ?
+                    //        1 : 0.33
+                    //    );
+                    //},
                     fallbackSize : function(val, id, exps, filteredExps, exp){
                         return filteredExps && filteredExps[exp.accession] ? 1 : (filteredExps ? 0 : 1);
                     },
@@ -174,9 +173,9 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                         return expFxn.allFilesFromExperiment(exp).map(function(f,i,a){
                             return {
                                 'name' : f.accession,
-                                //'size' : (!filteredExps || (filteredExps && filteredExps[exp.accession]) ?
-                                //    1 : 0.33
-                                //),
+                                'size' : (!filteredExps || (filteredExps && filteredExps[exp.accession]) ?
+                                    1 : 0.33
+                                ),
                                 'description' : 'File ' + f.accession,
                                 'color' : '#ccc',
                                 'id' : id + '-' + f.accession,
