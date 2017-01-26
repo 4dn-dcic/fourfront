@@ -14,13 +14,6 @@ def test_parse_args_defaults():
     assert args.key == 'default'
 
 
-# def test_connect2server():
-    # keypath = 'data/documents/keypairs.json'
-    # keyname = 'default'
-    # connection = go.connect2server(keypath, keyname)
-    # assert(connection)
-
-
 @pytest.fixture
 def slim_terms():
     return [
