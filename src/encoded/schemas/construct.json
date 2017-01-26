@@ -48,11 +48,6 @@
               "description": "String describing tags the construct contains.",
               "type":  "string"
           },
-          "designed_to_target": {
-              "title": "Designed to Target",
-              "description": "The gene or genomic region that this construct is designed to target",
-              "type":  "string"
-          },
           "vector_backbone": {
               "title": "Vector Backbone",
               "description": "The vector backbone for this construct",

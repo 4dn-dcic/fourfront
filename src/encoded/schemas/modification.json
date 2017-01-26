@@ -58,17 +58,6 @@
                 "pattern": "^[ATGCN]+$"
             }
         },
-        "modified_regions": {
-            "title": "Modified Regions",
-            "description": "The genomic regions being modified.",
-            "type": "array",
-            "items": {
-                "title": "Genomic region",
-                "description": "region being modfied",
-                "type": "string",
-                "linkTo": "GenomicRegion"
-            }
-        },
         "target_of_mod": {
             "title": "Target of Modification",
             "description": "The targeted gene or genomic region that is targeted by the modification.",
