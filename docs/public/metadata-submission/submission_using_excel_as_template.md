@@ -134,6 +134,12 @@ The Submit4DN package is registered with Pypi so installation is as simple as:
     pip3 install submit4dn
 
 
+If it is already installed upgrade to the latest version:
+
+
+    pip3 install submit4dn --upgrade
+
+
 #### Source code
 The source code for the submission scripts is available on [github](https://github.com/4dn-dcic/Submit4DN).
 
