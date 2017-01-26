@@ -429,6 +429,17 @@ def add_slim_to_term(term, slim_terms):
     return term
 
 
+def get_synonym_terms(connection, ontology_id):
+    '''Checks an ontology item for ontology_terms that are used
+        to designate synonyms in that ontology and returns the list
+    '''
+    ontology = get_FDN(ontology_id, connection)
+    synonym_ids = ontology.get('synonym_terms')
+    if synonym_ids is not None:
+        return [get_FDN(termid, connection) for termid in synonym_ids]
+    return None
+
+
 def get_slim_terms(connection):
     '''Retrieves ontology_term jsons for those terms that have 'is_slim_for'
         field populated
@@ -447,10 +458,13 @@ def get_slim_terms(connection):
 
 
 def get_ontologies(connection, ont_list):
-    '''return list of ontology jsons retrieved from server'''
+    '''return list of ontology jsons retrieved from server
+        ontology jsons include linkTo items
+    '''
     ontologies = []
     if ont_list == 'all':
         ontologies = get_FDN(None, connection, None, 'ontologys')['@graph']
+        ontologies = [get_FDN(ontology['uuid'], connection) for ontology in ontologies]
     else:
         ontologies = [get_FDN('ontologys/' + ontology, connection) for ontology in ont_list]
 
@@ -510,18 +524,21 @@ def new_main():
     connection = connect2server(args.keyfile, args.key)
 
     ontologies = get_ontologies(connection, args.ontologies)
-    # print(ontologies)
+    print(ontologies)
     slim_terms = get_slim_terms(connection)
-    # print(slim_terms)
+    print(slim_terms)
 
     # start iteratively downloading and processing ontologies
     terms = {}
     for ontology in ontologies:
         if ontology['download_url'] is not None:
-            print(ontology['download_url'])
-            data = Owler(ontology['download_url'])
-            for class_ in data.allclasses:
-                pass
+            #print(ontology)
+            #print(ontology['download_url'])
+            synonym_terms = get_synonym_terms(connection, ontology['uuid'])
+            #print(synonym_terms)
+            # data = Owler(ontology['download_url'])
+            # for class_ in data.allclasses:
+            #    pass
 
 
 def main():
