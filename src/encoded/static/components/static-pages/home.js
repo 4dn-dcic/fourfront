@@ -5,7 +5,7 @@ var ReactDOM = require('react-dom');
 var _ = require('underscore');
 var { console } = require('./../util');
 var announcements_data = require('../../data/announcements_data');
-var Panel = require('react-bootstrap').Panel;
+var Collapse = require('react-bootstrap').Collapse;
 var store = require('../../store');
 var globals = require('./../globals');
 
