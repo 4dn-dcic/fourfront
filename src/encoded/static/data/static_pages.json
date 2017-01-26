@@ -1,0 +1,45 @@
+{
+    "pages" : {
+
+        "home"  : true,
+        "about" : true,
+
+        "help"  : {
+            "title"     : "Getting Started",
+            "directory" : "/src/encoded/static/data/help",
+            "sections"  : [
+                {   "filename" : "gettingStarted.html"  },
+                {
+                    "title" : "Metadata Structure",
+                    "filename" : "metadataStructure1.html"
+                },
+                {
+                    "filename" : "carousel-place-holder",
+                    "content" : "placeholder: <SlideCarousel />"
+                },
+                {   "filename" : "metadataStructure2.html"  },
+                {
+                    "title" : "Data Submission via Spreadsheet",
+                    "filename" : "submissionXLS.html"
+                },
+                {   "title" : "REST API", "filename" : "restAPI.html" }
+            ],
+            "filetype"  : "html"
+        },
+
+        "help/submitting" : {
+            "title"     : "Submitting Metadata and Data files to the 4DN-DCIC",
+            "directory" : "/docs/public/metadata-submission",
+            "filetype"  : "markdown",
+            "sections"  : [
+                {   "filename" : "introduction.md"  },
+                {   "title" : "Getting added as a user and a data submitter for a lab", "filename"  : "getting_added_as_user.md"    },
+                {
+                    "title" : "Submission of metadata using a Microsoft Excel WorkBook as a template", 
+                    "filename"  : "submission_using_excel_as_template.md"
+                }
+            ]
+        }
+
+    }
+}
