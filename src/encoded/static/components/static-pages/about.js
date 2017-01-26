@@ -1,7 +1,6 @@
 // Render a simple static about page
 
 var React = require('react');
-var statics = require('./../../data/statics');
 var globals = require('../globals');
 
 var AboutPage = module.exports = React.createClass({
