@@ -2,10 +2,10 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 var _ = require('underscore');
-var announcements_data = require('../data/announcements_data');
+var announcements_data = require('../../data/announcements_data');
 var Panel = require('react-bootstrap').Panel;
-var store = require('../store');
-var globals = require('./globals');
+var store = require('../../store');
+var globals = require('./../globals');
 
 /* ****************
 New homepage
