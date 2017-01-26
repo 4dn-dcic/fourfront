@@ -46,4 +46,4 @@ module.exports = {
     "title": "Getting Started",
     "notification": "success",
     "@context": "/help"
-}
+};

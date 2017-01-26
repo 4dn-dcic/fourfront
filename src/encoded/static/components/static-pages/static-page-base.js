@@ -25,7 +25,7 @@ var StaticPageBase = module.exports = {
                     }
                 }
             }
-        }
+        };
     },
 
     renderSections : function(renderMethod){

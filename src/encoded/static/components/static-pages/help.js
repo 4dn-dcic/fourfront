@@ -22,7 +22,9 @@ var HelpPage = module.exports = React.createClass({
             },
 
             replacePlaceholder : function(placeholderString){
-                if (placeholderString === '<SlideCarousel/>') return <SlideCarousel />;
+                if (placeholderString === '<SlideCarousel/>'){
+                    return (<SlideCarousel />);
+                }
                 return placeholderString;
             },
 
@@ -45,7 +47,7 @@ var HelpPage = module.exports = React.createClass({
     },
 
     entryRenderFxn : function(key, content){
-        return <HelpPage.Entry key={key} section={key} content={content} />;
+        return (<HelpPage.Entry key={key} section={key} content={content} />);
     },
 
     getDefaultProps : StaticPageBase.getDefaultProps,
