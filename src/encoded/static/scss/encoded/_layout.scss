@@ -32,6 +32,15 @@
 .static-page {
 	width: 75%;
 	margin: 0;
+	&.row {
+		width: auto;
+		> div > .page-title + .help-entry:first-of-type {
+			margin-top: 35px;
+		}
+		> div > .help-entry:first-child {
+			margin-top: 5px;
+		}
+	}
 }
 
 .page-container,
@@ -39,7 +48,7 @@
 .browse-page-container,
 .static-page {
 	/* Consistent margin between top navbar & content among pages */
-	margin-top: 25px;
+	margin-top: 35px;
 }
 
 /* top padding for small & large screens re: fixed nav */
@@ -65,7 +74,16 @@ h1.page-title {
 	/* Only set font-weight: 200 for h1,
 	   200 doesn't look as nice on smaller sizes. */
 	font-weight: 200;
-	margin-top: 14px;
+	margin-top: 32px;
+	margin-bottom: 32px;
+
+	.row > & {
+		margin-top: 0px; // Assuming 35px margin bottom on page sub-container
+	}
+
+	.row > div > & {
+		margin-top: 0px;
+	}
 
 	.subtitle {
 		/* Subtitles which are part of the title, e.g. Experiment Set <.subtitle>4324ADADF</.subtitle> */
@@ -82,7 +100,7 @@ h1.page-title {
 }
 
 h1.page-title + .page-subtitle {
-	margin-top: -5px; /* Assumes h1.page-title to have margin-bottom: 10px */
+	margin-top: -27px; /* Assumes h1.page-title to have margin-bottom: 32px */
 	margin-bottom: 15px;
 }
 
@@ -1001,8 +1019,20 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 .fourDN-header{
 	font-family: 'Work Sans', sans-serif;
-	font-weight: bold;
+	font-weight: 400;
 	margin-bottom: 20px;
+	padding-bottom: 15px;
+	border-bottom: 1px solid #f4f4f4;
+	font-size: 32px;
+	letter-spacing: -1px;
+	line-height: 38px;
+	position: relative;
+	
+	&[id]:before {
+		content : '';
+		position: relative;
+		top: -150px;
+	}
 }
 
 .fourDN-banner{
@@ -1052,7 +1082,26 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 .fourDN-content{
 	font-family: 'Yrsa', serif;
 	line-height: 130%;
-	font-size: 1.4em;
+	font-size: 1.375rem;
+
+	> h2, > div > h2 {
+		font-weight: 400;
+		margin: 30px 0;
+	}
+
+	> h3, > div > h3 {
+		margin-top: 25px;
+    	margin-bottom: 15px;
+	}
+
+	> h4, > div > h4 {
+		margin-top: 20px;
+	}
+
+	img {
+		max-width: 100%;
+	}
+
 }
 
 .fourDN-content-panel{

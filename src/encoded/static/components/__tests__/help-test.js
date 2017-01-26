@@ -15,13 +15,14 @@ jest.dontMock('react');
 jest.dontMock('underscore');
 
 describe('Testing help.js', function() {
-    var React, HelpPage, testItem, TestUtils, page, data, _, banners, Wrapper, helpEntries;
+    var React, HelpPage, testItem, TestUtils, page, context, _, banners, Wrapper, helpEntries;
 
     beforeAll(function() {
         React = require('react');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
-        HelpPage = require('../help');
+        HelpPage = require('../static-pages/help');
+        context = require('../testdata/static/helppage');
         Wrapper = React.createClass({
             render: function() {
                 return (
@@ -31,32 +32,51 @@ describe('Testing help.js', function() {
         });
         page = TestUtils.renderIntoDocument(
             <Wrapper>
-                <HelpPage />
+                <HelpPage context={context} />
             </Wrapper>
         );
         helpEntries = TestUtils.scryRenderedDOMComponentsWithClass(page, 'help-entry');
     });
 
 
-    it('Has at least one help entry, first title named "Getting Started", with paragraph', function() {
+    it('Has at least one help entry with paragraph, title', function() {
         expect(helpEntries.length).toBeGreaterThan(0); // Doesn't matter if 1 or more entries.
 
-        // Check that first child of first help entry is a title.
-        expect(helpEntries[0].children[0].className.search('fourDN-header')).toBeGreaterThan(-1);
+        // Check that there's titles.
+        expect(
+            helpEntries.filter(function(el){ 
+                return (
+                    el && el.children.length && 
+                    el.children[0].className.indexOf('fourDN-header') > -1
+                );
+            }).length
+        ).toBeGreaterThan(0);
 
-        // Make sure second child of first section is a content paragraph.
-        expect(helpEntries[0].children[1].className.search('fourDN-content')).toBeGreaterThan(-1);
+        // Check that there's paragraphs.
+        expect(
+            helpEntries.filter(function(el){ 
+                return (
+                    el && el.children.length && 
+                    (
+                        el.children[0].className.indexOf('fourDN-content') > -1 ||
+                        (el.children[1] && el.children[1].className.indexOf('fourDN-content') > -1)
+                    )
+                );
+            }).length
+        ).toBeGreaterThan(0);
 
     });
 
 
-    it('Has multiple help entries, titled: getting started, metadata structure, data submission ..., rest api', function() {
+    it('Has multiple help entries, titled:  metadata structure, rest api', function() {
+        var allHeaderNames = _.flatten(helpEntries.map(function(e){ return e.children[0]; }), true)
+            .filter(function(el){ return typeof el.innerHTML !== 'undefined'; })
+            .map(function(el){ return el.innerHTML.toLowerCase(); });
 
-        // .toLowerCase() in case capitalization changes ( e.g. Getting started -> Getting *S*tarted ) 
-        expect(helpEntries[0].children[0].innerHTML.toLowerCase()).toEqual('getting started');
-        expect(helpEntries[1].children[0].innerHTML.toLowerCase()).toEqual('metadata structure');
-        expect(helpEntries[2].children[0].innerHTML.toLowerCase().search('data submission')).toBeGreaterThan(-1); // In case it changes
-        expect(helpEntries[3].children[0].innerHTML.toLowerCase()).toEqual('rest api');
+        // .toLowerCase() in case capitalization changes ( e.g. Getting started -> Getting *S*tarted )
+        expect(_.contains(allHeaderNames, 'metadata structure')).toBe(true);
+        expect(_.contains(allHeaderNames, 'rest api')).toBe(true);
+        expect(_.contains(allHeaderNames, 'data submission via spreadsheet')).toBe(true);
 
     });
 

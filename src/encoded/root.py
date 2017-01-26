@@ -1,4 +1,6 @@
 import os
+import json
+from re import escape
 from pyramid.decorator import reify
 from snovault import (
     Root,
@@ -21,6 +23,7 @@ def includeme(config):
 
 
 cachedFileContents = {} # Should we cache in RAM like this (?), let perform file I/O, or something else?
+pageLocations = None
 
 def getStaticFileContent(filename, directory, contentFilesLocation):
     cachedName = directory + '/' + filename.split('.')[0]
@@ -28,35 +31,93 @@ def getStaticFileContent(filename, directory, contentFilesLocation):
     if output:
         #print("\n\n\nGot cached output for " + filename)     # Works
         return output
-    file = open(contentFilesLocation + '/' + filename)
+    file = open(contentFilesLocation + '/' + filename, encoding="utf-8")
     output = file.read()
     file.close()
     cachedFileContents[cachedName] = output
     return output
 
+def listFilesInInDirectory(dirLocation):
+    return [ fn for fn in os.listdir(dirLocation) if os.path.isfile(dirLocation + '/' + fn) ]
+
 def static_pages(config):
-    '''Setup static routes & content from static files (HTML or TODO: Markdown)'''
-    config.add_route('static-page', '/{page:(help|about|home)}') # TODO: put array of static pages into ini or yaml file?
+    '''Setup static routes & content from static files (HTML or Markdown)'''
+
+    try:
+        contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
+        pageLocations = json.loads(getStaticFileContent("static_pages.json", "/static/data", contentFilesLocation + "/static/data")).get('pages', {})
+    except Exception as e:
+        print("Error opening '" + contentFilesLocation + "/static/data/static_pages.json'")
+
+    
+    config.add_route(
+        'static-page',
+        '/{page:(' + '|'.join( map(escape, pageLocations.keys() )) + ')}'
+    )
+
     def static_page(request):
 
         page = request.matchdict.get('page','none')
         content = None
-        try:
-            contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
-            contentFilesLocation += "/static/data/"     # Where the static files be stored.
-            contentFilesLocation += page
-            content = { fn.split('.')[0] : getStaticFileContent(fn, page, contentFilesLocation) for fn in os.listdir(contentFilesLocation) if os.path.isfile(contentFilesLocation + '/' + fn) }
-        except FileNotFoundError as e:
-            print("No files found for static page: \"" + page + "\"")
+        contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
+        
+        pageMeta = pageLocations.get(page, None)
 
-        return { # Dummy-like 'context' JSON response 
-            "title" : request.matchdict.get('page','').capitalize(),
+        if isinstance(pageMeta, dict) and pageMeta.get('directory', None) is not None:
+            contentFilesLocation += "/../.." # get us to root of Git repo.
+            contentFilesLocation += pageMeta['directory']
+            
+            if pageMeta.get('sections', None) is not None:
+                sections = pageMeta['sections']
+            else:
+                sections = [ { 'filename' : fn } for fn in listFilesInInDirectory(contentFilesLocation) ]
+            
+            # Set order (as py dicts don't maintain order)
+            i = 0
+            for s in sections:
+                s.update(order = i)
+                i += 1
+
+            try:
+                content = {}
+                for s in sections:
+                    filenameParts = s['filename'].split('.')
+                    content[filenameParts[0]] = {
+                        'content' : s.get('content', False) or getStaticFileContent(
+                            s['filename'],
+                            pageMeta['directory'],
+                            contentFilesLocation
+                        ),
+                        'title'   : s.get('title', None),
+                        'order'   : s['order'],
+                        'filetype': filenameParts[len(filenameParts) - 1]
+                    }
+            except Exception as e:
+                print(e)
+                print('Could not get contents from ' + contentFilesLocation)
+
+        else:
+            print("No directory set for page \"" + page + "\" in /static/data/directories.json, checking default (/static/data)")
+            try:
+                contentFilesLocation += "/static/data/"     # Where the static files be stored by default.
+                contentFilesLocation += page
+                content = { fn.split('.')[0] : getStaticFileContent(fn, page, contentFilesLocation) for fn in os.listdir(contentFilesLocation) if os.path.isfile(contentFilesLocation + '/' + fn) }
+            except FileNotFoundError as e:
+                print("No files found for static page: \"" + page + "\"")
+
+        # Dummy-like 'context' JSON response
+        pathParts = request.matchdict.get('page','').split('/')
+        atTypes = [
+            ''.join([ pgType.capitalize() for pgType in list(reversed(pathParts))[pathIndex:] ]) + 'Page' for pathIndex in range(0, len(pathParts))
+        ] # creates e.g. SubmittingHelpPage, HelpPage
+
+        response = request.response
+        response.content_type = 'application/json; charset=utf-8'
+
+        return {
+            "title" : (isinstance(pageMeta, dict) and pageMeta.get('title')) or request.matchdict.get('page','').capitalize(),
             "notification" : "success",
-            "@type" : [
-                request.matchdict.get('page','').capitalize() + "Page", # e.g. AboutPage
-                "StaticPage",
-                "Portal"
-            ],
+            "@type" : atTypes + [ "StaticPage", "Portal" ],
             "@context" : "/" + request.matchdict.get('page','static-pages'),
             "@id" : "/" + request.matchdict.get('page',''),
             "content" : content
