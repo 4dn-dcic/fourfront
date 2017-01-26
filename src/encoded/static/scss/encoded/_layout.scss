@@ -1026,6 +1026,13 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	font-size: 32px;
 	letter-spacing: -1px;
 	line-height: 38px;
+	position: relative;
+	
+	&[id]:before {
+		content : '';
+		position: relative;
+		top: -150px;
+	}
 }
 
 .fourDN-banner{

@@ -3,7 +3,7 @@
 var React = require('react');
 var _ = require('underscore');
 var Markdown = require('markdown-to-jsx');
-//var TableOfContents = require('./table-contents');
+var TableOfContents = require('./table-contents');
 var globals = require('./../globals');
 
 /** 
@@ -78,7 +78,7 @@ var StaticPageBase = module.exports = {
 
         withTableOfContents : function(){
             return (
-                <StaticPageBase.Wrapper title={this.props.context.title}>
+                <StaticPageBase.Wrapper title={this.props.context.title} tableOfContents={true} context={this.props.context}>
                     { this.renderSections(this.entryRenderFxn) }
                 </StaticPageBase.Wrapper>
             );
@@ -89,20 +89,27 @@ var StaticPageBase = module.exports = {
 
         getDefaultProps : function(){
             return {
-                'contentColSize' : 9
+                'contentColSize' : 9,
+                'tableOfContents' : false
             };
         },
 
         render : function(){
             
-            var mainColClassName = "col-xs-12 col-sm-12 col-lg-" + this.props.contentColSize;
+            var title = this.props.title || (this.props.context && this.props.context.title) || null;
+            var contentColSize = Math.max(6, this.props.contentColSize); // Min 6.
+            contentColSize = Math.min(this.props.tableOfContents ? 9 : 12, contentColSize);
+            var mainColClassName = "col-xs-12 col-sm-12 col-lg-" + contentColSize;
 
             return(
                 <div className="static-page row">
                     <div className={mainColClassName}>
-                        <h1 className="page-title">{ this.props.title }</h1>
+                        <h1 className="page-title">{ title }</h1>
                         { this.props.children }
                     </div>
+                    { this.props.tableOfContents ? 
+                        <TableOfContents context={this.props.context} /> 
+                    : null }
                 </div>
             );
         }

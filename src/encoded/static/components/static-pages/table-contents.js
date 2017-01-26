@@ -3,7 +3,6 @@
 var React = require('react');
 var _ = require('underscore');
 var globals = require('./../globals');
-var StaticPageBase = require('./static-page-base');
 
 var TableOfContents = module.exports = React.createClass({
 
@@ -41,9 +40,26 @@ var TableOfContents = module.exports = React.createClass({
     },
 
     getDefaultProps : function(){
-        return _.extend(StaticPageBase.getDefaultProps.call(this), {
+        return {
+            "context" : {
+                "title" : "Page Title",
+                "content" : {
+                    "sectionNameID1" : {
+                        "order"      : 0,
+                        "title"      : "Section Title 1",
+                        "content"    : "<h2>Hello</h2>",
+                        "filetype"   : "html"
+                    },
+                    "sectionNameID2" : {
+                        "order"      : 1,
+                        "title"      : "Section Title 2",
+                        "content"    : "<h2>World</h2>",
+                        "filetype"   : "html"
+                    }
+                }
+            },
             'populateAnchors' : true
-        });
+        };
     },
 
     render : function(){
@@ -54,13 +70,14 @@ var TableOfContents = module.exports = React.createClass({
             })
             .sortBy('order')
             .map(function(s){
-                return (<TableOfContents.TableEntry link={s.link} title={link.title} />);
+                return (<TableOfContents.TableEntry link={'#' + s.link} title={s.title} />);
             })
             .value();
+
         return (
             <div className="table-of-contents">
                 <ol className="inner">
-                    
+                    { topEntries }
                 </ol>
             </div>
         );
