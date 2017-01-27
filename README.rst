@@ -185,3 +185,8 @@ After first setting up `Package Control`_ (follow install and usage instructions
     * sublimelinter-jshint
 
 .. _`Package Control`: https://sublime.wbond.net/
+
+
+.. image:: https://api.codacy.com/project/badge/Grade/cbe06c953e2e4be585825ee514695f12
+   :alt: Codacy Badge
+   :target: https://www.codacy.com/app/SooLee/fourfront?utm_source=github.com&utm_medium=referral&utm_content=4dn-dcic/fourfront&utm_campaign=badger
