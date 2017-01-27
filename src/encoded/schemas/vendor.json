@@ -35,7 +35,8 @@
             "description": "DON'T SUBMIT, auto-generated, use for referencing vendors in other sheets.",
             "type": "string",
             "pattern": "^[a-z0-9\\-]+$",
-            "uniqueKey": true
+            "uniqueKey": true,
+            "exclude_from": "submit4dn"
         },
         "url": {
             "title": "URL",

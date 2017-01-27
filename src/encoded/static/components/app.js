@@ -2,11 +2,9 @@
 var React = require('react');
 var jsonScriptEscape = require('../libs/jsonScriptEscape');
 var globals = require('./globals');
-var HomePage = require('./home');
 var ErrorPage = require('./error');
 var Navigation = require('./navigation');
-var HelpPage = require('./help');
-var AboutPage = require('./about');
+
 var Footer = require('./footer');
 var url = require('url');
 var _ = require('underscore');
@@ -25,10 +23,12 @@ var portal = {
     global_sections: [
         {id: 'browse', sid:'sBrowse', title: 'Browse', url: '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all'},
         {id: 'help', sid:'sHelp', title: 'Help', children: [
-            {id: 'gettingstarted', title: 'Getting started', url: '/help'},
-            {id: 'metadatastructure', title: 'Metadata structure', url: '/help#metadata-structure'},
-            {id: 'datasubmission', title: 'Data submission', url: '/help#data-submission'},
-            {id: 'restapi', title: 'REST API', url: '/help#rest-api'},
+            {id: 'gettingstarted', title: 'Getting started', url: '/help', children : [
+                {id: 'metadatastructure', title: 'Metadata structure', url: '/help#metadata-structure'},
+                {id: 'datasubmission', title: 'Data submission', url: '/help#data-submission'},
+                {id: 'restapi', title: 'REST API', url: '/help#rest-api'},
+            ]},
+            {id: 'submitting-metadata', title: 'Submitting Metadata', url: '/help/submitting'},
             {id: 'about', title: 'About', url: '/about'}
         ]}
     ],
