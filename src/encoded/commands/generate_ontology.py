@@ -24,6 +24,7 @@ from Submit4DN.wranglertools.fdnDCIC import (
 EPILOG = __doc__
 
 EFO = Namespace("http://www.ebi.ac.uk/efo/")
+EFO_SYN = EFO['alternative_term']
 EFO_DEF = EFO['definition']
 PART_OF = "http://purl.obolibrary.org/obo/BFO_0000050"
 DEVELOPS_FROM = "http://purl.obolibrary.org/obo/RO_0002202"
@@ -404,6 +405,20 @@ def getTermStructure():
     }
 
 
+def get_synonyms(class_, data, synonym_terms):
+    '''Gets synonyms for the class by querying the rdfGraph in data
+        for synonym_term classes and returns the values
+    '''
+    synonyms = {}
+    for term in synonym_terms:
+        syn = []
+        for o in data.rdfGraph.objects(class_, term):
+            syn += [o]
+        syn = [str(s) for s in syn]
+        synonyms.update(dict(zip(syn, [1] * len(syn))))
+    return list(synonyms.keys())
+
+
 def process_blank_node(class_, data, terms):
     for object_ in data.rdfGraph.objects(class_, subClassOf):
         # direct parents of blank nodes
@@ -429,15 +444,33 @@ def add_slim_to_term(term, slim_terms):
     return term
 
 
-def get_synonym_terms(connection, ontology_id):
+def convert2namespace(uri):
+    name, ns = splitNameFromNamespace(uri)
+
+    if '#' in uri:
+        ns = ns + '#'
+    else:
+        ns = ns + '/'
+    ns = Namespace(ns)
+    return ns[name]
+
+
+def get_synonym_terms(connection, ontology_id, to_rdf=True):
     '''Checks an ontology item for ontology_terms that are used
-        to designate synonyms in that ontology and returns the list
+        to designate synonyms in that ontology and returns the list.
+
+        By default converts url into RDF Namespace:name format so
+        they can be used directly in retrieval from graph
     '''
+    synterms = None
     ontology = get_FDN(ontology_id, connection)
     synonym_ids = ontology.get('synonym_terms')
     if synonym_ids is not None:
-        return [get_FDN(termid, connection) for termid in synonym_ids]
-    return None
+        synterms = [get_FDN(termid, connection) for termid in synonym_ids]
+    if synterms is not None and to_rdf:
+        synterms = [convert2namespace(syn['term_url']) for syn in synterms]
+
+    return synterms
 
 
 def get_slim_terms(connection):
@@ -524,21 +557,21 @@ def new_main():
     connection = connect2server(args.keyfile, args.key)
 
     ontologies = get_ontologies(connection, args.ontologies)
-    print(ontologies)
     slim_terms = get_slim_terms(connection)
-    print(slim_terms)
+
+    # for testing with local copy of file pass in ontologies EFO
+    ontologies[0]['download_url'] = '/Users/andrew/Documents/work/untracked_work_ff/test_families.owl'
 
     # start iteratively downloading and processing ontologies
     terms = {}
     for ontology in ontologies:
         if ontology['download_url'] is not None:
-            #print(ontology)
-            #print(ontology['download_url'])
             synonym_terms = get_synonym_terms(connection, ontology['uuid'])
-            #print(synonym_terms)
-            # data = Owler(ontology['download_url'])
-            # for class_ in data.allclasses:
-            #    pass
+            data = Owler(ontology['download_url'])
+            for class_ in data.allclasses:
+                print(class_)
+                synonyms = get_synonyms(class_, data, synonym_terms)
+                print(synonyms)
 
 
 def main():
