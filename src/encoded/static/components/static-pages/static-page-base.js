@@ -5,6 +5,7 @@ var _ = require('underscore');
 var Markdown = require('markdown-to-jsx');
 var TableOfContents = require('./table-contents');
 var globals = require('./../globals');
+var { isServerSide, gridContainerWidth } = require('./../objectutils');
 
 /** 
  * These are a set of 'mixin' functions which can be used directly on Static Page components. 
@@ -107,8 +108,12 @@ var StaticPageBase = module.exports = {
                         <h1 className="page-title">{ title }</h1>
                         { this.props.children }
                     </div>
-                    { this.props.tableOfContents ? 
-                        <TableOfContents context={this.props.context} /> 
+                    { this.props.tableOfContents ?
+                    <div className={'col-xs-12 col-sm-12 col-lg-' + (12 - contentColSize)}>
+                        <TableOfContents context={this.props.context} pageTitle={title} width={
+                            (gridContainerWidth() * ((12 - contentColSize) / 12))
+                        } />
+                    </div>
                     : null }
                 </div>
             );

@@ -1104,6 +1104,90 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 }
 
+.table-of-contents {
+
+	position: relative;
+
+	@media screen and (min-width : $screen-lg-min){
+		position: fixed;
+		margin: 0 -10px;
+		padding: 0 10px;
+		top: 140px;
+		transition: top .75s;
+		body.scrolled-past-top & {
+			top : 100px;
+		}
+	}
+
+	.toc-title {
+		font-weight: 500;
+		border-bottom: 1px solid #ddd;
+		padding-bottom: 10px;
+	}
+
+	ol {
+		padding-left: 20px;
+		> li {
+			margin-top: 5px;
+			line-height: 1.25rem;
+			&[data-depth="1"] { margin-top: 10px; }
+			&:last-child {
+				margin-bottom: 0;
+			}
+			.top-of-page {
+				display: block;
+				padding-bottom: 10px;
+				border-bottom: 1px solid #eee;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				color: #999;
+				
+				> small {
+					display: none;
+					line-height: 1rem;
+					&:before {
+						content: "|";
+						margin: 0 7px 0 3px;
+						color: #ccc;
+					}
+				}
+				&:hover {
+					> small {
+						display: inline;
+						opacity: 1;
+					}
+				}
+				i.icon {
+					color: #888;
+					text-align: center;
+					width: 20px;
+				}
+				a {
+					display: inline;
+				}
+			}
+			a {
+				display: block;
+				transition: color .5s;
+				&:hover {
+					text-decoration: none;
+					color: #042d50;
+				}
+				&:focus {
+					text-decoration: none;
+					color: $link-color;
+				}
+			}
+			&.active > a,
+			&.active > span > a  {
+				color: #000;
+			}
+		}
+	}
+
+}
+
 .fourDN-content-panel{
 	margin-top: 0px !important;
 }

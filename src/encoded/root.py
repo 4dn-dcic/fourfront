@@ -49,7 +49,7 @@ def static_pages(config):
     except Exception as e:
         print("Error opening '" + contentFilesLocation + "/static/data/static_pages.json'")
 
-    
+
     config.add_route(
         'static-page',
         '/{page:(' + '|'.join( map(escape, pageLocations.keys() )) + ')}'
@@ -92,6 +92,10 @@ def static_pages(config):
                         'order'   : s['order'],
                         'filetype': filenameParts[len(filenameParts) - 1]
                     }
+                    if s.get('title', None):
+                        content[filenameParts[0]]['title'] = s['title']
+                    if s.get('toc-title', None):
+                        content[filenameParts[0]]['toc-title'] = s['toc-title']
             except Exception as e:
                 print(e)
                 print('Could not get contents from ' + contentFilesLocation)

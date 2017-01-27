@@ -23,14 +23,12 @@
                     "filename" : "submissionXLS.html"
                 },
                 {   "title" : "REST API", "filename" : "restAPI.html" }
-            ],
-            "filetype"  : "html"
+            ]
         },
 
         "help/submitting" : {
             "title"     : "Submitting Metadata and Data files to 4DN-DCIC",
             "directory" : "/docs/public/metadata-submission",
-            "filetype"  : "markdown",
             "sections"  : [
                 {   "filename" : "introduction.md"  },
                 {   "title" : "Getting added as a user and a data submitter for a lab", "filename"  : "getting_added_as_user.md"    },
