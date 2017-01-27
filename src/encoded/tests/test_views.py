@@ -147,6 +147,7 @@ def test_load_sample_data(
         human_biosource,
         submitter,
         workflow_mapping,
+        workflow_run_sbg,
         ):
     assert True, 'Fixtures have loaded sample data'
 
