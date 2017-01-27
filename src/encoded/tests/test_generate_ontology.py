@@ -49,3 +49,20 @@ def test_add_slim_to_term(brain_term, slim_terms):
     assert brain_term['slim_terms']
     for term in brain_term['slim_terms']:
         assert term['term_id'] in slim_ids
+
+def test_connect2server(mocker):
+    # mock submit4dn stuff
+    mocker.patch.object(go, 'FDN_Key')
+    mocker.patch.object(go,'FDN_Connection')
+    go.FDN_Connection.server.return_value = 'test_server'
+    go.FDN_Connection.check.return_value = True
+
+    # run the test, we mocked everything so 
+    # parameters we pass in don't really matter
+    retval = go.connect2server('dummy-keyfile', 'dummy-keyname')
+
+    assert retval is not None
+
+
+
+    

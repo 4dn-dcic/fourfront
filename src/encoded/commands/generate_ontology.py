@@ -14,7 +14,7 @@ from encoded.commands.owltools import (
     IntersectionOf,
     OnProperty
 )
-from Submit4DN.wranglertools.fdnDCIC import (
+from wranglertools.fdnDCIC import (
     FDN_Key,
     FDN_Connection,
     get_FDN

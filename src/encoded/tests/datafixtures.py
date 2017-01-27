@@ -583,6 +583,21 @@ def document(testapp, lab, award):
 
 
 @pytest.fixture
+def workflow_run_sbg(testapp, lab, award, workflow_bam):
+    item = {'run_platform': 'SBG',
+            'parameters': [],
+            'workflow':  workflow_bam['@id'],
+            'title': u'md5 run 2017-01-20 13:16:11.026176',
+            'sbg_import_ids': [u'TBCKPdzfUE9DpvtzO6yb9yoIvO81RaZd'],
+            'award': award['@id'],
+            'sbg_task_id': '1235',
+            'lab': lab['@id'],
+            'sbg_mounted_volume_ids': ['4dn_s32gkz1s7x','4dn_s33xkquabu'],
+            'run_status': 'started',
+           }
+    return testapp.post_json('/workflow_run_sbg', item).json['@graph'][0]
+
+@pytest.fixture
 def human_biosample(testapp, human_biosource, lab, award):
     item = {
         "description": "GM12878 prepared for Hi-C",
