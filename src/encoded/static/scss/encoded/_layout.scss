@@ -1205,8 +1205,8 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 				transition: color .5s .25s;
 				font-weight: 400;
 				padding: 7px 0px 8px 22px;
-				border-top: 1px solid transparent;
-				border-bottom: 1px solid transparent;
+				border-top: 1px dotted transparent;
+				border-bottom: 1px dotted transparent;
 				margin-bottom: -4px;
 				margin-top: -3px;
 				margin-left: -20px;
@@ -1217,7 +1217,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 				&:hover {
 					text-decoration: none;
 					color: #042d50;
-					//border-top-color: #ddd;
+					border-top-color: #ddd;
 					border-bottom-color: #ddd;
 					//box-shadow: 0 6px 7px -8px rgba(0,0,0,0.5);
 					transition: color 0s;
