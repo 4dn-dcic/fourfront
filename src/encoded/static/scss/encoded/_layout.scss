@@ -1129,7 +1129,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	}
 
 	.toc-title {
-		font-weight: 500;
+		font-weight: 400;
 		border-bottom: 1px solid #ddd;
 		padding-bottom: 10px;
 		margin-bottom: 0;
@@ -1147,7 +1147,8 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			}
 
 			&[data-depth="1"]:first-child {
-				margin-top: 5px;
+				margin-top: 8px;
+				a { border-top: none; }
 			}
 
 			&[data-depth="3"],

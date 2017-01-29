@@ -34,7 +34,7 @@ var Navigation = module.exports = React.createClass({
                     key={action.id}
                     id={action.sid || action.id}
                     href={action.url || action.href || '#'}
-                    onClick={function(e){ e.target.blur(); }}
+                    onClick={function(e){ return e.target && typeof e.target.blur === 'function' && e.target.blur(); }}
                     className="global-entry"
                     active={
                         (action.url && action.url === Navigation.getWindowUrl.call(this, mounted)) ||

@@ -80,8 +80,8 @@ var TableOfContents = module.exports = React.createClass({
                 function scrollTopTween(scrollTop){
                     return function(){
                         var interpolate = d3.interpolateNumber(this.scrollTop, scrollTop);
-                        return function(t){ document.body.scrollTop = interpolate(t) };
-                    }
+                        return function(t){ document.body.scrollTop = interpolate(t); };
+                    };
                 }
                 var origScrollTop = document.body.scrollTop;
                 d3.select(document.body)
@@ -103,6 +103,8 @@ var TableOfContents = module.exports = React.createClass({
 
             determineIfActive : function(props = this.props){
 
+                if (!props.mounted) return false;
+
                 var targetElem, elemTop;
                 
                 if (props.depth === 0 && props.mounted){
@@ -118,7 +120,7 @@ var TableOfContents = module.exports = React.createClass({
                 
                 if (typeof elemTop !== 'number') return null;
 
-                 if (props.nextHeader) {
+                if (props.nextHeader) {
                     var nextHeaderTop = null;
                     if (typeof props.nextHeader === 'number'){
                         nextHeaderTop = props.nextHeader;
@@ -129,20 +131,20 @@ var TableOfContents = module.exports = React.createClass({
                     
                     if (
                         nextHeaderTop &&
-                        props.pageScrollTop >= (elemTop      - props.offsetBeforeTarget - 30) &&
-                        props.pageScrollTop < (nextHeaderTop - props.offsetBeforeTarget - 30)
+                        props.pageScrollTop >= (elemTop      - props.offsetBeforeTarget - 150) &&
+                        props.pageScrollTop < (nextHeaderTop - props.offsetBeforeTarget - 150)
                     ) return true;
                     else return false;
                     
                 } else if (targetElem && targetElem.className.split(' ').indexOf('static-section-entry') > -1) {
                     var elemStyle = (targetElem.computedStyle || window.getComputedStyle(targetElem));
                     if (
-                        props.pageScrollTop >= (elemTop - props.offsetBeforeTarget - 30) &&
+                        props.pageScrollTop >= (elemTop - props.offsetBeforeTarget - 150) &&
                         props.pageScrollTop <  (
                             elemTop + 
                             parseInt(elemStyle.marginTop) +
                             targetElem.offsetHeight - 
-                            props.offsetBeforeTarget - 30
+                            props.offsetBeforeTarget - 150
                         )
                     ) return true;
                     else return false;
@@ -363,9 +365,9 @@ var TableOfContents = module.exports = React.createClass({
                 }
             },
             'populateAnchors' : true,
-            'title' : "Table of Contents",
+            'title' : "Contents",
             'pageTitle' : 'Introduction',
-            'includeTop' : true,
+            'includeTop' : false,
             'listStyleTypes' : ['none','decimal', 'lower-alpha', 'lower-roman']
         };
     },
