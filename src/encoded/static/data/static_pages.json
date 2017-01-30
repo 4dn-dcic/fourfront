@@ -41,15 +41,15 @@
                     "toc-title" : "Introduction"
                 },
                 {
-                    "title"     : "Getting added as a user and a data submitter for a lab",
+                    "title"     : "Getting a Submitter Account",
                     "filename"  : "getting_added_as_user.md"
                 },
                 {
-                    "title"     : "Submission of metadata using a Microsoft Excel WorkBook as a template",
+                    "title"     : "Metadata Submission by Excel Workbook",
                     "filename"  : "submission_using_excel_as_template.md"
                 },
                 {
-                    "title"     : "Information about object schemas",
+                    "title"     : "Information About Schemas",
                     "filename"  : "schema_info.md"
                 }
             ],
