@@ -5,7 +5,7 @@ var _ = require('underscore');
 var Markdown = require('markdown-to-jsx');
 var TableOfContents = require('./table-contents');
 var globals = require('./../globals');
-var { isServerSide, gridContainerWidth } = require('./../objectutils');
+var { isServerSide } = require('./../util');
 
 /** 
  * These are a set of 'mixin' functions which can be used directly on Static Page components. 
