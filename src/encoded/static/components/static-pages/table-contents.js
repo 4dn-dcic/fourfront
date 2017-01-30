@@ -340,7 +340,7 @@ var TableOfContents = module.exports = React.createClass({
                 c && c.props &&
                 typeof c.props.type === 'string' &&
                 c.props.type.charAt(0).toLowerCase() === 'h' &&
-                [1,2,3,4,5,6].filter(function(n){ return n <= maxHeaderDepth; }).indexOf(parseInt(c.props.type.charAt(1))) > -1
+                _.range(1, maxHeaderDepth + 1).indexOf(parseInt(c.props.type.charAt(1))) > -1
             );
         },
 
