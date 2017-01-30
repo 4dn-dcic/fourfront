@@ -867,6 +867,8 @@ var App = React.createClass({
                         expIncompleteFacets={this.props.expIncompleteFacets}
                         session={this.state.session}
                         key={key}
+                        navigate={this.navigate}
+                        href={this.props.href}
                     />
                 );
                 title = context.title || context.name || context.accession || context['@id'];
