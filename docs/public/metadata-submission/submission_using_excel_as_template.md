@@ -2,7 +2,7 @@
 Metadata and data can be submitted to our platform using Microsoft Excel WorkBooks which describe related items in separate sheets. This section provides detailed information on how to fill the WorkBooks. You can check out the [example WorkBook](https://github.com/hms-dbmi/Submit4DN/blob/master/Data_Files/Rao_et_al_2014/fieldsRao.xls?raw=true) we prepared for the data from Rao et. al. 2014 to familiarize yourself with the general structure.
 
 
-Based on the type of experiment(s) for which you plan to submit data, the data wranglers can provide you with an Excel WorkBook containing several WorkSheets.  Each sheet corresponds to an Item type in our metadata database. The workbook provided should contain all the sheets that you may need for your submission. You can refer to [this table](schema_info.md) for information on all the Item types available in the database.  Each sheet should also contain all the data fields that can be submitted for that Item type. Depending on if you have submitted data before or if you are using shared reagents that have been submitted by other labs, you may not need to provide information on every sheet or in every field.
+Based on the type of experiment(s) for which you plan to submit data, the data wranglers can provide you with an Excel WorkBook containing several WorkSheets.  Each sheet corresponds to an Item type in our metadata database. The workbook provided should contain all the sheets that you may need for your submission. You can refer to [this table](#schema_info) for information on all the Item types available in the database.  Each sheet should also contain all the data fields that can be submitted for that Item type. Depending on if you have submitted data before or if you are using shared reagents that have been submitted by other labs, you may not need to provide information on every sheet or in every field.
 
 Generally, it makes sense to begin with the left most sheet in the workbook as the sheets in a workbook are ordered so that Items that have fields that take a reference to another Item as their value appear ‘after’ i.e. to the right of that Item’s sheet in the workbook.
 
@@ -17,18 +17,22 @@ A sheet for an Item starts with a row of field names. *Absolutely required field
 
 Any row that starts with “#” in the first column will be ignored, so you can add non-data rows for your own use but **PLEASE NOTE THAT THE FIRST 2 ROWS OF A SHEET SHOULD NOT BE MODIFIED.**
 
+<span id="preparing-workbook"></span>
+
 You may notice that in some sheets there are additional commented rows that contain data values. These are rows corresponding to items that already exist in the database and can provide you with identifiers that you can reuse in your submission (see [Referencing existing items](#existing-items) below.  Only those items that either are associated with your lab or are already released to the public will appear in these commented data rows.   Your data entry should begin at the first non-commented row.
 
-## <a name="values"></a>Preparing your workbook for metadata submission
+## Preparing your workbook for metadata submission
 A field can be one of a few different types; string, number/integer, array/list or Item and the type will be indicated in the second row.
+
+<span id="basic-field"></span>
 
 Most field values are strings - either a term with controlled vocabulary, i.e. from a constrained list of choices, a string that identifies an Item, or a text description. If the field type is an array, you may enter multiple values separated by commas.
 
 **Basic field formats**
-![Basic fields](./field_types.png)
+![Basic fields](/static/img/docs/submitting-metadata/field_types.png)
 
-**<a name="basic-field"></a>Basic fields example**
-![Basic fields examples](./basic_field_eg.png)
+**Basic fields example**
+![Basic fields examples](/static/img/docs/submitting-metadata/basic_field_eg.png)
 There are some fields values that require specific formatting. These cases and how to identify them are described below.
 
 #### When the string must conform to a certain format
@@ -66,15 +70,19 @@ For example, to submit a total of three related experiments to an ExperimentHiC 
 
 and enter a valid *relationship\_type* term and *experiment* identifier to each of the three pairs of columns.
 
-**Multiple linked columns for lists of embedded objects**
-![Embedded fields](./embedded_objects.png)
+<span id="using-aliases"></span>
 
-#### <a name="using-aliases"></a>Using aliases
+**Multiple linked columns for lists of embedded objects**
+![Embedded fields](/static/img/docs/submitting-metadata/embedded_objects.png)
+
+<span id="existing-items"></span>
+
+#### Using aliases
 An **alias** is a lab specific identifier that you can assign to an item. Aliases take the form of *lab:id\_string* eg. ```parklab:myalias```. An alias must be unique within all items. Once you submit an alias for an Item then that alias can be used as an identifier for that Item in the current submission as well as in any subsequent submission.
 
 You don't need to use an alias if you are referencing an item that already exists in the database.
 
-#### <a name="existing-items"></a>Referencing existing items
+#### Referencing existing items
 Every item in our database is assigned a “uuid” upon its creation, e.g. “44d3cdd1-a842-408e-9a60-7afadca11575”. Items from some item types (Files, Experiments, Biosamples, Biosources, Individuals...) also get a shorter “accession” assigned, e.g. 4DNEX4723419. These two are the default identifying terms of any item. Besides these two, there can also be object specific identifying terms, like award number for awards, or lab name for labs.
 
 
@@ -93,21 +101,25 @@ These three types of values can be used for referencing items in the excel sheet
 
 The DCIC has already created all the labs and awards that are part of the 4DN consortium. There will also be other items, for example vendors, enzymes and biosources that will already exist in the database and can be reused in your submissions.  If there is an existing vendor (e.g. new england biolabs) for the new enzyme you are creating, you should reference the existing one instead of creating a new one.
 
+<span id="supp_files"></span>
+
 In some cases information for existing items will be present in the Excel Work Sheets provided for your submission.  You can also check the existing items from *collection* pages that list all of them.   The links for item lists can be constructed by ```https://data.4dnucleome.org/ + plural object name``` and the identifiers that can be used for collections are referenced in [this table](schema_info.md).
 
-#### <a name="supp_files"></a>Submitting supplementary metadata files
+<span id="excel_reps"></span>
+
+#### Submitting supplementary metadata files
 To submit supplementary metadata files, such as pdfs or images, use the **Image** or **Document** schemas, and include the path of the files in the _*attachment*_ column.
 The path should be the full path to the supplementary file.
 
-#### <a name="excel_reps"></a>Replicate information submitted with Experiments
+#### Replicate information submitted with Experiments
 All experiments must be part of a replicate set - even if it is a set containing only a single experiment.  When preparing your submission you should determine how many replicate sets you will be submitting and create an entry - with an alias and preferably an informative description - for each set in the ExperimentSetReplicate sheet.
 
-![ExperimentSetReplicate example](./repsets_w_desc.png)
+![ExperimentSetReplicate example](/static/img/docs/submitting-metadata/repsets_w_desc.png)
 
 
 Then when entering information about individual experiments on the specific Experiment_ sheet you should enter the alias for the replicate set to which the experiment belongs and indicate the bioreplicate and technical replicate number for that experiment. In the example below the replicate set consists of five experiments categorized into one of two bioreplicates - bio_rep_no 1 and bio_rep_no_2, each of which contains three and two technical replicates, respectively.
 
-![Experiments with replicate info example](./expts_w_rep_info.png)
+![Experiments with replicate info example](/static/img/docs/submitting-metadata/expts_w_rep_info.png)
 
 
 
@@ -122,16 +134,24 @@ The Submit4DN package is registered with Pypi so installation is as simple as:
     pip3 install submit4dn
 
 
+If it is already installed upgrade to the latest version:
+
+
+    pip3 install submit4dn --upgrade
+
+
 #### Source code
 The source code for the submission scripts is available on [github](https://github.com/4dn-dcic/Submit4DN).
 
+
+<span id="access"></span>
 
 Note if you are attempting to run the scripts in the wranglertools directory without installing the package, then in order to get the correct sys.path you need to run the scripts from the parent directory as modules using the -m flag.
 
 ```python3 -m wranglertools.import_data  filename.xls```
 
 
-### <a name="access"></a>Establishing a Connection to the 4DN-DCIC servers
+### Establishing a Connection to the 4DN-DCIC servers
 An access key and a secret key are required to establish a connection to the 4DN database and to fetch, upload (post), or change (patch) data. Please follow these steps to get your keys.
 
 1. Log in to the 4DN website with your username (email) and password.
@@ -230,11 +250,13 @@ The scripts accepts the following parameters:.
     get_field_info --type Biosample --comments --outfile biosample.xls
 
 
+<span id="rest"></span>
+
 **To get the complete list of relevant sheets in one workbook:**
 
     get_field_info --type Publication --type Document --type Vendor --type Protocol --type BiosampleCellCulture --type Biosource --type Enzyme --type Construct --type TreatmentChemical --type TreatmentRnai --type Modification --type Biosample --type FileFastq --type FileSet --type IndividualHuman --type IndividualMouse --type ExperimentHiC --type ExperimentCaptureC --type ExperimentRepliseq --type Target --type GenomicRegion --type ExperimentSet --type ExperimentSetReplicate --type Image --comments --outfile AllItems.xls
 
-## <a name="rest"></a>Submission of metadata using the 4DN REST API
+## Submission of metadata using the 4DN REST API
 The 4DN-DCIC metadata database can be accessed using a Hypertext-Transfer-Protocol-(HTTP)-based, Representational-state-transfer (RESTful) application programming interface (API) - aka the REST API.  In fact, this API is used by the ```import_data``` script used to submit metadata entered into excel spreadsheets as described [in this document](https://docs.google.com/document/d/1Xh4GxapJxWXCbCaSqKwUd9a2wTiXmfQByzP0P8q5rnE). This API was developed by the [ENCODE][encode] project so if you have experience retrieving data from or submitting data to ENCODE use of the 4DN-DCIC API should be familiar to you.   The REST API can be used both for data submission and data retrieval, typically using scripts written in your language of choice.  Data objects exchanged with the server conform to the standard JavaScript Object Notation (JSON) format.  Libraries written for use with your chosen language are typically used for the network connection, data transfer, and parsing of data  (for example, requests and json, respectively for Python).  For a good introduction to scripting data retrieval (using GET requests) you can refer to [this page](https://www.encodeproject.org/help/rest-api/) on the [ENCODE][encode] web site that also has a good introduction to viewing and understanding JSON formatted data.
 
 [encode]: https://www.encodeproject.org/
@@ -260,7 +282,7 @@ The most important component of your submission is the proper formatting of the 
 Depending on the Item type that you are submitting there may be fields that require values (eg. *experiment_type* for experiments), fields for which values should never be submitted (eg. ‘date_created’ as this is an automatically generated value) and fields with specific formatting and fields that accept values of specific types.  In many cases the values must be selected from a list of constrained choices.  The documentation on field values [described in detail above](#values) and the annotated json document below can be used as a guide on formatting your json.  In addition, the unordered and unfiltered excel workbooks produced by ```get_field_info``` can be a useful reference for determining exactly what fields are associated with what object types.  The processed workbook that is actually used for data submission does not reflect the exact schema structure **should not** be used as a direct reference for API submission.
 
 
-**json for an ExperimentHiC POST request**
+**JSON for an ExperimentHiC POST request**
 
 ```
 {

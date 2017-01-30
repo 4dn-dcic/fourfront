@@ -18,8 +18,8 @@ describe('Testing home.js', function() {
         React = require('react');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
-        HomePage = require('../home');
-        statics = require('../testdata/statics'); // Maybe keep version of statics.js and put into /testdata/
+        HomePage = require('../static-pages/home');
+        statics = require('../../data/statics'); // Maybe keep version of statics.js and put into /testdata/
         Wrapper = React.createClass({
             childContextTypes: {
                 fetch: React.PropTypes.func

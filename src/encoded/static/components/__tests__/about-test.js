@@ -26,8 +26,11 @@ describe('Testing about.js', function() {
         ReactDOM = require('react-dom');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
-        App = require('../app');
-        statics = require('../testdata/statics'); // Maybe keep version of statics.js and put into /testdata/
+
+        // Get App from ../index instead of ../app to make sure prerequisite modules/components 
+        // have loaded and initialized, e.g. AboutPage registered as handler for AboutPage @type in about.js.
+        App = require('../index');
+        data = require('../testdata/static/aboutpage');
 
         sinon = require('sinon');
         server = sinon.fakeServer.create();
@@ -43,14 +46,9 @@ describe('Testing about.js', function() {
         );
 
         page = TestUtils.renderIntoDocument(
-            <App href="http://data.4dnucleome.org/about" alerts={[]} context={{ 
-                'content' : statics,
-                '@type' : ['AboutPage', 'StaticPage', 'Portal'],
-                '@context' : '/about',
-                '@id' : '/about',
-                'title' : 'Home'
-            }} />
+            <App href="http://data.4dnucleome.org/about" alerts={[]} context={data} />
         );
+        //jest.runAllTimers();
     });
 
     afterAll(function(){
@@ -132,7 +130,7 @@ describe('Testing about.js', function() {
         var staticContainer = TestUtils.findRenderedDOMComponentWithClass(page, "static-page");
         expect(staticContainer).toBeTruthy();
         
-        var staticContainerContentSections = staticContainer.children[1].children; 
+        var staticContainerContentSections = staticContainer.children[0].children[1].children; 
         // ^ == div.static-page > div.help-entry > *
 
         // Should at least have 1 child element (title, paragraphs) 

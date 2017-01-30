@@ -46,13 +46,13 @@ def static_pages(config):
     try:
         contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
         pageLocations = json.loads(getStaticFileContent("static_pages.json", "/static/data", contentFilesLocation + "/static/data")).get('pages', {})
-    except:
+    except Exception as e:
         print("Error opening '" + contentFilesLocation + "/static/data/static_pages.json'")
 
     
     config.add_route(
         'static-page',
-        '/{page:(' + '|'.join( map(lambda r: escape(r), pageLocations.keys() )) + ')}'
+        '/{page:(' + '|'.join( map(escape, pageLocations.keys() )) + ')}'
     )
 
     def static_page(request):
