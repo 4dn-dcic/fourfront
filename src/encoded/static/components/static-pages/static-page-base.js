@@ -5,11 +5,10 @@ var _ = require('underscore');
 var Markdown = require('markdown-to-jsx');
 var TableOfContents = require('./table-contents');
 var globals = require('./../globals');
-var { isServerSide } = require('./../util');
 
-/** 
- * These are a set of 'mixin' functions which can be used directly on Static Page components. 
- * Simply reference the component method to the relevant method below in React.createClass(..) 
+/**
+ * These are a set of 'mixin' functions which can be used directly on Static Page components.
+ * Simply reference the component method to the relevant method below in React.createClass(..)
  */
 var StaticPageBase = module.exports = {
 
@@ -91,6 +90,22 @@ var StaticPageBase = module.exports = {
 
     // TODO: fix ugly hack, wherein I set id in the h3 above actual spot because the usual way of doing anchors cut off entries
     render: {
+
+        base : function(){
+            var context = StaticPageBase.parseSectionsContent(this.props.context);
+            return (
+                <StaticPageBase.Wrapper
+                    title={context.title}
+                    tableOfContents={typeof context.toc === 'undefined' || context.toc.enabled === false ? false : true}
+                    context={context}
+                    navigate={this.props.navigate}
+                    href={this.props.href}
+                >
+                    { StaticPageBase.renderSections(this.entryRenderFxn, context) }
+                </StaticPageBase.Wrapper>
+            );
+        },
+
         simple : function() {
             var context = StaticPageBase.parseSectionsContent(this.props.context);
             return (
@@ -101,7 +116,7 @@ var StaticPageBase = module.exports = {
         },
 
         withTableOfContents : function(){
-            
+
             var context = StaticPageBase.parseSectionsContent(this.props.context);
             return (
                 <StaticPageBase.Wrapper
@@ -122,15 +137,44 @@ var StaticPageBase = module.exports = {
         getDefaultProps : function(){
             return {
                 'contentColSize' : 9,
-                'tableOfContents' : false
+                'tableOfContents' : false,
+                'tocListStyles' : ['decimal', 'lower-alpha', 'lower-roman']
             };
         },
 
+        contentColSize : function(){
+            return Math.min(
+                this.props.tableOfContents ? 9 : 12,
+                Math.max(6, this.props.contentColSize) // Min 6.
+            );
+        },
+
+        renderToC : function(){
+            if (!this.props.tableOfContents || this.props.tableOfContents.enabled === false) return null;
+            var contentColSize = this.contentColSize();
+            var context = this.props.context;
+            var toc = context.toc || typeof this.props.tableOfContents === 'object' ? this.props.tableOfContents : {};
+            var title = this.props.title || (context && context.title) || null;
+            return (
+                <div className={'pull-right col-xs-12 col-sm-12 col-lg-' + (12 - contentColSize)}>
+                    <TableOfContents
+                        context={context}
+                        pageTitle={title}
+                        fixedWidth={(1140 * ((12 - contentColSize) / 12))}
+                        navigate={this.props.navigate}
+                        href={this.props.href}
+                        maxHeaderDepth={toc && context.toc['header-depth'] || 6}
+                        includeTop={toc && context.toc['include-top-link']}
+                        listStyleTypes={['none'].concat((toc && context.toc['list-styles']) || this.props.tocListStyles)}
+                    />
+                </div>
+            );
+        },
+
         render : function(){
-            
+
             var title = this.props.title || (this.props.context && this.props.context.title) || null;
-            var contentColSize = Math.max(6, this.props.contentColSize); // Min 6.
-            contentColSize = Math.min(this.props.tableOfContents ? 9 : 12, contentColSize);
+            var contentColSize = this.contentColSize();
             var mainColClassName = "col-xs-12 col-sm-12 col-lg-" + contentColSize;
 
             return (
@@ -138,13 +182,7 @@ var StaticPageBase = module.exports = {
                     <div className={mainColClassName}>
                         <h1 className="page-title">{ title }</h1>
                     </div>
-                    { this.props.tableOfContents ?
-                        <div className={'pull-right col-xs-12 col-sm-12 col-lg-' + (12 - contentColSize)}>
-                            <TableOfContents context={this.props.context} pageTitle={title} fixedWidth={
-                                (1140 * ((12 - contentColSize) / 12))
-                            } navigate={this.props.navigate} href={this.props.href} />
-                        </div>
-                    : null }
+                    { this.renderToC() }
                     <div className={mainColClassName}>
                         { this.props.children }
                     </div>
@@ -173,7 +211,7 @@ var StaticPageBase = module.exports = {
             componentWillUnmount : function(){ delete this.id; },
             render : function(){
                 return React.createElement(
-                    this.props.type, 
+                    this.props.type,
                     {
                         'children' : this.props.children,
                         'id' : this.getID(true),
@@ -203,10 +241,10 @@ var StaticPageBase = module.exports = {
 
         render : function(){
             var c = this.props.content;
-            
+
             return (
                 <div className={this.props.entryType + "-entry static-section-entry"} id={this.props.section}>
-                    { c && c.title ? 
+                    { c && c.title ?
                         <h2 className="fourDN-header">{ c.title }</h2>
                     : null }
                     { this.renderEntryContent(this.props.className) }

@@ -118,7 +118,7 @@ def static_pages(config):
         response = request.response
         response.content_type = 'application/json; charset=utf-8'
 
-        return {
+        responseDict = {
             "title" : (isinstance(pageMeta, dict) and pageMeta.get('title')) or request.matchdict.get('page','').capitalize(),
             "notification" : "success",
             "@type" : atTypes + [ "StaticPage", "Portal" ],
@@ -126,6 +126,11 @@ def static_pages(config):
             "@id" : "/" + request.matchdict.get('page',''),
             "content" : content
         }
+
+        if isinstance(pageMeta, dict) and pageMeta.get('table-of-contents'):
+            responseDict['toc'] = pageMeta['table-of-contents']
+
+        return responseDict
 
     config.add_view(static_page, route_name='static-page')
 
