@@ -26,7 +26,10 @@
                     "filename" : "submissionXLS.html"
                 },
                 {   "title" : "REST API", "filename" : "restAPI.html" }
-            ]
+            ],
+            "table-of-contents" : {
+                "enabled" : true
+            }
         },
 
         "help/submitting" : {
@@ -51,7 +54,10 @@
                 }
             ],
             "table-of-contents" : {
-                "enabled" : true
+                "enabled"       : true,
+                "header-depth"  : 3,
+                "list-styles"   : ["decimal", "lower-alpha", "lower-roman"],
+                "include-top-link" : false
             }
         }
 

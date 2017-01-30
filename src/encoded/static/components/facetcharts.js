@@ -90,16 +90,17 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             'requestURLBase' : '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&from=0',
             'fieldsToFetch' : [ // What fields we need from /browse/... for this chart.
                 'experiments_in_set.experiment_summary',
+                'experiments_in_set.experiment_type',
                 'experiments_in_set.accession',
-                'experiments_in_set.status',
-                'experiments_in_set.files.file_type',
+                //'experiments_in_set.status',
+                //'experiments_in_set.files.file_type',
                 'experiments_in_set.files.accession',
                 'experiments_in_set.filesets.files_in_set.accession',
-                'experiments_in_set.biosample.description',
-                'experiments_in_set.biosample.modifications_summary_short',
+                //'experiments_in_set.biosample.description',
+                //'experiments_in_set.biosample.modifications_summary_short',
                 'experiments_in_set.biosample.biosource_summary',
-                'experiments_in_set.biosample.accession',
-                'experiments_in_set.biosample.biosource.description',
+                //'experiments_in_set.biosample.accession',
+                //'experiments_in_set.biosample.biosource.description',
                 'experiments_in_set.biosample.biosource.biosource_name',
                 'experiments_in_set.biosample.biosource.biosource_type',
                 'experiments_in_set.biosample.biosource.individual.organism.name',
@@ -140,6 +141,8 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 { title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
             ],
             'chartFieldsHierarchy'  : [
+                { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
+                { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
                 { 
                     field : 'experiments_in_set.biosample.biosource.individual.organism.name',
                     title : "Primary Organism",
@@ -147,7 +150,6 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                         return val.charAt(0).toUpperCase() + val.slice(1);
                     }
                 },
-                { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
                 { title : "Biosample", field : 'experiments_in_set.biosample.biosource_summary' },
                 { 
                     title : "Digestion Enzyme",
@@ -522,7 +524,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                             height={height}
                             width={this.width(0) - 20}
                             fields={this.state.chartFieldsHierarchy}
-                            maxFieldDepthIndex={3}
+                            maxFieldDepthIndex={4}
                             breadcrumbs={() => this.refs.breadcrumbs}
                             descriptionElement={() => this.refs.description}
                             handleClick={this.handleVisualNodeClickToUpdateFilters}

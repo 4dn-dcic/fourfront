@@ -72,7 +72,8 @@ class ExperimentSet(Item):
                 "experiments_in_set.biosample.biosource.individual.organism",
                 "experiments_in_set.files",
                 "experiments_in_set.files.related_files.relationship_type",
-                "experiments_in_set.files.related_files.file",
+                "experiments_in_set.files.related_files.file.\@id",
+                "experiments_in_set.files.related_files.file.uuid",
                 "experiments_in_set.filesets",
                 "experiments_in_set.filesets.files_in_set",
                 "experiments_in_set.digestion_enzyme"]

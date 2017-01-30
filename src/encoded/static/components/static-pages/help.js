@@ -53,7 +53,7 @@ var HelpPage = module.exports = React.createClass({
     getDefaultProps : StaticPageBase.getDefaultProps,
     parseSectionsContent : StaticPageBase.parseSectionsContent,
     renderSections  : StaticPageBase.renderSections,
-    render          : StaticPageBase.render.withTableOfContents
+    render          : StaticPageBase.render.base
 
 });
 

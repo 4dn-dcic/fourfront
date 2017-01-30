@@ -210,6 +210,7 @@ var TableOfContents = module.exports = React.createClass({
                             children={this.props.children}
                             navigate={this.props.navigate}
                             link={this.props.link}
+                            maxHeaderDepth={this.props.maxHeaderDepth}
                         />
                     </li>
                 );
@@ -230,7 +231,7 @@ var TableOfContents = module.exports = React.createClass({
                 //if (Array.isArray(this.childHeaders) && this.childHeaders.length > 0) return this.childHeaders;
                 if (!TableOfContents.isContentJSX(this.props.content)) return [];
                 return this.props.content.props.children.filter((child,i,a) =>
-                    TableOfContents.isHeaderComponent(child) && child.props.type === 'h' + (this.props.depth + 1)
+                    TableOfContents.isHeaderComponent(child, this.props.maxHeaderDepth || 6) && child.props.type === 'h' + (this.props.depth + 1)
                 );
             },
 
@@ -244,7 +245,7 @@ var TableOfContents = module.exports = React.createClass({
                         getNext = true;
                         return m;
                     }
-                    if (getNext && TableOfContents.isHeaderComponent(child)){
+                    if (getNext && TableOfContents.isHeaderComponent(child, this.props.maxHeaderDepth || 6)){
                         if (
                             child.props.type === 'h' + Math.max(this.props.depth + 1, 1) ||
                             child.props.type === 'h' + Math.max(this.props.depth    , 1) ||
@@ -285,6 +286,7 @@ var TableOfContents = module.exports = React.createClass({
                                 content={childContent.content}
                                 nextHeader={childContent.nextMajorHeader || this.props.nextHeader || null}
                                 navigate={this.props.navigate}
+                                maxHeaderDepth={this.props.maxHeaderDepth}
                             />
                         );
                     });
@@ -294,7 +296,8 @@ var TableOfContents = module.exports = React.createClass({
             },
 
             render : function(){
-                if (this.props.depth >= 3 && !this.props.active) return null;
+                // Removed: 'collapse' children if not over them (re: negative feedback)
+                //if (this.props.depth >= 3 && !this.props.active) return null;
                 var children = this.children();
                 if (!children) return null;
                 return (
@@ -332,12 +335,12 @@ var TableOfContents = module.exports = React.createClass({
             }
         },
 
-        isHeaderComponent : function(c){
+        isHeaderComponent : function(c, maxHeaderDepth = 6){
             return (
                 c && c.props &&
                 typeof c.props.type === 'string' &&
                 c.props.type.charAt(0).toLowerCase() === 'h' &&
-                [1,2,3].indexOf(parseInt(c.props.type.charAt(1))) > -1
+                _.range(1, maxHeaderDepth + 1).indexOf(parseInt(c.props.type.charAt(1))) > -1
             );
         },
 
@@ -368,7 +371,8 @@ var TableOfContents = module.exports = React.createClass({
             'title' : "Contents",
             'pageTitle' : 'Introduction',
             'includeTop' : false,
-            'listStyleTypes' : ['none','decimal', 'lower-alpha', 'lower-roman']
+            'listStyleTypes' : ['none','decimal', 'lower-alpha', 'lower-roman'],
+            'maxHeaderDepth' : 3
         };
     },
 
@@ -448,6 +452,7 @@ var TableOfContents = module.exports = React.createClass({
                         mounted={this.state.mounted}
                         nextHeader={s.nextHeader || (i === all.length - 1 ? 'bottom' : null) }
                         navigate={this.props.navigate}
+                        maxHeaderDepth={this.props.maxHeaderDepth}
                     />);
                 })
                 .value();
@@ -467,6 +472,7 @@ var TableOfContents = module.exports = React.createClass({
                     mounted={this.state.mounted}
                     navigate={this.props.navigate}
                     nextHeader={(children[0] && children[0].props && children[0].props.link) || null}
+                    maxHeaderDepth={this.props.maxHeaderDepth}
                 >
                     { children }
                 </TableOfContents.TableEntry>
