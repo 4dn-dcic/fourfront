@@ -838,6 +838,8 @@ var App = React.createClass({
                         expSetFilters={this.props.expSetFilters}
                         expIncompleteFacets={this.props.expIncompleteFacets}
                         session={this.state.session}
+                        navigate={this.navigate}
+                        href={this.props.href}
                     />
                 );
                 title = context.title || context.name || context.accession || context['@id'];
