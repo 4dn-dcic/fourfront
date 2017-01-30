@@ -40,7 +40,8 @@
             "enum" : [
               "crispr construct",
               "rnai construct",
-              "tagging construct"
+              "tagging construct",
+              "retroviral construct"
             ]
           },
           "tags": {
