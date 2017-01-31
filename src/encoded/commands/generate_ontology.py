@@ -405,6 +405,14 @@ def getTermStructure():
     }
 
 
+def process_blank_node(class_, data, terms):
+    for object_ in data.rdfGraph.objects(class_, subClassOf):
+        # direct parents of blank nodes
+        if not isBlankNode(object_):
+            # we have a resource
+            pass
+
+
 def get_synonyms(class_, data, synonym_terms):
     '''Gets synonyms for the class by querying the rdfGraph in data
         for synonym_term classes and returns the values
@@ -419,14 +427,6 @@ def get_synonyms(class_, data, synonym_terms):
     return list(synonyms.keys())
 
 
-def process_blank_node(class_, data, terms):
-    for object_ in data.rdfGraph.objects(class_, subClassOf):
-        # direct parents of blank nodes
-        if not isBlankNode(object_):
-            # we have a resource
-            pass
-
-
 def add_slim_to_term(term, slim_terms):
     '''Checks the list of ancestor terms to see if any are slim_terms
         and if so adds the slim_term to the term in slim_term slot
@@ -436,11 +436,12 @@ def add_slim_to_term(term, slim_terms):
     '''
     slimterms2add = {}
     for slimterm in slim_terms:
-        if slimterm['term_id'] in term['closure']:
+        if term.get('closure') and slimterm['term_id'] in term['closure']:
             slimterms2add[slimterm['term_id']] = slimterm
-        if slimterm['term_id'] in term['closure_with_develops_from']:
+        if term.get('closure_with_develops_from') and slimterm['term_id'] in term['closure_with_develops_from']:
             slimterms2add[slimterm['term_id']] = slimterm
-    term['slim_terms'] = slimterms2add.values()
+    if slimterms2add:
+        term['slim_terms'] = list(slimterms2add.values())
     return term
 
 

@@ -164,19 +164,29 @@ def test_get_ontologies_not_in_db(mocker, connection):
         assert ontologies[0]['ontology_prefix'] == prefix
 
 
-# see ontology_term schema for full schema
-test_slim_terms = [
-    [{'term_id': 'd_term1', 'is_slim_for': 'developmental'},
-     {'term_id': 'd_term2', 'is_slim_for': 'developmental'}],
-    [{'term_id': 'a_term1', 'is_slim_for': 'assay'}],
-    {'notification': 'No result found'},
-    {'notification': 'No result found'}
-]
+@pytest.fixture
+def slim_terms():
+    # see ontology_term schema for full schema
+    return [{'term_id': 'd_term1', 'is_slim_for': 'developmental'},
+            {'term_id': 'd_term2', 'is_slim_for': 'developmental'},
+            {'term_id': 'a_term1', 'is_slim_for': 'assay'}]
 
 
-def test_get_slim_terms(mocker, connection):
+@pytest.fixture
+def slim_terms_by_ont(slim_terms):
+    return [
+        [slim_terms[0],
+         slim_terms[1]],
+        [slim_terms[2]],
+        {'notification': 'No result found'},
+        {'notification': 'No result found'}
+    ]
+
+
+def test_get_slim_terms(mocker, connection, slim_terms_by_ont):
     present = ['developmental', 'assay']
     absent = ['organ', 'system']
+    test_slim_terms = slim_terms_by_ont
     with mocker.patch('encoded.commands.generate_ontology.get_FDN',
                       side_effect=test_slim_terms):
         terms = go.get_slim_terms(connection)
@@ -184,6 +194,55 @@ def test_get_slim_terms(mocker, connection):
         for term in terms:
             assert term['is_slim_for'] in present
             assert term['is_slim_for'] not in absent
+
+
+@pytest.fixture
+def term_w_closure():
+    return {'term_id': '1', 'closure': ['id1', 'id2', 'd_term1']}
+
+
+@pytest.fixture
+def terms_w_closures(term_w_closure):
+    # term with 2 slims
+    term_w_two = term_w_closure.copy()
+    term_w_two['term_id'] = '4'
+    term_w_two['closure'] = term_w_closure['closure'].copy()
+    term_w_two['closure'].append('d_term2')
+    # term w closure but no slim terms
+    term_wo_slim = term_w_closure.copy()
+    term_wo_slim['term_id'] = '5'
+    term_wo_slim['closure'] = term_w_closure['closure'].copy()
+    term_wo_slim['closure'].pop()
+    # term with both 'closure' and 'closure_with_develops_from' both with the same slim
+    term_with_both = term_w_closure.copy()
+    term_with_both['term_id'] = '3'
+    term_with_both['closure_with_develops_from'] = term_with_both['closure']
+    # term with 'closure_with_develops_from with slim term'
+    term_cwdf = term_with_both.copy()
+    term_cwdf['term_id'] = '2'
+    del term_cwdf['closure']
+    # term with no closures
+    term_w_none = term_cwdf.copy()
+    term_w_none['term_id'] = '6'
+    del term_w_none['closure_with_develops_from']
+    return [term_w_closure, term_cwdf, term_with_both,
+            term_w_two, term_wo_slim, term_w_none]
+
+
+def test_add_slim_to_term(terms_w_closures, slim_terms):
+    slim_ids = ['d_term1', 'd_term2']
+    for i, term in enumerate(terms_w_closures):
+        test_term = go.add_slim_to_term(term, slim_terms)
+        assert test_term['term_id'] == str(i + 1)
+        if i < 3:
+            assert len(test_term['slim_terms']) == 1
+            assert test_term['slim_terms'][0]['term_id'] == slim_ids[0]
+        elif i == 3:
+            assert len(test_term['slim_terms']) == 2
+            for t in test_term['slim_terms']:
+                assert t['term_id'] in slim_ids
+        elif i > 3:
+            assert 'slim_terms' not in test_term
 
 
 test_syn_terms = [
@@ -217,11 +276,33 @@ def test_get_synonym_terms_no_ontology(mocker, connection):
         assert synterms is None
 
 
-def test_convert2namespace_slash(mocker):
-    uri = 'http://www.ebi.ac.uk/efo/alternative_term'
-    #mocker.patch.object(go, 'Namespace')
-    #with mocker.patch('encoded.commands.generate_ontology.splitNameFromNamespace',
-    #                  return_value=('http://www.ebi.ac.uk/efo', 'alternative_term')):
-    ns = go.convert2namespace(uri)
-    #assert isinstance(ns, go.Namespace)
-    assert str(ns) == uri
+@pytest.fixture
+def syn_uris():
+    return ['http://www.ebi.ac.uk/efo/alternative_term',
+            'http://www.geneontology.org/formats/oboInOwl#hasExactSynonym']
+
+
+def check_if_URIRef(uri):
+    from rdflib import URIRef
+    return isinstance(uri, URIRef)
+
+
+def test_convert2namespace(syn_uris):
+    for uri in syn_uris:
+        ns = go.convert2namespace(uri)
+        assert check_if_URIRef(ns)
+        assert str(ns) == uri
+
+
+def test_get_synonym_terms_as_uri(mocker, connection, syn_uris):
+    asrdf = [True, False]
+    with mocker.patch('encoded.commands.generate_ontology.get_synonym_terms',
+                      return_value=test_syn_terms):
+        for rdf in asrdf:
+            uris = go.get_synonym_terms_as_uri(connection, 'ontid', rdf)
+            if rdf:
+                for uri in uris:
+                    assert check_if_URIRef(uri)
+                    assert str(uri) in syn_uris
+            else:
+                assert str(uri) in syn_uris
