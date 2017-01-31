@@ -4,7 +4,7 @@ import argparse
 import json
 from rdflib.collection import Collection
 from encoded.commands.owltools import (
-    # from owltools import (
+#from owltools import (
     Namespace,
     Owler,
     splitNameFromNamespace,
@@ -14,7 +14,7 @@ from encoded.commands.owltools import (
     IntersectionOf,
     OnProperty
 )
-from wranglertools.fdnDCIC import (
+from Submit4DN.wranglertools.fdnDCIC import (
     FDN_Key,
     FDN_Connection,
     get_FDN
@@ -455,37 +455,53 @@ def convert2namespace(uri):
     return ns[name]
 
 
-def get_synonym_terms(connection, ontology_id, to_rdf=True):
+def get_synonym_terms(connection, ontology_id):
     '''Checks an ontology item for ontology_terms that are used
-        to designate synonyms in that ontology and returns the list.
-
-        By default converts url into RDF Namespace:name format so
-        they can be used directly in retrieval from graph
+        to designate synonyms in that ontology and returns a list
+        of OntologyTerm dicts.
     '''
     synterms = None
-    ontology = get_FDN(ontology_id, connection)
-    synonym_ids = ontology.get('synonym_terms')
-    if synonym_ids is not None:
-        synterms = [get_FDN(termid, connection) for termid in synonym_ids]
-    if synterms is not None and to_rdf:
-        synterms = [convert2namespace(syn['term_url']) for syn in synterms]
+    ontologies = get_ontologies(connection, [ontology_id])
+    if ontologies:
+        ontology = ontologies[0]
+        synonym_ids = ontology.get('synonym_terms')
+        if synonym_ids is not None:
+            synterms = [get_FDN(termid, connection) for termid in synonym_ids]
 
     return synterms
+
+
+def get_synonym_terms_as_uri(connection, ontology_id, as_rdf=True):
+    '''Checks an ontology item for ontology_terms that are used
+        to designate synonyms in that ontology and returns a list
+        of RDF Namespace:name pairs by default or simple URI strings
+        if as_rdf=False.
+    '''
+    terms = get_synonym_terms(connection, ontology_id)
+    uris = [syn['term_url'] for syn in terms]
+    if as_rdf:
+        uris = [convert2namespace(uri) for uri in uris]
+    return uris
 
 
 def get_slim_terms(connection):
     '''Retrieves ontology_term jsons for those terms that have 'is_slim_for'
         field populated
     '''
-    # currently need to hard code the categories of slims but once the accessibility
-    # to search will all will add parameters to retrieve all or just the terms in the
+    # currently need to hard code the categories of slims but once the ability
+    # to search all can add parameters to retrieve all or just the terms in the
     # categories passed as a list
     slim_categories = ['developmental', 'assay', 'organ', 'system']
     search_suffix = 'search/?type=OntologyTerm&is_slim_for='
     slim_terms = []
     for cat in slim_categories:
-        terms = get_FDN(None, connection, None, search_suffix + cat)['@graph']
-        if terms is not None:
+        terms = get_FDN(None, connection, None, search_suffix + cat)
+        try:
+            # a notification indicates an issue eg. No results found
+            # so ignore
+            notification = terms.get('notification')
+            pass
+        except:
             slim_terms.extend(terms)
     return slim_terms
 
@@ -496,7 +512,7 @@ def get_ontologies(connection, ont_list):
     '''
     ontologies = []
     if ont_list == 'all':
-        ontologies = get_FDN(None, connection, None, 'ontologys')['@graph']
+        ontologies = get_FDN(None, connection, None, 'ontologys')
         ontologies = [get_FDN(ontology['uuid'], connection) for ontology in ontologies]
     else:
         ontologies = [get_FDN('ontologys/' + ontology, connection) for ontology in ont_list]
@@ -505,7 +521,7 @@ def get_ontologies(connection, ont_list):
     for i, ontology in enumerate(ontologies):
         if 'Ontology' not in ontology['@type']:
             # place to set up logging
-            print(ontology)
+            # print(ontology)
             ontologies.pop(i)
     return ontologies
 
@@ -560,18 +576,18 @@ def new_main():
     slim_terms = get_slim_terms(connection)
 
     # for testing with local copy of file pass in ontologies EFO
-    ontologies[0]['download_url'] = '/Users/andrew/Documents/work/untracked_work_ff/test_families.owl'
+    # ontologies[0]['download_url'] = '/Users/andrew/Documents/work/untracked_work_ff/test_families.owl'
 
     # start iteratively downloading and processing ontologies
     terms = {}
     for ontology in ontologies:
         if ontology['download_url'] is not None:
-            synonym_terms = get_synonym_terms(connection, ontology['uuid'])
+            synonym_terms = get_synonym_terms_as_uri(connection, ontology['uuid'])
             data = Owler(ontology['download_url'])
             for class_ in data.allclasses:
-                print(class_)
+                # print(class_)
                 synonyms = get_synonyms(class_, data, synonym_terms)
-                print(synonyms)
+                # print(synonyms)
 
 
 def main():
