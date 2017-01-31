@@ -4,7 +4,7 @@ import argparse
 import json
 from rdflib.collection import Collection
 from encoded.commands.owltools import (
-#from owltools import (
+# from owltools import (
     Namespace,
     Owler,
     splitNameFromNamespace,
@@ -415,13 +415,19 @@ def process_blank_node(class_, data, terms):
 
 def get_synonyms(class_, data, synonym_terms):
     '''Gets synonyms for the class by querying the rdfGraph in data
-        for synonym_term classes and returns the values
+        for synonym_term classes (term predicates are rdf.URIRefs)
+        and returns the values
     '''
     synonyms = {}
     for term in synonym_terms:
         syn = []
+        # print(data.rdfGraph.objects(class_, term))
         for o in data.rdfGraph.objects(class_, term):
+            # print('O=', o)
             syn += [o]
+        # for s in syn:
+        #    print(s)
+        #    print(type(s))
         syn = [str(s) for s in syn]
         synonyms.update(dict(zip(syn, [1] * len(syn))))
     return list(synonyms.keys())
@@ -577,18 +583,21 @@ def new_main():
     slim_terms = get_slim_terms(connection)
 
     # for testing with local copy of file pass in ontologies EFO
-    # ontologies[0]['download_url'] = '/Users/andrew/Documents/work/untracked_work_ff/test_families.owl'
+    ontologies[0]['download_url'] = '/Users/andrew/Documents/work/untracked_work_ff/test_families.owl'
 
     # start iteratively downloading and processing ontologies
     terms = {}
     for ontology in ontologies:
         if ontology['download_url'] is not None:
+            print(ontology['download_url'])
             synonym_terms = get_synonym_terms_as_uri(connection, ontology['uuid'])
+            for term in synonym_terms:
+                print(term)
             data = Owler(ontology['download_url'])
             for class_ in data.allclasses:
-                # print(class_)
+                print(class_)
                 synonyms = get_synonyms(class_, data, synonym_terms)
-                # print(synonyms)
+                print(synonyms)
 
 
 def main():

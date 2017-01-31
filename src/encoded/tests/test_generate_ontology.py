@@ -72,54 +72,38 @@ all_ontology = [{'download_url': 'http://www.ebi.ac.uk/efo/efo_inferred.owl',
                  'synonym_terms': [
                      '/ontology-terms/111111bc-8535-4448-903e-854af460a233/',
                      '/ontology-terms/111112bc-8535-4448-903e-854af460a233/'],
-                 'notes': "The download link also downloads all of CL cell type ontology which will get split into it's own ontology during processing",
                  '@id': '/ontologys/530006bc-8535-4448-903e-854af460b254/',
                  '@type': ['Ontology', 'Item'],
                  'definition_terms': [
                      '/ontology-terms/111115bc-8535-4448-903e-854af460a233/',
                      '/ontology-terms/111116bc-8535-4448-903e-854af460a233/'],
-                 'date_created': '2017-01-27T19:07:16.927423+00:00',
                  'namespace_url': 'http://www.ebi.ac.uk/efo/',
                  'ontology_prefix': 'EFO',
-                 'description': 'The Experimental Factor Ontology (EFO) provides a systematic description of many experimental variables available in EBI databases, and for external projects such as the NHGRI GWAS catalog.',
-                 'schema_version': '1',
-                 'status': 'released',
                  'uuid': '530006bc-8535-4448-903e-854af460b254',
-                 'references': [],
-                 'ontology_url': 'http://www.ebi.ac.uk/efo/',
-                 'ontology_name': 'Experimental Factor Ontology'},
-                {'schema_version': '1',
-                 'ontology_name': 'Ontology for Biomedical Investigations',
+                 'ontology_name': 'Experimental Factor Ontology'
+                 },
+                {'ontology_name': 'Ontology for Biomedical Investigations',
                  '@type': ['Ontology', 'Item'],
-                 'ontology_url': 'obi-ontology.org',
                  'ontology_prefix': 'OBI',
                  'namespace_url': 'http://purl.obolibrary.org/obo/',
-                 'references': [],
                  'download_url': 'http://purl.obolibrary.org/obo/obi.owl',
                  '@id': '/ontologys/530026bc-8535-4448-903e-854af460b254/',
                  'definition_terms': ['/ontology-terms/111116bc-8535-4448-903e-854af460a233/'],
-                 'date_created': '2017-01-27T19:07:16.974003+00:00',
-                 'description': 'The Ontology for Biomedical Investigations (OBI) project is developing an integrated ontology for the description of biological and clinical investigations.',
                  'uuid': '530026bc-8535-4448-903e-854af460b254',
-                 'status': 'released'},
-                {'schema_version': '1',
-                 'synonym_terms': [
-                     '/ontology-terms/111112bc-8535-4448-903e-854af460a233/',
-                     '/ontology-terms/111113bc-8535-4448-903e-854af460a233/',
-                     '/ontology-terms/111114bc-8535-4448-903e-854af460a233/'],
+                 },
+                {'synonym_terms': [
+                    '/ontology-terms/111112bc-8535-4448-903e-854af460a233/',
+                    '/ontology-terms/111113bc-8535-4448-903e-854af460a233/',
+                    '/ontology-terms/111114bc-8535-4448-903e-854af460a233/'],
                  'ontology_name': 'Uberon',
                  '@type': ['Ontology', 'Item'],
-                 'ontology_url': 'http://uberon.github.io/',
                  'ontology_prefix': 'UBERON',
                  'namespace_url': 'http://purl.obolibrary.org/obo/',
-                 'references': [],
                  'download_url': 'http://purl.obolibrary.org/obo/uberon/composite-metazoan.owl',
                  '@id': '/ontologys/530016bc-8535-4448-903e-854af460b254/',
                  'definition_terms': ['/ontology-terms/111116bc-8535-4448-903e-854af460a233/'],
-                 'date_created': '2017-01-27T19:07:16.950897+00:00',
-                 'description': 'Uberon is an integrated cross-species ontology covering anatomical structures in animals.',
                  'uuid': '530016bc-8535-4448-903e-854af460b254',
-                 'status': 'released'}]
+                 }]
 
 
 def get_fdn_ontology_side_effect(*args):
@@ -306,3 +290,32 @@ def test_get_synonym_terms_as_uri(mocker, connection, syn_uris):
                     assert str(uri) in syn_uris
             else:
                 assert str(uri) in syn_uris
+
+
+@pytest.fixture
+def owler(mocker):
+    return mocker.patch.object(go, 'Owler')
+
+
+def emptygen(*args, **kwargs):
+    return
+    yield
+
+
+def synonym_generator(syn_list):
+    for syn in syn_list:
+        yield syn
+
+
+@pytest.fixture
+def objects():
+    pass
+
+
+def test_get_synonyms_none_there(mocker, owler):
+    with mocker.patch('encoded.commands.generate_ontology.Owler.rdfGraph.objects',
+                      side_effect=emptygen):
+        class_ = 'test_class'
+        synonym_terms = ['1']
+        syns = go.get_synonyms(class_, owler, synonym_terms)
+        assert not syns
