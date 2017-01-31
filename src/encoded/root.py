@@ -49,7 +49,7 @@ def static_pages(config):
     except Exception as e:
         print("Error opening '" + contentFilesLocation + "/static/data/static_pages.json'")
 
-    
+
     config.add_route(
         'static-page',
         '/{page:(' + '|'.join( map(escape, pageLocations.keys() )) + ')}'
@@ -92,6 +92,10 @@ def static_pages(config):
                         'order'   : s['order'],
                         'filetype': filenameParts[len(filenameParts) - 1]
                     }
+                    if s.get('title', None):
+                        content[filenameParts[0]]['title'] = s['title']
+                    if s.get('toc-title', None):
+                        content[filenameParts[0]]['toc-title'] = s['toc-title']
             except Exception as e:
                 print(e)
                 print('Could not get contents from ' + contentFilesLocation)
@@ -114,7 +118,7 @@ def static_pages(config):
         response = request.response
         response.content_type = 'application/json; charset=utf-8'
 
-        return {
+        responseDict = {
             "title" : (isinstance(pageMeta, dict) and pageMeta.get('title')) or request.matchdict.get('page','').capitalize(),
             "notification" : "success",
             "@type" : atTypes + [ "StaticPage", "Portal" ],
@@ -122,6 +126,11 @@ def static_pages(config):
             "@id" : "/" + request.matchdict.get('page',''),
             "content" : content
         }
+
+        if isinstance(pageMeta, dict) and pageMeta.get('table-of-contents'):
+            responseDict['toc'] = pageMeta['table-of-contents']
+
+        return responseDict
 
     config.add_view(static_page, route_name='static-page')
 

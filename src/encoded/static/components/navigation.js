@@ -34,6 +34,7 @@ var Navigation = module.exports = React.createClass({
                     key={action.id}
                     id={action.sid || action.id}
                     href={action.url || action.href || '#'}
+                    onClick={function(e){ return e.target && typeof e.target.blur === 'function' && e.target.blur(); }}
                     className="global-entry"
                     active={
                         (action.url && action.url === Navigation.getWindowUrl.call(this, mounted)) ||
@@ -118,12 +119,16 @@ var Navigation = module.exports = React.createClass({
             ){
                 if (!this.state.scrolledPastTop){
                     stateChange.scrolledPastTop = true;
-                    this.setState(stateChange);
+                    this.setState(stateChange, function(){
+                        if (document.body.className.indexOf(' scrolled-past-top') === -1) document.body.className += ' scrolled-past-top';
+                    });
                 }
             } else {
                 if (this.state.scrolledPastTop){
                     stateChange.scrolledPastTop = false;
-                    this.setState(stateChange);
+                    this.setState(stateChange, function(){
+                        if (document.body.className.indexOf(' scrolled-past-top') !== -1) document.body.className = document.body.className.replace(' scrolled-past-top', '');
+                    });
                 }
             }
         }, 100);

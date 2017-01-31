@@ -38,12 +38,8 @@ $modal-backdrop-opacity : 0.8;
 // 20px: 1.4
 
 @mixin font-size($size, $important: false) {
-    $imptext: "";
-    @if $important {
-        $imptext: " !important";
-    }
-    font-size: round($size * strip-units($font-size-base)) + px#{$imptext};
-    font-size: $size + rem#{$imptext};
+    font-size: round($size * strip-units($font-size-base)) + px + (if($important, ' !important',''));
+    font-size: $size + rem + (if($important, ' !important',''));
 }
 
 

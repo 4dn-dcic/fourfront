@@ -88,7 +88,9 @@
                   "KBM-7",
                   "192627",
                   "CC-2517",
-                  "HeLa-S3"
+                  "HeLa-S3",
+                  "HFF",
+                  "HFFc6"
               ]
           },
           "cell_line_termid": {

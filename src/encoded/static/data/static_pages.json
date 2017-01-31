@@ -8,7 +8,10 @@
             "title"     : "Getting Started",
             "directory" : "/src/encoded/static/data/help",
             "sections"  : [
-                {   "filename" : "gettingStarted.html"  },
+                {
+                    "filename" : "gettingStarted.html",
+                    "toc-title" : "Getting Started"
+                },
                 {
                     "title" : "Metadata Structure",
                     "filename" : "metadataStructure1.html"
@@ -24,25 +27,38 @@
                 },
                 {   "title" : "REST API", "filename" : "restAPI.html" }
             ],
-            "filetype"  : "html"
+            "table-of-contents" : {
+                "enabled" : true
+            }
         },
 
         "help/submitting" : {
             "title"     : "Submitting Metadata and Data files to 4DN-DCIC",
             "directory" : "/docs/public/metadata-submission",
-            "filetype"  : "markdown",
             "sections"  : [
-                {   "filename" : "introduction.md"  },
-                {   "title" : "Getting added as a user and a data submitter for a lab", "filename"  : "getting_added_as_user.md"    },
                 {
-                    "title" : "Submission of metadata using a Microsoft Excel WorkBook as a template",
+                    "filename"  : "introduction.md",
+                    "toc-title" : "Introduction"
+                },
+                {
+                    "title"     : "Getting a Submitter Account",
+                    "filename"  : "getting_added_as_user.md"
+                },
+                {
+                    "title"     : "Metadata Submission by Excel Workbook",
                     "filename"  : "submission_using_excel_as_template.md"
                 },
                 {
-                    "title" : "Information about different object schemas",
+                    "title"     : "Information About Schemas",
                     "filename"  : "schema_info.md"
                 }
-            ]
+            ],
+            "table-of-contents" : {
+                "enabled"       : true,
+                "header-depth"  : 3,
+                "list-styles"   : ["decimal", "lower-alpha", "lower-roman"],
+                "include-top-link" : false
+            }
         }
 
     }

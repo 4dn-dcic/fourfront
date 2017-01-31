@@ -47,7 +47,7 @@
             "title": "Cut Sequence",
             "description": "The bases of the enzyme recognition sequence.",
             "type": "string",
-            "pattern": "^[ATGCN]+$"
+            "pattern": "^[ATGCYRWSKMDVHBN]+$"
         },
         "site_length": {
           "title": "Site Length",
