@@ -10,23 +10,5 @@
         "scientific_name": "Mus musculus",
         "taxon_id": "10090",
         "uuid": "3413218c-3d86-498b-a0a2-9a406638e786"
-    },
-    {
-        "name": "rat",
-        "scientific_name": "Rattus norvegicus",
-        "taxon_id": "10116",
-        "uuid": "3aa8d64b-dc44-48b5-926d-60ad2befebe7"
-    },
-    {
-        "name": "dmelanogaster",
-        "scientific_name": "Drosophila melanogaster",
-        "taxon_id": "7227",
-        "uuid": "ab546d43-8e2a-4567-8db7-a217e6d6eea0"
-    },
-    {
-        "name": "celegans",
-        "scientific_name": "Caenorhabditis elegans",
-        "taxon_id": "6239",
-        "uuid": "2732dfd9-4fe6-4fd2-9d88-61b7c58cbe20"
     }
 ]
