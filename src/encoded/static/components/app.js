@@ -4,7 +4,7 @@ var jsonScriptEscape = require('../libs/jsonScriptEscape');
 var globals = require('./globals');
 var ErrorPage = require('./error');
 var Navigation = require('./navigation');
-
+var Edit = require('./edit');
 var Footer = require('./footer');
 var url = require('url');
 var _ = require('underscore');
@@ -119,7 +119,7 @@ var App = React.createClass({
         // user_info.details is kept in sync to client-side via browser.js, user_info.user_actions is not.
         // Don't use user_actions unless session is also true.
         // user_actions is only set client-side upon login (it cannot expire unless logout).
-        var user_info = JWT.getUserInfo(); 
+        var user_info = JWT.getUserInfo();
         if (user_info && typeof user_info.user_actions !== 'undefined' && Array.isArray(user_info.user_actions)){
             user_actions = user_info.user_actions;
         }
@@ -298,7 +298,7 @@ var App = React.createClass({
                 JWT.saveUserInfo(response);
                 this.updateUserInfo(callback);
             }, error => {
-                // error, clear JWT token from cookie & user_info from localStorage (via JWT.remove()) 
+                // error, clear JWT token from cookie & user_info from localStorage (via JWT.remove())
                 // and unset state.session & state.user_actions (via this.updateUserInfo())
                 JWT.remove();
                 this.updateUserInfo(callback);
@@ -388,12 +388,12 @@ var App = React.createClass({
         // get user actions (a function of log in) from local storage
         var userActions = [];
         var session = false;
-        var userInfo = JWT.getUserInfo(); 
+        var userInfo = JWT.getUserInfo();
         if (userInfo){
             userActions = userInfo.user_actions;
             session = true;
         }
-        
+
         var stateChange = {};
         if (!_.isEqual(userActions, this.state.user_actions)) stateChange.user_actions = userActions;
         if (session != this.state.session) stateChange.session = session;
@@ -549,7 +549,7 @@ var App = React.createClass({
     navigate: function (href, options = {}, callback = null) {
         // options.skipRequest only used by collection search form
         // options.replace only used handleSubmit, handlePopState, handlePersonaLogin
-        
+
         var fragment;
 
         function setupRequest(targetHref){
@@ -632,7 +632,7 @@ var App = React.createClass({
 
             var promise = request.then((response)=>{
                 // Check/handle server-provided error code/message(s).
-                
+
                 if (response.code === 403){
 
                     var jwtHeader = null;
@@ -649,7 +649,7 @@ var App = React.createClass({
                         (jwtHeader === 'expired')
                     ){
                         JWT.remove();
-                        
+
                         // Wait until request(s) complete before setting notification (callback is called later in promise chain)
                         var oldCallback = callback;
                         callback = function(response){
@@ -823,15 +823,27 @@ var App = React.createClass({
         var routeList = canonical.split("/");
         var lowerList = [];
         var scrollList = [];
+        var actionList = [];
         routeList.map(function(value) {
             if (value.includes('#') && value.charAt(0) !== "#"){
                 var navSplit = value.split("#");
                 lowerList.push(navSplit[0].toLowerCase());
-                scrollList.push(navSplit[1].toLowerCase());
+                if (navSplit[1].charAt(0) === '!'){
+                    actionList.push(navSplit[1].toLowerCase());
+                }else{
+                    scrollList.push(navSplit[1].toLowerCase());
+                }
             }else if(value.charAt(0) !== "!" && value.length > 0){
-                lowerList.push(value.toLowerCase());
+                // test for edit handle
+                if (value == '#!edit'){
+                    actionList.push('edit');
+                }else{
+                    lowerList.push(value.toLowerCase());
+                }
             }
         });
+        console.log('--->', actionList);
+        console.log('===>', context);
         var currRoute = lowerList.slice(1); // eliminate http
         // check error status
         var status;
@@ -856,6 +868,32 @@ var App = React.createClass({
         }else if(status){
             content = <ErrorPage currRoute={currRoute[currRoute.length-1]} status={status}/>;
             title = 'Error';
+        }else if(actionList.length == 1 && actionList[0] == 'edit'){
+            ContentView = globals.content_views.lookup(context, current_action);
+            if (ContentView){
+                content = (
+                    <Edit
+                        context={context}
+                        schemas={this.state.schemas}
+                        expSetFilters={this.props.expSetFilters}
+                        expIncompleteFacets={this.props.expIncompleteFacets}
+                        session={this.state.session}
+                        key={key}
+                        navigate={this.navigate}
+                        href={this.props.href}
+                    />
+                );
+                title = context.title || context.name || context.accession || context['@id'];
+                if (title && title != 'Home') {
+                    title = title + ' – ' + portal.portal_title;
+                } else {
+                    title = portal.portal_title;
+                }
+            }else{
+                // Handle the case where context is not loaded correctly
+                content = <ErrorPage status={null}/>;
+                title = 'Error';
+            }
         }else if (context) {
             var ContentView = globals.content_views.lookup(context, current_action);
             if (ContentView){
@@ -933,7 +971,7 @@ var App = React.createClass({
                                         context={this.props.context}
                                         expSetFilters={this.props.expSetFilters}
                                         navigate={this.navigate}
-                                        
+
                                     />
                                     <Alerts alerts={this.props.alerts} />
                                     { content }
