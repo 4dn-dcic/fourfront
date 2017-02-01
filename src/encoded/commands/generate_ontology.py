@@ -421,13 +421,8 @@ def get_synonyms(class_, data, synonym_terms):
     synonyms = {}
     for term in synonym_terms:
         syn = []
-        # print(data.rdfGraph.objects(class_, term))
         for o in data.rdfGraph.objects(class_, term):
-            # print('O=', o)
             syn += [o]
-        # for s in syn:
-        #    print(s)
-        #    print(type(s))
         syn = [str(s) for s in syn]
         synonyms.update(dict(zip(syn, [1] * len(syn))))
     return list(synonyms.keys())

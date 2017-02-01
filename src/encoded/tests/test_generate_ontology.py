@@ -308,8 +308,62 @@ def synonym_generator(syn_list):
 
 
 @pytest.fixture
-def objects():
-    pass
+def rdf_syn_objects():
+    from rdflib import Literal
+    syns = ['testsyn1', 'testsyn2']
+    syns = [Literal(syn) for syn in syns]
+    return [synonym_generator(syns)]
+
+
+@pytest.fixture
+def rdf_syn_objects_2_1():
+    from rdflib import Literal
+    syns = ['testsyn1']
+    syns = [Literal(syn) for syn in syns]
+    return [synonym_generator(syns), synonym_generator(syns)]
+
+
+@pytest.fixture
+def rdf_syn_objects_2_3():
+    from rdflib import Literal
+    syns = ['testsyn1', 'testsyn2', 'testsyn3']
+    syns = [Literal(syn) for syn in syns]
+    return [synonym_generator(syns[:1]), synonym_generator(syns[1:])]
+
+
+def test_get_synonyms_one_type_two_syn(mocker, owler, rdf_syn_objects):
+    checks = ['testsyn1', 'testsyn2']
+    with mocker.patch('encoded.commands.generate_ontology.Owler.rdfGraph.objects',
+                      side_effect=rdf_syn_objects):
+        class_ = 'test_class'
+        synonym_terms = ['1']
+        synonyms = go.get_synonyms(class_, owler, synonym_terms)
+        assert len(synonyms) == 2
+        for syn in synonyms:
+            assert syn in checks
+
+
+def test_get_synonyms_two_types_one_syn(mocker, owler, rdf_syn_objects_2_1):
+    check = 'testsyn1'
+    with mocker.patch('encoded.commands.generate_ontology.Owler.rdfGraph.objects',
+                      side_effect=rdf_syn_objects_2_1):
+        class_ = 'test_class'
+        synonym_terms = ['1', '2']
+        synonyms = go.get_synonyms(class_, owler, synonym_terms)
+        assert len(synonyms) == 1
+        assert synonyms[0] == check
+
+
+def test_get_synonyms_two_types_three_syn(mocker, owler, rdf_syn_objects_2_3):
+    checks = ['testsyn1', 'testsyn2', 'testsyn3']
+    with mocker.patch('encoded.commands.generate_ontology.Owler.rdfGraph.objects',
+                      side_effect=rdf_syn_objects_2_3):
+        class_ = 'test_class'
+        synonym_terms = ['1', '2']
+        synonyms = go.get_synonyms(class_, owler, synonym_terms)
+        assert len(synonyms) == 3
+        for syn in synonyms:
+            assert syn in checks
 
 
 def test_get_synonyms_none_there(mocker, owler):
