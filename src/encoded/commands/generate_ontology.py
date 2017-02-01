@@ -533,8 +533,7 @@ def get_slim_terms(connection):
         try:
             # a notification indicates an issue eg. No results found
             # so ignore
-            notification = terms.get('notification')
-            pass
+            terms.get('notification')
         except:
             slim_terms.extend(terms)
     return slim_terms
@@ -607,13 +606,13 @@ def new_main():
     connection = connect2server(args.keyfile, args.key)
 
     ontologies = get_ontologies(connection, args.ontologies)
-    slim_terms = get_slim_terms(connection)
+    # slim_terms = get_slim_terms(connection)
 
     # for testing with local copy of file pass in ontologies EFO
     # ontologies[0]['download_url'] = '/Users/andrew/Documents/work/untracked_work_ff/test_families.owl'
 
     # start iteratively downloading and processing ontologies
-    terms = {}
+    # terms = {}
     for ontology in ontologies:
         if ontology['download_url'] is not None:
             print(ontology['download_url'])

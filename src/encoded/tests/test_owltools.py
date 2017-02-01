@@ -1,4 +1,3 @@
-import os
 import pytest
 pytestmark = pytest.mark.working
 from encoded.commands import owltools as ot
@@ -11,7 +10,7 @@ def owler(mocker):
 
 def emptygen(*args, **kwargs):
     return
-    yield
+    yield  # necessary to produce generator
 
 
 def rdfobject_generator(rdfobj_list):

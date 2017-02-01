@@ -32,24 +32,6 @@ def slim_terms():
 
 
 @pytest.fixture
-def brain_term():
-    return {
-        "term_name": 'brain',
-        "term_id": "TEST:1234",
-        "closure_with_develops_from": ['UBERON:0000924'],
-        "closure": ['OBI:0001917']
-    }
-
-
-def test_add_slim_to_term(brain_term, slim_terms):
-    slim_ids = ['UBERON:0000924', 'OBI:0001917']
-    brain_term = go.add_slim_to_term(brain_term, slim_terms)
-    assert brain_term['slim_terms']
-    for term in brain_term['slim_terms']:
-        assert term['term_id'] in slim_ids
-
-
-@pytest.fixture
 def connection(mocker):
     return mocker.patch.object(go, 'FDN_Connection')
 
@@ -149,7 +131,7 @@ def test_get_ontologies_not_in_db(mocker, connection):
 
 
 @pytest.fixture
-def slim_terms():
+def slim_term_list():
     # see ontology_term schema for full schema
     return [{'term_id': 'd_term1', 'is_slim_for': 'developmental'},
             {'term_id': 'd_term2', 'is_slim_for': 'developmental'},
@@ -157,11 +139,11 @@ def slim_terms():
 
 
 @pytest.fixture
-def slim_terms_by_ont(slim_terms):
+def slim_terms_by_ont(slim_term_list):
     return [
-        [slim_terms[0],
-         slim_terms[1]],
-        [slim_terms[2]],
+        [slim_term_list[0],
+         slim_term_list[1]],
+        [slim_term_list[2]],
         {'notification': 'No result found'},
         {'notification': 'No result found'}
     ]
@@ -213,10 +195,10 @@ def terms_w_closures(term_w_closure):
             term_w_two, term_wo_slim, term_w_none]
 
 
-def test_add_slim_to_term(terms_w_closures, slim_terms):
+def test_add_slim_to_term(terms_w_closures, slim_term_list):
     slim_ids = ['d_term1', 'd_term2']
     for i, term in enumerate(terms_w_closures):
-        test_term = go.add_slim_to_term(term, slim_terms)
+        test_term = go.add_slim_to_term(term, slim_term_list)
         assert test_term['term_id'] == str(i + 1)
         if i < 3:
             assert len(test_term['slim_terms']) == 1
@@ -358,7 +340,6 @@ def returned_synonyms():
         ['testsyn1'],
         ['testsyn1', 'testsyn2']
     ]
-    pass
 
 
 def test_get_synonyms(mocker, owler, returned_synonyms):

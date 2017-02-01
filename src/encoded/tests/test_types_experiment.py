@@ -1,6 +1,6 @@
 import pytest
 # from encoded.types.experiment import Experiment, ExperimentHiC
-from snovault.storage import UUID
+# from snovault.storage import UUID
 pytestmark = pytest.mark.working
 '''Has tests for both experiment.py and experiment_set.py'''
 
