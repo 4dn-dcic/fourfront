@@ -420,6 +420,12 @@ def get_synonyms(class_, data, synonym_terms):
     return getObjectLiteralsOfType(class_, data, synonym_terms)
 
 
+def get_definitions(class_, data, definition_terms):
+    '''Gets definitions for the class as strings
+    '''
+    return getObjectLiteralsOfType(class_, data, definition_terms)
+
+
 def add_slim_to_term(term, slim_terms):
     '''Checks the list of ancestor terms to see if any are slim_terms
         and if so adds the slim_term to the term in slim_term slot
@@ -449,7 +455,7 @@ def convert2namespace(uri):
     return ns[name]
 
 
-def get_synonym_terms(connection, ontology_id):
+def get_definition_terms(connection, ontology_id):
     '''Checks an ontology item for ontology_terms that are used
         to designate synonyms in that ontology and returns a list
         of OntologyTerm dicts.
@@ -465,17 +471,51 @@ def get_synonym_terms(connection, ontology_id):
     return synterms
 
 
-def get_synonym_terms_as_uri(connection, ontology_id, as_rdf=True):
+def get_syndef_terms(connection, ontology_id, termtype):
+    '''Checks an ontology item for ontology_terms that are used
+        to designate synonyms or definitions in that ontology and
+        returns a list of OntologyTerm dicts.
+    '''
+    terms = None
+    ontologies = get_ontologies(connection, [ontology_id])
+    if ontologies:
+        ontology = ontologies[0]
+        term_ids = ontology.get(termtype)
+        if term_ids is not None:
+            terms = [get_FDN(termid, connection) for termid in term_ids]
+
+    return terms
+
+
+def get_syndef_terms_as_uri(connection, ontology_id, termtype, as_rdf=True):
+    '''Checks an ontology item for ontology_terms that are used
+        to designate synonyms or definitions in that ontology and returns a list
+        of RDF Namespace:name pairs by default or simple URI strings
+        if as_rdf=False.
+    '''
+    terms = get_syndef_terms(connection, ontology_id, termtype)
+    uris = [term['term_url'] for term in terms]
+    if as_rdf:
+        uris = [convert2namespace(uri) for uri in uris]
+    return uris
+
+
+def get_synonym_term_uris(connection, ontology_id, as_rdf=True):
     '''Checks an ontology item for ontology_terms that are used
         to designate synonyms in that ontology and returns a list
         of RDF Namespace:name pairs by default or simple URI strings
         if as_rdf=False.
     '''
-    terms = get_synonym_terms(connection, ontology_id)
-    uris = [syn['term_url'] for syn in terms]
-    if as_rdf:
-        uris = [convert2namespace(uri) for uri in uris]
-    return uris
+    return get_syndef_terms_as_uri(connection, ontology_id, 'synonym_terms', as_rdf)
+
+
+def get_definition_term_uris(connection, ontology_id, as_rdf=True):
+    '''Checks an ontology item for ontology_terms that are used
+        to designate definitions in that ontology and returns a list
+        of RDF Namespace:name pairs by default or simple URI strings
+        if as_rdf=False.
+    '''
+    return get_syndef_terms_as_uri(connection, ontology_id, 'definition_terms', as_rdf)
 
 
 def get_slim_terms(connection):
@@ -570,21 +610,26 @@ def new_main():
     slim_terms = get_slim_terms(connection)
 
     # for testing with local copy of file pass in ontologies EFO
-    ontologies[0]['download_url'] = '/Users/andrew/Documents/work/untracked_work_ff/test_families.owl'
+    # ontologies[0]['download_url'] = '/Users/andrew/Documents/work/untracked_work_ff/test_families.owl'
 
     # start iteratively downloading and processing ontologies
     terms = {}
     for ontology in ontologies:
         if ontology['download_url'] is not None:
             print(ontology['download_url'])
-            synonym_terms = get_synonym_terms_as_uri(connection, ontology['uuid'])
+            synonym_terms = get_synonym_term_uris(connection, ontology['uuid'])
+            definition_terms = get_definition_term_uris(connection, ontology['uuid'])
             for term in synonym_terms:
+                print(term)
+            for term in definition_terms:
                 print(term)
             data = Owler(ontology['download_url'])
             for class_ in data.allclasses:
                 print(class_)
                 synonyms = get_synonyms(class_, data, synonym_terms)
                 print(synonyms)
+                definitions = get_definitions(class_, data, definition_terms)
+                print(definitions)
 
 
 def main():
@@ -732,4 +777,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    new_main()

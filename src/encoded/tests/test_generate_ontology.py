@@ -241,22 +241,29 @@ test_syn_terms = [
 ]
 
 
-def test_get_synonym_terms_has_terms(mocker, connection):
+def test_get_syndef_terms_has_terms(mocker, connection):
     mocker.patch('encoded.commands.generate_ontology.get_ontologies',
                  return_value=[all_ontology[0]])
     with mocker.patch('encoded.commands.generate_ontology.get_FDN',
                       side_effect=test_syn_terms):
-        synterms = go.get_synonym_terms(connection, 'ontologys/EFO')
+        synterms = go.get_syndef_terms(connection, 'ontologys/EFO', 'synonym_terms')
         assert len(synterms) == 2
         uuids = ['1', '2']
         for syn in synterms:
             assert syn['uuid'] in uuids
 
 
-def test_get_synonym_terms_no_ontology(mocker, connection):
+def test_get_syndef_terms_no_terms(mocker, connection):
+    with mocker.patch('encoded.commands.generate_ontology.get_ontologies',
+                      return_value=[all_ontology[1]]):
+        synterms = go.get_syndef_terms(connection, 'ontologys/OBI', 'synonym_terms')
+        assert not synterms
+
+
+def test_get_syndef_terms_no_ontology(mocker, connection):
     with mocker.patch('encoded.commands.generate_ontology.get_ontologies',
                       return_value=[]):
-        synterms = go.get_synonym_terms(connection, 'ontologys/FAKE')
+        synterms = go.get_syndef_terms(connection, 'ontologys/FAKE', 'synonym_terms')
         assert synterms is None
 
 
@@ -264,6 +271,11 @@ def test_get_synonym_terms_no_ontology(mocker, connection):
 def syn_uris():
     return ['http://www.ebi.ac.uk/efo/alternative_term',
             'http://www.geneontology.org/formats/oboInOwl#hasExactSynonym']
+
+
+@pytest.fixture
+def syn_uris_as_URIRef(syn_uris):
+    return [go.convert2namespace(uri) for uri in syn_uris]
 
 
 def check_if_URIRef(uri):
@@ -278,12 +290,54 @@ def test_convert2namespace(syn_uris):
         assert str(ns) == uri
 
 
-def test_get_synonym_terms_as_uri(mocker, connection, syn_uris):
+def test_get_syndef_terms_as_uri(mocker, connection, syn_uris):
     asrdf = [True, False]
-    with mocker.patch('encoded.commands.generate_ontology.get_synonym_terms',
+    with mocker.patch('encoded.commands.generate_ontology.get_syndef_terms',
                       return_value=test_syn_terms):
         for rdf in asrdf:
-            uris = go.get_synonym_terms_as_uri(connection, 'ontid', rdf)
+            uris = go.get_syndef_terms_as_uri(connection, 'ontid', 'synonym_terms', rdf)
+            if rdf:
+                for uri in uris:
+                    assert check_if_URIRef(uri)
+                    assert str(uri) in syn_uris
+            else:
+                assert str(uri) in syn_uris
+
+
+def test_get_synonym_term_uris_no_ontology(mocker, connection):
+    with mocker.patch('encoded.commands.generate_ontology.get_syndef_terms_as_uri',
+                      return_value=[]):
+        synterms = go.get_synonym_term_uris(connection, 'ontologys/FAKE')
+        assert not synterms
+
+
+def test_get_definition_term_uris_no_ontology(mocker, connection):
+    with mocker.patch('encoded.commands.generate_ontology.get_syndef_terms_as_uri',
+                      return_value=[]):
+        synterms = go.get_definition_term_uris(connection, 'ontologys/FAKE')
+        assert not synterms
+
+
+def test_get_synonym_term_uris(mocker, connection, syn_uris, syn_uris_as_URIRef):
+    asrdf = [True, False]
+    with mocker.patch('encoded.commands.generate_ontology.get_syndef_terms_as_uri',
+                      return_value=syn_uris_as_URIRef):
+        for rdf in asrdf:
+            uris = go.get_synonym_term_uris(connection, 'ontid', rdf)
+            if rdf:
+                for uri in uris:
+                    assert check_if_URIRef(uri)
+                    assert str(uri) in syn_uris
+            else:
+                assert str(uri) in syn_uris
+
+
+def test_get_definition_term_uris(mocker, connection, syn_uris, syn_uris_as_URIRef):
+    asrdf = [True, False]
+    with mocker.patch('encoded.commands.generate_ontology.get_syndef_terms_as_uri',
+                      return_value=syn_uris_as_URIRef):
+        for rdf in asrdf:
+            uris = go.get_synonym_term_uris(connection, 'ontid', rdf)
             if rdf:
                 for uri in uris:
                     assert check_if_URIRef(uri)
