@@ -34,10 +34,10 @@ var FormattedInfoBlockList = React.createClass({
             var results = [];
             endpoints.forEach(function(endpoint, i){
 
-                console.log('Obtaining submitsForArray[' + i + '] via AJAX.');
-                ajaxLoad(endpoint + '?format=json', function(result){
+                console.log('Obtaining ' + propertyName + '[' + i + '] via AJAX from ' + endpoint);
+                ajaxLoad(endpoint + '?format=json&frame=embedded', function(result){
                     results[i] = result;
-                    console.log('Obtained submitsForArray[' + i + '] via AJAX.');
+                    console.log('Obtained ' + propertyName + '[' + i + '] via AJAX.');
                     if (results.length == endpoints.length){
                         // All loaded
                         var newState = {};
@@ -47,7 +47,7 @@ var FormattedInfoBlockList = React.createClass({
                                 callback(results);
                             }
                         });
-                        console.log('Obtained details_submits_for via AJAX: ', results);
+                        console.log('Obtained details_'+ propertyName +' (' + results.length + ') via AJAX: ', results);
                     }
                 }.bind(this), 'GET');
             }.bind(this));
@@ -199,7 +199,7 @@ var FormattedInfoBlock = module.exports = React.createClass({
          */
         ajaxPropertyDetails : function(endpoint, propertyName, callback = null){
             console.info('Obtaining details_' + propertyName + ' via AJAX.');
-            ajaxLoad(endpoint + '?format=json', function(result){
+            ajaxLoad(endpoint + '?format=json&frame=embedded', function(result){
                 var newStateAddition = {};
                 newStateAddition['details_' + propertyName] = result;
                 this.setState(newStateAddition, ()=>{
@@ -207,7 +207,7 @@ var FormattedInfoBlock = module.exports = React.createClass({
                         callback(result);
                     }
                 });
-                console.info('Obtained details_' + propertyName + ' via AJAX.');
+                console.info('Obtained details_' + propertyName + ' via AJAX:', result);
             }.bind(this), 'GET', function(error){
                 var newStateAddition = {};
                 newStateAddition['details_' + propertyName] = {

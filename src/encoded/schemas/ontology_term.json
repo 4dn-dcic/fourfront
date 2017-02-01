@@ -4,8 +4,8 @@
     "id": "/profiles/ontology_term.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
-    "required": ["term_name"],
-    "identifyingProperties": ["uuid", "term_name", "termid", "display_name"],
+    "required": ["term_id"],
+    "identifyingProperties": ["uuid", "term_id", "preferred_name"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -22,38 +22,43 @@
         "status": {
             "default": "released"
         },
-        "preferred_name": {
-          "title": "Display name",
-          "description": "A preferred name (possibly shortened or simpler version) for the ontology term - can be used for submission or retrieval.",
-          "type": "string"
+        "term_url": {
+            "title": "URL",
+            "description": "The url that uniquely identifies term - often purl.",
+            "type": "string",
+            "format": "uri",
+            "permission": "import-items",
+            "exclude_from": "submit4dn"
+        },
+        "term_id": {
+          "title": "Term ID",
+          "description": "The ID for the ontology term including the prefix.",
+          "type": "string",
+          "permission": "import-items"
         },
         "term_name": {
           "title": "Term name",
           "description": "The current valid name for the ontology term.",
-          "type": "string"
-        },
-        "term_id": {
-          "title": "Term ID",
-          "description": "The ID for the ontology term.",
-          "type": "string"
-        },
-        "source_ontology": {
-            "title": "Ontology that this term is part of",
-            "descripton": "The ontology from whence this term EFO, OBI, UBERON",
-            "type": "string",
-            "linkTo": "Ontology"
+          "type": "string",
+          "permission": "import-items"
         },
         "definition": {
             "title": "Definition",
             "description": "The definition for the ontology term.",
             "type": "string",
             "permission": "import-items",
-            "exclude_from": "submit4dn",
-            "internal_comment": "calculated from term info"
+            "exclude_from": "submit4dn"
         },
-        "exact_synonyms": {
+        "preferred_name": {
+          "title": "Display name",
+          "description": "A preferred name (possibly shortened or simpler version) for the ontology term - can be used for submission or retrieval.",
+          "type": "string",
+          "permission": "import-items"
+        },
+        "synonyms": {
             "title": "Synonyms",
             "description": "Synonyms for the ontology term.",
+            "permission": "import-items",
             "exclude_from": "submit4dn",
             "internal_comment": "Calculated from term info - cannot be used as ID",
             "type": "array",
@@ -64,44 +69,47 @@
                 "permission": "import-items"
             }
         },
-        "term_url": {
-            "title": "URL",
-            "description": "An external resource with information about the ontology term.",
-            "type": "string",
-            "format": "uri",
+        "source_ontology": {
+            "title": "Ontology that this term is part of",
+            "descripton": "The ontology from whence this term EFO, OBI, UBERON",
             "permission": "import-items",
-            "exclude_from": "submit4dn",
-            "internal_comment": "Calculated"
+            "type": "string",
+            "linkTo": "Ontology"
         },
         "namespace": {
             "title": "Term namespace",
-            "description": "The namespace to which the term belongs",
-            "type": "string"
+            "description": "The namespace to which the term belongs - relevant for imported ontologies",
+            "type": "string",
+            "permission": "import-items"
         },
         "parents": {
             "title": "Parent terms",
-            "description": "Ontology terms that are direct parents of this term",
+            "description": "Ontology terms that are direct parents of this term via subClassOf",
+            "permission": "import-items",
             "type": "array",
             "items": {
-                "title": "Parent Term",
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                    "relationship": {
-                        "title": "Relationship",
-                        "description": "the relationship to the child",
-                        "type": "string",
-                        "enum": ["part of", "is a", "derives from"],
-                        "internal_comment": "Use string for now but consider using a formal relationship ontology?"
-                    },
-                    "parent": {
-                        "title": "Parent",
-                        "description": "The parent ontology term",
-                        "type": "string",
-                        "linkTo": "OntologyTerm"
-                    }
-                }
+                "title": "Parent",
+                "description": "The parent ontology term",
+                "type": "string",
+                "linkTo": "OntologyTerm"
             }
+        },
+        "slim_terms": {
+            "title": "Slim terms",
+            "description": "Ontology terms that are slimmed - less specific that are used in search",
+            "permission": "import-items",
+            "type": "array",
+            "items": {
+                "title": "Slim Term",
+                "type": "string",
+                "linkTo": "OntologyTerm"
+            }
+        },
+        "is_slim_for": {
+            "title": "Slim Branch",
+            "description": "If the term is a slim term the value is the slot that the slim is for",
+            "type": "string",
+            "enum": ["developmental", "organ", "system", "assay"]
         }
     }
 }

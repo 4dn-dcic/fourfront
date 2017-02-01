@@ -3,7 +3,7 @@
         "uuid": "530036bc-8535-4448-903e-854af460b254",
         "preferred_name": "GM12878",
         "term_name": "GM12878",
-        "term_id": "EFO_0002784",
+        "term_id": "EFO:0002784",
         "source_ontology": "530006bc-8535-4448-903e-854af460b254",
         "term_url": "http://www.ebi.ac.uk/efo/EFO_0002784"
     },
@@ -11,18 +11,156 @@
         "uuid": "530046bc-8535-4448-903e-854af460b254",
         "preferred_name": "skin",
         "term_name": "skin of body",
-        "term_id": "UBERON_0002097",
+        "term_id": "UBERON:0002097",
         "source_ontology": "530016bc-8535-4448-903e-854af460b254",
         "term_url": "http://purl.obolibrary.org/obo/UBERON_0002097",
-        "exact_synonyms": ["skin organ", "entire skin"],
-        "parents": [{"relationship": "part of", "parent": "530056bc-8535-4448-903e-854af460b254"}]
+        "synonyms": ["skin organ", "entire skin"],
+        "parents": ["530056bc-8535-4448-903e-854af460b254"]
     },
     {
         "uuid": "530056bc-8535-4448-903e-854af460b254",
         "preferred_name": "integument",
         "term_name": "integument",
-        "term_id": "UBERON_0002199",
+        "term_id": "UBERON:0002199",
         "source_ontology": "530016bc-8535-4448-903e-854af460b254",
         "term_url": "http://purl.obolibrary.org/obo/UBERON_0002199"
+    },
+    {
+        "uuid": "111111bc-8535-4448-903e-854af460a233",
+        "term_name": "alternative_term",
+        "term_id": "EFO:alternative_term",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "term_url": "http://www.ebi.ac.uk/efo/alternative_term",
+        "definition": "An alternative label for a given entity such as a commonly used abbreviation or synonym.",
+        "namespace": "http://www.ebi.ac.uk/efo"
+    },
+    {
+        "uuid": "111112bc-8535-4448-903e-854af460a233",
+        "term_name": "has_exact_synonym",
+        "term_id": "oboInOwl:hasExactSynonym",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "term_url": "http://www.geneontology.org/formats/oboInOwl#hasExactSynonym",
+        "definition": "An alias in which the alias exhibits true synonymy. Example: ornithine cycle is an exact synonym of urea cycle.",
+        "namespace": "http://www.geneontology.org/formats/oboInOwl"
+    },
+    {
+        "uuid": "111113bc-8535-4448-903e-854af460a233",
+        "term_name": "has_narrow_synonym",
+        "term_id": "oboInOwl:hasNarrowSynonym",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "term_url": "http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym",
+        "namespace": "http://www.geneontology.org/formats/oboInOwl"
+    },
+    {
+        "uuid": "111114bc-8535-4448-903e-854af460a233",
+        "term_name": "has_related_synonym",
+        "term_id": "oboInOwl:hasRelatedSynonym",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "term_url": "http://www.geneontology.org/formats/oboInOwl#RelatedSynonym",
+        "namespace": "http://www.geneontology.org/formats/oboInOwl"
+    },
+    {
+        "uuid": "111115bc-8535-4448-903e-854af460a233",
+        "term_name": "definition",
+        "term_id": "EFO:definition",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "term_url": "http://www.ebi.ac.uk/efo/definition",
+        "namespace": "http://www.ebi.ac.uk/efo"
+    },
+    {
+        "uuid": "111116bc-8535-4448-903e-854af460a233",
+        "term_name": "definition",
+        "term_id": "IAO:0000115",
+        "source_ontology": "530006bc-8535-4448-903e-854af460b254",
+        "term_url": "http://purl.obolibrary.org/obo/IAO_0000115",
+        "namespace": "http://purl.obolibrary.org/obo"
+    },
+    {
+        "uuid": "111117bc-8535-4448-903e-854af460a233",
+        "term_name": "alternative term",
+        "term_id": "IAO:0000118",
+        "source_ontology": "530026bc-8535-4448-903e-854af460b254",
+        "term_url": "http://purl.obolibrary.org/obo/IAO_0000118",
+        "namespace": "http://purl.obolibrary.org/obo"
+    },
+    {
+        "uuid": "111118bc-8535-4448-903e-854af460a233",
+        "term_name": "germ layer",
+        "term_id": "UBERON:0000923",
+        "source_ontology": "530016bc-8535-4448-903e-854af460b254",
+        "term_url": "http://purl.obolibrary.org/obo/UBERON_0000923",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "definition": "A layer of cells produced during the process of gastrulation during the early development of the animal embryo, which is distinct from other such layers of cells, as an early step of cell differentiation. The three types of germ layers are the endoderm, ectoderm, and mesoderm.",
+        "synonyms": ["embryonic germ layer", "germinal layer", "primary germ layer"]
+    },
+    {
+        "uuid": "111119bc-8535-4448-903e-854af460a233",
+        "term_name": "ectoderm",
+        "term_id": "UBERON:0000924",
+        "source_ontology": "530016bc-8535-4448-903e-854af460b254",
+        "term_url": "http://purl.obolibrary.org/obo/UBERON_0000924",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "definition": "Primary germ layer that is the outer of the embryo's three germ layers and gives rise to epidermis and neural tissue.",
+        "is_slim_for": "developmental",
+        "synonyms": ["embryonic ectoderm"],
+        "parents": ["111118bc-8535-4448-903e-854af460a233"]
+    },
+    {
+        "uuid": "111120bc-8535-4448-903e-854af460a233",
+        "term_name": "mesoderm",
+        "term_id": "UBERON:0000926",
+        "source_ontology": "530016bc-8535-4448-903e-854af460b254",
+        "term_url": "http://purl.obolibrary.org/obo/UBERON_0000926",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "definition": "The middle germ layer of the embryo, between the endoderm and ectoderm.",
+        "is_slim_for": "developmental",
+        "synonyms": ["entire mesoderm", "embryonic mesoderm", "mesodermal mantle"],
+        "parents": ["111118bc-8535-4448-903e-854af460a233"]
+    },
+    {
+        "uuid": "111121bc-8535-4448-903e-854af460a233",
+        "term_name": "endoderm",
+        "term_id": "UBERON:0000925",
+        "source_ontology": "530016bc-8535-4448-903e-854af460b254",
+        "term_url": "http://purl.obolibrary.org/obo/UBERON_0000925",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "definition": "Primary germ layer that lies remote from the surface of the embryo and gives rise to internal tissues such as gut.",
+        "is_slim_for": "developmental",
+        "synonyms": ["entoderm"],
+        "parents": ["111118bc-8535-4448-903e-854af460a233"]
+    },
+    {
+        "uuid": "111122bc-8535-4448-903e-854af460a233",
+        "preferred_name": "3D chromatin structure",
+        "term_name": "chromosome conformation identification objective",
+        "term_id": "OBI:0001917",
+        "source_ontology": "530026bc-8535-4448-903e-854af460b254",
+        "term_url": "http://purl.obolibrary.org/obo/OBI_0001917",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "definition": "A molecular feature identification objective that aims to determine spatial organization of chromatin.",
+        "is_slim_for": "assay"
+    },
+    {
+        "uuid": "111123bc-8535-4448-903e-854af460a233",
+        "preferred_name": "Replication timing",
+        "term_name": "DNA replication identification objective",
+        "term_id": "OBI:0001917",
+        "source_ontology": "530026bc-8535-4448-903e-854af460b254",
+        "term_url": "http://purl.obolibrary.org/obo/OBI_0001916",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "definition": "A molecular feature identification objective that aims to examine charateristics of DNA replication, such as replication time.",
+        "is_slim_for": "assay"
+    },
+    {
+        "uuid": "111124bc-8535-4448-903e-854af460a233",
+        "preferred_name": "Imaging",
+        "term_name": "imaging assay",
+        "term_id": "OBI:0000185",
+        "source_ontology": "530026bc-8535-4448-903e-854af460b254",
+        "term_url": "http://purl.obolibrary.org/obo/OBI_0000185",
+        "namespace": "http://purl.obolibrary.org/obo",
+        "definition": "An imaging assay is an assay to produce a picture of an entity.",
+        "is_slim_for": "assay"
     }
+
 ]

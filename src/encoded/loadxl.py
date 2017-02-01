@@ -40,6 +40,9 @@ ORDER = [
     'treatment_rnai',
     'treatment_chemical',
     'biosample',
+    'quality_metric_fastqc',
+    'quality_metric_bamqc',
+    'quality_metric_pairsqc',
     'file_fastq',
     'file_fasta',
     'file_processed',
@@ -54,7 +57,6 @@ ORDER = [
     'analysis_step',
     'workflow',
     'workflow_mapping',
-    'workflow_run',
     'workflow_run_sbg'
 ]
 
@@ -518,8 +520,11 @@ def get_pipeline(testapp, docsdir, test_only, item_type, phase=None, method=None
 # Additional pipeline sections for item types
 
 PHASE1_PIPELINES = {
+    'ontology': [
+        remove_keys('synonym_terms', 'definition_terms', 'relation_terms')
+    ],
     'ontology_term': [
-        remove_keys('parents')
+        remove_keys('parents', 'slim_terms')
     ],
     'user': [
         remove_keys('lab', 'submits_for'),
@@ -565,8 +570,11 @@ PHASE1_PIPELINES = {
 
 
 PHASE2_PIPELINES = {
+    'ontology': [
+        skip_rows_missing_all_keys('synonym_terms', 'definition_terms', 'relation_terms'),
+    ],
     'ontology_term': [
-        skip_rows_missing_all_keys('parents'),
+        skip_rows_missing_all_keys('parents', 'slim_terms'),
     ],
     'user': [
         skip_rows_missing_all_keys('lab', 'submits_for'),

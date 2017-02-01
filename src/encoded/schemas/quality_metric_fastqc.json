@@ -13,7 +13,8 @@
         { "$ref": "mixins.json#/aliases" },
         { "$ref": "mixins.json#/attribution" },
         { "$ref": "mixins.json#/submitted" },
-        { "$ref": "mixins.json#/status" }
+        { "$ref": "mixins.json#/status" },
+        { "$ref": "quality_metric.json#/properties" }
    ],
     "properties": {
         "schema_version": {
