@@ -97,13 +97,15 @@
               "title": "Cell Line Term ID",
               "description": "EFO term ID for cell line",
               "type": "string",
-              "permission": "import_items"
+              "permission": "import_items",
+              "exclude_from": "submit4dn"
           },
           "cell_line_tier": {
               "title": "Cell line tier",
               "description": "Tier into which the cell line has been classified",
               "type": "string",
               "permission": "import_items",
+              "exclude_from": "submit4dn",
               "enum": [
                   "Tier 1",
                   "Tier 2",
