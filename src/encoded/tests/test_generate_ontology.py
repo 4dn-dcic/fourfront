@@ -297,79 +297,27 @@ def owler(mocker):
     return mocker.patch.object(go, 'Owler')
 
 
-def emptygen(*args, **kwargs):
-    return
-    yield
-
-
-def synonym_generator(syn_list):
-    for syn in syn_list:
-        yield syn
-
-
 @pytest.fixture
-def rdf_syn_objects():
-    from rdflib import Literal
-    syns = ['testsyn1', 'testsyn2']
-    syns = [Literal(syn) for syn in syns]
-    return [synonym_generator(syns)]
+def returned_synonyms():
+    return [
+        [],
+        ['testsyn1'],
+        ['testsyn1', 'testsyn2']
+    ]
+    pass
 
 
-@pytest.fixture
-def rdf_syn_objects_2_1():
-    from rdflib import Literal
-    syns = ['testsyn1']
-    syns = [Literal(syn) for syn in syns]
-    return [synonym_generator(syns), synonym_generator(syns)]
-
-
-@pytest.fixture
-def rdf_syn_objects_2_3():
-    from rdflib import Literal
-    syns = ['testsyn1', 'testsyn2', 'testsyn3']
-    syns = [Literal(syn) for syn in syns]
-    return [synonym_generator(syns[:1]), synonym_generator(syns[1:])]
-
-
-def test_get_synonyms_one_type_two_syn(mocker, owler, rdf_syn_objects):
+def test_get_synonyms(mocker, owler, returned_synonyms):
     checks = ['testsyn1', 'testsyn2']
-    with mocker.patch('encoded.commands.generate_ontology.Owler.rdfGraph.objects',
-                      side_effect=rdf_syn_objects):
+    with mocker.patch('encoded.commands.generate_ontology.getObjectLiteralsOfType',
+                      side_effect=returned_synonyms):
         class_ = 'test_class'
         synonym_terms = ['1']
-        synonyms = go.get_synonyms(class_, owler, synonym_terms)
-        assert len(synonyms) == 2
-        for syn in synonyms:
-            assert syn in checks
-
-
-def test_get_synonyms_two_types_one_syn(mocker, owler, rdf_syn_objects_2_1):
-    check = 'testsyn1'
-    with mocker.patch('encoded.commands.generate_ontology.Owler.rdfGraph.objects',
-                      side_effect=rdf_syn_objects_2_1):
-        class_ = 'test_class'
-        synonym_terms = ['1', '2']
-        synonyms = go.get_synonyms(class_, owler, synonym_terms)
-        assert len(synonyms) == 1
-        assert synonyms[0] == check
-
-
-def test_get_synonyms_two_types_three_syn(mocker, owler, rdf_syn_objects_2_3):
-    checks = ['testsyn1', 'testsyn2', 'testsyn3']
-    with mocker.patch('encoded.commands.generate_ontology.Owler.rdfGraph.objects',
-                      side_effect=rdf_syn_objects_2_3):
-        class_ = 'test_class'
-        synonym_terms = ['1', '2']
-        synonyms = go.get_synonyms(class_, owler, synonym_terms)
-        assert len(synonyms) == 3
-        for syn in synonyms:
-            assert syn in checks
-
-
-def test_get_synonyms_none_there(mocker, owler):
-    with mocker.patch('encoded.commands.generate_ontology.Owler.rdfGraph.objects',
-                      side_effect=emptygen):
-        class_ = 'test_class'
-        synonym_terms = ['1']
-        syns = go.get_synonyms(class_, owler, synonym_terms)
-        assert not syns
+        for i in range(len(returned_synonyms)):
+            synonyms = go.get_synonyms(class_, owler, synonym_terms)
+            if i == 0:
+                assert not synonyms
+            else:
+                assert len(synonyms) == i
+                for syn in synonyms:
+                    assert syn in checks

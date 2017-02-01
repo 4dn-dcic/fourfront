@@ -9,12 +9,13 @@ from encoded.commands.owltools import (
     Owler,
     splitNameFromNamespace,
     isBlankNode,
+    getObjectLiteralsOfType,
     subClassOf,
     SomeValuesFrom,
     IntersectionOf,
     OnProperty
 )
-from Submit4DN.wranglertools.fdnDCIC import (
+from wranglertools.fdnDCIC import (
     FDN_Key,
     FDN_Connection,
     get_FDN
@@ -414,18 +415,9 @@ def process_blank_node(class_, data, terms):
 
 
 def get_synonyms(class_, data, synonym_terms):
-    '''Gets synonyms for the class by querying the rdfGraph in data
-        for synonym_term classes (term predicates are rdf.URIRefs)
-        and returns the values
+    '''Gets synonyms for the class as strings
     '''
-    synonyms = {}
-    for term in synonym_terms:
-        syn = []
-        for o in data.rdfGraph.objects(class_, term):
-            syn += [o]
-        syn = [str(s) for s in syn]
-        synonyms.update(dict(zip(syn, [1] * len(syn))))
-    return list(synonyms.keys())
+    return getObjectLiteralsOfType(class_, data, synonym_terms)
 
 
 def add_slim_to_term(term, slim_terms):
@@ -740,4 +732,4 @@ def main():
 
 
 if __name__ == '__main__':
-    new_main()
+    main()
