@@ -406,10 +406,49 @@ def getTermStructure():
     }
 
 
-def process_intersection_of(class_, data, terms):
-    '''Given an IntersectionOf
+def _has_human_partof(cols):
+    ans = False
+    if HUMAN_TAXON in col_list and PART_OF in col_list:
+        ans = True
+    return ans
+
+
+def get_termid_from_uri(uri):
+    '''Given a uri - takes the last part (name) and converts _ to :
+        eg. http://www.ebi.ac.uk/efo/EFO_0002784 => EFO:0002784
     '''
-    pass
+    return splitNameFromNamespace(uri)[0].replace('_', ':')
+
+
+def add_term_and_info(class_, term, relationship, data, terms):
+    for subclass in data.rdfGraph.objects(class_, subClassOf):
+        term_id = get_termid_from_uri(term)
+        if term_id not in terms:
+            terms[term_id] = getTermStructure()
+        terms[term_id][relationship].append(get_termid_from_uri(subclass))
+    return terms
+
+
+def process_intersection_of(class_, intersection, data, terms):
+    '''Given a class with IntersectionOf predicate determine if the
+        intersected class is part of human or if our term develops_from
+        the class and if so make ontology_term json for it if it doesn't
+        already exist
+    '''
+    # the intersectionOf rdf consists of a collection of 2 members
+    # the first (collection[0]) is the resource uri (term)
+    # the second (collection[1]) is a restriction
+    collection = Collection(data.rdfGraph, intersection)
+    col_list = []
+    for col in data.rdfGraph.objects(collection[1]):
+        # get restriction terms and add to col_list as string
+        col_list.append(col.__str__())
+    if _has_human_partof(col_list):
+        terms = add_term_and_info(class_, collection[0], 'part_of', data, terms)
+    elif DEVELOPS_FROM in col_list:
+        # will we never have both part of and develops_from??
+        terms = add_term_and_info(class_, collection[0], 'develops_from', data, terms)
+    return terms
 
 
 def process_blank_node(class_, data, terms):
@@ -423,7 +462,8 @@ def process_blank_node(class_, data, terms):
             for intersection in data.rdfGraph.objects(class_, IntersectionOf):
                 # intersectionOf triples are checked for human part_of
                 # or develops_from
-                process_intersection_of(class_, data, terms)
+                terms = process_intersection_of(class_, intersection, data, terms)
+    return terms
 
 
 def get_synonyms(class_, data, synonym_terms):
