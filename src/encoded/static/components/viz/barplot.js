@@ -3,7 +3,7 @@
 var React = require('react');
 var _ = require('underscore');
 var d3 = require('d3');
-var { ChartBreadcrumbs, vizUtil } = require('./common');
+var vizUtil = require('./utilities');
 var { console, object, isServerSide, expFxn } = require('../util');
 
 
@@ -220,8 +220,8 @@ var BarPlot = React.createClass({
                 'labelWidth' : 200,
                 'yAxisMaxHeight' : 100, // This will override labelWidth to set it to something that will fit at angle.
                 'offset' : {
-                    'top' : 0,
-                    'bottom' : 50,
+                    'top' : 30,
+                    'bottom' : 0,
                     'left' : 80,
                     'right' : 0
                 }
@@ -596,7 +596,8 @@ var BarPlot = React.createClass({
                 <div className="y-axis-bottom" style={{ 
                     left : styleOpts.offset.left, 
                     right : styleOpts.offset.right,
-                    height : styleOpts.offset.bottom - 5
+                    height : Math.max(styleOpts.offset.bottom - 5, 0),
+                    bottom : Math.min(styleOpts.offset.bottom - 5, 0)
                 }}>
                     { currentBars.map(function(bar){
                         return (
@@ -605,7 +606,7 @@ var BarPlot = React.createClass({
                                 data-term={bar.term}
                                 className="y-axis-label no-highlight-color"
                                 style={{
-                                    transform : vizUtil.style.translate3d(bar.attr.x, 0, 0),
+                                    transform : vizUtil.style.translate3d(bar.attr.x, 5, 0),
                                     width : bar.attr.width,
                                     opacity : _this.state.transitioning && (bar.removing || !bar.existing) ? 0 : ''
                                 }}

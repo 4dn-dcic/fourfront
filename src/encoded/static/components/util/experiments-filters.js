@@ -3,9 +3,9 @@
 var _ = require('underscore');
 var url = require('url');
 var ajax = require('./ajax');
+var Alerts = null; //require('./../alerts');
 var store = null;
 
-//console.log(store);
 
 var expFilters = module.exports = {
 
@@ -84,7 +84,8 @@ var expFilters = module.exports = {
      * @param {function}[callback]      Callback function.
      */
     saveChangedFilters : function(expSetFilters, useAjax=true, href=null, callback = null){
-        if (!store) store = require('./../../store');
+        if (!store)   store = require('./../../store');
+        if (!Alerts) Alerts = require('../alerts');
         if (!useAjax) {
             store.dispatch({
                 type : {'expSetFilters' : expSetFilters}
@@ -99,6 +100,9 @@ var expFilters = module.exports = {
         var newHref = expFilters.filtersToHref(expSetFilters, href);
 
         var ajaxCallback = (newContext) => {
+
+            Alerts.deQueue(Alerts.NoFilterResults);
+
             function saveToReduxStore(){
                 store.dispatch({
                     type: {
@@ -125,13 +129,8 @@ var expFilters = module.exports = {
         }
 
         ajax.load(newHref, ajaxCallback, 'GET', (newContext)=>{
-            // Fallback
-            var Alerts = require('../alerts');
-            Alerts.queue({
-                'title' : "No Results",
-                'message' : "Selecting this filter returned 0 results so it was deselected.",
-                'style' : "warning"
-            });
+            // Fallback    
+            Alerts.queue(Alerts.NoFilterResults);
             if (typeof callback === 'function') setTimeout(callback, 0);
         });
 

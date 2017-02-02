@@ -84,7 +84,7 @@ var f = module.exports = {
                     // Make sure we return new exp & set objects instead of mutating existing ones.
                     var cExp = _.clone(exp);
                     var cSet = _.clone(set);
-                    delete cSet.experiments_in_set;
+                    cSet.experiments_in_set = cSet.experiments_in_set.length;
                     cExp.experiment_sets = [cSet];
                     return cExp;
                 }); 

@@ -236,6 +236,25 @@ var App = React.createClass({
         });
     },
 
+    getStatsComponent : function(){
+        if (!this.refs || !this.refs.navigation) return null;
+        if (!this.refs.navigation.refs) return null;
+        if (!this.refs.navigation.refs.stats) return null;
+        return this.refs.navigation.refs.stats;
+    },
+
+    updateStats : function(counts, totals = false, callback = null){
+        var statsComponent = this.getStatsComponent();
+        if (statsComponent){
+            if (!totals){
+                return statsComponent.updateCurrentCounts(counts, callback);
+            } else {
+                return statsComponent.updateTotalCounts(counts, callback);
+            }
+        }
+        return null;
+    },
+
     // When current dropdown changes; componentID is _rootNodeID of newly dropped-down component
     handleDropdownChange: function(componentID) {
         // Use React _rootNodeID to uniquely identify a dropdown menu;
@@ -933,7 +952,7 @@ var App = React.createClass({
                                         context={this.props.context}
                                         expSetFilters={this.props.expSetFilters}
                                         navigate={this.navigate}
-                                        
+                                        updateStats={this.updateStats}
                                     />
                                     <Alerts alerts={this.props.alerts} />
                                     { content }

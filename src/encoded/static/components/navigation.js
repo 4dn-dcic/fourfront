@@ -5,7 +5,8 @@ var Login = require('./login');
 var { Navbars, Navbar, Nav, NavItem, NavDropdown, MenuItem } = require('react-bootstrap');
 var _ = require('underscore');
 var store = require('../store');
-var { JWT, console, layout } = require('./util');
+var { JWT, console, layout, isServerSide } = require('./util');
+var HoverStatistics = require('./viz/hover-statistics');
 var TestWarning = require('./testwarning');
 var productionHost = require('./globals').productionHost;
 
@@ -13,6 +14,13 @@ var productionHost = require('./globals').productionHost;
 var Navigation = module.exports = React.createClass({
 
     statics : {
+
+        getCurrentHeight : function(){
+            if (!isServerSide() && document){
+                return parseInt(document.getElementById('top-nav').offsetHeight);
+            }
+            return null;
+        },
 
         /** May be bound to access this.props.href (if available) as fallback */
         getWindowPath : function(mounted){
@@ -253,6 +261,7 @@ var Navigation = module.exports = React.createClass({
                             {/* REMOVE SEARCH FOR NOW: <Search href={this.props.href} /> */}
                         </Navbar.Collapse>
                     </Navbar>
+                    <HoverStatistics ref="stats" href={this.props.href} />
                 </div>
             </div>
         );

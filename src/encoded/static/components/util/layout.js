@@ -2,7 +2,45 @@
 
 var { isServerSide } = require('./misc');
 
+/** 
+ * Most of these functions should not be run from a component until it has mounted as they do not work
+ * on serverside (depend on window, document, DOM, etc.)
+ */
 var layout = module.exports = {
+
+    /** Get distance from top of browser viewport to an element's top. */
+    getElementTop : function(el){
+        if (!(typeof window !== 'undefined' && window && document && document.body)) return null;
+        if (!el || typeof el.getBoundingClientRect !== 'function') return null;
+        var bodyRect = document.body.getBoundingClientRect();
+        var boundingRect = el.getBoundingClientRect();
+        return boundingRect.top - bodyRect.top;
+    },
+
+    getElementOffset : function(el){
+        if (!(typeof window !== 'undefined' && window && document && document.body)) return null;
+        if (!el || typeof el.getBoundingClientRect !== 'function') return null;
+        var bodyRect = document.body.getBoundingClientRect();
+        var boundingRect = el.getBoundingClientRect();
+        return {
+            'top' : boundingRect.top - bodyRect.top,
+            'left' : boundingRect.left - bodyRect.left
+        };
+    },
+
+    getElementOffsetFine : function(el) {
+        var x = 0;
+        var y = 0;
+
+        while (el && !isNaN(el.offsetLeft) && !isNaN(el.offsetTop)) {
+            // FF & IE don't support body's scrollTop - use window instead
+            x += el.offsetLeft - (el.tagName === 'BODY' ? window.pageXOffset : el.scrollLeft);
+            y += el.offsetTop - (el.tagName === 'BODY' ? window.pageYOffset : el.scrollTop);
+            el = el.offsetParent;
+        }
+
+        return { left: x, top: y };
+    },
 
     /**
      * Get current grid size, if need to sidestep CSS.
@@ -81,7 +119,9 @@ var layout = module.exports = {
             return { containerHeight : fullContainerHeight, textWidth : textLineWidth };
         }
         return textLineWidth;
-    }
+    },
+
+
 
 
 }; 

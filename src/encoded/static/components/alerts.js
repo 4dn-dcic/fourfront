@@ -9,17 +9,31 @@ var Alerts = module.exports = React.createClass({
 
     statics : {
         queue : function(alert, callback){
+            var currentAlerts = store.getState().alerts;
+            if (_.pluck(currentAlerts, 'title').indexOf(alert.title) > -1) return null; // Same alert is already set.
             store.dispatch({
-                type: { 'alerts' : store.getState().alerts.concat([alert]) }
+                type: { 'alerts' : currentAlerts.concat([alert]) }
             });
         },
         deQueue : function(alert, callback){
+            var currentAlerts = store.getState().alerts;
+            currentAlerts = currentAlerts.filter(function(a){ return a.title != alert.title; });
             store.dispatch({
-                type: { 'alerts' : _.without(store.getState().alerts, alert) }
+                type: { 'alerts' : currentAlerts }
             });
         },
+
         // Common alert definitions
-        LoggedOut : {"title" : "Logged Out", "message" : "You have been logged out due to an expired session.", style : 'danger'}
+        LoggedOut : {
+            "title"     : "Logged Out",
+            "message"   : "You have been logged out due to an expired session.",
+            "style"     : 'danger'
+        },
+        NoFilterResults : {
+            'title'     : "No Results",
+            'message'   : "Selecting this filter returned no results so it was deselected.",
+            'style'     : "warning"
+        }
     },
 
     getInitialState : function(){ 
