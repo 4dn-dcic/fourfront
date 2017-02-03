@@ -19,8 +19,6 @@ var { FacetCharts } = require('./facetcharts');
 
 var dispatch_dict = {}; //used to store value for simultaneous dispatch
 
-if (!isServerSide()) console.log(ajax);
-
 var portal = {
     portal_title: '4DN Data Portal',
     global_sections: [
@@ -542,15 +540,18 @@ var App = React.createClass({
             if (request && this.requestCurrent) {
                 // Abort the current request, then remember we've aborted it so that we don't render
                 // the Network Request Error page.
-                if (request && typeof request.abort === 'function') request.abort();
+                if (request && typeof request.abort === 'function'){
+                    request.abort();
+                    console.warn("Aborted previous request", request);
+                }
                 this.requestAborted = true;
                 this.requestCurrent = false;
             }
             store.dispatch({
-                type: {'context': event.state}
-            });
-            store.dispatch({
-                type: {'href': href}
+                type: {
+                    'href': href,
+                    'context': event.state
+                }
             });
 
         }

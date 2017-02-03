@@ -1,10 +1,10 @@
 'use strict';
 var React = require('react');
-var globals = require('./globals');
+var globals = require('./../globals');
 var Panel = require('react-bootstrap').Panel;
-var Table = require('./collection').Table;
-var { AuditIndicators, AuditDetail, AuditMixin } = require('./audit');
-var { console, object } = require('./util');
+var Table = require('./../collection').Table;
+var { AuditIndicators, AuditDetail, AuditMixin } = require('./../audit');
+var { console, object } = require('./../util');
 
 var Fallback = module.exports.Fallback = React.createClass({
     contextTypes: {
@@ -65,13 +65,6 @@ globals.content_views.register(Item, 'Item');
 // Also use this view as a fallback for anything we haven't registered
 globals.content_views.fallback = function () {
     return Fallback;
-};
-
-
-
-// Also use this view as a fallback for anything we haven't registered
-globals.panel_views.fallback = function () {
-    return ItemLoader;
 };
 
 

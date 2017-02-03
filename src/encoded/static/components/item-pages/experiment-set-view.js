@@ -1,14 +1,14 @@
 'use strict';
 
 var React = require('react');
-var globals = require('./globals');
+var globals = require('./../globals');
 var Panel = require('react-bootstrap').Panel;
-var { ExperimentsTable } = require('./experiments-table');
+var { ExperimentsTable } = require('./../experiments-table');
 var _ = require('underscore');
-var { DescriptorField, formValue, ItemHeader } = require('./item-view');
-var FacetList = require('./facetlist');
-var { ajax, console, DateUtility, object } = require('./util');
-var FormattedInfoBlock = require('./formatted-info-block');
+var { DescriptorField, Detail, ItemHeader } = require('./item-view');
+var FacetList = require('./../facetlist');
+var { ajax, console, DateUtility, object } = require('./../util');
+var FormattedInfoBlock = require('./../formatted-info-block');
 
 /**
  * Entire ExperimentSet page view.
@@ -251,7 +251,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                                     }
                                 />
 
-                                <dd>{ formValue(this.props.schemas, this.props.context[ikey], ikey, 0) }</dd>
+                                <dd>{ Detail.formValue(this.props.schemas, this.props.context[ikey], ikey, 0) }</dd>
                             </div>
                         )}
                     </dl>

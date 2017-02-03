@@ -1116,6 +1116,7 @@ var Browse = browse.Browse = React.createClass({
         if (this.props.context !== nextProps.context) return true;
         if (this.props.expSetFilters !== nextProps.expSetFilters) return true;
         if (this.props.session !== nextProps.session) return true;
+        if (this.props.href !== nextProps.href) return true;
         return false; // We don't care about props.schemas or props.expIncomplete props (other views might), so we can skip re-render.
     },
 
@@ -1133,9 +1134,10 @@ var Browse = browse.Browse = React.createClass({
             return <div className="error-page"><h4>{context.notification}</h4></div>
         }
         var results = context['@graph'];
-        var searchBase = url.parse(this.context.location_href).search || '';
+        var searchBase = url.parse(this.props.href || this.context.location_href).search || '';
 
         // browse is only for experiment sets
+        console.log(this.props.href, this.context.location_href, searchBase);
         if(searchBase.indexOf('?type=ExperimentSetReplicate') === -1){
             return(
                 <div className="error-page">

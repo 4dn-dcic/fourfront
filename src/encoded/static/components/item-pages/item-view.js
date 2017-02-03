@@ -1,12 +1,13 @@
 'use strict';
 
 var React = require('react');
-var globals = require('./globals');
+var globals = require('./../globals');
 var Panel = require('react-bootstrap').Panel;
-var Table = require('./collection').Table;
-var { AuditIndicators, AuditDetail, AuditMixin } = require('./audit');
-var { console, object, DateUtility } = require('./util');
-var { FlexibleDescriptionBox } = require('./experiment-common');
+var Table = require('./../collection').Table;
+var _ = require('underscore');
+var { AuditIndicators, AuditDetail, AuditMixin } = require('./../audit');
+var { console, object, DateUtility } = require('./../util');
+var { FlexibleDescriptionBox } = require('./../experiment-common');
 
 
 
@@ -55,7 +56,7 @@ var ItemHeader = {
                     <h3 className="col-sm-6 item-label-title">
                         { /* PLACEHOLDER / TEMP-EMPTY */ }
                     </h3>
-                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra text-capitalize indicators clearfix">
+                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra text-capitalize item-header-indicators clearfix">
                         { this.wrapChildren() }
                         { this.parsedStatus() }
                     </h5>
@@ -124,10 +125,9 @@ var ItemHeader = {
 
 
 
-var ItemView = module.exports = React.createClass({
+var Detail = React.createClass({
 
-    statics : {
-
+    statics: {
         // Formats the correct display for each metadata field
         formKey : function(tips, key){
             var tooltip = '';
@@ -142,7 +142,6 @@ var ItemView = module.exports = React.createClass({
             );
         },
 
-
         /**
          * Recursively render keys/values included in a provided item.
          * Wraps URLs/paths in link elements. Sub-panels for objects.
@@ -154,7 +153,7 @@ var ItemView = module.exports = React.createClass({
             var toReturn = [];
             if(Array.isArray(item)) {
                 for (var i=0; i < item.length; i++){
-                    toReturn.push(ItemView.formValue(schemas, item[i], keyPrefix, depth + 1));
+                    toReturn.push(Detail.formValue(schemas, item[i], keyPrefix, depth + 1));
                 }
             } else if (typeof item === 'object') {
                 toReturn.push(
@@ -175,6 +174,41 @@ var ItemView = module.exports = React.createClass({
                 <div>{toReturn}</div>
             );
         },
+    },
+
+    propTypes : {
+        schemas : React.PropTypes.object.isRequired,
+        context : React.PropTypes.object.isRequired
+    },
+
+    shouldComponentUpdate : function(nextProps){
+        if (this.props.context !== nextProps.context) return true;
+        if (this.props.schemas !== nextProps.schemas) return true;
+        return false;
+    },
+
+    render : function(){
+        var context = this.props.context;
+        var sortKeys = _.keys(context).sort();
+        var tips = object.tipsFromSchema(this.props.schemas, context);
+        return (
+            <dl className="key-value">
+                {sortKeys.map((ikey, idx) =>
+                    <div key={ikey} data-test="term-name">
+                        {Detail.formKey(tips,ikey)}
+                        <dd>{Detail.formValue(this.props.schemas,context[ikey])}</dd>
+                    </div>
+                )}
+            </dl>
+        );
+    }
+});
+
+
+
+var ItemView = module.exports = React.createClass({
+
+    statics : {
 
         // Display the item field with a tooltip showing the field description from
         // schema, if available
@@ -273,8 +307,8 @@ var ItemView = module.exports = React.createClass({
                                         {sortKeys.map(function(ikey, idx){
                                             return (
                                                 <div className="sub-entry" key={ikey} data-test="term-name">
-                                                {ItemView.formKey(tips,ikey)}
-                                                <dd>{ItemView.formValue(schemas, item[ikey])}</dd>
+                                                {Detail.formKey(tips,ikey)}
+                                                <dd>{Detail.formValue(schemas, item[ikey])}</dd>
                                                 </div>
                                             );
                                         })}
@@ -287,7 +321,8 @@ var ItemView = module.exports = React.createClass({
             }
         }),
 
-        ItemHeader : ItemHeader
+        ItemHeader : ItemHeader,
+        Detail : Detail
 
     },
 
@@ -295,9 +330,6 @@ var ItemView = module.exports = React.createClass({
         var schemas = this.props.schemas || {};
         var context = this.props.context;
         var title = globals.listing_titles.lookup(context)({context: context});
-        var sortKeys = Object.keys(context).sort();
-        var tips = object.tipsFromSchema(schemas, context);
-
         var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container');
 
         return (
@@ -311,14 +343,7 @@ var ItemView = module.exports = React.createClass({
                     <ItemHeader.BottomRow />
                 </ItemHeader.Wrapper>
 
-                <dl className="key-value">
-                    {sortKeys.map((ikey, idx) =>
-                        <div key={ikey} data-test="term-name">
-                            {ItemView.formKey(tips,ikey)}
-                            <dd>{ItemView.formValue(schemas,context[ikey])}</dd>
-                        </div>
-                    )}
-                </dl>
+                <Detail context={context} schemas={schemas} />
 
             </div>
         );

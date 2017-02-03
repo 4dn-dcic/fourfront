@@ -17,8 +17,8 @@ describe('Testing item.js', function() {
         React = require('react');
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
-        item = require('../item');
-        Item = require('../item-view');
+        item = require('./../item-pages/item');
+        Item = require('./../item-pages/item-view');
         context = require('../testdata/library/sid38806');
         schemas = require('../testdata/schemas');
         Wrapper = React.createClass({
