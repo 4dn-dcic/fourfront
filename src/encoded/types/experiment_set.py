@@ -76,6 +76,9 @@ class ExperimentSet(Item):
                 "experiments_in_set.files.related_files.file.uuid",
                 "experiments_in_set.filesets",
                 "experiments_in_set.filesets.files_in_set",
+                "experiments_in_set.filesets.files_in_set.related_files.relationship_type",
+                "experiments_in_set.filesets.files_in_set.related_files.file.\@id",
+                "experiments_in_set.filesets.files_in_set.related_files.file.uuid",
                 "experiments_in_set.digestion_enzyme"]
 
     def _update(self, properties, sheets=None):

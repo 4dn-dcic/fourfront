@@ -374,9 +374,10 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 @media screen and (min-width: $screen-md-min){
 	/* Nudge accession #, etc. closer to title on wide desktop views */
-	.exp-set-header-area {
-		margin-top: -17px;
+	.item-view-header {
+		margin-top: -27px;
 	}
+	
 }
 
 .item-label-title {

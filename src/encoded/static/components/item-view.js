@@ -68,7 +68,7 @@ var ItemHeader = {
         render : function(){
             return (
                 <FlexibleDescriptionBox
-                    description={ this.props.context.description }
+                    description={ this.props.context.description || <em>No description provided.</em> }
                     className="item-page-heading experiment-heading"
                     textClassName="text-large"
                     fitTo="grid"
