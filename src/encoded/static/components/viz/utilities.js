@@ -32,7 +32,7 @@ var vizUtil = module.exports = {
 
     colorCache : {}, // We cache generated colors into here to re-use and speed up.
 
-    colorForNode : function(node, predefinedColors){
+    colorForNode : function(node, predefinedColors = {}, cachedOnly = false){
         var nodeDatum = node.data || node; // So can process on d3-gen'd/wrapped elements as well as plain datums.
 
         if (nodeDatum.color){
@@ -43,9 +43,12 @@ var vizUtil = module.exports = {
         var nodeName = nodeDatum.name.toLowerCase();
 
         if (typeof predefinedColors[nodeName] !== 'undefined'){
+            vizUtil.colorCache[nodeName] = predefinedColors[nodeName];
             return predefinedColors[nodeName];
         } else if (typeof vizUtil.colorCache[nodeName] !== 'undefined') {
             return vizUtil.colorCache[nodeName]; // Previously calc'd color
+        } else if (cachedOnly){
+            return '#ddd';
         } else if (
             nodeDatum.field === 'accession' ||
             nodeDatum.field === 'experiments_in_set.accession' || 

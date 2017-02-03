@@ -143,17 +143,17 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 { title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
             ],
             'chartFieldsHierarchy'  : [
-                { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
-                { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
                 { 
                     field : 'experiments_in_set.biosample.biosource.individual.organism.name',
                     title : "Primary Organism",
                     name : function(val, id, exps, filteredExps){
-                        return val.charAt(0).toUpperCase() + val.slice(1);
+                        return Filters.Term.toName('experiments_in_set.biosample.biosource.individual.organism.name', val);
                     }
                 },
+                { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
                 { title : "Biosample", field : 'experiments_in_set.biosample.biosource_summary' },
-                { 
+                { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
+                {
                     title : "Digestion Enzyme",
                     field : 'experiments_in_set.digestion_enzyme.name',
                     description : function(val, id, exps, filteredExps, exp){
@@ -485,8 +485,8 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         FacetList.unhighlightTerms();
 
         if (!this.state.mounted){
-            return ( // + 66 == breadcrumbs (26) + breadcrumbs-margin-bottom (10) + description (30)
-                <div className={"facet-charts loading " + show} key="facet-charts" style={{ 'height' : height + 66 }}>
+            return ( // + 30 == breadcrumbs (26) + breadcrumbs-margin-bottom (10) + description (30)
+                <div className={"facet-charts loading " + show} key="facet-charts" style={{ 'height' : height + 30 }}>
                     <i
                         className="icon icon-spin icon-circle-o-notch" 
                         style={{
@@ -499,7 +499,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
         return (
             <div className={"facet-charts show-" + show} key="facet-charts">
-                <ChartBreadcrumbs ref="breadcrumbs" selectedNodes={this.state.selectedNodes} key="facet-crumbs" />
+                
                 <div className="facet-charts-description description" ref="description" key="facet-chart-description"></div>
                 <div className="row facet-chart-row-1" key="facet-chart-row-1">
                     <div className={genChartColClassName(1)} key="facet-chart-row-1-chart-1" style={{ height: height }}>
@@ -510,7 +510,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                             maxFieldDepthIndex={5}
 
                             height={height} width={this.width(0) - 20}
-                            breadcrumbs={() => this.refs.breadcrumbs}
+                            updateBreadcrumbsHoverNodes={(nodes) => this.refs && this.refs.breadcrumbs && this.refs.breadcrumbs.updateHoverNodes(nodes)}
                             descriptionElement={() => this.refs.description}
 
                             handleClick={this.handleVisualNodeClickToUpdateFilters}

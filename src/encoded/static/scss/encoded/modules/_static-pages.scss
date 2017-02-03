@@ -21,6 +21,16 @@
 	}
 }
 
+h4.fourDN-header {
+	font-size: 24px;
+	margin-bottom: 10px;
+	padding-bottom: 8px;
+}
+
+h5.fourDN-header {
+	font-size: 20px;
+}
+
 .fourDN-banner{
 	margin-top: 40px;
 	margin-bottom: 40px;
@@ -254,9 +264,31 @@
 
 // Home
 
-.home-announcements{
+.home-announcements {
 	padding: 5px !important;
 	margin-top: 30px;
+}
+
+.homepage-links-row {
+	
+	.link-block {
+		width: 25%;
+		float: left;
+		text-align: center;
+		font-weight: 500;
+		padding: 4px 8px;
+		//border-left: 1px solid #ddd;
+
+		&:not(:first-child){
+			border-left: 1px solid #eee;
+		}
+		/*
+		&:last-child {
+			border-right: 1px solid #ddd;
+		}
+		*/
+	}
+
 }
 
 // Error

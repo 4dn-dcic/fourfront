@@ -195,6 +195,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                             experimentsOrSets="experiments"
                             expIncompleteFacets={ this.props.expIncompleteFacets }
                             className="with-header-bg"
+                            useAjax={false}
                         />
                     </div>
 

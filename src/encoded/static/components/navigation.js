@@ -261,7 +261,7 @@ var Navigation = module.exports = React.createClass({
                             {/* REMOVE SEARCH FOR NOW: <Search href={this.props.href} /> */}
                         </Navbar.Collapse>
                     </Navbar>
-                    <HoverStatistics ref="stats" href={this.props.href} />
+                    <HoverStatistics ref="stats" href={this.props.href} expSetFilters={this.props.expSetFilters} />
                 </div>
             </div>
         );

@@ -366,7 +366,6 @@ var SunBurst = React.createClass({
             'fields' : null,
             'maxFieldDepthIndex' : null, // If set, will not display fields past this index, though will still calculate values for it.
             'id' : 'main',
-            'breadcrumbs' : true, // true (show built-in), false (don't show), function (returns ChartBreadcrumbs instance), or instance of ChartBreadcrumbs.
             'descriptionElement' : true, // same as above, but for a <div> element to hold description.
             'fallbackToSampleData' : false, // Perhaps for tests.
             'handleClick' : function(e){
@@ -448,7 +447,7 @@ var SunBurst = React.createClass({
 
         });
 
-        if (this.props.breadcrumbs !== false) this.updateBreadcrumbs(sequenceArray);
+        this.updateBreadcrumbs(sequenceArray);
     },
 
     // Restore everything to full opacity when moving off the visualization.
@@ -461,7 +460,7 @@ var SunBurst = React.createClass({
         var _this = this;
         setTimeout(function(){ // Wait 50ms (duration of mouseenter throttle) so delayed handler doesn't cancel this mouseleave transition.
             // Hide the breadcrumb trail
-            if (_this.props.breadcrumbs !== false) _this.updateBreadcrumbs([], '0%'); //_this.breadcrumbs().setState({ 'visible' : false });
+            _this.updateBreadcrumbs([], '0%');
 
             // Transition each segment to full opacity and then reactivate it.
             d3.selectAll("svg.sunburst-svg-chart path, svg.sunburst-svg-chart > g").classed('hover', false);
@@ -479,12 +478,13 @@ var SunBurst = React.createClass({
     },
 
     updateBreadcrumbs : function(nodeArray){
-        this.breadcrumbs().setState({ 
-            highlighted : nodeArray.map((n)=>{
+        if (typeof this.props.updateBreadcrumbsHoverNodes !== 'function') return null;
+        this.props.updateBreadcrumbsHoverNodes(
+            nodeArray.map((n)=>{
                 n.color = this.props.colorForNode(n);
                 return n;
             })
-        });
+        );
     },
 
     /** @return {number} visible chart height, corrected for any offsets */
@@ -754,7 +754,6 @@ var SunBurst = React.createClass({
     },
 
     /** Get refs to breadcrumb and description components, whether they created by own component or passed in as props. */
-    breadcrumbs : function(){ return vizUtil.mixin.getBreadcrumbs.call(this); },
     descriptionElement : function(){ return vizUtil.mixin.getDescriptionElement.call(this); },
 
     updateExplanation : function(){
@@ -824,15 +823,28 @@ var SunBurst = React.createClass({
         if (this.state.transitioning || this.justMounted) {
             _this.existingNodes = {};
         }
+
+        var applicableFields = null;
+        if (_this.props.expSetFilters){
+            applicableFields = _.intersection(
+                _.keys(_this.props.expSetFilters).sort(),
+                _.pluck(_this.props.fields, 'field').sort()
+            );
+        }
+
+        console.log(applicableFields);
         
         function genPath(node, nodeIndex, allNodes, removing = false){
             var existing = !!(pastExistingNodes && pastExistingNodes[node.data.id]);
 
             var hasTerm = typeof node.data.field === 'string' && typeof node.data.term === 'string';
             var clickable = hasTerm && node.data.noClick !== true;
+            var applicableFields, isSetAsFilter;
+
             var isSetAsFilter = (
                 hasTerm &&
-                _this.props.expSetFilters &&
+                applicableFields &&
+                applicableFields.length > 0 &&
                 _this.props.expSetFilters[node.data.field] instanceof Set &&
                 _this.props.expSetFilters[node.data.field].has(node.data.term)
             );
@@ -842,7 +854,7 @@ var SunBurst = React.createClass({
                 clickable ? " clickable" : " static"
             ) + (_this.root.data.active > 0 ?
                 (node.data.active === 0 ? ' filtered-out' : '') +
-                (isSetAsFilter ? ' term-is-set' : (hasTerm ? ' term-is-not-set' : ''))
+                (isSetAsFilter ? ' term-is-set' : (hasTerm && applicableFields && applicableFields.length > 0 ? ' term-is-not-set' : ''))
                 : ' '
             );
             
@@ -889,7 +901,7 @@ var SunBurst = React.createClass({
                     onMouseOver={node.depth > 0 ? _this.mouseoverHandle : null }
                     onMouseEnter={ node.depth === 0 ? _this.mouseleave : null }
                     onMouseLeave={node.depth > 0 ? function(e){ unhighlightTerms(e.target.__data__.data.field); } : null}
-                    onClick={clickable ? (e) => _this.props.handleClick(e.target.__data__) : null}
+                    onClick={/*clickable ? (e) => _this.props.handleClick(e.target.__data__) : */null}
                     key={node.data.id}
                     data-key={node.data.id}
                 />
@@ -931,12 +943,6 @@ var SunBurst = React.createClass({
         var styleOpts = this.styleOptions();
         this.visualizationSetup();
         var paths = this.state.mounted ? this.generatePaths() : null;
-        
-        // Generate breadcrumb/description elements IF their prop vals are true.
-        function breadcrumbs(){
-            if (this.props.breadcrumbs !== true) return null;
-            return <ChartBreadcrumbs parentId={this.props.id} ref="breadcrumbs" />;
-        }
 
         function description(){
             if (this.props.descriptionElement !== true) return null;
@@ -948,8 +954,9 @@ var SunBurst = React.createClass({
             var xOffset = (this.root && this.root.y1) || 0;
             var svgWidth = this.width();
             var svgHeight = this.height();
-            return (
-                <ZoomCursor
+
+            /*
+            <ZoomCursor
                     onMouseLeave={this.mouseleave}
                     width={svgWidth}
                     height={svgHeight}
@@ -964,32 +971,34 @@ var SunBurst = React.createClass({
                         right : 5//- (svgWidth / (this.props.maxFieldDepthIndex + 1))
                     }}
                 >
-                    <svg
-                        key={this.props.id + "-svg"}
-                        className="sunburst-svg-chart"
-                        data-width={this.width()}
-                        style={{
-                            'width'  : svgWidth,
-                            'height' : svgHeight
-                        }}
-                        ref="svgElem"
-                        onMouseLeave={this.mouseleave}
+                */
+
+            return (
+                <svg
+                    key={this.props.id + "-svg"}
+                    className="sunburst-svg-chart"
+                    data-width={this.width()}
+                    style={{
+                        'width'  : svgWidth,
+                        'height' : svgHeight
+                    }}
+                    ref="svgElem"
+                    onMouseLeave={this.mouseleave}
+                >
+                    <g
+                        key={this.props.id + "-svg-group"} 
+                        className="group-container"
+                        ref={(r) => { this.vis = d3.select(r); }}
+                        transform={
+                            "translate(" + (-xOffset) + ",0)"
+                        }
+                        onMouseLeave={null /*this.mouseleave*/}
                     >
-                        <g
-                            key={this.props.id + "-svg-group"} 
-                            className="group-container"
-                            ref={(r) => { this.vis = d3.select(r); }}
-                            transform={
-                                "translate(" + (-xOffset) + ",0)"
-                            }
-                            onMouseLeave={null /*this.mouseleave*/}
-                        >
-                            {/* <circle r={this.radius} className="bounding-circle" key={this.props.id +"-bounding-circle"} /> */}
-                            { paths }
-                        </g>
-                    </svg>
-                </ZoomCursor>
+                        { paths }
+                    </g>
+                </svg>
             );
+            /* </ZoomCursor> */
         }
 
         function renderYAxis(){
@@ -1008,9 +1017,7 @@ var SunBurst = React.createClass({
                 if (n.length > 0) active = true;
                 return (
                     <div className={"top-label " + (active ? 'active' : '')} style={{ 'width': barWidth, 'left' : p }} onClick={active ? ()=>{
-                        var esf = _.clone(this.props.expSetFilters);
-                        delete esf[n[0].data.field];
-                        Filters.saveChangedFilters(esf, true, this.props.href);
+                        Filters.unsetAllTermsForField(n[0].data.field, this.props.expSetFilters, true, this.props.href);
                     } : null} key={'col-' + i}>
                         <i className="icon icon-times"/>
                     </div>
@@ -1048,7 +1055,6 @@ var SunBurst = React.createClass({
                     transform : 'none',
                 }}
             >
-                { breadcrumbs.call(this) }
                 <div id={this.props.id + "-chart"} className="chart chart-sunburst" ref="chart" style={{
                     'height' : this.props.height,
                     'transform' : ''

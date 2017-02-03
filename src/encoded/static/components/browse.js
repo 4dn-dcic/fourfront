@@ -1106,7 +1106,6 @@ var Browse = browse.Browse = React.createClass({
 
     propTypes : {
         'context' : React.PropTypes.object.isRequired,
-        'expIncompleteFacets' : React.PropTypes.object,
         'expSetFilters' : React.PropTypes.object,
         'session' : React.PropTypes.bool,
         'schemas' : React.PropTypes.object,

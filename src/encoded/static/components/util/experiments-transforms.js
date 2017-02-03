@@ -195,11 +195,11 @@ var f = module.exports = {
             .reduce(function(pairsObj, file, files){
                 // Group via { 'file_paired_end_1_ID' : { '1' : file_paired_end_1, '2' : file_paired_end_2,...} }
                 if (parseInt(file.paired_end) === 1){
-                    pairsObj[file['@id']] = { '1' : file };
+                    pairsObj[file.uuid] = { '1' : file };
                 } else if (Array.isArray(file.related_files)) {
                     _.each(file.related_files, function(related){
-                        if (pairsObj[related.file]) {
-                            pairsObj[related.file][file.paired_end + ''] = file;
+                        if (pairsObj[related.file && related.file.uuid]) {
+                            pairsObj[related.file && related.file.uuid][file.paired_end + ''] = file;
                         } else {
                             file.unpaired = true; // Mark file as unpaired
                         }

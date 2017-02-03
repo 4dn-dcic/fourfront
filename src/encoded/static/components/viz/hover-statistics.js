@@ -6,6 +6,7 @@ var url = require('url');
 var d3 = require('d3');
 var vizUtil = require('./utilities');
 var { expFxn, Filters, console, object, isServerSide } = require('../util');
+var ChartBreadcrumbs = require('./components/ChartBreadcrumbs');
 
 
 var HoverStatistics = module.exports = React.createClass({
@@ -27,7 +28,8 @@ var HoverStatistics = module.exports = React.createClass({
             'count_experiments_total'     : 0,
             'count_experiment_sets_total' : 0,
             'count_files_total'           : 0,
-            'mounted' : false
+            'mounted' : false,
+            'showFilters' : false
         };
     },
 
@@ -45,7 +47,9 @@ var HoverStatistics = module.exports = React.createClass({
         if (!this.state.count_files_total           && this.state.count_files_total !== newState.count_files_total) return true;
 
         if (this.state.mounted !== newState.mounted) return true;
+        if (this.state.showFilters !== newState.showFilters) return true;
         if (this.props.showCurrent !== newProps.showCurrent) return true;
+        if (this.props.expSetFilters !== newProps.expSetFilters) return true;
         if (this.isInvisible(this.props, this.state) != this.isInvisible(newProps, newState)) return true;
 
         return false;
@@ -94,6 +98,12 @@ var HoverStatistics = module.exports = React.createClass({
         return false;
     },
 
+    componentWillReceiveProps : function(nextProps){
+        if (!(nextProps.expSetFilters && _.keys(nextProps.expSetFilters).length > 0) && this.state.showFilters){
+            this.setState({ 'showFilters' : false });
+        }
+    },
+
     className: function(){
         var cn = "explanation";
         if (typeof this.props.className === 'string') cn += ' ' + this.props.className;
@@ -102,6 +112,7 @@ var HoverStatistics = module.exports = React.createClass({
     },
 
     renderStats : function(){
+        var areAnyFiltersSet = (this.props.expSetFilters && _.keys(this.props.expSetFilters).length > 0);
         var stats;
         if (this.props.showCurrent || this.state.showCurrent){
             stats = {
@@ -117,31 +128,53 @@ var HoverStatistics = module.exports = React.createClass({
             };
         }
         return (
-            <div className="inner container">
-                <HoverStatistics.Stat
-                    shortLabel="Exp. Sets"
-                    longLabel="Experiment Sets"
-                    id={this.props.id}
-                    classNameID="expsets"
-                    value={stats.experiment_sets}
-                    key={0}
-                />
-                <HoverStatistics.Stat
-                    shortLabel="Exps"
-                    longLabel="Experiments"
-                    id={this.props.id}
-                    classNameID="experiments"
-                    value={stats.experiments}
-                    key={1}
-                />
-                <HoverStatistics.Stat
-                    shortLabel="Files"
-                    longLabel="Files in Experiments"
-                    id={this.props.id}
-                    classNameID="files"
-                    value={stats.files}
-                    key={2}
-                />
+            <div className={"inner container" + (this.state.showFilters ? ' showing-filters' : '')} onMouseLeave={()=>{
+                this.setState({ showFilters : false });
+            }}>
+                <div className="left-side clearfix" onMouseEnter={()=>{
+                    if (areAnyFiltersSet) this.setState({ showFilters : true });
+                }}>
+                    <HoverStatistics.Stat
+                        shortLabel="Exp. Sets"
+                        longLabel="Experiment Sets"
+                        id={this.props.id}
+                        classNameID="expsets"
+                        value={stats.experiment_sets}
+                        key={0}
+                    />
+                    <HoverStatistics.Stat
+                        shortLabel="Exps"
+                        longLabel="Experiments"
+                        id={this.props.id}
+                        classNameID="experiments"
+                        value={stats.experiments}
+                        key={1}
+                    />
+                    <HoverStatistics.Stat
+                        shortLabel="Files"
+                        longLabel="Files in Experiments"
+                        id={this.props.id}
+                        classNameID="files"
+                        value={stats.files}
+                        key={2}
+                    />
+                    <div className="any-filters-glance-label" title={areAnyFiltersSet ? "Filtered" : "No filters set"}>
+                        <i className="icon icon-filter" style={{ opacity : areAnyFiltersSet ? 1 : 0.25 }} />
+                    </div>
+                </div>
+                <div className="bottom-side" style={{ opacity : this.state.showFilters ? 1 : 0 }}>
+                    <div className="crumbs-label">
+                        Filtered by
+                    </div>
+                    <ChartBreadcrumbs
+                        ref="breadcrumbs"
+                        expSetFilters={this.props.expSetFilters}
+                        invisible={!this.state.mounted}
+                        orderedFieldNames={null}
+                        href={this.props.href}
+                        showTitle={false}
+                    />
+                </div>
             </div>
         );
     },

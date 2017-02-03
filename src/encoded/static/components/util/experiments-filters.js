@@ -5,15 +5,101 @@ var url = require('url');
 var ajax = require('./ajax');
 var Alerts = null; //require('./../alerts');
 var store = null;
+var object = require('./object');
 
 
 var expFilters = module.exports = {
 
-    // navigate should be set by app.js in App.getInitialState(); 
+    // navigate should be set by app.js in App.getInitialState(), getSchemas is set in App.componentDidMount() -> App.loadSchemas()
     // the others (getPage,getLimit) are defaults but should be overwritten by some component, referencing its state.
     navigate : null,
+    getSchemas : null,
     getPage  : function(){ return 1;  },
     getLimit : function(){ return 25; },
+
+
+    Term : {
+
+        toName : function(field, term){
+            switch (field) {
+                case 'experiments_in_set.biosample.biosource.individual.organism.name':
+                    return term.charAt(0).toUpperCase() + term.slice(1);
+                default:
+                    return term;
+            }
+        },
+
+    },
+
+    Field : {
+
+        nameMap : {
+            'experiments_in_set.biosample.biosource.individual.organism.name' : 'Primary Organism'
+        },
+
+        toName : function(field, schemaOnly = false){
+            if (!schemaOnly && expFilters.Field.nameMap[field]){
+                return expFilters.Field.nameMap[field];
+            } else {
+                var schemaProperty = expFilters.Field.getSchemaProperty(field);
+                if (schemaProperty && schemaProperty.title){
+                    expFilters.Field.nameMap[field] = schemaProperty.title; // Cache in nameMap for faster lookups.
+                    return schemaProperty.title;
+                } else if (!schemaOnly) {
+                    return field;
+                } else {
+                    return null;
+                }
+            }
+        },
+
+        getSchemaProperty : function(field){
+            var schemas = expFilters.getSchemas && expFilters.getSchemas();
+            if (!schemas) return null;
+            var fieldParts = field.split('.');
+            var baseSchemaProperties = schemas.ExperimentSet.properties;
+
+
+            function getNextSchemaProperties(linkToName){
+
+                function combineSchemaPropertiesFor(relatedLinkToNames){
+                    return _.reduce(relatedLinkToNames, function(schemaProperties, schemaName){
+                        if (schemas[schemaName]){
+                            return _.extend(schemaProperties, schemas[schemaName].properties);
+                        }
+                        else return schemaProperties;
+                    }, {});
+                }
+
+                if (linkToName === 'Experiment'){
+                    return combineSchemaPropertiesFor(['Experiment', 'ExperimentRepliseq', 'ExperimentHiC', 'ExperimentCaptureC']);
+                } else if (linkToName === 'Individual'){
+                    return combineSchemaPropertiesFor(['Individual', 'IndividualHuman', 'ExperimentHiC', 'IndividualMouse']);
+                } else {
+                    return schemas[linkToName].properties;
+                }
+            }
+
+
+            function getProperty(propertiesObj, fieldPartIndex){
+                var property = propertiesObj[fieldParts[fieldPartIndex]];
+                if (fieldPartIndex >= fieldParts.length - 1) return property;
+                var nextSchemaProperties = null;
+
+                if (property.type === 'array' && property.items && property.items.linkTo){
+                    nextSchemaProperties = getNextSchemaProperties(property.items.linkTo);
+                } else if (property.linkTo) {
+                    nextSchemaProperties = getNextSchemaProperties(property.linkTo);
+                }
+
+                if (nextSchemaProperties) return getProperty(nextSchemaProperties, fieldPartIndex + 1);
+            }
+
+            return getProperty(schemas.ExperimentSet.properties, 0);
+
+        }
+
+    },
 
 
     /**
@@ -136,6 +222,15 @@ var expFilters = module.exports = {
 
     },
 
+    unsetAllTermsForField : function(field, expSetFilters, save = true, href = null){
+        var esf = _.clone(expSetFilters);
+        delete esf[field];
+        if (save && href){
+            return expFilters.saveChangedFilters(esf, true, href);
+        } else {
+            return esf;
+        }
+    },
 
     /**
      * Convert expSetFilters to a URL, given a current URL whose path is used to append arguments
@@ -214,6 +309,39 @@ var expFilters = module.exports = {
                 return field + '=' + encodeURIComponent(t).replace(/%20/g, '+');
             }).join('&');
         }).join('&');
+    },
+
+    filtersToNodes : function(expSetFilters = {}, orderedFieldNames = null, flatten = false){
+        // Convert orderedFieldNames into object/hash for faster lookups.
+        var sortObj = null;
+        if (Array.isArray(orderedFieldNames)) sortObj = _.invert(_.object(_.pairs(orderedFieldNames)));
+        return _(expSetFilters).chain()
+            .pairs() // fieldPair[0] = field, fieldPair[1] = Set of terms
+            .sortBy(function(fieldPair){
+                if (sortObj && typeof sortObj[fieldPair[0]] !== 'undefined') return parseInt(sortObj[fieldPair[0]]);
+                else return fieldPair[0];
+            })
+            .reduce(function(m, fieldPair){
+                var termNodes = [...fieldPair[1]].map(function(term){
+                    return {
+                        'data' : {
+                            'term' : term,
+                            'name' : expFilters.Term.toName(fieldPair[0], term),
+                            'field' : fieldPair[0]
+                        }
+                    };
+                });
+                if (flatten){
+                    // [field1:term1, field1:term2, field1:term3, field2:term1]
+                    termNodes.push('spacer');
+                    return m.concat(termNodes);
+                } else {
+                    // [[field1:term1, field1:term2, field1:term3],[field2:term1, field2:term2], ...]
+                    m.push(termNodes);
+                    return m;
+                }
+            }, [])
+            .value();
     },
 
     /**

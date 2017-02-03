@@ -209,17 +209,43 @@ $navbar-transition-length: .75s;
             border-bottom-width: 0;
             .inner.container {
                 height: 0px;
-                overflow: hidden;
             }
         }
         .inner.container {
             text-align: left;
             display: block;
             height : 38px;
-            .stat {
+            transition: height .75s;
+            overflow: hidden;
+            &.showing-filters {
+                height: 108px;
+            }
+            .any-filters-glance-label {
                 display: inline-block;
+                width: 32px;
+                text-align: center;
+                position: relative;
+                padding-top: 10px;
+                height: 38px;
+                border-right: 1px solid #f4f4f4;
+            }
+            .bottom-side {
+                opacity: 1;
+                transition: opacity 0.75s;
+                padding-top: 10px;
+                border-top: 1px solid #f4f4f4;
+                .crumbs-label {
+                    float: left;
+                    width: 72px;
+                    font-size: .85rem;
+                    margin-top: 4px;
+                }
+            }
+            .stat {
+                //display: inline-block;
+                float: left;
                 padding: 5px 12px 5px 5px;
-                height: inherit;
+                height: 38px;
                 border-right: 1px solid #f4f4f4;
                 min-width: 125px;
                 text-align: right;

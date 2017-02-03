@@ -180,24 +180,40 @@ var HomePage = module.exports = React.createClass({
                     </h4>
                 </div>
                 <div className="row">
-                    <div className="col-md-7 col-xs-12">
+                    <div className="col-md-6 col-xs-12">
                         <h3 className="fourDN-header">Welcome</h3>
                         <div className="fourDN-content text-justify" dangerouslySetInnerHTML={{__html: c.description}}></div>
                     </div>
-                    <div className="col-md-5 col-xs-12">
+                    <div className="col-md-6 col-xs-12">
                         <h3 className="fourDN-header">Announcements</h3>
                         {announcements}
                     </div>
-                </div>
-                <div className="row">
-                    <div className="col-md-9 col-xs-12">
 
+                    <div className="col-xs-12 col-sm-12 col-md-6 homepage-links-row">
+                        
+                        <h4 className="fourDN-header">Links</h4>
+                        <div className="links-wrapper">
+                            <div className="link-block">
+                                    <a href="http://www.4dnucleome.org/" target="_blank">Main Portal</a>
+                            </div>
+                            <div className="link-block">
+                                <a href="http://dcic.4dnucleome.org/" target="_blank">DCIC</a>
+                            </div>
+                            <div className="link-block">
+                                <a href="https://commonfund.nih.gov/4Dnucleome/index" target="_blank">Common Fund</a>
+                            </div>
+                            <div className="link-block">
+                                <a href="https://commonfund.nih.gov/4Dnucleome/FundedResearch" target="_blank">Centers and Labs</a>
+                            </div>
+                        </div>
                     </div>
-                    <div className="col-md-3 col-xs-12">
-                        <h3 className="fourDN-header">4DN Links</h3>
-                        <div className="fourDN-content"dangerouslySetInnerHTML={{__html: c.links}}></div>
-                    </div>
+
                 </div>
+
+                <div className="row">
+                    
+                </div>
+
             </div>
         );
     }

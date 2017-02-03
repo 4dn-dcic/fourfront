@@ -527,8 +527,9 @@ var BarPlot = React.createClass({
                     className={
                         "chart-bar no-highlight-color" + 
                         (
-                            d.attr.height > Math.max((this.height() - styleOpts.offset.bottom - styleOpts.offset.top) / 2, 30) ?
-                            ' larger-height' : ''
+                            //d.attr.height > Math.max((this.height() - styleOpts.offset.bottom - styleOpts.offset.top) / 2, 30) ?
+                            //' larger-height' : ''
+                            ''
                         )
                     }
                     data-term={d.term}
@@ -571,19 +572,6 @@ var BarPlot = React.createClass({
                 >
 
                 </div>
-            );
-        },
-
-        topYAxis : function(availWidth, styleOpts){
-            return (
-                <line
-                    key="y-axis-top"
-                    className="y-axis-top"
-                    x1={styleOpts.offset.left}
-                    y1={styleOpts.offset.top}
-                    x2={availWidth - styleOpts.offset.right}
-                    y2={styleOpts.offset.top}
-                />
             );
         },
 
@@ -633,6 +621,37 @@ var BarPlot = React.createClass({
                             </div>
                         );
                     }) }
+                </div>
+            );
+        },
+
+        leftAxis : function(availWidth, availHeight, barData, styleOpts){
+            //console.log(barData);
+            var chartHeight = availHeight - styleOpts.offset.top - styleOpts.offset.bottom;
+            var valStep = barData.maxY / 8;
+            var rangeVal = d3.range(0, barData.maxY + valStep, valStep);
+            console.log(rangeVal);
+            var steps = rangeVal.map(function(v,i){
+                return (
+                    <div className="axis-step" style={{
+                        position : 'absolute',
+                        left: 0,
+                        right: 0,
+                        bottom : (v / barData.maxY) * chartHeight
+                    }} key={i}>
+                        <span className="axis-label">
+                            { v }
+                        </span>
+                    </div>
+                );
+            });
+            return (
+                <div className="bar-plot-left-axis" style={{
+                    height : chartHeight,
+                    width: Math.max(styleOpts.offset.left - 5, 0),
+                    top:  styleOpts.offset.top + 'px'
+                }}>
+                    { steps }
                 </div>
             );
         }
@@ -696,10 +715,11 @@ var BarPlot = React.createClass({
                 style={{ height : availHeight, width: availWidth }}
             >
                 { barComponents }
+                { this.renderParts.leftAxis.call(this, availWidth, availHeight, barData, styleOpts) }
                 { this.renderParts.bottomYAxis.call(this, availWidth, availHeight, allBars, styleOpts) }
             </div>
         );
-
+        /*
         // Keep in mind that 0,0 coordinate is located at top left for SVGs.
         // Easier to reason in terms of 0,0 being bottom left, thus e.g. d.attr.y for bars is set to be positive,
         // so we need to flip it via like availHeight - y in render function(s).
@@ -713,6 +733,7 @@ var BarPlot = React.createClass({
                 { this.renderParts.svg.bottomYAxis.call(this, availWidth, availHeight, currentBars, styleOpts) }
             </svg>
         );
+        */
     }
 });
 
