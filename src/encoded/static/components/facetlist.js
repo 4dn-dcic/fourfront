@@ -131,7 +131,7 @@ var ExpTerm = React.createClass({
 
                 newState.passExpsCount = this.getPassExpsCount(termMatchExps, newProps.experimentSetListJSON || this.props.experimentSetListJSON);
             } else {
-                newState.passExpsCount = (newProps.term && newProps.term.doc_count) || 0
+                newState.passExpsCount = (newProps.term && newProps.term.doc_count) || 0;
             }
         }
 

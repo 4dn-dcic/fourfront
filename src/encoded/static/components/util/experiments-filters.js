@@ -206,13 +206,13 @@ var expFilters = module.exports = {
                             console.error('No navigate function.');
                             cb();
                         }
-            )
+            );
             
             navigateFxn(newHref, { skipRequest : true, skipUpdateHref : true }, ()=>{
                 saveToReduxStore.call(this);
                 if (typeof callback === 'function') setTimeout(callback, 0);
             });
-        }
+        };
 
         ajax.load(newHref, ajaxCallback, 'GET', (newContext)=>{
             // Fallback    

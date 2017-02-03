@@ -67,7 +67,7 @@ var f = module.exports = {
                 ),
                 true
             )
-        )
+        );
     },
 
     /** 
@@ -132,7 +132,7 @@ var f = module.exports = {
                 r[1].biosample.bio_rep_no = r[0].bio_rep_no; // Copy over bio_rep_no to biosample to ensure sorting.
                 return _.extend(r[0], r[1]);
             })
-            .value()
+            .value();
     },
 
     findUnpairedFiles : function(files_in_experiment){
@@ -191,7 +191,7 @@ var f = module.exports = {
     groupFilesByPairs : function(files_in_experiment){
         // Add 'file_pairs' property containing array of arrays of paired files to each experiment.
         return _(files_in_experiment).chain()
-            .sortBy(function(file){ return parseInt(file.paired_end) }) // Bring files w/ paired_end == 1 to top of list.
+            .sortBy(function(file){ return parseInt(file.paired_end); }) // Bring files w/ paired_end == 1 to top of list.
             .reduce(function(pairsObj, file, files){
                 // Group via { 'file_paired_end_1_ID' : { '1' : file_paired_end_1, '2' : file_paired_end_2,...} }
                 if (parseInt(file.paired_end) === 1){

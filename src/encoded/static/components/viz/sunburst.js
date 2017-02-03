@@ -326,11 +326,12 @@ var SunBurst = React.createClass({
                     // Positions of paths under parent
                     //var dif = b.value - a.value;
                     //if (a.depth < 3) console.log('AB', a, b);
+                    var dif;
                     if (typeof a.data.experiments === 'number' && typeof b.data.experiments === 'number'){
-                        var dif = a.data.experiments - b.data.experiments;
+                        dif = a.data.experiments - b.data.experiments;
                         if (dif !== 0) return dif; // Ascending
                     } else if (Array.isArray(a.children) && Array.isArray(b.children)){
-                        var dif = a.children.length - b.children.length;
+                        dif = a.children.length - b.children.length;
                         if (dif !== 0) return dif; // Ascending
                     }
                     if (a.data.name < b.data.name) return -1;
@@ -666,7 +667,7 @@ var SunBurst = React.createClass({
             } else {
                 if (this.props.debug) console.info("No paths to perform transitions on.");
                 this.setState({ 'transitioning' : false });
-           }
+            }
         }
         //*/
 
@@ -841,7 +842,7 @@ var SunBurst = React.createClass({
             var clickable = hasTerm && node.data.noClick !== true;
             var applicableFields, isSetAsFilter;
 
-            var isSetAsFilter = (
+            isSetAsFilter = (
                 hasTerm &&
                 applicableFields &&
                 applicableFields.length > 0 &&

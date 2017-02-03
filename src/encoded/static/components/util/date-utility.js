@@ -123,7 +123,7 @@ var DateUtility = module.exports = (function(){
                 customOutputFormat : null,
                 fallback : "N/A",
                 className : "localized-date-time"
-            }
+            };
         },
         getInitialState : function(){
             return {

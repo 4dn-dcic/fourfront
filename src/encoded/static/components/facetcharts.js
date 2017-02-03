@@ -415,7 +415,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 Filters.saveChangedFilters(newFilters, true, this.props.href);
             } else { */
                 // If not a tree, adjust filter re: node's term.
-                Filters.changeFilter(node.data.field, node.data.term, 'sets', this.props.expSetFilters, null, false, true, this.props.href);
+            Filters.changeFilter(node.data.field, node.data.term, 'sets', this.props.expSetFilters, null, false, true, this.props.href);
             //}
         }
 
@@ -489,9 +489,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 <div className={"facet-charts loading " + show} key="facet-charts" style={{ 'height' : height + 30 }}>
                     <i
                         className="icon icon-spin icon-circle-o-notch" 
-                        style={{
-                            'top' : (height / 2 + 10) + 'px'
-                         }}
+                        style={{ 'top' : (height / 2 + 10) + 'px' }}
                     ></i>
                 </div>
             );

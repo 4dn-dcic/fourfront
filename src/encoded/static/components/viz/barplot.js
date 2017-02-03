@@ -70,7 +70,7 @@ var BarPlot = React.createClass({
             var field;
             var fieldIndex;
             if (Array.isArray(fields)){ // Fields can be array or single field.
-                fieldIndex = _.findIndex(fields, function(f){ return typeof f.childField !== 'undefined' });
+                fieldIndex = _.findIndex(fields, function(f){ return typeof f.childField !== 'undefined'; });
                 field = fields[fieldIndex];
             } else {
                 field = fields;
@@ -198,7 +198,7 @@ var BarPlot = React.createClass({
                     .forEach(function(d,i){
                         d.attr.x = barXCoords[i];
                     })
-                    .value()
+                    .value();
             }
 
             var barData = {
@@ -260,10 +260,10 @@ var BarPlot = React.createClass({
   
     getDefaultProps : function(){
   	    return {
-            experiments : [],
-            fields : [],
-            styleOptions : null, // Can use to override default margins/style stuff.
-            colorForNode : function(node){ return vizUtil.stringToColor((node.data || node).name); } // Default color determinator
+          experiments : [],
+          fields : [],
+          styleOptions : null, // Can use to override default margins/style stuff.
+          colorForNode : function(node){ return vizUtil.stringToColor((node.data || node).name); } // Default color determinator
         };
     },
 
@@ -364,7 +364,7 @@ var BarPlot = React.createClass({
 
                 if (!styleOpts) styleOpts = this.styleOptions();
 
-                var prevBarExists = function(){ return typeof existingBars[d.term] !== 'undefined' && existingBars[d.term] !== null; }
+                var prevBarExists = function(){ return typeof existingBars[d.term] !== 'undefined' && existingBars[d.term] !== null; };
                 var prevBarData = null;
                 if (prevBarExists() && transitioning) prevBarData = existingBars[d.term].__data__;
 
@@ -687,7 +687,7 @@ var BarPlot = React.createClass({
             // Determine whether bar existed before, for this.renderParts.bar render func.
             return _.extend(d, { 
                 'existing' : typeof this.pastBars[d.term] !== 'undefined' && this.pastBars[d.term] !== null
-            })
+            });
         });
 
         var allBars = currentBars; // All bars -- current (from barData) and those which now need to be removed if transitioning (see block below).
