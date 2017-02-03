@@ -216,6 +216,19 @@ function countSelectedTerms(terms, field, filters) {
 }
 
 var Term = search.Term = React.createClass({
+
+    getHref : function(selected = termSelected(this.props.term['key'], this.props.facet['field'], this.props.filters)){
+        var href;
+        if (selected && !this.props.canDeselect) {
+            href = null;
+        } else if (selected) {
+            href = selected;
+        } else {
+            href = this.props.searchBase + this.props.facet['field'] + '=' + encodeURIComponent(this.props.term['key']).replace(/%20/g, '+');
+        }
+        return href;
+    },
+
     render: function () {
         var filters = this.props.filters;
         var term = this.props.term['key'];
@@ -229,14 +242,8 @@ var Term = search.Term = React.createClass({
             width:  Math.ceil( (count/this.props.total) * 100) + "%"
         };
         var selected = termSelected(term, field, filters);
-        var href;
-        if (selected && !this.props.canDeselect) {
-            href = null;
-        } else if (selected) {
-            href = selected;
-        } else {
-            href = this.props.searchBase + field + '=' + encodeURIComponent(term).replace(/%20/g, '+');
-        }
+        var href = this.getHref(selected);
+        
         return (
             <li className={selected ? 'selected-facet' : ""} id={selected ? "selected" : null} key={term}>
                 <span className="bar" style={barStyle}></span>
