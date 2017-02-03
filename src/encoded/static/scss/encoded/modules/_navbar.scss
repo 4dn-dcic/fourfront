@@ -19,11 +19,13 @@ $navbar-transition-length: .75s;
         line-height: $navbar-full-height;
         //box-shadow: 0 0 3px rgba(0,0,0,0);
         transform: translate3d(0,0,0);
+        position: relative;
 
         @media screen and (min-width: $navbar-fixed-breakpoint){
             
             min-height: $navbar-small-height;
             height: $navbar-full-height;
+            z-index: 10;
 
             .navbar-container.nav-initialized & {
                 -webkit-backface-visibility: hidden;
@@ -256,7 +258,7 @@ $navbar-transition-length: .75s;
                     color: rgba(100, 100, 100, 1);
                     transition: color 0.3s;
                     display: inline-block;
-                    width: 40px;
+                    min-width: 40px;
                 }
                 .stat-label {
                     line-height: 1rem;
