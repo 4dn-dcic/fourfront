@@ -4,7 +4,7 @@ var globals = require('./globals');
 var Panel = require('react-bootstrap').Panel;
 var Table = require('./collection').Table;
 var { AuditIndicators, AuditDetail, AuditMixin } = require('./audit');
-var { console } = require('./util');
+var { console, object } = require('./util');
 
 var Fallback = module.exports.Fallback = React.createClass({
     contextTypes: {
@@ -34,7 +34,12 @@ var Fallback = module.exports.Fallback = React.createClass({
 });
 
 var Item = React.createClass({
-    mixins: [AuditMixin],
+
+    getChildContext     : AuditMixin.getChildContext,
+    getInitialState     : AuditMixin.getInitialState,
+    auditStateToggle    : AuditMixin.auditStateToggle,
+    childContextTypes   : AuditMixin.childContextTypes,
+
     contextTypes: {
         schemas: React.PropTypes.object
     },
@@ -42,19 +47,13 @@ var Item = React.createClass({
     render: function() {
         var context = this.props.context;
         var itemClass = globals.itemClass(context, 'view-item');
-        var IPanel = globals.panel_views.lookup(context);
+        var ContentPanel = globals.panel_views.lookup(context);
         // Make string of alternate accessions
         return (
             <div className={itemClass}>
-                <header className="row">
-                    <div className="col-sm-12">
-                        <div className="status-line">
-                            <AuditIndicators context={context} key="biosample-audit" />
-                        </div>
-                    </div>
-                </header>
+                <AuditIndicators.Header context={context} />
                 <AuditDetail context={context} key="biosample-audit" />
-                <IPanel {...this.props} />
+                <ContentPanel {...this.props} />
             </div>
         );
     }
@@ -68,37 +67,6 @@ globals.content_views.fallback = function () {
     return Fallback;
 };
 
-
-var IPanel = module.exports.IPanel = React.createClass({
-    render: function() {
-        var schemas = this.props.schemas || {};
-        var context = this.props.context;
-        //var itemClass = globals.itemClass(context, 'view-detail panel');
-        var title = globals.listing_titles.lookup(context)({context: context});
-        var sortKeys = Object.keys(context).sort();
-        var tips = tipsFromSchema(schemas, context);
-
-
-        return (
-            <Panel className="data-display panel-body-with-header">
-                <div className="flexcol-heading experiment-heading">
-                    <h4>{ title }</h4>
-                </div>
-                <dl className="key-value">
-                    {sortKeys.map((ikey, idx) =>
-                        <div key={ikey} data-test="term-name">
-                            {formKey(tips,ikey)}
-                            <dd>{formValue(schemas,context[ikey])}</dd>
-                        </div>
-                    )}
-                </dl>
-            </Panel>
-        );
-    }
-});
-
-
-globals.panel_views.register(IPanel, 'Item');
 
 
 // Also use this view as a fallback for anything we haven't registered
@@ -214,162 +182,3 @@ var FetchedRelatedItems = React.createClass({
 //     },
 // });
 
-// ******* Refined item.js code below... *******
-
-var SubIPanel = module.exports.SubIPanel = React.createClass({
-    getInitialState: function() {
-    	return {isOpen: false};
-    },
-    handleToggle: function (e) {
-      e.preventDefault();
-      this.setState({
-  		  isOpen: !this.state.isOpen,
-  	  });
-    },
-    render: function() {
-        var schemas = this.props.schemas;
-        var item = this.props.content;
-        var title = item.title || item.name || item.accession || item.uuid || item['@id'] || "Open";
-        var toggleRender;
-        var toggleLink;
-        if (!this.state.isOpen) {
-            toggleLink = <a href="" className="item-toggle-link" onClick={this.handleToggle}>{title}</a>
-            toggleRender = <span/>;
-        }else{
-            toggleLink = <a href="" className="item-toggle-link" onClick={this.handleToggle}>Close</a>
-            toggleRender = <Subview schemas={schemas} content={item} title={title}/>;
-        }
-        return (
-    	  <div className="flexrow">
-              <div>
-                  {toggleLink}
-              </div>
-              {toggleRender}
-    	 </div>
-        );
-        },
-});
-
-var Subview = React.createClass({
-    render: function(){
-        var schemas = this.props.schemas;
-        var item = this.props.content;
-        var title = this.props.title;
-        var tips = tipsFromSchema(schemas, item);
-        var sortKeys = Object.keys(item).sort();
-        return(
-            <div className="flexcol-sm-6 subview">
-                <Panel className="sub-panel data-display panel-body-with-header">
-                    <div className="flexrow">
-                        <div className="flexcol-sm-6">
-                            <div className="flexcol-heading experiment-heading">
-                                <h5>{title}</h5>
-                            </div>
-                            <dl className="key-value sub-descriptions">
-                                {sortKeys.map(function(ikey, idx){
-                                    return (
-                                        <div className="sub-entry" key={ikey} data-test="term-name">
-                                        {formKey(tips,ikey)}
-                                        <dd>{formValue(schemas, item[ikey])}</dd>
-                                        </div>
-                                    );
-                                })}
-                            </dl>
-                        </div>
-                    </div>
-                </Panel>
-            </div>
-        );
-    }
-});
-
-//Return the properties dictionary from a schema for use as tooltips
-var tipsFromSchema = module.exports.tipsFromSchema = function(schemas, content){
-    var tips = {};
-    if(content['@type'] && typeof schemas === 'object' && schemas !== null){
-        var type = content['@type'][0];
-        if(schemas[type]){
-            tips = schemas[type]['properties'];
-        }
-    }
-    return tips;
-};
-
-// Formats the correct display for each metadata field
-
-var formKey =  function(tips, key){
-    var tooltip = '';
-    if (tips[key]){
-        var info = tips[key];
-        if(info['description']){
-            tooltip = info['description'];
-        }
-    }
-    return(
-        <DescriptorField field={key} description={tooltip}/>
-    );
-};
-
-var formValue = function (schemas, item) {
-    var toReturn = [];
-    if(Array.isArray(item)) {
-        for (var i=0; i < item.length; i++){
-            toReturn.push(formValue(schemas, item[i]));
-        }
-    }else if (typeof item === 'object') {
-        toReturn.push(<SubIPanel schemas={schemas} content={item}/>);
-    }else{
-        if (typeof item === 'string' && item.charAt(0) === '/') {
-            toReturn.push(<a key={item} href={item}>{item}</a>);
-        }else{
-            toReturn.push(item);
-        }
-    }
-    return(
-        <div>{toReturn}</div>
-    );
-};
-
-
-// Display the item field with a tooltip showing the field description from
-// schema, if available
-var DescriptorField = module.exports.DescriptorField = React.createClass({
-    propTypes: {
-        field: React.PropTypes.string.isRequired,
-        description: React.PropTypes.string.isRequired
-    },
-    getInitialState: function() {
-        return {
-            active: false
-        };
-    },
-
-    handleHover: function(b) {
-        this.setState({active: b});
-    },
-
-    render: function() {
-        var {field, description} = this.props;
-        var active = this.state.active;
-        var header;
-        if (description === ""){
-            header = <span>{field}</span>;
-        }else{
-            header = (
-                <div className="tooltip-trigger"
-                    onMouseEnter={this.handleHover.bind(null, true)}
-                    onMouseLeave={this.handleHover.bind(null, false)}>
-                    <span>{field}</span>
-                    <i className="icon icon-info-circle item-icon"/>
-                    <div className={'tooltip bottom' + (active ? ' tooltip-open' : '')}>
-                        <div className="tooltip-arrow"></div>
-                        <div className="tooltip-inner">
-                            <span>{description}</span>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-        return (<dt>{header}</dt>);
-    }
-});

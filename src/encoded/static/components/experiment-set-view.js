@@ -5,9 +5,9 @@ var globals = require('./globals');
 var Panel = require('react-bootstrap').Panel;
 var { ExperimentsTable } = require('./experiments-table');
 var _ = require('underscore');
-var { SubIPanel, DescriptorField, tipsFromSchema } = require('./item');
+var { DescriptorField, formValue } = require('./item-view');
 var FacetList = require('./facetlist');
-var { ajax, console, DateUtility } = require('./util');
+var { ajax, console, DateUtility, object } = require('./util');
 var FormattedInfoBlock = require('./formatted-info-block');
 var { FlexibleDescriptionBox } = require('./experiment-common');
 
@@ -49,7 +49,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
     componentWillMount : function(){
         if (!this.tips) {
-            this.tips = tipsFromSchema(this.props.schemas, this.props.context);
+            this.tips = object.tipsFromSchema(this.props.schemas, this.props.context);
         }
 
         this.setLinkedDetails(false);
@@ -383,37 +383,3 @@ var ExperimentSetInfoArea = React.createClass({
 
 });
 
-
-/**
- * Recursively render keys/values included in a provided item.
- * Wraps URLs/paths in link elements. Sub-panels for objects.
- *
- * @param {Object} schemas - Object containing schemas for server's JSONized object output.
- * @param {*|*[]} item - Item(s) to render recursively.
- */
-
-var formValue = function (schemas, item, keyPrefix = '', depth = 0) {
-    var toReturn = [];
-    if(Array.isArray(item)) {
-        for (var i=0; i < item.length; i++){
-            toReturn.push(formValue(schemas, item[i], keyPrefix, depth + 1));
-        }
-    }else if (typeof item === 'object') {
-        toReturn.push(
-            <SubIPanel
-                schemas={schemas}
-                content={item}
-                key={item['@id'] || item.name || (keyPrefix.length > 0 ? keyPrefix + '-' : '') + depth + '-' + toReturn.length }
-            />
-        );
-    }else{
-        if (typeof item === 'string' && item.charAt(0) === '/') {
-            toReturn.push(<a key={item} href={item}>{item}</a>);
-        }else{
-            toReturn.push(item);
-        }
-    }
-    return(
-        <div>{toReturn}</div>
-    );
-};

@@ -5,6 +5,18 @@ var _ = require('underscore');
 
 module.exports = {
 
+    /** Return the properties dictionary from a schema for use as tooltips */
+    tipsFromSchema : function(schemas, content){
+        var tips = {};
+        if(content['@type'] && typeof schemas === 'object' && schemas !== null){
+            var type = content['@type'][0];
+            if(schemas[type]){
+                tips = schemas[type]['properties'];
+            }
+        }
+        return tips;
+    },
+
     /**
      * Find property within an object using a propertyName in object dot notation.
      * Recursively travels down object tree following dot-delimited property names.

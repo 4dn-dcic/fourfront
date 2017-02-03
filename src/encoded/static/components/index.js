@@ -9,6 +9,7 @@ require('./globals');
 require('./static-pages/home');
 require('./static-pages/help');
 require('./static-pages/about');
+require('./item-view');
 require('./item');
 require('./facetlist');
 require('./experiment-set-view');
