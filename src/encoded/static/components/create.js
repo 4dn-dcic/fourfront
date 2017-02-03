@@ -27,7 +27,7 @@ var Create = module.exports = React.createClass({
             'validated': false,
             'thisType': contType[0],
             'thisSchema': thisSchema,
-            'error': null
+            'errorCount': 0
         };
     },
 
@@ -92,18 +92,24 @@ var Create = module.exports = React.createClass({
 
     testPostNewContext: function(e){
         e.preventDefault();
-        this.setState({'validated': true});
+        this.executePost(true);
     },
 
     realPostNewContext: function(e){
         e.preventDefault();
-        Alerts.dequeue({ 'title' : "Object validation error"});
+        this.executePost();
+    },
+
+    executePost: function(test=false){
+        // get rid of any hanging errors
+        for(var i=1; i<this.state.errorCount; i++){
+            Alerts.deQueue({ 'title' : "Object validation error " +parseInt(i + 1)});
+        }
         var objType = this.props.context['@type'][0] || 'Item';
         var lab;
         var award;
         var finalizedContext = this.contextSift(this.state.newContext, this.state.thisSchema);
         ajax.promise('/me?frame=embedded').then(data => {
-            console.log('!!!! ', data);
             if (this.context.contentTypeIsJSON(data)){
                 lab = data.submits_for[0] || {};
                 award = lab.awards[0] || {};
@@ -111,7 +117,8 @@ var Create = module.exports = React.createClass({
             // TODO: should we really always use the first award?
             finalizedContext.award = award;
             finalizedContext.lab = lab['@id'];
-            this.context.fetch('/' + objType, {
+            var destination = test ? '/' + objType + '/?check_only=True' : '/' + objType;
+            this.context.fetch(destination, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -124,21 +131,30 @@ var Create = module.exports = React.createClass({
                 return response;
             })
             .then(response => {
-                console.log('OBJECT SUCCESSFULLY POSTED!');
-                var newID = response['@graph'][0]['@id'];
-                if(typeof newID !== 'string'){
-                    newID = '/';
+                if(test){
+                    console.log('OBJECT SUCCESFFULLY TESTED!');
+                    this.setState({'validated': true});
+                }else{
+                    console.log('OBJECT SUCCESSFULLY POSTED!');
+                    var newID = response['@graph'][0]['@id'];
+                    if(typeof newID !== 'string'){
+                        newID = '/';
+                    }
+                    alert('Success! Navigating to the new object page.');
+                    this.context.navigate(newID);
                 }
-                alert('Success!');
-                this.context.navigate(newID);
             }, error => {
                 console.log('OBJECT COULD NOT BE POSTED!');
                 console.log(error);
-                var errorList = error.errors || [];
+                var errorList = error.errors || [error.detail] || [];
                 // make an alert for each error description
+                for(var i=0; i<errorList.length; i++){
+                    Alerts.queue({ 'title' : "Object validation error " + parseInt(i + 1), 'message': errorList[i].description || errorList[i] || "Unidentified error", 'style': 'danger' })
+                }
                 errorList.forEach(function(element){
-                    Alerts.queue({ 'title' : "Object validation error", 'message': element.description || "Unidentified error", 'style': 'danger' })
+
                 });
+                // scroll to the top of the page using d3
                 function scrollTopTween(scrollTop){
                     return function(){
                         var interpolate = d3.interpolateNumber(this.scrollTop, scrollTop);
@@ -152,6 +168,7 @@ var Create = module.exports = React.createClass({
                     .transition()
                     .duration(750)
                     .tween("bodyScroll", scrollTopTween(0));
+                this.setState({'errorCount': errorList.length});
             });
         });
     },
@@ -164,21 +181,12 @@ var Create = module.exports = React.createClass({
         var schemas = this.props.schemas;
         var createTitle = 'Creating ' + thisType + ' with ' + title + ' as template';
         var reqFields = this.state.requiredFields;
-        var errorPanel = null;
-        if(this.state.error){
-            errorPanel = (
-                <div style={{'color':'#a94442', "paddingTop":"10px"}}>
-                    {JSON.stringify(this.state.error)}
-                </div>
-            );
-        }
         return (
             <div className={itemClass}>
                 <h2>{createTitle}</h2>
-                <h4 style={{'color':'#808080', 'paddingBottom': '10px'}}>Add and remove field values. Submit at the bottom of the form.</h4>
+                <h4 style={{'color':'#808080', 'paddingBottom': '10px'}}>Add, edit, and remove field values. Submit at the bottom of the form.</h4>
                 <CreatePanel thisType={thisType} context={context} schemas={schemas} modifyNewContext={this.modifyNewContext} reqFields={reqFields}/>
                 <div>{this.generatePostButton()}</div>
-                {errorPanel}
             </div>
         );
     }
@@ -296,7 +304,7 @@ var BuildField = React.createClass({
                     <input id="intNumber" type="number" inputMode="latin" {...inputProps} />
                 </div>
             );
-            case 'float' : return (
+            case 'number' : return (
                 <div className="input-wrapper">
                     <input id="floatNumber" type="number" inputMode="latin" {...inputProps} />
                 </div>
@@ -595,8 +603,8 @@ var ArrayField = React.createClass({
                 <a href="#" className="cancel-button-inline" onClick={function(e){
                         e.preventDefault();
                         this.deleteArrayValue(arrayIdx);
-                    }.bind(this)} title="Delete entry">
-                    {'Delete entry'}
+                    }.bind(this)} title="Delete item">
+                    {'Delete item'}
                 </a>
             </td></tr>
 
@@ -605,8 +613,8 @@ var ArrayField = React.createClass({
 
     render: function(){
         var schema = this.props.schema.items || {};
-        var title = this.props.schema.title || 'Array field';
-        var fieldTip = schema.description ? schema.description + ' ' : '';
+        var title = this.props.schema.title ? this.props.schema.title + ' ' : '';
+        var fieldTip = schema.description ? title +schema.description + ' ' : title;
         var fieldType = schema.type || 'undefined';
         var arrayTable = null;
         if(fieldType == 'string'){
@@ -626,7 +634,7 @@ var ArrayField = React.createClass({
                     <div>
                         <span style={{'display':'inlineBlock'}} className="display-tip">{fieldTip}</span>
                         <span style={{'display':'inlineBlock'}} className="display-message">{'Type: ' + fieldType}</span>
-                        <a href="#" style={{'display':'inlineBlock', 'float':'right', 'color':'#388a92'}} onClick={this.pushArrayValue} title="Add element">
+                        <a href="#" style={{'display':'inlineBlock', 'float':'right', 'color':'#388a92'}} onClick={this.pushArrayValue} title="Add item">
                             <i className="icon icon-plus-circle icon-fw"></i>
                         </a>
                     </div>
@@ -640,7 +648,7 @@ var ArrayField = React.createClass({
         return(
             <div>
                 <span>
-                    {title}
+                    {parseInt(value.length) + ' items'}
                     {this.displayToggle()}
                 </span>
                 {arrayTable}
