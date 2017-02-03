@@ -372,14 +372,14 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             return;
         }
 
-        function updateExpSetFilters(){
+        function getNavUrl(){
+            var hrefParts = url.parse(this.props.href);
+            var reqParts = url.parse(this.props.requestURLBase, true);
+            var query = _.extend({}, reqParts.query, { 'limit' : Filters.getLimit() || 25 });
+            return hrefParts.protocol + "//" + hrefParts.host + reqParts.pathname + '?' + querystring.stringify(query);
+        }
 
-            function getNavUrl(){
-                var hrefParts = url.parse(this.props.href);
-                var reqParts = url.parse(this.props.requestURLBase, true);
-                var query = _.extend({}, reqParts.query, { 'limit' : Filters.getLimit() || 25 });
-                return hrefParts.protocol + "//" + hrefParts.host + reqParts.pathname + '?' + querystring.stringify(query);
-            }
+        function updateExpSetFilters(){
 
             // if part of tree
             /*
