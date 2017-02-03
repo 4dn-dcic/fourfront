@@ -9,7 +9,8 @@ var SunBurstChart = require('./viz/sunburst');
 var BarPlotChart = require('./viz/barplot');
 var { expFxn, Filters, ajax, console, layout, isServerSide } = require('./util');
 var FacetList = require('./facetlist');
-var { ChartBreadcrumbs, vizUtil } = require('./viz/common');
+var vizUtil = require('./viz/utilities');
+var { ChartBreadcrumbs, SVGFilters, FetchingView } = require('./viz/components');
 
 /**
  * @callback showFunc
@@ -73,6 +74,12 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             if (document.documentElement.className.indexOf('uaEdge') > -1) return true;
             return true;
         },
+
+        getFieldsRequiredURLQueryPart : function(fields){
+            return fields.map(function(fieldToIncludeInResult){
+                return '&field=' + fieldToIncludeInResult;
+            }).join('');
+        },
         
     },
     
@@ -80,7 +87,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         return {
             'href' : '/',
             'show' : function(path){
-                if (path === '/') return 'large';
+                if (path === '/' || path === '/home') return 'large';
                 if (path.indexOf('/browse/') > -1) return true;
                 return false;
             },
@@ -89,17 +96,19 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             'views' : ['small', 'large'],
             'requestURLBase' : '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&from=0',
             'fieldsToFetch' : [ // What fields we need from /browse/... for this chart.
+                'accession',
                 'experiments_in_set.experiment_summary',
+                'experiments_in_set.experiment_type',
                 'experiments_in_set.accession',
-                'experiments_in_set.status',
-                'experiments_in_set.files.file_type',
+                //'experiments_in_set.status',
+                //'experiments_in_set.files.file_type',
                 'experiments_in_set.files.accession',
                 'experiments_in_set.filesets.files_in_set.accession',
-                'experiments_in_set.biosample.description',
-                'experiments_in_set.biosample.modifications_summary_short',
+                //'experiments_in_set.biosample.description',
+                //'experiments_in_set.biosample.modifications_summary_short',
                 'experiments_in_set.biosample.biosource_summary',
-                'experiments_in_set.biosample.accession',
-                'experiments_in_set.biosample.biosource.description',
+                //'experiments_in_set.biosample.accession',
+                //'experiments_in_set.biosample.biosource.description',
                 'experiments_in_set.biosample.biosource.biosource_name',
                 'experiments_in_set.biosample.biosource.biosource_type',
                 'experiments_in_set.biosample.biosource.individual.organism.name',
@@ -144,46 +153,36 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                     field : 'experiments_in_set.biosample.biosource.individual.organism.name',
                     title : "Primary Organism",
                     name : function(val, id, exps, filteredExps){
-                        return val.charAt(0).toUpperCase() + val.slice(1);
+                        return Filters.Term.toName('experiments_in_set.biosample.biosource.individual.organism.name', val);
                     }
                 },
                 { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
                 { title : "Biosample", field : 'experiments_in_set.biosample.biosource_summary' },
-                { 
+                { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
+                {
                     title : "Digestion Enzyme",
                     field : 'experiments_in_set.digestion_enzyme.name',
                     description : function(val, id, exps, filteredExps, exp){
                         return 'Enzyme ' + val;
-                    } 
-                },
-                { title : "Experiment Summary", field : "experiments_in_set.experiment_summary" },
-                {
-                    title: "Experiment Accession",
-                    field : 'experiments_in_set.accession',
-                    //size : function(val, id, exps, filteredExps, exp){
-                    //    return (!filteredExps || (filteredExps && filteredExps[exp.accession]) ?
-                    //        1 : 0.33
-                    //    );
-                    //},
-                    fallbackSize : function(val, id, exps, filteredExps, exp){
-                        return filteredExps && filteredExps[exp.accession] ? 1 : (filteredExps ? 0 : 1);
-                    },
-                    isFacet : false,
-                    children : function(val, id, exps, filteredExps, exp){
-                        return expFxn.allFilesFromExperiment(exp).map(function(f,i,a){
-                            return {
-                                'name' : f.accession,
-                                'size' : (!filteredExps || (filteredExps && filteredExps[exp.accession]) ?
-                                    1 : 0.33
-                                ),
-                                'description' : 'File ' + f.accession,
-                                'color' : '#ccc',
-                                'id' : id + '-' + f.accession,
-                                'field' : 'experiments_in_set.files.accession'
-                            };
-                        });
                     }
-                }
+                },
+                {
+                    title : "Experiment Set",
+                    aggregatefield : "experiment_sets.accession",
+                    field : "accession",
+                    isFacet : false,
+                    size : 1
+                },
+                //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" },
+                //{
+                //    title: "Experiment Accession",
+                //    field : 'experiments_in_set.accession',
+                //    //size : function(val, id, exps, filteredExps, exp, parentNode){
+                //    //    return 1 / (_.findWhere(exp.experiment_sets, { 'accession' : parentNode.term }).experiments_in_set);
+                //    //},
+                //    color : "#eee",
+                //    isFacet : false,
+                //}
             ]
         };
     },
@@ -220,9 +219,6 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
     shouldComponentUpdate : function(nextProps, nextState){
         if (this.props.debug) console.log('FacetChart next props & state:', nextProps, nextState);
         if (
-            //this.props.href !== nextProps.href ||
-            //this.props.expSetFilters !== nextProps.expSetFilters ||
-            //this.props.context !== nextProps.context ||
             !_.isEqual(this.state, nextState) ||
             !_.isEqual(this.state.experiments, nextState.experiments) ||
             !_.isEqual(this.state.filteredExperiments, nextState.filteredExperiments) ||
@@ -243,6 +239,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
          * check if one is part of selected expSetFilters,
          * and if so, add to sequenceArray for ChartBreadcrumbs. 
          */
+        /*
         function updatedBreadcrumbsSequence(){
             var sequence = [];
             if (typeof this.refs.sunburstChart === 'undefined') return sequence;
@@ -271,16 +268,11 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             }
             return sequence;
         }
+        */
 
         var newState = {};
 
         if (
-            //(
-            //    nextProps.context &&
-            //    nextProps.context !== this.props.context &&
-            //    !_.isEqual(nextProps.context, this.props.context) &&
-            //    FacetCharts.isContextDataValid(nextProps.context)
-            //) ||
             nextProps.expSetFilters !== this.props.expSetFilters
         ){
             
@@ -290,7 +282,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             //}
 
             // Update breadcrumbs
-            newState.selectedNodes = updatedBreadcrumbsSequence.call(this);
+            // newState.selectedNodes = updatedBreadcrumbsSequence.call(this);
 
             // Unset filtered experiments if no filters.
             if (_.keys(nextProps.expSetFilters).length === 0 && Array.isArray(this.state.experiments)){
@@ -364,11 +356,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
     getFilteredContextHref : function(props = this.props){ return Filters.filtersToHref(props.filters, props.href, 0, 'all', '/browse/'); },
 
-    getFieldsRequiredURLQueryPart : function(){
-        return this.props.fieldsToFetch.map(function(fieldToIncludeInResult){
-            return '&field=' + fieldToIncludeInResult;
-        }).join('');
-    },
+    getFieldsRequiredURLQueryPart : function(){ return FacetCharts.getFieldsRequiredURLQueryPart(this.props.fieldsToFetch); },
 
     colorForNode : function(node){ return vizUtil.colorForNode(node, this.props.colors); },
 
@@ -384,8 +372,17 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             return;
         }
 
+        function getNavUrl(){
+            var hrefParts = url.parse(this.props.href);
+            var reqParts = url.parse(this.props.requestURLBase, true);
+            var query = _.extend({}, reqParts.query, { 'limit' : Filters.getLimit() || 25 });
+            return hrefParts.protocol + "//" + hrefParts.host + reqParts.pathname + '?' + querystring.stringify(query);
+        }
+
         function updateExpSetFilters(){
+
             // if part of tree
+            /*
             if (node.parent) {
 
                 // Don't save filters until all filters updated (prevent app re-renders)
@@ -426,20 +423,13 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 }
 
                 Filters.saveChangedFilters(newFilters, true, this.props.href);
-            } else {
+            } else { */
                 // If not a tree, adjust filter re: node's term.
-                Filters.changeFilter(node.data.field, node.data.term, 'sets', this.props.expSetFilters, null, false, true, this.props.href);
-            }
+            Filters.changeFilter(node.data.field, node.data.term, 'sets', this.props.expSetFilters, null, false, true, this.props.href);
+            //}
         }
 
         if (this.props.href.indexOf('/browse/') === -1){
-
-            function getNavUrl(){
-                var hrefParts = url.parse(this.props.href);
-                var reqParts = url.parse(this.props.requestURLBase, true);
-                var query = _.extend({}, reqParts.query, { 'limit' : Filters.getLimit() || 25 });
-                return hrefParts.protocol + "//" + hrefParts.host + reqParts.pathname + '?' + querystring.stringify(query);
-            }
 
             // We're not on browse page, so filters probably wouldn't be useful to set without navigating to there.
             if (typeof this.props.navigate === 'function'){
@@ -455,12 +445,12 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
     }, 500, { trailing : false }), // Prevent more than 1 click per 500ms because it takes a while to grab calculate exps matching filters.
 
     show : function(props = this.props){
-        if (typeof props.show === false) return false;
+        if (props.show === false) return false;
         if (typeof props.show === 'string' && props.views.indexOf(props.show) > -1) return props.show;
         if (typeof props.show === 'function') {
             var show;
             if (typeof props.href === 'string') {
-                show = props.show(url.parse(props.href).path);
+                show = props.show(url.parse(props.href).pathname);
             } else {
                 show = props.show();
             }
@@ -498,13 +488,11 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         FacetList.unhighlightTerms();
 
         if (!this.state.mounted){
-            return ( // + 66 == breadcrumbs (26) + breadcrumbs-margin-bottom (10) + description (30)
-                <div className={"facet-charts loading " + show} key="facet-charts" style={{ 'height' : height + 66 }}>
+            return ( // + 30 == breadcrumbs (26) + breadcrumbs-margin-bottom (10) + description (30)
+                <div className={"facet-charts loading " + show} key="facet-charts" style={{ 'height' : height + 30 }}>
                     <i
                         className="icon icon-spin icon-circle-o-notch" 
-                        style={{
-                            'top' : (height / 2 + 10) + 'px'
-                         }}
+                        style={{ 'top' : (height / 2 + 10) + 'px' }}
                     ></i>
                 </div>
             );
@@ -512,34 +500,40 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
         return (
             <div className={"facet-charts show-" + show} key="facet-charts">
-                <ChartBreadcrumbs ref="breadcrumbs" selectedNodes={this.state.selectedNodes} key="facet-crumbs" />
+                
                 <div className="facet-charts-description description" ref="description" key="facet-chart-description"></div>
-                <div className="row facet-chart-row-1" key="facet-chart-row-1" height={height}>
-                    <div className={genChartColClassName(1)} key="facet-chart-row-1-chart-1">
+                <div className="row facet-chart-row-1" key="facet-chart-row-1">
+                    <div className={genChartColClassName(1)} key="facet-chart-row-1-chart-1" style={{ height: height }}>
                         <SunBurstChart
                             experiments={this.state.experiments}
                             filteredExperiments={this.state.filteredExperiments}
-                            height={height}
-                            width={this.width(0) - 20}
                             fields={this.state.chartFieldsHierarchy}
-                            maxFieldDepthIndex={3}
-                            breadcrumbs={() => this.refs.breadcrumbs}
+                            maxFieldDepthIndex={5}
+
+                            height={height} width={this.width(0) - 20}
+                            updateBreadcrumbsHoverNodes={(nodes) => this.refs && this.refs.breadcrumbs && this.refs.breadcrumbs.updateHoverNodes(nodes)}
                             descriptionElement={() => this.refs.description}
+
                             handleClick={this.handleVisualNodeClickToUpdateFilters}
                             colorForNode={this.colorForNode}
+                            updateStats={this.props.updateStats}
+
+                            expSetFilters={this.props.expSetFilters}
+                            href={this.props.href}
                             key="sunburst"
                             ref="sunburstChart"
                             debug
                         />
+                        <FetchingView display={this.state.fetching} />
                     </div>
-                    <div className={genChartColClassName(2)} key="facet-chart-row-1-chart-2">
+                    <div className={genChartColClassName(2)} key="facet-chart-row-1-chart-2" style={{ height: height }}>
                         <BarPlotChart 
                             experiments={this.state.filteredExperiments || this.state.experiments}
-                            width={this.width(1) - 20}
-                            height={height}
                             fields={this.state.chartFieldsBarPlot}
+                            width={this.width(1) - 20} height={height}
                             colorForNode={this.colorForNode}
                         />
+                        <FetchingView display={this.state.fetching} />
                     </div>
                 </div>
             </div>

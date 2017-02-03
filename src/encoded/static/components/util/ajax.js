@@ -2,6 +2,7 @@
 
 var _ = require('underscore');
 var jwt = require('./json-web-token');
+var console = require('./patched-console');
 
 var ajax = module.exports = {
 
@@ -37,10 +38,10 @@ var ajax = module.exports = {
                     var response;
                     try {
                         response = JSON.parse(xhr.responseText);
-                        (patchedConsole || console).error('ajax.load error: ', response);
+                        console.error('ajax.load error: ', response);
                         if (typeof fallback == 'function') fallback(response);
                     } catch (error) {
-                        (patchedConsole || console).error('Non-JSON error response:', xhr.responseText);
+                        console.error('Non-JSON error response:', xhr.responseText);
                     }
                 }
             }

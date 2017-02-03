@@ -813,7 +813,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                 .filter(function(expSet){ return expSet.experiments_in_set.length > 0; })
                 .map(function(expSet){
                     return { 
-                        'intersection' : new Set(experiment_set.experiments_in_set.filter(x => this.state.passExperiments.has(x))),
+                        'intersection' : new Set(expSet.experiments_in_set.filter(x => this.state.passExperiments.has(x))),
                         'set' : expSet
                     };
                 })
@@ -1106,7 +1106,6 @@ var Browse = browse.Browse = React.createClass({
 
     propTypes : {
         'context' : React.PropTypes.object.isRequired,
-        'expIncompleteFacets' : React.PropTypes.object,
         'expSetFilters' : React.PropTypes.object,
         'session' : React.PropTypes.bool,
         'schemas' : React.PropTypes.object,

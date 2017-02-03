@@ -3,10 +3,10 @@
 var React = require('react');
 var _ = require('underscore');
 var d3 = require('d3');
-var { ChartBreadcrumbs, vizUtil } = require('./common');
-var { expFxn, console, object, isServerSide } = require('../util');
-var { highlightTerm, unhighlightTerms } = require('../facetlist');
-
+var vizUtil = require('./utilities');
+var { expFxn, Filters, console, object, isServerSide } = require('./../util');
+var { highlightTerm, unhighlightTerms } = require('./../facetlist');
+var ZoomCursor = require('./components/ZoomCursor');
 
 /**
  * Based on Sunburst D3 Example @ http://bl.ocks.org/kerryrodden/7090426
@@ -124,26 +124,27 @@ var SunBurst = React.createClass({
 
             function getDataFromExperiment(exp){
 
-                function attachNode(field, fieldIndex, attachToNode){
-                    var fieldValue = object.getNestedProperty(exp, field.field.replace('experiments_in_set.', ''));
+                function attachNode(fieldIndex, attachToNode, currID){
+                    if (fieldIndex >= fields.length) return true;
+                    var field = fields[fieldIndex];
+                    var fieldValue = object.getNestedProperty(exp, (field.aggregatefield || field.field).replace('experiments_in_set.', ''));
                     
-                    if (fieldValue){
-                        currentID += '~' + fieldValue;
-                    } else {
-                        console.error("Couldn't get value for " + field.field + ' from:', exp);
+                    if (!fieldValue){
+                        console.error("Couldn't get value for " + (field.aggregateField || field.field) + ' from:', exp);
                     }
 
-                    function genNode(){
+                    function genNode(term = fieldValue){
                         
-                        var callbackArgs = [fieldValue, currentID, experiments, filteredExperiments, exp];
+                        var callbackArgs = [term, currID, experiments, filteredExperiments, exp, attachToNode];
+
                         var node = {
-                            'id'          : currentID,
-                            'name'        : typeof field.name === 'function' ? field.name.apply(field.name, callbackArgs) : fieldValue,
+                            'id'          : currID,
+                            'name'        : typeof field.name === 'function' ? field.name.apply(field.name, callbackArgs) : term,
                             'experiments' : 0,
                             'active'      : 0,
                             'files'       : 0,
                             'activeFiles' : 0,
-                            'term'        : fieldValue,
+                            'term'        : term,
                             'field'       : field.field,
                             'children'    : typeof field.children === 'function' ? field.children.apply(field.children, callbackArgs) : {}
                         };
@@ -151,7 +152,7 @@ var SunBurst = React.createClass({
 
                         // Conditional properties
 
-                        if (field.isFacet === false) node.noClick = true;
+                        if (field.isFacet === false || field.clickable === false) node.noClick = true;
 
                         if      (typeof field.title === 'string')   node.title = field.title;
                         else if (typeof field.title === 'function') node.title = field.title.apply(field.title, callbackArgs);
@@ -165,14 +166,46 @@ var SunBurst = React.createClass({
                         if      (typeof field.size === 'number')   node.size = field.size;
                         else if (typeof field.size === 'function') node.size = field.size.apply(field.size, callbackArgs);
 
+                        if      (typeof field.aggregateField === 'string')   node.aggregateField = field.aggregateField;
+
+                        if      (typeof field.color === 'string')   node.color = field.color;
+                        else if (typeof field.color === 'function') node.color = field.color.apply(field.color, callbackArgs);
+
                         return node;
+                    }
+
+                    function attachOrUpdateNode(term){
+                        currID += '~' + term;
+                        if (typeof attachToNode.children[term] === 'undefined'){
+                            attachToNode.children[term] = genNode(term);
+                        }
+                        
+                        //var filesCount = expFxn.fileCount(exp);
+                        attachToNode.children[term].experiments++;
+                        attachToNode.children[term].files += expFxn.fileCount(exp);
+
+                        if (filteredExperiments && filteredExperiments[exp.accession]){ 
+                            attachToNode.children[term].active++;
+                            //attachToNode.children[term].activeFiles += filesCount;
+                        }
+
+                        if (field.field === 'accession') {
+                            attachToNode.children[term].experiment_sets = 1;
+                        } else { 
+                            addExpSetsToNode(attachToNode.children[term]);
+                        }
+
+                        // Recurse & repeat for subsequent fields (child node(s)), currID should have been modified by genNode().
+                        return attachNode(fieldIndex + 1, attachToNode.children[term], currID);
                     }
 
                     if (Array.isArray(attachToNode.children)) return null; // Can't attach, children already set as array.
 
                     if (Array.isArray(fieldValue)){
                         if (fieldValue.length === 1){
-                            fieldValue = fieldValue[0];
+                            return attachOrUpdateNode(fieldValue[0]);
+                        } else if (field.field === 'accession') {
+                            return fieldValue.map(function(fv){ return attachOrUpdateNode(fv); });
                         } else {
                             // Needs to be tested
                             console.log('FV1',fieldValue);
@@ -185,25 +218,11 @@ var SunBurst = React.createClass({
                                 .sortBy(function(fieldValPair){ return -fieldValPair[1]; })
                                 .value()[0][0]; // [['human', 2], ...] -- grab first item from first array ('human')
                             console.log('FV2',fieldValue);
+                            return attachOrUpdateNode(fieldValue);
                         }
                     }
 
-                    if (typeof attachToNode.children[fieldValue] === 'undefined'){
-                        attachToNode.children[fieldValue] = genNode();
-                    }
-                    
-                    attachToNode.children[fieldValue].experiments++;
-                    var filesCount = expFxn.fileCount(exp);
-                    attachToNode.children[fieldValue].files += filesCount;
-
-                    if (filteredExperiments && filteredExperiments[exp.accession]){ 
-                        attachToNode.children[fieldValue].active++;
-                        attachToNode.children[fieldValue].activeFiles += filesCount;
-                    }
-
-                    addExpSetsToNode(attachToNode.children[fieldValue]);
-
-                    return attachToNode.children[fieldValue];
+                    return attachOrUpdateNode(fieldValue, currID);
                 }
 
                 function addExpSetsToNode(node){
@@ -221,21 +240,20 @@ var SunBurst = React.createClass({
                     return node;
                 }
 
-                var currentID = rootNode.id; // 'root'
-                var currentNode = rootNode;
+                var currentID = rootNode.id; // 'root' -- built into root~in-situ Hi-C~human~ ...etc and set at each field level
 
-                fields.forEach(function(f,i,a){
-                    currentNode = attachNode(f, i, currentNode);
-                });
+                // Recursively attach nodes, using either best match in case of encountering 'array-ified' property (greatest occurence)
+                // Or split (in case of expsets)
+                attachNode(0, rootNode, currentID);
 
                 rootNode.experiments++;
-                rootNode.files += expFxn.fileCount(exp);
                 if (filteredExperiments && filteredExperiments[exp.accession]) { 
                     rootNode.active++;
-                    rootNode.activeFiles += expFxn.fileCount(exp);
+                    rootNode.files += expFxn.fileCount(exp);
                     addExpSetsToNode(rootNode);
                 } else if (!filteredExperiments){
                     addExpSetsToNode(rootNode);
+                    rootNode.files += expFxn.fileCount(exp);
                 }
                 //addExpSetsToNode(rootNode);
             }
@@ -263,7 +281,7 @@ var SunBurst = React.createClass({
                 
                 if (typeof maxFieldDepthIndex === 'number' && depth >= maxFieldDepthIndex){
                     // We don't chart past this node's depth.
-                    node.size = gatherChildrenSize(node);
+                    if (typeof node.size !== 'number') node.size = gatherChildrenSize(node);
                     delete node.children;
                     return;
                 }
@@ -308,11 +326,12 @@ var SunBurst = React.createClass({
                     // Positions of paths under parent
                     //var dif = b.value - a.value;
                     //if (a.depth < 3) console.log('AB', a, b);
+                    var dif;
                     if (typeof a.data.experiments === 'number' && typeof b.data.experiments === 'number'){
-                        var dif = a.data.experiments - b.data.experiments;
+                        dif = a.data.experiments - b.data.experiments;
                         if (dif !== 0) return dif; // Ascending
                     } else if (Array.isArray(a.children) && Array.isArray(b.children)){
-                        var dif = a.children.length - b.children.length;
+                        dif = a.children.length - b.children.length;
                         if (dif !== 0) return dif; // Ascending
                     }
                     if (a.data.name < b.data.name) return -1;
@@ -328,10 +347,10 @@ var SunBurst = React.createClass({
                 'labelRotation' : 'auto',
                 'labelWidth' : 200,
                 'offset' : {
-                    'top' : 0,
-                    'bottom' : 50,
+                    'top' : 30,
+                    'bottom' : 0,
                     'left' : 0,
-                    'right' : 100
+                    'right' : 0
                 }
             };
         }
@@ -348,7 +367,6 @@ var SunBurst = React.createClass({
             'fields' : null,
             'maxFieldDepthIndex' : null, // If set, will not display fields past this index, though will still calculate values for it.
             'id' : 'main',
-            'breadcrumbs' : true, // true (show built-in), false (don't show), function (returns ChartBreadcrumbs instance), or instance of ChartBreadcrumbs.
             'descriptionElement' : true, // same as above, but for a <div> element to hold description.
             'fallbackToSampleData' : false, // Perhaps for tests.
             'handleClick' : function(e){
@@ -358,6 +376,7 @@ var SunBurst = React.createClass({
                 return 'red';
             },
             'styleOptions' : null, // @see SunBurst.getDefaultStyleOpts for possible options.
+            'doManualTransitions' : false,
             'debug' : false
         };
     },
@@ -370,15 +389,12 @@ var SunBurst = React.createClass({
 
     resetActiveExperimentsCount : function(){
         var rootNode = this.getRootNode();
-        var exps = rootNode.data.active || rootNode.data.experiments;
-        if (typeof exps === 'number'){
-            this.refs.countExps.innerHTML = exps;
-            this.refs.countExpSets.innerHTML = rootNode.data.experiment_sets || null;
-            this.refs.countFiles.innerHTML = rootNode.data.activeFiles || rootNode.data.files || 0;
-        } else {
-            this.refs.countExps.innerHTML = '&nbsp;';
-            this.refs.countExpSets.innerHTML = '&nbsp;';
-            this.refs.countFiles.innerHTML = 0;
+        if (typeof this.props.updateStats === 'function'){
+            this.props.updateStats({
+                'experiments' : rootNode.data.active || rootNode.data.experiments || 0,
+                'experiment_sets' : rootNode.data.experiment_sets || 0,
+                'files' : rootNode.data.activeFiles || rootNode.data.files || 0
+            });
         }
     },
 
@@ -391,56 +407,67 @@ var SunBurst = React.createClass({
         var sequenceArray = SunBurst.getAncestors(d);
         d = d.data || d;
 
-        if (d.field && d.term) highlightTerm(d.field, d.term, this.props.colorForNode(d));
-
         var expCount = d.active || d.experiments || null;
         var expSetCount = d.experiment_sets || null;
 
         // .appendChild used to be faster than .innerHTML but seems
         // innerHTML is better now (?) https://jsperf.com/appendchild-vs-documentfragment-vs-innerhtml/24
-
         if (expCount !== null){
-            this.refs.countExps.innerHTML = expCount;
-            this.refs.countExpSets.innerHTML = expSetCount;
-            this.refs.countFiles.innerHTML = d.activeFiles || d.files || 0;
-        } else {
-            this.resetActiveExperimentsCount();
-        }
-
-        if (d.title && this.descriptionElement() !== null) {
-            this.descriptionElement().innerHTML = d.title;
-        } else {
-            this.descriptionElement().innerHTML = '';
-        }
-
-        this.getExplanationRefs().forEach(function(eR, i){
-            if (eR.className.indexOf('invisible') !== -1) {
-                eR.className = eR.className.replace(' invisible','');
+            if (typeof this.props.updateStats === 'function'){
+                this.props.updateStats({
+                    'experiments' : expCount,
+                    'experiment_sets' : expSetCount,
+                    'files' : d.activeFiles || d.files || 0
+                });
             }
+        }
+
+        vizUtil.requestAnimationFrame(()=>{
+            if (d.field && d.term) highlightTerm(d.field, d.term, this.props.colorForNode(d));
+
+            //if (d.title && this.descriptionElement() !== null) {
+            //    this.descriptionElement().innerHTML = d.title;
+            //} else {
+            //    this.descriptionElement().innerHTML = '';
+            //}
+
+            // Fade all the segments.
+            // Then highlight only those that are an ancestor of the current segment.
+            
+            var finalSelection = d3.selectAll("svg.sunburst-svg-chart path")
+                .classed("hover", false)
+                .filter(function(node){
+                    return _.find(sequenceArray, function(sNode){ return sNode.data.id === node.data.id; }) || false;
+                })
+                .classed("hover", true);
+
+            d3.selectAll("svg.sunburst-svg-chart > g").classed('hover',
+                finalSelection && Array.isArray(finalSelection._groups) && finalSelection._groups[0].length > 0
+            );
+            
+
         });
 
-        // Fade all the segments.
-        // Then highlight only those that are an ancestor of the current segment.
-        this.vis.selectAll("path")
-            .classed("hover", false)
-            .filter(function(node){
-                return _.find(sequenceArray, function(sNode){ return sNode.data.id === node.data.id; }) || false;
-            })
-            .classed("hover", true);
-
-        if (this.props.breadcrumbs !== false) this.updateBreadcrumbs(sequenceArray);
+        this.updateBreadcrumbs(sequenceArray);
     },
 
     // Restore everything to full opacity when moving off the visualization.
-    mouseleave : function(d) {
-
+    mouseleave : function(e) {
+        if (e) {
+            e.persist();
+            // Cancel if left to go onto another path.
+            if (e && e.relatedTarget && e.relatedTarget.__data__ && e.relatedTarget.__data__.data && e.relatedTarget.__data__ .data.id) return null;
+        }
         var _this = this;
         setTimeout(function(){ // Wait 50ms (duration of mouseenter throttle) so delayed handler doesn't cancel this mouseleave transition.
             // Hide the breadcrumb trail
-            if (_this.props.breadcrumbs !== false) _this.updateBreadcrumbs([], '0%'); //_this.breadcrumbs().setState({ 'visible' : false });
+            _this.updateBreadcrumbs([], '0%');
 
             // Transition each segment to full opacity and then reactivate it.
-            _this.vis.selectAll("path").classed('hover', false);
+            d3.selectAll("svg.sunburst-svg-chart path, svg.sunburst-svg-chart > g").classed('hover', false);
+            //_this.vis.selectAll("path").classed('hover', false);
+
+            unhighlightTerms();
 
             _this.resetActiveExperimentsCount();
 
@@ -451,34 +478,29 @@ var SunBurst = React.createClass({
         }, 50);
     },
 
-    getExplanationRefs : function(){
-        return ['Exps', 'ExpSets', 'Files'].map((suffix) => this.refs['explanation' + suffix]);
-    },
-
-    getCountsRefs : function(){
-        return ['Files', 'Exps', 'ExpSets'].map((suffix) => this.refs['count' + suffix]);
-    },
-
     updateBreadcrumbs : function(nodeArray){
-        this.breadcrumbs().setState({ 
-            highlighted : nodeArray.map((n)=>{
+        if (typeof this.props.updateBreadcrumbsHoverNodes !== 'function') return null;
+        this.props.updateBreadcrumbsHoverNodes(
+            nodeArray.map((n)=>{
                 n.color = this.props.colorForNode(n);
                 return n;
             })
-        });
+        );
     },
 
-    /** Return height, corrected for any offsets. */
+    /** @return {number} visible chart height, corrected for any offsets */
     height : function(baseHeight = this.props.height){
         var styleOpts = this.styleOptions();
         return baseHeight - styleOpts.offset.bottom - styleOpts.offset.top;
     },
 
+    /** @return {number} visible chart width, corrected for any offsets */
     width : function(baseWidth = this.baseWidth()){
         var styleOpts = this.styleOptions();
         return baseWidth - styleOpts.offset.left - styleOpts.offset.right;
     },
 
+    /** @return {number} analogous to and fallback for props.width, if none set */
     baseWidth : function(){
         if (this.props.width) return this.props.width;
         return (this.refs && this.refs.container && this.refs.container.offsetWidth) || null;
@@ -522,7 +544,7 @@ var SunBurst = React.createClass({
             this.chartLayersWidth()
         ]);
         return;
-
+        /*
         this.arc = d3.arc()
             .startAngle(function(d) { return d.x0; })
             .endAngle(function(d) { return d.x1; })
@@ -542,6 +564,7 @@ var SunBurst = React.createClass({
                 //return d.y1;
                 return Math.sqrt(d.y1);
             });
+            */
     },
 
     generateRectPath : function(node){
@@ -558,7 +581,7 @@ var SunBurst = React.createClass({
 
     componentWillMount : function(){
         //this.visualizationSetup();
-        this.throttledMouseOverHandler = _.throttle(this.mouseoverHandle, 50); // Improve performance
+        //this.throttledMouseOverHandler = _.throttle(this.mouseoverHandle, 50); // Improve performance
     },
 
     componentDidMount : function(){
@@ -568,12 +591,8 @@ var SunBurst = React.createClass({
          */
 
         if (!this.state.mounted){
-            //this.updateWidthAndRadius();
             this.justMounted = true;
             this.setState({ 'mounted' : true });
-            this.getExplanationRefs().forEach(function(eR, i){
-                if (eR) eR.className = eR.className.replace(' invisible','');
-            });
             return;
         }
     },
@@ -590,17 +609,19 @@ var SunBurst = React.createClass({
      */
     shouldPerformManualTransitions : function(nextProps, pastProps){
         return !!(
-            (
-                nextProps.experiments &&
-                nextProps.experiments !== pastProps.experiments &&
-                !_.isEqual(nextProps.experiments, pastProps.experiments)
-            ) || (
-                nextProps.filteredExperiments !== pastProps.filteredExperiments &&
-                !_.isEqual(nextProps.filteredExperiments, pastProps.filteredExperiments)
+            nextProps.doManualTransitions && (
+                (
+                    nextProps.experiments &&
+                    nextProps.experiments !== pastProps.experiments &&
+                    !_.isEqual(nextProps.experiments, pastProps.experiments)
+                ) || (
+                    nextProps.filteredExperiments !== pastProps.filteredExperiments &&
+                    !_.isEqual(nextProps.filteredExperiments, pastProps.filteredExperiments)
+                )
             )
         );
     },
-
+    ///*
     componentWillReceiveProps : function(nextProps){
         // Stop current transitions or things will throw errors and break (D3 unable to find element it was transitioning)
         if (this.state.transitioning){
@@ -611,6 +632,7 @@ var SunBurst = React.createClass({
             this.setState({ 'transitioning' : true });
         }
     },
+    //*/
 
     shouldComponentUpdate : function(nextProps, nextState){
         if (this.state.transitioning !== nextState.transitioning){
@@ -637,7 +659,7 @@ var SunBurst = React.createClass({
         if (this.justMounted){
             this.justMounted = false; // unset (execs after render)
         }
-
+        ///*
         if (this.shouldPerformManualTransitions(this.props, pastProps)){
             // state.transitioning = false was set in componentWillReceiveProps.
             if (this.existingNodes && _.keys(this.existingNodes).length > 0){ // We might not have any existing paths to transition.
@@ -645,14 +667,15 @@ var SunBurst = React.createClass({
             } else {
                 if (this.props.debug) console.info("No paths to perform transitions on.");
                 this.setState({ 'transitioning' : false });
-           }
+            }
         }
+        //*/
 
         this.updateExplanation();
     },
 
     getPathsToManuallyTransition: function(){
-        return this.vis.selectAll('path').filter((d) => {
+        return d3.selectAll("svg.sunburst-svg-chart path").filter((d) => {
             return d.depth < 6 && (this.existingNodes && this.existingNodes[d.data.id]);
         });
     },
@@ -686,7 +709,7 @@ var SunBurst = React.createClass({
             //a.x0_past = b.x0;
             //a.x1_past = b.x1;
             return this.generateRectPath(b);
-            return b;//this.arc(b);
+            //return b;//this.arc(b);
         };
     },
 
@@ -709,7 +732,6 @@ var SunBurst = React.createClass({
         //var s = Math.min(nextProps.height, newWidth) / Math.min(pastProps.height, oldWidth); // Circle's radius is based off smaller dimension (w or h).
 
         vizUtil.requestAnimationFrame(() => {
-            this.getExplanationRefs().forEach(function(eR, i){ eR.className += ' invisible'; });
             this.refs.chart.style.height = nextProps.height + 'px';
             this.refs.chart.style.transform = (
                 vizUtil.style.scale3d(newWidth / oldWidth, this.height(nextProps.height) / this.height(pastProps.height)) + ' ' + 
@@ -721,29 +743,23 @@ var SunBurst = React.createClass({
                     this.refs.chart.style.transition = 'none'; // No transition before next update of transform style prop
                     this.refs.chart.style.transform = 'none';
                     console.info("Ending scale transition on SunBurst.");
-                    //this.setState({ 'transitioning' : false }, ()=>{
-                        this.forceUpdate();
-                        setTimeout(()=>{
-                            this.refs.chart.style.transition = '';
-                        }, 50);
-                    //});
+                    this.forceUpdate();
+                    setTimeout(()=>{
+                        this.refs.chart.style.transition = '';
+                    }, 50);
                 });
             }, 775);
         });
     },
 
     /** Get refs to breadcrumb and description components, whether they created by own component or passed in as props. */
-    breadcrumbs : function(){ return vizUtil.mixin.getBreadcrumbs.call(this); },
     descriptionElement : function(){ return vizUtil.mixin.getDescriptionElement.call(this); },
 
     updateExplanation : function(){
         setTimeout(()=>{
             vizUtil.requestAnimationFrame(()=>{
                 var rootNode = this.getRootNode();
-                this.refs.countExps.innerHTML = rootNode.data.active || rootNode.data.experiments;
-                this.refs.countExpSets.innerHTML = rootNode.data.experiment_sets;
-                this.refs.countFiles.innerHTML = rootNode.data.activeFiles || rootNode.data.files || 0;
-                this.getExplanationRefs().forEach(function(eR,i){ eR.className = eR.className.replace(' invisible','') });
+                this.resetActiveExperimentsCount();
             });
         }, 500);
     },
@@ -782,7 +798,6 @@ var SunBurst = React.createClass({
             )
         );
 
-        console.log('ROOTND', this.root);
         this.partition(this.root);
         var _this = this;
 
@@ -807,27 +822,49 @@ var SunBurst = React.createClass({
         if (this.state.transitioning || this.justMounted) {
             _this.existingNodes = {};
         }
+
+        var applicableFields = null;
+        if (_this.props.expSetFilters){
+            applicableFields = _.intersection(
+                _.keys(_this.props.expSetFilters).sort(),
+                _.pluck(_this.props.fields, 'field').sort()
+            );
+        }
+
+        console.log(applicableFields);
         
         function genPath(node, nodeIndex, allNodes, removing = false){
             var existing = !!(pastExistingNodes && pastExistingNodes[node.data.id]);
 
             var hasTerm = typeof node.data.field === 'string' && typeof node.data.term === 'string';
             var clickable = hasTerm && node.data.noClick !== true;
+            var applicableFields, isSetAsFilter;
+
+            isSetAsFilter = (
+                hasTerm &&
+                applicableFields &&
+                applicableFields.length > 0 &&
+                _this.props.expSetFilters[node.data.field] instanceof Set &&
+                _this.props.expSetFilters[node.data.field].has(node.data.term)
+            );
             var className = (
                 (node.depth === 0) ? 'root-node' : ''
             ) + (
                 clickable ? " clickable" : " static"
-            ) + (
-                (_this.root.data.active > 0 && node.data.active === 0) ? ' filtered-out' : ''
+            ) + (_this.root.data.active > 0 ?
+                (node.data.active === 0 ? ' filtered-out' : '') +
+                (isSetAsFilter ? ' term-is-set' : (hasTerm && applicableFields && applicableFields.length > 0 ? ' term-is-not-set' : ''))
+                : ' '
             );
             
             if (!removing && (_this.state.transitioning || _this.justMounted)) _this.existingNodes[node.data.id] = node;
-            
+
             return (
                 <path
                     style={{
                         fill    : _this.props.colorForNode(node),
-                        zIndex: existing ? 3 : ( removing ? 1 : 2 )
+                        zIndex: existing ? 3 : ( removing ? 1 : 2 ),
+                        stroke : '#fff'
                     }}
                     ref={(r)=>{
                         if (r && _this.state.transitioning){
@@ -863,7 +900,7 @@ var SunBurst = React.createClass({
                     onMouseOver={node.depth > 0 ? _this.mouseoverHandle : null }
                     onMouseEnter={ node.depth === 0 ? _this.mouseleave : null }
                     onMouseLeave={node.depth > 0 ? function(e){ unhighlightTerms(e.target.__data__.data.field); } : null}
-                    onClick={clickable ? (e) => _this.props.handleClick(e.target.__data__) : null}
+                    onClick={/*clickable ? (e) => _this.props.handleClick(e.target.__data__) : */null}
                     key={node.data.id}
                     data-key={node.data.id}
                 />
@@ -884,7 +921,7 @@ var SunBurst = React.createClass({
             var bParts = b.split('~');
             if (aParts.length !== bParts.length) return aParts.length - bParts.length;
             return a < b ? -1 : 1;
-        };
+        }
 
         ///* ToDo: 'Removing' nodes transition
         var pathComponents = nodes.map(genPath);
@@ -903,12 +940,8 @@ var SunBurst = React.createClass({
     render : function(){
 
         var styleOpts = this.styleOptions();
-        
-        // Generate breadcrumb/description elements IF their prop vals are true.
-        function breadcrumbs(){
-            if (this.props.breadcrumbs !== true) return null;
-            return <ChartBreadcrumbs parentId={this.props.id} ref="breadcrumbs" />;
-        }
+        this.visualizationSetup();
+        var paths = this.state.mounted ? this.generatePaths() : null;
 
         function description(){
             if (this.props.descriptionElement !== true) return null;
@@ -916,10 +949,41 @@ var SunBurst = React.createClass({
         }
 
         function renderSVG(){
-            var paths = this.state.mounted ? this.generatePaths() : null;
+            
             var xOffset = (this.root && this.root.y1) || 0;
+            var svgWidth = this.width();
+            var svgHeight = this.height();
+
+            /*
+            <ZoomCursor
+                    onMouseLeave={this.mouseleave}
+                    width={svgWidth}
+                    height={svgHeight}
+                    offsetX={styleOpts.offset.left}
+                    offsetY={styleOpts.offset.top}
+                    isChildSVG={true}
+                    zoomClassName="chart-sunburst chart-zoombox"
+                    visibilityMargin={{
+                        top : 5,
+                        bottom : 5,
+                        left : 5,
+                        right : 5//- (svgWidth / (this.props.maxFieldDepthIndex + 1))
+                    }}
+                >
+                */
+
             return (
-                <svg key={this.props.id + "-svg"} data-width={this.width()} style={{'width' : this.baseWidth(), 'height' : this.height() }} ref="svgElem">
+                <svg
+                    key={this.props.id + "-svg"}
+                    className="sunburst-svg-chart"
+                    data-width={this.width()}
+                    style={{
+                        'width'  : svgWidth,
+                        'height' : svgHeight
+                    }}
+                    ref="svgElem"
+                    onMouseLeave={this.mouseleave}
+                >
                     <g
                         key={this.props.id + "-svg-group"} 
                         className="group-container"
@@ -927,99 +991,75 @@ var SunBurst = React.createClass({
                         transform={
                             "translate(" + (-xOffset) + ",0)"
                         }
-                        onMouseLeave={this.mouseleave}
+                        onMouseLeave={null /*this.mouseleave*/}
                     >
-                        {/* <circle r={this.radius} className="bounding-circle" key={this.props.id +"-bounding-circle"} /> */}
                         { paths }
                     </g>
                 </svg>
             );
-        }
-        
-        function renderHoverExplanation(instanceIDString = '', instanceIndex = 0){
-            var styleObj = null;
-            var initialExplClassName = "explanation invisible";
-            var initialExpCountClassName = "experiments-count half-visible";
-            var initialExpCountLabelClassName = "experiments-count-label";
-            if (styleOpts.offset.right >= 60){
-                styleObj = {
-                    width : styleOpts.offset.right - 8,
-                    bottom : styleOpts.offset.bottom * (instanceIndex + 1)
-                };
-                initialExpCountClassName += ' align-to-right';
-                initialExpCountLabelClassName += ' align-to-right';
-                initialExplClassName += ' align-to-right';
-            }
-
-            var labelName = 'Experiments';
-            var initialVal = <span>&nbsp;</span>;
-            var rootData = (this.root && this.root.data) || this.root || {};
-            if (instanceIDString.toLowerCase() === 'exps'){ 
-                initialVal = rootData.active || rootData.experiments || initialVal;
-            }
-            if (instanceIDString.toLowerCase() === 'expsets'){ 
-                labelName = 'Exp. Sets';
-                initialVal = rootData.experiment_sets || initialVal;
-            }
-            if (instanceIDString.toLowerCase() === 'files'){ 
-                labelName = 'Files';
-                initialVal = rootData.activeFiles || rootData.files || 0;
-            }
-
-            return (
-                <div 
-                    id={this.props.id + "-explanation-" + instanceIDString}
-                    ref={"explanation" + instanceIDString}
-                    key={instanceIDString}
-                    className={initialExplClassName}
-                    style={styleObj}
-                >
-                    <div id={this.props.id + "-experiments-count-" + instanceIDString} className={initialExpCountClassName} ref={"count" + instanceIDString}>
-                        { initialVal }
-                    </div>
-                    <div className={initialExpCountLabelClassName}>
-                        { labelName }
-                    </div>
-                    { description.call(this) }
-                </div>
-            );
+            /* </ZoomCursor> */
         }
 
         function renderYAxis(){
+
+            
+            if (!this.root || !this.props.expSetFilters) return null;
+            var barWidth = this.singleChartLayerWidth();
+            var nodes = this.root.descendants();
+            var depths = _.range(1, this.root.height);
+            var startPoints = _.range(0, this.width(), this.singleChartLayerWidth());
+            var icons = startPoints.map((p,i)=>{
+                var active = false;
+                var n = nodes.filter((d)=>{
+                    return d.depth === i + 1 && this.props.expSetFilters[d.data.field] && this.props.expSetFilters[d.data.field].has(d.data.term);
+                });
+                if (n.length > 0) active = true;
+                return (
+                    <div className={"top-label " + (active ? 'active' : '')} style={{ 'width': barWidth, 'left' : p }} onClick={active ? ()=>{
+                        Filters.unsetAllTermsForField(n[0].data.field, this.props.expSetFilters, true, this.props.href);
+                    } : null} key={'col-' + i}>
+                        <i className="icon icon-times"/>
+                    </div>
+                );
+            });
             return (
                 <div 
-                    className="y-axis-bottom"
+                    className="y-axis-top"
                     style={{ 
-                        width : this.baseWidth(),
-                        height : styleOpts.offset.bottom - 5
+                        width : this.width(),
+                        height : Math.max(styleOpts.offset.top - 5, 0),
+                        lineHeight : Math.max(styleOpts.offset.top - 5, 0) + 'px',
+                        marginBottom : 5
                     }}
                 >
-                    
+                    { icons }
                 </div>
             );
         }
 
-        this.visualizationSetup();
+        
 
         // Wrapping stuff
         return (
             <div
-                className={"chart-container chart-container-sunburst" + (this.props.experiments === null && !this.props.fallbackToSampleData ? ' no-data' : '')}
+                className={
+                    "chart-container chart-container-sunburst" + 
+                    (this.props.experiments === null && !this.props.fallbackToSampleData ? ' no-data' : '') +
+                    (this.props.fetching ? ' fetching' : '')
+                }
                 id={this.props.id}
                 ref="container"
                 key={this.props.id + '-chart-container'}
                 style={{
-                    transform : 'none'
+                    transform : 'none',
                 }}
             >
-                { breadcrumbs.call(this) }
                 <div id={this.props.id + "-chart"} className="chart chart-sunburst" ref="chart" style={{
                     'height' : this.props.height,
                     'transform' : ''
                 }} key={this.props.id + "-chart"}>
-                    { renderSVG.call(this) }
-                    { ['ExpSets', 'Exps', 'Files'].map(renderHoverExplanation.bind(this)) }
                     { renderYAxis.call(this) }
+                    { renderSVG.call(this) }
                 </div>
             </div>
                 

@@ -1,5 +1,6 @@
 'use strict';
 
+var moment = require('moment');
 var { isServerSide } = require('./misc');
 
 /**
@@ -23,7 +24,7 @@ var patchedConsole = module.exports = (function(){
                 return false;
             }
             return true;
-        }
+        };
 
         this._initArgs = arguments; // arguments variable contains any arguments passed to function in an array.
         this._enabled = true; // Default
@@ -51,7 +52,7 @@ var patchedConsole = module.exports = (function(){
                             'color: black',
                             Array.prototype.slice.apply(arguments)
                         )
-                    )
+                    );
                 }.bind(this);
             } else {
                 this.timeLog = this._dummyFunc;
@@ -82,7 +83,7 @@ var patchedConsole = module.exports = (function(){
         }.bind(this);
 
         this._patchMethods();
-    }
+    };
 
     var patchedConsole = new PatchedConsole();
 

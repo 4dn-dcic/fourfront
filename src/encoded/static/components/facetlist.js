@@ -4,7 +4,7 @@ var queryString = require('query-string');
 var _ = require('underscore');
 var store = require('../store');
 var { ajax, console, object, isServerSide, Filters } = require('./util');
-var { vizUtil } = require('./viz/common');
+var vizUtil = require('./viz/utilities');
 
 
 /**
@@ -131,7 +131,7 @@ var ExpTerm = React.createClass({
 
                 newState.passExpsCount = this.getPassExpsCount(termMatchExps, newProps.experimentSetListJSON || this.props.experimentSetListJSON);
             } else {
-                newState.passExpsCount = (newProps.term && newProps.term.doc_count) || 0
+                newState.passExpsCount = (newProps.term && newProps.term.doc_count) || 0;
             }
         }
 
@@ -612,7 +612,6 @@ var FacetList = module.exports = React.createClass({
                 }
 
             }
-            if (Object.keys(ignoredFilters).length && this.props.debug) console.log("Found Ignored Filters: ", ignoredFilters);
             return ignoredFilters;
         },
 

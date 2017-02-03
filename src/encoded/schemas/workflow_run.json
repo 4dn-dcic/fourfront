@@ -63,7 +63,7 @@
                 "title": "Output file mapping",
                 "description": "Info on file output by the workflow and how it is mapped to CWL arguments.",
                 "type": "object",
-                "additionalProperties": false,
+                "additionalProperties": true,
                 "properties": {
                     "workflow_argument_name": {
                         "title": "Workflow argument name",

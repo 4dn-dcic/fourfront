@@ -3,14 +3,14 @@
 require('./libs/react-patches');
 var React = require('react');
 var _ = require('underscore');
-var ReactDOM = require('react-dom')
+var ReactDOM = require('react-dom');
 var ReactMount = require('react-dom/lib/ReactMount');
 ReactMount.allowFullPageRender = true;
 
 var App = require('./components');
 var domready = require('domready');
 var store = require('./store');
-var { Provider, connect } = require('react-redux')
+var { Provider, connect } = require('react-redux');
 var { JWT, Filters } = require('./components/util');
 
 
@@ -58,7 +58,7 @@ if (typeof window !== 'undefined' && window.document && !window.TEST_RUNNER && !
 
     if (reloadIfBadUserInfo(true)) return;
 
-    var expSetFiltersPropContainer = App.getRenderedPropValues(document, ['expSetFilters'])
+    var expSetFiltersPropContainer = App.getRenderedPropValues(document, ['expSetFilters']);
 
     store.dispatch({
         // Update Redux store from Redux store props that've been rendered into <script data-prop-name={ propName }> elems server-side

@@ -3,7 +3,7 @@
 var React = require('react');
 var _ = require('underscore');
 var d3 = require('d3');
-var { ChartBreadcrumbs, vizUtil } = require('./common');
+var vizUtil = require('./utilities');
 var { console, object, isServerSide, expFxn } = require('../util');
 
 
@@ -70,7 +70,7 @@ var BarPlot = React.createClass({
             var field;
             var fieldIndex;
             if (Array.isArray(fields)){ // Fields can be array or single field.
-                fieldIndex = _.findIndex(fields, function(f){ return typeof f.childField !== 'undefined' });
+                fieldIndex = _.findIndex(fields, function(f){ return typeof f.childField !== 'undefined'; });
                 field = fields[fieldIndex];
             } else {
                 field = fields;
@@ -198,7 +198,7 @@ var BarPlot = React.createClass({
                     .forEach(function(d,i){
                         d.attr.x = barXCoords[i];
                     })
-                    .value()
+                    .value();
             }
 
             var barData = {
@@ -220,8 +220,8 @@ var BarPlot = React.createClass({
                 'labelWidth' : 200,
                 'yAxisMaxHeight' : 100, // This will override labelWidth to set it to something that will fit at angle.
                 'offset' : {
-                    'top' : 0,
-                    'bottom' : 50,
+                    'top' : 30,
+                    'bottom' : 0,
                     'left' : 80,
                     'right' : 0
                 }
@@ -259,7 +259,7 @@ var BarPlot = React.createClass({
     },
   
     getDefaultProps : function(){
-  	    return {
+        return {
             experiments : [],
             fields : [],
             styleOptions : null, // Can use to override default margins/style stuff.
@@ -310,6 +310,7 @@ var BarPlot = React.createClass({
 
         // THE BELOW IF BLOCK IS NO LONGER NECESSARY AS CONVERTED TO HTML ELEMS, KEEPING FOR IF NEEDED IN FUTURE.
         // shouldPerformManualTransitions WILL ALWAYS RETURN FALSE CURRENTLY.
+        /*
         if (this.shouldPerformManualTransitions(this.props, pastProps)){
             if (typeof this.pastBars !== 'undefined'){
 
@@ -353,6 +354,7 @@ var BarPlot = React.createClass({
                 .on('end', transitionCompleteCallback);
             }
         }
+        */
     },
 
     renderParts : {
@@ -364,7 +366,7 @@ var BarPlot = React.createClass({
 
                 if (!styleOpts) styleOpts = this.styleOptions();
 
-                var prevBarExists = function(){ return typeof existingBars[d.term] !== 'undefined' && existingBars[d.term] !== null; }
+                var prevBarExists = function(){ return typeof existingBars[d.term] !== 'undefined' && existingBars[d.term] !== null; };
                 var prevBarData = null;
                 if (prevBarExists() && transitioning) prevBarData = existingBars[d.term].__data__;
 
@@ -527,8 +529,9 @@ var BarPlot = React.createClass({
                     className={
                         "chart-bar no-highlight-color" + 
                         (
-                            d.attr.height > Math.max((this.height() - styleOpts.offset.bottom - styleOpts.offset.top) / 2, 30) ?
-                            ' larger-height' : ''
+                            //d.attr.height > Math.max((this.height() - styleOpts.offset.bottom - styleOpts.offset.top) / 2, 30) ?
+                            //' larger-height' : ''
+                            ''
                         )
                     }
                     data-term={d.term}
@@ -574,19 +577,6 @@ var BarPlot = React.createClass({
             );
         },
 
-        topYAxis : function(availWidth, styleOpts){
-            return (
-                <line
-                    key="y-axis-top"
-                    className="y-axis-top"
-                    x1={styleOpts.offset.left}
-                    y1={styleOpts.offset.top}
-                    x2={availWidth - styleOpts.offset.right}
-                    y2={styleOpts.offset.top}
-                />
-            );
-        },
-
         bottomYAxis : function(availWidth, availHeight, currentBars, styleOpts){
             var _this = this;
             
@@ -596,7 +586,8 @@ var BarPlot = React.createClass({
                 <div className="y-axis-bottom" style={{ 
                     left : styleOpts.offset.left, 
                     right : styleOpts.offset.right,
-                    height : styleOpts.offset.bottom - 5
+                    height : Math.max(styleOpts.offset.bottom - 5, 0),
+                    bottom : Math.min(styleOpts.offset.bottom - 5, 0)
                 }}>
                     { currentBars.map(function(bar){
                         return (
@@ -605,7 +596,7 @@ var BarPlot = React.createClass({
                                 data-term={bar.term}
                                 className="y-axis-label no-highlight-color"
                                 style={{
-                                    transform : vizUtil.style.translate3d(bar.attr.x, 0, 0),
+                                    transform : vizUtil.style.translate3d(bar.attr.x, 5, 0),
                                     width : bar.attr.width,
                                     opacity : _this.state.transitioning && (bar.removing || !bar.existing) ? 0 : ''
                                 }}
@@ -634,11 +625,42 @@ var BarPlot = React.createClass({
                     }) }
                 </div>
             );
+        },
+
+        leftAxis : function(availWidth, availHeight, barData, styleOpts){
+            //console.log(barData);
+            var chartHeight = availHeight - styleOpts.offset.top - styleOpts.offset.bottom;
+            var valStep = barData.maxY / 8;
+            var rangeVal = d3.range(0, barData.maxY + valStep, valStep);
+            console.log(rangeVal);
+            var steps = rangeVal.map(function(v,i){
+                return (
+                    <div className="axis-step" style={{
+                        position : 'absolute',
+                        left: 0,
+                        right: 0,
+                        bottom : (v / barData.maxY) * chartHeight
+                    }} key={i}>
+                        <span className="axis-label">
+                            { v }
+                        </span>
+                    </div>
+                );
+            });
+            return (
+                <div className="bar-plot-left-axis" style={{
+                    height : chartHeight,
+                    width: Math.max(styleOpts.offset.left - 5, 0),
+                    top:  styleOpts.offset.top + 'px'
+                }}>
+                    { steps }
+                </div>
+            );
         }
 
     },
 
-	render : function(){
+    render : function(){
         if (this.state.mounted === false) return <div ref="container"></div>;
 
         var availHeight = this.height(),
@@ -660,14 +682,14 @@ var BarPlot = React.createClass({
             this.styleOptions()
         );
 
-        console.log('BARDATA', barData);
+        //console.log('BARDATA', barData);
 
         // Bars from current dataset/filters only.
         var currentBars = barData.bars.map((d)=>{
             // Determine whether bar existed before, for this.renderParts.bar render func.
             return _.extend(d, { 
                 'existing' : typeof this.pastBars[d.term] !== 'undefined' && this.pastBars[d.term] !== null
-            })
+            });
         });
 
         var allBars = currentBars; // All bars -- current (from barData) and those which now need to be removed if transitioning (see block below).
@@ -695,10 +717,11 @@ var BarPlot = React.createClass({
                 style={{ height : availHeight, width: availWidth }}
             >
                 { barComponents }
+                { this.renderParts.leftAxis.call(this, availWidth, availHeight, barData, styleOpts) }
                 { this.renderParts.bottomYAxis.call(this, availWidth, availHeight, allBars, styleOpts) }
             </div>
         );
-
+        /*
         // Keep in mind that 0,0 coordinate is located at top left for SVGs.
         // Easier to reason in terms of 0,0 being bottom left, thus e.g. d.attr.y for bars is set to be positive,
         // so we need to flip it via like availHeight - y in render function(s).
@@ -712,6 +735,7 @@ var BarPlot = React.createClass({
                 { this.renderParts.svg.bottomYAxis.call(this, availWidth, availHeight, currentBars, styleOpts) }
             </svg>
         );
+        */
     }
 });
 

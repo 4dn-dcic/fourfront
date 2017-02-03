@@ -123,14 +123,14 @@ var DateUtility = module.exports = (function(){
                 customOutputFormat : null,
                 fallback : "N/A",
                 className : "localized-date-time"
-            }
+            };
         },
         getInitialState : function(){
             return {
                 moment : this.props.momentDate ? this.props.momentDate :
                     this.props.timestamp ? moment.utc(this.props.timestamp) : moment.utc(),
                 mounted : false
-            }
+            };
         },
         componentDidMount : function(){
             this.setState({ mounted : true });

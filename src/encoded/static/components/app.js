@@ -125,9 +125,10 @@ var App = React.createClass({
             user_actions = user_info.user_actions;
         }
 
+        // Save navigate fxn and other req'd stuffs to Filters.
         Filters.navigate = this.navigate;
 
-       console.log("App Initial State: ", session, user_actions);
+        console.log("App Initial State: ", session, user_actions);
 
         return {
             'errors': [],
@@ -231,10 +232,31 @@ var App = React.createClass({
                 this.setState({
                     schemas: data
                 }, () => {
+                    // Let Filters have access to schemas for own functions.
+                    Filters.getSchemas = () => this.state.schemas;
                     if (typeof callback === 'function') callback(data);
                 });
             }
         });
+    },
+
+    getStatsComponent : function(){
+        if (!this.refs || !this.refs.navigation) return null;
+        if (!this.refs.navigation.refs) return null;
+        if (!this.refs.navigation.refs.stats) return null;
+        return this.refs.navigation.refs.stats;
+    },
+
+    updateStats : function(counts, totals = false, callback = null){
+        var statsComponent = this.getStatsComponent();
+        if (statsComponent){
+            if (!totals){
+                return statsComponent.updateCurrentCounts(counts, callback);
+            } else {
+                return statsComponent.updateTotalCounts(counts, callback);
+            }
+        }
+        return null;
     },
 
     // When current dropdown changes; componentID is _rootNodeID of newly dropped-down component
@@ -314,7 +336,8 @@ var App = React.createClass({
         globals.bindEvent(window, 'keydown', this.handleKey);
 
         this.authenticateUser();
-        this.loadSchemas(); // Load schemas into app.state, access them where needed via props (preferred, safer) or this.context.
+        // Load schemas into app.state, access them where needed via props (preferred, safer) or this.context.
+        this.loadSchemas();
 
         var query_href;
         if(document.querySelector('link[rel="canonical"]')){
@@ -980,14 +1003,20 @@ var App = React.createClass({
                         <div id="application" className={appClass}>
                             <div className="loading-spinner"></div>
                             <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
-                                <Navigation href={this.props.href} session={this.state.session} ref="navigation" />
+                                <Navigation
+                                    href={this.props.href}
+                                    session={this.state.session}
+                                    expSetFilters={this.props.expSetFilters}
+                                    ref="navigation"
+                                />
                                 <div id="content" className="container">
                                     <FacetCharts
                                         href={this.props.href}
                                         context={this.props.context}
                                         expSetFilters={this.props.expSetFilters}
                                         navigate={this.navigate}
-
+                                        updateStats={this.updateStats}
+                                        schemas={this.state.schemas}
                                     />
                                     <Alerts alerts={this.props.alerts} />
                                     { content }

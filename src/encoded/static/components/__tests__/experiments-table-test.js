@@ -17,7 +17,7 @@ describe('Testing experiments-table.js', function() {
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
         ExperimentsTable = require('../experiments-table').ExperimentsTable;
-        context = require('../testdata/experiment_set/replicate_4DNESC5JYZPZ');
+        context = require('../testdata/experiment_set/replicate_4DNESH4MYRID');
         schemas = require('../testdata/schemas');
         expFuncs = require('../util').expFxn;
 
@@ -26,11 +26,11 @@ describe('Testing experiments-table.js', function() {
             getInitialState : function(){
                 return {
                     selectedFiles : new Set ([
-                        "28dbe808-474d-41fc-aac4-0f3ad036d51a",
-                        "5a80104a-9dc1-4168-afb3-574f39e62a5b",
-                        "56de517e-b634-4e47-89ab-443c3c35ae0f",
-                        "9c7ecb77-8717-4eda-84fc-b77ec927e6af",
-                        "bc3243ed-79dd-4209-9465-7c0940e89b99"
+                        "8e39bf85-02e2-4cbf-8352-55ca1ab402c7",
+                        "177a19b9-5801-4523-a1bf-c0f174a72864",
+                        "c315f5ae-62d4-4413-8606-9cd5556c2341",
+                        "f08bbdca-247b-4c75-b3bf-a9ba2ac8c1e1",
+                        "210a7047-37cc-406d-8246-62fbe3400fc3"
                     ])
                 };
             },
