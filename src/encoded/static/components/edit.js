@@ -3,7 +3,6 @@ var React = require('react');
 var globals = require('./globals');
 var _ = require('underscore');
 var { EditableField, FieldSet } = require('./forms');
-var IPanel = require('./item').IPanel;
 var { ajax, console, object, isServerSide } = require('./util');
 
 // var sorted_json = module.exports.sorted_json = function (obj) {

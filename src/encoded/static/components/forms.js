@@ -474,7 +474,6 @@ var EditableField = module.exports.EditableField = React.createClass({
         }
 
         // ToDo : cross-browser validation check + set error state then use for styling, etc.
-        console.log('++++ ', e)
         this.setState(state);
     },
 

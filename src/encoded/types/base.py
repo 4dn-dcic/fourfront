@@ -241,12 +241,12 @@ def edit(context, request):
 
 
 @snovault.calculated_property(context=Item, category='action')
-def edit_json(context, request):
+def create(context, request):
     """smth."""
     if request.has_permission('edit'):
         return {
-            'name': 'edit-json',
-            'title': 'Edit JSON',
+            'name': 'create',
+            'title': 'Create',
             'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
-            'href': '{item_uri}#!edit-json'.format(item_uri=request.resource_path(context)),
+            'href': '{item_uri}#!create'.format(item_uri=request.resource_path(context)),
         }

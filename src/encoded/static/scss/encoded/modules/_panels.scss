@@ -8,6 +8,53 @@
     overflow: visible;
     border: 1px solid transparent; /* So bordered and border-less panels have same padding */
     @include box-shadow(0px 0px 0px rgba(0,0,0,0));
+    // Highly specific case for create.js
+    &.panel-create-obj{
+        margin-top: 4px !important;
+        margin-bottom: 4px !important;
+        border: 1px solid #ccc !important;
+        width: 100%;
+        & > .panel-heading {
+            padding: 2px 2px 2px 5px !important;
+            background-color: #ffffff !important;
+            color: #808080 !important;
+        }
+        > table > tbody {
+            display: block;
+            max-height: 280px;
+            overflow-y: auto;
+            > tr{
+                display: block;
+                width: 100%;
+                > td {
+                    border-top: 0px !important;
+                    border-bottom: 1px solid #ccc !important;
+                    display: inline-block;
+                    width: 100%;
+                    &.active-object{
+                        background-color: #d9edf7;
+                    }
+                    >a{
+                        &.cancel-button-inline{
+                            color: #a94442 !important;
+                            display: inline-block;
+                            float: right;
+                            padding-right: 14px;
+                        }
+                        &.tab-right{
+                            display: inline-block;
+                            float: right;
+                        }
+                        &.tab-left{
+                            display: inline-block;
+                            float: left;
+                        }
+                    }
+                    padding: 2px 2px 2px 5px !important;
+                }
+            }
+        }
+    }
     &.panel-default {
         padding: 0;
 
@@ -20,8 +67,8 @@
         }
     }
 
-    > h1:first-child, > h2:first-child, 
-    > h3:first-child, > h4:first-child, 
+    > h1:first-child, > h2:first-child,
+    > h3:first-child, > h4:first-child,
     > h5:first-child, > h6:first-child {
         margin-top: 0;
         padding-top: 2px;

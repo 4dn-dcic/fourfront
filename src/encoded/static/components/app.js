@@ -5,6 +5,7 @@ var globals = require('./globals');
 var ErrorPage = require('./error');
 var Navigation = require('./navigation');
 var Edit = require('./edit');
+var Create = require('./create');
 var Footer = require('./footer');
 var url = require('url');
 var _ = require('underscore');
@@ -837,13 +838,13 @@ var App = React.createClass({
                 // test for edit handle
                 if (value == '#!edit'){
                     actionList.push('edit');
+                }else if (value == '#!create'){
+                    actionList.push('create');
                 }else{
                     lowerList.push(value.toLowerCase());
                 }
             }
         });
-        console.log('--->', actionList);
-        console.log('===>', context);
         var currRoute = lowerList.slice(1); // eliminate http
         // check error status
         var status;
@@ -868,21 +869,36 @@ var App = React.createClass({
         }else if(status){
             content = <ErrorPage currRoute={currRoute[currRoute.length-1]} status={status}/>;
             title = 'Error';
-        }else if(actionList.length == 1 && actionList[0] == 'edit'){
+        }else if(actionList.length == 1){
             ContentView = globals.content_views.lookup(context, current_action);
             if (ContentView){
-                content = (
-                    <Edit
-                        context={context}
-                        schemas={this.state.schemas}
-                        expSetFilters={this.props.expSetFilters}
-                        expIncompleteFacets={this.props.expIncompleteFacets}
-                        session={this.state.session}
-                        key={key}
-                        navigate={this.navigate}
-                        href={this.props.href}
-                    />
-                );
+                if(actionList[0] == 'edit'){
+                    content = (
+                        <Edit
+                            context={context}
+                            schemas={this.state.schemas}
+                            expSetFilters={this.props.expSetFilters}
+                            expIncompleteFacets={this.props.expIncompleteFacets}
+                            session={this.state.session}
+                            key={key}
+                            navigate={this.navigate}
+                            href={this.props.href}
+                        />
+                    );
+                }else if(actionList[0] == 'create'){
+                    content = (
+                        <Create
+                            context={context}
+                            schemas={this.state.schemas}
+                            expSetFilters={this.props.expSetFilters}
+                            expIncompleteFacets={this.props.expIncompleteFacets}
+                            session={this.state.session}
+                            key={key}
+                            navigate={this.navigate}
+                            href={this.props.href}
+                        />
+                    );
+                }
                 title = context.title || context.name || context.accession || context['@id'];
                 if (title && title != 'Home') {
                     title = title + ' – ' + portal.portal_title;
