@@ -83,7 +83,7 @@ var patchedConsole = module.exports = (function(){
         }.bind(this);
 
         this._patchMethods();
-    }
+    };
 
     var patchedConsole = new PatchedConsole();
 

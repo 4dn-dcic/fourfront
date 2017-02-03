@@ -3,6 +3,7 @@
 var _ = require('underscore');
 var cookie = require('react-cookie');
 var { isServerSide } = require('./misc');
+var console = require('./patched-console');
 
 var JWT = module.exports = {
 

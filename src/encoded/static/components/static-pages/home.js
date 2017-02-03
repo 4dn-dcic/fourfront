@@ -119,7 +119,7 @@ var Announcement = React.createClass({
 
         var icon = null;
         if (this.props.icon){
-            if (typeof this.props.icon === true){
+            if (this.props.icon === true){
                 icon = <i className={"icon text-small icon-" + (this.state.active ? 'minus' : 'plus')}></i>;
             } else {
                 icon = this.props.icon; // Custom icon maybe for future

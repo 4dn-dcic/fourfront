@@ -259,11 +259,11 @@ var BarPlot = React.createClass({
     },
   
     getDefaultProps : function(){
-  	    return {
-          experiments : [],
-          fields : [],
-          styleOptions : null, // Can use to override default margins/style stuff.
-          colorForNode : function(node){ return vizUtil.stringToColor((node.data || node).name); } // Default color determinator
+        return {
+            experiments : [],
+            fields : [],
+            styleOptions : null, // Can use to override default margins/style stuff.
+            colorForNode : function(node){ return vizUtil.stringToColor((node.data || node).name); } // Default color determinator
         };
     },
 
@@ -310,6 +310,7 @@ var BarPlot = React.createClass({
 
         // THE BELOW IF BLOCK IS NO LONGER NECESSARY AS CONVERTED TO HTML ELEMS, KEEPING FOR IF NEEDED IN FUTURE.
         // shouldPerformManualTransitions WILL ALWAYS RETURN FALSE CURRENTLY.
+        /*
         if (this.shouldPerformManualTransitions(this.props, pastProps)){
             if (typeof this.pastBars !== 'undefined'){
 
@@ -353,6 +354,7 @@ var BarPlot = React.createClass({
                 .on('end', transitionCompleteCallback);
             }
         }
+        */
     },
 
     renderParts : {
@@ -658,7 +660,7 @@ var BarPlot = React.createClass({
 
     },
 
-	render : function(){
+    render : function(){
         if (this.state.mounted === false) return <div ref="container"></div>;
 
         var availHeight = this.height(),
@@ -680,7 +682,7 @@ var BarPlot = React.createClass({
             this.styleOptions()
         );
 
-        console.log('BARDATA', barData);
+        //console.log('BARDATA', barData);
 
         // Bars from current dataset/filters only.
         var currentBars = barData.bars.map((d)=>{

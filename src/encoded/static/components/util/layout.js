@@ -99,7 +99,7 @@ var layout = module.exports = {
     ){
         if (isServerSide()){
             return null;
-        };
+        }
         var contElem = document.createElement(containerElementType);
         contElem.className = "off-screen " + (containerClassName || '');
         contElem.innerHTML = textContent;

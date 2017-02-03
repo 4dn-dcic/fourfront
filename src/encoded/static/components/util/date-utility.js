@@ -130,7 +130,7 @@ var DateUtility = module.exports = (function(){
                 moment : this.props.momentDate ? this.props.momentDate :
                     this.props.timestamp ? moment.utc(this.props.timestamp) : moment.utc(),
                 mounted : false
-            }
+            };
         },
         componentDidMount : function(){
             this.setState({ mounted : true });

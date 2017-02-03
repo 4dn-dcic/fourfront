@@ -371,6 +371,14 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         }
 
         function updateExpSetFilters(){
+
+            function getNavUrl(){
+                var hrefParts = url.parse(this.props.href);
+                var reqParts = url.parse(this.props.requestURLBase, true);
+                var query = _.extend({}, reqParts.query, { 'limit' : Filters.getLimit() || 25 });
+                return hrefParts.protocol + "//" + hrefParts.host + reqParts.pathname + '?' + querystring.stringify(query);
+            }
+
             // if part of tree
             /*
             if (node.parent) {
@@ -421,13 +429,6 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
         if (this.props.href.indexOf('/browse/') === -1){
 
-            function getNavUrl(){
-                var hrefParts = url.parse(this.props.href);
-                var reqParts = url.parse(this.props.requestURLBase, true);
-                var query = _.extend({}, reqParts.query, { 'limit' : Filters.getLimit() || 25 });
-                return hrefParts.protocol + "//" + hrefParts.host + reqParts.pathname + '?' + querystring.stringify(query);
-            }
-
             // We're not on browse page, so filters probably wouldn't be useful to set without navigating to there.
             if (typeof this.props.navigate === 'function'){
                 this.props.navigate(getNavUrl.call(this), {}, () => setTimeout(()=>{
@@ -442,7 +443,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
     }, 500, { trailing : false }), // Prevent more than 1 click per 500ms because it takes a while to grab calculate exps matching filters.
 
     show : function(props = this.props){
-        if (typeof props.show === false) return false;
+        if (props.show === false) return false;
         if (typeof props.show === 'string' && props.views.indexOf(props.show) > -1) return props.show;
         if (typeof props.show === 'function') {
             var show;

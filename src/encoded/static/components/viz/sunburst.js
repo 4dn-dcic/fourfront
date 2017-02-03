@@ -709,7 +709,7 @@ var SunBurst = React.createClass({
             //a.x0_past = b.x0;
             //a.x1_past = b.x1;
             return this.generateRectPath(b);
-            return b;//this.arc(b);
+            //return b;//this.arc(b);
         };
     },
 
@@ -743,12 +743,10 @@ var SunBurst = React.createClass({
                     this.refs.chart.style.transition = 'none'; // No transition before next update of transform style prop
                     this.refs.chart.style.transform = 'none';
                     console.info("Ending scale transition on SunBurst.");
-                    //this.setState({ 'transitioning' : false }, ()=>{
-                        this.forceUpdate();
-                        setTimeout(()=>{
-                            this.refs.chart.style.transition = '';
-                        }, 50);
-                    //});
+                    this.forceUpdate();
+                    setTimeout(()=>{
+                        this.refs.chart.style.transition = '';
+                    }, 50);
                 });
             }, 775);
         });
@@ -923,7 +921,7 @@ var SunBurst = React.createClass({
             var bParts = b.split('~');
             if (aParts.length !== bParts.length) return aParts.length - bParts.length;
             return a < b ? -1 : 1;
-        };
+        }
 
         ///* ToDo: 'Removing' nodes transition
         var pathComponents = nodes.map(genPath);
