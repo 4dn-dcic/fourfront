@@ -74,6 +74,12 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             if (document.documentElement.className.indexOf('uaEdge') > -1) return true;
             return true;
         },
+
+        getFieldsRequiredURLQueryPart : function(fields){
+            return fields.map(function(fieldToIncludeInResult){
+                return '&field=' + fieldToIncludeInResult;
+            }).join('');
+        },
         
     },
     
@@ -350,11 +356,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
     getFilteredContextHref : function(props = this.props){ return Filters.filtersToHref(props.filters, props.href, 0, 'all', '/browse/'); },
 
-    getFieldsRequiredURLQueryPart : function(){
-        return this.props.fieldsToFetch.map(function(fieldToIncludeInResult){
-            return '&field=' + fieldToIncludeInResult;
-        }).join('');
-    },
+    getFieldsRequiredURLQueryPart : function(){ return FacetCharts.getFieldsRequiredURLQueryPart(this.props.fieldsToFetch); },
 
     colorForNode : function(node){ return vizUtil.colorForNode(node, this.props.colors); },
 
