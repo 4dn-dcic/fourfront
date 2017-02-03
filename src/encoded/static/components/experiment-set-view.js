@@ -5,11 +5,10 @@ var globals = require('./globals');
 var Panel = require('react-bootstrap').Panel;
 var { ExperimentsTable } = require('./experiments-table');
 var _ = require('underscore');
-var { DescriptorField, formValue } = require('./item-view');
+var { DescriptorField, formValue, ItemHeader } = require('./item-view');
 var FacetList = require('./facetlist');
 var { ajax, console, DateUtility, object } = require('./util');
 var FormattedInfoBlock = require('./formatted-info-block');
-var { FlexibleDescriptionBox } = require('./experiment-common');
 
 /**
  * Entire ExperimentSet page view.
@@ -269,91 +268,17 @@ globals.panel_views.register(ExperimentSetView, 'ExperimentSet');
 globals.panel_views.register(ExperimentSetView, 'ExperimentSetReplicate');
 
 
+
 var ExperimentSetHeader = React.createClass({
-
-    parsedCreationDate(){
-        if (!('date_created' in this.props.context)) return <span><i></i></span>;
-        return (
-            <span>
-                <i className="icon sbt-calendar"></i>&nbsp; Added{' '}
-                <DateUtility.LocalizedTime timestamp={this.props.context.date_created} formatType='date-time-md' dateTimeSeparator=" at " />
-            </span>
-        );
-    },
-
-    parsedStatus(){
-        if (!('status' in this.props.context)) return <div></div>;
-        /*  Removed icon in lieu of color indicator for status
-        var iconClass = null;
-        switch (this.props.context.status){
-
-            case 'in review by lab':
-            case 'in review by project':
-                iconClass = 'icon ss-stopwatch';
-                break;
-
-        }
-        */
-
-        // Status colors are set via CSS (layout.scss) dependent on data-status attribute
-        return (
-            <div
-                className="expset-indicator expset-status right"
-                data-status={ this.props.context.status.toLowerCase() }
-                title="Review Status"
-            >
-                { this.props.context.status }
-            </div>
-        );
-    },
-
-    parsedExperimentSetType(){
-        if (!('experimentset_type' in this.props.context)) return <div></div>;
-        return (
-            <div
-                className="expset-indicator expset-type right"
-                data-set-type={ this.props.context.experimentset_type }
-                title="Experiment Set Type"
-            >
-                { this.props.context.experimentset_type }
-            </div>
-        );
-    },
 
     render: function() {
         console.log('render ExperimentSetHeader')
         return (
-            <div className="exp-set-header-area">
-
-                <div className="row clearfix top-row">
-                    <h3 className="col-sm-6 item-label-title">
-                        { /* PLACEHOLDER / TEMP-EMPTY */ }
-                    </h3>
-                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra text-capitalize indicators clearfix">
-                        { this.parsedExperimentSetType() }
-                        { this.parsedStatus() }
-                    </h5>
-                </div>
-
-                <FlexibleDescriptionBox
-                    description={ this.props.context.description }
-                    className="item-page-heading experiment-heading"
-                    textClassName="text-large"
-                    fitTo="grid"
-                    dimensions={{
-                        paddingWidth : 32,
-                        paddingHeight : 22,
-                        buttonWidth : 30,
-                        initialHeight : 45
-                    }}
-                />
-
-                <div className="row clearfix bottom-row">
-                    <div className="col-sm-6 item-label-extra set-type-indicators">{ /* PLACEHOLDER / TEMP-EMPTY */ }</div>
-                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra" title="Date Added - UTC/GMT">{ this.parsedCreationDate() }</h5>
-                </div>
-
-            </div>
+            <ItemHeader.Wrapper className="exp-set-header-area" context={this.props.context}>
+                <ItemHeader.TopRow>{ this.props.context.experimentset_type }</ItemHeader.TopRow>
+                <ItemHeader.MiddleRow />
+                <ItemHeader.BottomRow />
+            </ItemHeader.Wrapper>
         );
     }
 });

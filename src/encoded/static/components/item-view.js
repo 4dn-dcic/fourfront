@@ -5,7 +5,124 @@ var globals = require('./globals');
 var Panel = require('react-bootstrap').Panel;
 var Table = require('./collection').Table;
 var { AuditIndicators, AuditDetail, AuditMixin } = require('./audit');
-var { console, object } = require('./util');
+var { console, object, DateUtility } = require('./util');
+var { FlexibleDescriptionBox } = require('./experiment-common');
+
+
+
+var ItemHeader = {
+
+    TopRow : React.createClass({
+        parsedStatus : function(){
+            if (!('status' in this.props.context)) return <div></div>;
+            /*  Removed icon in lieu of color indicator for status
+            var iconClass = null;
+            switch (this.props.context.status){
+
+                case 'in review by lab':
+                case 'in review by project':
+                    iconClass = 'icon ss-stopwatch';
+                    break;
+
+            }
+            */
+
+            // Status colors are set via CSS (layout.scss) dependent on data-status attribute
+            return (
+                <div
+                    className="expset-indicator expset-status right"
+                    data-status={ this.props.context.status.toLowerCase() }
+                    title="Review Status"
+                >
+                    { this.props.context.status }
+                </div>
+            );
+        },
+        wrapChildren : function(){
+            if (!this.props.children) return <div></div>;
+            return (
+                <div
+                    className="expset-indicator expset-type right"
+                    title={this.props.title || null}
+                >
+                    { this.props.children }
+                </div>
+            );
+        },
+        render : function(){
+            return (
+                <div className="row clearfix top-row">
+                    <h3 className="col-sm-6 item-label-title">
+                        { /* PLACEHOLDER / TEMP-EMPTY */ }
+                    </h3>
+                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra text-capitalize indicators clearfix">
+                        { this.wrapChildren() }
+                        { this.parsedStatus() }
+                    </h5>
+                </div>
+            );
+        }
+    }),
+
+    MiddleRow : React.createClass({
+        render : function(){
+            return (
+                <FlexibleDescriptionBox
+                    description={ this.props.context.description }
+                    className="item-page-heading experiment-heading"
+                    textClassName="text-large"
+                    fitTo="grid"
+                    dimensions={{
+                        paddingWidth : 32,
+                        paddingHeight : 22,
+                        buttonWidth : 30,
+                        initialHeight : 45
+                    }}
+                />
+            );
+        }
+    }),
+
+    BottomRow : React.createClass({
+        parsedCreationDate: function(){
+            if (!('date_created' in this.props.context)) return <span><i></i></span>;
+            return (
+                <span>
+                    <i className="icon sbt-calendar"></i>&nbsp; Added{' '}
+                    <DateUtility.LocalizedTime timestamp={this.props.context.date_created} formatType='date-time-md' dateTimeSeparator=" at " />
+                </span>
+            );
+        },
+        render : function(){
+            return (
+                <div className="row clearfix bottom-row">
+                    <div className="col-sm-6 item-label-extra set-type-indicators">{ this.props.children }</div>
+                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra" title="Date Added - UTC/GMT">{ this.parsedCreationDate() }</h5>
+                </div>
+            );
+        }
+    }),
+
+    Wrapper : React.createClass({
+        adjustChildren : function(){
+            if (!this.props.context) return this.props.children;
+            return React.Children.map(this.props.children, (child)=>{
+                if (typeof child.props.context !== 'undefined') return child;
+                else {
+                    return React.cloneElement(child, { context : this.props.context }, child.props.children);
+                }
+            });
+        },
+        render : function(){
+            return (
+                <div className={"item-view-header " + (this.props.className || '')}>{ this.adjustChildren() }</div>
+            );
+        }
+    }),
+
+};
+
+
 
 var ItemView = module.exports = React.createClass({
 
@@ -108,10 +225,10 @@ var ItemView = module.exports = React.createClass({
                 return {isOpen: false};
             },
             handleToggle: function (e) {
-            e.preventDefault();
-            this.setState({
-                isOpen: !this.state.isOpen,
-            });
+                e.preventDefault();
+                this.setState({
+                    isOpen: !this.state.isOpen,
+                });
             },
             render: function() {
                 var schemas = this.props.schemas;
@@ -120,10 +237,10 @@ var ItemView = module.exports = React.createClass({
                 var toggleRender;
                 var toggleLink;
                 if (!this.state.isOpen) {
-                    toggleLink = <a href="" className="item-toggle-link" onClick={this.handleToggle}>{title}</a>
+                    toggleLink = <a href="#" className="item-toggle-link" onClick={this.handleToggle}>{title}</a>
                     toggleRender = <span/>;
                 }else{
-                    toggleLink = <a href="" className="item-toggle-link" onClick={this.handleToggle}>Close</a>
+                    toggleLink = <a href="#" className="item-toggle-link" onClick={this.handleToggle}>Close</a>
                     toggleRender = <ItemView.Subview schemas={schemas} content={item} title={title}/>;
                 }
                 return (
@@ -168,24 +285,32 @@ var ItemView = module.exports = React.createClass({
                     </div>
                 );
             }
-        })
+        }),
+
+        ItemHeader : ItemHeader
 
     },
 
     render: function() {
         var schemas = this.props.schemas || {};
         var context = this.props.context;
-        //var itemClass = globals.itemClass(context, 'view-detail panel');
         var title = globals.listing_titles.lookup(context)({context: context});
         var sortKeys = Object.keys(context).sort();
         var tips = object.tipsFromSchema(schemas, context);
 
+        var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container');
 
         return (
-            <Panel className="data-display panel-body-with-header">
-                <div className="flexcol-heading experiment-heading">
-                    <h4>{ title }</h4>
-                </div>
+            <div className={itemClass}>
+
+                <h1 className="page-title">{context['@type'][0]} <span className="subtitle prominent">{ title }</span></h1>
+
+                <ItemHeader.Wrapper context={context} className="exp-set-header-area">
+                    <ItemHeader.TopRow>Some common properties</ItemHeader.TopRow>
+                    <ItemHeader.MiddleRow />
+                    <ItemHeader.BottomRow />
+                </ItemHeader.Wrapper>
+
                 <dl className="key-value">
                     {sortKeys.map((ikey, idx) =>
                         <div key={ikey} data-test="term-name">
@@ -194,7 +319,8 @@ var ItemView = module.exports = React.createClass({
                         </div>
                     )}
                 </dl>
-            </Panel>
+
+            </div>
         );
     }
 });
