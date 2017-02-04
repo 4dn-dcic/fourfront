@@ -486,6 +486,7 @@ var App = React.createClass({
             if (this.refs && this.refs.navigation){
                 this.refs.navigation.closeMobileMenu();
             }
+            if (target && target.blur) target.blur();
         }
     },
 

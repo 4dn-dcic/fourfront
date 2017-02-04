@@ -275,18 +275,40 @@
         position: absolute;
         left: 0;
         top: 0;
+        transition: height .75s ease-out;
+        z-index: 0;
         .axis-step {
             position: absolute;
             left: 0;
             right: 0;
             text-align: right;
-            &:after {
+            transition: bottom .75s ease-out;
+            z-index: 0;
+            &:before {
                 content : '';
-                border-top: 1px solid #ccc;
+                border-top: 1px solid #ddd;
                 width: 10px;
                 right: 0;
                 bottom: 0;
                 position: absolute;
+            }
+            .axis-bg-line {
+                border-top: 1px dotted #f0f0f0;
+                width: 1000px;
+                right: -1000px;
+                position: absolute;
+                display: block;
+                top: -1px;
+                transition: width .75s;
+            }
+            &.last {
+                .axis-label {
+                    display: none;
+                }
+                &:before {
+                    border-top-color: #ddd;
+                    width: 5px;
+                }
             }
             .axis-label {
                 text-align: right;
@@ -318,7 +340,7 @@
 
         .bar-part {
             opacity: 1;
-            transition: opacity 0.5s, height .75s, width .75s;
+            transition: opacity 0.5s, height .75s ease-out, width .75s;
             /*
             &:first-of-type {
                 border-top-left-radius: 3px;

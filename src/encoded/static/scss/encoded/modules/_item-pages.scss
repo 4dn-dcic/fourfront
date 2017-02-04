@@ -74,8 +74,8 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 .item-page-heading {
     /** Extends .flexible-description-box **/
-	border-radius: $border-radius-base;
-	border: 1px solid #e0e0e0;
+	border-radius: 2px;
+	border: 1px solid #eee;
 	min-height: 42px;
 	padding: 10px 15px 8px;
 
@@ -89,6 +89,27 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		}
 	}
 
+}
+
+.flexcol-heading, .item-page-heading {
+    position: relative;
+    margin-right: -10px;
+    margin-left: -10px;
+    background-color: #f4f4f4;
+
+    h1, h2, h3, h4, h5, h6 {
+        margin: 0;
+    }
+
+    // For the Experiment Summary header
+    &.experiment-heading {
+		font-family: 'Work Sans', sans-serif;
+
+        h1, h2, h3, h4, h5, h6 {
+            line-height: 20px;  // 50px - 20px of vertical padding
+        }
+
+    }
 }
 
 .item-header-indicators {
@@ -243,8 +264,38 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 }
 
 
-.item-page-container .info-area {
-	margin-top: 24px;
+.item-page-container {
+    .info-area {
+	    margin-top: 24px;
+    }
+    .item-info-area {
+        margin-bottom: 20px;
+        min-height: 120px;
+    }
+
+}
+
+.item-page-detail {
+
+	.list-item {
+		border-bottom: 1px solid #eee;
+		padding-top: 5px;
+		padding-bottom: 5px;
+		
+		.item-label, .item-value {
+			min-height: 20px;
+			word-break: break-all;
+		}
+		.item-label {
+			font-weight: 500;
+		}
+		ul {
+			padding-left: 20px;
+			margin-bottom: 0;
+			//margin-top: 3px;
+		}
+	}
+		
 }
 
 

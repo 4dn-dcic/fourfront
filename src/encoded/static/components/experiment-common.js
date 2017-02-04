@@ -72,7 +72,7 @@ var FlexibleDescriptionBox = module.exports.FlexibleDescriptionBox = React.creat
         } else if (this.props.fitTo === 'parent'){
             containerWidth = this.refs.box.parentElement.offsetWidth;
         } else if (this.props.fitTo === 'self'){
-            containerWidth = this.refs.box.offsetWidth;
+            containerWidth = (this.refs.box && this.refs.box.offsetWidth) || 1000;
         }
 
         containerWidth -= dims.paddingWidth; // Account for inner padding & border.

@@ -234,30 +234,6 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
                 </div>
 
-                {/*
-                <br/><br/><br /><br /><hr />
-                <h6>Existing Print-out (temporary):</h6>
-
-                <Panel className="data-display panel-body-with-header">
-                    <dl className="key-value">
-                        {Object.keys(this.props.context).sort().map((ikey, idx) =>
-                            <div key={ikey} data-test="term-name">
-
-                                <DescriptorField
-                                    field={ikey}
-                                    description={
-                                        this.tips[ikey] && this.tips[ikey].description ?
-                                            this.tips[ikey].description : ''
-                                    }
-                                />
-
-                                <dd>{ Detail.formValue(this.props.schemas, this.props.context[ikey], ikey, 0) }</dd>
-                            </div>
-                        )}
-                    </dl>
-                </Panel>
-                */}
-
             </div>
         );
     }
@@ -274,7 +250,7 @@ var ExperimentSetHeader = React.createClass({
     render: function() {
         console.log('render ExperimentSetHeader')
         return (
-            <ItemHeader.Wrapper className="exp-set-header-area" context={this.props.context}>
+            <ItemHeader.Wrapper className="exp-set-header-area" context={this.props.context} href={this.props.href}>
                 <ItemHeader.TopRow>{ this.props.context.experimentset_type }</ItemHeader.TopRow>
                 <ItemHeader.MiddleRow />
                 <ItemHeader.BottomRow />
