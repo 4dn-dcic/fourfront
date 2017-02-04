@@ -4,7 +4,8 @@ var React = require('react');
 var _ = require('underscore');
 var d3 = require('d3');
 var vizUtil = require('./utilities');
-var { console, object, isServerSide, expFxn } = require('../util');
+var Legend = require('./components/Legend');
+var { console, object, isServerSide, expFxn, Filters } = require('../util');
 
 
 var BarPlot = React.createClass({
@@ -209,6 +210,17 @@ var BarPlot = React.createClass({
             };
 
             return barData;
+        },
+
+        barDataToLegendData : function(barData){
+            var fields = {};
+            barData.bars.forEach(function(b){
+                if (typeof fields[b.field] === 'undefined') fields[b.field] = { 'field' : b.field, 'terms' : {}, 'name' : Filters.Field.toName(b.field) };
+                fields[b.field].terms[b.term] = { 'term' : b.term, 'name' : b.name || Filters.Term.toName(b.term), 'color' : vizUtil.colorForNode(b) };
+            });
+            fields = _.values(fields);
+            fields.forEach(function(f){ f.terms = _.values(f.terms); });
+            return fields;
         },
 
         /** Get default style options for chart. Should suffice most of the time. */
@@ -493,7 +505,6 @@ var BarPlot = React.createClass({
                 );
             }
 
-
         },
 
         bar : function(d, index, all, styleOpts = null, existingBars = this.pastBars){
@@ -630,20 +641,29 @@ var BarPlot = React.createClass({
         leftAxis : function(availWidth, availHeight, barData, styleOpts){
             //console.log(barData);
             var chartHeight = availHeight - styleOpts.offset.top - styleOpts.offset.bottom;
-            var valStep = barData.maxY / 8;
-            var rangeVal = d3.range(0, barData.maxY + valStep, valStep);
-            console.log(rangeVal);
-            var steps = rangeVal.map(function(v,i){
+            var chartWidth = availWidth - styleOpts.offset.left - styleOpts.offset.right;
+            var ticks = d3.ticks(0, barData.maxY * ((chartHeight - 10)/chartHeight), Math.min(8, barData.maxY)).concat([barData.maxY]);
+            //console.log(ticks);
+            var steps = ticks.map(function(v,i){
+                var w = (
+                    Math.min(
+                        (barData.bars.filter(function(b){
+                            return b.count >= v - ((ticks[1] - ticks[0]) * 2);
+                        }).length) * Math.min(styleOpts.maxBarWidth + styleOpts.gap, chartWidth / barData.bars.length) + (styleOpts.maxBarWidth * .66),
+                        chartWidth
+                    )
+                );
                 return (
-                    <div className="axis-step" style={{
+                    <div className={"axis-step" + (i >= ticks.length - 1 ? ' last' : '')} style={{
                         position : 'absolute',
                         left: 0,
                         right: 0,
-                        bottom : (v / barData.maxY) * chartHeight
-                    }} key={i}>
+                        bottom : (v / barData.maxY) * chartHeight - 1,
+                    }} key={v}>
                         <span className="axis-label">
                             { v }
                         </span>
+                        <div className="axis-bg-line" style={{ width : w + 3, right : -w - 5 }}/>
                     </div>
                 );
             });
@@ -682,7 +702,7 @@ var BarPlot = React.createClass({
             this.styleOptions()
         );
 
-        //console.log('BARDATA', barData);
+        console.log('BARDATA', barData);
 
         // Bars from current dataset/filters only.
         var currentBars = barData.bars.map((d)=>{
@@ -716,9 +736,10 @@ var BarPlot = React.createClass({
                 data-field={this.props.fields[barData.fieldIndex].field}
                 style={{ height : availHeight, width: availWidth }}
             >
-                { barComponents }
                 { this.renderParts.leftAxis.call(this, availWidth, availHeight, barData, styleOpts) }
+                { barComponents }
                 { this.renderParts.bottomYAxis.call(this, availWidth, availHeight, allBars, styleOpts) }
+                <Legend fields={BarPlot.barDataToLegendData(barData)} />
             </div>
         );
         /*
