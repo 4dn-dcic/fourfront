@@ -6,6 +6,7 @@ var d3 = require('d3');
 var vizUtil = require('./utilities');
 var Legend = require('./components/Legend');
 var { console, object, isServerSide, expFxn, Filters } = require('../util');
+var { highlightTerm, unhighlightTerms } = require('./../facetlist');
 
 
 var BarPlot = React.createClass({
@@ -212,11 +213,17 @@ var BarPlot = React.createClass({
             return barData;
         },
 
-        barDataToLegendData : function(barData){
+        barDataToLegendData : function(barData, schemas = null){
             var fields = {};
-            barData.bars.forEach(function(b){
-                if (typeof fields[b.field] === 'undefined') fields[b.field] = { 'field' : b.field, 'terms' : {}, 'name' : Filters.Field.toName(b.field) };
-                fields[b.field].terms[b.term] = { 'term' : b.term, 'name' : b.name || Filters.Term.toName(b.term), 'color' : vizUtil.colorForNode(b) };
+            _.reduce(barData.bars, function(m,b){
+                if (Array.isArray(b.bars)) return m.concat(b.bars);
+                else {
+                    m.push(b);
+                    return m;
+                }
+            }, []).forEach(function(b){
+                if (typeof fields[b.field] === 'undefined') fields[b.field] = { 'field' : b.field, 'terms' : {}, 'name' : Filters.Field.toName(b.field, schemas) };
+                fields[b.field].terms[b.term] = { 'term' : b.term, 'name' : b.name || Filters.Term.toName(b.field, b.term), 'color' : vizUtil.colorForNode(b) };
             });
             fields = _.values(fields);
             fields.forEach(function(f){ f.terms = _.values(f.terms); });
@@ -545,6 +552,12 @@ var BarPlot = React.createClass({
                             ''
                         )
                     }
+                    onMouseLeave={
+                        Array.isArray(d.bars) && d.bars.length > 0 ?
+                        function(e){
+                            unhighlightTerms(d.bars[0].field);
+                        } : null
+                    }
                     data-term={d.term}
                     data-field={Array.isArray(d.bars) && d.bars.length > 0 ? d.bars[0].field : null}
                     key={"bar-" + d.term}
@@ -582,6 +595,7 @@ var BarPlot = React.createClass({
                     data-target-height={d.attr.height}
                     key={'bar-part-' + (d.parent ? d.parent.term + '~' + d.term : d.term)}
                     data-term={d.parent ? d.term : null}
+                    onMouseEnter={highlightTerm.bind(this, d.field, d.term, color)}
                 >
 
                 </div>
@@ -739,7 +753,13 @@ var BarPlot = React.createClass({
                 { this.renderParts.leftAxis.call(this, availWidth, availHeight, barData, styleOpts) }
                 { barComponents }
                 { this.renderParts.bottomYAxis.call(this, availWidth, availHeight, allBars, styleOpts) }
-                <Legend fields={BarPlot.barDataToLegendData(barData)} />
+                <Legend fields={BarPlot.barDataToLegendData(barData, this.props.schemas || null)} title={
+                    <div>
+                        <h5 className="text-400 legend-title">
+                            { Filters.Field.toName(barData.fields[barData.fieldIndex].field, this.props.schemas) } <small>x</small>
+                        </h5>
+                    </div>
+                } />
             </div>
         );
         /*

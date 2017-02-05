@@ -372,7 +372,7 @@ var FacetList = module.exports = React.createClass({
          * @param {string} term - Term to highlight.
          * @param {string} color - A valid CSS color.
          */
-        highlightTerm : function(
+        highlightTerm : _.throttle(function(
             field = 'experiments_in_set.biosample.biosource.individual.organism.name',
             term = 'human',
             color = ''
@@ -415,20 +415,22 @@ var FacetList = module.exports = React.createClass({
 
                 // unhighlight previously selected terms, if any.
                 _.each(document.querySelectorAll('[data-term]'), function(termElement){
-                    if (field && termElement.getAttribute('data-field') === field) return; // Skip, we need to leave as highlighted as also our field container.
+                    var dataField = termElement.getAttribute('data-field');
+                    if (field && dataField && dataField === field) return; // Skip, we need to leave as highlighted as also our field container.
                     var isSVG = setHighlightClass(termElement, true);
                     if (!isSVG && termElement.className.indexOf('no-highlight-color') === -1) termElement.style.backgroundColor = '';
                 });
 
                 if (color.length > 0){
                     _.each(document.querySelectorAll('[data-term="' + term + '"]'), function(termElement){
+                        //console.log(termElement, termElement.className);
                         var isSVG = setHighlightClass(termElement, color.length === 0);
                         if (!isSVG && termElement.className.indexOf('no-highlight-color') === -1) termElement.style.backgroundColor = color;
                     });
                 }
             });
             return true;
-        },
+        }, 100, { leading: false }),
 
         /** Resets background color of term(s). @see FacetList.highlightTerm */
         unhighlightTerms : function(field = null){

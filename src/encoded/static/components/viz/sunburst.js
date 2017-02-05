@@ -895,11 +895,12 @@ var SunBurst = React.createClass({
                         //if (node.depth < 3) console.log('PATH',node);
                     }}
                     d={_this.generateRectPath(node)}
+                    data-term={node.data.term}
                     fillRule="evenodd"
                     className={className + (removing ? ' removing' : (!existing ? ' adding' : ''))}
                     onMouseOver={node.depth > 0 ? _this.mouseoverHandle : null }
                     onMouseEnter={ node.depth === 0 ? _this.mouseleave : null }
-                    onMouseLeave={node.depth > 0 ? function(e){ unhighlightTerms(e.target.__data__.data.field); } : null}
+                    onMouseLeave={/*node.depth > 0 ? function(e){ unhighlightTerms(e.target.__data__.data.field); } :*/ null}
                     onClick={/*clickable ? (e) => _this.props.handleClick(e.target.__data__) : */null}
                     key={node.data.id}
                     data-key={node.data.id}

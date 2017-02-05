@@ -146,7 +146,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             'chartFieldsBarPlot'    : [
                 { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
                 { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
-                { title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
+                //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
             ],
             'chartFieldsHierarchy'  : [
                 { 
@@ -222,6 +222,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             !_.isEqual(this.state, nextState) ||
             !_.isEqual(this.state.experiments, nextState.experiments) ||
             !_.isEqual(this.state.filteredExperiments, nextState.filteredExperiments) ||
+            this.props.schemas !== nextProps.schemas ||
             this.show(nextProps) !== this.show(this.props) ||
             (nextState.mounted !== this.state.mounted)
         ){
@@ -532,6 +533,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                             fields={this.state.chartFieldsBarPlot}
                             width={this.width(1) - 20} height={height}
                             colorForNode={this.colorForNode}
+                            schemas={this.props.schemas}
                         />
                         <FetchingView display={this.state.fetching} />
                     </div>

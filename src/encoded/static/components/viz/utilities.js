@@ -49,7 +49,7 @@ var vizUtil = module.exports = {
         } else if (typeof vizUtil.colorCache[nodeName] !== 'undefined') {
             return vizUtil.colorCache[nodeName]; // Previously calc'd color
         } else if (cachedOnly){
-            return '#ddd';
+            return '#888';
         } else if (
             nodeDatum.field === 'accession' ||
             nodeDatum.field === 'experiments_in_set.accession' || 

@@ -3,6 +3,7 @@
 var React = require('react');
 var _ = require('underscore');
 var vizUtil = require('./../utilities');
+var { highlightTerm, unhighlightTerms } = require('./../../facetlist');
 var { console, isServerSide, Filters } = require('./../../util');
 
 var Legend = module.exports = React.createClass({
@@ -12,9 +13,9 @@ var Legend = module.exports = React.createClass({
 
             render : function(){
                 return (
-                    <div className="field" data-field={this.props.field}>
-                        <h6>{ this.props.name || this.props.field }</h6>
-                        { this.props.terms.map(function(term){ return <Legend.Term {...term} key={term.term} />; }) }
+                    <div className="field" data-field={this.props.field} onMouseLeave={unhighlightTerms.bind(this, this.props.field)}>
+                        <h5 className="text-500 legend-field-title">{ this.props.name || this.props.field }</h5>
+                        { this.props.terms.map((term) => <Legend.Term {...term} field={this.props.field} key={term.term} />) }
                     </div>
                 );
             }
@@ -24,7 +25,15 @@ var Legend = module.exports = React.createClass({
 
             render : function(){
                 return (
-                    <div className="term">
+                    <div
+                        className="term"
+                        onMouseEnter={highlightTerm.bind(this, this.props.field, this.props.term, this.props.color)}
+                    >
+                        <div
+                            className="color-patch no-highlight-color"
+                            data-term={this.props.term}
+                            style={{ backgroundColor : this.props.color }}
+                        />
                         { this.props.name || this.props.term }
                     </div>
                 );
@@ -37,7 +46,8 @@ var Legend = module.exports = React.createClass({
             'position' : 'absolute',
             'fields' : [],
             'id' : null,
-            'className' : 'chart-color-legend'
+            'className' : 'chart-color-legend',
+            'title' : null //<h4 className="text-500">Legend</h4>
         };
     },
 
@@ -45,7 +55,7 @@ var Legend = module.exports = React.createClass({
 
         return (
             <div className={"legend " + this.props.className} id={this.props.id}>
-                <h5>Legend</h5>
+                { this.props.title }
                 { this.props.fields.map(function(field){ return <Legend.Field {...field} key={field.field} />; }) }
             </div>
         );
