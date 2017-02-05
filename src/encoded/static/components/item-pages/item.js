@@ -33,7 +33,7 @@ var Fallback = module.exports.Fallback = React.createClass({
     }
 });
 
-var Item = React.createClass({
+var Item = module.exports.Item = React.createClass({
 
     getChildContext     : AuditMixin.getChildContext,
     getInitialState     : AuditMixin.getInitialState,
