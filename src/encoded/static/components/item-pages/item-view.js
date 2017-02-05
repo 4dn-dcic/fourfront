@@ -193,7 +193,7 @@ var PartialList = React.createClass({
     },
 
     render : function(){
-
+        //console.log('render partial list',this.props.open, this.props.collapsible);
         return (
             <div className={this.props.className}>
 
@@ -475,9 +475,9 @@ var ItemView = module.exports = React.createClass({
                 <h4 className="text-500">Aliases</h4>
                 <div>
                     <ul>
-                    { aliases.map(function(alias){
+                    { aliases.map(function(alias, i){
                         return (
-                            <li>{ alias }</li>
+                            <li key={i}>{ alias }</li>
                         );
                     }) }
                     </ul>
@@ -494,9 +494,9 @@ var ItemView = module.exports = React.createClass({
                 <h4 className="text-500">Alternate Accessions</h4>
                 <div>
                     <ul>
-                    { alternateAccessions.map(function(alias){
+                    { alternateAccessions.map(function(alias, i){
                         return (
-                            <li>{ alias }</li>
+                            <li key={i}>{ alias }</li>
                         );
                     }) }
                     </ul>
@@ -513,9 +513,9 @@ var ItemView = module.exports = React.createClass({
                 <h4 className="text-500">External References</h4>
                 <div>
                     <ul>
-                    { alternateAccessions.map(function(alias){
+                    { alternateAccessions.map(function(acc, i){
                         return (
-                            <li>{ alias }</li>
+                            <li key={i}>{ acc }</li>
                         );
                     }) }
                     </ul>
