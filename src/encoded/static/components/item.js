@@ -109,7 +109,7 @@ globals.panel_views.fallback = function () {
 
 var title = module.exports.title = function (props) {
     var context = props.context;
-    return context.title || context.name || context.accession || context['@id'] || 'No title found';
+    return context.title || context.name || context.accession || context.uuid || context['@id'] || 'No title found';
 };
 
 globals.listing_titles.register(title, 'Item');

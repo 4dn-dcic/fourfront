@@ -24,7 +24,7 @@ var Create = module.exports = React.createClass({
         return{
             'newContext': this.props.context || {},
             'requiredFields': reqFields,
-            'validated': false,
+            'validated': 0, // 0 = not validated, 1 = validated, 2 = error
             'thisType': contType[0],
             'thisSchema': thisSchema,
             'errorCount': 0
@@ -70,21 +70,26 @@ var Create = module.exports = React.createClass({
         }else{
             contextCopy[splitField[splitField.length-1]] = value;
         }
-        console.log('NEW_CONTEXT:  ', contextCopy);
-        this.setState({'newContext': contextCopy, 'validated': false});
+        this.setState({'newContext': contextCopy, 'validated': 0});
     },
 
     generatePostButton: function(){
-        if(this.state.validated){
+        if(this.state.validated == 1){
             return(
                 <Button bsStyle="success" onClick={this.realPostNewContext}>
                     {'Create object'}
                 </Button>
             );
-        }else{
+        }else if (this.state.validated == 0){
             return(
                 <Button bsStyle="warning" onClick={this.testPostNewContext}>
                     {'Test object validity'}
+                </Button>
+            );
+        }else{
+            return(
+                <Button bsStyle="danger" onClick={this.testPostNewContext}>
+                    {'Failed user permissions'}
                 </Button>
             );
         }
@@ -101,9 +106,11 @@ var Create = module.exports = React.createClass({
     },
 
     executePost: function(test=false){
+        var stateToSet = {} // hold state
         // get rid of any hanging errors
-        for(var i=1; i<this.state.errorCount; i++){
-            Alerts.deQueue({ 'title' : "Object validation error " +parseInt(i + 1)});
+        for(var i=0; i<this.state.errorCount; i++){
+            Alerts.deQueue({ 'title' : "Object validation error " + parseInt(i + 1)});
+            stateToSet.errorCount = 0;
         }
         var objType = this.props.context['@type'][0] || 'Item';
         var lab;
@@ -111,6 +118,11 @@ var Create = module.exports = React.createClass({
         var finalizedContext = this.contextSift(this.state.newContext, this.state.thisSchema);
         ajax.promise('/me?frame=embedded').then(data => {
             if (this.context.contentTypeIsJSON(data)){
+                if(!data.submits_for || data.submits_for.length == 0){
+                    console.log('THIS ACCOUNT DOES NOT HAVE SUBMISSION PRIVILEGE');
+                    this.setState({'validated': 2});
+                    return;
+                }
                 lab = data.submits_for[0] || {};
                 award = lab.awards[0] || {};
             }
@@ -132,8 +144,9 @@ var Create = module.exports = React.createClass({
             })
             .then(response => {
                 if(test){
-                    console.log('OBJECT SUCCESFFULLY TESTED!');
-                    this.setState({'validated': true});
+                    console.log('OBJECT SUCCESSFULLY TESTED!');
+                    stateToSet.validated = 1;
+                    this.setState(stateToSet);
                 }else{
                     console.log('OBJECT SUCCESSFULLY POSTED!');
                     var newID = response['@graph'][0]['@id'];
@@ -144,16 +157,15 @@ var Create = module.exports = React.createClass({
                     this.context.navigate(newID);
                 }
             }, error => {
+                stateToSet.validated = 0;
                 console.log('OBJECT COULD NOT BE POSTED!');
                 console.log(error);
                 var errorList = error.errors || [error.detail] || [];
                 // make an alert for each error description
+                stateToSet.errorCount = errorList.length;
                 for(var i=0; i<errorList.length; i++){
                     Alerts.queue({ 'title' : "Object validation error " + parseInt(i + 1), 'message': errorList[i].description || errorList[i] || "Unidentified error", 'style': 'danger' })
                 }
-                errorList.forEach(function(element){
-
-                });
                 // scroll to the top of the page using d3
                 function scrollTopTween(scrollTop){
                     return function(){
@@ -168,7 +180,7 @@ var Create = module.exports = React.createClass({
                     .transition()
                     .duration(750)
                     .tween("bodyScroll", scrollTopTween(0));
-                this.setState({'errorCount': errorList.length});
+                this.setState(stateToSet);
             });
         });
     },
@@ -485,7 +497,7 @@ var LinkedObj = React.createClass({
             }
         }
         return(
-            <tr><td {...moreStyles}>
+            <tr key={key}><td {...moreStyles}>
                 <a href="#" className="tab-left" onClick={function(e){
                         e.preventDefault();
                         this.props.modifyNewContext(this.props.field, targetVal);
@@ -501,8 +513,7 @@ var LinkedObj = React.createClass({
                             alert('Object page popup blocked!');
                         }
                     }} title="Select">
-                    {"View object page  "}
-                    <i className="icon icon-long-arrow-right icon-fw"></i>
+                    <i className="icon icon-external-link icon-fw"></i>
                 </a>
             </td></tr>
         );
@@ -598,7 +609,7 @@ var ArrayField = React.createClass({
             fieldType = 'linked object';
         }
         return(
-            <tr><td>
+            <tr key={field + parseInt(arrayIdx)}><td>
                 <BuildField value={value} key={arrayIdx} schema={fieldSchema} label={arrayIdx} fieldType={fieldType} fieldTip={fieldTip} enumValues={enumValues} disabled={false} modifyNewContext={this.modifyArrayContent} required={false} isArray={true}/>
                 <a href="#" className="cancel-button-inline" onClick={function(e){
                         e.preventDefault();

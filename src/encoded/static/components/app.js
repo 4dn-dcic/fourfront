@@ -893,45 +893,55 @@ var App = React.createClass({
             content = <ErrorPage currRoute={currRoute[currRoute.length-1]} status={status}/>;
             title = 'Error';
         }else if(actionList.length == 1){
-            ContentView = globals.content_views.lookup(context, current_action);
-            if (ContentView){
-                if(actionList[0] == 'edit'){
-                    content = (
-                        <Edit
-                            context={context}
-                            schemas={this.state.schemas}
-                            expSetFilters={this.props.expSetFilters}
-                            expIncompleteFacets={this.props.expIncompleteFacets}
-                            session={this.state.session}
-                            key={key}
-                            navigate={this.navigate}
-                            href={this.props.href}
-                        />
-                    );
-                }else if(actionList[0] == 'create'){
-                    content = (
-                        <Create
-                            context={context}
-                            schemas={this.state.schemas}
-                            expSetFilters={this.props.expSetFilters}
-                            expIncompleteFacets={this.props.expIncompleteFacets}
-                            session={this.state.session}
-                            key={key}
-                            navigate={this.navigate}
-                            href={this.props.href}
-                        />
-                    );
-                }
-                title = context.title || context.name || context.accession || context['@id'];
-                if (title && title != 'Home') {
-                    title = title + ' – ' + portal.portal_title;
-                } else {
-                    title = portal.portal_title;
-                }
+            // check if the desired action is allowed per user (in the context)
+            var contextActionNames = this.listActionsFor('context').map(function(act){
+                return act.name || '';
+            });
+            // see if desired actions is not allowed for current user
+            if (!_.contains(contextActionNames, actionList[0])){
+                content = <ErrorPage status={'forbidden'}/>;
+                title = 'Action not permitted';
             }else{
-                // Handle the case where context is not loaded correctly
-                content = <ErrorPage status={null}/>;
-                title = 'Error';
+                ContentView = globals.content_views.lookup(context, current_action);
+                if (ContentView){
+                    if(actionList[0] == 'edit'){
+                        content = (
+                            <Edit
+                                context={context}
+                                schemas={this.state.schemas}
+                                expSetFilters={this.props.expSetFilters}
+                                expIncompleteFacets={this.props.expIncompleteFacets}
+                                session={this.state.session}
+                                key={key}
+                                navigate={this.navigate}
+                                href={this.props.href}
+                            />
+                        );
+                    }else if(actionList[0] == 'create'){
+                        content = (
+                            <Create
+                                context={context}
+                                schemas={this.state.schemas}
+                                expSetFilters={this.props.expSetFilters}
+                                expIncompleteFacets={this.props.expIncompleteFacets}
+                                session={this.state.session}
+                                key={key}
+                                navigate={this.navigate}
+                                href={this.props.href}
+                            />
+                        );
+                    }
+                    title = context.title || context.name || context.accession || context['@id'];
+                    if (title && title != 'Home') {
+                        title = title + ' – ' + portal.portal_title;
+                    } else {
+                        title = portal.portal_title;
+                    }
+                }else{
+                    // Handle the case where context is not loaded correctly
+                    content = <ErrorPage status={null}/>;
+                    title = 'Error';
+                }
             }
         }else if (context) {
             var ContentView = globals.content_views.lookup(context, current_action);
