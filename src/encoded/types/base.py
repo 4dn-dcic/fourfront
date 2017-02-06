@@ -18,6 +18,8 @@ from pyramid.traversal import (
 import snovault
 # from ..schema_formats import is_accession
 from snovault.resource_views import item_view_page_object
+from snovault.crud_views import collection_add as sno_collection_add
+from snovault.validators import validate_item_content_post
 
 
 @lru_cache()
@@ -120,6 +122,20 @@ class Collection(snovault.Collection, AbstractCollection):
         # Don't access type_info.schema here as that precaches calculated schema too early.
         if 'lab' in self.type_info.factory.schema['properties']:
             self.__acl__ = ALLOW_SUBMITTER_ADD
+
+
+@view_config(context=Collection, permission='add', request_method='POST',
+             validators=[validate_item_content_post])
+def collection_add(context, request, render=None):
+    check_only = request.params.get('check_only', False)
+
+    if check_only:
+         return { 'status' : "success",
+                  '@type': ['result'],
+                 }
+
+    return sno_collection_add(context, request, render)
+
 
 
 class Item(snovault.Item):
