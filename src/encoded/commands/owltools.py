@@ -29,13 +29,17 @@ def inferNamespacePrefix(aUri):
 
 
 def splitNameFromNamespace(aUri):
+    name = ''
     stringa = aUri.__str__()
     try:
         ns = stringa.split("#")[0]
         name = stringa.split("#")[1]
     except:
         ns = stringa.rsplit("/", 1)[0]
-        name = stringa.rsplit("/", 1)[1]
+        if '/' in stringa:
+            name = stringa.rsplit("/", 1)[1]
+        else:
+            print('URI=', aUri)
     return (name, ns)
 
 

@@ -408,7 +408,7 @@ def getTermStructure():
 
 def _has_human_partof(cols):
     ans = False
-    if HUMAN_TAXON in col_list and PART_OF in col_list:
+    if HUMAN_TAXON in cols and PART_OF in cols:
         ans = True
     return ans
 
@@ -420,11 +420,28 @@ def get_termid_from_uri(uri):
     return splitNameFromNamespace(uri)[0].replace('_', ':')
 
 
+def get_term_name_from_rdf(class_, data):
+    '''Looks for label for class in the rdf graph'''
+    name = None
+    try:
+        name = data.rdfGraph.label(c).__str__()
+    except:
+        pass
+    return name
+
+
 def add_term_and_info(class_, term, relationship, data, terms):
     for subclass in data.rdfGraph.objects(class_, subClassOf):
         term_id = get_termid_from_uri(term)
-        if term_id not in terms:
-            terms[term_id] = getTermStructure()
+        if terms.get(term_id) is None:
+            terms[term_id] = {}
+            terms[term_id]['term_id'] = term_id
+            terms[term_id]['term_url'] = class_.__str__()
+            name = get_term_name_from_rdf(term, data)
+            if name is not None:
+                terms[term_id]['term_name'] = get_term_name_from_rdf(term)
+        if terms[term_id].get(relationship) is None:
+            terms[term_id][relationship] = []
         terms[term_id][relationship].append(get_termid_from_uri(subclass))
     return terms
 
@@ -466,14 +483,43 @@ def process_blank_node(class_, data, terms):
     return terms
 
 
+def _find_and_add_parent_of_type(parent, child_id, relationship, data, terms):
+    for obj in data.rdfGraph.objects(parent, SomeValuesFrom):
+        if not isBlankNode(obj):
+            if not terms[child_id].get(relationship):
+                terms[child_id][relationship] = []
+            terms[child_id][relationship].append(get_termid_from_uri(obj))
+    return terms
+
+
+def process_parents(class_, termid, data, terms):
+    '''Gets the parents of the class - direct and those linked via
+        specified relationship types
+    '''
+    for parent in data.get_classDirectSupers(class_, excludeBnodes=False):
+        rtypes = {PART_OF: 'part_of',
+                  DEVELOPS_FROM: 'develops_from',
+                  HAS_PART: 'has_part',
+                  ACHIEVES_PLANNED_OBJECTIVE: 'achieves_planned_objective'}
+        if isBlankNode(parent):
+            for s, v, o in data.rdfGraph.triples((parent, OnProperty, None)):
+                if o.__str__() in rtypes:
+                    terms = _find_and_add_parent_of_type(parent, termid, rtypes[o.__str__()], data, terms)
+        else:
+            if not terms[termid].get('parents'):
+                terms[termid]['parents'] = []
+            terms[termid]['parents'].append(get_termid_from_uri(parent))
+    return terms
+
+
 def get_synonyms(class_, data, synonym_terms):
-    '''Gets synonyms for the class as strings
+    '''Returns list of synonyms for the class as strings
     '''
     return getObjectLiteralsOfType(class_, data, synonym_terms)
 
 
 def get_definitions(class_, data, definition_terms):
-    '''Gets definitions for the class as strings
+    '''Returns list of definitions for the class as strings
     '''
     return getObjectLiteralsOfType(class_, data, definition_terms)
 
@@ -658,7 +704,7 @@ def new_main():
     connection = connect2server(args.keyfile, args.key)
 
     ontologies = get_ontologies(connection, args.ontologies)
-    # slim_terms = get_slim_terms(connection)
+    slim_terms = get_slim_terms(connection)
 
     # for testing with local copy of file pass in ontologies EFO
     # ontologies[0]['download_url'] = '/Users/andrew/Documents/work/untracked_work_ff/test_families.owl'
@@ -666,23 +712,54 @@ def new_main():
     # start iteratively downloading and processing ontologies
     terms = {}
     for ontology in ontologies:
+        print('Processing: ', ontology['ontology_name'])
+        ontology_uuid = ontology['uuid']
+        print('uuid=', ontology_uuid)
         if ontology['download_url'] is not None:
             # print(ontology['download_url'])
             synonym_terms = get_synonym_term_uris(connection, ontology['uuid'])
             definition_terms = get_definition_term_uris(connection, ontology['uuid'])
-            # for term in synonym_terms:
-            #    print(term)
-            # for term in definition_terms:
-            #    print(term)
             data = Owler(ontology['download_url'])
             for class_ in data.allclasses:
                 # print(class_)
-                # synonyms = get_synonyms(class_, data, synonym_terms)
-                # print(synonyms)
-                # definitions = get_definitions(class_, data, definition_terms)
-                # print(definitions)
                 if isBlankNode(class_):
-                    process_blank_node(class_, data, terms)
+                    terms = process_blank_node(class_, data, terms)
+                else:
+                    termid = get_termid_from_uri(class_)
+                    if terms.get(termid) is None:
+                        terms[termid] = {}
+                        terms[termid]['term_id'] = termid
+                        terms[termid]['term_url'] = class_.__str__()
+                    if terms.get(termid) is not None and terms[termid].get('term_name') is None:
+                        terms[termid]['term_name'] = get_term_name_from_rdf(class_, data)
+
+                # deal with parent terms
+                terms = process_parents(class_, termid, data, terms)
+
+            # add other term info - synonyms, definitions, ontology, namespace
+            for termid in terms:
+                terms[termid]['source_ontology'] = ontology_uuid
+
+                synonyms = get_synonyms(terms[termid]['term_url'], data, synonym_terms)
+                if synonyms:
+                    if terms[termid].get('synonyms') is not None:
+                        # add missing synonyms
+                        [terms[termid]['synonyms'].append(syn) for syn in synonyms
+                            if syn not in terms[termid]['synonyms']]
+
+                # we only want one definition - may want to add some checking if multiple
+                if terms[termid].get('definition') is None:
+                    definitions = get_definitions(terms[termid]['term_url'], data, definition_terms)
+                    if definitions:
+                        terms[termid]['definition'] = definitions[0]
+
+                if terms[termid].get('namespace') is None:
+                    (name, ns) = splitNameFromNamespace(terms[termid]['term_url'])
+                    terms[termid]['namespace'] = ns
+
+    # at this point we've processed the rdf of all the ontologies
+    for tid, term in terms.items():
+        print(term)
 
 
 def main():
