@@ -302,5 +302,5 @@ def test_post_check_only_invalid_data(testapp, human_data):
     note theese test should work on any object
     '''
     human_data['taxon_id'] = 24;
-    rest = testapp.post_json('/organism/?check_only=True', human_data, status=422)
+    testapp.post_json('/organism/?check_only=True', human_data, status=422)
 
