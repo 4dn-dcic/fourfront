@@ -888,20 +888,20 @@ var ResultTable = browse.ResultTable = React.createClass({
                         </ButtonToolbar>
                     </div>
                 </div>
-
-                <div className="expset-table-container" ref="expSetTableContainer">
-                    <Table className="expset-table expsets-table" condensed id="result-table">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th></th>
-                                { this.formatColumnHeaders(this.getTemplate('column')) }
-                            </tr>
-                        </thead>
-                        { formattedExperimentSetListings }
-                    </Table>
+                <div className="row">
+                    <div className="expset-table-container col-sm-12" ref="expSetTableContainer">
+                        <Table className="expset-table expsets-table" condensed id="result-table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    { this.formatColumnHeaders(this.getTemplate('column')) }
+                                </tr>
+                            </thead>
+                            { formattedExperimentSetListings }
+                        </Table>
+                    </div>
                 </div>
-
             </div>
         );
     },
