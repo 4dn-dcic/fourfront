@@ -1,5 +1,6 @@
 import pytest
 # from encoded.types.experiment import Experiment, ExperimentHiC
+from encoded.types.experiment_set import is_newer_than
 pytestmark = pytest.mark.working
 '''Has tests for both experiment.py and experiment_set.py'''
 
@@ -67,7 +68,7 @@ def test_experiment_set_replicate_update_adds_experiments_in_set(testapp, experi
     assert experiment['@id'] in res.json['@graph'][0]['experiments_in_set']
 
 
-# tests for the experiment_sets calculated property
+# tests for the experiment_sets calculated properties
 def test_calculated_experiment_sets_for_custom_experiment_set(testapp, experiment, custom_experiment_set):
     assert not experiment['experiment_sets']
     res = testapp.patch_json(custom_experiment_set['@id'], {'experiments_in_set': [experiment['@id']]}, status=200)
@@ -88,3 +89,39 @@ def test_calculated_experiment_sets_for_replicate_experiment_set(testapp, experi
     expt_res = testapp.get(experiment['@id'])
     print(expt_res)
     assert '/experiment_set_replicate/' + replicate_experiment_set['uuid'] in expt_res.json['experiment_sets']
+
+
+def test_calculated_produced_in_pub_for_experiment_set_one_pub():
+    pass
+
+
+def test_calculated_produced_in_pub_for_experiment_set_two_pub():
+    pass
+
+
+def test_calculated_produced_in_pub_for_experiment_set_no_pub():
+    pass
+
+
+def test_is_newer_than():
+    ok_date_pairs = [
+        ('2001-01-01', '2000-01-01'),
+        ('2010-02-01', '2010-01-01'),
+        ('2010-01-02', '2010-01-01'),
+    ]
+
+    bad_date_pairs = [
+        ('2000-01-01', '2000-01-01'),
+        ('', '2010-01-01'),
+        (None, '2000-01-01'),
+        ('2000', '01-01'),
+        ('bob', 1),
+    ]
+
+    for dp in ok_date_pairs:
+        assert is_newer_than(dp[0], dp[1])
+        assert not is_newer_than(dp[1], dp[0])
+
+    for dp2 in bad_date_pairs:
+        assert not is_newer_than(dp2[0], dp2[1])
+        assert not is_newer_than(dp2[1], dp2[0])

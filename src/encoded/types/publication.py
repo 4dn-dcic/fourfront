@@ -5,6 +5,8 @@ from snovault import (collection, load_schema)
 from .base import Item
 from html.parser import HTMLParser
 
+from encoded.types.experiment_set import invalidate_linked_items
+
 ################################################
 # Outside methods for online data fetch
 ################################################
@@ -186,3 +188,7 @@ class Publication(Item):
         if date != "":
             properties['date_published'] = date
         super(Publication, self)._update(properties, sheets)
+        if 'exp_sets_prod_in_pub' in properties:
+            invalidate_linked_items(self, 'exp_sets_prod_in_pub')
+        if 'exp_sets_used_in_pub' in properties:
+            invalidate_linked_items(self, 'exp_sets_used_in_pub')
