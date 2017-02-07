@@ -7,6 +7,7 @@
         "Total Mapped sequences": 38000000,
         "Total Uniquely Mapped Sequences": 30000000,
         "%Mapped": 95,
-        "%Uniquely Mapped": 75
+        "%Uniquely Mapped": 75,
+        "overall_quality_status": "PASS"
     }
 ]
