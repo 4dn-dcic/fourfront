@@ -7,6 +7,15 @@
     "additionalProperties": false,
     "identifyingProperties": ["uuid", "aliases"],
     "properties": {
+        "overall_quality_status": {
+            "description": "Overall QC decision",
+            "type": "string",
+            "enum": [
+                "PASS",
+                "FAIL",
+                "WARN"
+            ]
+        },
         "attachment": {
             "title": "QC metric document metadata",
             "type": "object",
