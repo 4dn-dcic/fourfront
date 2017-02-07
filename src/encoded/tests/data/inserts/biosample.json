@@ -10,7 +10,7 @@
         "award": "Test-4DN",
         "submitted_by": "wrangler@wrangler.com",
         "lab": "test-4dn-lab",
-        "status": "in review by lab",
+        "status": "released",
         "accession": "4DNBS1234567"
     },
     {
@@ -24,7 +24,7 @@
         "award": "Test-4DN",
         "submitted_by": "wrangler@wrangler.com",
         "lab": "test-4dn-lab",
-        "status": "in review by lab",
+        "status": "released",
         "accession": "4DNBS2548734"
     },
     {
