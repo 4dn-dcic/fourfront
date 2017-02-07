@@ -31,28 +31,32 @@ module.exports = {
 
         if (typeof propertyName === 'string') propertyName = propertyName.split('.'); 
         if (!Array.isArray(propertyName)) throw new Error('Using improper propertyName in objectutils.getNestedProperty.');
+        try {
+            return (function findNestedValue(currentNode, fieldHierarchyLevels, level = 0){
+                if (level == fieldHierarchyLevels.length) return currentNode;
 
-        return (function findNestedValue(currentNode, fieldHierarchyLevels, level = 0){
-            if (level == fieldHierarchyLevels.length) return currentNode;
-
-            if (Array.isArray(currentNode)){
-                var arrayVals = [];
-                for (var i = 0; i < currentNode.length; i++){
-                    arrayVals.push( findNestedValue(currentNode[i], fieldHierarchyLevels, level) );
+                if (Array.isArray(currentNode)){
+                    var arrayVals = [];
+                    for (var i = 0; i < currentNode.length; i++){
+                        arrayVals.push( findNestedValue(currentNode[i], fieldHierarchyLevels, level) );
+                    }
+                    return arrayVals;
+                } else {
+                    if (typeof object === 'undefined' || !object) {
+                        if (!suppressNotFoundError) throw new Error('Field ' + _.clone(fieldHierarchyLevels).splice(0, level + 1).join('.') + ' not found on object.');
+                        return;
+                    }
+                    return findNestedValue(
+                        currentNode[fieldHierarchyLevels[level]],
+                        fieldHierarchyLevels,
+                        level + 1
+                    );
                 }
-                return arrayVals;
-            } else {
-                if (typeof object === 'undefined' || !object) {
-                    if (!suppressNotFoundError) throw new Error('Field ' + _.clone(fieldHierarchyLevels).splice(0, level + 1).join('.') + ' not found on object.');
-                    return;
-                }
-                return findNestedValue(
-                    currentNode[fieldHierarchyLevels[level]],
-                    fieldHierarchyLevels,
-                    level + 1
-                );
-            }
-        })(object, propertyName);
+            })(object, propertyName);
+        } catch (e) {
+            console.warn('Could not get ' + propertyName.join('.') + ' from nested object.');
+            return null;
+        }
 
     },
 

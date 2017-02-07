@@ -36,7 +36,7 @@
 /** Individual and standalone chart styles **/
 
 .chart-container {
-    transition: opacity .75s, transform .75s;
+    transition: opacity .75s, transform .75s ease-out;
     opacity: 1;
 
     .chart {
@@ -99,11 +99,11 @@
             min-width: 100%;
             width: 100%;
             box-sizing: content-box;
-            padding: 4px 3px 4px 3px;
+            padding: 5px 3px 4px 3px;
             text-transform: capitalize;
             border-radius: 1px;
             border-top: 1px solid transparent;
-            box-shadow: 0px 5px 3px -4px rgba(0,0,0,0);
+            box-shadow: 0px 5px 3px -14px rgba(0,0,0,0);
             transition: box-shadow .5s, width .5s, background-color .5s, border-color .5s;
         }
         &:last-child {
@@ -130,7 +130,7 @@
             position: absolute;
             left: -3px;
             right: -3px;
-            bottom: -4px;
+            bottom: -3px;
             height: 3px;
             border: 1px solid #ccc;
             border-top: none;
@@ -412,7 +412,7 @@
         .bar-part {
             opacity: 1;
             &.multiple-parts {
-                opacity : 0;
+                opacity : 0.1;
                 border-radius: 0;
                 &.highlight {
                     opacity : 1;
@@ -420,6 +420,57 @@
             }
         }
     }
+
+    .chart-color-legend {
+        position: absolute;
+        right: 0;
+        top: 0;
+        padding: 14px 16px 14px;
+        background-color: #fff;
+        //border: 1px solid #eee;
+        //border-radius: 1px;
+
+        .legend-title {
+            margin-bottom: 1px;
+            margin-top: 0px;
+        }
+
+        .color-patch {
+            display: inline-block;
+            height: 12px;
+            width: 12px;
+            margin-right: 6px;
+            position: relative;
+            top: 1px;
+            transition: opacity .25s;
+            //border: 1px solid #000;
+        }
+
+        .highlight .color-patch {
+            opacity : 0.125;
+            &.highlight {
+                opacity : 1;
+            }
+        }
+
+        .field {
+            .legend-field-title {
+                margin-top: 1px;
+            }
+            > .color-patch {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+            }
+
+            .term {
+                font-size: 0.85rem;
+                
+            }
+
+        }
+    }
+
 }
 
 /** Sunburst Chart Style(s) **/
@@ -536,7 +587,7 @@
         color:#888;
         opacity: 1;
         transition: opacity .3s;
-        padding-top: 4px;
+        padding-top: 14px;
 
         &.align-to-right {
             text-align: right;

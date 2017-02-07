@@ -28,12 +28,12 @@
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
         "biosample_quantity": 2000000,
         "biosample_quantity_units": "cells",
-        "follows_sop": "Yes"
+        "follows_sop": "Yes",
+        "status":"released"
     },
     {
         "accession":"4DNEX067APT1",
         "biosample":"231111bc-8535-4448-903e-854af460ba4d",
-        "biosample":"231111bc-8535-4448-903e-854af460b254",
         "fragmentation_method": "chemical",
         "experiment_type": "dilution Hi-C",
         "enzyme_lot_number": "123456",
@@ -59,7 +59,8 @@
         "protocol": "131106bc-8535-4448-903e-854af460b244",
         "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEX067APU1"}],
         "submitted_by": "4dndcic@gmail.com",
-        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"]
+        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
+        "status":"released"
     },
     {
         "accession":"4DNEX067APV1",
@@ -85,7 +86,8 @@
         "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEX067APU1"}],
         "submitted_by": "wrangler@wrangler.com",
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
-        "biosample": "231111bc-8535-4448-903e-854af460b254"
+        "biosample": "231111bc-8535-4448-903e-854af460b254",
+        "status":"released"
     },
     {
         "accession":"4DNEX067APY1",
@@ -114,7 +116,8 @@
         "protocol": "131106bc-8535-4448-903e-854af460b244",
         "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEX067APU1"}],
         "submitted_by": "4dndcic@gmail.com",
-        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"]
+        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
+        "status":"released"
     },
     {
         "accession":"4DNEX067APZ1",
@@ -143,6 +146,7 @@
         "protocol": "131106bc-8535-4448-903e-854af460b244",
         "experiment_relation":[{"relationship_type":"controlled by","experiment":"4DNEX067APU1"}],
         "submitted_by": "4dndcic@gmail.com",
-        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"]
+        "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
+        "status":"released"
     }
 ]

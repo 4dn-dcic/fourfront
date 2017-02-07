@@ -37,11 +37,11 @@ var expFilters = module.exports = {
             'experiments_in_set.biosample.biosource.individual.organism.name' : 'Primary Organism'
         },
 
-        toName : function(field, schemaOnly = false){
+        toName : function(field, schemas, schemaOnly = false){
             if (!schemaOnly && expFilters.Field.nameMap[field]){
                 return expFilters.Field.nameMap[field];
             } else {
-                var schemaProperty = expFilters.Field.getSchemaProperty(field);
+                var schemaProperty = expFilters.Field.getSchemaProperty(field, schemas);
                 if (schemaProperty && schemaProperty.title){
                     expFilters.Field.nameMap[field] = schemaProperty.title; // Cache in nameMap for faster lookups.
                     return schemaProperty.title;
@@ -53,8 +53,8 @@ var expFilters = module.exports = {
             }
         },
 
-        getSchemaProperty : function(field){
-            var schemas = expFilters.getSchemas && expFilters.getSchemas();
+        getSchemaProperty : function(field, schemas = null){
+            if (!schemas) schemas = expFilters.getSchemas && expFilters.getSchemas();
             if (!schemas) return null;
             var fieldParts = field.split('.');
             var baseSchemaProperties = schemas.ExperimentSet.properties;
