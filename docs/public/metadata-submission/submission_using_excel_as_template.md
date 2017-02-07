@@ -1,3 +1,4 @@
+
 ### Overview
 
 Metadata and data can be submitted to our platform using Microsoft Excel WorkBooks which describe related items in separate sheets. This section provides detailed information on how to fill the WorkBooks. You can check out the [example WorkBook](https://github.com/hms-dbmi/Submit4DN/blob/master/Data_Files/Rao_et_al_2014/fieldsRao.xls?raw=true) we prepared for the data from Rao et. al. 2014 to familiarize yourself with the general structure.
@@ -8,7 +9,6 @@ Based on the type of experiment(s) for which you plan to submit data, the data w
 Generally, it makes sense to begin with the left most sheet in the workbook as the sheets in a workbook are ordered so that Items that have fields that take a reference to another Item as their value appear ‘after’ i.e. to the right of that Item’s sheet in the workbook.
 
 A sheet for an Item starts with a row of field names. *Absolutely required fields are marked with a leading asterisk (eg. \*experiment_type).* The second row of the sheet indicates the type of the information expected for the fields. The third row includes a description of each of the fields. In some cases the values that you can submit for a particular field are constrained to a specific set of terms and when this is the case the possible values are shown in the fourth row.
-
 
 ##### Excel Headers
 

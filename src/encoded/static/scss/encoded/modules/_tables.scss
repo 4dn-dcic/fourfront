@@ -564,7 +564,7 @@ table.matrix {
 }
 
 .browse-title{
-    text-align: right;
+    text-align: left;
     margin-bottom: 10px;
 	font-weight: 400;
 	color: #999999 !important;
@@ -658,10 +658,6 @@ tr.expset-addinfo-row {
     }
 }
 
-.expset-result-table-fix{
-	margin-top: -15px;
-}
-
 
 /** Primarily for Browse Table / View **/
 
@@ -669,6 +665,7 @@ tr.expset-addinfo-row {
 
 	//display: none; /* TEMPORARY - FOR ALIGNMENT */
 	padding: 10px 0;
+	height: 38px;
 
 	> div > .btn-group > button {
 		width: 240px;
@@ -679,6 +676,10 @@ tr.expset-addinfo-row {
 		text-align: left;
 		padding: 10px;
 	}
+}
+
+.above-chart-row {
+	height: 38px;
 }
 
 // Column Widths - these are also set & used from JS, but these override.

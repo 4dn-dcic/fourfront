@@ -122,8 +122,15 @@
 .btn-outline-white {
     color: $btn-primary-color;
     border-color: $btn-primary-color;
-    &:hover {
+    &:hover, &:focus {
         color: $btn-default-color;
         background-color: $btn-primary-color;
     }
+    /*
+    &:focus {
+        color: $btn-primary-color;
+        border-color: $btn-primary-color;
+        background-color: transparent;
+    }
+    */
 }

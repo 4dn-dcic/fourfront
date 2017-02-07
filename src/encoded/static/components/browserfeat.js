@@ -25,19 +25,25 @@ module.exports.BrowserFeat = {
             // Detect CSS transforms
             this.feat.csstransforms = (function() {
                 var elem = document.createElement('tspan');
-                return 'transform' in elem.style
+                return 'transform' in elem.style;
             })();
 
             // Detect FlexBox
             this.feat.flexbox = (function() {
                 var elem = document.createElement('tspan');
-                return 'flexBasis' in elem.style
+                return 'flexBasis' in elem.style;
             })();
 
             // UA checks; should be retired as soon as possible
             this.feat.uaTrident = (function() {
                 return navigator.userAgent.indexOf('Trident') > 0;
             })();
+
+            // UA checks; should be retired as soon as possible
+            this.feat.uaEdge = (function() {
+                return navigator.userAgent.indexOf('Edge') > 0;
+            })();
+
         }
         return feat ? this.feat[feat] : this.feat;
     },

@@ -10,7 +10,6 @@ require('./static-pages/home');
 require('./static-pages/help');
 require('./static-pages/about');
 require('./item');
-require('./objectutils');
 require('./facetlist');
 require('./experiment-set-view');
 require('./user');
