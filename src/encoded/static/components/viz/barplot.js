@@ -755,9 +755,10 @@ var BarPlot = React.createClass({
                 { this.renderParts.bottomYAxis.call(this, availWidth, availHeight, allBars, styleOpts) }
                 <Legend fields={BarPlot.barDataToLegendData(barData, this.props.schemas || null)} title={
                     <div>
-                        <h5 className="text-400 legend-title">
-                            { Filters.Field.toName(barData.fields[barData.fieldIndex].field, this.props.schemas) } <small>x</small>
-                        </h5>
+                        <h6 className="text-400 legend-title">
+                            { Filters.Field.toName(barData.fields[barData.fieldIndex].field, this.props.schemas) }
+                            <br/><span className="text-300">divided into</span>
+                        </h6>
                     </div>
                 } />
             </div>
