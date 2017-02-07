@@ -18,6 +18,7 @@
         "Adapter Content": "PASS",
         "Overrepresented sequences": "PASS",
         "Per sequence quality scores": "PASS",
-        "Per base N content": "PASS"
+        "Per base N content": "PASS",
+        "overall_quality_status": "PASS"
 }
 ]
