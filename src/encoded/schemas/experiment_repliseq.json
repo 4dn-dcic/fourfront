@@ -82,9 +82,6 @@
         "biosample.biosource_summary": {
             "title": "Biosource"
         },
-        "digestion_enzyme.name": {
-            "title": "Enzyme"
-        },
         "biosample.modifications_summary": {
             "title": "Modifications"
         },
