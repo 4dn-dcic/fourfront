@@ -130,7 +130,7 @@ var SunBurst = React.createClass({
                     var fieldValue = object.getNestedProperty(exp, (field.aggregatefield || field.field).replace('experiments_in_set.', ''));
                     
                     if (!fieldValue){
-                        console.error("Couldn't get value for " + (field.aggregateField || field.field) + ' from:', exp);
+                        console.warn("Couldn't get value for " + (field.aggregateField || field.field) + ' from:', exp);
                         fieldValue = "None";
                     }
 
@@ -373,9 +373,6 @@ var SunBurst = React.createClass({
             'handleClick' : function(e){
                 console.log('Default Click Handler, clicked on:', e.target);
             },
-            'colorForNode' : function(node){ // Fallback color determinator. Pass in correct func from FacetCharts.
-                return 'red';
-            },
             'styleOptions' : null, // @see SunBurst.getDefaultStyleOpts for possible options.
             'doManualTransitions' : false,
             'debug' : false
@@ -424,7 +421,7 @@ var SunBurst = React.createClass({
         }
 
         vizUtil.requestAnimationFrame(()=>{
-            if (d.field && d.term) highlightTerm(d.field, d.term, this.props.colorForNode(d));
+            if (d.field && d.term) highlightTerm(d.field, d.term, vizUtil.colorForNode(d));
 
             //if (d.title && this.descriptionElement() !== null) {
             //    this.descriptionElement().innerHTML = d.title;
@@ -483,7 +480,7 @@ var SunBurst = React.createClass({
         if (typeof this.props.updateBreadcrumbsHoverNodes !== 'function') return null;
         this.props.updateBreadcrumbsHoverNodes(
             nodeArray.map((n)=>{
-                n.color = this.props.colorForNode(n);
+                n.color = vizUtil.colorForNode(n);
                 return n;
             })
         );
@@ -863,7 +860,7 @@ var SunBurst = React.createClass({
             return (
                 <path
                     style={{
-                        fill    : _this.props.colorForNode(node),
+                        fill    : vizUtil.colorForNode(node),
                         zIndex: existing ? 3 : ( removing ? 1 : 2 ),
                         stroke : '#fff'
                     }}

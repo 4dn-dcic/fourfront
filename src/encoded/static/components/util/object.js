@@ -54,7 +54,7 @@ module.exports = {
                 }
             })(object, propertyName);
         } catch (e) {
-            console.error('Could not get ' + propertyName.join('.') + ' from nested object.');
+            console.warn('Could not get ' + propertyName.join('.') + ' from nested object.');
             return null;
         }
 

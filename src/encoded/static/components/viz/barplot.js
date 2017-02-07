@@ -40,6 +40,7 @@ var BarPlot = React.createClass({
          * @param {string|string[]} term - A string or array of strings denoting terms. If multiple terms are passed, then field must have fields as terms (with incomplete 'terms' & 'total') object.
          */
         countFieldTermForExperiment : function(fieldObj, term, updateTotal = true){
+            if (term === null) term = "None";
             var termsCont = fieldObj.terms;
             if (Array.isArray(term)){
                 if (term.length === 1) term = term[0];
@@ -272,7 +273,6 @@ var BarPlot = React.createClass({
                 'right'         : React.PropTypes.number
             })
         }),
-        'colorForNode'  : React.PropTypes.func,
         'height'        : React.PropTypes.number,
         'width'         : React.PropTypes.number
     },
@@ -282,7 +282,6 @@ var BarPlot = React.createClass({
             experiments : [],
             fields : [],
             styleOptions : null, // Can use to override default margins/style stuff.
-            colorForNode : function(node){ return vizUtil.stringToColor((node.data || node).name); } // Default color determinator
         };
     },
 
@@ -465,7 +464,7 @@ var BarPlot = React.createClass({
                             rx={5}
                             ry={5}
                             style={{
-                                fill : this.props.colorForNode(d)
+                                fill : vizUtil.colorForNode(d)
                             }}
                         />
                     </g>
@@ -580,7 +579,7 @@ var BarPlot = React.createClass({
 
         barPart : function(d){
             
-            var color = this.props.colorForNode(d);
+            var color = vizUtil.colorForNode(d);
 
             return (
                 <div
