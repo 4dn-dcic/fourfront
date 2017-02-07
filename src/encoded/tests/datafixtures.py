@@ -282,14 +282,18 @@ def human_biosource(testapp, human_individual, worthington_biochemical, lab, awa
 
 
 @pytest.fixture
-def human(testapp):
-    item = {
-        'uuid': '7745b647-ff15-4ff3-9ced-b897d4e2983c',
-        'name': 'human',
-        'scientific_name': 'Homo sapiens',
-        'taxon_id': '9606',
-    }
-    return testapp.post_json('/organism', item).json['@graph'][0]
+def human_data():
+    return {
+            'uuid': '7745b647-ff15-4ff3-9ced-b897d4e2983c',
+            'name': 'human',
+            'scientific_name': 'Homo sapiens',
+            'taxon_id': '9606',
+           }
+
+
+@pytest.fixture
+def human(testapp, human_data):
+    return testapp.post_json('/organism', human_data).json['@graph'][0]
 
 
 @pytest.fixture
@@ -328,6 +332,32 @@ def experiment_set_custom(testapp, lab, award):
         'status': 'in review by lab'
     }
     return testapp.post_json('/experiment_set', item).json['@graph'][0]
+
+
+# fixtures for testing calculated experiment_sets property in experiment_set
+# and also for _update method of experiment_set_replicate (and experiment_set)
+@pytest.fixture
+def custom_experiment_set(testapp, lab, award):
+    item = {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'description': 'test experiment set',
+        'experimentset_type': 'custom',
+        'status': 'in review by lab'
+    }
+    return testapp.post_json('/experiment_set', item).json['@graph'][0]
+
+
+@pytest.fixture
+def replicate_experiment_set(testapp, lab, award):
+    item = {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'description': 'test replicate set',
+        'experimentset_type': 'replicate',
+        'status': 'in review by lab'
+    }
+    return testapp.post_json('/experiment_set_replicate', item).json['@graph'][0]
 
 
 @pytest.fixture

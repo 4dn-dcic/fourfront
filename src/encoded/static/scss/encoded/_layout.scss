@@ -32,6 +32,23 @@
 .static-page {
 	width: 75%;
 	margin: 0;
+	&.row {
+		width: auto;
+		> div > .page-title + .help-entry:first-of-type {
+			margin-top: 35px;
+		}
+		> div > .help-entry:first-child {
+			margin-top: 5px;
+		}
+	}
+
+	.help-entry{
+		margin: 50px 0px 50px 0px;
+		&:first-of-type {
+			margin-top: 27px;
+		}
+	}
+
 }
 
 .page-container,
@@ -39,7 +56,7 @@
 .browse-page-container,
 .static-page {
 	/* Consistent margin between top navbar & content among pages */
-	margin-top: 25px;
+	margin-top: 35px;
 }
 
 /* top padding for small & large screens re: fixed nav */
@@ -65,7 +82,16 @@ h1.page-title {
 	/* Only set font-weight: 200 for h1,
 	   200 doesn't look as nice on smaller sizes. */
 	font-weight: 200;
-	margin-top: 14px;
+	margin-top: 32px;
+	margin-bottom: 32px;
+
+	.row > & {
+		margin-top: 0px; // Assuming 35px margin bottom on page sub-container
+	}
+
+	.row > div > & {
+		margin-top: 0px;
+	}
 
 	.subtitle {
 		/* Subtitles which are part of the title, e.g. Experiment Set <.subtitle>4324ADADF</.subtitle> */
@@ -82,7 +108,7 @@ h1.page-title {
 }
 
 h1.page-title + .page-subtitle {
-	margin-top: -5px; /* Assumes h1.page-title to have margin-bottom: 10px */
+	margin-top: -27px; /* Assumes h1.page-title to have margin-bottom: 32px */
 	margin-bottom: 15px;
 }
 
@@ -226,6 +252,7 @@ h1.page-title + .page-subtitle {
 .text-600 { font-weight: 600; }
 
 .text-normal { font-size: 1rem; } // Reset to default size.
+.text-small { font-size: 0.9rem; }
 .text-medium { font-size: 15px; }
 .text-large { font-size: 17.5px; }
 
@@ -699,206 +726,6 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 }
 
 
-/**********************************************************
-		User Profile Page
-***********************************************************/
-
-.page-container > .row.first-row {
-	margin-top: 29px;
-}
-
-.panel.user-info,
-.panel.user-work-info {
-
-	margin-bottom: 0;
-
-	#email {
-		font-weight: 500;
-	}
-
-	.formatted-info-panel {
-
-		&:not(.no-details){
-			/* min-height: 41px; */
-		}
-
-		/* When in list (maybe ToDo: li > .formatted-info-panel) ... */
-		&.no-details.no-icon.no-label {
-			display: inline-block;
-			padding: 0;
-			vertical-align: text-top;
-			max-width: 85%;
-			word-break: break-word;
-		}
-
-		.block-title,
-		.block-title a {
-			font-weight: 600;
-		}
-	}
-
-}
-
-.panel.user-info {
-	/* for fun - comment out bottom transform in Inspect Element */
-	transform: rotateZ(0deg) scale3d(1, 1, 1) translateX(0);
-    opacity: 1;
-	left: 0px;
-	transition: transform 1.2s ease-out, opacity 1.5s ease-out, left 1.2s ease-out;
-	position: relative;
-	z-index: 2;
-	background-color: #fff;
-
-	&.transition { transform: rotateZ(-900deg) scale3d(0.1, 0.1, 0.1) translateX(-1200px); opacity: 0; left: -900px; }
-
-	.user-title-row-container {
-		margin-bottom: 20px;
-		border-bottom: 1px solid #eee;
-	}
-
-	.user-title-col {
-		padding-bottom: 17px;
-	}
-
-	.user-title {
-		margin-top: 0px;
-		margin-bottom: 0px;
-		font-weight: 300;
-		font-size: 2.6rem;
-
-		.editable-field-entry {
-			//max-width: 50%; // Need to fit 2 inline editable fields on one row for users full name.
-			text-overflow: ellipsis;
-			.value {
-				word-break: break-word;
-				.edit-button {
-					font-size: 1rem;
-				}
-			}
-			&.editing{
-				//max-width: 70%;
-			}
-		}
-
-	}
-
-	@media screen and (min-width: $screen-sm-min){
-
-		.user-title-col {
-			padding-top: 15px;
-			min-height: 85px;
-			padding-bottom: 30px;
-		}
-
-		.user-title {
-			/* white-space: nowrap; */
-			/* overflow: hidden; */
-			text-overflow: ellipsis;
-		}
-	}
-
-	@media screen and (max-width: $screen-xs-max){
-
-		.user-title-col {
-			padding-top: 2px;
-		}
-
-		.user-title {
-			font-size: 2rem;
-			font-weight: 400;
-			margin-right: 70px;
-		}
-	}
-
-	img.gravatar {
-		width: 70px;
-		height: 70px;
-		float: right;
-		border-radius: $border-radius-base;
-	}
-
-	@media screen and (max-width: $screen-xs-max){
-		img.gravatar {
-			width: 94px; /* Account for border */
-			height: 70px;
-			position: relative;
-			z-index: 2;
-			margin-bottom: -30px;
-			margin-top: 5px;
-			border-left: 24px solid #FFF;
-		}
-	}
-
-}
-
-@media screen and (min-width: $screen-sm-min){
-	.editing .user-title .editable-field-entry.inline:not(.editing) {
-		display: inline-block;
-		//max-width: 30%;
-	}
-}
-
-.panel.user-work-info {
-
-	> .block-title {
-		margin-bottom: 20px;
-		padding-bottom: 15px;
-		border-bottom: 1px solid #eee;
-		padding-top: 0;
-
-		> i.icon.icon-fw {
-			margin-right: 5px;
-			font-size: 1.5rem;
-		}
-	}
-
-}
-
-.access-keys-container {
-	padding-top: 15px;
-
-	> h3 {
-
-		margin-bottom: 17px;
-		/*
-	    padding-bottom: 17px;
-    	border-bottom: 1px solid #eee;
-		*/
-	}
-
-	table.access-keys-table {
-		margin-bottom: 20px;
-
-		tr {
-			/*
-			&:nth-child(2n-1) {
-				background-color: #f8f8f8;
-			}
-			*/
-			td {
-				border-bottom: 1px solid #eee;
-				&.access-key-buttons {
-					width: 140px;
-					.btn.btn-xs {
-						margin: 0 4px;
-					}
-				}
-			}
-		}
-	}
-
-	#add-access-key.btn{
-		float: right;
-		min-width: 180px;
-	}
-
-	.no-access-keys > hr:first-child {
-		margin-top: 0;
-		margin-bottom: 17px;
-	}
-
-}
-
 /* *********************************************************
 		CARL'S LOGIN BOX
 ********************************************************** */
@@ -995,69 +822,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
     color: red;
 }
 
-/* *********************************************************
-		CARL'S RANDOM CHANGES
-********************************************************** */
 
-.fourDN-header{
-	font-family: 'Work Sans', sans-serif;
-	font-weight: bold;
-	margin-bottom: 20px;
-}
-
-.fourDN-banner{
-	margin-top: 40px;
-	margin-bottom: 40px;
-	> h4 {
-		font-size: 1.4em;
-		color: #999999;
-		> div {
-			display: inline-block;
-		}
-	}
-}
-
-.fourDN-section{
-	font-family: 'Work Sans', sans-serif;
-	padding-bottom: 10px;
-	margin-top: 20px;
-}
-
-.fourDN-section-title{
-	width: inherit;
-	font-weight: 300;
-	font-size: 1.4em !important;
-	border-bottom: 2px solid #168369;
-	padding-bottom: 5px;
-	margin-bottom: 15px;
-
-}
-
-.fourDN-section-toggle{
-	color: #999999;
-	text-decoration: none !important;
-	&:hover,
-	&:focus {
-		color: #000000;
-	}
-}
-
-.fourDN-section-info{
-	color: #b3b3b3 !important;
-	font-weight: 300;
-	font-size: 1.2em;
-}
-
-
-.fourDN-content{
-	font-family: 'Yrsa', serif;
-	line-height: 130%;
-	font-size: 1.4em;
-}
-
-.fourDN-content-panel{
-	margin-top: 0px !important;
-}
 
 .item-toggle-link{
 	padding: 10px;
@@ -1082,20 +847,6 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	padding-left: 4px;
 }
 
-
-.home-announcements{
- padding: 5px !important;
- margin-top: 30px;
-}
-
-.help-entry{
-	margin: 50px 0px 50px 0px;
-}
-
-.static-page > .help-entry:first-of-type {
-	margin-top: 27px;
-}
-
 h1, h2, h3, h4, h5, h6, td, th, span {
 	font-family: 'Work Sans', sans-serif;
 }
@@ -1116,22 +867,6 @@ p, input {
 .inline-subheader{
 	display: inline;
 	color: #999999 !important;
-}
-
-.error-page{
-	margin-top: 50px;
-	text-align: center;
-}
-
-.slide-display{
-	padding: 20px 0px 20px 0px;
-	>img{
-		display: block;
-		margin: auto;
-	}
-	>.slide-controls{
-		text-align: center;
-	}
 }
 
 .impersonate-user{

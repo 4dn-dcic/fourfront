@@ -40,6 +40,14 @@ class Biosource(Item):
             'RPE-hTERT': ['Tier 2', None],
             'WTC-11': ['Tier 2', None],
             'F123-CASTx129': ['Tier 2', None],
+            'HHF': ['Unclassified', None],
+            'HHFc6': ['Tier 1', None],
+            "CC-2551": ['Unclassified', None],
+            "CH12-LX": ['Unclassified', 'EFO:0005233'],
+            "KBM-7": ['Unclassified', 'EFO_0005903'],
+            "192627": ['Unclassified', None],
+            "CC-2517": ['Unclassified', 'EFO:0002795'],
+            "HeLa-S3": ['Unclassified', 'EFO:0002791']
         }
         if 'cell_line' in properties:
             if properties['cell_line'] in name2info:

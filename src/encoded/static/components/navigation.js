@@ -5,7 +5,8 @@ var Login = require('./login');
 var { Navbars, Navbar, Nav, NavItem, NavDropdown, MenuItem } = require('react-bootstrap');
 var _ = require('underscore');
 var store = require('../store');
-var { responsiveGridState, JWT, console } = require('./objectutils');
+var { JWT, console, layout, isServerSide } = require('./util');
+var HoverStatistics = require('./viz/hover-statistics');
 var TestWarning = require('./testwarning');
 var productionHost = require('./globals').productionHost;
 
@@ -14,31 +15,60 @@ var Navigation = module.exports = React.createClass({
 
     statics : {
 
+        getCurrentHeight : function(){
+            if (!isServerSide() && document){
+                return parseInt(document.getElementById('top-nav').offsetHeight);
+            }
+            return null;
+        },
+
         /** May be bound to access this.props.href (if available) as fallback */
-        getWindowUrl : function(mounted){
-            var href;
-            if (this && this.props && this.props.href) {
-                href = url.parse(this.props.href);
-            }
-            if (mounted && typeof window === 'object' && window && typeof window.location !== 'undefined'){
-                href = window.location;
-            }
+        getWindowPath : function(mounted){
+            var href = Navigation.getWindowLocation.call(this, mounted);
             if (!href) return null;
             return (href.pathname || '/') + (href.search || '') + (href.hash || '');
         },
 
-        /** Can be bound to access this.props.href for getWindowUrl (if available) */
+        getWindowURL : function(mounted){
+            var href = Navigation.getWindowLocation.call(this, mounted);
+            return href.href;
+        },
+
+        getWindowLocation : function(mounted){
+            if (this && this.props && this.props.href) {
+                return url.parse(this.props.href);
+            }
+            if (mounted && typeof window === 'object' && window && typeof window.location !== 'undefined'){
+                return window.location;
+            }
+            return null;
+        },
+
+        isMenuItemActive : function(action, mounted){
+            return (
+                (typeof action.active === 'function' && action.active(Navigation.getWindowPath.call(this, mounted))) ||
+                (Navigation.getMenuItemURL(action, mounted) === Navigation.getWindowPath.call(this, mounted))
+            );
+        },
+
+        getMenuItemURL : function(action, mounted = false){
+            if (typeof action.url === 'string') return action.url;
+            if (typeof action.url === 'function') return action.url(Navigation.getWindowLocation.call(this, mounted));
+            if (typeof action.href === 'string') return action.href;
+            if (typeof action.href === 'function') return action.href(Navigation.getWindowLocation.call(this, mounted));
+            return '#';
+        },
+
+        /** Can be bound to access this.props.href for getWindowPath (if available) */
         buildMenuItem : function(action, mounted, extraProps){
             return (
                 <MenuItem
                     key={action.id}
                     id={action.sid || action.id}
-                    href={action.url || action.href || '#'}
+                    href={Navigation.getMenuItemURL(action, mounted)}
+                    onClick={function(e){ return e.target && typeof e.target.blur === 'function' && e.target.blur(); }}
                     className="global-entry"
-                    active={
-                        (action.url && action.url === Navigation.getWindowUrl.call(this, mounted)) ||
-                        (action.href && action.href === Navigation.getWindowUrl.call(this, mounted))
-                    }
+                    active={Navigation.isMenuItemActive.call(this, action, mounted)}
                     {...extraProps}
                 >
                     {action.title}
@@ -46,7 +76,7 @@ var Navigation = module.exports = React.createClass({
             );
         },
 
-        /** Can be bound to access this.props.href for getWindowUrl (if available) */
+        /** Can be bound to access this.props.href for getWindowPath (if available) */
         buildDropdownMenu : function(action, mounted){
             if (action.children){
                 return (
@@ -56,11 +86,13 @@ var Navigation = module.exports = React.createClass({
                 );
             } else {
                 return (
-                    <NavItem key={action.id} id={action.sid || action.id} href={action.url || action.href || '#'} active={
-                        (action.url && action.url === Navigation.getWindowUrl.call(this, mounted)) ||
-                        (action.href && action.href === Navigation.getWindowUrl.call(this, mounted))
-                    }>
-                        {action.title}
+                    <NavItem 
+                        key={action.id}
+                        id={action.sid || action.id}
+                        href={Navigation.getMenuItemURL(action, mounted)}
+                        active={Navigation.isMenuItemActive.call(this, action, mounted)}
+                    >
+                            {action.title}
                     </NavItem>
                 );
             }
@@ -110,7 +142,7 @@ var Navigation = module.exports = React.createClass({
             lastScrollTop = document.body.scrollTop;
 
             if (
-                ['xs','sm'].indexOf(responsiveGridState()) === -1 && // Fixed nav takes effect at medium grid breakpoint or wider.
+                ['xs','sm'].indexOf(layout.responsiveGridState()) === -1 && // Fixed nav takes effect at medium grid breakpoint or wider.
                 (
                     (document.body.scrollTop > 20 && scrollVector >= 0) ||
                     (document.body.scrollTop > 80)
@@ -118,12 +150,16 @@ var Navigation = module.exports = React.createClass({
             ){
                 if (!this.state.scrolledPastTop){
                     stateChange.scrolledPastTop = true;
-                    this.setState(stateChange);
+                    this.setState(stateChange, function(){
+                        if (document.body.className.indexOf(' scrolled-past-top') === -1) document.body.className += ' scrolled-past-top';
+                    });
                 }
             } else {
                 if (this.state.scrolledPastTop){
                     stateChange.scrolledPastTop = false;
-                    this.setState(stateChange);
+                    this.setState(stateChange, function(){
+                        if (document.body.className.indexOf(' scrolled-past-top') !== -1) document.body.className = document.body.className.replace(' scrolled-past-top', '');
+                    });
                 }
             }
         }, 100);
@@ -136,7 +172,7 @@ var Navigation = module.exports = React.createClass({
             var navBarBrandImgContainer = navBarBrandImg.parentNode;
             var navBarBrand = navBarBrandImgContainer.parentNode.parentNode;
             navBarBrand.style.width = ''; // Clear any earlier width
-            if (['xs','sm'].indexOf(responsiveGridState()) !== -1) return; // If mobile / non-fixed nav width
+            if (['xs','sm'].indexOf(layout.responsiveGridState()) !== -1) return; // If mobile / non-fixed nav width
             //navBarBrandImgContainer.style.width = navBarBrandImgContainer.offsetWidth + 'px'; // Enable to fix width of logo to its large size.
             navBarBrand.style.width = navBarBrand.offsetWidth + 'px';
         };
@@ -214,11 +250,18 @@ var Navigation = module.exports = React.createClass({
                             </Navbar.Toggle>
                         </Navbar.Header>
                         <Navbar.Collapse>
-                            <Nav>{ this.context.listActionsFor('global_sections').map((a)=> Navigation.buildDropdownMenu.call(this, a, this.state.mounted) ) }</Nav>
+                            <Nav>
+                            { 
+                                this.context.listActionsFor('global_sections').map((a)=> 
+                                    Navigation.buildDropdownMenu.call(this, a, this.state.mounted)
+                                ) 
+                            }
+                            </Nav>
                             <UserActions mounted={this.state.mounted} closeMobileMenu={this.closeMobileMenu} session={this.props.session} />
                             {/* REMOVE SEARCH FOR NOW: <Search href={this.props.href} /> */}
                         </Navbar.Collapse>
                     </Navbar>
+                    <HoverStatistics ref="stats" href={this.props.href} expSetFilters={this.props.expSetFilters} />
                 </div>
             </div>
         );
@@ -264,7 +307,7 @@ var UserActions = React.createClass({
         
         acctTitle = (
             <span>
-                <i title={session ? "Signed In" : null} className={"icon icon-user" + (session ? "" : "-o")}></i>&nbsp; { acctTitle }
+                <i title={session ? "Signed In" : null} className={"account-icon icon icon-user" + (session ? "" : "-o")}></i> { acctTitle }
             </span>
         );
 

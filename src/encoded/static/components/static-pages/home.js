@@ -1,16 +1,18 @@
 'use strict';
+
 var React = require('react');
 var ReactDOM = require('react-dom');
 var _ = require('underscore');
-var announcements_data = require('../data/announcements_data');
-var Panel = require('react-bootstrap').Panel;
-var store = require('../store');
-var globals = require('./globals');
+var { console } = require('./../util');
+var announcements_data = require('../../data/announcements_data');
+var Collapse = require('react-bootstrap').Collapse;
+var store = require('../../store');
+var globals = require('./../globals');
 
 /* ****************
 New homepage
-Will load static entries from a js file
 Uses fetch to get context necessary to populate banner entry
+ToDo : Embed info needed for chart(s) & banners into /home/?format=json endpoint (reduce AJAX reqs).
 **************** */
 
 var BannerEntry = React.createClass({
@@ -86,7 +88,7 @@ var BannerEntry = React.createClass({
     }
 });
 
-var ContentItem = React.createClass({
+var Announcement = React.createClass({
     getInitialState: function() {
         return {
             active: true
@@ -115,13 +117,28 @@ var ContentItem = React.createClass({
             subtitle = "";
         }
 
+        var icon = null;
+        if (this.props.icon){
+            if (this.props.icon === true){
+                icon = <i className={"icon text-small icon-" + (this.state.active ? 'minus' : 'plus')}></i>;
+            } else {
+                icon = this.props.icon; // Custom icon maybe for future
+            }
+        }
+
         return (
-            <div className="fourDN-section">
-                <div className="fourDN-section-title"><a className="fourDN-section-toggle" href="" onClick={this.handleToggle}>{title}</a></div>
-                <div className="fourDN-section-info">{subtitle}</div>
-                <Panel collapsible expanded={this.state.active} className="fourDN-content fourDN-content-panel">
-                    <p dangerouslySetInnerHTML={{__html: content}}></p>
-                </Panel>
+            <div className="fourDN-section announcement">
+                <div className="fourDN-section-title announcement-title">
+                    <a className="fourDN-section-toggle" href="#" onClick={this.handleToggle}>
+                        {icon} {title}
+                    </a>
+                </div>
+                <div className="fourDN-section-info announcement-subtitle">{subtitle}</div>
+                <Collapse in={this.state.active}>
+                    <div className="fourDN-content announcement-content">
+                        <p dangerouslySetInnerHTML={{__html: content}}></p>
+                    </div>
+                </Collapse>
             </div>
         );
     }
@@ -138,6 +155,10 @@ var HomePage = module.exports = React.createClass({
         }).isRequired
     },
 
+    shouldComponentUpdate : function(){
+        return false; // Never re-render after initial mount (reduce chart re-rendering), let sub-components handle own state.
+    },
+
     render: function() {
         var c = this.props.context.content; // Content
         var experiment4DNBanner = <BannerEntry session={this.props.session} text='experiments' defaultFilter="4DN" destination="/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all" fetchLoc='/search/?type=Experiment&award.project=4DN&format=json'/>;
@@ -145,7 +166,7 @@ var HomePage = module.exports = React.createClass({
         var biosourceBanner = <BannerEntry session={this.props.session} text='cell types' destination='/search/?type=Biosource' fetchLoc='/search/?type=Biosource&format=json'/>;
         var announcements = announcements_data.map(function(announce) {
             return (
-                <ContentItem key={announce.title} content={announce}/>
+                <Announcement key={announce.title} content={announce} icon={announcements_data.length > 3 ? true : false} />
             );
         });
         return (
@@ -159,21 +180,40 @@ var HomePage = module.exports = React.createClass({
                     </h4>
                 </div>
                 <div className="row">
-                    <div className="col-md-9 col-xs-12">
-                        <h3 className="fourDN-header">Welcome!</h3>
-                        <p className="fourDN-content text-justify" dangerouslySetInnerHTML={{__html: c.description}}></p>
+                    <div className="col-md-6 col-xs-12">
+                        <h3 className="fourDN-header">Welcome</h3>
+                        <div className="fourDN-content text-justify" dangerouslySetInnerHTML={{__html: c.description}}></div>
                     </div>
-                    <div className="col-md-3 col-xs-12">
-                        <h3 className="fourDN-header">4DN Links</h3>
-                        <p className="fourDN-content"dangerouslySetInnerHTML={{__html: c.links}}></p>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-md-8 col-xs-12">
+                    <div className="col-md-6 col-xs-12">
                         <h3 className="fourDN-header">Announcements</h3>
                         {announcements}
                     </div>
+
+                    <div className="col-xs-12 col-sm-12 col-md-6 homepage-links-row">
+                        
+                        <h4 className="fourDN-header">Links</h4>
+                        <div className="links-wrapper">
+                            <div className="link-block">
+                                    <a href="http://www.4dnucleome.org/" target="_blank">Main Portal</a>
+                            </div>
+                            <div className="link-block">
+                                <a href="http://dcic.4dnucleome.org/" target="_blank">DCIC</a>
+                            </div>
+                            <div className="link-block">
+                                <a href="https://commonfund.nih.gov/4Dnucleome/index" target="_blank">Common Fund</a>
+                            </div>
+                            <div className="link-block">
+                                <a href="https://commonfund.nih.gov/4Dnucleome/FundedResearch" target="_blank">Centers and Labs</a>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
+
+                <div className="row">
+                    
+                </div>
+
             </div>
         );
     }

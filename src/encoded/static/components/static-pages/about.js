@@ -1,8 +1,8 @@
 // Render a simple static about page
 
 var React = require('react');
-var statics = require('../data/statics');
-var globals = require('./globals');
+var globals = require('../globals');
+var { Wrapper } = require('./static-page-base');
 
 var AboutPage = module.exports = React.createClass({
 
@@ -18,16 +18,20 @@ var AboutPage = module.exports = React.createClass({
 
     render: function() {
         var c = this.props.context.content;
-        return(
-            <div className="static-page">
-                <h1 className="page-title">About</h1>
+        return (
+            <Wrapper title="About">
                 <div className="help-entry">
+
+                    <h3 className="fourDN-header">Introduction</h3>
+                    <div className="fourDN-content" dangerouslySetInnerHTML={{__html: c.introduction}}></div>
+
                     <h3 className="fourDN-header">Team & Contact</h3>
-                    <p className="fourDN-content" dangerouslySetInnerHTML={{__html: c.dcic}}></p>
-                    <p className="fourDN-content" dangerouslySetInnerHTML={{__html: c.acknowledgements}}></p>
-                    <p className="fourDN-content" dangerouslySetInnerHTML={{__html: c.funding}}></p>
+                    <div className="fourDN-content" dangerouslySetInnerHTML={{__html: c.dcic}}></div>
+
+                    <div className="fourDN-content" dangerouslySetInnerHTML={{__html: c.acknowledgements}}></div>
+                    <div className="fourDN-content" dangerouslySetInnerHTML={{__html: c.funding}}></div>
                 </div>
-            </div>
+            </Wrapper>
         );
     }
 });

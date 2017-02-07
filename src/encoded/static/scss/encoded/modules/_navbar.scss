@@ -5,25 +5,27 @@ $navbar-small-height : 40px; /* Bootstrap navbar default */
 $navbar-transition-length: .75s;
 
 #top-nav {
-    border: none;
     background: #ffffff;
     margin-bottom: 0;
 
     > nav.navbar-main {
         /* React-Bootstrap Navbar itself */
-        border-width: 0 0 1px;
+        //border-width: 0 0 1px;
         border-radius: 0;
-        border-color: #eee;
+        //border-color: #eee;
+        border: none;
         box-sizing: content-box; /* Exclude bottom border from min-height */
         min-height: $navbar-full-height; /* Mobile default */
         line-height: $navbar-full-height;
-        box-shadow: 0 0 3px rgba(0,0,0,0);
+        //box-shadow: 0 0 3px rgba(0,0,0,0);
         transform: translate3d(0,0,0);
+        position: relative;
 
         @media screen and (min-width: $navbar-fixed-breakpoint){
             
             min-height: $navbar-small-height;
             height: $navbar-full-height;
+            z-index: 10;
 
             .navbar-container.nav-initialized & {
                 -webkit-backface-visibility: hidden;
@@ -31,16 +33,16 @@ $navbar-transition-length: .75s;
                 backface-visibility: hidden;
                 transform: translate3d(0,0,0);
                 transition: height $navbar-transition-length, 
-                    line-height $navbar-transition-length, 
-                    box-shadow $navbar-transition-length, 
-                    border-color $navbar-transition-length;
+                    line-height $navbar-transition-length;
+                    /* box-shadow $navbar-transition-length, 
+                    border-color $navbar-transition-length */;
             }
 
             .navbar-container.scrolled-past-top & {
                 height: $navbar-small-height;
                 line-height: $navbar-small-height;
-                border-color: #d4d4d4;
-                box-shadow: 0 0 3px rgba(0,0,0,0.2);
+                //border-color: #d4d4d4;
+                //box-shadow: 0 0 3px rgba(0,0,0,0.2);
             }
         }
 
@@ -197,15 +199,98 @@ $navbar-transition-length: .75s;
         }
 
     }
+
+    #stats {
+        //border-bottom: 1px solid #ddd;
+        opacity : 1;
+        transition: opacity .5s;
+        &.invisible {
+            visibility: visible;
+            opacity : 0;
+            z-index: -1;
+            border-bottom-width: 0;
+            .inner.container {
+                height: 0px;
+            }
+        }
+        .inner.container {
+            text-align: left;
+            display: block;
+            height : 38px;
+            transition: height .75s;
+            overflow: hidden;
+            &.showing-filters {
+                height: 108px;
+            }
+            .any-filters-glance-label {
+                display: inline-block;
+                width: 32px;
+                text-align: center;
+                position: relative;
+                padding-top: 10px;
+                height: 38px;
+                border-right: 1px solid #f4f4f4;
+            }
+            .bottom-side {
+                opacity: 1;
+                transition: opacity 0.75s;
+                padding-top: 10px;
+                border-top: 1px solid #f4f4f4;
+                .crumbs-label {
+                    float: left;
+                    width: 72px;
+                    font-size: .85rem;
+                    margin-top: 4px;
+                }
+            }
+            .stat {
+                //display: inline-block;
+                float: left;
+                padding: 5px 12px 5px 5px;
+                height: 38px;
+                border-right: 1px solid #f4f4f4;
+                min-width: 125px;
+                text-align: right;
+                .stat-value {
+                    font-size: 1.5rem;
+                    line-height: 2rem;
+                    font-weight: 300;
+                    color: rgba(100, 100, 100, 1);
+                    transition: color 0.3s;
+                    display: inline-block;
+                    min-width: 40px;
+                }
+                .stat-label {
+                    line-height: 1rem;
+                    display: inline-block;
+                    margin-left: 5px;
+                    color : rgba(100, 100, 100, 0.5);
+                }
+            }
+        }
+    }
+
 }
 
 .navbar-fixed-top {
     position: relative;
     top: 0;
+    border: none;
+    border-bottom: 1px solid #eee;
+    box-shadow: 0 0 3px rgba(0,0,0,0);
+    transition: border-color $navbar-transition-length, box-shadow $navbar-transition-length;
 
     @media (min-width: $navbar-fixed-breakpoint) {
         position: fixed;
+
+        .navbar-container.nav-initialized.navbar-container.scrolled-past-top & {
+            border-color: #d4d4d4;
+            box-shadow: 0 0 3px rgba(0,0,0,0.2);
+        }
+
     }
+
+
 }
 
 
@@ -292,7 +377,7 @@ $navbar-transition-length: .75s;
 
 @media (min-width: $screen-md-min) {
 	.navbar-container.test-warning-visible {
-		margin-bottom: 34px;
+		padding-bottom: 34px;
 	}
 }
 

@@ -2,6 +2,7 @@
     {
         "title": "Worthington Biochemical",
         "name": "worthington-biochemical",
+        "aliases":["dcic:wortbio"],
         "description": "",
         "url": "http://www.worthington-biochem.com",
         "award": "1U01CA200059-01",
@@ -12,6 +13,7 @@
     {
         "title": "New England Biolabs",
         "name": "new-england-biolabs",
+        "aliases":["dcic:neb"],
         "description": "",
         "url": "https://www.neb.com",
         "award": "1U01CA200059-01",
@@ -22,6 +24,7 @@
     {
         "title": "ThermoFisher Scientific",
         "name": "thermofisher-scientific",
+        "aliases":["dcic:tfs"],
         "description": "previously also Fermentas",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",

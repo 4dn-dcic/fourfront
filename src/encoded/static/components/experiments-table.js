@@ -4,14 +4,14 @@ var React = require('react');
 var { Table, Checkbox, Collapse } = require('react-bootstrap');
 var _ = require('underscore');
 var FacetList = require('./facetlist'); // Only used for statics.
-var { isServerSide, console } = require('./objectutils');
+var { expFxn, Filters, console, isServerSide } = require('./util');
 
 /**
  * To be used within Experiments Set View/Page, or
  * within a collapsible row on the browse page.
- * 
+ *
  * Shows experiments only, not experiment sets.
- * 
+ *
  * Allows either table component itself to control state of "selectedFiles"
  * or for a parentController (passed in as a prop) to take over management
  * of "selectedFiles" Set and "checked", for integration with other pages/UI.
@@ -24,21 +24,21 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         /* List of headers which are created/controlled by component (not customizable), by experimentset_type */
         builtInHeaders : function(expSetType = 'replicate'){
             switch (expSetType){
-                case 'replicate' : 
+                case 'replicate' :
                     return [
                         { className: 'biosample', title: 'Biosample Accession' },
                         { className: 'experiment', title: 'Experiment Accession' },
                         { className: 'file-pair', title: 'File Pair', visibleTitle : <i className="icon icon-download"></i> },
                         { className: 'file', title: 'File Accession' },
                     ];
-                default: 
+                default:
                     return [
                         { className: 'biosample', title: 'Biosample Accession' },
                         { className: 'experiment', title: 'Experiment Accession'},
                         { className: 'file', title: 'File Accession' },
                     ];
             }
-            
+
         },
 
         /* Returns undefined if not set */
@@ -64,7 +64,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             }
         },
 
-        /** 
+        /**
          * Calculate amount of experiments out of provided experiments which match currently-set filters.
          * Use only for front-end faceting, e.g. on Exp-Set View page where all experiments are provided,
          * NOT (eventually) for /browse/ page where faceting results will be controlled by back-end.
@@ -95,12 +95,12 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                     ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(facets, filters);
                 }
             } else if (getIgnoredFiltersMethod === 'single-term') {
-                // Ignore filters if none in current experiment_set match it so that if coming from 
+                // Ignore filters if none in current experiment_set match it so that if coming from
                 // another page w/ filters enabled (i.e. browse) and deselect own 'static'/single term, it isn't empty.
                 ignoredFilters = FacetList.findIgnoredFiltersByStaticTerms(allExperiments, filters);
             }
-            if (useSet) return FacetList.siftExperiments(allExperiments, filters, ignoredFilters); // Set
-            else return [...FacetList.siftExperiments(allExperiments, filters, ignoredFilters)]; // Convert to array
+            if (useSet) return Filters.siftExperimentsClientSide(allExperiments, filters, ignoredFilters); // Set
+            else return [...Filters.siftExperimentsClientSide(allExperiments, filters, ignoredFilters)]; // Convert to array
         },
 
         totalExperimentsCount : function(experimentArray = null){
@@ -283,13 +283,13 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                         }
                         return (
                             <div className={"name col-" + this.props.columnClass} style={style}>
-                                { this.props.label ? 
+                                { this.props.label ?
                                     ExperimentsTable.StackedBlock.Name.renderBlockLabel(
                                         this.props.label.title,
                                         this.props.label.subtitle,
                                         false,
                                         this.props.label.subtitleVisible === true ? 'subtitle-visible' : null
-                                    ) 
+                                    )
                                 : null }
                                 { this.adjustedChildren() }
                             </div>
@@ -308,7 +308,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                                 handleCollapseToggle : React.PropTypes.func
                                 // + those from parent .List
                             },
-                            
+
                             shouldComponentUpdate : function(nextProps){
                                 if (this.props.collapsed !== nextProps.collapsed) return true;
                                 if (this.props.currentlyCollapsing !== nextProps.currentlyCollapsing) return true;
@@ -321,8 +321,8 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
                                 if (this.props.collapsibleChildren.length === 0) return null;
 
-                                var collapsedMsg = this.props.collapsed && 
-                                (this.props.currentlyCollapsing ? 
+                                var collapsedMsg = this.props.collapsed &&
+                                (this.props.currentlyCollapsing ?
                                     (this.props.currentlyCollapsing === this.props.parentID ? false : true)
                                     :
                                     true
@@ -408,9 +408,9 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
                     handleCollapseToggle : function(){
                         if (this.props.expTable && this.props.expTable.state && !this.props.expTable.state.collapsing){
-                            this.props.expTable.setState({ 
+                            this.props.expTable.setState({
                                 'collapsing' : this.props.rootList ? 'root' :
-                                    this.props.parentID || this.props.className || true 
+                                    this.props.parentID || this.props.className || true
                             }, ()=>{
                                 this.setState({ 'collapsed' : !this.state.collapsed });
                             });
@@ -526,210 +526,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                     </div>
                 );
             }
-        }),
-
-        funcs : {
-
-            listEmptyExperiments : function(experiments){
-                return _.filter(experiments, function(exp){
-                    if (Array.isArray(exp.files) && exp.files.length > 0) return false;
-                    else if (Array.isArray(exp.filesets) && exp.filesets.length > 0){
-                        for (var i; i < exp.filesets.length; i++){
-                            if (Array.isArray(exp.filesets[i].files_in_set) && exp.filesets[i].files_in_set.length > 0){
-                                return false;
-                            }
-                        }
-                        return true;
-                    }
-                    else return true;
-                });
-            },
-
-            fileCountFromExperiments : function(experiments){
-                return _.reduce(experiments.map(ExperimentsTable.funcs.fileCount), function(r,expFileCount,i){
-                    return r + expFileCount;
-                }, 0);
-            },
-
-            /* NOT SORTED */
-            listAllUnpairedFiles : function(experiments){
-                return _.filter(
-                    _.flatten(
-                        ExperimentsTable.funcs.findUnpairedFilesPerExperiment(experiments),
-                        true
-                    ),
-                    function(file){ return typeof file !== 'undefined'; }
-                );
-            },
-
-            /* NOT SORTED */
-            listAllFilePairs : function(experiments){
-                return (
-                    _.flatten(
-                        _.filter(
-                            _.pluck(
-                                ExperimentsTable.funcs.groupFilesByPairsForEachExperiment(experiments),
-                                'file_pairs'
-                            ),
-                            function(file){ return typeof file !== 'undefined'; }
-                        ),
-                        true
-                    )
-                )
-            },
-
-            /** 
-             *  Partial Funcs (probably don't use these unless composing a function)
-             */
-
-            combineWithReplicateNumbers : function(experimentsWithReplicateNums, fullExperimentData){
-                if (!Array.isArray(experimentsWithReplicateNums)) return false;
-                return _(experimentsWithReplicateNums).chain()
-                    .map(function(r){ 
-                        return {
-                            'tec_rep_no' : r.tec_rep_no || null,
-                            'bio_rep_no' : r.bio_rep_no || null,
-                            '@id' : r.replicate_exp['@id']
-                        };
-                    })
-                    .zip(fullExperimentData) // 'replicate_exps' and 'experiments_in_set' are delivered in same order from backend, so can .zip (linear) vs .map -> .findWhere  (nested loop).
-                    .map(function(r){
-                        r[1].biosample.bio_rep_no = r[0].bio_rep_no; // Copy over bio_rep_no to biosample to ensure sorting.
-                        return _.extend(r[0], r[1]);
-                    })
-                    .value()
-            },
-
-            findUnpairedFiles : function(files_in_experiment){
-                return _.reduce(files_in_experiment, function(unpairedFiles, file, files){
-                    if (!Array.isArray(file.related_files) || typeof file.paired_end == 'undefined') {
-                        unpairedFiles.push(file);
-                    }
-                    return unpairedFiles;
-                }, []);
-            },
-
-            findUnpairedFilesPerExperiment : function(experiments){
-                return experiments.map(function(exp){
-                    if (Array.isArray(exp.files)){
-                        return ExperimentsTable.funcs.findUnpairedFiles(exp.files);
-                    } else if (
-                        Array.isArray(exp.filesets) && 
-                        exp.filesets.length > 0 && 
-                        Array.isArray(exp.filesets[0].files_in_set)
-                    ){
-                        return ExperimentsTable.funcs.findUnpairedFiles(
-                            _.flatten(
-                                _.pluck(exp.filesets, 'files_in_set'),
-                                true
-                            )
-                        );
-                    }
-                });
-            },
-
-            fileCount : function(experiment){
-                if (Array.isArray(experiment.files)) return experiment.files.length;
-                if (Array.isArray(experiment.filesets)) return _.reduce(experiment.filesets, function(r,fs){
-                    return r + (fs.files_in_set || []).length;
-                }, 0);
-                return 0;
-            },
-
-            groupFilesByPairs : function(files_in_experiment){
-                // Add 'file_pairs' property containing array of arrays of paired files to each experiment.
-                return _(files_in_experiment).chain()
-                    .sortBy(function(file){ return parseInt(file.paired_end) }) // Bring files w/ paired_end == 1 to top of list.
-                    .reduce(function(pairsObj, file, files){
-                        // Group via { 'file_paired_end_1_ID' : { '1' : file_paired_end_1, '2' : file_paired_end_2,...} }
-                        if (parseInt(file.paired_end) === 1){
-                            pairsObj[file['@id']] = { '1' : file };
-                        } else if (Array.isArray(file.related_files)) {
-                            _.each(file.related_files, function(related){
-                                if (pairsObj[related.file]) {
-                                    pairsObj[related.file][file.paired_end + ''] = file;
-                                } else {
-                                    file.unpaired = true; // Mark file as unpaired
-                                }
-                            });
-                        } else {
-                            file.unpaired = true; // Mark file as unpaired
-                        }
-                        return pairsObj;
-                    }, { })
-                    .values()
-                    .map(function(filePairObj){
-                        return _(filePairObj).chain()
-                            .pairs()
-                            .sortBy (function(fp){ return parseInt(fp[0]); })
-                            .map    (function(fp){ return fp[1]; })
-                            .value();
-                    })
-                    .value(); // [[file1,file2,file3,...],[file1,file2,file3,file4,...],...]
-            },
-
-            groupFilesByPairsForEachExperiment: function(experiments){
-                return experiments.map(function(exp){
-                    var file_pairs;
-                    if (Array.isArray(exp.files)){
-                        file_pairs = ExperimentsTable.funcs.groupFilesByPairs(exp.files);
-                    } else if (
-                        Array.isArray(exp.filesets) && 
-                        exp.filesets.length > 0 && 
-                        Array.isArray(exp.filesets[0].files_in_set)
-                    ){
-                        file_pairs = ExperimentsTable.funcs.groupFilesByPairs(
-                            _.flatten(
-                                _.pluck(exp.filesets, 'files_in_set'),
-                                true
-                            )
-                        );
-                    }
-
-                    if (Array.isArray(file_pairs) && file_pairs.length > 0) exp.file_pairs = file_pairs;
-                    return exp;
-                });
-            },
-
-            flattenFileSetsToFilesIfNoFilesOnExperiment : function(experiment){
-                if (Array.isArray(experiment.files)) return experiment;
-                if (!Array.isArray(experiment.filesets) || experiment.filesets.length === 0 || !Array.isArray(experiment.filesets[0].files_in_set)) return experiment;
-                experiment.files = _.flatten(
-                    _.pluck(experiment.filesets, 'files_in_set'),
-                    true
-                );
-                return experiment;
-            },
-
-            flattenFileSetsToFilesIfNoFilesForEachExperiment : function(experiments){
-                return experiments.map(ExperimentsTable.funcs.flattenFileSetsToFilesIfNoFilesOnExperiment);
-            },
-
-            groupExperimentsByBiosampleRepNo : function(experiments){
-                return _(experiments).chain()
-                    .groupBy(function(exp){
-                        return exp.biosample.bio_rep_no;
-                    })          // Creates { '1' : [expObjWBiosample1-1, expObjWBiosample1-2, ...], '2' : [expObjWBiosample2-1, expObjWBiosample2-2, ...], ... }
-                    .pairs()    // Creates [['1', [expObjWBiosample1-1, expObjWBiosample1-2]], ['2', [expObjWBiosample2-1, expObjWBiosample2-2]], ...]
-                    .sortBy(function(expSet){ return parseInt(expSet[0]); }) // Sort outer list (biosamples) by bio_rep_no
-                    .map(function(expSet){ // Creates [[expObjWBiosample1-1, expObjWBiosample1-2], [expObjWBiosample2-1, expObjWBiosample2-2], ...]
-                        return _.sortBy(expSet[1], 'tec_rep_no'); // Sort inner list (experiments) by tec_rep_no
-                    })
-                    .value();
-            },
-
-            groupExperimentsByBiosample : function(experiments){
-                return _(experiments).chain()
-                    .groupBy(function(exp){
-                        return exp.biosample['@id'];
-                    })
-                    .pairs()
-                    .sortBy(function(expSet){ return expSet[0]; }) // Sort outer list (biosamples) by biosample id
-                    .map(function(expSet){ return expSet[1]; }) // Creates [[expObjWBiosample1-1, expObjWBiosample1-2], [expObjWBiosample2-1, expObjWBiosample2-2], ...]
-                    .value();
-            }
-
-        }
+        })
 
     },
 
@@ -741,13 +538,13 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         selectedFiles : React.PropTypes.instanceOf(Set),
         parentController : function(props, propName, componentName){
             // Custom validation
-            if (props[propName] && 
+            if (props[propName] &&
                 (!(props[propName].state.selectedFiles instanceof Set))
             ){
                 return new Error('parentController must be a React Component passed in as "this", with "selectedFiles" (Set) and "checked" (bool) in its state.');
-            } 
+            }
         },
-        keepCounts : React.PropTypes.bool // Whether to run updateCachedCounts and store output in this.counts (get from instance if ref, etc.) 
+        keepCounts : React.PropTypes.bool // Whether to run updateCachedCounts and store output in this.counts (get from instance if ref, etc.)
     },
 
     getDefaultProps : function(){
@@ -762,7 +559,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
     },
 
     cache : null,
-    
+
     getInitialState: function() {
         this.cache = {
             origColumnWidths : null,
@@ -775,8 +572,8 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             mounted : false
         };
         if (!(
-            this.props.parentController && 
-            this.props.parentController.state && 
+            this.props.parentController &&
+            this.props.parentController.state &&
             this.props.parentController.state.selectedFiles
         )) initialState.selectedFiles = new Set();
         return initialState;
@@ -810,7 +607,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         var newColWidths = origColumnWidths.map(function(c){
             return Math.floor(c * scale);
         });
-        
+
         // Adjust first column by few px to fit perfectly.
         var totalNewColsWidth = _.reduce(newColWidths, function(m,v){ return m + v }, 0);
         var remainder = availableWidth - totalNewColsWidth;
@@ -882,7 +679,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
     selectedFiles : function(){
         //if (this.props.selectedFiles) {
         //    return this.props.selectedFiles;
-        if (this.props.parentController && this.props.parentController.state.selectedFiles){ 
+        if (this.props.parentController && this.props.parentController.state.selectedFiles){
             return this.props.parentController.state.selectedFiles;
         } else if (this.state.selectedFiles){
             return this.state.selectedFiles;
@@ -891,8 +688,8 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
     },
 
     handleFileUpdate: function (uuid, add=true){
-        
-        var selectedFiles = this.selectedFiles(); 
+
+        var selectedFiles = this.selectedFiles();
         if (!selectedFiles) return null;
 
         if(add){
@@ -913,23 +710,23 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 'selectedFiles': selectedFiles
             });
         }
-        
+
     },
 
     renderExperimentBlock : function(exp,i){
         this.cache.oddExpRow = !this.cache.oddExpRow;
-        
+
         var contentsClassName = Array.isArray(exp.file_pairs) ? 'file-pairs' : 'files';
 
         return (
-            <ExperimentsTable.StackedBlock 
+            <ExperimentsTable.StackedBlock
                 key={exp['@id']}
-                hideNameOnHover={true}
+                hideNameOnHover={false}
                 columnClass="experiment"
-                label={{ 
+                label={{
                     title : 'Experiment',
                     subtitle : (
-                        exp.tec_rep_no ? 'Tech Replicate ' + exp.tec_rep_no : 
+                        exp.tec_rep_no ? 'Tech Replicate ' + exp.tec_rep_no :
                             exp.experiment_type ? exp.experiment_type : null
                     ),
                     subtitleVisible: true
@@ -937,11 +734,11 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 stripe={this.cache.oddExpRow}
                 id={(exp.bio_rep_no && exp.tec_rep_no) ? 'exp-' + exp.bio_rep_no + '-' + exp.tec_rep_no : exp.accession || exp['@id']}
             >
-                <ExperimentsTable.StackedBlock.Name relativePosition={ExperimentsTable.funcs.fileCount(exp) > 6}>
+                <ExperimentsTable.StackedBlock.Name relativePosition={expFxn.fileCount(exp) > 6}>
                     <a href={ exp['@id'] || '#' } className="name-title mono-text">{ exp.accession }</a>
                 </ExperimentsTable.StackedBlock.Name>
-                <ExperimentsTable.StackedBlock.List 
-                    className={contentsClassName} 
+                <ExperimentsTable.StackedBlock.List
+                    className={contentsClassName}
                     title={contentsClassName === 'file-pairs' ? 'File Pairs' : 'Files'}
                 >
                     { contentsClassName === 'file-pairs' ? /* File Pairs Exist */
@@ -953,7 +750,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                                 columnHeaders={this.customColumnHeaders()}
                                 handleFileUpdate={this.handleFileUpdate}
                                 label={ exp.file_pairs.length > 1 ?
-                                    { title : "Pair " + (i + 1) } : { title : "Pair" } 
+                                    { title : "Pair " + (i + 1) } : { title : "Pair" }
                                 }
                             />
                         )
@@ -998,12 +795,12 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         return (
             <ExperimentsTable.StackedBlock
                 columnClass="biosample"
-                hideNameOnHover={true}
+                hideNameOnHover={false}
                 key={expsWithBiosample[0].biosample['@id']}
                 id={'bio-' + (expsWithBiosample[0].biosample.bio_rep_no || i + 1)}
                 label={{
                     title : 'Biosample',
-                    subtitle : expsWithBiosample[0].biosample.bio_rep_no ? 
+                    subtitle : expsWithBiosample[0].biosample.bio_rep_no ?
                         'Bio Replicate ' + expsWithBiosample[0].biosample.bio_rep_no
                         :
                         expsWithBiosample[0].biosample.biosource_summary,
@@ -1012,7 +809,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             >
                 <ExperimentsTable.StackedBlock.Name
                     relativePosition={
-                        expsWithBiosample.length > 3 || ExperimentsTable.funcs.fileCountFromExperiments(expsWithBiosample) > 6
+                        expsWithBiosample.length > 3 || expFxn.fileCountFromExperiments(expsWithBiosample) > 6
                     }
                 >
                     <a href={ expsWithBiosample[0].biosample['@id'] || '#' } className="name-title mono-text">
@@ -1026,20 +823,20 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                     showMoreExtTitle={
                         expsWithBiosample.length > 5 ?
                             'with ' + (
-                                _.all(expsWithBiosample.slice(3), function(exp){ 
-                                    return exp.file_pairs !== 'undefined' 
+                                _.all(expsWithBiosample.slice(3), function(exp){
+                                    return exp.file_pairs !== 'undefined'
                                 }) ? /* Do we have filepairs for all exps? */
                                     _.flatten(_.pluck(expsWithBiosample.slice(3), 'file_pairs'), true).length +
                                     ' File Pairs'
                                     :
-                                    ExperimentsTable.funcs.fileCountFromExperiments(expsWithBiosample.slice(3)) + 
+                                    expFxn.fileCountFromExperiments(expsWithBiosample.slice(3)) + 
                                     ' Files'
                             )
                             :
                             null
                     }
                 />
-                
+
             </ExperimentsTable.StackedBlock>
         );
     },
@@ -1057,7 +854,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
      * |             Experiment ___________________________|
      * |                         File   File Detail Columns|
      * |___________________________________________________|
-     * 
+     *
      * Much of styling/layouting is defined in CSS.
      */
     renderRootStackedBlockListOfBiosamplesWithExperiments : function(experimentsGroupedByBiosample){
@@ -1086,11 +883,11 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
             var experimentsGroupedByBiosample = _.compose(
                 this.renderRootStackedBlockListOfBiosamplesWithExperiments,
-                ExperimentsTable.funcs.groupExperimentsByBiosampleRepNo,
-                ExperimentsTable.funcs.groupFilesByPairsForEachExperiment,
-                ExperimentsTable.funcs.combineWithReplicateNumbers
+                expFxn.groupExperimentsByBiosampleRepNo,
+                expFxn.groupFilesByPairsForEachExperiment,
+                expFxn.combineWithReplicateNumbers
             );
-            
+
             return (
                 <div className="body clearfix">
                     { experimentsGroupedByBiosample(this.props.replicateExpsArray, this.props.experimentArray) }
@@ -1101,8 +898,8 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         default : function(){
             var experimentsGroupedByBiosample = _.compose(
                 this.renderRootStackedBlockListOfBiosamplesWithExperiments,
-                ExperimentsTable.funcs.groupExperimentsByBiosample,
-                ExperimentsTable.funcs.flattenFileSetsToFilesIfNoFilesForEachExperiment
+                expFxn.groupExperimentsByBiosample,
+                expFxn.flattenFileSetsToFilesIfNoFilesForEachExperiment
             );
 
             return (
@@ -1134,7 +931,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 <div className="headers expset-headers" ref="header">
                     { this.columnHeaders().map(renderHeader) }
                 </div>
-                { this.props.experimentSetType && typeof this.renderers[this.props.experimentSetType] === 'function' ? 
+                { this.props.experimentSetType && typeof this.renderers[this.props.experimentSetType] === 'function' ?
                     this.renderers[this.props.experimentSetType].call(this) : this.renderers.default.call(this) }
             </div>
         );
@@ -1225,7 +1022,7 @@ var FilePairBlock = React.createClass({
             <div className="s-block file-pair">
                 { nameColumn.call(this) }
                 <div className="files s-block-list">
-                    { Array.isArray(this.props.files) ? 
+                    { Array.isArray(this.props.files) ?
                         this.props.files.map(this.renderFileEntryBlock)
                         :
                         <FileEntryBlock file={null} columnHeaders={ this.props.columnHeaders } colWidthStyles={this.props.colWidthStyles} />
@@ -1261,7 +1058,7 @@ var FileEntryBlock  = React.createClass({
     handleCheck: function() {
         this.updateFileChecked(!this.isChecked());
     },
-    
+
     filledFileRow : function (file = this.props.file){
         var row = [];
         var cols = this.props.columnHeaders;
@@ -1272,7 +1069,7 @@ var FileEntryBlock  = React.createClass({
             var className = baseClassName + ' col-' + cols[i].className + ' detail-col-' + i;
             var title = cols[i].valueTitle || cols[i].title;
 
-            if (!file || !file['@id']) { 
+            if (!file || !file['@id']) {
                 row.push(<div key={"file-detail-empty-" + i} className={className + i} style={baseStyle}></div>);
                 continue;
             }
@@ -1356,7 +1153,7 @@ var FileEntryBlock  = React.createClass({
                     'col-file'
                 );
             }
-            
+
             if (Array.isArray(this.props.columnHeaders)) {
                 var headerTitles = _.pluck(this.props.columnHeaders, 'title');
                 if (
@@ -1366,7 +1163,7 @@ var FileEntryBlock  = React.createClass({
                     return ExperimentsTable.StackedBlock.Name.renderBlockLabel(
                         'File', this.props.file.file_type || this.props.file.file_format, false, 'col-file'
                     );
-                } 
+                }
                 if (
                     this.props.file.instrument &&
                     _.intersection(headerTitles,['Instrument', 'File Instrument']).length === 0
@@ -1376,7 +1173,7 @@ var FileEntryBlock  = React.createClass({
                     );
                 }
             }
-            
+
             return ExperimentsTable.StackedBlock.Name.renderBlockLabel('File', null, false, 'col-file');
         }
 
@@ -1408,7 +1205,7 @@ var FileEntryBlock  = React.createClass({
 
 /**
  * Returns an object containing fileDetail and emptyExps.
- * 
+ *
  * @param {Object[]} experimentArray - Array of experiments in set. Required.
  * @param {Set} [passedExperiments=null] - Set of experiments which match filter(s).
  * @return {Object} JS object containing two keys with arrays: 'fileDetail' of experiments with formatted details and 'emptyExps' with experiments with no files.
@@ -1496,7 +1293,7 @@ var getFileDetailContainer = module.exports.getFileDetailContainer = function(ex
 
 var FileEntry = React.createClass({
 
-    // TODO (ideally): Functionality to customize columns (e.g. pass in a schema instead of list of 
+    // TODO (ideally): Functionality to customize columns (e.g. pass in a schema instead of list of
     // column names, arrange fields appropriately under them).
 
     getInitialState: function() {
@@ -1575,14 +1372,14 @@ var FileEntry = React.createClass({
             for (var i = 0; i < columnHeadersShortened.length; i++){
 
                 if (columnHeadersShortened[i] == 'File Accession'){
-                    if (!exists) { 
+                    if (!exists) {
                         f.push(<td>No files</td>);
                         continue;
-                    } 
+                    }
                     f.push(<td><a href={file['@id'] || ''}>{file.accession || file.uuid || file['@id']}</a></td>);
                 }
 
-                if (!exists) { 
+                if (!exists) {
                     f.push(<td></td>);
                     continue;
                 }
@@ -1647,7 +1444,7 @@ var FileEntry = React.createClass({
             relatedFile = relationship.data;
         }
 
-        var fileInfo = this.fastQFilePairRow(file, relatedFile); 
+        var fileInfo = this.fastQFilePairRow(file, relatedFile);
         // Maybe later can do like switch...case for which function to run (fastQFilePairRow or other)
         // to fill fileInfo according to type of file or experiment type.
         var fileOne = fileInfo.fileOne;
@@ -1670,7 +1467,7 @@ var FileEntry = React.createClass({
                 </td>
             );
         //}
-        
+
         return(
             <tbody>
                 <tr className='expset-sublist-entry'>
@@ -1678,7 +1475,7 @@ var FileEntry = React.createClass({
                         <td rowSpan="2" className="expset-exp-cell expset-checkbox-cell">
                             <Checkbox validationState='warning' checked={this.state.checked} name="file-checkbox" id={fileID} className='expset-checkbox-sub' onChange={this.handleCheck}/>
                         </td>
-                    : 
+                    :
                         <td rowSpan="2" className="expset-exp-cell expset-checkbox-cell">
                             <Checkbox checked={false} disabled={true} className='expset-checkbox-sub' />
                         </td>

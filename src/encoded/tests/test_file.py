@@ -1,5 +1,5 @@
 import pytest
-from encoded.types.file import File, FileFastq, post_upload
+from encoded.types.file import File, FileFastq, FileFasta, post_upload
 from pyramid.httpexceptions import HTTPForbidden
 pytestmark = pytest.mark.working
 
@@ -15,7 +15,7 @@ def test_replaced_file_not_uniqued(testapp, file):
 
 
 @pytest.fixture
-def fastq(award, experiment, lab):
+def fastq_json(award, experiment, lab):
     return {
         'accession': '4DNFI067APU2',
         'award': award['uuid'],
@@ -28,9 +28,46 @@ def fastq(award, experiment, lab):
 
 
 @pytest.fixture
-def fastq_uploading(fastq):
-    fastq['status'] = 'uploading'
-    return fastq
+def fasta_json(award, experiment, lab):
+    return {
+        'accession': '4DNFI067APA2',
+        'award': award['uuid'],
+        'lab': lab['uuid'],
+        'file_format': 'fasta',
+        'filename': 'test.fasta',
+        'md5sum': '0123456789abcdef0123456789111111',
+        'status': 'uploaded',
+    }
+
+
+@pytest.fixture
+def all_file_jsons(fastq_json, fasta_json):
+    return [fastq_json, fasta_json]
+
+
+@pytest.fixture
+def related_files(all_file_jsons):
+    r_files = []
+    for f in all_file_jsons:
+        item = f.copy()
+        item['related_files'] = [{'relationship_type': 'derived from',
+                                  'file': f['accession']}]
+        item['md5sum'] = '2123456789abcdef0123456789abcdef'
+        item['accession'] = ''
+        r_files.append(item)
+    return(zip(all_file_jsons, r_files))
+
+
+def test_file_post_all(testapp, all_file_jsons):
+    for f in all_file_jsons:
+        file_url = '/file_' + f['file_format']
+        testapp.post_json(file_url, f, status=201)
+
+
+@pytest.fixture
+def fastq_uploading(fastq_json):
+    fastq_json['status'] = 'uploading'
+    return fastq_json
 
 
 def test_files_get_s3_with_no_filename_posted(testapp, fastq_uploading):
@@ -45,9 +82,9 @@ def test_files_get_s3_with_no_filename_posted(testapp, fastq_uploading):
 
 
 def test_files_get_s3_with_no_filename_patched(testapp, fastq_uploading,
-                                              fastq):
+                                               fastq_json):
     fastq_uploading.pop('filename')
-    res = testapp.post_json('/file_fastq', fastq, status=201)
+    res = testapp.post_json('/file_fastq', fastq_json, status=201)
     resobj = res.json['@graph'][0]
 
     props = {'uuid': resobj['uuid'],
@@ -60,10 +97,6 @@ def test_files_get_s3_with_no_filename_patched(testapp, fastq_uploading,
     fastq_res = testapp.get('{href}'
                             .format(**res.json['@graph'][0]),
                             status=307)
-
-
-def test_file_post_fastq(testapp, fastq):
-    testapp.post_json('/file_fastq', fastq, status=201)
 
 
 @pytest.fixture
@@ -82,21 +115,21 @@ def file(testapp, award, experiment, lab):
 
 
 @pytest.fixture
-def fastq_related_file(fastq):
-    item = fastq.copy()
+def fastq_related_file(fastq_json):
+    item = fastq_json.copy()
     item['related_files'] = [{'relationship_type': 'derived from',
-                              'file': fastq['accession']}]
+                              'file': fastq_json['accession']}]
     item['md5sum'] = '2123456789abcdef0123456789abcdef'
     item['accession'] = ''
     return item
 
 
-def test_file_post_fastq_related(testapp, fastq, fastq_related_file):
-    testapp.post_json('/file_fastq', fastq, status=201)
+def test_file_post_fastq_related(testapp, fastq_json, fastq_related_file):
+    testapp.post_json('/file_fastq', fastq_json, status=201)
     fastq_related_res = testapp.post_json('/file_fastq', fastq_related_file, status=201)
 
     # when updating the last one we should have updated this one too
-    fastq_res = testapp.get('/md5:{md5sum}'.format(**fastq)).follow(status=200)
+    fastq_res = testapp.get('/md5:{md5sum}'.format(**fastq_json)).follow(status=200)
     fastq_related_files = fastq_res.json['related_files']
     assert fastq_related_files == [{'file': fastq_related_res.json['@graph'][0]['@id'],
                                    'relationship_type': 'parent of'}]
@@ -113,53 +146,53 @@ def test_external_creds(mocker):
     assert 'upload_credentials' in ret.keys()
 
 
-def test_create_file_request_proper_s3_resource(registry, fastq, mocker):
+def test_create_file_request_proper_s3_resource(registry, fastq_json, mocker):
     # note mocker is pytest-mock functionality
     # ensure status uploading so create tries to upload
-    fastq['status'] = "uploading"
+    fastq_json['status'] = "uploading"
     # don't actually call aws
     external_creds = mocker.patch('encoded.types.file.external_creds')
     # don't actually create this bad boy
     mocker.patch('encoded.types.base.Item.create')
-    my_file = FileFastq.create(registry, '1234567', fastq)
+    FileFastq.create(registry, '1234567', fastq_json)
     # check that we would have called aws
-    expected_s3_key = "1234567/%s.fastq.gz" % (fastq['accession'])
+    expected_s3_key = "1234567/%s.fastq.gz" % (fastq_json['accession'])
     external_creds.assert_called_once_with('test-bucket', expected_s3_key,
-                                           fastq['filename'], 'test-profile')
+                                           fastq_json['filename'], 'test-profile')
 
 
-def test_name_for_replaced_file_is_uuid(registry, fastq):
-    fastq['status'] = 'replaced'
+def test_name_for_replaced_file_is_uuid(registry, fastq_json):
+    fastq_json['status'] = 'replaced'
     uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
-    my_file = FileFastq.create(registry, uuid, fastq)
+    my_file = FileFastq.create(registry, uuid, fastq_json)
     assert my_file.__name__ == uuid
 
 
-def test_upload_credentails_not_set_for_replaced_file(registry, fastq):
-    fastq['status'] = 'replaced'
+def test_upload_credentails_not_set_for_replaced_file(registry, fastq_json):
+    fastq_json['status'] = 'replaced'
     uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
-    my_file = FileFastq.create(registry, uuid, fastq)
+    my_file = FileFastq.create(registry, uuid, fastq_json)
     # upload credentials only get set when status is 'uploading'
     assert my_file.upload_credentials() is None
 
 
-def test_name_for_file_is_accession(registry, fastq):
+def test_name_for_file_is_accession(registry, fastq_json):
     uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
-    my_file = FileFastq.create(registry, uuid, fastq)
-    assert my_file.__name__ == fastq['accession']
+    my_file = FileFastq.create(registry, uuid, fastq_json)
+    assert my_file.__name__ == fastq_json['accession']
 
 
-def test_file_type(registry, fastq):
+def test_file_type(registry, fastq_json):
     uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
-    my_file = FileFastq.create(registry, uuid, fastq)
+    my_file = FileFastq.create(registry, uuid, fastq_json)
     assert 'gz' == my_file.file_type('gz')
     assert "fastq gz" == my_file.file_type('fastq', 'gz')
 
 
-def test_post_upload_only_for_uploading_or_upload_failed_status(registry, fastq, request):
-    fastq['status'] = 'uploaded'
+def test_post_upload_only_for_uploading_or_upload_failed_status(registry, fastq_json, request):
+    fastq_json['status'] = 'uploaded'
     uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
-    my_file = FileFastq.create(registry, uuid, fastq)
+    my_file = FileFastq.create(registry, uuid, fastq_json)
     try:
         post_upload(my_file, request)
     except HTTPForbidden as e:

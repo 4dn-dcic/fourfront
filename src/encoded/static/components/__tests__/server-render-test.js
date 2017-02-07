@@ -13,7 +13,7 @@ describe("Server rendering", function () {
     var ReactDOMServer;
     var document;
     var store;
-    var statics = require('../../data/statics');
+    var statics = require('../testdata/statics');
     var fetch;
     var sinon;
     var server;

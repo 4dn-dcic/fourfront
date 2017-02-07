@@ -2,7 +2,7 @@
 
 var React = require('react');
 var _ = require('underscore');
-var { textContentWidth, gridContainerWidth, isServerSide, console } = require('./objectutils');
+var { console, layout, isServerSide } = require('./util');
 
 var FlexibleDescriptionBox = module.exports.FlexibleDescriptionBox = React.createClass({
 
@@ -68,7 +68,7 @@ var FlexibleDescriptionBox = module.exports.FlexibleDescriptionBox = React.creat
         var containerWidth;
 
         if (this.props.fitTo === 'grid'){
-            containerWidth = gridContainerWidth();
+            containerWidth = layout.gridContainerWidth();
         } else if (this.props.fitTo === 'parent'){
             containerWidth = this.refs.box.parentElement.offsetWidth;
         } else if (this.props.fitTo === 'self'){
@@ -77,7 +77,7 @@ var FlexibleDescriptionBox = module.exports.FlexibleDescriptionBox = React.creat
 
         containerWidth -= dims.paddingWidth; // Account for inner padding & border.
         
-        var tcw = textContentWidth(
+        var tcw = layout.textContentWidth(
             this.props.description,
             this.props.textElement,
             this.props.textClassName,
