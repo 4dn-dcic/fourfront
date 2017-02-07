@@ -721,8 +721,13 @@ var ResultTable = browse.ResultTable = React.createClass({
             }
             var splitFilters = columnTemplate[Object.keys(columnTemplate)[i]].split('.');
             var valueProbe = firstExp;
-            for (var j=0; j<splitFilters.length;j++){
-                valueProbe = Array.isArray(valueProbe) ? valueProbe[0][splitFilters[j]] : valueProbe[splitFilters[j]];
+            try {
+                for (var j=0; j<splitFilters.length;j++){
+                    valueProbe = Array.isArray(valueProbe) ? valueProbe[0][splitFilters[j]] : valueProbe[splitFilters[j]];
+                }
+            } catch (e) {
+                console.error("Could not find value for " + splitFilters.join('.') + " in exp", firstExp);
+                valueProbe = "N/A";
             }
             columns[Object.keys(columnTemplate)[i]] = valueProbe;
         }
@@ -829,6 +834,8 @@ var ResultTable = browse.ResultTable = React.createClass({
         if (this.props.debug) console.log('Rendering ResultTable.');
         var formattedExperimentSetListings = this.formatExperimentSetListings();
         if (!formattedExperimentSetListings) return null;
+
+        console.log('RENDER TABLE EXP LISTINGS', formattedExperimentSetListings);
 
         this.experimentSetRows = {}; // ExperimentSetRow instances stored here, keyed by @id, to get selectFiles from (?).
         var maxPage = Math.ceil(this.props.context.total / this.state.limit);

@@ -131,6 +131,7 @@ var SunBurst = React.createClass({
                     
                     if (!fieldValue){
                         console.error("Couldn't get value for " + (field.aggregateField || field.field) + ' from:', exp);
+                        fieldValue = "None";
                     }
 
                     function genNode(term = fieldValue){
