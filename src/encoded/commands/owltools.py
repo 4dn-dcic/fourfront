@@ -86,6 +86,20 @@ def removeDuplicates(seq, idfun=None):
         return []
 
 
+def getObjectLiteralsOfType(class_, data, terms):
+    '''Given a class identifier, rdfGraph and predicate URIRefs
+        Returns the list of unique object literals
+    '''
+    objects = {}
+    for term in terms:
+        obj = []
+        for o in data.rdfGraph.objects(class_, term):
+            obj += [o]
+        obj = [str(s) for s in obj]
+        objects.update(dict(zip(obj, [1] * len(obj))))
+    return list(objects.keys())
+
+
 class Owler(object):
 
     """ Class that includes methods for building an RDF graph from an OWL ontology

@@ -34,6 +34,8 @@
           "title": "Term ID",
           "description": "The ID for the ontology term including the prefix.",
           "type": "string",
+          "comment": "Must be unique in our system",
+          "uniqueKey": true,
           "permission": "import-items"
         },
         "term_name": {
@@ -53,6 +55,8 @@
           "title": "Display name",
           "description": "A preferred name (possibly shortened or simpler version) for the ontology term - can be used for submission or retrieval.",
           "type": "string",
+          "comment": "Must be unique in our system",
+          "uniqueKey": true,
           "permission": "import-items"
         },
         "synonyms": {
