@@ -293,7 +293,6 @@ def main(global_config, **local_config):
     config.include('.upgrade')
     config.include('.audit')
 
-
     app = config.make_wsgi_app()
 
     workbook_filename = settings.get('load_workbook', '')
