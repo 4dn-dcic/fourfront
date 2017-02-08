@@ -91,7 +91,25 @@ def test_calculated_experiment_sets_for_replicate_experiment_set(testapp, experi
     assert '/experiment_set_replicate/' + replicate_experiment_set['uuid'] in expt_res.json['experiment_sets']
 
 
-def test_calculated_produced_in_pub_for_experiment_set_one_pub():
+@pytest.fixture
+def pub_data(lab, award):
+    return {
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'ID': "PMID:22955616",
+    }
+
+
+def pub_w_no_prod_eset(testapp, pub_data):
+    return testapp.post_json('/publication', pub_data).json['@graph'][0]
+
+
+@pytest.fixture
+def pub_w_one_prod_eset(testapp, pub_data):
+    pass
+
+
+def test_calculated_produced_in_pub_for_experiment_set_one_pub(testapp, replicate_experiment_set, custom_experiment_set, pub_w_one_prod_eset):
     pass
 
 
