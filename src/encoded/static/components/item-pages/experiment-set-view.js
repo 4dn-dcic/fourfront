@@ -190,6 +190,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                             experimentSetListJSON={this.props.context.experiments_in_set}
                             orientation="vertical"
                             expSetFilters={this.props.expSetFilters}
+                            itemTypes={this.props.context['@type'] || ['ExperimentSetReplicate']}
                             facets={null}
                             experimentsOrSets="experiments"
                             expIncompleteFacets={ this.props.expIncompleteFacets }

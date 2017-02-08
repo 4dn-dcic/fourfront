@@ -548,7 +548,7 @@ var FacetList = module.exports = React.createClass({
 
             incompleteFacets.forEach(function(facet, facetIndex){
 
-                var fieldHierarchyLevels = facet.field.split('.'); // E.g. [biosample, biosource, individual,..]
+                var fieldHierarchyLevels = facet.field.replace('experiments_in_set.', '').split('.'); // E.g. [biosample, biosource, individual,..]
                 var termCounts = {};
 
                 // Loop through experiments to find all terms and counts per term.
@@ -867,7 +867,8 @@ var FacetList = module.exports = React.createClass({
     },
 
     loadFacets : function(callback = null){
-        var facetType = (this.props.experimentsOrSets == 'sets' ? 'ExperimentSet' : 'Experiment');
+        var facetType = (this.props.itemTypes && Array.isArray(this.props.itemTypes) && this.props.itemTypes[0]) ||
+            (this.props.experimentsOrSets == 'sets' ? 'ExperimentSetReplicate' : 'ExperimentHiC');
         ajax.load('/facets?type=' + facetType + '&format=json', function(r){
             this.facets = this.filterFacets(r);
             if (this.props.debug) console.log('Loaded Facet List via AJAX.');
