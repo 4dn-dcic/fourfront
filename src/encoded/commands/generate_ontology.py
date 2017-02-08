@@ -1,6 +1,6 @@
 import json
 from rdflib.collection import Collection
-from owltools import (
+from encoded.commands.owltools import (
     Namespace,
     Owler,
     splitNameFromNamespace,
