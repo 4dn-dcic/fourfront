@@ -52,7 +52,7 @@
     "ckeditor": "file:node_shims/ckeditor",
     "classnames": "^2.2.5",
     "color": "^0.10.1",
-    "d3": "^3.4.6",
+    "d3": "^4.4.0",
     "dagre-d3": "git+https://github.com/ENCODE-DCC/dagre-d3.git#compound-nodes",
     "domready": "^0.3.0",
     "form-serialize": "^0.6.0",

@@ -17,7 +17,7 @@ describe('Testing statics.js (to increase coverage)', function() {
 
     beforeAll(function() {
         React = require('react');
-        Statics = require('../../data/statics');
+        Statics = require('../testdata/statics');
     });
 
     it('Has the required keys & values', function() {

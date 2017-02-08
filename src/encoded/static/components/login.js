@@ -1,7 +1,7 @@
 'use strict';
 var React = require('react');
 var store = require('../store');
-var JWT = require('./objectutils').JWT;
+var { JWT } = require('./util');
 var { MenuItem } = require('react-bootstrap');
 var Alerts = require('./alerts');
 

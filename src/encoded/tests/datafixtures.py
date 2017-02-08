@@ -282,14 +282,18 @@ def human_biosource(testapp, human_individual, worthington_biochemical, lab, awa
 
 
 @pytest.fixture
-def human(testapp):
-    item = {
-        'uuid': '7745b647-ff15-4ff3-9ced-b897d4e2983c',
-        'name': 'human',
-        'scientific_name': 'Homo sapiens',
-        'taxon_id': '9606',
-    }
-    return testapp.post_json('/organism', item).json['@graph'][0]
+def human_data():
+    return {
+            'uuid': '7745b647-ff15-4ff3-9ced-b897d4e2983c',
+            'name': 'human',
+            'scientific_name': 'Homo sapiens',
+            'taxon_id': '9606',
+           }
+
+
+@pytest.fixture
+def human(testapp, human_data):
+    return testapp.post_json('/organism', human_data).json['@graph'][0]
 
 
 @pytest.fixture
