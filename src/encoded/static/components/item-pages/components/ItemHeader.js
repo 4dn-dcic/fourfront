@@ -79,7 +79,7 @@ var ItemHeader = module.exports = {
     MiddleRow : React.createClass({
         render : function(){
             var isTextShort = false;
-            if (typeof this.props.context.description === 'string' && this.props.context.description.length <= 140){
+            if (typeof this.props.context.description === 'string' && this.props.context.description.length <= 120){
                 isTextShort = true;
             }
             return (

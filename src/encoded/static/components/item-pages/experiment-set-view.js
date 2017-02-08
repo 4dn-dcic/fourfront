@@ -6,10 +6,9 @@ var Panel = require('react-bootstrap').Panel;
 var { ExperimentsTable } = require('./../experiments-table');
 var _ = require('underscore');
 var { DescriptorField, Detail } = require('./item-view');
-var { ItemHeader } = require('./components');
+var { ItemHeader, FormattedInfoBlock } = require('./components');
 var FacetList = require('./../facetlist');
 var { ajax, console, DateUtility, object } = require('./../util');
-var FormattedInfoBlock = require('./components/FormattedInfoBlock');
 
 /**
  * Entire ExperimentSet page view.
@@ -191,7 +190,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                             experimentSetListJSON={this.props.context.experiments_in_set}
                             orientation="vertical"
                             expSetFilters={this.props.expSetFilters}
-                            facets={ this.props.facets }
+                            facets={null}
                             experimentsOrSets="experiments"
                             expIncompleteFacets={ this.props.expIncompleteFacets }
                             className="with-header-bg"

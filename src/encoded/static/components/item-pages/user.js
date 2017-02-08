@@ -11,7 +11,7 @@ var { ItemStore } = require('./../lib/store');
 var globals = require('./../globals');
 var store = require('./../../store');
 var { ajax, JWT, console, DateUtility } = require('./../util');
-var FormattedInfoBlock = require('./components/formattedInfoBlock');
+var FormattedInfoBlock = require('./components/FormattedInfoBlock');
 var { EditableField, FieldSet } = require('./../forms');
 
 

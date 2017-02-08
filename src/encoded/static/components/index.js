@@ -1,11 +1,14 @@
 'use strict';
 
 // Require all components to ensure javascript load ordering
+
 require('./lib');
+require('./util');
 require('./app');
 require('./collection');
 require('./footer');
 require('./globals');
+require('./static-pages/static-page-base');
 require('./static-pages/home');
 require('./static-pages/help');
 require('./static-pages/about');

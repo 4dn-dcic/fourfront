@@ -121,7 +121,7 @@ var Navigation = module.exports = React.createClass({
 
     componentDidMount : function(){
         this.setState({ mounted : true });
-        this.setupScrollHandler();
+        if (!isServerSide()) this.setupScrollHandler();
     },
 
     setupScrollHandler : function(){
@@ -167,10 +167,10 @@ var Navigation = module.exports = React.createClass({
         // Save logo/brand element's 'full width' before any height transitions.
         // Ideally wait until logo/brand image has loaded before doing so.
         var navBarBrandImg = document.getElementsByClassName('navbar-logo-image')[0];
-
+        console.log(navBarBrandImg);
         function saveWidth(){
-            var navBarBrandImgContainer = navBarBrandImg.parentNode;
-            var navBarBrand = navBarBrandImgContainer.parentNode.parentNode;
+            var navBarBrandImgContainer = navBarBrandImg.parentElement;
+            var navBarBrand = navBarBrandImgContainer.parentElement.parentElement;
             navBarBrand.style.width = ''; // Clear any earlier width
             if (['xs','sm'].indexOf(layout.responsiveGridState()) !== -1) return; // If mobile / non-fixed nav width
             //navBarBrandImgContainer.style.width = navBarBrandImgContainer.offsetWidth + 'px'; // Enable to fix width of logo to its large size.

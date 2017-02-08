@@ -18,8 +18,8 @@ var Detail = React.createClass({
             var tooltip = '';
             if (tips[key]){
                 var info = tips[key];
-                if(info['description']){
-                    tooltip = info['description'];
+                if(info.description){
+                    tooltip = info.description;
                 }
             }
             return(
@@ -68,7 +68,9 @@ var Detail = React.createClass({
         return {
             'excludedKeys' : [
                 '@context', 'actions', 'audit' /* audit currently not embedded (empty obj) */,
-                'aliases', 'dbxrefs', 'date_created', 'lab', 'award', 'description', 'status', // Visible elsewhere on page
+                // Visible elsewhere on page
+                'aliases', 'dbxrefs', 'date_created', 'lab', 'award', 'description',
+                'status', 'external_references'
             ],
             'persistentKeys' : [
                 '@id', 
