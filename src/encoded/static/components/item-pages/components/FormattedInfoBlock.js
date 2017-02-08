@@ -2,7 +2,7 @@
 
 var React = require('react');
 var _ = require('underscore');
-var { ajax, console, isServerSide } = require('./util');
+var { ajax, console, isServerSide } = require('./../../util');
 
 /**
  * Optional container of FormattedInfoBlocks, wrapping them in a <UL> and <LI> elements.

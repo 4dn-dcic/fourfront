@@ -5,10 +5,11 @@ var globals = require('./../globals');
 var Panel = require('react-bootstrap').Panel;
 var { ExperimentsTable } = require('./../experiments-table');
 var _ = require('underscore');
-var { DescriptorField, Detail, ItemHeader } = require('./item-view');
+var { DescriptorField, Detail } = require('./item-view');
+var { ItemHeader } = require('./components');
 var FacetList = require('./../facetlist');
 var { ajax, console, DateUtility, object } = require('./../util');
-var FormattedInfoBlock = require('./../formatted-info-block');
+var FormattedInfoBlock = require('./components/FormattedInfoBlock');
 
 /**
  * Entire ExperimentSet page view.

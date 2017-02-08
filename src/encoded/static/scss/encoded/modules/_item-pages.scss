@@ -277,14 +277,25 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 .item-page-detail {
 
+	margin-bottom: 12px;
+
 	.list-item {
-		border-bottom: 1px solid #eee;
-		padding-top: 5px;
-		padding-bottom: 5px;
 		
-		.item-label, .item-value {
-			min-height: 20px;
-			word-break: break-all;
+		/* Equalize Height of Columns, unsupported for IE9 and below: */
+		display: -webkit-box;
+		display: -webkit-flex;
+		display: -ms-flexbox;
+		display: flex;
+		
+		.item-label, .item-value {		
+			> div {
+				min-height: 20px;
+				height: 100%;
+				word-break: break-all;
+				border-bottom: 1px solid #eee;
+				padding-top: 5px;
+				padding-bottom: 5px;
+			}
 		}
 		.item-label {
 			font-weight: 500;

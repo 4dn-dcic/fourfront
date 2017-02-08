@@ -13,7 +13,7 @@ require('./facetlist');
 require('./item-pages/item-view');
 require('./item-pages/experiment-set-view');
 require('./item-pages/item');
-require('./user');
+require('./item-pages/user');
 require('./statuslabel');
 require('./navigation');
 require('./inputs');

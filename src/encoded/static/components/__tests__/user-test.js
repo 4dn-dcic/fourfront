@@ -64,7 +64,7 @@ describe('Testing user.js', function() {
 
         // Mock this b/c certain data doesn't exist in test environment -- 
         // e.g. REST endpoints for test lab data which is to be AJAXed in.
-        jest.mock('../formatted-info-block');
+        jest.mock('./../item-pages/components/FormattedInfoBlock');
 
         var UseUser = connect(mapStateToProps)(User);
         page = TestUtils.renderIntoDocument(

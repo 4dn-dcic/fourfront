@@ -293,6 +293,10 @@ def main(global_config, **local_config):
     config.include('.upgrade')
     config.include('.audit')
 
+    # Add namespaces.json to registry
+    config.registry['namespaces'] = json_from_path(settings.get('namespaces_path'), {})
+
+
     app = config.make_wsgi_app()
 
     workbook_filename = settings.get('load_workbook', '')

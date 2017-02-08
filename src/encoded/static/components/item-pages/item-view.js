@@ -3,216 +3,11 @@
 var React = require('react');
 var globals = require('./../globals');
 var Collapse = require('react-bootstrap').Collapse;
-var Table = require('./../collection').Table;
 var _ = require('underscore');
-var url = require('url');
-var querystring = require('querystring');
+var { ItemHeader, PartialList, ExternalReferenceLink } = require('./components');
 var { AuditIndicators, AuditDetail, AuditMixin } = require('./../audit');
 var { console, object, DateUtility } = require('./../util');
-var { FlexibleDescriptionBox } = require('./../experiment-common');
-var FormattedInfoBlock = require('./../formatted-info-block');
-
-
-
-var ItemHeader = {
-
-    TopRow : React.createClass({
-        parsedStatus : function(){
-            if (!('status' in this.props.context)) return <div></div>;
-            /*  Removed icon in lieu of color indicator for status
-            var iconClass = null;
-            switch (this.props.context.status){
-
-                case 'in review by lab':
-                case 'in review by project':
-                    iconClass = 'icon ss-stopwatch';
-                    break;
-
-            }
-            */
-
-            // Status colors are set via CSS (layout.scss) dependent on data-status attribute
-            return (
-                <div
-                    className="expset-indicator expset-status right"
-                    data-status={ this.props.context.status.toLowerCase() }
-                    title="Review Status"
-                >
-                    { this.props.context.status }
-                </div>
-            );
-        },
-        viewJSONButton : function(){
-            if (!this.props.href) return null;
-
-            var urlParts = url.parse(this.props.href, true);
-            urlParts.search = '?' + querystring.stringify(_.extend(urlParts.query, { 'format' : 'json' }));
-            return (
-                <div className="expset-indicator right view-ajax-button">
-                    <a href={url.format(urlParts)} target="_parent">
-                        View JSON
-                    </a>
-                </div>
-            );
-        },
-        wrapChildren : function(){
-            if (!this.props.children) return null;
-            return React.Children.map(this.props.children, (child,i) =>
-                <div
-                    className="expset-indicator expset-type right"
-                    title={this.props.title || null}
-                    key={i}
-                >
-                    { child }
-                </div>
-            );
-        },
-        render : function(){
-            return (
-                <div className="row clearfix top-row">
-                    <h3 className="col-sm-6 item-label-title">
-                        { /* PLACEHOLDER / TEMP-EMPTY */ }
-                    </h3>
-                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra text-capitalize item-header-indicators clearfix">
-                        { this.viewJSONButton() }
-                        { this.wrapChildren() }
-                        { this.parsedStatus() }
-                    </h5>
-                </div>
-            );
-        }
-    }),
-
-    MiddleRow : React.createClass({
-        render : function(){
-            return (
-                <FlexibleDescriptionBox
-                    description={ this.props.context.description || <em>No description provided.</em> }
-                    className="item-page-heading experiment-heading"
-                    textClassName="text-large"
-                    fitTo="grid"
-                    dimensions={{
-                        paddingWidth : 32,
-                        paddingHeight : 22,
-                        buttonWidth : 30,
-                        initialHeight : 45
-                    }}
-                />
-            );
-        }
-    }),
-
-    BottomRow : React.createClass({
-        parsedCreationDate: function(){
-            if (!('date_created' in this.props.context)) return <span><i></i></span>;
-            return (
-                <span>
-                    <i className="icon sbt-calendar"></i>&nbsp; Added{' '}
-                    <DateUtility.LocalizedTime timestamp={this.props.context.date_created} formatType='date-time-md' dateTimeSeparator=" at " />
-                </span>
-            );
-        },
-        render : function(){
-            return (
-                <div className="row clearfix bottom-row">
-                    <div className="col-sm-6 item-label-extra set-type-indicators">{ this.props.children }</div>
-                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra" title="Date Added - UTC/GMT">{ this.parsedCreationDate() }</h5>
-                </div>
-            );
-        }
-    }),
-
-    Wrapper : React.createClass({
-        adjustChildren : function(){
-            if (!this.props.context) return this.props.children;
-            return React.Children.map(this.props.children, (child)=>{
-                if (typeof child.props.context !== 'undefined' && typeof child.props.href === 'string') return child;
-                else {
-                    return React.cloneElement(child, { context : this.props.context, href : this.props.href }, child.props.children);
-                }
-            });
-        },
-        render : function(){
-            return (
-                <div className={"item-view-header " + (this.props.className || '')}>{ this.adjustChildren() }</div>
-            );
-        }
-    }),
-
-};
-
-var PartialList = React.createClass({
-
-    statics : {
-        Row : React.createClass({
-
-            getDefaultProps : function(){
-                return {
-                    'colSm' : 12,
-                    'colMd' : 4,
-                    'colLg' : 4,
-                    'className' : ''
-                };
-            },
-
-            render : function(){
-                var valSm = 12 - this.props.colSm;
-                var valMd = 12 - this.props.colMd;
-                var valLg = 12 - this.props.colLg;
-                if (valSm < 3) valSm = 12;
-                if (valMd < 3) valMd = 12;
-                if (valLg < 3) valLg = 12;
-                return (
-                    <div className={"row list-item " + this.props.className}>
-                        <div className={"item-label col-sm-"+ this.props.colSm +" col-md-"+ this.props.colMd +" col-lg-"+ this.props.colLg}>
-                            { this.props.label || this.props.title || "Label" }
-                        </div>
-                        <div className={"item-value col-sm-"+ valSm +" col-md-"+ valMd +" col-lg-"+ valLg}>
-                            { this.props.value || this.props.val || this.props.children || "Value" }
-                        </div>
-                    </div>
-                );
-            }
-        })
-    }, 
-
-    getDefaultProps : function(){
-        return {
-            'className' : null,
-            'containerClassName' : null,
-            'containerType' : 'div',
-            'persistent' : [],
-            'collapsible' : [],
-            'open' : null
-        };
-    },
-
-    getInitialState : function(){
-        if (this.props.open === null) return { 'open' : false };
-        else return null;
-    },
-
-    render : function(){
-        //console.log('render partial list',this.props.open, this.props.collapsible);
-        return (
-            <div className={this.props.className}>
-
-                { React.createElement(this.props.containerType, { 'className' : this.props.containerClassName }, this.props.persistent || this.props.children) }
-
-                { this.props.collapsible.length > 0 ?
-                <Collapse in={this.props.open === null ? this.state.open : this.props.open}>
-                    <div>
-                        { this.props.collapsible }
-                    </div>
-                </Collapse>
-                : null }
-            </div>
-        );  
-
-    }
-
-});
-
+var FormattedInfoBlock = require('./components/FormattedInfoBlock');
 
 
 var Detail = React.createClass({
@@ -431,7 +226,6 @@ var ItemView = module.exports = React.createClass({
             }
         }),
 
-        ItemHeader : ItemHeader,
         Detail : Detail,
         Title : React.createClass({
             render : function(){
@@ -505,17 +299,19 @@ var ItemView = module.exports = React.createClass({
         );
     },
 
-    externalReferences : function(){
+    externalReferences : function(schemas){
         if (!this.props.context || !Array.isArray(this.props.context.dbxrefs)) return null;
-        var alternateAccessions = this.props.context.dbxrefs.length > 0 ? this.props.context.dbxrefs : [<em>None</em>];
+        var externalRefs = this.props.context.dbxrefs.length > 0 ? this.props.context.dbxrefs : [<em>None</em>];
         return (
             <div>
                 <h4 className="text-500">External References</h4>
                 <div>
                     <ul>
-                    { alternateAccessions.map(function(acc, i){
+                    { externalRefs.map(function(acc, i){
                         return (
-                            <li key={i}>{ acc }</li>
+                            <li key={i}>
+                                <ExternalReferenceLink schemas={schemas}>{ acc }</ExternalReferenceLink>
+                            </li>
                         );
                     }) }
                     </ul>
@@ -529,7 +325,7 @@ var ItemView = module.exports = React.createClass({
         var context = this.props.context;
         var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container');
 
-        var externalReferences  = this.externalReferences(),
+        var externalReferences  = this.externalReferences(schemas),
             aliases             = this.aliases(),
             alternateAccessions = this.alternateAccessions();
         
@@ -544,36 +340,13 @@ var ItemView = module.exports = React.createClass({
                     <ItemHeader.BottomRow />
                 </ItemHeader.Wrapper>
 
-
-                <div className="row">
-
-                    { externalReferences ?
-                    <div className="col-xs-12 col-md-4">
-                        { externalReferences }
-                    </div>
-                    : null }
-
-                    { aliases ?
-                    <div className="col-xs-12 col-md-4">
-                        { aliases }
-                    </div>
-                    : null }
-
-                    { alternateAccessions ?
-                    <div className="col-xs-12 col-md-4">
-                        { alternateAccessions }
-                    </div>
-                    : null }
-
-                </div>
-
                 <div className="row">
 
                     <div className="col-xs-12 col-md-8">
 
                         <hr/>
 
-                        <div className="item-page-detail panel">
+                        <div className="item-page-detail">
                             <Detail
                                 context={context}
                                 schemas={schemas}
@@ -609,6 +382,28 @@ var ItemView = module.exports = React.createClass({
                         : null }
 
                     </div>
+
+                </div>
+
+                <div className="row">
+
+                    { externalReferences ?
+                    <div className="col-xs-12 col-md-4">
+                        { externalReferences }
+                    </div>
+                    : null }
+
+                    { aliases ?
+                    <div className="col-xs-12 col-md-4">
+                        { aliases }
+                    </div>
+                    : null }
+
+                    { alternateAccessions ?
+                    <div className="col-xs-12 col-md-4">
+                        { alternateAccessions }
+                    </div>
+                    : null }
 
                 </div>
 
