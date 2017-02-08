@@ -72,7 +72,8 @@ class ExperimentSet(Item):
                 "experiments_in_set.biosample.biosource.individual.organism",
                 "experiments_in_set.files",
                 "experiments_in_set.files.related_files.relationship_type",
-                "experiments_in_set.files.related_files.file",
+                "experiments_in_set.files.related_files.file.\@id",
+                "experiments_in_set.files.related_files.file.uuid",
                 "experiments_in_set.filesets",
                 "experiments_in_set.filesets.files_in_set",
                 "experiments_in_set.digestion_enzyme"]
@@ -96,7 +97,11 @@ class ExperimentSetReplicate(ExperimentSet):
     item_type = 'experiment_set_replicate'
     schema = load_schema('encoded:schemas/experiment_set_replicate.json')
     name_key = "accession"
-    embedded = ExperimentSet.embedded + ["replicate_exps.replicate_exp"]
+    embedded = ExperimentSet.embedded + [
+        "replicate_exps",
+        "replicate_exps.replicate_exp.accession",
+        "replicate_exps.replicate_exp.uuid"
+    ]
 
     def _update(self, properties, sheets=None):
         all_experiments = [exp['replicate_exp'] for exp in properties['replicate_exps']]

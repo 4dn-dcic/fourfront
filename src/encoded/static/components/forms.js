@@ -3,7 +3,7 @@
 var React = require('react');
 var _ = require('underscore');
 var store = require('../store');
-var { ajaxLoad, console, getNestedProperty, isServerSide } = require('./objectutils');
+var { ajax, console, object, isServerSide } = require('./util');
 
 /**
  * FieldSet allows to group EditableFields together.
@@ -223,7 +223,7 @@ var EditableField = module.exports.EditableField = React.createClass({
     getInitialState : function(){
         var initialValue = null;
         try {
-            initialValue = getNestedProperty(this.props.context, this.props.labelID); // Returns undefined if doesn't exist in context
+            initialValue = object.getNestedProperty(this.props.context, this.props.labelID); // Returns undefined if doesn't exist in context
         } catch (e){
             console.error(e);
         }
@@ -303,7 +303,7 @@ var EditableField = module.exports.EditableField = React.createClass({
                 (this.props.labelID !== newProps.labelID)
             )
         ) {
-            var newVal = getNestedProperty(newProps.context, this.props.labelID, true);
+            var newVal = object.getNestedProperty(newProps.context, this.props.labelID, true);
             newState.savedValue = newState.value = newVal || null;
             newState.valueExistsOnObj = typeof newVal !== 'undefined';
         }
@@ -378,8 +378,8 @@ var EditableField = module.exports.EditableField = React.createClass({
     },
 
     fetch : function(){
-        ajaxLoad(this.props.endpoint || this.props.context['@id'], (r)=>{
-            var val = getNestedProperty(r, this.props.labelID);
+        ajax.load(this.props.endpoint || this.props.context['@id'], (r)=>{
+            var val = object.getNestedProperty(r, this.props.labelID);
             this.setState({ value : val, savedValue : val });
         }, 'GET');
     },
@@ -397,7 +397,7 @@ var EditableField = module.exports.EditableField = React.createClass({
             var value = this.state.value;
             var patchData = EditableField.generateNestedProperty(this.props.labelID, value);
             var timestamp = Math.floor(Date.now ? Date.now() / 1000 : (new Date()).getTime() / 1000);
-            ajaxLoad((this.props.endpoint || this.props.context['@id']) + '?ts=' + timestamp, (r)=>{
+            ajax.load((this.props.endpoint || this.props.context['@id']) + '?ts=' + timestamp, (r)=>{
                 console.log('EditableField Save Result:', r);
 
                 if (r.status !== 'success'){
@@ -586,7 +586,7 @@ var EditableField = module.exports.EditableField = React.createClass({
         var objectType = this.objectType();
         if (!objectType) return null;
 
-        return getNestedProperty(
+        return object.getNestedProperty(
             schemas,
             [objectType, 'properties', this.props.labelID],
             true

@@ -25,7 +25,7 @@ describe('Testing user.js', function() {
         User = require('../user').User;
         context = require('../testdata/submitter');
         store = require('../../store');
-        getNestedProperty = require('../objectutils').getNestedProperty;
+        getNestedProperty = require('../util').object.getNestedProperty;
         var dispatch_vals = {
             'context' : context
         };
