@@ -18,12 +18,8 @@ from pyramid.traversal import (
 import snovault
 # from ..schema_formats import is_accession
 from snovault.resource_views import item_view_page_object
-from snovault.schema_views import _annotated_schema
 from snovault.crud_views import collection_add as sno_collection_add
 from snovault.validators import validate_item_content_post
-from snovault.interfaces import (
-    TYPES
-)
 
 
 @lru_cache()
@@ -220,14 +216,9 @@ class Item(snovault.Item):
 def item_page_view(context, request):
     """Return the frame=object view rather than embedded view by default."""
     properties = item_view_page_object(context, request)
-    types = request.registry[TYPES]
-    
-    # Add item_schema and reference_namespaces to returned object (only needed for Item pages currently)
-    for type_info in types.by_item_type.values():
-        if type_info.name != 'Item' and type_info.name in properties['@type']:
-            properties['item_schema'] = _annotated_schema(type_info, request)
 
-    properties['reference_namespaces'] = request.registry.get('namespaces')
+    # Add namespaces.json to convert external reference IDs to external URLs.
+    properties['reference_namespaces'] = request.registry.settings.get('snovault.jsonld.namespaces')
     return properties
 
 class SharedItem(Item):
