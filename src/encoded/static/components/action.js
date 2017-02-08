@@ -2,15 +2,19 @@
 var React = require('react');
 var globals = require('./globals');
 var _ = require('underscore');
-var { EditableField, FieldSet } = require('./forms');
 var { ajax, console, object, isServerSide } = require('./util');
 var { DropdownButton, Button, MenuItem, Panel, Table} = require('react-bootstrap');
 var makeTitle = require('./item').title;
 var Alerts = require('./alerts');
 var d3 = require('d3');
 
-// Object holding new context and submission/validation controls
-var Create = module.exports = React.createClass({
+// Master component used for user actions: create and edit
+// create is considered default mode, but by simply switching the behavior
+// from POST to PATCH, this can be used for editing by providing a value
+// of true to the edit prop.
+// This component initiates and hold the new context and coordinated
+// submission/validation
+var Action = module.exports = React.createClass({
     contextTypes: {
         fetch: React.PropTypes.func,
         contentTypeIsJSON: React.PropTypes.func,
@@ -21,14 +25,47 @@ var Create = module.exports = React.createClass({
         var contType = this.props.context['@type'] || [];
         var thisSchema = this.props.schemas[contType[0]] || {};
         var reqFields = thisSchema.required || [];
+        // use edit mode for patching
         return{
-            'newContext': this.props.context || {},
+            'newContext': {},
             'requiredFields': reqFields,
             'validated': 0, // 0 = not validated, 1 = validated, 2 = error
             'thisType': contType[0],
             'thisSchema': thisSchema,
             'errorCount': 0
         };
+    },
+
+    // run async request to get frame=object context to fill the forms
+    componentDidMount: function(){
+        this.contextFlatten(this.props.context);
+    },
+
+    // we need the frame=object context for create, so fetch this
+    contextFlatten: function(context){
+        var contextID = context['@id'] || null;
+        if(!contextID){
+            this.setState({'newContext': {}});
+            return;
+        };
+        this.context.fetch(contextID + '?frame=object', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            var newID = response['@id'] || null;
+            if (!newID || newID != contextID) throw response;
+            return response;
+        })
+        .then(response => {
+            this.setState({'newContext': response});
+        }, error => {
+            // something went wrong with fetch context. Just use an empty object
+            this.setState({'newContext': {}});
+        });
     },
 
     contextSift: function(context, schema){
@@ -81,7 +118,7 @@ var Create = module.exports = React.createClass({
         if(this.state.validated == 1){
             return(
                 <Button bsStyle="success" onClick={this.realPostNewContext}>
-                    {'Create object'}
+                    {this.props.edit ? 'Create object' : 'Edit object'}
                 </Button>
             );
         }else if (this.state.validated == 0){
@@ -130,64 +167,83 @@ var Create = module.exports = React.createClass({
                     this.setState({'validated': 2});
                     return;
                 }
-                lab = data.submits_for[0] || {};
-                award = lab.awards[0] || {};
+                lab = data.submits_for[0];
             }
-            // TODO: should we really always use the first award?
-            finalizedContext.award = award;
-            finalizedContext.lab = lab['@id'];
-            // if testing validation, use check_only=True (see /types/base.py)
-            var destination = test ? '/' + objType + '/?check_only=True' : '/' + objType;
-            this.context.fetch(destination, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(finalizedContext)
-            })
-            .then(response => {
-                if (response.status && response.status !== 'success') throw response;
-                return response;
-            })
-            .then(response => {
-                if(test){
-                    console.log('OBJECT SUCCESSFULLY TESTED!');
-                    stateToSet.validated = 1;
-                    this.setState(stateToSet);
-                }else{
-                    console.log('OBJECT SUCCESSFULLY POSTED!');
-                    var newID = response['@graph'][0]['@id'];
-                    if(typeof newID !== 'string'){
-                        newID = '/';
+            ajax.promise(lab).then(lab_data => {
+                if (this.context.contentTypeIsJSON(lab_data)){
+                    if(!lab_data.awards || lab_data.awards.length == 0){
+                        console.log('THIS LAB FOR ACCOUNT LACKS AN AWARD');
+                        this.setState({'validated': 2});
+                        return;
                     }
-                    alert('Success! Navigating to the new object page.');
-                    this.context.navigate(newID);
+                    // should we really always use the first award?
+                    award = lab_data.awards[0];
                 }
-            }, error => {
-                stateToSet.validated = 0;
-                console.log('OBJECT COULD NOT BE POSTED!');
-                console.log(error);
-                var errorList = error.errors || [error.detail] || [];
-                // make an alert for each error description
-                stateToSet.errorCount = errorList.length;
-                for(var i=0; i<errorList.length; i++){
-                    Alerts.queue({ 'title' : "Object validation error " + parseInt(i + 1), 'message': errorList[i].description || errorList[i] || "Unidentified error", 'style': 'danger' })
+                finalizedContext.award = award['@id'] ? award['@id'] : award;
+                finalizedContext.lab = lab;
+                // if testing validation, use check_only=True (see /types/base.py)
+                var destination = test ? '/' + objType + '/?check_only=True' : '/' + objType;
+                var actionMethod = 'POST';
+                // see if this is not a test and we're editing
+                if(!test && this.props.edit){
+                    actionMethod = 'PATCH';
+                    destination = this.state.newContext['@id'];
                 }
-                // scroll to the top of the page using d3
-                function scrollTopTween(scrollTop){
-                    return function(){
-                        var interpolate = d3.interpolateNumber(this.scrollTop, scrollTop);
-                        return function(t){ document.body.scrollTop = interpolate(t); };
-                    };
-                }
-                var origScrollTop = document.body.scrollTop;
-                d3.select(document.body)
-                    .interrupt()
-                    .transition()
-                    .duration(750)
-                    .tween("bodyScroll", scrollTopTween(0));
-                this.setState(stateToSet);
+                this.context.fetch(destination, {
+                    method: actionMethod,
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(finalizedContext)
+                })
+                .then(response => {
+                    if (response.status && response.status !== 'success') throw response;
+                    return response;
+                })
+                .then(response => {
+                    if(test){
+                        console.log('OBJECT SUCCESSFULLY TESTED!');
+                        stateToSet.validated = 1;
+                        this.setState(stateToSet);
+                    }else if(this.props.edit){
+                        console.log('OBJECT SUCCESSFULLY PATCHED!');
+                        alert('Success! Navigating to the patched object page.');
+                        this.context.navigate(destination);
+                    }else{
+                        console.log('OBJECT SUCCESSFULLY POSTED!');
+                        var newID = response['@graph'][0]['@id'];
+                        if(typeof newID !== 'string'){
+                            newID = '/';
+                        }
+                        alert('Success! Navigating to the new object page.');
+                        this.context.navigate(newID);
+                    }
+                }, error => {
+                    stateToSet.validated = 0;
+                    console.log('ERROR IN OBJECT VALIDATION!');
+                    console.log(error);
+                    var errorList = error.errors || [error.detail] || [];
+                    // make an alert for each error description
+                    stateToSet.errorCount = errorList.length;
+                    for(var i=0; i<errorList.length; i++){
+                        Alerts.queue({ 'title' : "Object validation error " + parseInt(i + 1), 'message': errorList[i].description || errorList[i] || "Unidentified error", 'style': 'danger' })
+                    }
+                    // scroll to the top of the page using d3
+                    function scrollTopTween(scrollTop){
+                        return function(){
+                            var interpolate = d3.interpolateNumber(this.scrollTop, scrollTop);
+                            return function(t){ document.body.scrollTop = interpolate(t); };
+                        };
+                    }
+                    var origScrollTop = document.body.scrollTop;
+                    d3.select(document.body)
+                        .interrupt()
+                        .transition()
+                        .duration(750)
+                        .tween("bodyScroll", scrollTopTween(0));
+                    this.setState(stateToSet);
+                });
             });
         });
     },
@@ -204,7 +260,7 @@ var Create = module.exports = React.createClass({
             <div className={itemClass}>
                 <h2>{createTitle}</h2>
                 <h4 style={{'color':'#808080', 'paddingBottom': '10px'}}>Add, edit, and remove field values. Submit at the bottom of the form.</h4>
-                <CreatePanel thisType={thisType} context={context} schema={schema} modifyNewContext={this.modifyNewContext} reqFields={reqFields}/>
+                <FieldPanel thisType={thisType} context={context} schema={schema} modifyNewContext={this.modifyNewContext} reqFields={reqFields}/>
                 <div>{this.generatePostButton()}</div>
             </div>
         );
@@ -212,7 +268,7 @@ var Create = module.exports = React.createClass({
 });
 
 // Based off EditPanel in edit.js
-var CreatePanel = React.createClass({
+var FieldPanel = React.createClass({
 
     includeField : function(schema, field){
         if (!schema) return null;
@@ -264,7 +320,7 @@ var CreatePanel = React.createClass({
     render: function() {
         var schema = this.props.schema;
         // get the fields from the schema of this item
-        var fields = schemas['properties'] ? Object.keys(schemas['properties']) : [];
+        var fields = schema['properties'] ? Object.keys(schema['properties']) : [];
         var buildFields = [];
         for (var i=0; i<fields.length; i++){
             var fieldSchema = this.includeField(schema, fields[i]);
@@ -282,7 +338,7 @@ var CreatePanel = React.createClass({
 
 /*
 This is a key/input pair for any one field. Made to be stateless; changes
- to the newContext state of Create propogate downwards. Also includes a
+ to the newContext state of Action propogate downwards. Also includes a
  description and some validation message based on the schema
  */
 var BuildField = React.createClass({
@@ -339,7 +395,7 @@ var BuildField = React.createClass({
                 </span>
             );
             case 'linked object' : return (
-                <LinkedObj field={this.props.label} value={inputProps.value} collection={this.props.schema.linkTo} modifyNewContext={this.props.modifyNewContext}/>
+                    <LinkedObj field={this.props.label} value={inputProps.value} collection={this.props.schema.linkTo} modifyNewContext={this.props.modifyNewContext}/>
             );
             case 'array' : return (
                 <ArrayField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext}/>
@@ -523,6 +579,9 @@ var LinkedObj = React.createClass({
                     }.bind(this)} title="Select">
                     {display}
                 </a>
+                <span style={{'color':'#808080', 'textAlign':'center'}}>
+                    {thisObj.description || null}
+                </span>
                 <a href="#" className="tab-right" onClick={function(e){
                         e.preventDefault();
                         var win = window.open(popLink, '_blank');
@@ -687,7 +746,7 @@ var ArrayField = React.createClass({
     }
 });
 
-/* Builds a field that represents an inline object. Based off of CreatePanel*/
+/* Builds a field that represents an inline object. Based off of FieldPanel*/
 var ObjectField = React.createClass({
 
     modifyObjectContent: function(field, value){

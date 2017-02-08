@@ -5,7 +5,7 @@ var globals = require('./globals');
 var ErrorPage = require('./error');
 var Navigation = require('./navigation');
 var Edit = require('./edit');
-var Create = require('./create');
+var Action = require('./action');
 var Footer = require('./footer');
 var url = require('url');
 var _ = require('underscore');
@@ -17,6 +17,7 @@ var { Filters, ajax, JWT, console, isServerSide } = require('./util');
 var Alerts = require('./alerts');
 var jwt = require('jsonwebtoken');
 var { FacetCharts } = require('./facetcharts');
+var makeTitle = require('./item').title;
 
 var dispatch_dict = {}; //used to store value for simultaneous dispatch
 
@@ -904,34 +905,20 @@ var App = React.createClass({
             }else{
                 ContentView = globals.content_views.lookup(context, current_action);
                 if (ContentView){
-                    if(actionList[0] == 'edit'){
-                        content = (
-                            <Edit
-                                context={context}
-                                schemas={this.state.schemas}
-                                expSetFilters={this.props.expSetFilters}
-                                expIncompleteFacets={this.props.expIncompleteFacets}
-                                session={this.state.session}
-                                key={key}
-                                navigate={this.navigate}
-                                href={this.props.href}
-                            />
-                        );
-                    }else if(actionList[0] == 'create'){
-                        content = (
-                            <Create
-                                context={context}
-                                schemas={this.state.schemas}
-                                expSetFilters={this.props.expSetFilters}
-                                expIncompleteFacets={this.props.expIncompleteFacets}
-                                session={this.state.session}
-                                key={key}
-                                navigate={this.navigate}
-                                href={this.props.href}
-                            />
-                        );
-                    }
-                    title = context.title || context.name || context.accession || context['@id'];
+                    content = (
+                        <Action
+                            context={context}
+                            schemas={this.state.schemas}
+                            expSetFilters={this.props.expSetFilters}
+                            expIncompleteFacets={this.props.expIncompleteFacets}
+                            session={this.state.session}
+                            key={key}
+                            navigate={this.navigate}
+                            href={this.props.href}
+                            edit={actionList[0] == 'edit'}
+                        />
+                    );
+                    title = makeTitle(context);
                     if (title && title != 'Home') {
                         title = title + ' – ' + portal.portal_title;
                     } else {

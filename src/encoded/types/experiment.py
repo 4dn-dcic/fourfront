@@ -24,8 +24,7 @@ class Experiment(Item):
     base_types = ['Experiment'] + Item.base_types
     embedded = ["protocol", "protocol_variation", "lab", "award", "biosample",
                 "biosample.biosource", "biosample.modifications",
-                "biosample.treatments", "biosample.biosource.individual.organism",
-                "experiment_sets"]
+                "biosample.treatments", "biosample.biosource.individual.organism"]
     embedded = process_embeds(embedded)
     name_key = 'accession'
 

@@ -67,9 +67,7 @@ class User(Item):
     item_type = 'user'
     schema = load_schema('encoded:schemas/user.json')
     # Avoid access_keys reverse link so editing access keys does not reindex content.
-    embedded = [
-        'submits_for'
-    ]
+    embedded = []
     embedded = process_embeds(embedded)
     STATUS_ACL = {
         'current': ONLY_OWNER_EDIT,

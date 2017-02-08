@@ -57,7 +57,6 @@ var EditPanel = React.createClass({
         if (schemaVal.permission && schemaVal.permission == "import_items"){
             return null;
         }
-        console.log('_passing_schema_', field, '-->', schemaVal);
         return schemaVal;
     },
 
