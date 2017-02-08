@@ -167,7 +167,8 @@ var Navigation = module.exports = React.createClass({
         // Save logo/brand element's 'full width' before any height transitions.
         // Ideally wait until logo/brand image has loaded before doing so.
         var navBarBrandImg = document.getElementsByClassName('navbar-logo-image')[0];
-        console.log(navBarBrandImg);
+        if (typeof navBarBrandImg === 'undefined') return;
+
         function saveWidth(){
             var navBarBrandImgContainer = navBarBrandImg.parentElement;
             var navBarBrand = navBarBrandImgContainer.parentElement.parentElement;
