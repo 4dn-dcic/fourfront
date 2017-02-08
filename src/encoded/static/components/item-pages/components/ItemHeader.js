@@ -78,11 +78,15 @@ var ItemHeader = module.exports = {
 
     MiddleRow : React.createClass({
         render : function(){
+            var isTextShort = false;
+            if (typeof this.props.context.description === 'string' && this.props.context.description.length <= 140){
+                isTextShort = true;
+            }
             return (
                 <FlexibleDescriptionBox
                     description={ this.props.context.description || <em>No description provided.</em> }
                     className="item-page-heading experiment-heading"
-                    textClassName="text-large"
+                    textClassName={ isTextShort ? "text-larger" : "text-large" }
                     fitTo="grid"
                     dimensions={{
                         paddingWidth : 32,
