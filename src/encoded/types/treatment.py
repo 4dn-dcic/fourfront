@@ -7,8 +7,9 @@ from snovault import (
 )
 # from pyramid.security import Authenticated
 from .base import (
-    Item
-    # paths_filtered_by_status
+    Item,
+    process_embeds
+    # paths_filtered_by_status,
 )
 
 
@@ -62,3 +63,4 @@ class TreatmentRnai(Treatment):
     item_type = 'treatment_rnai'
     schema = load_schema('encoded:schemas/treatment_rnai.json')
     embedded = ['rnai_vendor', 'rnai_constructs', 'target']
+    embedded = process_embeds(embedded)

@@ -10,6 +10,7 @@ from snovault import (
 )
 from .base import (
     Item,
+    process_embeds
 )
 import string
 import re

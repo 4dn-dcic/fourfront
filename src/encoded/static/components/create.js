@@ -9,6 +9,7 @@ var makeTitle = require('./item').title;
 var Alerts = require('./alerts');
 var d3 = require('d3');
 
+// Object holding new context and submission/validation controls
 var Create = module.exports = React.createClass({
     contextTypes: {
         fetch: React.PropTypes.func,
@@ -19,7 +20,6 @@ var Create = module.exports = React.createClass({
     getInitialState: function() {
         var contType = this.props.context['@type'] || [];
         var thisSchema = this.props.schemas[contType[0]] || {};
-        var siftedContext = this.contextSift(this.props.context, thisSchema);
         var reqFields = thisSchema.required || [];
         return{
             'newContext': this.props.context || {},
@@ -32,6 +32,7 @@ var Create = module.exports = React.createClass({
     },
 
     contextSift: function(context, schema){
+        // Remove non-creatable fields from the new context
         var sifted = {};
         var contextKeys = Object.keys(context);
         for(var i=0; i<contextKeys.length; i++){
@@ -55,6 +56,9 @@ var Create = module.exports = React.createClass({
     },
 
     modifyNewContext: function(field, value, del=false){
+        // function that modifies new context and sets validation state whenever
+        // a modification occurs. Is passed down to child elements representing
+        // individual fields
         var splitField = field.split('.');
         var contextCopy = this.state.newContext;
         for (var i=0; i<(splitField.length-1); i++){
@@ -106,6 +110,8 @@ var Create = module.exports = React.createClass({
     },
 
     executePost: function(test=false){
+        // function to test a POST of the data or actually POST it.
+        // validates if test=true, POSTs if test=false.
         var stateToSet = {} // hold state
         // get rid of any hanging errors
         for(var i=0; i<this.state.errorCount; i++){
@@ -116,6 +122,7 @@ var Create = module.exports = React.createClass({
         var lab;
         var award;
         var finalizedContext = this.contextSift(this.state.newContext, this.state.thisSchema);
+        // get award and lab info from the /me endpoint
         ajax.promise('/me?frame=embedded').then(data => {
             if (this.context.contentTypeIsJSON(data)){
                 if(!data.submits_for || data.submits_for.length == 0){
@@ -129,6 +136,7 @@ var Create = module.exports = React.createClass({
             // TODO: should we really always use the first award?
             finalizedContext.award = award;
             finalizedContext.lab = lab['@id'];
+            // if testing validation, use check_only=True (see /types/base.py)
             var destination = test ? '/' + objType + '/?check_only=True' : '/' + objType;
             this.context.fetch(destination, {
                 method: 'POST',
@@ -173,7 +181,6 @@ var Create = module.exports = React.createClass({
                         return function(t){ document.body.scrollTop = interpolate(t); };
                     };
                 }
-                // scroll to the top of the page
                 var origScrollTop = document.body.scrollTop;
                 d3.select(document.body)
                     .interrupt()
@@ -190,14 +197,14 @@ var Create = module.exports = React.createClass({
         var thisType = this.state.thisType;
         var itemClass = globals.itemClass(context, 'view-item');
         var title = globals.listing_titles.lookup(context)({context: context});
-        var schemas = this.props.schemas;
+        var schema = this.state.thisSchema;
         var createTitle = 'Creating ' + thisType + ' with ' + title + ' as template';
         var reqFields = this.state.requiredFields;
         return (
             <div className={itemClass}>
                 <h2>{createTitle}</h2>
                 <h4 style={{'color':'#808080', 'paddingBottom': '10px'}}>Add, edit, and remove field values. Submit at the bottom of the form.</h4>
-                <CreatePanel thisType={thisType} context={context} schemas={schemas} modifyNewContext={this.modifyNewContext} reqFields={reqFields}/>
+                <CreatePanel thisType={thisType} context={context} schema={schema} modifyNewContext={this.modifyNewContext} reqFields={reqFields}/>
                 <div>{this.generatePostButton()}</div>
             </div>
         );
@@ -209,7 +216,7 @@ var CreatePanel = React.createClass({
 
     includeField : function(schema, field){
         if (!schema) return null;
-        var schemaVal = object.getNestedProperty(schema, [this.props.thisType, 'properties', field], true);
+        var schemaVal = object.getNestedProperty(schema, ['properties', field], true);
         if (!schemaVal) return null;
         // check to see if this field should be excluded based on exclude_from status
         if (schemaVal.exclude_from && schemaVal.exclude_from == 'submit4dn'){
@@ -226,6 +233,7 @@ var CreatePanel = React.createClass({
         return schemaVal;
     },
 
+    // collect props necessary to build create a BuildField child
     initiateField: function(fieldInfo) {
         var field = fieldInfo[0];
         var fieldSchema = fieldInfo[1];
@@ -254,11 +262,12 @@ var CreatePanel = React.createClass({
     },
 
     render: function() {
-        var schemas = this.props.schemas;
-        var fields = schemas[this.props.thisType]['properties'] ? Object.keys(schemas[this.props.thisType]['properties']) : [];
+        var schema = this.props.schema;
+        // get the fields from the schema of this item
+        var fields = schemas['properties'] ? Object.keys(schemas['properties']) : [];
         var buildFields = [];
         for (var i=0; i<fields.length; i++){
-            var fieldSchema = this.includeField(schemas, fields[i]);
+            var fieldSchema = this.includeField(schema, fields[i]);
             if (fieldSchema){
                 buildFields.push([fields[i], fieldSchema])
             }
@@ -271,11 +280,12 @@ var CreatePanel = React.createClass({
     }
 });
 
-/* This is a key/input pair for any one field. Made to be stateless; changes
+/*
+This is a key/input pair for any one field. Made to be stateless; changes
  to the newContext state of Create propogate downwards. Also includes a
- description and some validation message based on the schema */
+ description and some validation message based on the schema
+ */
 var BuildField = React.createClass({
-
     // display a limited message including if the field is required and its type
     displayMessage: function(){
         if(this.props.required){
@@ -406,7 +416,11 @@ var BuildField = React.createClass({
         );
     }
 });
-
+/*
+Case for a linked object. Fetches the search results for that subobject to
+allow the user to pick one from a displayed table. This component holds the
+state of whether it is currently open and the fetched data.
+*/
 var LinkedObj = React.createClass({
     contextTypes: {
         contentTypeIsJSON: React.PropTypes.func
@@ -419,6 +433,7 @@ var LinkedObj = React.createClass({
         };
     },
 
+    // fetch the appropriate linked object collection
     componentDidMount: function(){
         // test for this
         var state = {};
@@ -463,6 +478,7 @@ var LinkedObj = React.createClass({
         }
     },
 
+    // render the object results in a table
     displayObjectList: function(){
         var collections = this.state.collection || 'objects';
         var tableContent = Object.keys(this.state.data).map((key) => this.objectEntry(key));
@@ -478,6 +494,9 @@ var LinkedObj = React.createClass({
         }
     },
 
+    // each individual object corresponds to a <tr> in the table
+    // onClick for these objects modifies the top level newContext state
+    // through this.props.modifyNewContext
     objectEntry: function(key){
         var thisObj = this.state.data[key];
         var moreStyles = {};

@@ -9,7 +9,8 @@ from snovault import (
 )
 from snovault.schema_utils import schema_validator
 from .base import (
-    Item
+    Item,
+    process_embeds
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -116,6 +117,7 @@ class File(Item):
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
     embedded = ['lab']
+    embedded = process_embeds(embedded)
     name_key = 'accession'
 
     def _update(self, properties, sheets=None):
@@ -240,7 +242,7 @@ class File(Item):
     def create(cls, registry, uuid, properties, sheets=None):
         if properties.get('status') == 'uploading':
             sheets = {} if sheets is None else sheets.copy()
-            sheets['external'] = cls.build_external_creds(registry, uuid, properties) 
+            sheets['external'] = cls.build_external_creds(registry, uuid, properties)
         return super(File, cls).create(registry, uuid, properties, sheets)
 
 

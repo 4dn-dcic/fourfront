@@ -7,7 +7,8 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    process_embeds
 )
 
 @abstract_collection(
@@ -25,6 +26,7 @@ class Experiment(Item):
                 "biosample.biosource", "biosample.modifications",
                 "biosample.treatments", "biosample.biosource.individual.organism",
                 "experiment_sets"]
+    embedded = process_embeds(embedded)
     name_key = 'accession'
 
     def generate_mapid(self, experiment_type, num):
@@ -135,6 +137,7 @@ class ExperimentHiC(Experiment):
     item_type = 'experiment_hi_c'
     schema = load_schema('encoded:schemas/experiment_hi_c.json')
     embedded = Experiment.embedded + ["digestion_enzyme", "submitted_by"]
+    embedded = process_embeds(embedded)
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -171,6 +174,7 @@ class ExperimentCaptureC(Experiment):
                                       "targeted_regions",
                                       "targeted_regions.target",
                                       "targeted_regions.oligo_file"]
+    embedded = process_embeds(embedded)
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -203,6 +207,7 @@ class ExperimentRepliseq(Experiment):
     item_type = 'experiment_repliseq'
     schema = load_schema('encoded:schemas/experiment_repliseq.json')
     embedded = Experiment.embedded + ["submitted_by"]
+    embedded = process_embeds(embedded)
     name_key = 'accession'
 
     @calculated_property(schema={

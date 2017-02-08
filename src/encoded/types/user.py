@@ -12,6 +12,8 @@ from pyramid.security import (
 )
 from .base import (
     Item,
+    process_embeds
+    # paths_filtered_by_status,
 )
 from snovault import (
     CONNECTION,
@@ -68,6 +70,7 @@ class User(Item):
     embedded = [
         'submits_for'
     ]
+    embedded = process_embeds(embedded)
     STATUS_ACL = {
         'current': ONLY_OWNER_EDIT,
         'deleted': USER_DELETED,

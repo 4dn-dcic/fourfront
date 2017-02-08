@@ -7,8 +7,9 @@ from snovault import (
 )
 # from pyramid.security import Authenticated
 from .base import (
-    Item
-    # paths_filtered_by_status
+    Item,
+    process_embeds
+    # paths_filtered_by_status,
 )
 
 
