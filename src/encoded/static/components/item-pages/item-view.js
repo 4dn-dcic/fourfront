@@ -300,17 +300,17 @@ var ItemView = module.exports = React.createClass({
     },
 
     externalReferences : function(schemas){
-        if (!this.props.context || !Array.isArray(this.props.context.dbxrefs)) return null;
-        var externalRefs = this.props.context.dbxrefs.length > 0 ? this.props.context.dbxrefs : [<em>None</em>];
+        if (!this.props.context || !Array.isArray(this.props.context.external_references)) return null;
+        var externalRefs = this.props.context.external_references.length > 0 ? this.props.context.external_references : [<em>None</em>];
         return (
             <div>
                 <h4 className="text-500">External References</h4>
                 <div>
                     <ul>
-                    { externalRefs.map(function(acc, i){
+                    { externalRefs.map(function(extRef, i){
                         return (
                             <li key={i}>
-                                <ExternalReferenceLink schemas={schemas}>{ acc }</ExternalReferenceLink>
+                                <ExternalReferenceLink uri={extRef.uri}>{ extRef.ref }</ExternalReferenceLink>
                             </li>
                         );
                     }) }
