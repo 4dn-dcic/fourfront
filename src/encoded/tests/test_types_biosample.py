@@ -3,6 +3,17 @@ from snovault.schema_utils import load_schema
 pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
+@pytest.fixture
+def biosample_1(testapp, human_biosource, lab, award):
+    item = {
+        'description': "GM12878 prepared for Hi-C",
+        'biosource': [human_biosource['@id'], ],
+        'award': award['@id'],
+        'lab': lab['@id'],
+    }
+    return testapp.post_json('/biosample', item).json['@graph'][0]
+
+
 def biosample_relation(derived_from):
     return {"biosample_relation": [{"relationship_type": "derived from",
             "biosample": derived_from['@id']}]}
