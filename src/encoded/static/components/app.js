@@ -918,7 +918,7 @@ var App = React.createClass({
                             edit={actionList[0] == 'edit'}
                         />
                     );
-                    title = makeTitle(context);
+                    title = makeTitle({'context': context});
                     if (title && title != 'Home') {
                         title = title + ' – ' + portal.portal_title;
                     } else {

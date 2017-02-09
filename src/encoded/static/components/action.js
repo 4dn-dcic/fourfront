@@ -249,16 +249,17 @@ var Action = module.exports = React.createClass({
     },
 
     render: function() {
+        var title = makeTitle({'context': this.props.context});
         var context = this.state.newContext;
         var thisType = this.state.thisType;
         var itemClass = globals.itemClass(context, 'view-item');
-        var title = globals.listing_titles.lookup(context)({context: context});
         var schema = this.state.thisSchema;
         var createTitle = 'Creating ' + thisType + ' with ' + title + ' as template';
+        var editTitle = 'Editing ' + thisType + ' ' + title;
         var reqFields = this.state.requiredFields;
         return (
             <div className={itemClass}>
-                <h2>{createTitle}</h2>
+                <h2>{this.props.edit ? editTitle : createTitle}</h2>
                 <h4 style={{'color':'#808080', 'paddingBottom': '10px'}}>Add, edit, and remove field values. Submit at the bottom of the form.</h4>
                 <FieldPanel thisType={thisType} context={context} schema={schema} modifyNewContext={this.modifyNewContext} reqFields={reqFields}/>
                 <div>{this.generatePostButton()}</div>
@@ -632,13 +633,13 @@ var ArrayField = React.createClass({
     displayToggle: function(){
         if(this.state.open){
             return(
-                <a style={{'paddingLeft': '5px'}} href="#" onClick={this.toggleOpen} title="Close objects">
+                <a className='array-contract' style={{'paddingLeft': '5px'}} href="#" onClick={this.toggleOpen} title="Close objects">
                     <i className="icon icon-toggle-up icon-fw"></i>
                 </a>
             );
         }else{
             return(
-                <a style={{'paddingLeft': '5px'}} href="#" onClick={this.toggleOpen} title="Expand objects">
+                <a className='array-expand' style={{'paddingLeft': '5px'}} href="#" onClick={this.toggleOpen} title="Expand objects">
                     <i className="icon icon-toggle-down icon-fw"></i>
                 </a>
             );
