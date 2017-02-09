@@ -156,7 +156,7 @@ describe('Testing item.js', function() {
             }else if(input.type.toLowerCase() == 'number'){
                 numInputs += 1;
             }
-        })
+        });
         expect(inputs.length).toEqual(16);
         expect(textInputs).toEqual(15);
         expect(numInputs).toEqual(1);

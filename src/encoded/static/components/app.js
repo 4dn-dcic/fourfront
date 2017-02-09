@@ -4,7 +4,6 @@ var jsonScriptEscape = require('../libs/jsonScriptEscape');
 var globals = require('./globals');
 var ErrorPage = require('./error');
 var Navigation = require('./navigation');
-var Edit = require('./edit');
 var Action = require('./action');
 var Footer = require('./footer');
 var url = require('url');

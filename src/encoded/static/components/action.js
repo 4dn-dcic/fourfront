@@ -73,13 +73,13 @@ var Action = module.exports = React.createClass({
         var sifted = {};
         var contextKeys = Object.keys(context);
         for(var i=0; i<contextKeys.length; i++){
-            if(schema['properties'][contextKeys[i]]){
-                var fieldSchema = schema['properties'][contextKeys[i]];
+            if(schema.properties[contextKeys[i]]){
+                var fieldSchema = schema.properties[contextKeys[i]];
                 if (fieldSchema.exclude_from && fieldSchema.exclude_from == 'submit4dn'){
                     continue;
                 }
                 // check to see if this field is a calculated val
-                if (fieldSchema.calculatedProperty && fieldSchema.calculatedProperty == true){
+                if (fieldSchema.calculatedProperty && fieldSchema.calculatedProperty === true){
                     continue;
                 }
                 // check to see if permission == import items
@@ -100,7 +100,7 @@ var Action = module.exports = React.createClass({
         var contextCopy = this.state.newContext;
         for (var i=0; i<(splitField.length-1); i++){
             if(contextCopy[splitField[i]]){
-                contextCopy = pointer[splitField[i]]
+                contextCopy = pointer[splitField[i]];
             } else {
                 console.log('PROBLEM CREATE NEW CONTEXT WITH: ', field, value);
                 return;
@@ -149,7 +149,7 @@ var Action = module.exports = React.createClass({
     executePost: function(test=false){
         // function to test a POST of the data or actually POST it.
         // validates if test=true, POSTs if test=false.
-        var stateToSet = {} // hold state
+        var stateToSet = {}; // hold state
         // get rid of any hanging errors
         for(var i=0; i<this.state.errorCount; i++){
             Alerts.deQueue({ 'title' : "Object validation error " + parseInt(i + 1)});
@@ -227,7 +227,7 @@ var Action = module.exports = React.createClass({
                     // make an alert for each error description
                     stateToSet.errorCount = errorList.length;
                     for(var i=0; i<errorList.length; i++){
-                        Alerts.queue({ 'title' : "Object validation error " + parseInt(i + 1), 'message': errorList[i].description || errorList[i] || "Unidentified error", 'style': 'danger' })
+                        Alerts.queue({ 'title' : "Object validation error " + parseInt(i + 1), 'message': errorList[i].description || errorList[i] || "Unidentified error", 'style': 'danger' });
                     }
                     // scroll to the top of the page using d3
                     function scrollTopTween(scrollTop){
@@ -280,7 +280,7 @@ var FieldPanel = React.createClass({
             return null;
         }
         // check to see if this field is a calculated val
-        if (schemaVal.calculatedProperty && schemaVal.calculatedProperty == true){
+        if (schemaVal.calculatedProperty && schemaVal.calculatedProperty === true){
             return null;
         }
         // check to see if permission == import items
@@ -326,7 +326,7 @@ var FieldPanel = React.createClass({
         for (var i=0; i<fields.length; i++){
             var fieldSchema = this.includeField(schema, fields[i]);
             if (fieldSchema){
-                buildFields.push([fields[i], fieldSchema])
+                buildFields.push([fields[i], fieldSchema]);
             }
         }
         return(
@@ -575,23 +575,23 @@ var LinkedObj = React.createClass({
         return(
             <tr key={key}><td {...moreStyles}>
                 <a href="#" className="tab-left" onClick={function(e){
-                        e.preventDefault();
-                        this.props.modifyNewContext(this.props.field, targetVal);
-                    }.bind(this)} title="Select">
+                    e.preventDefault();
+                    this.props.modifyNewContext(this.props.field, targetVal);
+                }.bind(this)} title="Select">
                     {display}
                 </a>
                 <span style={{'color':'#808080', 'textAlign':'center'}}>
                     {thisObj.description || null}
                 </span>
                 <a href="#" className="tab-right" onClick={function(e){
-                        e.preventDefault();
-                        var win = window.open(popLink, '_blank');
-                        if(win){
-                            win.focus();
-                        }else{
-                            alert('Object page popup blocked!');
-                        }
-                    }} title="Select">
+                    e.preventDefault();
+                    var win = window.open(popLink, '_blank');
+                    if(win){
+                        win.focus();
+                    }else{
+                        alert('Object page popup blocked!');
+                    }
+                }} title="Select">
                     <i className="icon icon-external-link icon-fw"></i>
                 </a>
             </td></tr>
@@ -691,9 +691,9 @@ var ArrayField = React.createClass({
             <tr key={field + parseInt(arrayIdx)}><td>
                 <BuildField value={value} key={arrayIdx} schema={fieldSchema} label={arrayIdx} fieldType={fieldType} fieldTip={fieldTip} enumValues={enumValues} disabled={false} modifyNewContext={this.modifyArrayContent} required={false} isArray={true}/>
                 <a href="#" className="cancel-button-inline" onClick={function(e){
-                        e.preventDefault();
-                        this.deleteArrayValue(arrayIdx);
-                    }.bind(this)} title="Delete item">
+                    e.preventDefault();
+                    this.deleteArrayValue(arrayIdx);
+                }.bind(this)} title="Delete item">
                     {'Delete item'}
                 </a>
             </td></tr>
@@ -770,7 +770,7 @@ var ObjectField = React.createClass({
             return null;
         }
         // check to see if this field is a calculated val
-        if (schemaVal.calculatedProperty && schemaVal.calculatedProperty == true){
+        if (schemaVal.calculatedProperty && schemaVal.calculatedProperty === true){
             return null;
         }
         // check to see if permission == import items

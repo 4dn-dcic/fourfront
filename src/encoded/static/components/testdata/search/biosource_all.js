@@ -1407,4 +1407,4 @@ module.exports = {
   },
   "clear_filters": "/search/?type=Biosource",
   "total": 19
-}
+};
