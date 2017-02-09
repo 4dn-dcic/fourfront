@@ -1,6 +1,7 @@
 import pytest
 # from encoded.types.experiment import Experiment, ExperimentHiC
 from encoded.types.experiment_set import is_newer_than
+# from snovault.storage import UUID
 pytestmark = pytest.mark.working
 '''Has tests for both experiment.py and experiment_set.py'''
 
@@ -51,7 +52,8 @@ def test_calculated_experiment_summary(testapp, experiment, mboI):
 
 # tests for Experiment class methodss
 # def test_generate_mapid(registry, experiment_data):
-#    uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
+#    uuid = UUID("0afb6080-1c08-11e4-8c21-0800200c9a44")
+#    print(uuid)
 #    etype = 'micro-C'
 #    my_expt = ExperimentHiC.create(registry, uuid, experiment_data)
 #    assert my_expt.generate_mapid(etype, suffnum) == 'ExperimentHiC_1'
