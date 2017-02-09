@@ -4,7 +4,6 @@ import argparse
 import json
 from rdflib.collection import Collection
 from encoded.commands.owltools import (
-# from owltools import (
     Namespace,
     Owler,
     splitNameFromNamespace,
@@ -513,13 +512,13 @@ def process_parents(class_, termid, data, terms):
 
 
 def get_synonyms(class_, data, synonym_terms):
-    '''Returns list of synonyms for the class as strings
+    '''Gets synonyms for the class as strings
     '''
     return getObjectLiteralsOfType(class_, data, synonym_terms)
 
 
 def get_definitions(class_, data, definition_terms):
-    '''Returns list of definitions for the class as strings
+    '''Gets definitions for the class as strings
     '''
     return getObjectLiteralsOfType(class_, data, definition_terms)
 
@@ -632,6 +631,7 @@ def get_slim_terms(connection):
             # a notification indicates an issue eg. No results found
             # so ignore
             terms.get('notification')
+            pass
         except:
             slim_terms.extend(terms)
     return slim_terms
@@ -760,6 +760,21 @@ def new_main():
     # at this point we've processed the rdf of all the ontologies
     for tid, term in terms.items():
         print(term)
+        if ontology['download_url'] is not None:
+            print(ontology['download_url'])
+            synonym_terms = get_synonym_term_uris(connection, ontology['uuid'])
+            definition_terms = get_definition_term_uris(connection, ontology['uuid'])
+            for term in synonym_terms:
+                print(term)
+            for term in definition_terms:
+                print(term)
+            data = Owler(ontology['download_url'])
+            for class_ in data.allclasses:
+                print(class_)
+                synonyms = get_synonyms(class_, data, synonym_terms)
+                print(synonyms)
+                definitions = get_definitions(class_, data, definition_terms)
+                print(definitions)
 
 
 def main():
