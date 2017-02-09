@@ -423,7 +423,6 @@ var FacetList = module.exports = React.createClass({
 
                 if (color.length > 0){
                     _.each(document.querySelectorAll('[data-term="' + term + '"]'), function(termElement){
-                        //console.log(termElement, termElement.className);
                         var isSVG = setHighlightClass(termElement, color.length === 0);
                         if (!isSVG && termElement.className.indexOf('no-highlight-color') === -1) termElement.style.backgroundColor = color;
                     });
@@ -578,6 +577,8 @@ var FacetList = module.exports = React.createClass({
                 });
 
             }, this);
+
+            return incompleteFacets; // Now complete.
 
         },
 
@@ -750,8 +751,7 @@ var FacetList = module.exports = React.createClass({
     },
 
     /**
-     * Sets up list of facets to use for filtering in this.facets. 
-     * `this.facets` be migrated to `this.state.facets` at some point.
+     * Sets up list of facets to use for filtering in facets.
      * - (1) Try to use facets passed in through props, if any.
      * - (2) Try to get list of incomplete experiment-applicable facets from redux store (passed through props),
      *       if has been loaded previously. Then fill up facets with terms and term-match counts on mount.
@@ -763,35 +763,29 @@ var FacetList = module.exports = React.createClass({
     getInitialState : function(){
 
         var initState = {
-            usingProvidedFacets : !!(this.props.facets), // Convert to bool
             facetsLoaded : false
         };
 
-        if (initState.usingProvidedFacets) {
-            this.facets = this.filterFacets(this.props.facets);
-        } else {
+        if (!this.isUsingProvidedFacets()) {
             // Try to get from Redux store via App props.
             // If exists, will fill them up w/ terms from current experiments before mount.
             // Else, if doesn't exist (facetsLoaded remains false), will perform ajax fetch on mount
             // to get list of applicable then fill up w/ terms.
-            this.facets = this.props.expIncompleteFacets || [];
-            if (this.facets && this.facets.length > 0) {
+            var facets = this.props.expIncompleteFacets || [];
+            if (facets && facets.length > 0) {
                 initState.facetsLoaded = true;
-                this.facets = this.filterFacets(this.facets);
+                initState.facets = FacetList.fillFacetTermsAndCountFromExps(
+                    this.filterFacets(facets),
+                    this.props.experimentSetListJSON
+                );
             }
         }
 
         return initState;
     },
 
-    /**
-     * If not using facets that were passed in through props and incomplete facets were obtained through redux store,
-     * fill them up w/ terms from experiments.
-     */
-    componentWillMount : function(){
-        if (this.state.usingProvidedFacets === false && this.state.facetsLoaded){
-            FacetList.fillFacetTermsAndCountFromExps(this.facets, this.props.experimentSetListJSON);
-        }
+    isUsingProvidedFacets : function(){
+        return !!(this.props.facets);
     },
 
     /**
@@ -804,41 +798,39 @@ var FacetList = module.exports = React.createClass({
 
         if (this.props.debug) console.log(
             'Mounted FacetList on ' + (this.props.urlPath || 'unknown page.'),
-            '\nFacets Provided: ' + this.state.usingProvidedFacets,
+            '\nFacets Provided: ' + this.isUsingProvidedFacets(),
             'Facets Loaded: ' + this.state.facetsLoaded
         );
 
-        if (this.state.usingProvidedFacets === false && !this.state.facetsLoaded && typeof window !== 'undefined'){
-            // Load list of available facets via AJAX once & reuse.
-            this.loadFacets(() => {
-                FacetList.fillFacetTermsAndCountFromExps(this.facets, this.props.experimentSetListJSON);
+        if (!this.isUsingProvidedFacets() && !this.state.facetsLoaded && !isServerSide()){
+            this.loadFacets((facets) => {
+                facets = FacetList.fillFacetTermsAndCountFromExps(
+                    this.filterFacets(facets),
+                    this.props.experimentSetListJSON
+                );
                 if (!this.props.ignoredFilters) {
-                    this.ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(this.facets, this.props.expSetFilters);
-                } // else: @see getInitialState
+                    this.ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(facets, this.props.expSetFilters);
+                }
+                this.setState({ 'facets' : facets, 'facetsLoaded' : true });
             });
-        } // else if (this.state.usingProvidedFacets === false && this.state.facetsLoaded) : @see componentWillMount
+        } // else @see getInitialState
     },
 
     /**
-     * Because redux store seems to store a reference to facets,
-     * reset them to be incomplete on dismount so they can be reused.
-     */
-    componentWillUnmount : function(){
-        if (this.state.usingProvidedFacets === false) {
-            FacetList.resetFacetTermsAndCounts(this.facets);
-        }
-    },
-
-    /**
+     * Deprecated description:
      * Since there's a good chunk of intensive (potentially UI-blocking) calculation,
      * minimize updates to only when necessary, i.e. only when relevant-to-facetlist-changes props
      * or state has changed. Child components' state changes (e.g. show/collapse facet) are not affected.
      */
     shouldComponentUpdate : function(nextProps, nextState){
         if (
-            this.state.usingProvidedFacets === false ||
+            !this.isUsingProvidedFacets() ||
+            this.props.useAjax ||
             this.props.expSetFilters !== nextProps.expSetFilters ||
             !_.isEqual(nextProps.facets, this.props.facets) ||
+            !_.isEqual(this.state.facets, nextState.facets) ||
+            this.state.facetsLoaded !== nextState.facetsLoaded ||
+            !_.isEqual(nextProps.expIncompleteFacets, this.props.expIncompleteFacets) ||
             !_.isEqual(nextProps.ignoredFilters, this.props.ignoredFilters)
         ){
             if (this.props.debug) console.log('%cWill','color: green', 'update FacetList');
@@ -855,29 +847,30 @@ var FacetList = module.exports = React.createClass({
             !_.isEqual(nextProps.ignoredFilters, this.props.ignoredFilters)
         ){
 
-            if (this.state.usingProvidedFacets === true && this.props.facets !== nextProps.facets){
-                this.facets = this.filterFacets(nextProps.facets);
+            if (nextProps.facets && this.props.facets !== nextProps.facets){
                 if (this.props.debug) console.log('FacetList props.facets updated.');
             }
 
-            if (!this.props.ignoredFilters && (this.state.usingProvidedFacets === true || this.state.facetsLoaded)){
-                this.ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(this.facets, nextProps.expSetFilters);
+            if (!this.props.ignoredFilters && nextProps.facets){
+                this.ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(
+                    nextProps.facets, nextProps.expSetFilters
+                );
             } // else: See @componentDidMount > this.loadFacets() callback param
         }
     },
 
+    /** Load list of available facets via AJAX once & reuse via redux store. */
     loadFacets : function(callback = null){
         var facetType = (this.props.itemTypes && Array.isArray(this.props.itemTypes) && this.props.itemTypes[0]) ||
             (this.props.experimentsOrSets == 'sets' ? 'ExperimentSetReplicate' : 'ExperimentHiC');
-        ajax.load('/facets?type=' + facetType + '&format=json', function(r){
-            this.facets = this.filterFacets(r);
-            if (this.props.debug) console.log('Loaded Facet List via AJAX.');
-            if (typeof callback == 'function') callback();
-            if (facetType == 'Experiment' && !this.props.expIncompleteFacets && typeof window !== 'undefined'){
+
+        ajax.load('/facets?type=' + facetType + '&format=json', function(resultFacets){
+            if (this.props.debug) console.log('Loaded Facet List via AJAX.', resultFacets);
+            if (typeof callback == 'function') callback(resultFacets);
+            if (/* facetType == 'Experiment' && */ !this.props.expIncompleteFacets && typeof window !== 'undefined'){
                 window.requestAnimationFrame(()=>{
-                    // Will trigger app re-render & update state.facetsLoaded as well through getInitialState.
                     store.dispatch({
-                        type : {'expIncompleteFacets' : this.facets}
+                        type : { 'expIncompleteFacets' : resultFacets }
                     });
                     if (this.props.debug) console.info('Stored Incomplete Facet List in Redux store.');
                 });
@@ -885,7 +878,8 @@ var FacetList = module.exports = React.createClass({
         }.bind(this));
     },
 
-    filterFacets : function(facets = this.facets){
+    filterFacets : function(facets){
+        if (!Array.isArray(facets)) throw new Error("Not an array");
         return facets.filter(facet =>
             (
                 (facet.field.substring(0, 6) === 'audit.') || /* ignore all audit facets for the time being */
@@ -927,15 +921,15 @@ var FacetList = module.exports = React.createClass({
         return queryString.parse(searchQuery);
     },
 
-    checkIfAllSingleTerm : function(){
-        for (var i = 0; i < this.facets.length; i++){
-            if (!Array.isArray(this.facets[i].terms)) throw new Error("Facets must have list of terms.");
-            if (this.facets[i].terms && this.facets[i].terms.length > 1) return false;
+    checkIfAllSingleTerm : function(facets = this.state.facets || this.props.facets || []){
+        for (var i = 0; i < facets.length; i++){
+            if (!Array.isArray(facets[i].terms)) throw new Error("Facets must have list of terms.");
+            if (facets[i].terms && facets[i].terms.length > 1) return false;
         }
         return true;
     },
 
-    renderFacets : function(facets = this.facets){
+    renderFacets : function(facets = this.state.facets || this.props.facets || []){
         var extClass = this.checkIfAllSingleTerm() ? ' all-single-term' : null;
         return facets.map(facet =>
             <FacetList.Facet
@@ -957,13 +951,19 @@ var FacetList = module.exports = React.createClass({
     render: function() {
         if (this.props.debug) console.log('render facetlist');
         var exptypeDropdown;
-
+        var facets = null;// = this.state.facets;
+        if (!this.isUsingProvidedFacets()) {
+            facets = this.state.facets || null;
+        } else if (Array.isArray(this.props.facets)) {
+            facets = this.filterFacets(this.props.facets);
+        }
         if (
-            !this.facets ||
-            (!this.facets.length && this.props.mode != 'picker') ||
-            (!this.facets[0].terms && this.props.mode != 'picker')
+            !facets ||
+            !facets.length
+            //(facets.length && this.props.mode != 'picker') ||
+            //(facets[0].terms && this.props.mode != 'picker')
         ) {
-            if (!this.state.facetsLoaded && !this.state.usingProvidedFacets) {
+            if (!this.state.facetsLoaded && !this.isUsingProvidedFacets()) {
                 return (
                     <div className="text-center" style={{ padding : "162px 0", fontSize : '26px', color : "#aaa" }}>
                         <i className="icon icon-spin icon-circle-o-notch"></i>
@@ -1004,7 +1004,7 @@ var FacetList = module.exports = React.createClass({
                             </a>
                         </div>
                     </div>
-                    { this.renderFacets() }
+                    { this.renderFacets(facets) }
                 </div>
             </div>
         );

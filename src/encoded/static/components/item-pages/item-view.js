@@ -83,7 +83,8 @@ var Detail = React.createClass({
                 'protocol', 'biosample', 'digestion_enzyme', 'digestion_temperature',
                 'digestion_time', 'ligation_temperature', 'ligation_time', 'ligation_volume',
                 'tagging_method',
-                'biosource','biosource_summary',    // Biosample
+                // Biosample
+                'biosource','biosource_summary',
                 'awards', 'address1', 'address2', 'city', 'country', 'institute_name', 'state',     // Lab
                 'end_date', 'project', 'uri'        // Award
             ],
@@ -165,7 +166,9 @@ var ItemView = module.exports = React.createClass({
                 return (
                     <div className="tooltip-trigger"
                         onMouseEnter={this.handleHover.bind(null, true)}
-                        onMouseLeave={this.handleHover.bind(null, false)}>
+                        onMouseLeave={this.handleHover.bind(null, false)}
+                        data-field={field}
+                    >
                         <span>{ title || field }</span>
                         <i className="icon icon-info-circle item-icon"/>
                         <div className={'tooltip bottom' + (active ? ' tooltip-open' : '')}>
@@ -330,7 +333,12 @@ var ItemView = module.exports = React.createClass({
                     { externalRefs.map(function(extRef, i){
                         return (
                             <li key={i}>
-                                <ExternalReferenceLink uri={extRef.uri}>{ extRef.ref }</ExternalReferenceLink>
+                                { typeof extRef.uri === 'string' && extRef.ref ?
+                                    <ExternalReferenceLink uri={extRef.uri || null}>{ extRef.ref }</ExternalReferenceLink>
+                                    :
+                                    extRef
+                                }
+                                
                             </li>
                         );
                     }) }
