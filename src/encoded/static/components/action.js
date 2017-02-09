@@ -47,7 +47,7 @@ var Action = module.exports = React.createClass({
         if(!contextID){
             this.setState({'newContext': {}});
             return;
-        };
+        }
         this.context.fetch(contextID + '?frame=object', {
             method: 'GET',
             headers: {
@@ -92,33 +92,57 @@ var Action = module.exports = React.createClass({
         return sifted;
     },
 
-    modifyNewContext: function(field, value, del=false){
+    modifyNewContext: function(field, value, fieldType, del=false){
         // function that modifies new context and sets validation state whenever
         // a modification occurs. Is passed down to child elements representing
         // individual fields
+        // deleting edited fields is difficult because of patching
         var splitField = field.split('.');
         var contextCopy = this.state.newContext;
         for (var i=0; i<(splitField.length-1); i++){
             if(contextCopy[splitField[i]]){
-                contextCopy = pointer[splitField[i]];
+                contextCopy = contextCopy[splitField[i]];
             } else {
-                console.log('PROBLEM CREATE NEW CONTEXT WITH: ', field, value);
+                console.log('PROBLEM CREATING NEW CONTEXT WITH: ', field, value);
                 return;
             }
         }
         if(del){
-            delete contextCopy[splitField[splitField.length-1]];
+            if(this.props.edit){
+                var emptyEdit = this.generateEmptyEdit(fieldType);
+                if(emptyEdit === null){
+                    delete contextCopy[splitField[splitField.length-1]];
+                }else{
+                    contextCopy[splitField[splitField.length-1]] = emptyEdit;
+                }
+            }else{
+                delete contextCopy[splitField[splitField.length-1]];
+            }
         }else{
             contextCopy[splitField[splitField.length-1]] = value;
         }
         this.setState({'newContext': contextCopy, 'validated': 0});
     },
 
+    // attempt to create empty cases for patch. Doesn't work with ints or enums
+    generateEmptyEdit: function(type){
+        // null fields are ones that cannot be "empty-patched"
+        switch(type){
+            case 'text': return('');
+            case 'number': return(null);
+            case 'integer': return(null);
+            case 'enum': return(null);
+            case 'array': return([]);
+            case 'linked object': return(null);
+            case 'object': return({});
+        }
+    },
+
     generatePostButton: function(){
         if(this.state.validated == 1){
             return(
                 <Button bsStyle="success" onClick={this.realPostNewContext}>
-                    {this.props.edit ? 'Create object' : 'Edit object'}
+                    {this.props.edit ? 'Edit object' : 'Create object'}
                 </Button>
             );
         }else if (this.state.validated == 0){
@@ -370,7 +394,8 @@ var BuildField = React.createClass({
             'onChange' : this.handleChange,
             'name' : this.props.label,
             'autoFocus': true,
-            'placeholder': "No value"
+            'placeholder': "No value",
+            'fieldType': this.props.fieldType
         };
         switch(this.props.fieldType){
             case 'text' : return (
@@ -396,13 +421,13 @@ var BuildField = React.createClass({
                 </span>
             );
             case 'linked object' : return (
-                    <LinkedObj field={this.props.label} value={inputProps.value} collection={this.props.schema.linkTo} modifyNewContext={this.props.modifyNewContext}/>
+                    <LinkedObj field={this.props.label} value={inputProps.value} collection={this.props.schema.linkTo} modifyNewContext={this.props.modifyNewContext} fieldType={this.props.fieldType}/>
             );
             case 'array' : return (
-                <ArrayField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext}/>
+                <ArrayField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext} fieldType={this.props.fieldType}/>
             );
             case 'object' : return (
-                <ObjectField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext}/>
+                <ObjectField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext} fieldType={this.props.fieldType}/>
             );
         }
         // Fallback
@@ -420,7 +445,7 @@ var BuildField = React.createClass({
 
     submitEnumVal: function(eventKey){
         //TODO: add an option to remove the value?
-        this.props.modifyNewContext(this.props.label, eventKey);
+        this.props.modifyNewContext(this.props.label, eventKey, this.props.fieldType);
     },
 
     handleChange: function(e){
@@ -428,21 +453,21 @@ var BuildField = React.createClass({
         var currValue = inputElement.value;
         // TODO: add case for array
         if (this.props.fieldType == 'integer'){
-            if(parseInt(currValue) != NaN){
+            if(!isNaN(parseInt(currValue))){
                 currValue = parseInt(currValue);
             }
         } else if (this.props.fieldType == 'float'){
-            if(parseFloat(currValue) != NaN){
+            if(!isNaN(parseFloat(currValue))){
                 currValue = parseFloat(currValue);
             }
         }
-        this.props.modifyNewContext(this.props.label, currValue);
+        this.props.modifyNewContext(this.props.label, currValue, this.props.fieldType);
     },
 
     // call modifyNewContext from parent to delete the value in the field
     deleteField : function(e){
         e.preventDefault();
-        this.props.modifyNewContext(this.props.label, null, true);
+        this.props.modifyNewContext(this.props.label, null, this.props.fieldType, true);
     },
 
     render: function(){
@@ -576,7 +601,7 @@ var LinkedObj = React.createClass({
             <tr key={key}><td {...moreStyles}>
                 <a href="#" className="tab-left" onClick={function(e){
                     e.preventDefault();
-                    this.props.modifyNewContext(this.props.field, targetVal);
+                    this.props.modifyNewContext(this.props.field, targetVal, this.props.fieldType);
                 }.bind(this)} title="Select">
                     {display}
                 </a>
@@ -649,20 +674,20 @@ var ArrayField = React.createClass({
     modifyArrayContent: function(idx, value){
         var valueCopy = this.props.value;
         valueCopy[idx] = value;
-        this.props.modifyNewContext(this.props.field, valueCopy);
+        this.props.modifyNewContext(this.props.field, valueCopy, this.props.fieldType);
     },
 
     pushArrayValue: function(e){
         e.preventDefault();
         var valueCopy = this.props.value || [];
         valueCopy.push(null);
-        this.props.modifyNewContext(this.props.field, valueCopy);
+        this.props.modifyNewContext(this.props.field, valueCopy, this.props.fieldType);
     },
 
     deleteArrayValue: function(idx){
         var valueCopy = this.props.value;
         valueCopy.splice(idx, 1);
-        this.props.modifyNewContext(this.props.field, valueCopy);
+        this.props.modifyNewContext(this.props.field, valueCopy, this.props.fieldType);
     },
 
     initiateArrayField: function(arrayInfo) {
@@ -758,7 +783,7 @@ var ObjectField = React.createClass({
             valueCopy = this.props.value;
         }
         valueCopy[field] = value;
-        this.props.modifyNewContext(this.props.field, valueCopy);
+        this.props.modifyNewContext(this.props.field, valueCopy, this.props.fieldType);
     },
 
     includeField : function(schema, field){
@@ -817,7 +842,7 @@ var ObjectField = React.createClass({
         for (var i=0; i<fields.length; i++){
             var fieldSchema = this.includeField(schema, fields[i]);
             if (fieldSchema){
-                buildFields.push([fields[i], fieldSchema])
+                buildFields.push([fields[i], fieldSchema]);
             }
         }
         return(
