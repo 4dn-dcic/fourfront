@@ -6,7 +6,7 @@ var Collapse = require('react-bootstrap').Collapse;
 var _ = require('underscore');
 var { ItemHeader, PartialList, ExternalReferenceLink } = require('./components');
 var { AuditIndicators, AuditDetail, AuditMixin } = require('./../audit');
-var { console, object, DateUtility } = require('./../util');
+var { console, object, DateUtility, Filters } = require('./../util');
 var FormattedInfoBlock = require('./components/FormattedInfoBlock');
 
 
@@ -16,14 +16,19 @@ var Detail = React.createClass({
         // Formats the correct display for each metadata field
         formKey : function(tips, key){
             var tooltip = '';
+            var title = null;
             if (tips[key]){
                 var info = tips[key];
-                if(info.description){
+                if (info.description){
                     tooltip = info.description;
                 }
+                if (info.title){
+                    title = info.title;
+                }
             }
+
             return(
-                <ItemView.DescriptorField field={key} description={tooltip}/>
+                <ItemView.DescriptorField field={key} description={tooltip} title={title}/>
             );
         },
 
@@ -70,15 +75,14 @@ var Detail = React.createClass({
                 '@context', 'actions', 'audit' /* audit currently not embedded (empty obj) */,
                 // Visible elsewhere on page
                 'aliases', 'dbxrefs', 'date_created', 'lab', 'award', 'description',
-                'status', 'external_references'
+                'status', 'external_references', '@id'
             ],
             'persistentKeys' : [
-                '@id', 
                 // Experiment
-                'biosample', 'digestion_enzyme', 'digestion_temperature',
-                'digestion_time', 'experiment_sets', 'experiment_summary',
-                'filesets', 'ligation_temperature', 'ligation_time', 'ligation_volume',
-                'protocol', 'tagging_method',
+                'experiment_type', 'experiment_summary', 'experiment_sets', 'files', 'filesets',
+                'protocol', 'biosample', 'digestion_enzyme', 'digestion_temperature',
+                'digestion_time', 'ligation_temperature', 'ligation_time', 'ligation_volume',
+                'tagging_method',
                 'biosource','biosource_summary',    // Biosample
                 'awards', 'address1', 'address2', 'city', 'country', 'institute_name', 'state',     // Lab
                 'end_date', 'project', 'uri'        // Award
@@ -95,16 +99,30 @@ var Detail = React.createClass({
     },
 
     render : function(){
+        console.log(this.props.persistentKeys);
         var context = this.props.context;
         var sortKeys = _.difference(_.keys(context).sort(), this.props.excludedKeys.sort());
         var tips = object.tipsFromSchema(this.props.schemas, context);
 
+        // Sort applicable persistent keys by original persistent keys sort order.
+        var persistentKeysObj = _.object(
+            _.intersection(sortKeys, this.props.persistentKeys.slice(0).sort()).map(function(key){
+                return [key, true];
+            })
+        );
+        var orderedPersistentKeys = [];
+        this.props.persistentKeys.forEach(function (key) {
+            if (persistentKeysObj[key] === true) orderedPersistentKeys.push(key);
+        });
+
+        var extraKeys = _.difference(sortKeys, this.props.persistentKeys.slice(0).sort());
+
         return (
             <PartialList
-                persistent={_.intersection(sortKeys, this.props.persistentKeys.sort()).map((key,i) =>
+                persistent={ orderedPersistentKeys.map((key,i) =>
                     <PartialList.Row key={key} label={Detail.formKey(tips,key)}>{ Detail.formValue(this.props.schemas,context[key], key) }</PartialList.Row>
                 )}
-                collapsible={ _.difference(sortKeys, this.props.persistentKeys.sort()).map((key,i) =>
+                collapsible={ extraKeys.map((key,i) =>
                     <PartialList.Row key={key} label={Detail.formKey(tips,key)}>{ Detail.formValue(this.props.schemas,context[key], key) }</PartialList.Row>
                 )}
                 open={this.props.open}
@@ -138,7 +156,7 @@ var ItemView = module.exports = React.createClass({
             },
 
             render: function() {
-                var {field, description} = this.props;
+                var { field, description, title } = this.props;
                 var active = this.state.active;
                 var header;
                 if (!description || description === ""){
@@ -148,7 +166,7 @@ var ItemView = module.exports = React.createClass({
                     <div className="tooltip-trigger"
                         onMouseEnter={this.handleHover.bind(null, true)}
                         onMouseLeave={this.handleHover.bind(null, false)}>
-                        <span>{field}</span>
+                        <span>{ title || field }</span>
                         <i className="icon icon-info-circle item-icon"/>
                         <div className={'tooltip bottom' + (active ? ' tooltip-open' : '')}>
                             <div className="tooltip-arrow"></div>

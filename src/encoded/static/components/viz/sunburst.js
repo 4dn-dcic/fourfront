@@ -828,8 +828,6 @@ var SunBurst = React.createClass({
                 _.pluck(_this.props.fields, 'field').sort()
             );
         }
-
-        console.log(applicableFields);
         
         function genPath(node, nodeIndex, allNodes, removing = false){
             var existing = !!(pastExistingNodes && pastExistingNodes[node.data.id]);
