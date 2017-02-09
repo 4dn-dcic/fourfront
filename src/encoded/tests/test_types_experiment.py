@@ -1,7 +1,50 @@
 import pytest
 # from encoded.types.experiment import Experiment, ExperimentHiC
+# from snovault.storage import UUID
 pytestmark = pytest.mark.working
 '''Has tests for both experiment.py and experiment_set.py'''
+
+
+@pytest.fixture
+def custom_experiment_set(testapp, lab, award):
+    item = {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'description': 'test experiment set',
+        'experimentset_type': 'custom',
+        'status': 'in review by lab'
+    }
+    return testapp.post_json('/experiment_set', item).json['@graph'][0]
+
+
+@pytest.fixture
+def replicate_experiment_set(testapp, lab, award):
+    item = {
+        'lab': lab['@id'],
+        'award': award['@id'],
+        'description': 'test replicate set',
+        'experimentset_type': 'replicate',
+        'status': 'in review by lab'
+    }
+    return testapp.post_json('/experiment_set_replicate', item).json['@graph'][0]
+
+
+@pytest.fixture
+def sop_map_data(protocol, lab, award):
+    return {
+        "sop_name": "in situ Hi-C SOP map",
+        "sop_version": 1,
+        'lab': lab['@id'],
+        'award': award['@id'],
+        "associated_item_type": "ExperimentHiC",
+        "id_values": ["micro-C"],
+        "notes": "This is just a dummy insert not linked to true SOP protocol",
+        "description": "Fields with specified defaults in the SOP for in situ Hi-C experiments as per ??",
+        "sop_protocol": protocol['@id'],
+        "fields_with_default": [
+            {"field_name": "digestion_enzyme", "field_value": "MboI"},
+        ]
+    }
 
 
 def test_experiment_update_experiment_relation(testapp, base_experiment, experiment):
@@ -50,7 +93,8 @@ def test_calculated_experiment_summary(testapp, experiment, mboI):
 
 # tests for Experiment class methodss
 # def test_generate_mapid(registry, experiment_data):
-#    uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
+#    uuid = UUID("0afb6080-1c08-11e4-8c21-0800200c9a44")
+#    print(uuid)
 #    etype = 'micro-C'
 #    my_expt = ExperimentHiC.create(registry, uuid, experiment_data)
 #    assert my_expt.generate_mapid(etype, suffnum) == 'ExperimentHiC_1'

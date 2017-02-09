@@ -11,6 +11,7 @@ from .base import (
 
 @collection(
     name='ontology-terms',
+    unique_key='ontology_term:preferred_name',
     properties={
         'title': 'Ontology Terms',
         'description': 'Listing of Ontology Terms',
@@ -24,6 +25,7 @@ class OntologyTerm(Item):
 
 @collection(
     name='ontologys',
+    unique_key='ontology:ontology_prefix',
     properties={
         'title': 'Ontologies',
         'description': 'Listing of Ontologies',
