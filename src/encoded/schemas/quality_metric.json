@@ -18,7 +18,8 @@
         },
         "url": {
             "type": "string",
-            "description": "Location of the main html file"
+            "description": "Location of the main html file",
+            "format": "uri"
         }
     }
 }
