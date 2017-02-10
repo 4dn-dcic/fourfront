@@ -9,7 +9,7 @@ from snovault import (
 # from pyramid.traversal import find_root
 from .base import (
     Item,
-    process_embeds
+    add_default_embeds
     # paths_filtered_by_status,
 )
 
@@ -33,7 +33,7 @@ class AnalysisStep(Item):
     name_key = 'name'
     schema = load_schema('encoded:schemas/analysis_step.json')
     embedded = ['software_used', 'qa_stats_generated']
-    embedded = process_embeds(embedded)
+    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -50,7 +50,7 @@ class Award(Item):
     schema = load_schema('encoded:schemas/award.json')
     name_key = 'name'
     embedded = ['pi']
-    embedded = process_embeds(embedded)
+    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -91,7 +91,7 @@ class Document(ItemWithAttachment, Item):
     item_type = 'document'
     schema = load_schema('encoded:schemas/document.json')
     embedded = ['lab', 'award', 'submitted_by']
-    embedded = process_embeds(embedded)
+    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -108,7 +108,7 @@ class Enzyme(Item):
     schema = load_schema('encoded:schemas/enzyme.json')
     name_key = 'name'
     embedded = ['enzyme_source']
-    embedded = process_embeds(embedded)
+    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -136,7 +136,7 @@ class Modification(Item):
     item_type = 'modification'
     schema = load_schema('encoded:schemas/modification.json')
     embedded = ['constructs', 'modified_regions', 'created_by', 'target_of_mod']
-    embedded = process_embeds(embedded)
+    embedded = add_default_embeds(embedded, schema)
 
     @calculated_property(schema={
         "title": "Modification name",
@@ -204,7 +204,7 @@ class QualityMetricFlag(Item):
     item_type = 'quality_metric_flag'
     schema = load_schema('encoded:schemas/quality_metric_flag.json')
     embedded = ['quality_metrics']
-    embedded = process_embeds(embedded)
+    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -219,7 +219,7 @@ class Target(Item):
     item_type = 'target'
     schema = load_schema('encoded:schemas/target.json')
     embedded = ['targeted_region']
-    embedded = process_embeds(embedded)
+    embedded = add_default_embeds(embedded, schema)
 
     @calculated_property(schema={
         "title": "Target summary",

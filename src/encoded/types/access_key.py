@@ -11,7 +11,7 @@ from pyramid.security import (
 from pyramid.settings import asbool
 from .base import (
     Item,
-    process_embeds,
+    add_default_embeds,
     DELETED,
     ONLY_ADMIN_VIEW,
 )

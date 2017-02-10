@@ -12,7 +12,7 @@ from snovault.calculated import calculate_properties
 
 from .base import (
     Item,
-    process_embeds
+    add_default_embeds
 )
 
 
@@ -74,7 +74,7 @@ class ExperimentSet(Item):
                 "experiments_in_set.filesets",
                 "experiments_in_set.filesets.files_in_set",
                 "experiments_in_set.digestion_enzyme"]
-    embedded = process_embeds(embedded)
+    embedded = add_default_embeds(embedded, schema)
 
     def _update(self, properties, sheets=None):
         super(ExperimentSet, self)._update(properties, sheets)
@@ -100,7 +100,7 @@ class ExperimentSetReplicate(ExperimentSet):
         "replicate_exps.replicate_exp.accession",
         "replicate_exps.replicate_exp.uuid"
     ]
-    embedded = process_embeds(embedded)
+    embedded = add_default_embeds(embedded, schema)
 
     def _update(self, properties, sheets=None):
         all_experiments = [exp['replicate_exp'] for exp in properties['replicate_exps']]

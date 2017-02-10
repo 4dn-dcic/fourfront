@@ -137,7 +137,6 @@ def collection_add(context, request, render=None):
     return sno_collection_add(context, request, render)
 
 
-
 class Item(snovault.Item):
     """smth."""
 
@@ -215,8 +214,15 @@ class Item(snovault.Item):
 @view_config(context=Item, permission='view', request_method='GET', name='page')
 def item_page_view(context, request):
     """Return the frame=embedded view with @ids for objects not embedded."""
-    properties = item_view_page_object(context, request)
-    return properties
+    properties_emb, properties_obj = item_view_page_object(context, request)
+    for key, val in properties_emb.items():
+        if isinstance(val, dict) and '@id' not in val.keys() and key in properties_obj:
+            properties_emb[key]['@id'] = properties_obj[key]
+        elif isinstance(val, list):
+            for i in range(len(val)):
+                if isinstance(val, dict) and '@id' not in val.keys() and key in properties_obj:
+                    properties_emb[key][i]['@id'] = properties_obj[key][i]
+    return properties_emb
 
 class SharedItem(Item):
     """An Item visible to all authenticated users while "proposed" or "in progress"."""
@@ -268,17 +274,29 @@ def create(context, request):
         }
 
 
-def process_embeds(embeds):
-    """Perform processing on the embed list. Currently, that means adding
-    a title field to any object that is NOT fully embedded or doesn't already have one
-    Does a simple check on the list of embeds
+def add_default_embeds(embeds, schema={}):
+    """Perform default processing on the embeds list.
+    This adds display_title to any non-fully embedded linkTo field and defaults
+    to using the @id and display_title of non-embedded linkTo's
     """
+
+    embedded_base_fields = []
     fields_to_process = []
+    # find pre-existing fields
     for field in embeds:
         split_field = field.strip().split('.')
         if len(split_field) > 1:
             embed_path = '.'.join(split_field[:-1])
             if embed_path not in embeds and embed_path not in fields_to_process:
                 fields_to_process.append(embed_path)
+        elif len(split_field) == 1:
+            embedded_base_fields.append(split_field)
     processed_fields = [field + '.display_title' for field in fields_to_process]
+    if('properties' not in schema.keys()):
+        return processed_fields + embeds
+    # automatically embed top level linkTo's not already embedded
+    for key, val in schema['properties'].items():
+        if key not in embedded_base_fields and 'linkTo' in val:
+            if key + '.display_title' not in processed_fields:
+                processed_fields.append(key + '.display_title')
     return processed_fields + embeds
