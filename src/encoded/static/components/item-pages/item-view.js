@@ -44,7 +44,11 @@ var Detail = React.createClass({
             if(Array.isArray(item)) {
                 return (
                     <ul>
-                        { item.map(function(it, i){ return <li key={i}>{ Detail.formValue(schemas, it, keyPrefix, depth + 1) }</li>; }) }
+                        {   item.length === 0 ?
+                            <li><em>None</em></li>
+                            :
+                            item.map(function(it, i){ return <li key={i}>{ Detail.formValue(schemas, it, keyPrefix, depth + 1) }</li>; })
+                        }
                     </ul>
                 );
             } else if (typeof item === 'object') {
@@ -97,8 +101,12 @@ var Detail = React.createClass({
                 // Biosample
                 'biosource','biosource_summary','biosample_protocols','modifications_summary',
                 'treatments_summary',
-                'awards', 'address1', 'address2', 'city', 'country', 'institute_name', 'state',     // Lab
-                'end_date', 'project', 'uri'        // Award
+                // File
+                'file_type', 'file_format', 'filename', 'href', 'notes', 'flowcell_details',
+                // Lab
+                'awards', 'address1', 'address2', 'city', 'country', 'institute_name', 'state',
+                // Award
+                'end_date', 'project', 'uri'
             ],
             'open' : null
         };
