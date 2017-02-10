@@ -130,12 +130,11 @@ def collection_add(context, request, render=None):
     check_only = request.params.get('check_only', False)
 
     if check_only:
-         return { 'status' : "success",
-                  '@type': ['result'],
-                 }
+        return {'status': "success",
+                '@type': ['result'],
+                }
 
     return sno_collection_add(context, request, render)
-
 
 
 class Item(snovault.Item):
@@ -211,12 +210,29 @@ class Item(snovault.Item):
             keys['accession'].append(properties['accession'])
         return keys
 
+    @snovault.calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string",
+    })
+    def display_title(self, properties):
+        """create a display_title field."""
+        display_title = ""
+        look_for = ["name", "title", "description"]
+        for field in look_for:
+            if field in self.schema['properties']:
+                display_title = properties['field']
+                break
+        properties['display_title'] = display_title
+
+
 # make it so any item page defaults to using the object, not embedded, view
 @view_config(context=Item, permission='view', request_method='GET', name='page')
 def item_page_view(context, request):
     """Return the frame=object view rather than embedded view by default."""
     properties = item_view_page_object(context, request)
     return properties
+
 
 class SharedItem(Item):
     """An Item visible to all authenticated users while "proposed" or "in progress"."""
