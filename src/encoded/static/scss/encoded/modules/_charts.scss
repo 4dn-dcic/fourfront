@@ -423,10 +423,11 @@
 
     .chart-color-legend {
         position: absolute;
-        right: 0;
+        right: 20px;
         top: 0;
         padding: 14px 16px 14px;
         background-color: #fff;
+        min-width: 200px;
         //border: 1px solid #eee;
         //border-radius: 1px;
 

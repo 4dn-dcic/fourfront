@@ -747,6 +747,7 @@ var FacetList = module.exports = React.createClass({
             title : "Properties",
             useAjax : true,
             debug : false,
+            expIncompleteFacets : []
         };
     },
 
@@ -771,7 +772,7 @@ var FacetList = module.exports = React.createClass({
             // If exists, will fill them up w/ terms from current experiments before mount.
             // Else, if doesn't exist (facetsLoaded remains false), will perform ajax fetch on mount
             // to get list of applicable then fill up w/ terms.
-            var facets = this.props.expIncompleteFacets || [];
+            var facets = this.props.expIncompleteFacets;
             if (facets && facets.length > 0) {
                 initState.facetsLoaded = true;
                 initState.facets = FacetList.fillFacetTermsAndCountFromExps(
@@ -811,7 +812,9 @@ var FacetList = module.exports = React.createClass({
                 if (!this.props.ignoredFilters) {
                     this.ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(facets, this.props.expSetFilters);
                 }
-                this.setState({ 'facets' : facets, 'facetsLoaded' : true });
+                if (Array.isArray(facets) && facets.length > 0){
+                    this.setState({ 'facets' : facets, 'facetsLoaded' : true });
+                }
             });
         } // else @see getInitialState
     },

@@ -84,7 +84,8 @@ var Detail = React.createClass({
                 'digestion_time', 'ligation_temperature', 'ligation_time', 'ligation_volume',
                 'tagging_method',
                 // Biosample
-                'biosource','biosource_summary',
+                'biosource','biosource_summary','biosample_protocols','modifications_summary',
+                'treatments_summary',
                 'awards', 'address1', 'address2', 'city', 'country', 'institute_name', 'state',     // Lab
                 'end_date', 'project', 'uri'        // Award
             ],
@@ -100,7 +101,6 @@ var Detail = React.createClass({
     },
 
     render : function(){
-        console.log(this.props.persistentKeys);
         var context = this.props.context;
         var sortKeys = _.difference(_.keys(context).sort(), this.props.excludedKeys.sort());
         var tips = object.tipsFromSchema(this.props.schemas, context);
@@ -333,8 +333,8 @@ var ItemView = module.exports = React.createClass({
                     { externalRefs.map(function(extRef, i){
                         return (
                             <li key={i}>
-                                { typeof extRef.uri === 'string' && extRef.ref ?
-                                    <ExternalReferenceLink uri={extRef.uri || null}>{ extRef.ref }</ExternalReferenceLink>
+                                { typeof extRef.ref === 'string' ?
+                                    <ExternalReferenceLink uri={extRef.uri || null} children={extRef.ref} />
                                     :
                                     extRef
                                 }

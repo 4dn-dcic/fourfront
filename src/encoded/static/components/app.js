@@ -82,7 +82,7 @@ class Timeout {
  * It lives for the entire duration the page is loaded.
  */
 var App = React.createClass({
-    SLOW_REQUEST_TIME: 250,
+    SLOW_REQUEST_TIME: 750,
     historyEnabled: !!(typeof window != 'undefined' && window.history && window.history.pushState),
 
     /**
@@ -571,7 +571,7 @@ var App = React.createClass({
         return true;
     },
 
-    navigate: function (href, options = {}, callback = null) {
+    navigate: function (href, options = {}, callback = null, fallbackCallback = null, includeReduxDispatch = {}) {
         // options.skipRequest only used by collection search form
         // options.replace only used handleSubmit, handlePopState, handlePersonaLogin
         
@@ -579,7 +579,7 @@ var App = React.createClass({
 
         function setupRequest(targetHref){
             targetHref = url.resolve(this.props.href, targetHref);
-            if (!this.confirmNavigation(targetHref, options)) {
+            if (!options.skipConfirmCheck && !this.confirmNavigation(targetHref, options)) {
                 return false;
             }
             // Strip url fragment.
@@ -648,7 +648,7 @@ var App = React.createClass({
                     // store.dispatch({
                     //     type: {'slow':true}
                     // });
-
+                    this.setState({ 'slowLoad' : true });
                 } else {
                     // Request has returned data
                     this.requestCurrent = false;
@@ -729,18 +729,23 @@ var App = React.createClass({
 
                 return response;
             })
-            .then(this.receiveContextResponse)
+            .then(response => this.receiveContextResponse(response,includeReduxDispatch))
             .then(response => {
+                this.state.slowLoad && this.setState({'slowLoad' : false});
                 if (typeof callback == 'function'){
                     callback(response);
                 }
             });
 
-            if (!options.replace) {
+            if (!options.replace && !options.dontScrollToTop) {
                 promise = promise.then(this.scrollTo);
             }
 
             promise.catch((err)=>{
+                this.state.slowLoad && this.setState({'slowLoad' : false});
+                if (typeof fallbackCallback == 'function'){
+                    fallbackCallback(err);
+                }
                 if (err.message !== 'HTTPForbidden'){
                     console.error('Error in App.navigate():', err);
                     throw err; // Bubble it up.
@@ -765,7 +770,7 @@ var App = React.createClass({
 
     },
 
-    receiveContextResponse: function (data) {
+    receiveContextResponse: function (data, extendDispatchDict = {}) {
         // title currently ignored by browsers
         try {
             window.history.replaceState(data, '', window.location.href);
@@ -787,7 +792,7 @@ var App = React.createClass({
             this.requestAborted = false;
         }
         store.dispatch({
-            type: dispatch_dict
+            type: _.extend({},dispatch_dict,extendDispatchDict)
         });
         dispatch_dict={};
         return data;
@@ -947,6 +952,12 @@ var App = React.createClass({
                     <script data-prop-name="expSetFilters" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: jsonScriptEscape(JSON.stringify(Filters.convertExpSetFiltersTerms(this.props.expSetFilters, 'array')))
                     }}></script>
+                    <div id="slow-load-container" className={this.state.slowLoad ? 'visible' : null}>
+                        <div className="inner">
+                            <i className="icon icon-circle-o-notch"/>
+                            { /*<img src="/static/img/ajax-loader.gif"/>*/ }
+                        </div>
+                    </div>
                     <div id="slot-application">
                         <div id="application" className={appClass}>
                             <div className="loading-spinner"></div>
@@ -965,6 +976,7 @@ var App = React.createClass({
                                         navigate={this.navigate}
                                         updateStats={this.updateStats}
                                         schemas={this.state.schemas}
+                                        session={this.state.session}
                                     />
                                     <Alerts alerts={this.props.alerts} />
                                     { content }

@@ -185,40 +185,45 @@ var expFilters = module.exports = {
 
         var newHref = expFilters.filtersToHref(expSetFilters, href);
 
-        var ajaxCallback = (newContext) => {
+        var navigateFxn = (
+            this.props && typeof this.props.navigate === 'function' ?   this.props.navigate : 
+                typeof expFilters.navigate === 'function' ?     expFilters.navigate : null
+        );
 
-            Alerts.deQueue(Alerts.NoFilterResults);
+        store.dispatch({
+            type: {
+                'expSetFilters' : expSetFilters,
+            }
+        });
 
-            function saveToReduxStore(){
+        if (navigateFxn){
+            navigateFxn(newHref, { replace : true, skipConfirmCheck: true }, ()=>{
+                Alerts.deQueue(Alerts.NoFilterResults);
+                if (typeof callback === 'function') setTimeout(callback, 0);
+            }, ()=>{
+                // Fallback callback
+                Alerts.queue(Alerts.NoFilterResults);
+                if (typeof callback === 'function') setTimeout(callback, 0);
+            }/*, { 'expSetFilters' : expSetFilters }*/);
+        } else {
+            ajax.load(newHref, (newContext) => {
+                Alerts.deQueue(Alerts.NoFilterResults);
                 store.dispatch({
                     type: {
                         'context'       : newContext,
-                        'expSetFilters' : expSetFilters,
+                        //'expSetFilters' : expSetFilters,
                         'href'          : newHref
                     }
                 });
-            }
-
-            var navigateFxn = (
-                this.props && typeof this.props.navigate === 'function' ?   this.props.navigate : 
-                    typeof expFilters.navigate === 'function' ?     expFilters.navigate :
-                        function(navToHref, options, cb){
-                            console.error('No navigate function.');
-                            cb();
-                        }
-            );
-            
-            navigateFxn(newHref, { skipRequest : true, skipUpdateHref : true }, ()=>{
-                saveToReduxStore.call(this);
+                if (typeof callback === 'function') setTimeout(callback, 0);
+            }, 'GET', ()=>{
+                // Fallback callback
+                Alerts.queue(Alerts.NoFilterResults);
                 if (typeof callback === 'function') setTimeout(callback, 0);
             });
-        };
+        }
 
-        ajax.load(newHref, ajaxCallback, 'GET', (newContext)=>{
-            // Fallback    
-            Alerts.queue(Alerts.NoFilterResults);
-            if (typeof callback === 'function') setTimeout(callback, 0);
-        });
+        
 
     },
 

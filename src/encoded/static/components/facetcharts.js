@@ -215,6 +215,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             !_.isEqual(this.state.experiments, nextState.experiments) ||
             !_.isEqual(this.state.filteredExperiments, nextState.filteredExperiments) ||
             this.props.schemas !== nextProps.schemas ||
+            this.state.session !== nextState.session ||
             this.show(nextProps) !== this.show(this.props) ||
             (nextState.mounted !== this.state.mounted)
         ){

@@ -318,6 +318,39 @@ h1.page-title + .page-subtitle {
 	left : -9999px;
 }
 
+#slow-load-container {
+	position: fixed;
+	left: 0;
+	top: 0;
+	right :0;
+	bottom: 0;
+	pointer-events: none;
+	z-index: -10;
+	background-color: rgba(255,255,255,0.8);
+	opacity: 0;
+	transition: opacity .25s, z-index 0s 0.25s;
+	.inner {
+		position: absolute;
+		top: 50%;
+		margin-top:-20px;
+		left: 0;
+		right:0;
+		text-align:center;
+		color: #999;
+		> i.icon {
+			font-size: 3rem;
+		}
+	}
+	&.visible {
+		opacity: 1;
+		z-index: 100;
+		transition: opacity .25s, z-index 0s 0s;
+		.inner > i.icon {
+			-webkit-animation: fa-spin 2s infinite linear;
+    		animation: fa-spin 2s infinite linear;
+		}
+	}
+}
 
 
 
