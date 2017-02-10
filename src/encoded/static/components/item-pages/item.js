@@ -70,7 +70,15 @@ globals.content_views.fallback = function () {
 
 var title = module.exports.title = function (props) {
     var context = props.context;
-    return context.display_title || context.title || context.name || context.accession || context.uuid || context['@id'] || 'No title found';
+    return (
+        context.display_title   ||
+        context.title           ||
+        context.name            ||
+        context.accession       ||
+        context.uuid            ||
+        (typeof context['@id'] === 'string' ? context['id'] :
+        'No title found')
+    );
 };
 
 globals.listing_titles.register(title, 'Item');

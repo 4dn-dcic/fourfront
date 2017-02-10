@@ -7,6 +7,7 @@ var _ = require('underscore');
 var { ItemHeader, PartialList, ExternalReferenceLink } = require('./components');
 var { AuditIndicators, AuditDetail, AuditMixin } = require('./../audit');
 var { console, object, DateUtility, Filters } = require('./../util');
+var itemTitle = require('./item').title;
 var FormattedInfoBlock = require('./components/FormattedInfoBlock');
 
 
@@ -47,6 +48,15 @@ var Detail = React.createClass({
                     </ul>
                 );
             } else if (typeof item === 'object') {
+                var title = itemTitle({ 'context' : item});
+                if (typeof item['@id'] === 'string'){
+                    return (
+                        <a href={item['@id']}>{ title }</a>
+                    );
+                } else {
+                    return title;
+                }
+                /*
                 return (
                     <ItemView.SubIPanel
                         schemas={schemas}
@@ -54,6 +64,7 @@ var Detail = React.createClass({
                         key={item['@id'] || item.name || (keyPrefix.length > 0 ? keyPrefix + '-' : '') + depth + '-' }
                     />
                 );
+                */
             } else {
                 if (typeof item === 'string' && item.charAt(0) === '/') {
                     return <a key={item} href={item}>{item}</a>;
