@@ -48,6 +48,16 @@ var ItemHeader = module.exports = {
                 </div>
             );
         },
+        itemActions : function(){
+            if (!Array.isArray(this.props.context.actions) || this.props.context.actions.length === 0) return null;
+            return this.props.context.actions.map(function(a){
+                return (
+                    <div className="expset-indicator right action-button" data-action={a.name || null}>
+                        <a href={a.href}>{ a.title }</a>
+                    </div>
+                );
+            });
+        },
         wrapChildren : function(){
             if (!this.props.children) return null;
             return React.Children.map(this.props.children, (child,i) =>
@@ -68,6 +78,7 @@ var ItemHeader = module.exports = {
                     </h3>
                     <h5 className="col-sm-6 text-right text-left-xs item-label-extra text-capitalize item-header-indicators clearfix">
                         { this.viewJSONButton() }
+                        { this.itemActions() }
                         { this.wrapChildren() }
                         { this.parsedStatus() }
                     </h5>
