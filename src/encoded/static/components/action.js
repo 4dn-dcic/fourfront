@@ -92,7 +92,7 @@ var Action = module.exports = React.createClass({
         return sifted;
     },
 
-    modifyNewContext: function(field, value, fieldType, del=false){
+    modifyNewContext: function(field, value, del=false){
         // function that modifies new context and sets validation state whenever
         // a modification occurs. Is passed down to child elements representing
         // individual fields
@@ -108,34 +108,11 @@ var Action = module.exports = React.createClass({
             }
         }
         if(del){
-            if(this.props.edit){
-                var emptyEdit = this.generateEmptyEdit(fieldType);
-                if(emptyEdit === null){
-                    delete contextCopy[splitField[splitField.length-1]];
-                }else{
-                    contextCopy[splitField[splitField.length-1]] = emptyEdit;
-                }
-            }else{
-                delete contextCopy[splitField[splitField.length-1]];
-            }
+            delete contextCopy[splitField[splitField.length-1]];
         }else{
             contextCopy[splitField[splitField.length-1]] = value;
         }
         this.setState({'newContext': contextCopy, 'validated': 0});
-    },
-
-    // attempt to create empty cases for patch. Doesn't work with ints or enums
-    generateEmptyEdit: function(type){
-        // null fields are ones that cannot be "empty-patched"
-        switch(type){
-            case 'text': return('');
-            case 'number': return(null);
-            case 'integer': return(null);
-            case 'enum': return(null);
-            case 'array': return([]);
-            case 'linked object': return(null);
-            case 'object': return({});
-        }
     },
 
     generatePostButton: function(){
@@ -394,8 +371,7 @@ var BuildField = React.createClass({
             'onChange' : this.handleChange,
             'name' : this.props.label,
             'autoFocus': true,
-            'placeholder': "No value",
-            'fieldType': this.props.fieldType
+            'placeholder': "No value"
         };
         switch(this.props.fieldType){
             case 'text' : return (
@@ -421,13 +397,13 @@ var BuildField = React.createClass({
                 </span>
             );
             case 'linked object' : return (
-                    <LinkedObj field={this.props.label} value={inputProps.value} collection={this.props.schema.linkTo} modifyNewContext={this.props.modifyNewContext} fieldType={this.props.fieldType}/>
+                    <LinkedObj field={this.props.label} value={inputProps.value} collection={this.props.schema.linkTo} modifyNewContext={this.props.modifyNewContext}/>
             );
             case 'array' : return (
-                <ArrayField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext} fieldType={this.props.fieldType}/>
+                <ArrayField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext}/>
             );
             case 'object' : return (
-                <ObjectField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext} fieldType={this.props.fieldType}/>
+                <ObjectField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext}/>
             );
         }
         // Fallback
@@ -445,7 +421,7 @@ var BuildField = React.createClass({
 
     submitEnumVal: function(eventKey){
         //TODO: add an option to remove the value?
-        this.props.modifyNewContext(this.props.label, eventKey, this.props.fieldType);
+        this.props.modifyNewContext(this.props.label, eventKey);
     },
 
     handleChange: function(e){
@@ -461,13 +437,13 @@ var BuildField = React.createClass({
                 currValue = parseFloat(currValue);
             }
         }
-        this.props.modifyNewContext(this.props.label, currValue, this.props.fieldType);
+        this.props.modifyNewContext(this.props.label, currValue);
     },
 
     // call modifyNewContext from parent to delete the value in the field
     deleteField : function(e){
         e.preventDefault();
-        this.props.modifyNewContext(this.props.label, null, this.props.fieldType, true);
+        this.props.modifyNewContext(this.props.label, null, true);
     },
 
     render: function(){
@@ -601,7 +577,7 @@ var LinkedObj = React.createClass({
             <tr key={key}><td {...moreStyles}>
                 <a href="#" className="tab-left" onClick={function(e){
                     e.preventDefault();
-                    this.props.modifyNewContext(this.props.field, targetVal, this.props.fieldType);
+                    this.props.modifyNewContext(this.props.field, targetVal);
                 }.bind(this)} title="Select">
                     {display}
                 </a>
@@ -674,20 +650,20 @@ var ArrayField = React.createClass({
     modifyArrayContent: function(idx, value){
         var valueCopy = this.props.value;
         valueCopy[idx] = value;
-        this.props.modifyNewContext(this.props.field, valueCopy, this.props.fieldType);
+        this.props.modifyNewContext(this.props.field, valueCopy);
     },
 
     pushArrayValue: function(e){
         e.preventDefault();
         var valueCopy = this.props.value || [];
         valueCopy.push(null);
-        this.props.modifyNewContext(this.props.field, valueCopy, this.props.fieldType);
+        this.props.modifyNewContext(this.props.field, valueCopy);
     },
 
     deleteArrayValue: function(idx){
         var valueCopy = this.props.value;
         valueCopy.splice(idx, 1);
-        this.props.modifyNewContext(this.props.field, valueCopy, this.props.fieldType);
+        this.props.modifyNewContext(this.props.field, valueCopy);
     },
 
     initiateArrayField: function(arrayInfo) {
@@ -783,7 +759,7 @@ var ObjectField = React.createClass({
             valueCopy = this.props.value;
         }
         valueCopy[field] = value;
-        this.props.modifyNewContext(this.props.field, valueCopy, this.props.fieldType);
+        this.props.modifyNewContext(this.props.field, valueCopy);
     },
 
     includeField : function(schema, field){
