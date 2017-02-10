@@ -6,7 +6,7 @@ from snovault import (
 )
 from .base import (
     Item,
-    process_embeds
+    add_default_embeds
     # paths_filtered_by_status,
 )
 
@@ -25,7 +25,6 @@ from .base import (
     })
 class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms):
     """Biosample class."""
-
     item_type = 'biosample'
     schema = load_schema('encoded:schemas/biosample.json')
     #name_key = 'accession'
@@ -42,7 +41,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'modifications.modified_regions',
         'cell_culture_details'
     ]
-    embedded = process_embeds(embedded)
+    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
     @calculated_property(schema={

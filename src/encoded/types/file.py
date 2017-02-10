@@ -10,7 +10,7 @@ from snovault import (
 from snovault.schema_utils import schema_validator
 from .base import (
     Item,
-    process_embeds
+    add_default_embeds
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -117,7 +117,7 @@ class File(Item):
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
     embedded = ['lab']
-    embedded = process_embeds(embedded)
+    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
     def _update(self, properties, sheets=None):

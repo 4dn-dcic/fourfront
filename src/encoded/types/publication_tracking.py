@@ -7,7 +7,7 @@ from snovault import (
 # from pyramid.traversal import find_root
 from .base import (
     Item,
-    process_embeds
+    add_default_embeds
     # paths_filtered_by_status,
 )
 
