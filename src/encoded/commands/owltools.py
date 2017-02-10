@@ -1,5 +1,5 @@
 from rdflib import ConjunctiveGraph, exceptions, Namespace
-from rdflib import RDFS, RDF, BNode
+from rdflib import RDFS, RDF, BNode, URIRef
 from rdflib.collection import Collection
 
 
@@ -17,6 +17,15 @@ SomeValuesFrom = OWLNS["someValuesFrom"]
 IntersectionOf = OWLNS["intersectionOf"]
 
 DEFAULT_LANGUAGE = "en"
+
+
+def convert2URIRef(astring):
+    '''converts a string to a URIRef type'''
+    try:
+        astring = URIRef(astring)
+    except:
+        pass
+    return astring
 
 
 def inferNamespacePrefix(aUri):
