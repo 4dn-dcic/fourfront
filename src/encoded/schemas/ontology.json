@@ -5,7 +5,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["ontology_name"],
-    "identifyingProperties": ["uuid", "ontology_name", "ontology_url"],
+    "identifyingProperties": ["uuid", "ontology_name", "ontology_url", "ontology_prefix"],
     "additionalProperties": false,
     "mixinProperties": [
         { "$ref": "mixins.json#/schema_version" },
@@ -49,8 +49,10 @@
         },
         "ontology_prefix": {
             "title": "Ontology Prefix",
-            "descripton": "The valid prefix for the ontology eg. EFO, OBI, UBERON",
-            "type": "string"
+            "descripton": "Abbreviation for the ontology - should correspond to the valid prefix for the ontology eg. EFO, OBI, UBERON and be unique",
+            "comment": "An identifying property that can be used for retrieval",
+            "type": "string",
+            "uniqueKey": true
         },
         "description": {
             "title": "Description",

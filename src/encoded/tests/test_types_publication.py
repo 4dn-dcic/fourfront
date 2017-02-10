@@ -2,6 +2,39 @@ import pytest
 pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
+@pytest.fixture
+def publication_PMID(testapp, lab, award):
+    item = {
+        'uuid': '8312fc0c-b241-4cb2-9b01-143891055000',
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'ID': "PMID:26673895",
+    }
+    return testapp.post_json('/publication', item).json['@graph'][0]
+
+
+@pytest.fixture
+def publication_doi_pubmed(testapp, lab, award):
+    item = {
+        'uuid': '8312fc0c-b241-4cb2-9b01-143891055001',
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'ID': "doi:10.1093/nar/gkv1046",
+    }
+    return testapp.post_json('/publication', item).json['@graph'][0]
+
+
+@pytest.fixture
+def publication_doi_biorxiv(testapp, lab, award):
+    item = {
+        'uuid': '8312fc0c-b241-4cb2-9b01-143891055002',
+        'award': award['@id'],
+        'lab': lab['@id'],
+        'ID': "doi:10.1101/000091"
+    }
+    return testapp.post_json('/publication', item).json['@graph'][0]
+
+
 # data from test/datafixtures
 def test_update_publication_PMID(testapp, publication_PMID):
     assert publication_PMID['title'][:50] == 'A deep proteomics perspective on CRM1-mediated nuc'

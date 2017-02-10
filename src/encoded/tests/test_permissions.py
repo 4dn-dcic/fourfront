@@ -2,6 +2,84 @@ import pytest
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 
+@pytest.fixture
+def remc_lab(testapp):
+    item = {
+        'name': 'remc-lab',
+        'title': 'REMC lab',
+        'status': 'current'
+    }
+    return testapp.post_json('/lab', item).json['@graph'][0]
+
+
+@pytest.fixture
+def remc_award(testapp):
+    item = {
+        'name': 'remc-award',
+        'description': 'REMC test award',
+        'viewing_group': 'Not 4DN',
+    }
+    return testapp.post_json('/award', item).json['@graph'][0]
+
+
+@pytest.fixture
+def wrangler(testapp):
+    item = {
+        'first_name': 'Wrangler',
+        'last_name': 'Admin',
+        'email': 'wrangler@example.org',
+        'groups': ['admin'],
+    }
+
+    # User @@object view has keys omitted.
+    res = testapp.post_json('/user', item)
+    return testapp.get(res.location).json
+
+
+@pytest.fixture
+def lab_viewer(testapp, lab, award):
+    item = {
+        'first_name': 'ENCODE',
+        'last_name': 'lab viewer',
+        'email': 'encode_viewer@example.org',
+        'lab': lab['name'],
+        'status': 'current',
+        'viewing_groups': [award['viewing_group']]
+    }
+    # User @@object view has keys omitted.
+    res = testapp.post_json('/user', item)
+    return testapp.get(res.location).json
+
+
+@pytest.fixture
+def viewing_group_member(testapp, award):
+    item = {
+        'first_name': 'Viewing',
+        'last_name': 'Group',
+        'email': 'viewing_group_member@example.org',
+        'viewing_groups': [award['viewing_group']],
+        'status': 'current'
+    }
+    # User @@object view has keys omitted.
+    res = testapp.post_json('/user', item)
+    return testapp.get(res.location).json
+
+
+@pytest.fixture
+def remc_submitter(testapp, remc_lab, remc_award):
+    item = {
+        'first_name': 'REMC',
+        'last_name': 'Submitter',
+        'email': 'remc_submitter@example.org',
+        'submits_for': [remc_lab['@id']],
+        'viewing_groups': [remc_award['viewing_group']],
+        'status': 'current'
+    }
+    # User @@object view has keys omitted.
+    res = testapp.post_json('/user', item)
+    return testapp.get(res.location).json
+
+
 def remote_user_testapp(app, remote_user):
     from webtest import TestApp
     environ = {
