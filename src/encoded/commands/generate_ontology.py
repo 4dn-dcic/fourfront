@@ -31,7 +31,7 @@ HAS_PART = "http://purl.obolibrary.org/obo/BFO_0000051"
 ACHIEVES_PLANNED_OBJECTIVE = "http://purl.obolibrary.org/obo/OBI_0000417"
 
 
-def iterativeChildren(nodes, terms, data):
+def iterative_parents(nodes, terms, data):
     '''returns all the parents traversing the term graph structure
         - (not the direct RDF graph) by iteratively following parents
         until there are no more parents
@@ -42,11 +42,13 @@ def iterativeChildren(nodes, terms, data):
         if len(nodes) == 0:
             break
         for node in nodes:
+            if not terms.get(node):
+                continue  # deal with a parent not being in the term dict
             results.append(node)
-            if terms[node][data]:
-                for child in terms[node][data]:
-                    if child not in results:
-                        newNodes.append(child)
+            if terms[node].get(data):
+                for parent in terms[node][data]:
+                    if parent not in results:
+                        newNodes.append(parent)
         nodes = list(set(newNodes))
     return list(set(results))
 
@@ -54,8 +56,8 @@ def iterativeChildren(nodes, terms, data):
 def get_all_ancestors(term, terms):
     if 'closure' not in term:
         term['closure'] = []
-    if term['all_parents']:
-        words = iterativeChildren(term['all_parents'], terms, 'all_parents')
+    if 'all_parents' in term:
+        words = iterative_parents(term['all_parents'], terms, 'all_parents')
         term['closure'].extend(words)
     term['closure'].append(term['term_url'])
     return term  # is this necessary
@@ -230,9 +232,9 @@ def add_slim_to_term(term, slim_terms):
     slimterms2add = {}
     for slimterm in slim_terms:
         if term.get('closure') and slimterm['term_id'] in term['closure']:
-            slimterms2add[slimterm['term_id']] = slimterm
+            slimterms2add[slimterm['term_id']] = slimterm['uuid']
         if term.get('closure_with_develops_from') and slimterm['term_id'] in term['closure_with_develops_from']:
-            slimterms2add[slimterm['term_id']] = slimterm
+            slimterms2add[slimterm['term_id']] = slimterm['uuid']
     if slimterms2add:
         term['slim_terms'] = list(slimterms2add.values())
     return term
@@ -452,26 +454,19 @@ def main():
     for termid, term in terms.items():
         term = get_all_ancestors(term, terms)
         term = add_slim_to_term(term, slim_terms)
-        print(term)
+    for termid, term in terms.items():
         if 'relationships' in term:
             del term['relationships']
+        if 'all_parents' in term:
+            del term['all_parents']
         del term['closure']  # should always have this
-        print('AFTER')
-        print(term)
 
-    # for testing
-    print('WE HAVE ', len(terms), ' TERMS')
-    onts = {}
-    for tid, term in terms.items():
-        print(term)
-        if term.get('source_ontology'):
-            ont = term['source_ontology']
-            print(ont)
-            if ont not in onts:
-                onts[ont] = 1
-            else:
-                onts[ont] += 1
-    print(onts)
+    with open('test_ontology.json', 'w') as outfile:
+        outfile.write('[\n')
+        for term in terms.values():
+            json.dump(term, outfile, indent=4)
+            outfile.write('\n')
+        outfile.write(']\n')
 
 
 if __name__ == '__main__':

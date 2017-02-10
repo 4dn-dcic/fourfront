@@ -47,8 +47,6 @@ def splitNameFromNamespace(aUri):
         ns = stringa.rsplit("/", 1)[0]
         if '/' in stringa:
             name = stringa.rsplit("/", 1)[1]
-        else:
-            print('URI=', aUri)
     return (name, ns)
 
 
