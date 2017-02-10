@@ -328,7 +328,7 @@ h1.page-title + .page-subtitle {
 	z-index: -10;
 	background-color: rgba(255,255,255,0.8);
 	opacity: 0;
-	transition: opacity .25s, z-index 0s 0.25s;
+	transition: opacity .5s, z-index 0s 0.5s;
 	.inner {
 		position: absolute;
 		top: 50%;

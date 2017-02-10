@@ -78,13 +78,13 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
      */
     setLinkedDetails : function(fallbackToAjax = false, callback = null, newState = {}){
         if (!this.state.details_lab) {
-            var labDetails = this.getLinkedPropertyDetailsFromExperiments('lab', fallbackToAjax);
+            var labDetails = this.getEmbeddedPropertyDetailsFromExperiments('lab', fallbackToAjax);
             if (labDetails !== null){
                 newState.details_lab = labDetails;
             }
         }
         if (!this.state.details_award) {
-            var awardDetails = this.getLinkedPropertyDetailsFromExperiments('award', fallbackToAjax);
+            var awardDetails = this.getEmbeddedPropertyDetailsFromExperiments('award', fallbackToAjax);
             if (awardDetails !== null){
                 newState.details_award = awardDetails;
             }
@@ -107,7 +107,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
      * @param {boolean} allowAjaxFallback - Whether to start an AJAX request to fetch details if they are not in experiment(s).
      * @return {Object} Details for the property/key supplied, or null if not available or not matched.
      */
-    getLinkedPropertyDetailsFromExperiments : function(propertyName, allowAjaxFallback = false){
+    getEmbeddedPropertyDetailsFromExperiments : function(propertyName, allowAjaxFallback = false){
         if (!this.props.context[propertyName]) return null;
 
         // If we have property already embedded as object, lets use it.
@@ -127,7 +127,10 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         for (var i = 0; i < experiments.length; i++){
 
             // If we have property ID from ExperimentSet, just grab first property info with matching ID.
-            if (propertyID && propertyID == experiments[i][propertyName]['@id']) {
+            if (
+                propertyID && experiments[i][propertyName] &&
+                propertyID == (experiments[i][propertyName]['@id'])
+            ) {
                 propertyInfo = experiments[i][propertyName];
                 break;
             } else if (!propertyID){

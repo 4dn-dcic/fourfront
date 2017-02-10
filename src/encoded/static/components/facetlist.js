@@ -865,7 +865,7 @@ var FacetList = module.exports = React.createClass({
     /** Load list of available facets via AJAX once & reuse via redux store. */
     loadFacets : function(callback = null){
         var facetType = (this.props.itemTypes && Array.isArray(this.props.itemTypes) && this.props.itemTypes[0]) ||
-            (this.props.experimentsOrSets == 'sets' ? 'ExperimentSetReplicate' : 'ExperimentHiC');
+            (this.props.experimentsOrSets == 'sets' ? 'ExperimentSet' : 'Experiment');
 
         ajax.load('/facets?type=' + facetType + '&format=json', function(resultFacets){
             if (this.props.debug) console.log('Loaded Facet List via AJAX.', resultFacets);
