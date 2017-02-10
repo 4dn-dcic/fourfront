@@ -39,7 +39,9 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'treatments',
         'modifications',
         'modifications.modified_regions',
-        'cell_culture_details'
+        'cell_culture_details',
+        'lab',
+        'award'
     ]
     embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
