@@ -215,13 +215,15 @@ class Item(snovault.Item):
 def item_page_view(context, request):
     """Return the frame=embedded view with @ids for objects not embedded."""
     properties_emb, properties_obj = item_view_page_object(context, request)
-    for key, val in properties_emb.items():
-        if isinstance(val, dict) and '@id' not in val.keys() and key in properties_obj:
-            properties_emb[key]['@id'] = properties_obj[key]
-        elif isinstance(val, list):
-            for i in range(len(val)):
-                if isinstance(val, dict) and '@id' not in val.keys() and key in properties_obj:
-                    properties_emb[key][i]['@id'] = properties_obj[key][i]
+    for key, val in properties_obj.items():
+        # check if it's an @id
+        if isinstance(val, str) and val[0] == '/':
+            if isinstance(properties_emb[key], dict) and '@id' not in properties_emb[key]:
+                properties_emb[key]['@id'] = properties_obj[key]
+            elif isinstance(properties_emb[key], list):
+                for i in range(len(properties_emb[key])):
+                    if isinstance(properties_emb[key][i], dict) and '@id' not in properties_emb[key][i]:
+                        properties_emb[key][i]['@id'] = val[i]
     return properties_emb
 
 class SharedItem(Item):
