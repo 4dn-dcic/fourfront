@@ -115,14 +115,6 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 'experiments_in_set.biosample.biosource.individual.organism.scientific_name',
                 'experiments_in_set.digestion_enzyme.name'
             ],
-            'colors' : { // Keys should be all lowercase
-                "human (homo sapiens)" : "rgb(218, 112, 6)",
-                "human" : "rgb(218, 112, 6)",
-                "mouse (mus musculus)" : "rgb(43, 88, 169)",
-                "mouse" : "rgb(43, 88, 169)",
-                "other": "#a173d1",
-                "end": "#bbbbbb"
-            },
             colWidthPerScreenSize : {
                 'small' : [
                     {'xs' : 12, 'sm' : 6,  'md' : 4, 'lg' : 3},
@@ -146,7 +138,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             'chartFieldsBarPlot'    : [
                 { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
                 { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
-                { title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
+                //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
             ],
             'chartFieldsHierarchy'  : [
                 { 
@@ -222,6 +214,8 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             !_.isEqual(this.state, nextState) ||
             !_.isEqual(this.state.experiments, nextState.experiments) ||
             !_.isEqual(this.state.filteredExperiments, nextState.filteredExperiments) ||
+            this.props.schemas !== nextProps.schemas ||
+            this.state.session !== nextState.session ||
             this.show(nextProps) !== this.show(this.props) ||
             (nextState.mounted !== this.state.mounted)
         ){
@@ -515,7 +509,6 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                             descriptionElement={() => this.refs.description}
 
                             handleClick={this.handleVisualNodeClickToUpdateFilters}
-                            colorForNode={this.colorForNode}
                             updateStats={this.props.updateStats}
 
                             expSetFilters={this.props.expSetFilters}
@@ -531,7 +524,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                             experiments={this.state.filteredExperiments || this.state.experiments}
                             fields={this.state.chartFieldsBarPlot}
                             width={this.width(1) - 20} height={height}
-                            colorForNode={this.colorForNode}
+                            schemas={this.props.schemas}
                         />
                         <FetchingView display={this.state.fetching} />
                     </div>

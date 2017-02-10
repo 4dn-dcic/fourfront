@@ -150,5 +150,28 @@
             "type": "string",
             "enum": ["Yes", "No"]
         }
+    },
+    "facets": {
+        "award.project": {
+            "title": "Project"
+        },
+        "biosample.biosource.individual.organism.name": {
+            "title": "Organism"
+        },
+        "biosample.biosource.biosource_type": {
+            "title": "Biosource type"
+        },
+        "biosample.biosource_summary": {
+            "title": "Biosource"
+        },
+        "biosample.modifications_summary": {
+            "title": "Modifications"
+        },
+        "biosample.treatments_summary": {
+            "title": "Treatments"
+        },
+        "lab.title": {
+            "title": "Lab"
+        }
     }
 }

@@ -1,15 +1,14 @@
 'use strict';
 
 var React = require('react');
-var globals = require('./globals');
+var globals = require('./../globals');
 var Panel = require('react-bootstrap').Panel;
-var { ExperimentsTable } = require('./experiments-table');
+var { ExperimentsTable } = require('./../experiments-table');
 var _ = require('underscore');
-var { SubIPanel, DescriptorField, tipsFromSchema } = require('./item');
-var FacetList = require('./facetlist');
-var { ajax, console, DateUtility } = require('./util');
-var FormattedInfoBlock = require('./formatted-info-block');
-var { FlexibleDescriptionBox } = require('./experiment-common');
+var { DescriptorField, Detail } = require('./item-view');
+var { ItemHeader, FormattedInfoBlock } = require('./components');
+var FacetList = require('./../facetlist');
+var { ajax, console, DateUtility, object } = require('./../util');
 
 /**
  * Entire ExperimentSet page view.
@@ -49,7 +48,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
     componentWillMount : function(){
         if (!this.tips) {
-            this.tips = tipsFromSchema(this.props.schemas, this.props.context);
+            this.tips = object.tipsFromSchema(this.props.schemas, this.props.context);
         }
 
         this.setLinkedDetails(false);
@@ -79,13 +78,13 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
      */
     setLinkedDetails : function(fallbackToAjax = false, callback = null, newState = {}){
         if (!this.state.details_lab) {
-            var labDetails = this.getLinkedPropertyDetailsFromExperiments('lab', fallbackToAjax);
+            var labDetails = this.getEmbeddedPropertyDetailsFromExperiments('lab', fallbackToAjax);
             if (labDetails !== null){
                 newState.details_lab = labDetails;
             }
         }
         if (!this.state.details_award) {
-            var awardDetails = this.getLinkedPropertyDetailsFromExperiments('award', fallbackToAjax);
+            var awardDetails = this.getEmbeddedPropertyDetailsFromExperiments('award', fallbackToAjax);
             if (awardDetails !== null){
                 newState.details_award = awardDetails;
             }
@@ -108,7 +107,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
      * @param {boolean} allowAjaxFallback - Whether to start an AJAX request to fetch details if they are not in experiment(s).
      * @return {Object} Details for the property/key supplied, or null if not available or not matched.
      */
-    getLinkedPropertyDetailsFromExperiments : function(propertyName, allowAjaxFallback = false){
+    getEmbeddedPropertyDetailsFromExperiments : function(propertyName, allowAjaxFallback = false){
         if (!this.props.context[propertyName]) return null;
 
         // If we have property already embedded as object, lets use it.
@@ -128,7 +127,10 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         for (var i = 0; i < experiments.length; i++){
 
             // If we have property ID from ExperimentSet, just grab first property info with matching ID.
-            if (propertyID && propertyID == experiments[i][propertyName]['@id']) {
+            if (
+                propertyID && experiments[i][propertyName] &&
+                propertyID == (experiments[i][propertyName]['@id'])
+            ) {
                 propertyInfo = experiments[i][propertyName];
                 break;
             } else if (!propertyID){
@@ -191,7 +193,8 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                             experimentSetListJSON={this.props.context.experiments_in_set}
                             orientation="vertical"
                             expSetFilters={this.props.expSetFilters}
-                            facets={ this.props.facets }
+                            itemTypes={this.props.context['@type'] || ['ExperimentSetReplicate']}
+                            facets={null}
                             experimentsOrSets="experiments"
                             expIncompleteFacets={ this.props.expIncompleteFacets }
                             className="with-header-bg"
@@ -235,30 +238,6 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
                 </div>
 
-                {/*
-                <br/><br/><br /><br /><hr />
-                <h6>Existing Print-out (temporary):</h6>
-
-                <Panel className="data-display panel-body-with-header">
-                    <dl className="key-value">
-                        {Object.keys(this.props.context).sort().map((ikey, idx) =>
-                            <div key={ikey} data-test="term-name">
-
-                                <DescriptorField
-                                    field={ikey}
-                                    description={
-                                        this.tips[ikey] && this.tips[ikey].description ?
-                                            this.tips[ikey].description : ''
-                                    }
-                                />
-
-                                <dd>{ formValue(this.props.schemas, this.props.context[ikey], ikey, 0) }</dd>
-                            </div>
-                        )}
-                    </dl>
-                </Panel>
-                */}
-
             </div>
         );
     }
@@ -269,91 +248,17 @@ globals.panel_views.register(ExperimentSetView, 'ExperimentSet');
 globals.panel_views.register(ExperimentSetView, 'ExperimentSetReplicate');
 
 
+
 var ExperimentSetHeader = React.createClass({
-
-    parsedCreationDate(){
-        if (!('date_created' in this.props.context)) return <span><i></i></span>;
-        return (
-            <span>
-                <i className="icon sbt-calendar"></i>&nbsp; Added{' '}
-                <DateUtility.LocalizedTime timestamp={this.props.context.date_created} formatType='date-time-md' dateTimeSeparator=" at " />
-            </span>
-        );
-    },
-
-    parsedStatus(){
-        if (!('status' in this.props.context)) return <div></div>;
-        /*  Removed icon in lieu of color indicator for status
-        var iconClass = null;
-        switch (this.props.context.status){
-
-            case 'in review by lab':
-            case 'in review by project':
-                iconClass = 'icon ss-stopwatch';
-                break;
-
-        }
-        */
-
-        // Status colors are set via CSS (layout.scss) dependent on data-status attribute
-        return (
-            <div
-                className="expset-indicator expset-status right"
-                data-status={ this.props.context.status.toLowerCase() }
-                title="Review Status"
-            >
-                { this.props.context.status }
-            </div>
-        );
-    },
-
-    parsedExperimentSetType(){
-        if (!('experimentset_type' in this.props.context)) return <div></div>;
-        return (
-            <div
-                className="expset-indicator expset-type right"
-                data-set-type={ this.props.context.experimentset_type }
-                title="Experiment Set Type"
-            >
-                { this.props.context.experimentset_type }
-            </div>
-        );
-    },
 
     render: function() {
         console.log('render ExperimentSetHeader')
         return (
-            <div className="exp-set-header-area">
-
-                <div className="row clearfix top-row">
-                    <h3 className="col-sm-6 item-label-title">
-                        { /* PLACEHOLDER / TEMP-EMPTY */ }
-                    </h3>
-                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra text-capitalize indicators clearfix">
-                        { this.parsedExperimentSetType() }
-                        { this.parsedStatus() }
-                    </h5>
-                </div>
-
-                <FlexibleDescriptionBox
-                    description={ this.props.context.description }
-                    className="item-page-heading experiment-heading"
-                    textClassName="text-large"
-                    fitTo="grid"
-                    dimensions={{
-                        paddingWidth : 32,
-                        paddingHeight : 22,
-                        buttonWidth : 30,
-                        initialHeight : 45
-                    }}
-                />
-
-                <div className="row clearfix bottom-row">
-                    <div className="col-sm-6 item-label-extra set-type-indicators">{ /* PLACEHOLDER / TEMP-EMPTY */ }</div>
-                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra" title="Date Added - UTC/GMT">{ this.parsedCreationDate() }</h5>
-                </div>
-
-            </div>
+            <ItemHeader.Wrapper className="exp-set-header-area" context={this.props.context} href={this.props.href}>
+                <ItemHeader.TopRow>{ this.props.context.experimentset_type }</ItemHeader.TopRow>
+                <ItemHeader.MiddleRow />
+                <ItemHeader.BottomRow />
+            </ItemHeader.Wrapper>
         );
     }
 });
@@ -383,37 +288,3 @@ var ExperimentSetInfoArea = React.createClass({
 
 });
 
-
-/**
- * Recursively render keys/values included in a provided item.
- * Wraps URLs/paths in link elements. Sub-panels for objects.
- *
- * @param {Object} schemas - Object containing schemas for server's JSONized object output.
- * @param {*|*[]} item - Item(s) to render recursively.
- */
-
-var formValue = function (schemas, item, keyPrefix = '', depth = 0) {
-    var toReturn = [];
-    if(Array.isArray(item)) {
-        for (var i=0; i < item.length; i++){
-            toReturn.push(formValue(schemas, item[i], keyPrefix, depth + 1));
-        }
-    }else if (typeof item === 'object') {
-        toReturn.push(
-            <SubIPanel
-                schemas={schemas}
-                content={item}
-                key={item['@id'] || item.name || (keyPrefix.length > 0 ? keyPrefix + '-' : '') + depth + '-' + toReturn.length }
-            />
-        );
-    }else{
-        if (typeof item === 'string' && item.charAt(0) === '/') {
-            toReturn.push(<a key={item} href={item}>{item}</a>);
-        }else{
-            toReturn.push(item);
-        }
-    }
-    return(
-        <div>{toReturn}</div>
-    );
-};

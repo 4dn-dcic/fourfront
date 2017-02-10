@@ -4,7 +4,7 @@ var globals = require('./globals');
 var _ = require('underscore');
 var { ajax, console, object, isServerSide } = require('./util');
 var { DropdownButton, Button, MenuItem, Panel, Table} = require('react-bootstrap');
-var makeTitle = require('./item').title;
+var makeTitle = require('./item-pages/item').title;
 var Alerts = require('./alerts');
 var d3 = require('d3');
 

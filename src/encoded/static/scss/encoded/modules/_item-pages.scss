@@ -1,0 +1,463 @@
+/***********************************************************
+Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
+************************************************************/
+
+
+@media screen and (min-width: $screen-md-min){
+	/* Nudge accession #, etc. closer to title on wide desktop views */
+	.item-view-header {
+		margin-top: -27px;
+	}
+	
+}
+
+.item-label-title {
+	margin-bottom: 9px;
+	font-family: 'Work Sans', sans-serif;
+	font-weight: 300;
+	margin-top: 0;
+}
+
+.item-label-extra {
+	font-weight: 300;
+
+	.icon[class*=" ss-"] {
+		margin-bottom: -4px;
+		vertical-align: middle;
+	}
+
+	.icon[class*=" sbt-"] {
+		margin-top: -2px;
+		vertical-align: middle;
+	}
+}
+
+@media screen and (max-width: $screen-xs-max){
+
+	.item-label-extra.text-right {
+		// Hackishly making text left-aligned for collapsed mobile view(s)
+		text-align: left !important;
+	}
+
+}
+
+/******* Item Page Headings *********/
+
+
+.flexible-description-box {
+	box-sizing: border-box;
+	padding: 0;
+	margin: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	transition: height .4s;
+
+	.description-expand-button {
+		padding: 0px;
+		width: 24px;
+		height: 24px;
+		margin-left: 6px;
+		box-sizing: border-box;
+		border: none;
+		background: none;
+		outline: none;
+	}
+
+	p {
+		overflow: inherit;
+		text-overflow: inherit;
+		&:last-child {
+			margin-bottom : 0;
+		}
+	}
+}
+
+.item-page-heading {
+    /** Extends .flexible-description-box **/
+	border-radius: 2px;
+	border: 1px solid #eee;
+	min-height: 42px;
+	padding: 10px 15px 8px;
+
+	h4 {
+		font-weight: 500;
+
+		small {
+			vertical-align: top;
+			line-height: inherit;
+			letter-spacing: normal;
+		}
+	}
+
+}
+
+.flexcol-heading, .item-page-heading {
+    position: relative;
+    margin-right: -10px;
+    margin-left: -10px;
+    background-color: #f4f4f4;
+
+    h1, h2, h3, h4, h5, h6 {
+        margin: 0;
+    }
+
+    // For the Experiment Summary header
+    &.experiment-heading {
+		font-family: 'Work Sans', sans-serif;
+
+        h1, h2, h3, h4, h5, h6 {
+            line-height: 20px;  // 50px - 20px of vertical padding
+        }
+
+    }
+}
+
+.item-header-indicators {
+
+	margin-top: 8px;
+	margin-bottom: 8px;
+
+	.expset-indicator {
+		display: inline-block;
+		box-sizing: border-box;
+		/* border: 1px solid rgba(0,0,0,0.125); */
+		/* border-radius: 5px; */
+		line-height: 20px;
+		color : #000;
+		font-weight: 400;
+		padding-left: 10px;
+		padding-right: 10px;
+		text-transform: capitalize;
+		color: #444;
+
+		&.right, .left {
+			max-width: 50%;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			&:after {
+				content : "";
+				display: block;
+				position: absolute;
+				height: 100%;
+				top: 0;
+			}
+		}
+
+		&.right {
+			padding-left: 21px;
+			padding-right: 0;
+			&:after {
+				margin-left: -10px;
+				border-left: 1px solid rgba(0,0,0,0.125);
+			}
+			&:last-child {
+				padding-left: 0;
+				margin-left: 0;
+			}
+			&:last-child:after {
+				display: none;
+			}
+		}
+
+		&.left {
+			padding-right: 21px;
+			padding-left: 0;
+			max-width: 50%;
+			&:after {
+				margin-right: -10px;
+				border-right: 1px solid rgba(0,0,0,0.125);
+			}
+			&:last-child {
+				padding-right: 0;
+				margin-right: 0;
+			}
+			&:last-child:after {
+				display: none;
+			}
+		}
+
+		&.expset-status:before {
+			content: "";
+			width: 9px;
+			height : 9px;
+			display: inline-block;
+			position: relative;
+			margin-right: 7px;
+			border-radius: 50%;
+		}
+
+		&.expset-status[data-status="released"]:before {
+			color: #fff;
+			background-color: #308756;
+		}
+
+		&.expset-status[data-status="current"]:before {
+			color: #fff;
+			background-color: #308756;
+		}
+
+		&.expset-status[data-status="revoked"]:before {
+			color: #fff;
+			background-color: #812423;
+		}
+
+		&.expset-status[data-status="deleted"]:before {
+			color: #fff;
+			background-color: #a90d0b;
+		}
+
+		&.expset-status[data-status="replaced"]:before {
+			color: #fff;
+			background-color: #47419a;
+		}
+
+		&.expset-status[data-status="in review by lab"]:before {
+			color: #fff;
+			background-color: #d8bd22;
+		}
+
+		&.expset-status[data-status="in review by project"]:before {
+			color: #fff;
+			background-color: #d8bd22;
+		}
+
+		&.expset-status[data-status="released to project"]:before {
+			color: #fff;
+			background-color: #397855;
+		}
+
+		&.expset-status[data-status="unspecified"]:before {
+			color: #fff;
+			background-color: #7b7b7b;
+			display: none;
+		}
+
+		/*
+		&[data-set-type="replicates"]{
+			background-color: #56889b;
+		}
+
+		&[data-set-type="replicates"]{
+			background-color: #397855;
+		}
+
+		&[data-set-type="technical replicates"]{
+			background-color: #34677b;
+		}
+
+		&[data-set-type="analysis set"]{
+			background-color: #812423;
+		}
+
+		&[data-set-type="publication"]{
+			background-color: #47419a;
+		}
+
+		&[data-set-type="unspecified"]{
+			background-color: #7b7b7b;
+			display: none;
+		}
+		*/
+	}
+
+}
+
+
+.item-page-container {
+    .info-area {
+	    margin-top: 24px;
+    }
+    .item-info-area {
+        margin-bottom: 20px;
+        min-height: 120px;
+    }
+
+}
+
+.item-page-detail {
+
+	margin-bottom: 12px;
+
+	.list-item {
+		
+		/* Equalize Height of Columns, unsupported for IE9 and below: */
+		display: -webkit-box;
+		display: -webkit-flex;
+		display: -ms-flexbox;
+		display: flex;
+		
+		.item-label, .item-value {		
+			> div {
+				min-height: 20px;
+				height: 100%;
+				word-break: break-all;
+				border-bottom: 1px solid #eee;
+				padding-top: 5px;
+				padding-bottom: 5px;
+			}
+		}
+		.item-label {
+			font-weight: 500;
+		}
+		ul {
+			padding-left: 20px;
+			margin-bottom: 0;
+			//margin-top: 3px;
+		}
+	}
+		
+}
+
+
+
+
+
+
+/*********** Formatted Info Panel/Block *****************/
+
+
+
+.formatted-info-panel {
+	padding : 0 10px 12px;
+	/* border-bottom: 1px solid #e2e2e2; */
+	margin-bottom: 5px;
+
+	/* Adjustments based on available props, ToDo: .no-title */
+
+	&.has-border {
+		padding : 8px 18px 15px;
+	}
+
+	&.no-icon {
+		padding : 0;
+		margin-bottom: 0;
+		&.loading {
+			min-height: 36.5px;
+		}
+	}
+
+	> h6 {
+		margin : 0 0 7px /* -3px -> */ -8px;
+		font-weight: 500;
+		color: #646464;
+
+		&:after {
+			content : "\f105";
+			font-family: "FontAwesome";
+			padding-left: 6px;
+		}
+
+	}
+
+	.row .icon-container {
+		max-width: 50px;
+	}
+
+	h5 {
+		margin-bottom: 0;
+		margin-top: 2px;
+		font-weight: 600;
+		/* white-space: nowrap; */
+		overflow: hidden;
+		text-overflow: ellipsis;
+		word-break: normal;
+
+		a {
+			/* display: block; */
+			overflow: inherit;
+			text-overflow: inherit;
+		}
+
+		&.no-link {
+			font-weight: 500;
+		}
+
+	}
+
+	&.error-block.no-icon h5:before {
+		content: "\f06a";
+		font-family: FontAwesome;
+		margin-right: 6px;
+		color: #999;
+	}
+
+	div.more-details {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+
+		&.error-message {
+			white-space: pre-line;
+			white-space: normal;
+			opacity: 0.5;
+		}
+	}
+
+	.icon-container {
+		text-align: center;
+		padding-top: 4px;
+		font-size: 20px;
+		margin-bottom: -10px;
+
+		&.col-xs-2 {
+			padding-right: 0px;
+			padding-left: 5px;
+		}
+	}
+
+}
+
+.formatted-info-panel,
+.formatted-info-panel-list {
+
+	&.loading > li,
+	&.loading > .row {
+		opacity : 1;
+	}
+
+	&.loaded > li,
+	&.loaded > .row {
+		opacity : 0;
+		transition: opacity 0s;
+	}
+
+	&.loaded.transitioned > li,
+	&.loaded.transitioned > .row {
+		opacity : 1;
+		transition: opacity .5s;
+	}
+
+}
+
+/************** Experiments Set View **************/
+
+.exp-table-section {
+
+	h3 {
+		font-weight: 300;
+		margin: 0;
+		border-top: 1px solid #eee;
+		padding: 16px 0 16px;
+
+		span.exp-number {
+			padding-top: 5px;
+		}
+
+	}
+
+	.exp-table-container {
+		overflow-x: auto;
+		display: block;
+	}
+
+	/*
+	table tbody tr:first-child td {
+
+		&:nth-child(1),
+		&:nth-child(2) {
+			border-bottom-color: #c0c0c0;
+		}
+	}
+	*/
+}

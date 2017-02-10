@@ -210,6 +210,41 @@ class Item(snovault.Item):
             keys['accession'].append(properties['accession'])
         return keys
 
+    @snovault.calculated_property(schema={
+        "title": "External Reference URIs",
+        "description": "External references to this item.",
+        "type": "array",
+        "items" : { "type" : "object", "title" : "External Reference", "properties" : { 
+                "uri" : { "type" : "string" },
+                "ref" : { "type" : "string" }
+            } 
+        }
+    })
+    def external_references(self, request, dbxrefs=None):
+        namespaces = request.registry.settings.get('snovault.jsonld.namespaces')
+        if dbxrefs and namespaces:
+            refs = []
+            for r in dbxrefs:
+                refObject = { "ref" : r, "uri" : None }
+                refParts = r.split(':')
+                if len(refParts) < 2:
+                    refs.append(refObject)
+                    continue
+                refPrefix = refParts[0]
+                refID = refParts[1]
+                baseUri = namespaces.get(refPrefix)
+                if not baseUri:
+                    refs.append(refObject)
+                    continue
+
+                if '{reference_id}' in baseUri:
+                    refObject['uri'] = baseUri.replace('{reference_id}', refID, 1)
+                else:
+                    refObject['uri'] = baseUri + refID
+                refs.append(refObject)
+                
+            return refs
+        return []
 
 @view_config(context=Item, permission='view', request_method='GET', name='page')
 def item_page_view(context, request):

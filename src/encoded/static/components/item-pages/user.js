@@ -4,15 +4,15 @@
 'use strict';
 
 var React = require('react');
-var globals = require('./globals');
-var store = require('../store');
-var { Modal, Alert } = require('react-bootstrap');
-var { ItemStore } = require('./lib/store');
-var { ajax, JWT, console, DateUtility } = require('./util');
-var FormattedInfoBlock = require('./formatted-info-block');
 var _ = require('underscore');
-var { EditableField, FieldSet } = require('./forms');
+var { Modal, Alert } = require('react-bootstrap');
 var jwt = require('jsonwebtoken');
+var { ItemStore } = require('./../lib/store');
+var globals = require('./../globals');
+var store = require('./../../store');
+var { ajax, JWT, console, DateUtility } = require('./../util');
+var FormattedInfoBlock = require('./components/FormattedInfoBlock');
+var { EditableField, FieldSet } = require('./../forms');
 
 
 class AccessKeyStore extends ItemStore {
