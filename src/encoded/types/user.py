@@ -12,6 +12,8 @@ from pyramid.security import (
 )
 from .base import (
     Item,
+    process_embeds
+    # paths_filtered_by_status,
 )
 from snovault import (
     CONNECTION,
@@ -65,9 +67,8 @@ class User(Item):
     item_type = 'user'
     schema = load_schema('encoded:schemas/user.json')
     # Avoid access_keys reverse link so editing access keys does not reindex content.
-    # embedded = [
-    #     'lab',
-    # ]
+    embedded = []
+    embedded = process_embeds(embedded)
     STATUS_ACL = {
         'current': ONLY_OWNER_EDIT,
         'deleted': USER_DELETED,

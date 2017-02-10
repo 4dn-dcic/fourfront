@@ -6,6 +6,7 @@ from snovault import (
 )
 from .base import (
     Item,
+    process_embeds
 )
 from snovault.attachment import ItemWithAttachment
 
@@ -28,6 +29,7 @@ class Image(ItemWithAttachment, Item):
         'image/gif',
     ]
     embedded = ['submitted_by']
+    embedded = process_embeds(embedded)
 
     def unique_keys(self, properties):
         """smth."""

@@ -247,11 +247,11 @@ class Item(snovault.Item):
             return refs
         return []
 
-# make it so any item page defaults to using the object, not embedded, view
 @view_config(context=Item, permission='view', request_method='GET', name='page')
 def item_page_view(context, request):
-    """Return the frame=object view rather than embedded view by default."""
+    """Return the frame=embedded view with @ids for objects not embedded."""
     return item_view_page_object(context, request)
+
 
 class SharedItem(Item):
     """An Item visible to all authenticated users while "proposed" or "in progress"."""
@@ -292,12 +292,28 @@ def edit(context, request):
 
 
 @snovault.calculated_property(context=Item, category='action')
-def edit_json(context, request):
+def create(context, request):
     """smth."""
     if request.has_permission('edit'):
         return {
-            'name': 'edit-json',
-            'title': 'Edit JSON',
+            'name': 'create',
+            'title': 'Create',
             'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
-            'href': '{item_uri}#!edit-json'.format(item_uri=request.resource_path(context)),
+            'href': '{item_uri}#!create'.format(item_uri=request.resource_path(context)),
         }
+
+
+def process_embeds(embeds):
+    """Perform processing on the embed list. Currently, that means adding
+    a title field to any object that is NOT fully embedded or doesn't already have one
+    Does a simple check on the list of embeds
+    """
+    fields_to_process = []
+    for field in embeds:
+        split_field = field.strip().split('.')
+        if len(split_field) > 1:
+            embed_path = '.'.join(split_field[:-1])
+            if embed_path not in embeds and embed_path not in fields_to_process:
+                fields_to_process.append(embed_path)
+    processed_fields = [field + '.display_title' for field in fields_to_process]
+    return processed_fields + embeds
