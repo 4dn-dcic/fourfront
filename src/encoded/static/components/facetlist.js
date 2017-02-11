@@ -167,7 +167,7 @@ var ExpTerm = React.createClass({
 
     render: function () {
 
-        var standardizedFieldKey = this.standardizeFieldKey();
+        //var standardizedFieldKey = this.standardizeFieldKey();
         //var expCount = this.state.termMatchExps.size;
         var selected = this.isSelected();
         return (
@@ -455,75 +455,8 @@ var FacetList = module.exports = React.createClass({
             });
         },
 
-        siftExperiments : function(graph, filters, ignored=null, field=null, term=null) {
-            var passExperiments = new Set();
-            // Start by adding all applicable experiments to set
-            for(var i=0; i < graph.length; i++){
-                if(graph[i].experiments_in_set){
-                    for(var j=0; j < graph[i].experiments_in_set.length; j++){
-                        passExperiments.add(graph[i].experiments_in_set[j]);
-                    }
-                } else {
-                    passExperiments.add(graph[i]);
-                }
-            }
-            // search through currently selected expt filters
-            var filterKeys = Object.keys(filters);
-            if (field && !_.contains(filterKeys, field)){
-                filterKeys.push(field);
-            }
-            for(let experiment of passExperiments){
-                var eliminated = false;
-                for(var k=0; k < filterKeys.length; k++){
-                    var refinedFilterSet = null;
-                    if (ignored && typeof ignored === 'object' && ignored[filterKeys[k]] && ignored[filterKeys[k]].size > 0){
-                        // remove the ignored filters by using the difference between sets
-                        refinedFilterSet = new Set([...filters[filterKeys[k]]].filter(x => !ignored[filterKeys[k]].has(x)));
-                    }
-                    if (refinedFilterSet === null) refinedFilterSet = filters[filterKeys[k]];
-                    if (eliminated){
-                        break;
-                    }
-                    var valueProbe = experiment;
-                    var filterSplit = filterKeys[k].split('.');
-                    for(var l=0; l < filterSplit.length; l++){
-                        if(filterSplit[l] === 'experiments_in_set'){
-                            continue;
-                        }
-                        // for now, use first item in an array (for things such as biosamples)
-                        if(Array.isArray(valueProbe)){
-                            valueProbe = valueProbe[0];
-                        }
-                        if(valueProbe[filterSplit[l]]){
-                            valueProbe = valueProbe[filterSplit[l]];
-                            if(l === filterSplit.length-1){ // last level of filter
-                                if(field && filterKeys[k] === field){
-                                    if(valueProbe !== term){
-                                        eliminated = true;
-                                        passExperiments.delete(experiment);
-                                    }
-                                }else if(refinedFilterSet.size > 0 && !refinedFilterSet.has(valueProbe)){ // OR behavior if not active field
-                                    eliminated = true;
-                                    passExperiments.delete(experiment);
-                                }
-                            }
-                        }else{
-                            if(filterKeys[k] !== field && refinedFilterSet.size > 0){
-                                eliminated = true;
-                                passExperiments.delete(experiment);
-                                break;
-                            }else{
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            return passExperiments;
-        },
-
         /**
+         * For client-side filtering of experiments only.
          * Unsets any 'terms' or 'total' properties on facets.
          * Modifies facets param in place, does not clone/copy/create new one(s).
          * 
@@ -537,6 +470,7 @@ var FacetList = module.exports = React.createClass({
         },
 
         /**
+         * For client-side filtering of experiments only.
          * Fills facet objects with 'terms' and 'total' properties, as well as terms' counts.
          * Modifies incompleteFacets param in place (to turn them into "complete" facets).
          *
