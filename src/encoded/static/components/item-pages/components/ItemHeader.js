@@ -40,9 +40,15 @@ var ItemHeader = module.exports = {
 
             var urlParts = url.parse(this.props.href, true);
             urlParts.search = '?' + querystring.stringify(_.extend(urlParts.query, { 'format' : 'json' }));
+            var viewUrl = url.format(urlParts);
             return (
                 <div className="expset-indicator right view-ajax-button">
-                    <a href={url.format(urlParts)} target="_parent">
+                    <a href={viewUrl} target="_blank" onClick={(e)=>{
+                        if (window && window.open){
+                            e.preventDefault();
+                            window.open(viewUrl, 'window', 'toolbar=no, menubar=no, resizable=yes, status=no, top=10, width=400');
+                        }
+                    }}>
                         View JSON
                     </a>
                 </div>

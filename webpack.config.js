@@ -90,7 +90,7 @@ module.exports = [
         debug: true
     },
     // for server-side rendering
-    /*
+    ///*
     {
         entry: {
             renderer: './src/encoded/static/server.js',
@@ -123,5 +123,5 @@ module.exports = [
         plugins: plugins,
         debug: false // See devtool comment.
     }
-    */
+    //*/
 ];

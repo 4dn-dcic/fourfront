@@ -314,8 +314,8 @@ h1.page-title + .page-subtitle {
 
 
 .off-screen {
-	position : absolute;
-	left : -9999px;
+	position : absolute !important;
+	left : -9999px !important;
 }
 
 #slow-load-container {

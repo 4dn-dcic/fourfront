@@ -379,6 +379,15 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
+            &.extra-long {
+                //overflow: hidden;
+                //height: 35px;
+                &:after {
+                    content : '...';
+                    margin-left: 2px;
+
+                }
+            }
         }
     }
 
@@ -564,7 +573,7 @@
         left: 0;
         right: 0;
         height: 50px;
-        border-bottom: 1px solid #aaa;
+        //border-bottom: 1px solid #aaa;
         .top-label {
             position: absolute;
             height: inherit;

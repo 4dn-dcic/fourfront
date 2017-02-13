@@ -474,8 +474,10 @@ var ProfileWorkFields = React.createClass({
                     <div id="lab" className="col-sm-9 value">
                         { typeof user.lab === 'string' ? 
                             FormattedInfoBlock.Lab(this.state.details_lab, false, false)
-                            : 
-                            <span className="not-set">No Labs</span>
+                            : (
+                                user.lab && user.lab.address1 && user.lab.title &&
+                                FormattedInfoBlock.Lab(user.lab, false, false)
+                            ) || <span className="not-set">No Labs</span>
                         }
                     </div>
                 </div>

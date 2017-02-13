@@ -348,7 +348,7 @@ var SunBurst = React.createClass({
                 'labelRotation' : 'auto',
                 'labelWidth' : 200,
                 'offset' : {
-                    'top' : 30,
+                    'top' : 18,
                     'bottom' : 0,
                     'left' : 0,
                     'right' : 0
@@ -1055,7 +1055,7 @@ var SunBurst = React.createClass({
                     'height' : this.props.height,
                     'transform' : ''
                 }} key={this.props.id + "-chart"}>
-                    { renderYAxis.call(this) }
+                    { styleOpts.offset.top >= 15 ? renderYAxis.call(this) : null }
                     { renderSVG.call(this) }
                 </div>
             </div>

@@ -3,7 +3,7 @@
 var React = require('react');
 var _ = require('underscore');
 var d3 = require('d3');
-var { console, isServerSide } = require('../util');
+var { console, isServerSide } = require('./../util');
 
 var vizUtil = module.exports = {
 

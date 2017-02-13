@@ -4,7 +4,7 @@ var React = require('react');
 var _ = require('underscore');
 var d3 = require('d3');
 var vizUtil = require('./utilities');
-var Legend = require('./components/Legend');
+var { Legend, RotatedLabel } = require('./components');
 var { console, object, isServerSide, expFxn, Filters } = require('../util');
 var { highlightTerm, unhighlightTerms } = require('./../facetlist');
 
@@ -236,12 +236,12 @@ var BarPlot = React.createClass({
             return {
                 'gap' : 5,
                 'maxBarWidth' : 60,
-                'labelRotation' : 'auto',
+                'labelRotation' : 30,
                 'labelWidth' : 200,
                 'yAxisMaxHeight' : 100, // This will override labelWidth to set it to something that will fit at angle.
                 'offset' : {
                     'top' : 30,
-                    'bottom' : 0,
+                    'bottom' : 50,
                     'left' : 80,
                     'right' : 0
                 }
@@ -603,6 +603,22 @@ var BarPlot = React.createClass({
 
         bottomYAxis : function(availWidth, availHeight, currentBars, styleOpts){
             var _this = this;
+
+            var labelWidth = styleOpts.labelWidth;
+            if (typeof styleOpts.labelRotation === 'number'){
+
+                var maxWidthGivenBottomOffset = (
+                    1 / Math.abs(Math.sin((styleOpts.labelRotation / 180) * Math.PI)
+                )) * styleOpts.offset.bottom;
+
+                labelWidth = Math.min(
+                    maxWidthGivenBottomOffset,
+                    (styleOpts.labelWidth || 100000)
+                );
+
+            }
+
+            
             
             // We need to know label height to make use of this (to subtract from to get max labelWidth), which would be too much work (in browser calculation) given character size variance for most fonts to be performant.
             // var maxHypotenuse = styleOpts.yAxisMaxHeight * (1/Math.cos((Math.PI * 2) / (360 / styleOpts.labelRotation)));
@@ -614,6 +630,23 @@ var BarPlot = React.createClass({
                     bottom : Math.min(styleOpts.offset.bottom - 5, 0)
                 }}>
                     { currentBars.map(function(bar){
+
+                        return (
+                            <RotatedLabel
+                                key={'count-for-' + bar.term}
+                                className="y-axis-label no-highlight-color"
+                                term={bar.term}
+                                opacity={_this.state.transitioning && (bar.removing || !bar.existing) ? 0 : ''}
+                                x={bar.attr.x}
+                                y={5}
+                                placementWidth={bar.attr.width}
+                                placementHeight={styleOpts.offset.bottom}
+                                angle={styleOpts.labelRotation}
+                                maxLabelWidth={styleOpts.maxLabelWidth}
+                                label={bar.name || bar.term}
+                            />
+                        );
+
                         return (
                             <div
                                 key={'count-for-' + bar.term}
@@ -627,17 +660,24 @@ var BarPlot = React.createClass({
                             >
                             
                                 <span className={"label-text" + (styleOpts.labelRotation === 'auto' ? ' auto-rotation' : '')} style={{
-                                    width: typeof styleOpts.labelWidth === 'number' ? styleOpts.labelWidth : null,
+                                    width: labelWidth,
                                     left:  0 - (
                                         (
-                                            typeof styleOpts.labelWidth === 'number' ? styleOpts.labelWidth : bar.attr.width
+                                            typeof labelWidth === 'number' ?
+                                                labelWidth
+                                                : bar.attr.width
                                         )
-                                        - ((bar.attr.width / (90 / bar.attr.width) ))
+                                        - 
+                                        (
+                                            typeof styleOpts.labelRotation === 'number' ? 
+                                                (bar.attr.width / 2)
+                                                : (bar.attr.width / (90 / bar.attr.width))
+                                        )
                                     ),
                                     transform : vizUtil.style.rotate3d(
                                         typeof styleOpts.labelRotation === 'number' ? 
-                                            styleOpts.labelRotation : 
-                                                -(90 / (bar.attr.width * .1)), // If not set, rotate so 1 line will fit.
+                                            - Math.abs(styleOpts.labelRotation) : 
+                                            - (90 / (bar.attr.width * .1)), // If not set, rotate so 1 line will fit.
                                         'z'
                                     ), 
                                 }}>
