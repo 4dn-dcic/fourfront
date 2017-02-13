@@ -214,10 +214,10 @@ class Item(snovault.Item):
         "title": "External Reference URIs",
         "description": "External references to this item.",
         "type": "array",
-        "items" : { "type" : "object", "title" : "External Reference", "properties" : { 
+        "items" : { "type" : "object", "title" : "External Reference", "properties" : {
                 "uri" : { "type" : "string" },
                 "ref" : { "type" : "string" }
-            } 
+            }
         }
     })
     def external_references(self, request, dbxrefs=None):
@@ -242,7 +242,7 @@ class Item(snovault.Item):
                 else:
                     refObject['uri'] = baseUri + refID
                 refs.append(refObject)
-                
+
             return refs
         return []
 

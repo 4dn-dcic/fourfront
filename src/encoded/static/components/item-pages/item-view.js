@@ -160,7 +160,7 @@ var ItemView = module.exports = React.createClass({
         // Display the item field with a tooltip showing the field description from
         // schema, if available
         DescriptorField : React.createClass({
-        
+
             propTypes: {
                 field: React.PropTypes.string.isRequired,
                 description: React.PropTypes.string.isRequired
@@ -357,7 +357,7 @@ var ItemView = module.exports = React.createClass({
                                     :
                                     extRef
                                 }
-                                
+
                             </li>
                         );
                     }) }
@@ -375,7 +375,7 @@ var ItemView = module.exports = React.createClass({
         var externalReferences  = this.externalReferences(schemas),
             aliases             = this.aliases(),
             alternateAccessions = this.alternateAccessions();
-        
+
         return (
             <div className={itemClass}>
 
@@ -402,7 +402,7 @@ var ItemView = module.exports = React.createClass({
                         </div>
 
                     </div>
-                    
+
 
                     <div className="col-xs-12 col-md-4 item-info-area section">
 

@@ -180,8 +180,12 @@ var Action = module.exports = React.createClass({
                     // should we really always use the first award?
                     award = lab_data.awards[0];
                 }
-                finalizedContext.award = award['@id'] ? award['@id'] : award;
-                finalizedContext.lab = lab;
+                if(this.state.thisSchema.properties.award){
+                    finalizedContext.award = award['@id'] ? award['@id'] : award;
+                }
+                if(this.state.thisSchema.properties.lab){
+                    finalizedContext.lab = lab;
+                }
                 // if testing validation, use check_only=True (see /types/base.py)
                 var destination = test ? '/' + objType + '/?check_only=True' : '/' + objType;
                 var actionMethod = 'POST';
@@ -345,24 +349,24 @@ This is a key/input pair for any one field. Made to be stateless; changes
  */
 var BuildField = React.createClass({
     // display a limited message including if the field is required and its type
-    displayMessage: function(){
+    displayMessage: function(field_case){
         if(this.props.required){
             return(
                 <div className="display-message">
                     <span className="display-bold">Required field. </span>
-                    <span>{'Type: ' + this.props.fieldType}</span>
+                    <span>{'Type: ' + field_case}</span>
                 </div>
             );
         }else{
             return(
                 <div className="display-message">
-                    <span>{'Type: ' + this.props.fieldType}</span>
+                    <span>{'Type: ' + field_case}</span>
                 </div>
             );
         }
     },
 
-    displayField: function(){
+    displayField: function(field_case){
         var inputProps = {
             'id' : this.props.label,
             'disabled' : this.props.disabled || false,
@@ -373,7 +377,8 @@ var BuildField = React.createClass({
             'autoFocus': true,
             'placeholder': "No value"
         };
-        switch(this.props.fieldType){
+
+        switch(field_case){
             case 'text' : return (
                 <div className="input-wrapper">
                     <input type="text" inputMode="latin" {...inputProps} />
@@ -405,6 +410,10 @@ var BuildField = React.createClass({
             case 'object' : return (
                 <ObjectField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext}/>
             );
+            case 'attachment' :
+                return (
+                <FileInput {...inputProps} field={this.props.label} modifyNewContext={this.props.modifyNewContext}/>
+            );
         }
         // Fallback
         return <div>No field for this case yet.</div>;
@@ -428,7 +437,7 @@ var BuildField = React.createClass({
         var inputElement = e && e.target ? e.target : this.refs.inputElement;
         var currValue = inputElement.value;
         // TODO: add case for array
-        if (this.props.fieldType == 'integer'){
+        if (this.props.fieldType == 'number'){
             if(!isNaN(parseInt(currValue))){
                 currValue = parseInt(currValue);
             }
@@ -447,12 +456,17 @@ var BuildField = React.createClass({
     },
 
     render: function(){
+        // check if any schema-specific adjustments need to made:
+        var field_case = this.props.fieldType;
+        if (this.props.schema.attachment && this.props.schema.attachment === true){
+            field_case = 'attachment';
+        }
         var isArray = this.props.isArray || false;
         // array entries don't need dt/dd rows
         if(isArray){
             return(
                 <div>
-                    {this.displayField()}
+                    {this.displayField(field_case)}
                 </div>
             );
         }
@@ -465,9 +479,9 @@ var BuildField = React.createClass({
                         </a>
                 </dt>
                 <dd className="col-sm-9">
-                    {this.displayField()}
+                    {this.displayField(field_case)}
                     <div className="display-tip">{this.props.fieldTip}</div>
-                    {this.displayMessage()}
+                    {this.displayMessage(field_case)}
                 </dd>
 
             </dl>
@@ -688,6 +702,7 @@ var ArrayField = React.createClass({
         if(fieldSchema.linkTo){
             fieldType = 'linked object';
         }
+
         return(
             <tr key={field + parseInt(arrayIdx)}><td>
                 <BuildField value={value} key={arrayIdx} schema={fieldSchema} label={arrayIdx} fieldType={fieldType} fieldTip={fieldTip} enumValues={enumValues} disabled={false} modifyNewContext={this.modifyArrayContent} required={false} isArray={true}/>
@@ -825,6 +840,55 @@ var ObjectField = React.createClass({
             <div>
                 {buildFields.map((field) => this.initiateField(field))}
             </div>
+        );
+    }
+});
+
+/* For version 1. A simple local file upload that gets the name, type,
+size, and b64 encoded stream in the form of a data url. Upon successful
+upload, adds this information to NewContext*/
+var FileInput = React.createClass({
+    handleChange: function(e){
+        var acceptedTypes = [
+            "application/pdf",
+            "text/plain",
+            "text/tab-separated-values",
+            "image/jpeg",
+            "image/tiff",
+            "image/gif",
+            "text/html",
+            "image/png",
+            "image/svs",
+            "text/autosql"
+        ]
+        var attachment_props = {};
+        var file = e.target.files[0];
+        if ((!file.type || !_.contains(acceptedTypes, file.type))){
+            this.refs.fileInput.value = '';
+            alert('File upload failed! File must of one of the following types: application/pdf, text/plain, text/tab-separated-values, image/jpeg, image/tiff, image/gif, text/html, image/png, image/svs, text/autosql.');
+            return;
+        }else{
+            attachment_props.type = file.type;
+        }
+        if(file.size) {attachment_props.size = file.size;}
+        if(file.name) {attachment_props.download = file.name;}
+        var fileReader = new window.FileReader();
+        fileReader.readAsDataURL(file);
+        fileReader.onloadend = function (e) {
+            if(e.target.result){
+                attachment_props.href = e.target.result
+            }else{
+                alert('There was a problem reading the given file.');
+                return;
+            }
+
+        }.bind(this);
+        this.props.modifyNewContext(this.props.field, attachment_props)
+    },
+
+    render: function(){
+        return(
+            <input id={this.props.field} type='file' onChange={this.handleChange} ref="fileInput"/>
         );
     }
 });

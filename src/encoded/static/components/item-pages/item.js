@@ -76,7 +76,7 @@ var title = module.exports.title = function (props) {
         context.name            ||
         context.accession       ||
         context.uuid            ||
-        (typeof context['@id'] === 'string' ? context['id'] :
+        (typeof context['@id'] === 'string' ? context['@id'] :
         'No title found')
     );
 };
@@ -127,4 +127,3 @@ var FetchedRelatedItems = React.createClass({
 //         );
 //     },
 // });
-
