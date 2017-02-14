@@ -17,7 +17,6 @@ from pyramid.traversal import (
 )
 import snovault
 # from ..schema_formats import is_accession
-from snovault.resource_views import item_view_page_object
 from snovault.crud_views import collection_add as sno_collection_add
 from snovault.validators import validate_item_content_post
 
@@ -130,9 +129,9 @@ def collection_add(context, request, render=None):
     check_only = request.params.get('check_only', False)
 
     if check_only:
-         return { 'status' : "success",
-                  '@type': ['result'],
-                 }
+        return {'status': "success",
+                '@type': ['result'],
+                }
 
     return sno_collection_add(context, request, render)
 
@@ -246,21 +245,36 @@ class Item(snovault.Item):
             return refs
         return []
 
-@view_config(context=Item, permission='view', request_method='GET', name='page')
-def item_page_view(context, request):
-    """Effectively merges the frame=object and frame=embedded pages, combining
-    the two to get @id in any top-level object that doesn't already have it."""
-    properties_emb, properties_obj = item_view_page_object(context, request)
-    for key, val in properties_emb.items():
-        if isinstance(val, dict) and '@id' not in val.keys() and key in properties_obj:
-            if isinstance(properties_obj[key], str) and properties_obj[key][0] == '/':
-                properties_emb[key]['@id'] = properties_obj[key]
-        elif isinstance(val, list):
-            for i in range(len(val)):
-                if isinstance(val[i], dict) and '@id' not in val[i].keys() and key in properties_obj:
-                    if isinstance(properties_obj[key][i], str) and properties_obj[key][i][0] == '/':
-                        properties_emb[key][i]['@id'] = properties_obj[key][i]
-    return properties_emb
+
+    @snovault.calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    },)
+    def display_title(self, request):
+        """create a display_title field."""
+        display_title = ""
+        look_for = ["name", "title", "description"]
+        for field in look_for:
+            display_title = self.properties.get(field, None)
+            if display_title:
+                return display_title
+
+
+    @snovault.calculated_property(schema={
+        "title": "link_id",
+        "description": "A copy of @id that can be embedded. Uses ~ instead of /",
+        "type": "string"
+    },)
+    def link_id(self, request):
+        """create the link_id field, which is a copy of @id using ~ instead of /"""
+        path_str = request.path if request.path else self.properties.get('accession', None)
+        if path_str:
+            path_split = path_str.split('/')
+            if len(path_split) == 4 and '@@' in path_split[-1]:
+                path_str = '~'.join(path_split[:-1]) + '~'
+            return path_str
+
 
 class SharedItem(Item):
     """An Item visible to all authenticated users while "proposed" or "in progress"."""
@@ -335,6 +349,8 @@ def add_default_embeds(embeds, schema={}):
     # automatically embed top level linkTo's not already embedded
     for key, val in schema['properties'].items():
         if key not in embedded_base_fields and 'linkTo' in val:
+            if key + '.link_id' not in processed_fields:
+                processed_fields.append(key + '.link_id')
             if key + '.display_title' not in processed_fields:
                 processed_fields.append(key + '.display_title')
     return processed_fields + embeds
