@@ -133,9 +133,9 @@ def test_get_ontologies_not_in_db(mocker, connection):
 @pytest.fixture
 def slim_term_list():
     # see ontology_term schema for full schema
-    return [{'term_id': 'd_term1', 'uuid': 'uuidd1', 'is_slim_for': 'developmental'},
-            {'term_id': 'd_term2', 'uuid': 'uuidd2', 'is_slim_for': 'developmental'},
-            {'term_id': 'a_term1', 'uuid': 'uuida1', 'is_slim_for': 'assay'}]
+    return [{'term_id': 'a_term1', 'uuid': 'uuida1', 'is_slim_for': 'assay'},
+            {'term_id': 'a_term2', 'uuid': 'uuida2', 'is_slim_for': 'assay'},
+            {'term_id': 'd_term1', 'uuid': 'uuidd1', 'is_slim_for': 'developmental'}]
 
 
 @pytest.fixture
@@ -164,7 +164,8 @@ def test_get_slim_terms(mocker, connection, slim_terms_by_ont):
 
 @pytest.fixture
 def term_w_closure():
-    return {'term_id': '1', 'uuid': 'uuid1', 'closure': ['id1', 'id2', 'd_term1']}
+    return {'term_id': '1', 'uuid': 'uuid1',
+            'closure': ['id1', 'id2', 'a_term1']}
 
 
 @pytest.fixture
@@ -174,7 +175,7 @@ def terms_w_closures(term_w_closure):
     term_w_two['term_id'] = '4'
     term_w_two['uuid'] = 'uuid2'
     term_w_two['closure'] = term_w_closure['closure'].copy()
-    term_w_two['closure'].append('d_term2')
+    term_w_two['closure'].append('a_term2')
     # term w closure but no slim terms
     term_wo_slim = term_w_closure.copy()
     term_wo_slim['term_id'] = '5'
@@ -185,8 +186,9 @@ def terms_w_closures(term_w_closure):
     term_with_both = term_w_closure.copy()
     term_with_both['term_id'] = '3'
     term_with_both['uuid'] = 'uuid3'
-    term_with_both['closure_with_develops_from'] = term_with_both['closure']
-    # term with 'closure_with_develops_from with slim term'
+    term_with_both['closure_with_develops_from'] = ['d_term1']
+    print(term_with_both)
+    # term with 'closure_with_develops_from' slim term'
     term_cwdf = term_with_both.copy()
     term_cwdf['term_id'] = '2'
     term_cwdf['uuid'] = 'uuid2'
@@ -201,14 +203,14 @@ def terms_w_closures(term_w_closure):
 
 
 def test_add_slim_to_term(terms_w_closures, slim_term_list):
-    slim_ids = ['uuidd1', 'uuidd2']
+    slim_ids = ['uuida1', 'uuidd1', 'uuida2']
     for i, term in enumerate(terms_w_closures):
         test_term = go.add_slim_to_term(term, slim_term_list)
         assert test_term['term_id'] == str(i + 1)
-        if i < 3:
+        if i < 2:
             assert len(test_term['slim_terms']) == 1
-            assert test_term['slim_terms'][0] == slim_ids[0]
-        elif i == 3:
+            assert test_term['slim_terms'][0] == slim_ids[i]
+        elif i <= 3:
             assert len(test_term['slim_terms']) == 2
             for t in test_term['slim_terms']:
                 assert t in slim_ids
@@ -411,29 +413,57 @@ def terms():
 def test_iterative_parents(terms):
     for tid, term in terms.items():
         parents = []
+        oks = []
         if 'all_parents' in term:
             parents = go.iterative_parents(term['all_parents'], terms, 'all_parents')
         if tid in ['id1', 'id6', 'id9']:
             assert not parents
         if tid == 'id2':
+            oks = ['id1']
             assert len(parents) == 1
-            assert 'id1' in parents
         if tid in ['id3', 'id4']:
+            oks = ['id1', 'id2']
             assert len(parents) == 2
-            assert 'id1' in parents
-            assert 'id2' in parents
         if tid == 'id5':
+            oks = ['id1', 'id2', 'id4']
             assert len(parents) == 3
-            assert 'id1' in parents
-            assert 'id2' in parents
-            assert 'id4' in parents
         if tid == 'id7':
+            oks = ['id6']
             assert len(parents) == 1
-            assert 'id6' in parents
         if tid == 'id8':
+            oks = ['id6', 'id7', 'id1', 'id2', 'id3']
             assert len(parents) == 5
-            assert 'id6' in parents
-            assert 'id7' in parents
-            assert 'id1' in parents
-            assert 'id2' in parents
-            assert 'id3' in parents
+        if oks:
+            assert [_id in oks for _id in parents]
+
+
+def test_get_all_ancestors(terms):
+    for tid, term in terms.items():
+        term['development'] = term['all_parents'].copy()  # adding development to all terms
+    for tid, term in terms.items():
+        term = go.get_all_ancestors(term, terms, 'all_parents')
+        term = go.get_all_ancestors(term, terms, 'development')
+        # check they're the same - no need to check both anymore
+        assert term['closure'] == term['closure_with_develops_from']
+        closure = term['closure']
+        okids = []
+        assert tid in closure  # checks that the term id is included
+        if tid in ['id1', 'id6', 'id9']:
+            assert len(closure) == 1
+        if tid in ['id2', 'id7']:
+            assert len(closure) == 2
+            if tid == 'id2':
+                okids = ['id1']
+            else:
+                okids = ['id6']
+        if tid in ['id3', 'id4']:
+            assert len(closure) == 3
+            okids = ['id1', 'id2']
+        if tid == 'id5':
+            assert len(closure) == 4
+            okids = ['id1', 'id2', 'id4']
+        if tid == 'id8':
+            assert len(closure) == 6
+            okids = ['id6', 'id7', 'id1', 'id2', 'id3']
+        if okids:   
+            assert [_id in okids for _id in closure]

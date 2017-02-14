@@ -53,30 +53,40 @@ def iterative_parents(nodes, terms, data):
     return list(set(results))
 
 
-def get_all_ancestors(term, terms):
-    if 'closure' not in term:
-        term['closure'] = []
-    if 'all_parents' in term:
-        words = iterative_parents(term['all_parents'], terms, 'all_parents')
-        term['closure'].extend(words)
-    term['closure'].append(term['term_url'])
+def get_all_ancestors(term, terms, field):
+    closure = 'closure'
+    if field == 'development':
+        closure = 'closure_with_develops_from'
+    if closure not in term:
+        term[closure] = []
+    if field in term:
+        words = iterative_parents(term[field], terms, field)
+        term[closure].extend(words)
+    term[closure].append(term['term_id'])
     return term  # is this necessary
 
 
 def _combine_all_parents(term):
     parents = set()
     relations = set()
+    develops = set()
     if 'parents' in term:
         parents = set(term['parents'])
     if 'relationships' in term:
         relations = set(term['relationships'])
+    if 'develops_from' in term:
+        develops = set(term['develops_from'])
     term['all_parents'] = list(parents | relations)
+    development = list(parents | relations | develops)
+    if 'has_part_inverse' in term:
+        development = [dev for dev in development if dev not in term['has_part_inverse']]
+    term['development'] = development
     return term
 
 
-def _has_human_partof(cols):
+def _has_human(cols):
     ans = False
-    if HUMAN_TAXON in cols and PART_OF in cols:
+    if cols and HUMAN_TAXON in cols:
         ans = True
     return ans
 
@@ -140,11 +150,11 @@ def process_intersection_of(class_, intersection, data, terms):
     for col in data.rdfGraph.objects(collection[1]):
         # get restriction terms and add to col_list as string
         col_list.append(col.__str__())
-    if _has_human_partof(col_list):
-        terms = add_term_and_info(class_, collection[0], 'part_of', data, terms)
-    elif DEVELOPS_FROM in col_list:
-        # will we never have both part of and develops_from??
-        terms = add_term_and_info(class_, collection[0], 'develops_from', data, terms)
+    if _has_human(col_list):
+        if PART_OF in col_list:
+            terms = add_term_and_info(class_, collection[0], 'part_of', data, terms)
+        elif DEVELOPS_FROM in col_list:
+            terms = add_term_and_info(class_, collection[0], 'develops_from', data, terms)
     return terms
 
 
@@ -163,26 +173,29 @@ def process_blank_node(class_, data, terms):
     return terms
 
 
-def _find_and_add_parent_of(parent, child_id, data, terms, has_part=False):
+def _find_and_add_parent_of(parent, child_id, data, terms, has_part=False, relation=None):
     '''Add parent terms with the provided relationship to the 'relationships'
-        field of the term - does inverse for 'has_part'
+        field of the term - treating has_part specially
 
         NOTE: encode had added fields for each relationship type to the dict
-        for now we'll just add to a single 'relationships' field - may need to
-        modify
+        our default is a  'relationships' field - but can pass in a specific
+        relation string eg. develops_from and that will get added as field
     '''
     for obj in data.rdfGraph.objects(parent, SomeValuesFrom):
         if not isBlankNode(obj):
             objid = get_termid_from_uri(obj)
             term2add = objid
             if has_part:
+                relation = 'has_part_inverse'
                 term2add = child_id
                 child_id = objid
                 if child_id not in terms:
                     terms[child_id] = create_term_dict(convert2URIRef(child_id), child_id, data)
-            if not terms[child_id].get('relationships'):
-                terms[child_id]['relationships'] = []
-            terms[child_id]['relationships'].append(term2add)
+            if relation is None:
+                relation = 'relationships'
+            if not terms[child_id].get(relation):
+                terms[child_id][relation] = []
+            terms[child_id][relation].append(term2add)
     return terms
 
 
@@ -199,10 +212,13 @@ def process_parents(class_, termid, data, terms):
             for s, v, o in data.rdfGraph.triples((parent, OnProperty, None)):
                 rel = o.__str__()
                 if rel in rtypes:
+                    relation = None
                     has_part = None
                     if rtypes[rel] == 'has_part':
                         has_part = True
-                    terms = _find_and_add_parent_of(parent, termid, data, terms, has_part)
+                    if rtypes[rel] == 'develops_from':
+                        relation = rtypes[rel]
+                    terms = _find_and_add_parent_of(parent, termid, data, terms, has_part, relation)
         else:
             if not terms[termid].get('parents'):
                 terms[termid]['parents'] = []
@@ -232,9 +248,11 @@ def add_slim_to_term(term, slim_terms):
     slimterms2add = {}
     for slimterm in slim_terms:
         if term.get('closure') and slimterm['term_id'] in term['closure']:
-            slimterms2add[slimterm['term_id']] = slimterm['uuid']
+            if slimterm['is_slim_for'] != 'developmental':
+                slimterms2add[slimterm['term_id']] = slimterm['uuid']
         if term.get('closure_with_develops_from') and slimterm['term_id'] in term['closure_with_develops_from']:
-            slimterms2add[slimterm['term_id']] = slimterm['uuid']
+            if slimterm['is_slim_for'] == 'developmental':
+                slimterms2add[slimterm['term_id']] = slimterm['uuid']
     if slimterms2add:
         term['slim_terms'] = list(slimterms2add.values())
     return term
@@ -452,14 +470,18 @@ def main():
     for termid, term in terms.items():
         term = _combine_all_parents(term)
     for termid, term in terms.items():
-        term = get_all_ancestors(term, terms)
+        term = get_all_ancestors(term, terms, 'all_parents')
+        term = get_all_ancestors(term, terms, 'development')
         term = add_slim_to_term(term, slim_terms)
+
+    # clean up
+    to_delete = ['relationships', 'all_parents', 'development',
+                 'has_part_inverse', 'develops_from', 'closure',
+                 'closure_with_develops_from']
     for termid, term in terms.items():
-        if 'relationships' in term:
-            del term['relationships']
-        if 'all_parents' in term:
-            del term['all_parents']
-        del term['closure']  # should always have this
+        for field in to_delete:
+            if field in term:
+                del term[field]
 
     with open('test_ontology.json', 'w') as outfile:
         outfile.write('[\n')
