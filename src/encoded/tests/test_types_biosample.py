@@ -19,6 +19,9 @@ def biosample_relation(derived_from):
             "biosample": derived_from['@id']}]}
 
 
+def test_biosample_has_display_title(testapp, biosample_1):
+    assert biosample_1['display_title'] == 'GM12878 prepared for Hi-C'
+
 # data from test/datafixtures
 def test_update_biosample_relation(testapp, human_biosample, biosample_1):
     patch_res = testapp.patch_json(human_biosample['@id'], biosample_relation(biosample_1))

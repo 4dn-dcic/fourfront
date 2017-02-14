@@ -211,6 +211,20 @@ class Item(snovault.Item):
         return keys
 
 
+    @snovault.calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    },)
+    def display_title(self, request):
+        """create a display_title field."""
+        display_title = ""
+        look_for = ["name", "title", "description"]
+        for field in look_for:
+            display_title = self.properties.get(field, None)
+            if display_title:
+                return display_title
+
 # make it so any item page defaults to using the object, not embedded, view
 @view_config(context=Item, permission='view', request_method='GET', name='page')
 def item_page_view(context, request):
@@ -269,19 +283,3 @@ def edit_json(context, request):
         }
 
 
-@snovault.calculated_property(context=Item.Collection)
-def display_title(self, properties):
-    display={
-        "title": "Display Title",
-        "description": "A calculated title for every object in 4DN",
-        "type": "string",
-    }
-    """create a display_title field."""
-    display_title = ""
-    look_for = ["name", "title", "description"]
-    for field in look_for:
-        if field in self.schema['properties']:
-            display_title = properties['field']
-            break
-
-    properties['display_title'] = display_title
