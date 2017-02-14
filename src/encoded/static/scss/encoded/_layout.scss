@@ -451,16 +451,6 @@ h1.page-title + .page-subtitle {
 }
 
 
-
-.item-toggle-link{
-	display: inline-block;
-	float: right;
-	color: #00cca3; // temporary?
-	&:hover,&:focus {
-		color: #00cca3;
-	}
-}
-
 // simply used to make invisible elements
 .invis{
 	display: none !important;
