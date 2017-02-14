@@ -150,7 +150,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 },
                 { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
                 { title : "Biosample", field : 'experiments_in_set.biosample.biosource_summary' },
-                { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
+                //{ title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
                 {
                     title : "Digestion Enzyme",
                     field : 'experiments_in_set.digestion_enzyme.name',
@@ -292,7 +292,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
     componentDidUpdate: function(pastProps, pastState){
 
-        if (pastProps.requestURLBase !== this.props.requestURLBase) {
+        if (pastProps.requestURLBase !== this.props.requestURLBase || pastProps.session !== this.props.session) {
             this.fetchUnfilteredAndFilteredExperiments(this.props, { 'fetching' : false });
         } else if (pastProps.expSetFilters !== this.props.expSetFilters || !_.isEqual(pastProps.expSetFilters, this.props.expSetFilters)){
             if (_.keys(this.props.expSetFilters).length > 0){
@@ -345,6 +345,9 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                     'filteredExperiments' : expFxn.listAllExperimentsFromExperimentSets(filteredContext['@graph'])
                 })
             );
+        }, 'GET', ()=>{
+            // Fallback (no results or lost connection)
+            this.setState(extraState);
         });
     },
 
@@ -514,7 +517,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                             expSetFilters={this.props.expSetFilters}
                             href={this.props.href}
                             key="sunburst"
-                            ref="sunburstChart"
+                            schemas={this.props.schemas}
                             debug
                         />
                         <FetchingView display={this.state.fetching} />

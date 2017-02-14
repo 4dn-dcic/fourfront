@@ -44,7 +44,7 @@ var layout = module.exports = {
     },
 
     /** 
-     * Concatanate a string to a maximum character length, splitting on word break (or other supplied character).
+     * Shorten a string to a maximum character length, splitting on word break (or other supplied character).
      * Optionally append an ellipsis.
      * 
      * @param {string}  textContent
@@ -52,7 +52,7 @@ var layout = module.exports = {
      * @param (boolean) [addEllipsis=true]
      * @param {string}  [splitOn=' ']
      */
-    concatString : function(textContent, maxChars = 140, addEllipsis = true, splitOn = ' '){
+    shortenString : function(textContent, maxChars = 140, addEllipsis = true, splitOn = ' '){
         var textArr         = textContent.split(splitOn),
             returnArr       = [],
             returnStrLen    = 0;

@@ -246,6 +246,77 @@
 
 }
 
+
+
+/*** Rotated Labels Axis ***/
+
+.rotated-labels-axis {
+    position: relative;
+    display: block;
+
+    .rotated-label {
+        opacity : 1;
+        transition: opacity .5s, transform .75s ease-out;
+        position: absolute;
+
+        > .label-text {
+            display: block;
+            transform-origin: 100% 0;
+            text-align: right;
+            position: relative;
+            font-size: 0.85rem;
+            line-height: 14px;
+            &.auto-rotation {
+                transition: transform 1s, left 1s;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .inner {
+                position: relative;
+                //vertical-align: sub;
+            }
+            .append {
+                position: absolute;
+                right : -10px;
+                content: '\f105';
+                font-family: FontAwesome;
+                top: 50%;
+                margin-top: -7px;
+                opacity : 0.33;
+                transition: opacity 0.5s;
+            }
+            &:before {
+            }
+            &.extra-long {
+                //overflow: hidden;
+                //height: 35px;
+                &:after {
+                    content : '...';
+                    margin-left: 2px;
+                }
+            }
+        }
+
+        &.expanded > .label-text {
+            &.extra-long {
+                background: '#fff';
+                &:after {
+                    content: none;
+                }
+            }
+        }
+
+        &:hover > .label-text {
+            .append {
+                opacity : 1;
+            }
+        }
+
+    }
+}
+
+
 /** Bar Plot Chart Style(s) **/
 
 .bar-plot-chart { // SVG is top-level element rendered by component;
@@ -361,36 +432,6 @@
 
     }
 
-    .y-axis-label {
-        opacity: 1;
-        transition: opacity .5s, transform .75s ease-out;
-        position: absolute;
-
-        > .label-text {
-            display: block;
-            transform-origin: 100% 0;
-            text-align: right;
-            position: relative;
-            font-size: 0.85rem;
-            line-height: 1.2rem;
-            &.auto-rotation {
-                transition: transform 1s, left 1s;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            &.extra-long {
-                //overflow: hidden;
-                //height: 35px;
-                &:after {
-                    content : '...';
-                    margin-left: 2px;
-
-                }
-            }
-        }
-    }
-
     &.highlight {
         .chart-bar > rect {
             fill-opacity: 0.4;
@@ -409,7 +450,7 @@
                 }
             }
         }
-        .y-axis-label {
+        .rotated-label {
             opacity : 0.4;
             &.highlight {
                 opacity : 1;
@@ -549,20 +590,31 @@
         }
     }
 
+    g.field.highlight {
+        path {
+            opacity : 0.25;
+            &.highlight {
+                opacity: 1;
+            }
+        }
+    }
+
     svg g.group-container:hover path,
     svg g.group-container.hover path {
         transition: opacity 0.25s;
-        opacity: 0.3;
+        opacity: 0.125;
+        cursor: crosshair;
         &:not(.filtered-out){
             //opacity : 0.66;
         }
         &.hover, &.term-is-set {
-            opacity: 0.75;
+            opacity: 0.66;
+            transition: opacity 0.5s .2s;
             &.filtered-out {
-                opacity : 0.75 !important;
+                opacity : 0.66 !important;
             }
         }
-        &:hover {
+        &.hover.term-is-set {
             opacity: 1;
         }
     }

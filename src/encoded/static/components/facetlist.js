@@ -153,16 +153,16 @@ var ExpTerm = React.createClass({
 
     handleClick: function(e) {
         e.preventDefault();
-        this.setState(
-            { filtering : true },
-            () => {
+        //this.setState(
+        //    { filtering : true },
+        //    () => {
                 this.props.handleChangeFilter(
                     this.props.facet.field,
                     this.props.term.key,
-                    () => this.setState({ filtering : false })
+                    //() => this.setState({ filtering : false })
                 );
-            }
-        );
+        //    }
+        //);
     },
 
     render: function () {
@@ -382,20 +382,28 @@ var FacetList = module.exports = React.createClass({
 
             function setHighlightClass(el, off = false){
                 var isSVG, className;
+                //if (el.nodeName.toLowerCase() === 'g')console.dir(el);
                 if (el.className.baseVal) {
                     isSVG = true;
                     className = el.className.baseVal;
+                    //if (el.nodeName.toLowerCase() === 'g')console.log('isSVG', off);
                 } else {
                     isSVG = false;
                     className = el.className;
                 }
+                
+                if (el.classList && el.classList.add){
+                    if (!off) el.classList.add('highlight');
+                    else el.classList.remove('highlight');
+                    return isSVG;
+                }
 
                 if (!off){
-                    if (className.indexOf(' highlight') === -1) className += ' highlight';
+                    if (className.indexOf(' highlight') < 0) className = className + ' highlight';
                 } else {
                     if (className.indexOf(' highlight') > -1)   className = className.replace(' highlight', '');
                 }
-                
+
                 if (isSVG)  el.className.baseVal = className;
                 else        el.className = className;
                 return isSVG;

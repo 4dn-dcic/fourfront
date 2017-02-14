@@ -743,11 +743,21 @@ var App = React.createClass({
             }
 
             promise.catch((err)=>{
+                // Unset these for future requests.
+                this.requestAborted = false;
+                this.requestCurrent = false;
                 this.state.slowLoad && this.setState({'slowLoad' : false});
                 if (typeof fallbackCallback == 'function'){
                     fallbackCallback(err);
                 }
-                if (err.message !== 'HTTPForbidden'){
+                // Err could be an XHR object if could not parse JSON.
+                if (
+                    typeof err.status === 'number' &&
+                    [502, 503, 504, 505, 598, 599, 444, 499, 522, 524].indexOf(err.status) > -1
+                ) { 
+                    // Bad connection
+                    Alerts.queue(Alerts.ConnectionError);
+                } else if (err.message !== 'HTTPForbidden'){
                     console.error('Error in App.navigate():', err);
                     throw err; // Bubble it up.
                 } else {

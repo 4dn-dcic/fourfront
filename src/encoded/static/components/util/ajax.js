@@ -42,6 +42,7 @@ var ajax = module.exports = {
                         if (typeof fallback == 'function') fallback(response);
                     } catch (error) {
                         console.error('Non-JSON error response:', xhr.responseText);
+                        if (typeof fallback == 'function') fallback(xhr);
                     }
                 }
             }
@@ -62,9 +63,17 @@ var ajax = module.exports = {
         var promise = new Promise(function(resolve, reject) {
             xhr = new XMLHttpRequest();
             xhr.onload = function() {
+                var response = null;
                 // response SHOULD be json
-                var response = JSON.parse(xhr.responseText);
-                if (debugResponse) console.info('Received data from ' + method + ' ' + url + ':', response);
+                try {
+                    response = JSON.parse(xhr.responseText);
+                    if (debugResponse) console.info('Received data from ' + method + ' ' + url + ':', response);
+                } catch (e) {
+                    console.log(xhr);
+                    console.error("Non-JSON error response:", xhr.responseText);
+                    reject(xhr);
+                    return;
+                }
                 resolve(response);
             };
             xhr.onerror = reject;

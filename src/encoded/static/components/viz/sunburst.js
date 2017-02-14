@@ -6,7 +6,7 @@ var d3 = require('d3');
 var vizUtil = require('./utilities');
 var { expFxn, Filters, console, object, isServerSide } = require('./../util');
 var { highlightTerm, unhighlightTerms } = require('./../facetlist');
-var ZoomCursor = require('./components/ZoomCursor');
+var { ZoomCursor, RotatedLabel } = require('./components');
 
 /**
  * Based on Sunburst D3 Example @ http://bl.ocks.org/kerryrodden/7090426
@@ -32,6 +32,27 @@ var SunBurst = React.createClass({
                 current = current.parent;
             }
             return path;
+        },
+
+        /** 
+         * Get all nodes from root node (or other parent node) which have matching depth.
+         * @param {Object} rootNode
+         * @param {number} depth
+         * @param {function} [filter] - Optional object whose keys/vals to filter resulting nodes by.
+         */
+        getAllNodesAtDepth : function(rootNode, depth = 1, filter = null){
+            return _.reduce(rootNode.children, function(m, childNode){
+                if (childNode.depth === depth) {
+                    if (typeof filter === 'function'){
+                        if (filter(childNode)) m.push(childNode);
+                    } else {
+                        m.push(childNode);
+                    }
+                } else if ((childNode.depth < depth) && Array.isArray(childNode.children)){
+                    m = m.concat(SunBurst.getAllNodesAtDepth(childNode, depth, filter));
+                }
+                return m;
+            },[]);
         },
 
         isDataEqual(data1, data2){
@@ -127,7 +148,7 @@ var SunBurst = React.createClass({
                 function attachNode(fieldIndex, attachToNode, currID){
                     if (fieldIndex >= fields.length) return true;
                     var field = fields[fieldIndex];
-                    var fieldValue = object.getNestedProperty(exp, (field.aggregatefield || field.field).replace('experiments_in_set.', ''));
+                    var fieldValue = object.getNestedProperty(exp, (field.aggregatefield || field.field).replace('experiments_in_set.', ''), true);
                     
                     if (!fieldValue){
                         console.warn("Couldn't get value for " + (field.aggregateField || field.field) + ' from:', exp);
@@ -209,7 +230,7 @@ var SunBurst = React.createClass({
                             return fieldValue.map(function(fv){ return attachOrUpdateNode(fv); });
                         } else {
                             // Needs to be tested
-                            console.log('FV1',fieldValue);
+                            //console.log('FV1',fieldValue);
                             fieldValue = _(fieldValue).chain()
                                 .reduce(function(counts, orgName){
                                     counts[orgName] = (counts[orgName] || 0) + 1;
@@ -218,7 +239,7 @@ var SunBurst = React.createClass({
                                 .pairs()
                                 .sortBy(function(fieldValPair){ return -fieldValPair[1]; })
                                 .value()[0][0]; // [['human', 2], ...] -- grab first item from first array ('human')
-                            console.log('FV2',fieldValue);
+                            //console.log('FV2',fieldValue);
                             return attachOrUpdateNode(fieldValue);
                         }
                     }
@@ -345,11 +366,11 @@ var SunBurst = React.createClass({
             return {
                 'gap' : 5,
                 'maxBarWidth' : 60,
-                'labelRotation' : 'auto',
+                'labelRotation' : 30,
                 'labelWidth' : 200,
                 'offset' : {
                     'top' : 18,
-                    'bottom' : 0,
+                    'bottom' : 50,
                     'left' : 0,
                     'right' : 0
                 }
@@ -396,32 +417,54 @@ var SunBurst = React.createClass({
         }
     },
 
-    /* We create a throttled version of this function in componentDidMount for performance */
-    mouseoverHandle : function(d){
-        if (typeof d.target !== 'undefined'){
-            // We have a click event from element rather than D3.
-            d = d.target.__data__; // Same as: d = d3.select(d.target).datum(); (d3.select(...).node().__data__ performed internally by D3).
-        }
-        var sequenceArray = SunBurst.getAncestors(d);
-        d = d.data || d;
+    onPathMouseOver : function(e){
+        if (!e || !e.target || !e.target.__data__) return null; // No D3 data attached to event target.
+        this.mouseoverHandle(e.target.__data__);
+    },
 
-        var expCount = d.active || d.experiments || null;
-        var expSetCount = d.experiment_sets || null;
+    /* We create a throttled version of this function in componentDidMount for performance */
+    /**
+     * @param {Object} d - Node datum with depth, etc.
+     */
+    mouseoverHandle : _.throttle(function(d){
+
+        //var sequenceArray = SunBurst.getAncestors(d);
+        var siblingArray = SunBurst.getAllNodesAtDepth(
+            this.root,
+            d.depth,
+            function(n){ return n.data.term === d.data.term; }//.bind(this)
+        );
+
+        var expCount = d.data.active || d.data.experiments || null;
+        var expSetCount = d.data.experiment_sets || null;
+
+        var totalCounts = _.reduce(siblingArray, (m, n) => {
+            if (n.data.active || !this.root.data.active) {
+                m.experiments += n.data.active || n.data.experiments || 0;
+                m.experiment_sets += n.data.experiment_sets || 0;
+                m.files += n.data.activeFiles || n.data.files || 0;
+                return m;
+            } else return m;
+        }, {
+            experiments : 0,
+            experiment_sets : 0,
+            files : 0
+        });
 
         // .appendChild used to be faster than .innerHTML but seems
         // innerHTML is better now (?) https://jsperf.com/appendchild-vs-documentfragment-vs-innerhtml/24
         if (expCount !== null){
             if (typeof this.props.updateStats === 'function'){
                 this.props.updateStats({
-                    'experiments' : expCount,
-                    'experiment_sets' : expSetCount,
-                    'files' : d.activeFiles || d.files || 0
+                    'experiments' : totalCounts.experiments,//expCount,
+                    'experiment_sets' : totalCounts.experiment_sets,//expSetCount,
+                    'files' : totalCounts.files//d.activeFiles || d.files || 0
                 });
             }
         }
 
         vizUtil.requestAnimationFrame(()=>{
-            if (d.field && d.term) highlightTerm(d.field, d.term, vizUtil.colorForNode(d));
+            if (d.data.field && d.data.term) highlightTerm(d.data.field, d.data.term, vizUtil.colorForNode(d));
 
             //if (d.title && this.descriptionElement() !== null) {
             //    this.descriptionElement().innerHTML = d.title;
@@ -435,7 +478,7 @@ var SunBurst = React.createClass({
             var finalSelection = d3.selectAll("svg.sunburst-svg-chart path")
                 .classed("hover", false)
                 .filter(function(node){
-                    return _.find(sequenceArray, function(sNode){ return sNode.data.id === node.data.id; }) || false;
+                    return _.find(siblingArray, function(sNode){ return sNode.data.id === node.data.id; }) || false;
                 })
                 .classed("hover", true);
 
@@ -446,8 +489,8 @@ var SunBurst = React.createClass({
 
         });
 
-        this.updateBreadcrumbs(sequenceArray);
-    },
+        //this.updateBreadcrumbs(sequenceArray);
+    }, 100),
 
     // Restore everything to full opacity when moving off the visualization.
     mouseleave : function(e) {
@@ -458,22 +501,24 @@ var SunBurst = React.createClass({
         }
         var _this = this;
         setTimeout(function(){ // Wait 50ms (duration of mouseenter throttle) so delayed handler doesn't cancel this mouseleave transition.
-            // Hide the breadcrumb trail
-            _this.updateBreadcrumbs([], '0%');
+            vizUtil.requestAnimationFrame(function(){
+                // Hide the breadcrumb trail
+                _this.updateBreadcrumbs([], '0%');
 
-            // Transition each segment to full opacity and then reactivate it.
-            d3.selectAll("svg.sunburst-svg-chart path, svg.sunburst-svg-chart > g").classed('hover', false);
-            //_this.vis.selectAll("path").classed('hover', false);
+                // Transition each segment to full opacity and then reactivate it.
+                d3.selectAll("svg.sunburst-svg-chart path, svg.sunburst-svg-chart > g").classed('hover', false);
+                //_this.vis.selectAll("path").classed('hover', false);
 
-            unhighlightTerms();
+                unhighlightTerms();
 
-            _this.resetActiveExperimentsCount();
+                _this.resetActiveExperimentsCount();
 
-            // Erase description (important if contained outside explanation element)
-            if (_this.descriptionElement()){
-                _this.descriptionElement().innerHTML = '';
-            }
-        }, 50);
+                // Erase description (important if contained outside explanation element)
+                //if (_this.descriptionElement()){
+                //    _this.descriptionElement().innerHTML = '';
+                //}
+            });
+        }, 150);
     },
 
     updateBreadcrumbs : function(nodeArray){
@@ -516,11 +561,9 @@ var SunBurst = React.createClass({
     },
 
     chartLayersWidth : function(props = this.props){
-        console.log('DEPTHS', this.chartLevelsCount(props));
         var levelsCount = this.chartLevelsCount(props);
         var availWidth = this.width(props.width);
         var singleLevelWidth = this.singleChartLayerWidth();
-        console.log('WIDTHLAYERS', this.singleChartLayerWidth(props) * this.chartLevelsCount(props));
         return (
             this.singleChartLayerWidth(props) * this.chartLevelsCount(props)
         );
@@ -575,11 +618,6 @@ var SunBurst = React.createClass({
         ];
         path.rect.apply(path, args);
         return path;
-    },
-
-    componentWillMount : function(){
-        //this.visualizationSetup();
-        //this.throttledMouseOverHandler = _.throttle(this.mouseoverHandle, 50); // Improve performance
     },
 
     componentDidMount : function(){
@@ -764,7 +802,6 @@ var SunBurst = React.createClass({
 
     componentWillUnmount : function(){
         // Clean up our stuff, just in case.
-        delete this.throttledMouseOverHandler;
         delete this.arc;
         delete this.partition;
         delete this.lastWidth;
@@ -894,7 +931,7 @@ var SunBurst = React.createClass({
                     data-term={node.data.term}
                     fillRule="evenodd"
                     className={className + (removing ? ' removing' : (!existing ? ' adding' : ''))}
-                    onMouseOver={node.depth > 0 ? _this.mouseoverHandle : null }
+                    onMouseOver={node.depth > 0 ? _this.onPathMouseOver : null }
                     onMouseEnter={ node.depth === 0 ? _this.mouseleave : null }
                     onMouseLeave={/*node.depth > 0 ? function(e){ unhighlightTerms(e.target.__data__.data.field); } :*/ null}
                     onClick={/*clickable ? (e) => _this.props.handleClick(e.target.__data__) : */null}
@@ -920,7 +957,17 @@ var SunBurst = React.createClass({
             return a < b ? -1 : 1;
         }
 
-        ///* ToDo: 'Removing' nodes transition
+        return _.values(_.groupBy(nodes, 'depth')).map(function(fieldNodes,i){
+            return (
+                <g data-field={fieldNodes[0].data.field} className="field" key={fieldNodes[0].data.field || fieldNodes[0].depth || i}>
+                    { fieldNodes.map(genPath).sort(sortByID) }
+                </g>
+            );
+        });
+
+        //return nodes.map(genPath).sort(sortByID);
+
+        /* ToDo: 'Removing' nodes transition
         var pathComponents = nodes.map(genPath);
         var pathComponentsToRemove = _.filter(
             _.values(pastExistingNodes), 
@@ -931,7 +978,7 @@ var SunBurst = React.createClass({
         });
 
         return pathComponentsToRemove.concat(pathComponents).sort(sortByID);
-        //*/
+        */
     },
 
     render : function(){
@@ -939,6 +986,7 @@ var SunBurst = React.createClass({
         var styleOpts = this.styleOptions();
         this.visualizationSetup();
         var paths = this.state.mounted ? this.generatePaths() : null;
+        var barWidth = this.singleChartLayerWidth();
 
         function description(){
             if (this.props.descriptionElement !== true) return null;
@@ -997,11 +1045,9 @@ var SunBurst = React.createClass({
             /* </ZoomCursor> */
         }
 
-        function renderYAxis(){
-
+        function renderYAxisTop(){
             
             if (!this.root || !this.props.expSetFilters) return null;
-            var barWidth = this.singleChartLayerWidth();
             var nodes = this.root.descendants();
             var depths = _.range(1, this.root.height);
             var startPoints = _.range(0, this.width(), this.singleChartLayerWidth());
@@ -1034,6 +1080,41 @@ var SunBurst = React.createClass({
             );
         }
 
+        function renderYAxisBottom(){
+            if (!paths || !this.props.schemas) return null;
+            //var labels = [];//_.groupBy(paths, '')
+            console.log(paths);
+            // Exclude first item (root node)
+            var labels = paths.slice(1).map((pathGroup, i) => {
+                return {
+                    name : Filters.Field.toName(pathGroup.key, this.props.schemas),
+                    field : pathGroup.key,
+                    x : i * barWidth
+                };
+            });
+
+            return (
+                <div className="y-axis-bottom" style={{ 
+                    left : styleOpts.offset.left, 
+                    right : styleOpts.offset.right,
+                    height : Math.max(styleOpts.offset.bottom - 5, 0),
+                    bottom : Math.min(styleOpts.offset.bottom - 5, 0)
+                }}>
+                    <RotatedLabel.Axis
+                        labels={labels}
+                        labelClassName="y-axis-label no-highlight-color"
+                        y={5}
+                        extraHeight={0}
+                        placementWidth={barWidth}
+                        placementHeight={styleOpts.offset.bottom}
+                        angle={styleOpts.labelRotation}
+                        maxLabelWidth={styleOpts.maxLabelWidth || 1000}
+                        isMounted={this.state.mounted}
+                    />
+                </div>
+            );
+        }
+
         
 
         // Wrapping stuff
@@ -1055,8 +1136,9 @@ var SunBurst = React.createClass({
                     'height' : this.props.height,
                     'transform' : ''
                 }} key={this.props.id + "-chart"}>
-                    { styleOpts.offset.top >= 15 ? renderYAxis.call(this) : null }
+                    { styleOpts.offset.top >= 15 ? renderYAxisTop.call(this) : null }
                     { renderSVG.call(this) }
+                    { styleOpts.offset.bottom >= 15 ? renderYAxisBottom.call(this) : null }
                 </div>
             </div>
                 

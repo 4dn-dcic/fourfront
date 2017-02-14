@@ -34,7 +34,10 @@ var expFilters = module.exports = {
     Field : {
 
         nameMap : {
-            'experiments_in_set.biosample.biosource.individual.organism.name' : 'Primary Organism'
+            'experiments_in_set.biosample.biosource.individual.organism.name' : 'Primary Organism',
+            'accession' : 'Experiment Set Accession',
+            'experiments_in_set.digestion_enzyme.name' : 'Digestion Enzyme',
+            'experiments_in_set.biosample.biosource_summary' : 'Biosource',
         },
 
         toName : function(field, schemas, schemaOnly = false){
@@ -155,7 +158,7 @@ var expFilters = module.exports = {
             return newObj;
         } else {
             console.info("Saving new filters:", newObj, "Using AJAX:", useAjax);
-            return expFilters.saveChangedFilters(newObj, useAjax, href, callback);
+            return expFilters.saveChangedFilters(newObj, useAjax, href, callback, expSetFilters);
         }
     },
 
@@ -170,7 +173,7 @@ var expFilters = module.exports = {
      * @param {string}  [href]          Base URL to use for AJAX request, with protocol (i.e. http(s)), hostname (i.e. domain name), and path, at minimum. Required if using AJAX.
      * @param {function}[callback]      Callback function.
      */
-    saveChangedFilters : function(expSetFilters, useAjax=true, href=null, callback = null){
+    saveChangedFilters : function(expSetFilters, useAjax=true, href=null, callback = null, originalFilters = null){
         if (!store)   store = require('./../../store');
         if (!Alerts) Alerts = require('../alerts');
         if (!useAjax) {
@@ -183,6 +186,8 @@ var expFilters = module.exports = {
 
         // Else we fetch new experiment_sets (i.e. (props.)context['@graph'] ) via AJAX.
         if (typeof href !== 'string') throw new Error("No valid href (3rd arg) supplied to saveChangedFilters:", href);
+
+        var originalReduxState = store.getState();
 
         var newHref = expFilters.filtersToHref(expSetFilters, href);
 
@@ -198,12 +203,26 @@ var expFilters = module.exports = {
         });
 
         if (navigateFxn){
-            navigateFxn(newHref, { replace : true, skipConfirmCheck: true }, ()=>{
-                Alerts.deQueue(Alerts.NoFilterResults);
+            navigateFxn(newHref, { replace : true, skipConfirmCheck: true }, (result)=>{
+                if (result && result.total === 0){
+                    // No results, cancel out.
+                    Alerts.queue(Alerts.NoFilterResults);
+                    store.dispatch({ 
+                        type : {
+                            'expSetFilters' : originalReduxState.expSetFilters,
+                            'context' : originalReduxState.context,
+                            //'expSetFilters' : originalReduxState.expSetFilters
+                        } 
+                    })
+                    navigateFxn(originalReduxState.href, { skipRequest : true });
+                } else {
+                    // Success. Remove any no result alerts.
+                    Alerts.deQueue(Alerts.NoFilterResults);
+                }
                 if (typeof callback === 'function') setTimeout(callback, 0);
-            }, ()=>{
+            }, (err) =>{
                 // Fallback callback
-                Alerts.queue(Alerts.NoFilterResults);
+                if (err && (err.status === 404 || err.total === 0)) Alerts.queue(Alerts.NoFilterResults);
                 if (typeof callback === 'function') setTimeout(callback, 0);
             }/*, { 'expSetFilters' : expSetFilters }*/);
         } else {

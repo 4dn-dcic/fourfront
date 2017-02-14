@@ -22,12 +22,12 @@ var HoverStatistics = module.exports = React.createClass({
 
     getInitialState : function(){
         return {
-            'count_experiments'     : 0,
-            'count_experiment_sets' : 0,
-            'count_files'           : 0,
-            'count_experiments_total'     : 0,
-            'count_experiment_sets_total' : 0,
-            'count_files_total'           : 0,
+            'count_experiments'     : null,
+            'count_experiment_sets' : null,
+            'count_files'           : null,
+            'count_experiments_total'     : null,
+            'count_experiment_sets_total' : null,
+            'count_files_total'           : null,
             'mounted' : false,
             'showFilters' : false
         };
@@ -78,9 +78,9 @@ var HoverStatistics = module.exports = React.createClass({
             !state.mounted ||
             props.invisible ||
             (
-                !(state.count_experiment_sets || state.count_experiment_sets_total) &&
-                !(state.count_experiments     || state.count_experiments_total) &&
-                !(state.count_files           || state.count_files_total)
+                (state.count_experiment_sets === null && state.count_experiment_sets_total === null) &&
+                (state.count_experiments === null     && state.count_experiments_total === null) &&
+                (state.count_files === null           && state.count_files_total === null)
             )
         ) return true;
 

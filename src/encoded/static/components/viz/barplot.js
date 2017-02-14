@@ -64,7 +64,7 @@ var BarPlot = React.createClass({
 
         countFieldsTermsForExperiment : function(fields, exp){
             _.forEach(fields, function(f){ 
-                var term = object.getNestedProperty(exp, f.field.replace('experiments_in_set.',''));
+                var term = object.getNestedProperty(exp, f.field.replace('experiments_in_set.',''), true);
                 BarPlot.countFieldTermForExperiment(f, term);
             });
         },
@@ -99,8 +99,8 @@ var BarPlot = React.createClass({
                 .value();
 
             experiments.forEach(function(exp){
-                var topLevelFieldTerm = object.getNestedProperty(exp, field.field.replace('experiments_in_set.',''));
-                var nextLevelFieldTerm = object.getNestedProperty(exp, field.childField.field.replace('experiments_in_set.',''));
+                var topLevelFieldTerm = object.getNestedProperty(exp, field.field.replace('experiments_in_set.',''), true);
+                var nextLevelFieldTerm = object.getNestedProperty(exp, field.childField.field.replace('experiments_in_set.',''), true);
                 BarPlot.countFieldTermForExperiment(field.terms[topLevelFieldTerm], nextLevelFieldTerm);
             });
 
@@ -236,11 +236,12 @@ var BarPlot = React.createClass({
             return {
                 'gap' : 5,
                 'maxBarWidth' : 60,
+                'maxLabelWidth' : null,
                 'labelRotation' : 30,
                 'labelWidth' : 200,
                 'yAxisMaxHeight' : 100, // This will override labelWidth to set it to something that will fit at angle.
                 'offset' : {
-                    'top' : 30,
+                    'top' : 18,
                     'bottom' : 50,
                     'left' : 80,
                     'right' : 0
@@ -619,9 +620,6 @@ var BarPlot = React.createClass({
             }
 
             
-            
-            // We need to know label height to make use of this (to subtract from to get max labelWidth), which would be too much work (in browser calculation) given character size variance for most fonts to be performant.
-            // var maxHypotenuse = styleOpts.yAxisMaxHeight * (1/Math.cos((Math.PI * 2) / (360 / styleOpts.labelRotation)));
             return (
                 <div className="y-axis-bottom" style={{ 
                     left : styleOpts.offset.left, 
@@ -629,64 +627,24 @@ var BarPlot = React.createClass({
                     height : Math.max(styleOpts.offset.bottom - 5, 0),
                     bottom : Math.min(styleOpts.offset.bottom - 5, 0)
                 }}>
-                    { currentBars.map(function(bar){
-
-                        return (
-                            <RotatedLabel
-                                key={'count-for-' + bar.term}
-                                className="y-axis-label no-highlight-color"
-                                term={bar.term}
-                                opacity={_this.state.transitioning && (bar.removing || !bar.existing) ? 0 : ''}
-                                x={bar.attr.x}
-                                y={5}
-                                placementWidth={bar.attr.width}
-                                placementHeight={styleOpts.offset.bottom}
-                                angle={styleOpts.labelRotation}
-                                maxLabelWidth={styleOpts.maxLabelWidth}
-                                label={bar.name || bar.term}
-                            />
-                        );
-
-                        return (
-                            <div
-                                key={'count-for-' + bar.term}
-                                data-term={bar.term}
-                                className="y-axis-label no-highlight-color"
-                                style={{
-                                    transform : vizUtil.style.translate3d(bar.attr.x, 5, 0),
-                                    width : bar.attr.width,
-                                    opacity : _this.state.transitioning && (bar.removing || !bar.existing) ? 0 : ''
-                                }}
-                            >
-                            
-                                <span className={"label-text" + (styleOpts.labelRotation === 'auto' ? ' auto-rotation' : '')} style={{
-                                    width: labelWidth,
-                                    left:  0 - (
-                                        (
-                                            typeof labelWidth === 'number' ?
-                                                labelWidth
-                                                : bar.attr.width
-                                        )
-                                        - 
-                                        (
-                                            typeof styleOpts.labelRotation === 'number' ? 
-                                                (bar.attr.width / 2)
-                                                : (bar.attr.width / (90 / bar.attr.width))
-                                        )
-                                    ),
-                                    transform : vizUtil.style.rotate3d(
-                                        typeof styleOpts.labelRotation === 'number' ? 
-                                            - Math.abs(styleOpts.labelRotation) : 
-                                            - (90 / (bar.attr.width * .1)), // If not set, rotate so 1 line will fit.
-                                        'z'
-                                    ), 
-                                }}>
-                                    { bar.name }
-                                </span>
-                            
-                            </div>
-                        );
-                    }) }
+                    <RotatedLabel.Axis
+                        labels={currentBars.map(function(b){ 
+                            return {
+                                name : b.name || b.term,
+                                term : b.term,
+                                x: b.attr.x,
+                                opacity : _this.state.transitioning && (bar.removing || !bar.existing) ? 0 : ''
+                            }; 
+                        })}
+                        labelClassName="y-axis-label no-highlight-color"
+                        y={5}
+                        extraHeight={5}
+                        placementWidth={currentBars[0].attr.width}
+                        placementHeight={styleOpts.offset.bottom}
+                        angle={styleOpts.labelRotation}
+                        maxLabelWidth={styleOpts.maxLabelWidth || 1000}
+                        isMounted={_this.state.mounted}
+                    />
                 </div>
             );
         },
