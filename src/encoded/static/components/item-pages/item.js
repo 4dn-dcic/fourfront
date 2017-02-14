@@ -74,6 +74,7 @@ var title = module.exports.title = function (props) {
         context.display_title   ||
         context.title           ||
         context.name            ||
+        context.download        ||
         context.accession       ||
         context.uuid            ||
         (typeof context['@id'] === 'string' ? context['@id'] :

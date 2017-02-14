@@ -127,7 +127,7 @@ def user_basic_view(context, request):
     """smth."""
     properties = item_view_object(context, request)
     filtered = {}
-    for key in ['@id', '@type', 'uuid', 'lab', 'title']:
+    for key in ['@id', '@type', 'uuid', 'lab', 'title', 'link_id', 'display_title']:
         try:
             filtered[key] = properties[key]
         except KeyError:

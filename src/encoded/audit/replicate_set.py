@@ -105,6 +105,7 @@ def audit_replicate_sets_consistency_check(value, system):
         '@id',
         '@type',
         'display_title',
+        'link_id',
         'accession',
         'aliases',
         'alternate_accessions',
