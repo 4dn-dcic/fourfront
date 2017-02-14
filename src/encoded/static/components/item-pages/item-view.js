@@ -43,7 +43,7 @@ var Detail = React.createClass({
         formValue : function (schemas, item, keyPrefix = '', depth = 0) {
             if(Array.isArray(item)) {
                 return (
-                    <ul>
+                    <ul style={{'display':'inline-block', 'float':'right', 'width':'100%'}}>
                         {   item.length === 0 ? <li><em>None</em></li>
                             :   item.map(function(it, i){
                                     return <li key={i}>{ Detail.formValue(schemas, it, keyPrefix, depth + 1) }</li>;
@@ -53,27 +53,35 @@ var Detail = React.createClass({
                 );
             } else if (typeof item === 'object') {
                 var title = itemTitle({ 'context' : item});
-                if (typeof item['@id'] === 'string'){
+                // if the following is true, we have an embedded object
+                if(item.display_title && item.link_id){
+                    var format_id = item.link_id.replace(/~/g, "/")
                     return (
-                        <a href={item['@id']}>{ title }</a>
+                        <a href={format_id} style={{'display':'inline-block', 'float':'right'}}>
+                            { title }
+                        </a>
                     );
-                } else {
-                    return title;
+                }else{ // it must be a subobject
+                    return (
+                        <ItemView.SubIPanel
+                            schemas={schemas}
+                            content={item}
+                            key={title}
+                            title={title}
+                        />
+                    );
                 }
-                /*
-                return (
-                    <ItemView.SubIPanel
-                        schemas={schemas}
-                        content={item}
-                        key={item['@id'] || item.name || (keyPrefix.length > 0 ? keyPrefix + '-' : '') + depth + '-' }
-                    />
-                );
-                */
             } else {
                 if (typeof item === 'string' && item.charAt(0) === '/') {
-                    return <a key={item} href={item}>{item}</a>;
+                    return(
+                            <a key={item} href={item} style={{'display':'inline-block', 'float':'right'}}>
+                                {item}
+                            </a>
+                        );
                 } else {
-                    return item;
+                    return(<span style={{'display':'inline-block', 'float':'right'}}>
+                                {item}
+                            </span>);
                 }
             }
         },
@@ -180,10 +188,12 @@ var ItemView = module.exports = React.createClass({
                 var active = this.state.active;
                 var header;
                 if (!description || description === ""){
-                    return <span>{field}</span>;
+                    return  <div style={{'display':'inline-block', 'float':'left'}}>
+                                {field}
+                            </div>;
                 }
                 return (
-                    <div className="tooltip-trigger"
+                    <div style={{'display':'inline-block', 'float':'left'}} className="tooltip-trigger"
                         onMouseEnter={this.handleHover.bind(null, true)}
                         onMouseLeave={this.handleHover.bind(null, false)}
                         data-field={field}
@@ -214,23 +224,27 @@ var ItemView = module.exports = React.createClass({
             render: function() {
                 var schemas = this.props.schemas;
                 var item = this.props.content;
-                var title = item.title || item.name || item.accession || item.uuid || item['@id'] || "Open";
+                var title = this.props.title;
                 var toggleRender;
                 var toggleLink;
                 if (!this.state.isOpen) {
-                    toggleLink = <a href="#" className="item-toggle-link" onClick={this.handleToggle}>{title}</a>
+                    toggleLink = <a href="#" className="item-toggle-link" onClick={this.handleToggle}>
+                        {title}
+                        <i className="icon icon-toggle-down icon-fw"></i>
+                    </a>
                     toggleRender = <span/>;
                 }else{
-                    toggleLink = <a href="#" className="item-toggle-link" onClick={this.handleToggle}>Close</a>
+                    toggleLink = <a href="#" className="item-toggle-link" style={{'paddingBottom':'15px'}} onClick={this.handleToggle}>
+                        {title}
+                        <i className="icon icon-toggle-up icon-fw"></i>
+                    </a>
                     toggleRender = <ItemView.Subview schemas={schemas} content={item} title={title}/>;
                 }
                 return (
-                    <div className="flexrow">
-                        <div>
-                            {toggleLink}
-                        </div>
-                        {toggleRender}
-                    </div>
+                    <span>
+                        {toggleLink}
+                        <div>{toggleRender}</div>
+                    </span>
                 );
             }
         }),
@@ -243,27 +257,18 @@ var ItemView = module.exports = React.createClass({
                 var tips = object.tipsFromSchema(schemas, item);
                 var sortKeys = Object.keys(item).sort();
                 return(
-                    <div className="flexcol-sm-6 subview">
                         <div className="sub-panel data-display panel-body-with-header">
-                            <div className="flexrow">
-                                <div className="flexcol-sm-6">
-                                    <div className="flexcol-heading experiment-heading">
-                                        <h5>{title}</h5>
-                                    </div>
                                     <dl className="key-value sub-descriptions">
                                         {sortKeys.map(function(ikey, idx){
                                             return (
                                                 <div className="sub-entry" key={ikey} data-test="term-name">
                                                 {Detail.formKey(tips,ikey)}
-                                                <dd>{Detail.formValue(schemas, item[ikey])}</dd>
+                                                {Detail.formValue(schemas, item[ikey])}
                                                 </div>
                                             );
                                         })}
                                     </dl>
-                                </div>
-                            </div>
                         </div>
-                    </div>
                 );
             }
         }),

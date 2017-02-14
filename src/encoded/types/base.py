@@ -344,6 +344,7 @@ def add_default_embeds(embeds, schema={}):
         elif len(split_field) == 1:
             embedded_base_fields.append(split_field)
     processed_fields = [field + '.display_title' for field in fields_to_process]
+    processed_fields += [field + '.link_id' for field in fields_to_process]
     if('properties' not in schema.keys()):
         return processed_fields + embeds
     # automatically embed top level linkTo's not already embedded

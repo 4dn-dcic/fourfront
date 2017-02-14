@@ -738,9 +738,9 @@ var ArrayField = React.createClass({
             arrayTable = (
                 <Panel className='panel-create-obj' header={
                     <div>
-                        <span style={{'display':'inlineBlock'}} className="display-tip">{fieldTip}</span>
-                        <span style={{'display':'inlineBlock'}} className="display-message">{'Type: ' + fieldType}</span>
-                        <a href="#" style={{'display':'inlineBlock', 'float':'right', 'color':'#388a92'}} onClick={this.pushArrayValue} title="Add item">
+                        <span className="display-tip">{fieldTip}</span>
+                        <span className="display-message">{'Type: ' + fieldType}</span>
+                        <a href="#" style={{'display':'inline-block', 'float':'right', 'color':'#388a92'}} onClick={this.pushArrayValue} title="Add item">
                             <i className="icon icon-plus-circle icon-fw"></i>
                         </a>
                     </div>

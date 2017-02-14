@@ -44,6 +44,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
         'award'
     ]
     embedded = add_default_embeds(embedded, schema)
+    print('---  ', embedded)
     name_key = 'accession'
 
     @calculated_property(schema={
