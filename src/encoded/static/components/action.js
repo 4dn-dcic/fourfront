@@ -222,7 +222,7 @@ var Action = module.exports = React.createClass({
                             newID = '/';
                         }
                         alert('Success! Navigating to the new object page.');
-                        this.context.navigate(newID);
+                        this.context.navigate(newID, {'inPlace':true});
                     }
                 }, error => {
                     stateToSet.validated = 0;
@@ -232,7 +232,11 @@ var Action = module.exports = React.createClass({
                     // make an alert for each error description
                     stateToSet.errorCount = errorList.length;
                     for(var i=0; i<errorList.length; i++){
-                        Alerts.queue({ 'title' : "Object validation error " + parseInt(i + 1), 'message': errorList[i].description || errorList[i] || "Unidentified error", 'style': 'danger' });
+                        var detail = errorList[i].description || errorList[i] || "Unidentified error";
+                        if(errorList[i].name && errorList[i].name.length > 0){
+                            detail += ('. See: ' + errorList[i].name[0]);
+                        }
+                        Alerts.queue({ 'title' : "Object validation error " + parseInt(i + 1), 'message': detail, 'style': 'danger' });
                     }
                     // scroll to the top of the page using d3
                     function scrollTopTween(scrollTop){
@@ -410,8 +414,7 @@ var BuildField = React.createClass({
             case 'object' : return (
                 <ObjectField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext}/>
             );
-            case 'attachment' :
-                return (
+            case 'attachment' : return (
                 <FileInput {...inputProps} field={this.props.label} modifyNewContext={this.props.modifyNewContext}/>
             );
         }
@@ -860,7 +863,7 @@ var FileInput = React.createClass({
             "image/png",
             "image/svs",
             "text/autosql"
-        ]
+        ];
         var attachment_props = {};
         var file = e.target.files[0];
         if ((!file.type || !_.contains(acceptedTypes, file.type))){
@@ -876,14 +879,14 @@ var FileInput = React.createClass({
         fileReader.readAsDataURL(file);
         fileReader.onloadend = function (e) {
             if(e.target.result){
-                attachment_props.href = e.target.result
+                attachment_props.href = e.target.result;
             }else{
                 alert('There was a problem reading the given file.');
                 return;
             }
 
         }.bind(this);
-        this.props.modifyNewContext(this.props.field, attachment_props)
+        this.props.modifyNewContext(this.props.field, attachment_props);
     },
 
     render: function(){
