@@ -27,7 +27,7 @@ class Biosample(Item):  # CalculatedBiosampleSlims, CalculatedBiosampleSynonyms)
     """Biosample class."""
     item_type = 'biosample'
     schema = load_schema('encoded:schemas/biosample.json')
-    #name_key = 'accession'
+    # name_key = 'accession'
     embedded = [
         'biosource.uuid',
         'biosource.biosource_type',

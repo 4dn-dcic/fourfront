@@ -254,11 +254,27 @@ class Item(snovault.Item):
     def display_title(self, request):
         """create a display_title field."""
         display_title = ""
-        look_for = ["name", "title", "description"]
+        look_for = [
+                    "experiment_summary",
+                    "biosource_name",
+                    "modification_name_short",
+                    "target_summary_short",
+                    "title",
+                    "name",
+                    "description",
+                    "accession",
+                    ]
         for field in look_for:
             display_title = self.properties.get(field, None)
             if display_title:
                 return display_title
+        # if none of the existing terms are available, use @type + date_created
+        try:
+            type_date = self.__class__.__name__ + " from " + self.properties.get("date_created", None)[:10]
+            return type_date
+        # last resort, use uuid
+        except:
+            return self.properties.get('uuid', None)
 
 
     @snovault.calculated_property(schema={
