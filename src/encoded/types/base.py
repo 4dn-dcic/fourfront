@@ -261,11 +261,17 @@ class Item(snovault.Item):
                     "target_summary_short",
                     "title",
                     "name",
+                    "first_name",
                     "description",
                     "accession",
                     ]
         for field in look_for:
+            # special case for user: concatenate first and last names
             display_title = self.properties.get(field, None)
+            if field == 'first_name':
+                more_display_title = self.properties.get('last_name', None)
+                if display_title and more_display_title:
+                    display_title += (' ' + more_display_title)
             if display_title:
                 return display_title
         # if none of the existing terms are available, use @type + date_created

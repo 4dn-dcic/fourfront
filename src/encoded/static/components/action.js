@@ -222,7 +222,7 @@ var Action = module.exports = React.createClass({
                             newID = '/';
                         }
                         alert('Success! Navigating to the new object page.');
-                        this.context.navigate(newID);
+                        this.context.navigate(newID, {'inPlace':true});
                     }
                 }, error => {
                     stateToSet.validated = 0;
@@ -232,7 +232,11 @@ var Action = module.exports = React.createClass({
                     // make an alert for each error description
                     stateToSet.errorCount = errorList.length;
                     for(var i=0; i<errorList.length; i++){
-                        Alerts.queue({ 'title' : "Object validation error " + parseInt(i + 1), 'message': errorList[i].description || errorList[i] || "Unidentified error", 'style': 'danger' });
+                        var detail = errorList[i].description || errorList[i] || "Unidentified error";
+                        if(errorList[i].name && errorList[i].name.length > 0){
+                            detail += ('. See: ' + errorList[i].name[0]);
+                        }
+                        Alerts.queue({ 'title' : "Object validation error " + parseInt(i + 1), 'message': detail, 'style': 'danger' });
                     }
                     // scroll to the top of the page using d3
                     function scrollTopTween(scrollTop){
