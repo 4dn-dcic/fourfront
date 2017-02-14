@@ -104,6 +104,7 @@ def audit_replicate_sets_consistency_check(value, system):
     fields2ignore = [
         '@id',
         '@type',
+        'display_title',
         'accession',
         'aliases',
         'alternate_accessions',
