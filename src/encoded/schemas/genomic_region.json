@@ -58,7 +58,7 @@
             "description": "If the exact end coordinate is not know a description of the start location",
             "type": "string"
         },
-        "location_description": {
+        "description": {
             "title": "Location Description",
             "description": "If exact coordinates of the region are not available a description of the genome location",
             "type": "string"

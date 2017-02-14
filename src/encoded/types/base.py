@@ -210,7 +210,6 @@ class Item(snovault.Item):
             keys['accession'].append(properties['accession'])
         return keys
 
-
     @snovault.calculated_property(schema={
         "title": "Display Title",
         "description": "A calculated title for every object in 4DN",
@@ -219,11 +218,28 @@ class Item(snovault.Item):
     def display_title(self, request):
         """create a display_title field."""
         display_title = ""
-        look_for = ["name", "title", "description"]
+        look_for = [
+                    "experiment_summary",
+                    "biosource_name",
+                    "modification_name_short",
+                    "target_summary_short",
+                    "title",
+                    "name",
+                    "description",
+                    "accession",
+                    ]
         for field in look_for:
             display_title = self.properties.get(field, None)
             if display_title:
                 return display_title
+        # if none of the existing terms are available, use @type + date_created
+        try:
+            type_date = self.__class__.__name__ + " from " + self.properties.get("date_created", None)[:10]
+            return type_date
+        # last resort, use uuid
+        except:
+            return self.properties.get('uuid', None)
+
 
 # make it so any item page defaults to using the object, not embedded, view
 @view_config(context=Item, permission='view', request_method='GET', name='page')
@@ -281,5 +297,3 @@ def edit_json(context, request):
             'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
             'href': '{item_uri}#!edit-json'.format(item_uri=request.resource_path(context)),
         }
-
-
