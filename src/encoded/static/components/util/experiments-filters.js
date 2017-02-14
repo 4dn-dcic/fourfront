@@ -154,6 +154,7 @@ var expFilters = module.exports = {
         if (returnInsteadOfSave){
             return newObj;
         } else {
+            console.info("Saving new filters:", newObj, "Using AJAX:", useAjax);
             return expFilters.saveChangedFilters(newObj, useAjax, href, callback);
         }
     },
@@ -476,11 +477,11 @@ var expFilters = module.exports = {
             // ToDo: arrays of expSet- and exp- exclusive fields
             if (reverse){
                 return field.replace('experiments_in_set.', '');
+            } else if (field.slice(0, 19) !== 'experiments_in_set.') {
+                return 'experiments_in_set.' + field;
             }
-            return 'experiments_in_set.' + field;
-        } else {
-            return field;
         }
+        return field;
     },
 
 

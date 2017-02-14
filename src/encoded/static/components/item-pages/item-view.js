@@ -44,10 +44,10 @@ var Detail = React.createClass({
             if(Array.isArray(item)) {
                 return (
                     <ul>
-                        {   item.length === 0 ?
-                            <li><em>None</em></li>
-                            :
-                            item.map(function(it, i){ return <li key={i}>{ Detail.formValue(schemas, it, keyPrefix, depth + 1) }</li>; })
+                        {   item.length === 0 ? <li><em>None</em></li>
+                            :   item.map(function(it, i){
+                                    return <li key={i}>{ Detail.formValue(schemas, it, keyPrefix, depth + 1) }</li>;
+                                })
                         }
                     </ul>
                 );
