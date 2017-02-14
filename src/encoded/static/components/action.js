@@ -414,8 +414,7 @@ var BuildField = React.createClass({
             case 'object' : return (
                 <ObjectField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext}/>
             );
-            case 'attachment' :
-                return (
+            case 'attachment' : return (
                 <FileInput {...inputProps} field={this.props.label} modifyNewContext={this.props.modifyNewContext}/>
             );
         }
@@ -864,7 +863,7 @@ var FileInput = React.createClass({
             "image/png",
             "image/svs",
             "text/autosql"
-        ]
+        ];
         var attachment_props = {};
         var file = e.target.files[0];
         if ((!file.type || !_.contains(acceptedTypes, file.type))){
@@ -880,14 +879,14 @@ var FileInput = React.createClass({
         fileReader.readAsDataURL(file);
         fileReader.onloadend = function (e) {
             if(e.target.result){
-                attachment_props.href = e.target.result
+                attachment_props.href = e.target.result;
             }else{
                 alert('There was a problem reading the given file.');
                 return;
             }
 
         }.bind(this);
-        this.props.modifyNewContext(this.props.field, attachment_props)
+        this.props.modifyNewContext(this.props.field, attachment_props);
     },
 
     render: function(){

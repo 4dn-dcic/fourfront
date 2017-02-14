@@ -55,7 +55,7 @@ var Detail = React.createClass({
                 var title = itemTitle({ 'context' : item});
                 // if the following is true, we have an embedded object
                 if(item.display_title && item.link_id){
-                    var format_id = item.link_id.replace(/~/g, "/")
+                    var format_id = item.link_id.replace(/~/g, "/");
                     return (
                         <a href={format_id} style={{'display':'inline-block', 'float':'right'}}>
                             { title }
@@ -77,7 +77,7 @@ var Detail = React.createClass({
                             <a key={item} href={item} style={{'display':'inline-block', 'float':'right'}}>
                                 {item}
                             </a>
-                        );
+                    );
                 } else {
                     return(<span style={{'display':'inline-block', 'float':'right'}}>
                                 {item}
@@ -228,10 +228,10 @@ var ItemView = module.exports = React.createClass({
                 var toggleRender;
                 var toggleLink;
                 if (!this.state.isOpen) {
-                    toggleLink = <a href="#" className="item-toggle-link" onClick={this.handleToggle}>
-                        {title}
-                        <i className="icon icon-toggle-down icon-fw"></i>
-                    </a>
+                    toggleLink = (  <a href="#" className="item-toggle-link" onClick={this.handleToggle}>
+                                        {title}
+                                        <i className="icon icon-toggle-down icon-fw"></i>
+                                    </a>);
                     toggleRender = <span/>;
                 }else{
                     toggleLink = <a href="#" className="item-toggle-link" style={{'paddingBottom':'15px'}} onClick={this.handleToggle}>
