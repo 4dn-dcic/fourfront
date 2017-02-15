@@ -291,12 +291,8 @@ var ItemView = module.exports = React.createClass({
     },
 
     componentDidMount : function(){
-        if (typeof this.props.context.lab == 'string' && this.props.context.lab.length > 0){
-            FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.context.lab, 'lab');
-        }
-        if (typeof this.props.context.award == 'string' && this.props.context.award.length > 0){
-            FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.context.award, 'award');
-        }
+        FormattedInfoBlock.onMountMaybeFetch.call(this, 'lab', this.props.context.lab);
+        FormattedInfoBlock.onMountMaybeFetch.call(this, 'award', this.props.context.award);
     },
 
     topRightHeaderSection : function(){
@@ -420,13 +416,19 @@ var ItemView = module.exports = React.createClass({
 
                         { typeof context.lab !== 'undefined' ?
                         <div className>
-                            { FormattedInfoBlock.Lab(typeof context.lab === 'string' ? this.state.details_lab : context.lab) }
+                            { FormattedInfoBlock.Lab(
+                                this.state && typeof this.state.details_lab !== 'undefined' ?
+                                this.state.details_lab : context.lab
+                            ) }
                         </div>
                         : null }
 
                         { typeof context.award !== 'undefined' ?
                         <div className>
-                            { FormattedInfoBlock.Award(typeof context.award === 'string' ? this.state.details_award : context.award) }
+                            { FormattedInfoBlock.Award(
+                                this.state && typeof this.state.details_award !== 'undefined' ?
+                                this.state.details_award : context.award
+                            ) }
                         </div>
                         : null }
 

@@ -218,6 +218,27 @@ var FormattedInfoBlock = module.exports = React.createClass({
             }.bind(this));
         },
 
+        /** Use like a mixin from a component which parents a FormattedInfoBlock(s) */
+        onMountMaybeFetch : function(propertyName = 'lab', contextProperty = this.props.context.lab){
+            if (typeof contextProperty == 'string' && contextProperty.length > 0){
+                FormattedInfoBlock.ajaxPropertyDetails.call(this, contextProperty, propertyName);
+                return true;
+            } 
+            if (contextProperty && typeof contextProperty === 'object'){
+                if (
+                    _.keys(contextProperty).length <= 3 &&
+                    typeof contextProperty.link_id === 'string' &&
+                    typeof contextProperty.display_title === 'string'
+                ){
+                    FormattedInfoBlock.ajaxPropertyDetails.call(
+                        this, contextProperty.link_id.replace(/~/g,'/'), propertyName
+                    );
+                    return true;
+                }
+            }
+            return false;
+        },
+
         /**
          * Preset generator for Lab detail block.
          * @see FormattedInfoBlock.generate
@@ -285,7 +306,7 @@ var FormattedInfoBlock = module.exports = React.createClass({
                     key={key}
                     label={label}
                     iconClass={iconClass}
-                    title={detail ? detail.title : null }
+                    title={(detail && detail.title) || null }
                     titleHref={detail && detail['@id'] ? detail['@id'] : null }
                     extraContainerClassName={extraContainerClassName}
                     extraDetailClassName={extraDetailClassName}
