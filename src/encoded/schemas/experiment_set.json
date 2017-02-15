@@ -58,7 +58,10 @@
     },
     "facets": {
         "experimentset_type": {
-            "title": "Experiment set type"
+            "title": "Experiment Set Type"
+        },
+        "experiments_in_set.experiment_type": {
+            "title": "Experiment Type"
         },
         "experiments_in_set.award.project": {
             "title": "Project"

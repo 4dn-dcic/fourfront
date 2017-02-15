@@ -23,14 +23,14 @@
             "default": "1"
         },
         "file_format": {
-            "title": "File format",
+            "title": "File Format",
             "type": "string",
             "enum": [
                 "fastq"
             ]
         },
         "file_type": {
-            "title": "File type",
+            "title": "File Type",
             "description": "The type of file based on the information in the file.",
             "type": "string",
             "enum": [

@@ -31,9 +31,19 @@ var vizUtil = module.exports = {
         return setTimeout(cb, 0);
     },
 
-    colorCache : {}, // We cache generated colors into here to re-use and speed up.
+    colorCache : {},        // We cache generated colors into here to re-use and speed up.
 
-    colorForNode : function(node, predefinedColors = {}, cachedOnly = false){
+    predefinedColors : {    // Keys should be all lowercase
+        "human (homo sapiens)"  : "rgb(218, 112, 6)",
+        "human"                 : "rgb(218, 112, 6)",
+        "mouse (mus musculus)"  : "rgb(43, 88, 169)",
+        "mouse"                 : "rgb(43, 88, 169)",
+        "other"                 : "#a173d1",
+        "end"                   : "#bbbbbb",
+        "none"                  : "#bbbbbb"
+    },
+
+    colorForNode : function(node, predefinedColors = vizUtil.predefinedColors, cachedOnly = false){
         var nodeDatum = node.data || node; // So can process on d3-gen'd/wrapped elements as well as plain datums.
 
         if (nodeDatum.color){
@@ -49,7 +59,7 @@ var vizUtil = module.exports = {
         } else if (typeof vizUtil.colorCache[nodeName] !== 'undefined') {
             return vizUtil.colorCache[nodeName]; // Previously calc'd color
         } else if (cachedOnly){
-            return '#ddd';
+            return '#888';
         } else if (
             nodeDatum.field === 'accession' ||
             nodeDatum.field === 'experiments_in_set.accession' || 

@@ -104,7 +104,8 @@
             "title": "Title",
             "description": "DON'T SUBMIT, auto-generated.",
             "uniqueKey": true,
-            "type": "string"
+            "type": "string",
+            "exclude_from": "edit"
         },
         "abstract": {
             "title": "Abstract",
