@@ -19,15 +19,19 @@ def custom_experiment_set(testapp, lab, award):
 
 
 @pytest.fixture
-def replicate_experiment_set(testapp, lab, award):
-    item = {
+def replicate_experiment_set_data(lab, award):
+    return {
         'lab': lab['@id'],
         'award': award['@id'],
         'description': 'test replicate set',
         'experimentset_type': 'replicate',
         'status': 'in review by lab'
     }
-    return testapp.post_json('/experiment_set_replicate', item).json['@graph'][0]
+
+
+@pytest.fixture
+def replicate_experiment_set(testapp, replicate_experiment_set_data):
+    return testapp.post_json('/experiment_set_replicate', replicate_experiment_set_data).json['@graph'][0]
 
 
 @pytest.fixture
@@ -155,13 +159,20 @@ def pub2_data(lab, award):
     }
 
 
-def test_calculated_produced_in_pub_for_rep_experiment_set(testapp, replicate_experiment_set, pub1_data):
+@pytest.fixture
+def replicate_posted_as_experiment_set(testapp, replicate_experiment_set_data):
+    return testapp.post_json('/experiment_set_replicate', replicate_experiment_set_data).json['@graph'][0]
+
+
+def test_calculated_produced_in_pub_for_rep_experiment_set(testapp, replicate_posted_as_experiment_set, pub1_data):
     # post single rep_exp_set to single pub
-    pub1_data['exp_sets_prod_in_pub'] = [replicate_experiment_set['@id']]
+    pub1_data['exp_sets_prod_in_pub'] = [replicate_posted_as_experiment_set['@id']]
     pub1res = testapp.post_json('/publication', pub1_data, status=201)
-    expsetres = testapp.get(replicate_experiment_set['@id'])
+    expsetres = testapp.get(replicate_posted_as_experiment_set['@id'])
+    print(expsetres)
     assert 'produced_in_pub' in expsetres
-    assert '/publication/' + pub1res.json['@graph'][0]['uuid'] == expsetres['produced_in_pub']
+    assert '/publication/' + pub1res.json['@graph'][0]['uuid'] == expsetres.json['produced_in_pub']
+    assert False
 
 
 def test_calculated_produced_in_pub_for_cust_experiment_set(testapp, custom_experiment_set, pub1_data):
@@ -170,7 +181,7 @@ def test_calculated_produced_in_pub_for_cust_experiment_set(testapp, custom_expe
     pub1res = testapp.post_json('/publication', pub1_data, status=201)
     expsetres = testapp.get(custom_experiment_set['@id'])
     assert 'produced_in_pub' in expsetres
-    assert '/publication/' + pub1res.json['@graph'][0]['uuid'] == expsetres['produced_in_pub']
+    assert '/publication/' + pub1res.json['@graph'][0]['uuid'] == expsetres.json['produced_in_pub']
 
 
 def test_calculated_produced_in_pub_for_two_experiment_set(testapp, replicate_experiment_set, custom_experiment_set, pub1_data):
