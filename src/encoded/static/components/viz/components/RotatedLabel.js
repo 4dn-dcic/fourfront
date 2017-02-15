@@ -112,7 +112,7 @@ var RotatedLabel = module.exports = React.createClass({
             'lineHeight' : 14,
             'extraHeight' : 5,
             'isMounted' : false, // IMPORTANT - Component relies on layout which relies on DOM being ready (not server-side).
-            'append' : <i className="icon icon-caret-right icon-fw"/>,
+            'append' : <i className="icon icon-caret-right"/>,
             //'appendExpanded' : <i className="icon icon-caret-right icon-fw"/>
         };
     },

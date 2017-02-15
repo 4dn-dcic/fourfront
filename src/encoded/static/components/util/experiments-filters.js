@@ -34,9 +34,9 @@ var expFilters = module.exports = {
     Field : {
 
         nameMap : {
-            'experiments_in_set.biosample.biosource.individual.organism.name' : 'Primary Organism',
-            'accession' : 'Experiment Set Accession',
-            'experiments_in_set.digestion_enzyme.name' : 'Digestion Enzyme',
+            'experiments_in_set.biosample.biosource.individual.organism.name' : 'Organism',
+            'accession' : 'Experiment Set',
+            'experiments_in_set.digestion_enzyme.name' : 'Enzyme',
             'experiments_in_set.biosample.biosource_summary' : 'Biosource',
         },
 

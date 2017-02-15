@@ -279,12 +279,13 @@
             .append {
                 position: absolute;
                 right : -10px;
-                content: '\f105';
-                font-family: FontAwesome;
                 top: 50%;
                 margin-top: -7px;
                 opacity : 0.33;
                 transition: opacity 0.5s;
+                > i.icon {
+                    width : 20px;
+                }
             }
             &:before {
             }
