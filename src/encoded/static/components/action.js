@@ -75,7 +75,7 @@ var Action = module.exports = React.createClass({
         for(var i=0; i<contextKeys.length; i++){
             if(schema.properties[contextKeys[i]]){
                 var fieldSchema = schema.properties[contextKeys[i]];
-                if (fieldSchema.exclude_from && fieldSchema.exclude_from == 'submit4dn'){
+                if (fieldSchema.exclude_from && (fieldSchema.exclude_from == 'submit4dn' || fieldSchema.exclude_from == 'edit')){
                     continue;
                 }
                 // check to see if this field is a calculated val
@@ -285,7 +285,7 @@ var FieldPanel = React.createClass({
         var schemaVal = object.getNestedProperty(schema, ['properties', field], true);
         if (!schemaVal) return null;
         // check to see if this field should be excluded based on exclude_from status
-        if (schemaVal.exclude_from && schemaVal.exclude_from == 'submit4dn'){
+        if (schemaVal.exclude_from && (schemaVal.exclude_from == 'submit4dn' || schemaVal.exclude_from == 'edit')){
             return null;
         }
         // check to see if this field is a calculated val
@@ -785,7 +785,7 @@ var ObjectField = React.createClass({
         var schemaVal = object.getNestedProperty(schema, ['properties', field], true);
         if (!schemaVal) return null;
         // check to see if this field should be excluded based on exclude_from status
-        if (schemaVal.exclude_from && schemaVal.exclude_from == 'submit4dn'){
+        if (schemaVal.exclude_from && (schemaVal.exclude_from == 'submit4dn' || schemaVal.exclude_from == 'edit')){
             return null;
         }
         // check to see if this field is a calculated val
