@@ -96,7 +96,7 @@ var Detail = React.createClass({
                 '@context', 'actions', 'audit' /* audit currently not embedded (empty obj) */,
                 // Visible elsewhere on page
                 'aliases', 'dbxrefs', 'date_created', 'lab', 'award', 'description',
-                'status', 'external_references', '@id'
+                'status', 'external_references', '@id', 'link_id'
             ],
             'persistentKeys' : [
                 // Experiment
@@ -112,7 +112,9 @@ var Detail = React.createClass({
                 // Lab
                 'awards', 'address1', 'address2', 'city', 'country', 'institute_name', 'state',
                 // Award
-                'end_date', 'project', 'uri'
+                'end_date', 'project', 'uri',
+                // Document
+                'attachment'
             ],
             'open' : null
         };
@@ -222,8 +224,8 @@ var ItemView = module.exports = React.createClass({
                 var iconType = isOpen ? 'icon-minus' : 'icon-plus';
                 return (
                     <span className="subitem-toggle">
-                        <i className={"icon " + iconType}/>
                         <a href="#" className="link" onClick={this.handleToggle}>
+                            <i style={{'color':'black', 'paddingRight':'10px'}} className={"icon " + iconType}/>
                             { title }
                         </a>
                     </span>
@@ -237,7 +239,7 @@ var ItemView = module.exports = React.createClass({
                 return (
                     <span>
                         { this.toggleLink(title, this.state.isOpen) }
-                        { this.state.isOpen ? 
+                        { this.state.isOpen ?
                             <ItemView.Subview schemas={schemas} content={item} title={title}/>
                         : null }
                     </span>
