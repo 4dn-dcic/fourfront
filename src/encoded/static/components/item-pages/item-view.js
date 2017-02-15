@@ -96,7 +96,7 @@ var Detail = React.createClass({
                 '@context', 'actions', 'audit' /* audit currently not embedded (empty obj) */,
                 // Visible elsewhere on page
                 'aliases', 'dbxrefs', 'date_created', 'lab', 'award', 'description',
-                'status', 'external_references', '@id', 'link_id'
+                'status', 'external_references', '@id', 'link_id', 'display_title'
             ],
             'persistentKeys' : [
                 // Experiment

@@ -53,6 +53,7 @@ class WorkflowRunSbg(WorkflowRun):
     item_type = 'workflow_run_sbg'
     schema = load_schema('encoded:schemas/workflow_run_sbg.json')
     embedded = WorkflowRun.embedded
+    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -66,3 +67,5 @@ class WorkflowMapping(Item):
 
     item_type = 'workflow_mapping'
     schema = load_schema('encoded:schemas/workflow_mapping.json')
+    embedded = []
+    embedded = add_default_embeds(embedded, schema)

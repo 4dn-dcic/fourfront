@@ -77,7 +77,8 @@ class Construct(Item):
 
     item_type = 'construct'
     schema = load_schema('encoded:schemas/construct.json')
-
+    embedded = []
+    embedded = add_default_embeds(embedded, schema)
 
 @collection(
     name='documents',
@@ -122,7 +123,8 @@ class GenomicRegion(Item):
 
     item_type = 'genomic_region'
     schema = load_schema('encoded:schemas/genomic_region.json')
-
+    embedded = []
+    embedded = add_default_embeds(embedded, schema)
 
 @collection(
     name='modifications',
@@ -178,7 +180,8 @@ class Organism(Item):
     item_type = 'organism'
     schema = load_schema('encoded:schemas/organism.json')
     name_key = 'name'
-
+    embedded = []
+    embedded = add_default_embeds(embedded, schema)
 
 @collection(
     name='protocols',
@@ -191,7 +194,8 @@ class Protocol(Item):
 
     item_type = 'protocol'
     schema = load_schema('encoded:schemas/protocol.json')
-
+    embedded = []
+    embedded = add_default_embeds(embedded, schema)
 
 @collection(
     name='quality-metric-flags',

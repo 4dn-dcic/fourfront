@@ -24,3 +24,5 @@ class PublicationTracking(Item):
 
     item_type = 'publication_tracking'
     schema = load_schema('encoded:schemas/publication_tracking.json')
+    embedded = []
+    embedded = add_default_embeds(embedded, schema)

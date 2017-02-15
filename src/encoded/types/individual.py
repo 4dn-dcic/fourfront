@@ -23,7 +23,9 @@ class Individual(Item):
     """the base class for individual collection."""
 
     base_types = ['Individual'] + Item.base_types
+    schema = load_schema('encoded:schemas/individual.json')
     embedded = ['organism']
+    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
 
@@ -40,6 +42,7 @@ class IndividualHuman(Individual):
     item_type = 'individual_human'
     schema = load_schema('encoded:schemas/individual_human.json')
     embedded = Individual.embedded
+    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(

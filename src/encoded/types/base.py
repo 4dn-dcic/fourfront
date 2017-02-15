@@ -262,7 +262,6 @@ class Item(snovault.Item):
                     "title",
                     "name",
                     "first_name",
-                    "description",
                     "accession",
                     ]
         for field in look_for:
