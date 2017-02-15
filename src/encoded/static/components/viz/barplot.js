@@ -4,7 +4,9 @@ var React = require('react');
 var _ = require('underscore');
 var d3 = require('d3');
 var vizUtil = require('./utilities');
-var { console, object, isServerSide, expFxn } = require('../util');
+var Legend = require('./components/Legend');
+var { console, object, isServerSide, expFxn, Filters } = require('../util');
+var { highlightTerm, unhighlightTerms } = require('./../facetlist');
 
 
 var BarPlot = React.createClass({
@@ -38,6 +40,7 @@ var BarPlot = React.createClass({
          * @param {string|string[]} term - A string or array of strings denoting terms. If multiple terms are passed, then field must have fields as terms (with incomplete 'terms' & 'total') object.
          */
         countFieldTermForExperiment : function(fieldObj, term, updateTotal = true){
+            if (term === null) term = "None";
             var termsCont = fieldObj.terms;
             if (Array.isArray(term)){
                 if (term.length === 1) term = term[0];
@@ -211,6 +214,23 @@ var BarPlot = React.createClass({
             return barData;
         },
 
+        barDataToLegendData : function(barData, schemas = null){
+            var fields = {};
+            _.reduce(barData.bars, function(m,b){
+                if (Array.isArray(b.bars)) return m.concat(b.bars);
+                else {
+                    m.push(b);
+                    return m;
+                }
+            }, []).forEach(function(b){
+                if (typeof fields[b.field] === 'undefined') fields[b.field] = { 'field' : b.field, 'terms' : {}, 'name' : Filters.Field.toName(b.field, schemas) };
+                fields[b.field].terms[b.term] = { 'term' : b.term, 'name' : b.name || Filters.Term.toName(b.field, b.term), 'color' : vizUtil.colorForNode(b) };
+            });
+            fields = _.values(fields);
+            fields.forEach(function(f){ f.terms = _.values(f.terms); });
+            return fields;
+        },
+
         /** Get default style options for chart. Should suffice most of the time. */
         getDefaultStyleOpts : function(){
             return {
@@ -253,7 +273,6 @@ var BarPlot = React.createClass({
                 'right'         : React.PropTypes.number
             })
         }),
-        'colorForNode'  : React.PropTypes.func,
         'height'        : React.PropTypes.number,
         'width'         : React.PropTypes.number
     },
@@ -263,7 +282,6 @@ var BarPlot = React.createClass({
             experiments : [],
             fields : [],
             styleOptions : null, // Can use to override default margins/style stuff.
-            colorForNode : function(node){ return vizUtil.stringToColor((node.data || node).name); } // Default color determinator
         };
     },
 
@@ -446,7 +464,7 @@ var BarPlot = React.createClass({
                             rx={5}
                             ry={5}
                             style={{
-                                fill : this.props.colorForNode(d)
+                                fill : vizUtil.colorForNode(d)
                             }}
                         />
                     </g>
@@ -493,7 +511,6 @@ var BarPlot = React.createClass({
                 );
             }
 
-
         },
 
         bar : function(d, index, all, styleOpts = null, existingBars = this.pastBars){
@@ -534,6 +551,12 @@ var BarPlot = React.createClass({
                             ''
                         )
                     }
+                    onMouseLeave={
+                        Array.isArray(d.bars) && d.bars.length > 0 ?
+                        function(e){
+                            unhighlightTerms(d.bars[0].field);
+                        } : null
+                    }
                     data-term={d.term}
                     data-field={Array.isArray(d.bars) && d.bars.length > 0 ? d.bars[0].field : null}
                     key={"bar-" + d.term}
@@ -556,7 +579,7 @@ var BarPlot = React.createClass({
 
         barPart : function(d){
             
-            var color = this.props.colorForNode(d);
+            var color = vizUtil.colorForNode(d);
 
             return (
                 <div
@@ -571,6 +594,7 @@ var BarPlot = React.createClass({
                     data-target-height={d.attr.height}
                     key={'bar-part-' + (d.parent ? d.parent.term + '~' + d.term : d.term)}
                     data-term={d.parent ? d.term : null}
+                    onMouseEnter={highlightTerm.bind(this, d.field, d.term, color)}
                 >
 
                 </div>
@@ -630,20 +654,29 @@ var BarPlot = React.createClass({
         leftAxis : function(availWidth, availHeight, barData, styleOpts){
             //console.log(barData);
             var chartHeight = availHeight - styleOpts.offset.top - styleOpts.offset.bottom;
-            var valStep = barData.maxY / 8;
-            var rangeVal = d3.range(0, barData.maxY + valStep, valStep);
-            console.log(rangeVal);
-            var steps = rangeVal.map(function(v,i){
+            var chartWidth = availWidth - styleOpts.offset.left - styleOpts.offset.right;
+            var ticks = d3.ticks(0, barData.maxY * ((chartHeight - 10)/chartHeight), Math.min(8, barData.maxY)).concat([barData.maxY]);
+            //console.log(ticks);
+            var steps = ticks.map(function(v,i){
+                var w = (
+                    Math.min(
+                        (barData.bars.filter(function(b){
+                            return b.count >= v - ((ticks[1] - ticks[0]) * 2);
+                        }).length) * Math.min(styleOpts.maxBarWidth + styleOpts.gap, chartWidth / barData.bars.length) + (styleOpts.maxBarWidth * .66),
+                        chartWidth
+                    )
+                );
                 return (
-                    <div className="axis-step" style={{
+                    <div className={"axis-step" + (i >= ticks.length - 1 ? ' last' : '')} style={{
                         position : 'absolute',
                         left: 0,
                         right: 0,
-                        bottom : (v / barData.maxY) * chartHeight
-                    }} key={i}>
+                        bottom : (v / barData.maxY) * chartHeight - 1,
+                    }} key={v}>
                         <span className="axis-label">
                             { v }
                         </span>
+                        <div className="axis-bg-line" style={{ width : w + 3, right : -w - 5 }}/>
                     </div>
                 );
             });
@@ -682,7 +715,7 @@ var BarPlot = React.createClass({
             this.styleOptions()
         );
 
-        //console.log('BARDATA', barData);
+        console.log('BARDATA', barData);
 
         // Bars from current dataset/filters only.
         var currentBars = barData.bars.map((d)=>{
@@ -716,9 +749,17 @@ var BarPlot = React.createClass({
                 data-field={this.props.fields[barData.fieldIndex].field}
                 style={{ height : availHeight, width: availWidth }}
             >
-                { barComponents }
                 { this.renderParts.leftAxis.call(this, availWidth, availHeight, barData, styleOpts) }
+                { barComponents }
                 { this.renderParts.bottomYAxis.call(this, availWidth, availHeight, allBars, styleOpts) }
+                <Legend fields={BarPlot.barDataToLegendData(barData, this.props.schemas || null)} title={
+                    <div>
+                        <h6 className="text-400 legend-title">
+                            { Filters.Field.toName(barData.fields[barData.fieldIndex].field, this.props.schemas) }
+                            <br/><span className="text-300">divided into</span>
+                        </h6>
+                    </div>
+                } />
             </div>
         );
         /*

@@ -7,7 +7,8 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    add_default_embeds
 )
 
 @abstract_collection(
@@ -21,9 +22,11 @@ class Experiment(Item):
     """The main experiment class."""
 
     base_types = ['Experiment'] + Item.base_types
+    schema = load_schema('encoded:schemas/experiment.json')
     embedded = ["protocol", "protocol_variation", "lab", "award", "biosample",
                 "biosample.biosource", "biosample.modifications",
                 "biosample.treatments", "biosample.biosource.individual.organism"]
+    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
     def generate_mapid(self, experiment_type, num):
@@ -134,6 +137,7 @@ class ExperimentHiC(Experiment):
     item_type = 'experiment_hi_c'
     schema = load_schema('encoded:schemas/experiment_hi_c.json')
     embedded = Experiment.embedded + ["digestion_enzyme", "submitted_by"]
+    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -170,6 +174,7 @@ class ExperimentCaptureC(Experiment):
                                       "targeted_regions",
                                       "targeted_regions.target",
                                       "targeted_regions.oligo_file"]
+    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -202,6 +207,7 @@ class ExperimentRepliseq(Experiment):
     item_type = 'experiment_repliseq'
     schema = load_schema('encoded:schemas/experiment_repliseq.json')
     embedded = Experiment.embedded + ["submitted_by"]
+    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
     @calculated_property(schema={

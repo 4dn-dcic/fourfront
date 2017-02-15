@@ -3,6 +3,7 @@
 var React = require('react');
 var _ = require('underscore');
 var { console, layout, isServerSide } = require('./util');
+var vizUtil = require('./viz/utilities');
 
 var FlexibleDescriptionBox = module.exports.FlexibleDescriptionBox = React.createClass({
 
@@ -18,7 +19,7 @@ var FlexibleDescriptionBox = module.exports.FlexibleDescriptionBox = React.creat
     },
 
     propTypes : {
-        description : React.PropTypes.string.isRequired,
+        description : React.PropTypes.any.isRequired,
         dimensions : React.PropTypes.shape({
             paddingWidth : React.PropTypes.number,
             paddingHeight : React.PropTypes.number,
@@ -72,7 +73,7 @@ var FlexibleDescriptionBox = module.exports.FlexibleDescriptionBox = React.creat
         } else if (this.props.fitTo === 'parent'){
             containerWidth = this.refs.box.parentElement.offsetWidth;
         } else if (this.props.fitTo === 'self'){
-            containerWidth = this.refs.box.offsetWidth;
+            containerWidth = (this.refs.box && this.refs.box.offsetWidth) || 1000;
         }
 
         containerWidth -= dims.paddingWidth; // Account for inner padding & border.
@@ -119,7 +120,7 @@ var FlexibleDescriptionBox = module.exports.FlexibleDescriptionBox = React.creat
             }, 300, false);
 
             window.addEventListener('resize', this.debouncedLayoutResizeStateChange);
-            window.requestAnimationFrame(()=>{
+            vizUtil.requestAnimationFrame(()=>{
                 this.setState({
                     descriptionWillFitOneLine : this.checkWillDescriptionFitOneLineAndUpdateHeight()
                 });
