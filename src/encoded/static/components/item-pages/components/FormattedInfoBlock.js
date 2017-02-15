@@ -219,9 +219,9 @@ var FormattedInfoBlock = module.exports = React.createClass({
         },
 
         /** Use like a mixin from a component which parents a FormattedInfoBlock(s) */
-        onMountMaybeFetch : function(propertyName = 'lab', contextProperty = this.props.context.lab){
+        onMountMaybeFetch : function(propertyName = 'lab', contextProperty = this.props.context.lab, cb = null){
             if (typeof contextProperty == 'string' && contextProperty.length > 0){
-                FormattedInfoBlock.ajaxPropertyDetails.call(this, contextProperty, propertyName);
+                FormattedInfoBlock.ajaxPropertyDetails.call(this, contextProperty, propertyName, cb);
                 return true;
             } 
             if (contextProperty && typeof contextProperty === 'object'){
@@ -231,7 +231,7 @@ var FormattedInfoBlock = module.exports = React.createClass({
                     typeof contextProperty.display_title === 'string'
                 ){
                     FormattedInfoBlock.ajaxPropertyDetails.call(
-                        this, contextProperty.link_id.replace(/~/g,'/'), propertyName
+                        this, contextProperty.link_id.replace(/~/g,'/'), propertyName, cb
                     );
                     return true;
                 }
