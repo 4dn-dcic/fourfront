@@ -222,7 +222,7 @@ var Action = module.exports = React.createClass({
                             newID = '/';
                         }
                         alert('Success! Navigating to the new object page.');
-                        this.context.navigate(newID, {'inPlace':true});
+                        this.context.navigate(newID);
                     }
                 }, error => {
                     stateToSet.validated = 0;
@@ -440,11 +440,11 @@ var BuildField = React.createClass({
         var inputElement = e && e.target ? e.target : this.refs.inputElement;
         var currValue = inputElement.value;
         // TODO: add case for array
-        if (this.props.fieldType == 'number'){
+        if (this.props.fieldType == 'integer'){
             if(!isNaN(parseInt(currValue))){
                 currValue = parseInt(currValue);
             }
-        } else if (this.props.fieldType == 'float'){
+        } else if (this.props.fieldType == 'number'){
             if(!isNaN(parseFloat(currValue))){
                 currValue = parseFloat(currValue);
             }
@@ -684,7 +684,7 @@ var ArrayField = React.createClass({
     },
 
     initiateArrayField: function(arrayInfo) {
-        var value = arrayInfo[0] || "No value";
+        var value = arrayInfo[0] || null;
         var fieldSchema = arrayInfo[1];
         var field = fieldSchema.title || "No title";
         // use arrayIdx as stand-in value for field
