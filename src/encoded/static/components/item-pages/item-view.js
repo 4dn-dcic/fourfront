@@ -261,12 +261,6 @@ var ItemView = module.exports = React.createClass({
                                         { Detail.formValue(schemas, item[key], key) }
                                     </PartialList.Row>
                                 );
-                                return (
-                                    <div className="sub-entry" key={key} data-test="term-name">
-                                        { Detail.formKey(tips,key) }
-                                        { Detail.formValue(schemas, item[key]) }
-                                    </div>
-                                );
                             })}
                         </div>
                     </div>
