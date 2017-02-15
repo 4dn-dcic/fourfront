@@ -10,6 +10,7 @@ from snovault import (
 )
 from .base import (
     Item,
+    add_default_embeds
 )
 import string
 import re
@@ -28,6 +29,8 @@ class Vendor(Item):
     item_type = 'vendor'
     schema = load_schema('encoded:schemas/vendor.json')
     name_key = 'name'
+    embedded = []
+    embedded = add_default_embeds(embedded, schema)
 
     def _update(self, properties, sheets=None):
         # set name based on what is entered into title

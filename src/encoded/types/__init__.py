@@ -8,7 +8,8 @@ from snovault import (
 )
 # from pyramid.traversal import find_root
 from .base import (
-    Item
+    Item,
+    add_default_embeds
     # paths_filtered_by_status,
 )
 
@@ -32,6 +33,7 @@ class AnalysisStep(Item):
     name_key = 'name'
     schema = load_schema('encoded:schemas/analysis_step.json')
     embedded = ['software_used', 'qa_stats_generated']
+    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -48,6 +50,7 @@ class Award(Item):
     schema = load_schema('encoded:schemas/award.json')
     name_key = 'name'
     embedded = ['pi']
+    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -74,7 +77,8 @@ class Construct(Item):
 
     item_type = 'construct'
     schema = load_schema('encoded:schemas/construct.json')
-
+    embedded = []
+    embedded = add_default_embeds(embedded, schema)
 
 @collection(
     name='documents',
@@ -88,6 +92,7 @@ class Document(ItemWithAttachment, Item):
     item_type = 'document'
     schema = load_schema('encoded:schemas/document.json')
     embedded = ['lab', 'award', 'submitted_by']
+    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -104,6 +109,7 @@ class Enzyme(Item):
     schema = load_schema('encoded:schemas/enzyme.json')
     name_key = 'name'
     embedded = ['enzyme_source']
+    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -117,7 +123,8 @@ class GenomicRegion(Item):
 
     item_type = 'genomic_region'
     schema = load_schema('encoded:schemas/genomic_region.json')
-
+    embedded = []
+    embedded = add_default_embeds(embedded, schema)
 
 @collection(
     name='modifications',
@@ -131,6 +138,7 @@ class Modification(Item):
     item_type = 'modification'
     schema = load_schema('encoded:schemas/modification.json')
     embedded = ['constructs', 'modified_regions', 'created_by', 'target_of_mod']
+    embedded = add_default_embeds(embedded, schema)
 
     @calculated_property(schema={
         "title": "Modification name",
@@ -172,7 +180,8 @@ class Organism(Item):
     item_type = 'organism'
     schema = load_schema('encoded:schemas/organism.json')
     name_key = 'name'
-
+    embedded = []
+    embedded = add_default_embeds(embedded, schema)
 
 @collection(
     name='protocols',
@@ -185,7 +194,8 @@ class Protocol(Item):
 
     item_type = 'protocol'
     schema = load_schema('encoded:schemas/protocol.json')
-
+    embedded = []
+    embedded = add_default_embeds(embedded, schema)
 
 @collection(
     name='quality-metric-flags',
@@ -198,6 +208,7 @@ class QualityMetricFlag(Item):
     item_type = 'quality_metric_flag'
     schema = load_schema('encoded:schemas/quality_metric_flag.json')
     embedded = ['quality_metrics']
+    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -212,6 +223,7 @@ class Target(Item):
     item_type = 'target'
     schema = load_schema('encoded:schemas/target.json')
     embedded = ['targeted_region']
+    embedded = add_default_embeds(embedded, schema)
 
     @calculated_property(schema={
         "title": "Target summary",
