@@ -126,6 +126,8 @@ def create_term_dict(class_, termid, data, ontology_id=None):
 
 
 def add_term_and_info(class_, term, relationship, data, terms):
+    if not terms:
+        terms = {}
     for subclass in data.rdfGraph.objects(class_, subClassOf):
         term_id = get_termid_from_uri(term)
         if terms.get(term_id) is None:
@@ -238,6 +240,17 @@ def get_definitions(class_, data, definition_terms):
     return getObjectLiteralsOfType(class_, data, definition_terms)
 
 
+def _cleanup_non_fields(terms):
+    to_delete = ['relationships', 'all_parents', 'development',
+                 'has_part_inverse', 'develops_from', 'closure',
+                 'closure_with_develops_from']
+    for termid, term in terms.items():
+        for field in to_delete:
+            if field in term:
+                del term[field]
+    return terms
+
+
 def add_slim_to_term(term, slim_terms):
     '''Checks the list of ancestor terms to see if any are slim_terms
         and if so adds the slim_term to the term in slim_term slot
@@ -256,6 +269,17 @@ def add_slim_to_term(term, slim_terms):
     if slimterms2add:
         term['slim_terms'] = list(slimterms2add.values())
     return term
+
+
+def add_slim_terms(terms, slim_terms):
+    for termid, term in terms.items():
+        term = _combine_all_parents(term)
+    for termid, term in terms.items():
+        term = get_all_ancestors(term, terms, 'all_parents')
+        term = get_all_ancestors(term, terms, 'development')
+        term = add_slim_to_term(term, slim_terms)
+    terms = _cleanup_non_fields(terms)
+    return terms
 
 
 def convert2namespace(uri):
@@ -386,6 +410,78 @@ def connect2server(keyfile, keyname):
     return None
 
 
+def remove_obsoletes_and_unnamed(terms):
+    terms = {termid: term for termid, term in terms.items()
+             if ('parents' not in term) or ('ObsoleteClass' not in term['parents'])}
+    terms = {termid: term for termid, term in terms.items()
+             if 'term_name' in term and (term['term_name'] and not term['term_name'].lower().startswith('obsolete'))}
+    # for termid, term in terms.items():
+    #     if 'parents' in term:
+    #         if 'ObsoleteClass' in term['parents']:
+    #             del terms[termid]
+    #     elif 'term_name' in term:
+    #         if not term['term_name']:
+    #             del terms[termid]
+    #         elif term['term_name'].lower().startswith('obsolete'):
+    #             del terms[termid]
+    return terms
+
+
+def add_additional_term_info(terms, data, synonym_terms, definition_terms):
+    for termid, term in terms.items():
+        termuri = convert2URIRef(term['term_url'])
+
+        # add any missing synonyms
+        synonyms = get_synonyms(termuri, data, synonym_terms)
+        if synonyms:
+            if 'synonyms' not in term:
+                term['synonyms'] = []
+            for syn in synonyms:
+                if syn not in term['synonyms']:
+                    term['synonyms'].append(syn)
+
+        # we only want one definition - may want to add some checking if multiple
+        if term.get('definition') is None:
+            definitions = get_definitions(termuri, data, definition_terms)
+            if definitions:
+                term['definition'] = definitions[0]
+    return terms
+
+
+def download_and_process_owl(ontology, connection, terms):
+    synonym_terms = get_synonym_term_uris(connection, ontology['uuid'])
+    definition_terms = get_definition_term_uris(connection, ontology['uuid'])
+    data = Owler(ontology['download_url'])
+    for class_ in data.allclasses:
+        if isBlankNode(class_):
+            terms = process_blank_node(class_, data, terms)
+        else:
+            if not terms:
+                terms = {}
+            termid = get_termid_from_uri(class_)
+            if terms.get(termid) is None:
+                terms[termid] = create_term_dict(class_, termid, data, ontology['uuid'])
+            else:
+                if 'term_name' not in terms[termid]:
+                    terms[termid]['term_name'] = get_term_name_from_rdf(class_, data)
+                if 'source_ontology' not in terms[termid]:
+                    terms[termid]['source_ontology'] = ontology['uuid']
+            # deal with parents
+            terms = process_parents(class_, termid, data, terms)
+    # add synonyms and definitions
+    terms = add_additional_term_info(terms, data, synonym_terms, definition_terms)
+    return terms
+
+
+def write_outfile(terms, filename):
+    with open(filename, 'w') as outfile:
+        outfile.write('[\n')
+        for term in terms.values():
+            json.dump(term, outfile, indent=4)
+            outfile.write('\n')
+        outfile.write(']\n')
+
+
 def parse_args(args):
     parser = argparse.ArgumentParser(
         description="Process specified Ontologies and create OntologyTerm inserts for updates",
@@ -397,6 +493,10 @@ def parse_args(args):
                         default='all',
                         help="Names of ontologies to process - eg. UBERON, OBI, EFO; \
                         all retrieves all ontologies that exist in db")
+    parser.add_argument('--outfile',
+                        default='ontology.json',
+                        help="The name of the output file.  \
+                        Default is --outfile=ontology.json")
     parser.add_argument('--key',
                         default='default',
                         help="The keypair identifier from the keyfile.  \
@@ -427,68 +527,14 @@ def main():
     for ontology in ontologies:
         print('Processing: ', ontology['ontology_name'])
         if ontology['download_url'] is not None:
-            synonym_terms = get_synonym_term_uris(connection, ontology['uuid'])
-            definition_terms = get_definition_term_uris(connection, ontology['uuid'])
-            data = Owler(ontology['download_url'])
-            for class_ in data.allclasses:
-                if isBlankNode(class_):
-                    terms = process_blank_node(class_, data, terms)
-                else:
-                    termid = get_termid_from_uri(class_)
-                    if terms.get(termid) is None:
-                        terms[termid] = create_term_dict(class_, termid, data, ontology['uuid'])
-                    else:
-                        if 'term_name' not in terms[termid]:
-                            terms[termid]['term_name'] = get_term_name_from_rdf(class_, data)
-                        if 'source_ontology' not in terms[termid]:
-                            terms[termid]['source_ontology'] = ontology['uuid']
-                    # deal with parents
-                    terms = process_parents(class_, termid, data, terms)
-
-            # here we should have all terms for a single ontology
-
-            # add other term info - synonyms, definitions, ontology, namespace
-            for termid, term in terms.items():
-                termuri = convert2URIRef(term['term_url'])
-
-                # add any missing synonyms
-                synonyms = get_synonyms(termuri, data, synonym_terms)
-                if synonyms:
-                    if 'synonyms' not in term:
-                        term['synonyms'] = []
-                    for syn in synonyms:
-                        if syn not in term['synonyms']:
-                            term['synonyms'].append(syn)
-
-                # we only want one definition - may want to add some checking if multiple
-                if term.get('definition') is None:
-                    definitions = get_definitions(termuri, data, definition_terms)
-                    if definitions:
-                        term['definition'] = definitions[0]
+            # get all the terms for an ontology
+            terms = download_and_process_owl(ontology, connection, terms)
 
     # at this point we've processed the rdf of all the ontologies
-    for termid, term in terms.items():
-        term = _combine_all_parents(term)
-    for termid, term in terms.items():
-        term = get_all_ancestors(term, terms, 'all_parents')
-        term = get_all_ancestors(term, terms, 'development')
-        term = add_slim_to_term(term, slim_terms)
-
-    # clean up
-    to_delete = ['relationships', 'all_parents', 'development',
-                 'has_part_inverse', 'develops_from', 'closure',
-                 'closure_with_develops_from']
-    for termid, term in terms.items():
-        for field in to_delete:
-            if field in term:
-                del term[field]
-
-    with open('test_ontology.json', 'w') as outfile:
-        outfile.write('[\n')
-        for term in terms.values():
-            json.dump(term, outfile, indent=4)
-            outfile.write('\n')
-        outfile.write(']\n')
+    if terms:
+        terms = add_slim_terms(terms, slim_terms)
+        terms = remove_obsoletes_and_unnamed(terms)
+        write_outfile(terms, args.outfile)
 
 
 if __name__ == '__main__':
