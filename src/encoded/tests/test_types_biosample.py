@@ -20,7 +20,8 @@ def biosample_relation(derived_from):
 
 
 def test_biosample_has_display_title(testapp, biosample_1):
-    assert biosample_1['display_title'] == 'GM12878 prepared for Hi-C'
+    # accession fallback used for display title here
+    assert biosample_1['display_title'] == biosample_1['accession']
 
 
 # link_id is equal to @id but uses ~ instead of / for embedding purposes
