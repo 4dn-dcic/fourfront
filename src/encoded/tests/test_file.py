@@ -88,6 +88,7 @@ def test_files_get_s3_with_no_filename_patched(testapp, fastq_uploading,
     resobj = res.json['@graph'][0]
 
     props = {'uuid': resobj['uuid'],
+             'aliases': ['dcic:test_1'],
              'status': 'uploading'}
 
     patched = testapp.patch_json('/file_fastq/{uuid}'
@@ -97,6 +98,7 @@ def test_files_get_s3_with_no_filename_patched(testapp, fastq_uploading,
     fastq_res = testapp.get('{href}'
                             .format(**res.json['@graph'][0]),
                             status=307)
+    assert props['uuid'] in fastq_res.text
 
 
 @pytest.fixture
@@ -187,6 +189,18 @@ def test_file_type(registry, fastq_json):
     my_file = FileFastq.create(registry, uuid, fastq_json)
     assert 'gz' == my_file.file_type('gz')
     assert "fastq gz" == my_file.file_type('fastq', 'gz')
+
+
+
+def test_post_upload_only_on_uploading(registry, fastq_json, request):
+    uuid = "0afb6080-1c08-11e4-8c21-0800200c9a44"
+    my_file = FileFastq.create(registry, uuid, fastq_json)
+    try:
+        post_upload(my_file, request)
+    except HTTPForbidden:
+        assert True
+        return
+    assert False
 
 
 def test_post_upload_only_for_uploading_or_upload_failed_status(registry, fastq_json, request):
