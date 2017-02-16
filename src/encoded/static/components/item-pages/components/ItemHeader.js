@@ -56,10 +56,10 @@ var ItemHeader = module.exports = {
         },
         itemActions : function(){
             if (!Array.isArray(this.props.context.actions) || this.props.context.actions.length === 0) return null;
-            return this.props.context.actions.map(function(a){
+            return this.props.context.actions.map(function(action, i){
                 return (
-                    <div className="expset-indicator right action-button" data-action={a.name || null}>
-                        <a href={a.href}>{ a.title }</a>
+                    <div className="expset-indicator right action-button" data-action={action.name || null} key={action.name || i}>
+                        <a href={action.href}>{ action.title }</a>
                     </div>
                 );
             });

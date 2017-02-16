@@ -305,6 +305,36 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			margin-bottom: 0;
 			//margin-top: 3px;
 		}
+
+		/** For embedded sub-objects **/
+		.subitem-toggle {
+			display: inline-block;
+			> .link {
+				color: #00cca3; // temporary?
+				&:hover,&:focus {
+					color: #00cca3;
+				}
+			}
+			> i.icon {
+				width: 20px;
+			}
+		}
+
+		li > span > .subitem-toggle > i.icon {
+			width: 20px;
+			margin-left: -20px;
+			background-color: #fff;
+		}
+
+		.data-display, .sub-panel {
+			padding: 0;
+			padding-top: 15px;
+			> .sub-descriptions > .list-item:last-child > div.item-label > .inner,
+			> .sub-descriptions > .list-item:last-child > div.item-value > .inner {
+				border-bottom: none;
+			}
+		}
+
 	}
 		
 }

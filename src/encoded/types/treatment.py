@@ -23,6 +23,9 @@ class Treatment(Item):
     """Treatment class."""
 
     base_types = ['Treatment'] + Item.base_types
+    schema = load_schema('encoded:schemas/treatment.json')
+    embedded = []
+    embedded = add_default_embeds(embedded, schema)
 
     @calculated_property(schema={
         "title": "Treatment_type",
@@ -49,6 +52,7 @@ class TreatmentChemical(Treatment):
     item_type = 'treatment_chemical'
     schema = load_schema('encoded:schemas/treatment_chemical.json')
     embedded = Treatment.embedded
+    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(

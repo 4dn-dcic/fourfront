@@ -102,6 +102,8 @@ class FileSet(Item):
     item_type = 'file_set'
     schema = load_schema('encoded:schemas/file_set.json')
     name_key = 'accession'
+    embedded = []
+    embedded = add_default_embeds(embedded, schema)
 
 
 @abstract_collection(
@@ -258,6 +260,7 @@ class FileFastq(File):
     item_type = 'file_fastq'
     schema = load_schema('encoded:schemas/file_fastq.json')
     embedded = File.embedded
+    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
 
@@ -273,6 +276,7 @@ class FileFasta(File):
     item_type = 'file_fasta'
     schema = load_schema('encoded:schemas/file_fasta.json')
     embedded = File.embedded
+    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
 
@@ -288,6 +292,7 @@ class FileProcessed(File):
     item_type = 'file_processed'
     schema = load_schema('encoded:schemas/file_processed.json')
     embedded = File.embedded
+    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
 
@@ -303,6 +308,7 @@ class FileReference(File):
     item_type = 'file_reference'
     schema = load_schema('encoded:schemas/file_reference.json')
     embedded = File.embedded
+    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
 
@@ -327,6 +333,7 @@ def get_upload(context, request):
 @view_config(name='upload', context=File, request_method='POST',
              permission='edit', validators=[schema_validator({"type": "object"})])
 def post_upload(context, request):
+
     properties = context.upgrade_properties()
     if properties['status'] not in ('uploading', 'upload failed'):
         raise HTTPForbidden('status must be "uploading" to issue new credentials')
@@ -337,6 +344,7 @@ def post_upload(context, request):
     if external is None:
         # Handle objects initially posted as another state.
         bucket = request.registry.settings['file_upload_bucket']
+        # maybe this should be properties.uuid
         uuid = context.uuid
         mapping = context.schema['file_format_file_extension']
         file_extension = mapping[properties['file_format']]

@@ -54,6 +54,8 @@ class AccessKey(Item):
     item_type = 'access_key'
     schema = load_schema('encoded:schemas/access_key.json')
     name_key = 'access_key_id'
+    embedded = []
+    embedded = add_default_embeds(embedded, schema)
 
     STATUS_ACL = {
         'current': [(Allow, 'role.owner', ['view', 'edit'])] + ONLY_ADMIN_VIEW,

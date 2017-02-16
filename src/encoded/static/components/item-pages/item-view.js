@@ -44,36 +44,42 @@ var Detail = React.createClass({
             if(Array.isArray(item)) {
                 return (
                     <ul>
-                        {   item.length === 0 ?
-                            <li><em>None</em></li>
-                            :
-                            item.map(function(it, i){ return <li key={i}>{ Detail.formValue(schemas, it, keyPrefix, depth + 1) }</li>; })
+                        {   item.length === 0 ? <li><em>None</em></li>
+                            :   item.map(function(it, i){
+                                    return <li key={i}>{ Detail.formValue(schemas, it, keyPrefix, depth + 1) }</li>;
+                                })
                         }
                     </ul>
                 );
             } else if (typeof item === 'object') {
                 var title = itemTitle({ 'context' : item});
-                if (typeof item['@id'] === 'string'){
+                // if the following is true, we have an embedded object
+                if (item.display_title && item.link_id){
+                    var format_id = item.link_id.replace(/~/g, "/")
                     return (
-                        <a href={item['@id']}>{ title }</a>
+                        <a href={format_id}>
+                            { title }
+                        </a>
                     );
-                } else {
-                    return title;
+                } else { // it must be an embedded sub-object (not Item)
+                    return (
+                        <ItemView.SubIPanel
+                            schemas={schemas}
+                            content={item}
+                            key={title}
+                            title={title}
+                        />
+                    );
                 }
-                /*
-                return (
-                    <ItemView.SubIPanel
-                        schemas={schemas}
-                        content={item}
-                        key={item['@id'] || item.name || (keyPrefix.length > 0 ? keyPrefix + '-' : '') + depth + '-' }
-                    />
-                );
-                */
             } else {
                 if (typeof item === 'string' && item.charAt(0) === '/') {
-                    return <a key={item} href={item}>{item}</a>;
+                    return (
+                        <a key={item} href={item}>
+                            {item}
+                        </a>
+                    );
                 } else {
-                    return item;
+                    return(<span key={item}>{item}</span>);
                 }
             }
         },
@@ -90,7 +96,7 @@ var Detail = React.createClass({
                 '@context', 'actions', 'audit' /* audit currently not embedded (empty obj) */,
                 // Visible elsewhere on page
                 'aliases', 'dbxrefs', 'date_created', 'lab', 'award', 'description',
-                'status', 'external_references', '@id'
+                'status', 'external_references', '@id', 'link_id', 'display_title'
             ],
             'persistentKeys' : [
                 // Experiment
@@ -106,7 +112,9 @@ var Detail = React.createClass({
                 // Lab
                 'awards', 'address1', 'address2', 'city', 'country', 'institute_name', 'state',
                 // Award
-                'end_date', 'project', 'uri'
+                'end_date', 'project', 'uri',
+                // Document
+                'attachment'
             ],
             'open' : null
         };
@@ -160,7 +168,7 @@ var ItemView = module.exports = React.createClass({
         // Display the item field with a tooltip showing the field description from
         // schema, if available
         DescriptorField : React.createClass({
-        
+
             propTypes: {
                 field: React.PropTypes.string.isRequired,
                 description: React.PropTypes.string.isRequired
@@ -180,7 +188,7 @@ var ItemView = module.exports = React.createClass({
                 var active = this.state.active;
                 var header;
                 if (!description || description === ""){
-                    return <span>{field}</span>;
+                    return  <span data-field={field}>{ title || field }</span>;
                 }
                 return (
                     <div className="tooltip-trigger"
@@ -211,26 +219,30 @@ var ItemView = module.exports = React.createClass({
                     isOpen: !this.state.isOpen,
                 });
             },
+
+            toggleLink : function(title = this.props.title, isOpen = this.state.isOpen){
+                var iconType = isOpen ? 'icon-minus' : 'icon-plus';
+                return (
+                    <span className="subitem-toggle">
+                        <a href="#" className="link" onClick={this.handleToggle}>
+                            <i style={{'color':'black', 'paddingRight':'10px'}} className={"icon " + iconType}/>
+                            { title }
+                        </a>
+                    </span>
+                );
+            },
+
             render: function() {
                 var schemas = this.props.schemas;
                 var item = this.props.content;
-                var title = item.title || item.name || item.accession || item.uuid || item['@id'] || "Open";
-                var toggleRender;
-                var toggleLink;
-                if (!this.state.isOpen) {
-                    toggleLink = <a href="#" className="item-toggle-link" onClick={this.handleToggle}>{title}</a>
-                    toggleRender = <span/>;
-                }else{
-                    toggleLink = <a href="#" className="item-toggle-link" onClick={this.handleToggle}>Close</a>
-                    toggleRender = <ItemView.Subview schemas={schemas} content={item} title={title}/>;
-                }
+                var title = this.props.title;
                 return (
-                    <div className="flexrow">
-                        <div>
-                            {toggleLink}
-                        </div>
-                        {toggleRender}
-                    </div>
+                    <span>
+                        { this.toggleLink(title, this.state.isOpen) }
+                        { this.state.isOpen ?
+                            <ItemView.Subview schemas={schemas} content={item} title={title}/>
+                        : null }
+                    </span>
                 );
             }
         }),
@@ -242,26 +254,16 @@ var ItemView = module.exports = React.createClass({
                 var title = this.props.title;
                 var tips = object.tipsFromSchema(schemas, item);
                 var sortKeys = Object.keys(item).sort();
-                return(
-                    <div className="flexcol-sm-6 subview">
-                        <div className="sub-panel data-display panel-body-with-header">
-                            <div className="flexrow">
-                                <div className="flexcol-sm-6">
-                                    <div className="flexcol-heading experiment-heading">
-                                        <h5>{title}</h5>
-                                    </div>
-                                    <dl className="key-value sub-descriptions">
-                                        {sortKeys.map(function(ikey, idx){
-                                            return (
-                                                <div className="sub-entry" key={ikey} data-test="term-name">
-                                                {Detail.formKey(tips,ikey)}
-                                                <dd>{Detail.formValue(schemas, item[ikey])}</dd>
-                                                </div>
-                                            );
-                                        })}
-                                    </dl>
-                                </div>
-                            </div>
+                return (
+                    <div className="sub-panel data-display panel-body-with-header">
+                        <div className="key-value sub-descriptions">
+                            {sortKeys.map(function(key, idx){
+                                return (
+                                    <PartialList.Row key={key} label={Detail.formKey(tips,key)}>
+                                        { Detail.formValue(schemas, item[key], key) }
+                                    </PartialList.Row>
+                                );
+                            })}
                         </div>
                     </div>
                 );
@@ -289,12 +291,8 @@ var ItemView = module.exports = React.createClass({
     },
 
     componentDidMount : function(){
-        if (typeof this.props.context.lab == 'string' && this.props.context.lab.length > 0){
-            FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.context.lab, 'lab');
-        }
-        if (typeof this.props.context.award == 'string' && this.props.context.award.length > 0){
-            FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.context.award, 'award');
-        }
+        FormattedInfoBlock.onMountMaybeFetch.call(this, 'lab', this.props.context.lab);
+        FormattedInfoBlock.onMountMaybeFetch.call(this, 'award', this.props.context.award);
     },
 
     topRightHeaderSection : function(){
@@ -357,7 +355,7 @@ var ItemView = module.exports = React.createClass({
                                     :
                                     extRef
                                 }
-                                
+
                             </li>
                         );
                     }) }
@@ -375,7 +373,7 @@ var ItemView = module.exports = React.createClass({
         var externalReferences  = this.externalReferences(schemas),
             aliases             = this.aliases(),
             alternateAccessions = this.alternateAccessions();
-        
+
         return (
             <div className={itemClass}>
 
@@ -402,7 +400,7 @@ var ItemView = module.exports = React.createClass({
                         </div>
 
                     </div>
-                    
+
 
                     <div className="col-xs-12 col-md-4 item-info-area section">
 
@@ -418,13 +416,19 @@ var ItemView = module.exports = React.createClass({
 
                         { typeof context.lab !== 'undefined' ?
                         <div className>
-                            { FormattedInfoBlock.Lab(typeof context.lab === 'string' ? this.state.details_lab : context.lab) }
+                            { FormattedInfoBlock.Lab(
+                                this.state && typeof this.state.details_lab !== 'undefined' ?
+                                this.state.details_lab : context.lab
+                            ) }
                         </div>
                         : null }
 
                         { typeof context.award !== 'undefined' ?
                         <div className>
-                            { FormattedInfoBlock.Award(typeof context.award === 'string' ? this.state.details_award : context.award) }
+                            { FormattedInfoBlock.Award(
+                                this.state && typeof this.state.details_award !== 'undefined' ?
+                                this.state.details_award : context.award
+                            ) }
                         </div>
                         : null }
 

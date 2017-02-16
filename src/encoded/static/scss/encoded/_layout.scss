@@ -66,7 +66,7 @@
     @media (min-width: $navbar-fixed-breakpoint) {
         padding-top: 81px; /* Navbar (80px inner height) + its bottom border (1px) */
     }
-	
+
 	> .alerts {
 		margin-top: 20px;
 	}
@@ -450,15 +450,6 @@ h1.page-title + .page-subtitle {
     color: red;
 }
 
-
-
-.item-toggle-link{
-	padding: 10px;
-	color: #00cca3; // temporary?
-	&:hover,&:focus {
-		color: #00cca3;
-	}
-}
 
 // simply used to make invisible elements
 .invis{

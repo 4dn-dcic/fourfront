@@ -78,15 +78,29 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
      */
     setLinkedDetails : function(fallbackToAjax = false, callback = null, newState = {}){
         if (!this.state.details_lab) {
-            var labDetails = this.getEmbeddedPropertyDetailsFromExperiments('lab', fallbackToAjax);
-            if (labDetails !== null){
-                newState.details_lab = labDetails;
+            if (
+                this.props.context.lab && typeof this.props.context.lab === 'object' &&
+                this.props.context.lab.address1 && this.props.context.lab.title
+            ){
+                newState.details_lab = this.props.context.lab;
+            } else {
+                var labDetails = this.getEmbeddedPropertyDetailsFromExperiments('lab', fallbackToAjax);
+                if (labDetails !== null){
+                    newState.details_lab = labDetails;
+                }
             }
         }
         if (!this.state.details_award) {
-            var awardDetails = this.getEmbeddedPropertyDetailsFromExperiments('award', fallbackToAjax);
-            if (awardDetails !== null){
-                newState.details_award = awardDetails;
+            if (
+                this.props.context.award && typeof this.props.context.award === 'object' &&
+                this.props.context.award.project && this.props.context.award.title
+            ){
+                newState.details_award = this.props.context.award;
+            } else {
+                var awardDetails = this.getEmbeddedPropertyDetailsFromExperiments('award', fallbackToAjax);
+                if (awardDetails !== null){
+                    newState.details_award = awardDetails;
+                }
             }
         }
         if (typeof callback == 'function') {
@@ -122,6 +136,8 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
         if (typeof this.props.context[propertyName] == 'string') {
             propertyID = this.props.context[propertyName];
+        } else if (this.props.context[propertyName] && this.props.context[propertyName].link_id){
+            propertyID = this.props.context[propertyName].link_id.replace(/~/g, "/");
         }
 
         for (var i = 0; i < experiments.length; i++){
@@ -155,7 +171,8 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
             console.warn("ExperimentSetView > details_" + propertyName + " could not be gotten from available data.");
             if (typeof window != 'undefined' && allowAjaxFallback) {
                 console.warn("ExperimentSetView > Reverting to AJAX.");
-                FormattedInfoBlock.ajaxPropertyDetails.call(this, propertyID, propertyName);
+                FormattedInfoBlock.onMountMaybeFetch.call(this, propertyName, this.props.context[propertyName])
+                //FormattedInfoBlock.ajaxPropertyDetails.call(this, propertyID, propertyName);
             }
         }
 

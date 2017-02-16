@@ -16,7 +16,7 @@ var { Filters, ajax, JWT, console, isServerSide } = require('./util');
 var Alerts = require('./alerts');
 var jwt = require('jsonwebtoken');
 var { FacetCharts } = require('./facetcharts');
-var makeTitle = require('./item').title;
+var makeTitle = require('./item-pages/item').title;
 
 var dispatch_dict = {}; //used to store value for simultaneous dispatch
 

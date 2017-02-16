@@ -13,7 +13,7 @@ var ajax = module.exports = {
     },
 
     setHeaders : function(xhr, headers = {}) {
-        headers = jwt.addToHeaders(_.extend(ajax.defaultHeaders, headers)); // Set defaults, add JWT if set
+        headers = jwt.addToHeaders(_.extend({}, ajax.defaultHeaders, headers)); // Set defaults, add JWT if set
 
         // Put everything in the header
         var headerKeys = Object.keys(headers);
