@@ -6,7 +6,8 @@ var d3 = require('d3');
 var vizUtil = require('./utilities');
 var { expFxn, Filters, console, object, isServerSide } = require('./../util');
 var { highlightTerm, unhighlightTerms } = require('./../facetlist');
-var { ZoomCursor, RotatedLabel } = require('./components');
+var { CursorComponent, RotatedLabel } = require('./components');
+var MosaicDetailCursor = require('./MosaicDetailCursor');
 
 /**
  * Based on Sunburst D3 Example @ http://bl.ocks.org/kerryrodden/7090426
@@ -1097,7 +1098,15 @@ var SunBurst = React.createClass({
             );
         }
 
-        
+        function renderCursorComponent(){
+            var cursorContainmentContainerElement = (this.refs && this.refs.svgElem) || null;
+            return (
+                <MosaicDetailCursor
+                    containingElement={cursorContainmentContainerElement}
+                    verticalAlign="center"
+                />
+            );
+        }
 
         // Wrapping stuff
         return (
@@ -1121,6 +1130,7 @@ var SunBurst = React.createClass({
                     { styleOpts.offset.top >= 15 ? renderYAxisTop.call(this) : null }
                     { renderSVG.call(this) }
                     { styleOpts.offset.bottom >= 15 ? renderYAxisBottom.call(this) : null }
+                    { renderCursorComponent.call(this) }
                 </div>
             </div>
                 

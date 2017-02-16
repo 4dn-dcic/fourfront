@@ -11,4 +11,4 @@ module.exports.FetchingView = require('./FetchingView');
 module.exports.Legend = require('./Legend');
 module.exports.ZoomCursor = require('./ZoomCursor');
 module.exports.RotatedLabel = require('./RotatedLabel');
-
+module.exports.CursorComponent = require('./CursorComponent');

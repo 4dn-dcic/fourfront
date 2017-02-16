@@ -766,6 +766,24 @@
 }
 
 
+/**** Cursor Component(s) ****/
+
+.cursor-component-container {
+    background-color: #fff;
+    box-shadow: 1px 1px 6px rgba(0,0,0,0.3);
+    z-index: 1000;
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 5px;
+    overflow: hidden;
+    //display: none !important;
+    opacity: 1;
+    transition: opacity .25s, transform .05s linear;
+    pointer-events: none;
+}
+
+
 /**** Zoom Cursor ****/
 
 
