@@ -18,7 +18,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 	@include font-size(1);
 	font-weight: normal;
 	@include transition(all 0.15s linear);
-		
+
 	&[disabled] { background-color: #ddd; }
 
 	@media (min-width: $screen-sm-min) {
@@ -164,10 +164,10 @@ input[type="text"], input[type="password"], input[type="date"], input[type="date
 }
 
 
-	
+
 div.fieldset.editable-fields {
 
-	padding-bottom: 15px; 
+	padding-bottom: 15px;
 
 	@media screen and (min-width: $screen-md-min){
 		// Transition is too laggy on (some) mobile
@@ -193,7 +193,7 @@ div.fieldset.editable-fields {
 		padding-bottom: 10px;
 
 		.not-set {
-			color: #bbb; 
+			color: #bbb;
 		}
 
 	}
@@ -217,7 +217,7 @@ div.fieldset.editable-fields {
 			}
 
 		}
-		
+
 	}
 
 }
@@ -322,8 +322,9 @@ div.fieldset.editable-fields {
 			display: block;
 			position: relative;
 			z-index: 2;
-			
+
 			input[type=text],
+			input[type=number],
 			input[type=email],
 			input[type=tel] {
 				margin-top: 3px;
@@ -335,6 +336,17 @@ div.fieldset.editable-fields {
 			}
 
 			span.help-block {
+				font-size: .85rem;
+				padding: 5px 3px 7px;
+				margin: 0;
+				background-color: #fff;
+				border-bottom: 1px solid #eee;
+				box-shadow: 0 10px 15px 0px rgba(255,255,255,0.75);
+				word-break: break-word;
+				transition: opacity .35s .15s;
+			}
+
+			span.tip-block {
 				font-size: .85rem;
 				padding: 5px 3px 7px;
 				margin: 0;
@@ -359,6 +371,10 @@ div.fieldset.editable-fields {
 					position: absolute;
 					width: 100%;
 				}
+				span.tip_block {
+					position: absolute;
+					width: 100%;
+				}
 			}
 
 			&.block-style {
@@ -379,14 +395,14 @@ div.fieldset.editable-fields {
 					border: 1px solid #eee;
 					/* border-bottom-color: #ddd; */
 				}
-				span.input-wrapper span.help-block {
+				span.input-wrapper span.help-block span.tip-block{
 					position: absolute;
 					background: none;
 					border-bottom: none;
 					box-shadow: none;
 					padding: 8px 5px 6px;
 				}
-				&.has-error span.input-wrapper span.help-block {
+				&.has-error span.input-wrapper span.help-block span.tip-block{
 					position: relative;
 				}
 			}

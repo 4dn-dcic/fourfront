@@ -12,14 +12,14 @@
             "accessionType": "FI"
         },
         "filename": {
-            "title": "File name",
+            "title": "File Name",
             "description": "The local file name used at time of submission.",
             "type": "string",
             "exclude_from": "submit4dn",
             "comment": "ultimately uploaded filename will be uuid/accession, but filename with no directory will be store in metadata as passed in"
         },
         "file_format": {
-            "title": "File format",
+            "title": "File Format",
             "type": "string",
             "enum": [
                 "bam",
@@ -40,7 +40,7 @@
             ]
         },
         "file_type": {
-            "title": "File type",
+            "title": "File Type",
             "description": "The type of file based on the information in the file.",
             "type": "string",
             "enum": [

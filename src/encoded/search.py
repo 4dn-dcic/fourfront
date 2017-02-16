@@ -152,32 +152,16 @@ def collection_view(context, request):
 
 
 @view_config(route_name='available_facets', request_method='GET', permission='search', renderer='json')
-def get_available_facets(context, request):
+def get_available_facets(context, request, search_type=None):
     """
     Method to get available facets for a content/data type; built off of search() without querying Elasticsearch.
     Unlike in search(), due to lack of ES query, does not return possible terms nor counts of experiments matching the terms.
     """
 
-    requestTypes = request.params.getall('type')
-    if len(requestTypes) == 0:
-        doc_types = ['Item']
-    else:
-        doc_types = [requestTypes[0]]
-
     types = request.registry[TYPES]
-
-    # Normalize to item_type
-    try:
-        doc_types = sorted({types[name].name for name in doc_types})
-    except KeyError:
-        # Check for invalid types
-        bad_types = [t for t in doc_types if t not in types]
-        msg = "Invalid type: {}".format(', '.join(bad_types))
-        raise HTTPBadRequest(explanation=msg)
-
-    facets = [] # [('type', {'title': 'Data Type'}),]
-    if len(doc_types) == 1 and 'facets' in types[doc_types[0]].schema:
-        facets.extend(types[doc_types[0]].schema['facets'].items())
+    doc_types = set_doc_types(request, types, search_type)
+    principals = effective_principals(request)
+    facets = initialize_facets(types, doc_types, request.has_permission('search_audit'), principals)
 
     ### Mini version of format_facets
     result = []
