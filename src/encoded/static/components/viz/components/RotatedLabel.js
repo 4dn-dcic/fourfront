@@ -42,7 +42,7 @@ var RotatedLabel = module.exports = React.createClass({
         },
 
         maxTextHeight : function(placementWidth = 60, lineHeight = 14, extraHeight = 0){
-            return (
+            return Math.max(lineHeight,
                 typeof lineHeight === 'number' ?
                     ((Math.floor(placementWidth / lineHeight) - 2) * lineHeight) // Max lines fit - 2
                     : ((placementWidth / 2) + extraHeight)
@@ -100,7 +100,7 @@ var RotatedLabel = module.exports = React.createClass({
                             if (props.debug)        childProps.debug = props.debug;
                             if (props.lineHeight)   childProps.lineHeight = props.lineHeight;
                             if (props.appendOffset) childProps.appendOffset = props.appendOffset;
-                            //if (!props.appendOffset && props.deRotateAppend) childProps.appendOffset = 5;
+                            if (!props.appendOffset && props.deRotateAppend) childProps.appendOffset = 3;
                             if (typeof label.opacity !== 'undefined')   childProps.opacity = label.opacity;
                             else if (typeof props.opacity !== 'undefined')   childProps.opacity = props.opacity;
                             return React.createElement(RotatedLabel, childProps);
@@ -135,7 +135,6 @@ var RotatedLabel = module.exports = React.createClass({
         var state = null; // State is null unless text is too long and we need a 'show full label' state.
 
         if (this.props.label && this.props.isMounted){
-
             var state = {
                 'textHeight' : layout.textHeight(
                     this.props.label,
@@ -145,7 +144,7 @@ var RotatedLabel = module.exports = React.createClass({
                 )
             };
             if (state.textHeight > this.maxTextHeight()){
-                state.shortLabel = layout.shortenString(this.props.label, 30, false);
+                state.shortLabel = layout.shortenString(this.props.label, 28, true);
                 state.expanded = false;
             }
         }
@@ -236,7 +235,7 @@ var RotatedLabel = module.exports = React.createClass({
     render : function(){
         var labelWidth = this.labelWidth();
         var labelHeight = Math.min(
-            (this.state && this.state.textHeight) || 0, 
+            (this.state && this.state.textHeight) || this.props.lineHeight,
             this.maxTextHeight()
         );
         var angle = - Math.abs(this.props.angle);
@@ -258,8 +257,8 @@ var RotatedLabel = module.exports = React.createClass({
             >
                 <span className={"label-text" + (this.state && this.state.shortLabel ? ' extra-long' : '')} style={{
                     width: labelWidth,
-                    left: 0 - parseInt(
-                        labelWidth - (this.props.placementWidth / 2) + (labelHeight * Math.cos(this.props.angle/180 * Math.PI))
+                    left: parseInt(
+                        (this.props.placementWidth / 2) - labelWidth - (labelHeight * Math.cos(this.props.angle/180 * Math.PI))
                     ),
                     transform : vizUtil.style.rotate3d(angle, 'z')
                 }}>

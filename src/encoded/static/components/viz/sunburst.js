@@ -391,7 +391,6 @@ var SunBurst = React.createClass({
             'fields' : null,
             'maxFieldDepthIndex' : null, // If set, will not display fields past this index, though will still calculate values for it.
             'id' : 'main',
-            'descriptionElement' : true, // same as above, but for a <div> element to hold description.
             'fallbackToSampleData' : false, // Perhaps for tests.
             'handleClick' : function(e){
                 console.log('Default Click Handler, clicked on:', e.target);
@@ -468,12 +467,6 @@ var SunBurst = React.createClass({
         vizUtil.requestAnimationFrame(()=>{
             if (d.data.field && d.data.term) highlightTerm(d.data.field, d.data.term, vizUtil.colorForNode(d));
 
-            //if (d.title && this.descriptionElement() !== null) {
-            //    this.descriptionElement().innerHTML = d.title;
-            //} else {
-            //    this.descriptionElement().innerHTML = '';
-            //}
-
             // Fade all the segments.
             // Then highlight only those that are an ancestor of the current segment.
             
@@ -514,11 +507,6 @@ var SunBurst = React.createClass({
                 unhighlightTerms();
 
                 _this.resetActiveExperimentsCount();
-
-                // Erase description (important if contained outside explanation element)
-                //if (_this.descriptionElement()){
-                //    _this.descriptionElement().innerHTML = '';
-                //}
             });
         }, 150);
     },
@@ -790,9 +778,6 @@ var SunBurst = React.createClass({
         });
     },
 
-    /** Get refs to breadcrumb and description components, whether they created by own component or passed in as props. */
-    descriptionElement : function(){ return vizUtil.mixin.getDescriptionElement.call(this); },
-
     updateExplanation : function(){
         setTimeout(()=>{
             vizUtil.requestAnimationFrame(()=>{
@@ -990,11 +975,6 @@ var SunBurst = React.createClass({
         var paths = this.state.mounted ? this.generatePaths() : null;
         var barWidth = this.singleChartLayerWidth();
 
-        function description(){
-            if (this.props.descriptionElement !== true) return null;
-            return <div id={this.props.id + "-description"} className="description" ref="description"></div>;
-        }
-
         function renderSVG(){
             
             var xOffset = (this.root && this.root.y1) || 0;
@@ -1083,7 +1063,7 @@ var SunBurst = React.createClass({
         }
 
         function renderYAxisBottom(){
-            if (!paths || !this.props.schemas) return null; // Need schemas for readable field names.
+            if (!paths) return null;
 
             // Exclude first item (root node)
             var labels = paths.slice(1).map((pathGroup, i) => {
@@ -1099,7 +1079,8 @@ var SunBurst = React.createClass({
                     left : styleOpts.offset.left, 
                     right : styleOpts.offset.right,
                     height : Math.max(styleOpts.offset.bottom - 5, 0),
-                    bottom : Math.min(styleOpts.offset.bottom - 5, 0)
+                    bottom : Math.min(styleOpts.offset.bottom - 5, 0),
+                    opacity : this.props.schemas ? 1 : 0
                 }}>
                     <RotatedLabel.Axis
                         labels={labels}

@@ -633,7 +633,7 @@ var BarPlot = React.createClass({
                                 name : b.name || b.term,
                                 term : b.term,
                                 x: b.attr.x,
-                                opacity : _this.state.transitioning && (bar.removing || !bar.existing) ? 0 : ''
+                                opacity : _this.state.transitioning && (b.removing || !b.existing) ? 0 : ''
                             }; 
                         })}
                         labelClassName="y-axis-label no-highlight-color"

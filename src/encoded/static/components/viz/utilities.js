@@ -76,7 +76,7 @@ var vizUtil = module.exports = {
             if (node.parent) {
                 var color = null;
                 if (nodeDatum.field === 'accession'){
-                    color = d3.color('#fbfbfb').darker(Math.sqrt(nodeDatum.experiments) / 10);
+                    color = d3.color('#aaa').darker(Math.sqrt(nodeDatum.experiments) / 10);
                 } else if (nodeDatum.field === 'experiments_in_set.experiment_summary' || nodeDatum.field === 'experiments_in_set.digestion_enzyme.name'){
                     color = d3.interpolateRgb(
                         vizUtil.colorForNode(node.parent, predefinedColors),

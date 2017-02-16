@@ -47,23 +47,26 @@ var layout = module.exports = {
      * Shorten a string to a maximum character length, splitting on word break (or other supplied character).
      * Optionally append an ellipsis.
      * 
-     * @param {string}  textContent
+     * @param {string}  originalText
      * @param {number}  maxChars
      * @param (boolean) [addEllipsis=true]
      * @param {string}  [splitOn=' ']
      */
-    shortenString : function(textContent, maxChars = 140, addEllipsis = true, splitOn = ' '){
-        var textArr         = textContent.split(splitOn),
+    shortenString : function(originalText, maxChars = 28, addEllipsis = true, splitOn = ' '){
+        var textArr         = originalText.split(splitOn),
+            nextLength,
             returnArr       = [],
             returnStrLen    = 0;
 
-        while (textArr[0]){
-            returnStrLen += textArr[0].length + splitOn.length;
-            if (returnStrLen < maxChars){
+        while (typeof textArr[0] === 'string'){
+            nextLength = textArr[0].length + splitOn.length;
+            if (returnStrLen + nextLength <= maxChars){
                 returnArr.push(textArr.shift());
+                returnStrLen += nextLength;
+                
             } else break;
         }
-        if (returnStrLen < maxChars) return textContent;
+        if (textArr.length === 0) return originalText;
         return returnArr.join(splitOn) + (addEllipsis ? '...' : '');
     },
 

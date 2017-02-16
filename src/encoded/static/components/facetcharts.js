@@ -217,6 +217,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             !_.isEqual(this.state.filteredExperiments, nextState.filteredExperiments) ||
             this.props.schemas !== nextProps.schemas ||
             this.state.session !== nextState.session ||
+            this.state.fetching !== nextState.fetching ||
             this.show(nextProps) !== this.show(this.props) ||
             (nextState.mounted !== this.state.mounted)
         ){
@@ -285,7 +286,10 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             } else {
                 newState.fetching = true;
             }
-            
+        }
+
+        if (nextProps.session !== this.props.session){
+            newState.fetching = true;
         }
 
         if (Object.keys(newState).length > 0) this.setState(newState);
@@ -499,7 +503,6 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         return (
             <div className={"facet-charts show-" + show} key="facet-charts">
                 
-                <div className="facet-charts-description description" ref="description" key="facet-chart-description"></div>
                 <div className="row facet-chart-row-1" key="facet-chart-row-1">
                     <div className={genChartColClassName(1)} key="facet-chart-row-1-chart-1" style={{ height: height }}>
                         <SunBurstChart
@@ -510,7 +513,6 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
                             height={height} width={this.width(0) - 20}
                             updateBreadcrumbsHoverNodes={(nodes) => this.refs && this.refs.breadcrumbs && this.refs.breadcrumbs.updateHoverNodes(nodes)}
-                            descriptionElement={() => this.refs.description}
 
                             handleClick={this.handleVisualNodeClickToUpdateFilters}
                             updateStats={this.props.updateStats}
