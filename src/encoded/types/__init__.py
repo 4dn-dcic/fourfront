@@ -80,6 +80,7 @@ class Construct(Item):
     embedded = []
     embedded = add_default_embeds(embedded, schema)
 
+
 @collection(
     name='documents',
     properties={
@@ -93,6 +94,12 @@ class Document(ItemWithAttachment, Item):
     schema = load_schema('encoded:schemas/document.json')
     embedded = ['lab', 'award', 'submitted_by']
     embedded = add_default_embeds(embedded, schema)
+
+    def display_title(self):
+        if self.properties.get('attachment'):
+            attach = self.properties['attachment']
+            if attach.get('download'):
+                return attach['download']
 
 
 @collection(
@@ -126,46 +133,6 @@ class GenomicRegion(Item):
     embedded = []
     embedded = add_default_embeds(embedded, schema)
 
-@collection(
-    name='modifications',
-    properties={
-        'title': 'Modifications',
-        'description': 'Listing of Stable Genomic Modifications',
-    })
-class Modification(Item):
-    """Modification class."""
-
-    item_type = 'modification'
-    schema = load_schema('encoded:schemas/modification.json')
-    embedded = ['constructs', 'modified_regions', 'created_by', 'target_of_mod']
-    embedded = add_default_embeds(embedded, schema)
-
-    @calculated_property(schema={
-        "title": "Modification name",
-        "description": "Modification name including type and target.",
-        "type": "string",
-    })
-    def modification_name(self, request, modification_type=None, target_of_mod=None):
-        if modification_type and target_of_mod:
-            target = request.embed(target_of_mod, '@@object')
-            return modification_type + " for " + target['target_summary']
-        elif modification_type:
-            return modification_type
-        return "None"
-
-    @calculated_property(schema={
-        "title": "Modification name short",
-        "description": "Shorter version of modification name for display on tables.",
-        "type": "string",
-    })
-    def modification_name_short(self, request, modification_type=None, target_of_mod=None):
-        if modification_type and target_of_mod:
-            target = request.embed(target_of_mod, '@@object')
-            return modification_type + " for " + target['target_summary_short']
-        elif modification_type:
-            return modification_type
-        return "None"
-
 
 @collection(
     name='organisms',
@@ -183,6 +150,7 @@ class Organism(Item):
     embedded = []
     embedded = add_default_embeds(embedded, schema)
 
+
 @collection(
     name='protocols',
     properties={
@@ -196,67 +164,3 @@ class Protocol(Item):
     schema = load_schema('encoded:schemas/protocol.json')
     embedded = []
     embedded = add_default_embeds(embedded, schema)
-
-@collection(
-    name='quality-metric-flags',
-    properties={
-        'title': 'Quality Metric Flags'
-    })
-class QualityMetricFlag(Item):
-    """Quality Metrics Flag class."""
-
-    item_type = 'quality_metric_flag'
-    schema = load_schema('encoded:schemas/quality_metric_flag.json')
-    embedded = ['quality_metrics']
-    embedded = add_default_embeds(embedded, schema)
-
-
-@collection(
-    name='targets',
-    properties={
-        'title': 'Targets',
-        'description': 'Listing of genes and regions targeted for some purpose',
-    })
-class Target(Item):
-    """The Target class that describes a target of something."""
-
-    item_type = 'target'
-    schema = load_schema('encoded:schemas/target.json')
-    embedded = ['targeted_region']
-    embedded = add_default_embeds(embedded, schema)
-
-    @calculated_property(schema={
-        "title": "Target summary",
-        "description": "Summary of target information, either specific genes or genomic coordinates.",
-        "type": "string",
-    })
-    def target_summary(self, request, targeted_genes=None, targeted_region=None):
-        if targeted_genes:
-            value = ""
-            value += ' and '.join(targeted_genes)
-            return value
-        elif targeted_region:
-            value = ""
-            genomic_region = request.embed(targeted_region, '@@object')
-            value += genomic_region['genome_assembly']
-            if genomic_region['chromosome']:
-                value += ':'
-                value += genomic_region['chromosome']
-            if genomic_region['start_coordinate'] and genomic_region['end_coordinate']:
-                value += ':' + str(genomic_region['start_coordinate']) + '-' + str(genomic_region['end_coordinate'])
-            return value
-        return "no target"
-
-    @calculated_property(schema={
-        "title": "Target summary short",
-        "description": "Shortened version of target summary.",
-        "type": "string",
-    })
-    def target_summary_short(self, request, targeted_genes=None, description=None):
-        if targeted_genes:
-            value = ""
-            value += ' and '.join(targeted_genes)
-            return value
-        elif description:
-            return description
-        return "no target"

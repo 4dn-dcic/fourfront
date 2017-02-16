@@ -13,6 +13,20 @@ from .base import (
 )
 
 
+@collection(
+    name='quality-metric-flags',
+    properties={
+        'title': 'Quality Metric Flags'
+    })
+class QualityMetricFlag(Item):
+    """Quality Metrics Flag class."""
+
+    item_type = 'quality_metric_flag'
+    schema = load_schema('encoded:schemas/quality_metric_flag.json')
+    embedded = ['quality_metrics']
+    embedded = add_default_embeds(embedded, schema)
+
+
 @abstract_collection(
     name='quality-metrics',
     properties={
@@ -43,6 +57,7 @@ class QualityMetricFastqc(QualityMetric):
     embedded = QualityMetric.embedded
     embedded = add_default_embeds(embedded, schema)
 
+
 @collection(
     name='quality-metrics-bamqc',
     properties={
@@ -56,6 +71,7 @@ class QualityMetricBamqc(QualityMetric):
     schema = load_schema('encoded:schemas/quality_metric_bamqc.json')
     embedded = QualityMetric.embedded
     embedded = add_default_embeds(embedded, schema)
+
 
 @collection(
     name='quality-metrics-pairsqc',
