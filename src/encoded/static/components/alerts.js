@@ -36,15 +36,15 @@ var Alerts = module.exports = React.createClass({
         }
     },
 
-    getInitialState : function(){ 
+    getInitialState : function(){
         return {
             'dismissing' : []
-        }; 
+        };
     },
 
     render : function(){
         if (this.props.alerts.length === 0) return null;
-        
+
         function dismiss(index){
             var currentAlert = this.props.alerts.slice(index, index + 1)[0];
             var dismissing = _.clone(this.state.dismissing);
@@ -62,10 +62,10 @@ var Alerts = module.exports = React.createClass({
 
         return (
             <div className="alerts">
-            { 
+            {
                 this.props.alerts.map(function(alert,i){
                     return (
-                        <Fade 
+                        <Fade
                             key={'alert-' + i}
                             timeout={500}
                             in={ _.findIndex(this.state.dismissing, alert) === -1 }

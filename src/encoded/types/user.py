@@ -12,6 +12,8 @@ from pyramid.security import (
 )
 from .base import (
     Item,
+    add_default_embeds
+    # paths_filtered_by_status,
 )
 from snovault import (
     CONNECTION,
@@ -65,9 +67,8 @@ class User(Item):
     item_type = 'user'
     schema = load_schema('encoded:schemas/user.json')
     # Avoid access_keys reverse link so editing access keys does not reindex content.
-    # embedded = [
-    #     'lab',
-    # ]
+    embedded = []
+    embedded = add_default_embeds(embedded, schema)
     STATUS_ACL = {
         'current': ONLY_OWNER_EDIT,
         'deleted': USER_DELETED,
@@ -126,7 +127,7 @@ def user_basic_view(context, request):
     """smth."""
     properties = item_view_object(context, request)
     filtered = {}
-    for key in ['@id', '@type', 'uuid', 'lab', 'title']:
+    for key in ['@id', '@type', 'uuid', 'lab', 'title', 'link_id', 'display_title']:
         try:
             filtered[key] = properties[key]
         except KeyError:

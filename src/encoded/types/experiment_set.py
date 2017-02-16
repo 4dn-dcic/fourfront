@@ -1,8 +1,5 @@
 """Collection for ExperimentSet and ExperimentSetReplicate."""
 
-from pyramid.view import (
-    view_config,
-)
 from pyramid.threadlocal import get_current_request
 
 from snovault import (
@@ -11,11 +8,11 @@ from snovault import (
     AfterModified,
     BeforeModified
 )
-from snovault.resource_views import item_view_page
 from snovault.calculated import calculate_properties
 
 from .base import (
-    Item
+    Item,
+    add_default_embeds
 )
 
 
@@ -72,11 +69,13 @@ class ExperimentSet(Item):
                 "experiments_in_set.biosample.biosource.individual.organism",
                 "experiments_in_set.files",
                 "experiments_in_set.files.related_files.relationship_type",
-                "experiments_in_set.files.related_files.file.\@id",
                 "experiments_in_set.files.related_files.file.uuid",
                 "experiments_in_set.filesets",
                 "experiments_in_set.filesets.files_in_set",
+                "experiments_in_set.filesets.files_in_set.related_files.relationship_type",
+                "experiments_in_set.filesets.files_in_set.related_files.file.uuid",
                 "experiments_in_set.digestion_enzyme"]
+    embedded = add_default_embeds(embedded, schema)
 
     def _update(self, properties, sheets=None):
         super(ExperimentSet, self)._update(properties, sheets)
@@ -102,16 +101,9 @@ class ExperimentSetReplicate(ExperimentSet):
         "replicate_exps.replicate_exp.accession",
         "replicate_exps.replicate_exp.uuid"
     ]
+    embedded = add_default_embeds(embedded, schema)
 
     def _update(self, properties, sheets=None):
         all_experiments = [exp['replicate_exp'] for exp in properties['replicate_exps']]
         properties['experiments_in_set'] = all_experiments
         super(ExperimentSetReplicate, self)._update(properties, sheets)
-
-
-# Use the the page view as default for experiment sets. This means that embedding
-# IS relevant with regard to this specific object pages
-@view_config(context=ExperimentSet, permission='view', request_method='GET', name='page')
-def item_page_view(context, request):
-    """Return the frame=page view rather than object view by default."""
-    return item_view_page(context, request)

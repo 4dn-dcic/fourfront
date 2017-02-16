@@ -4,7 +4,8 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    add_default_embeds
     # paths_filtered_by_status,
 )
 
@@ -22,6 +23,8 @@ class SopMap(Item):
     item_type = 'sop_map'
     schema = load_schema('encoded:schemas/sop_map.json')
     name_key = 'mapid'
+    embedded = []
+    embedded = add_default_embeds(embedded, schema)
 
     def _update(self, properties, sheets=None):
         delim = '_'

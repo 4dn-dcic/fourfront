@@ -6,9 +6,9 @@ var Markdown = require('markdown-to-jsx');
 var TableOfContents = require('./table-contents');
 var globals = require('./../globals');
 
-/** 
- * These are a set of 'mixin' functions which can be used directly on Static Page components. 
- * Simply reference the component method to the relevant method below in React.createClass(..) 
+/**
+ * These are a set of 'mixin' functions which can be used directly on Static Page components.
+ * Simply reference the component method to the relevant method below in React.createClass(..)
  */
 var StaticPageBase = module.exports = {
 
@@ -116,7 +116,7 @@ var StaticPageBase = module.exports = {
         },
 
         withTableOfContents : function(){
-            
+
             var context = StaticPageBase.parseSectionsContent(this.props.context);
             return (
                 <StaticPageBase.Wrapper
@@ -160,7 +160,7 @@ var StaticPageBase = module.exports = {
                     <TableOfContents
                         context={context}
                         pageTitle={title}
-                        fixedWidth={(1140 * ((12 - contentColSize) / 12))} 
+                        fixedWidth={(1140 * ((12 - contentColSize) / 12))}
                         navigate={this.props.navigate}
                         href={this.props.href}
                         maxHeaderDepth={toc && context.toc['header-depth'] || 6}
@@ -172,7 +172,7 @@ var StaticPageBase = module.exports = {
         },
 
         render : function(){
-            
+
             var title = this.props.title || (this.props.context && this.props.context.title) || null;
             var contentColSize = this.contentColSize();
             var mainColClassName = "col-xs-12 col-sm-12 col-lg-" + contentColSize;
@@ -211,7 +211,7 @@ var StaticPageBase = module.exports = {
             componentWillUnmount : function(){ delete this.id; },
             render : function(){
                 return React.createElement(
-                    this.props.type, 
+                    this.props.type,
                     {
                         'children' : this.props.children,
                         'id' : this.getID(true),
@@ -241,10 +241,10 @@ var StaticPageBase = module.exports = {
 
         render : function(){
             var c = this.props.content;
-            
+
             return (
                 <div className={this.props.entryType + "-entry static-section-entry"} id={this.props.section}>
-                    { c && c.title ? 
+                    { c && c.title ?
                         <h2 className="fourDN-header">{ c.title }</h2>
                     : null }
                     { this.renderEntryContent(this.props.className) }
