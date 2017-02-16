@@ -53,7 +53,7 @@
     }
 
     div.y-axis-bottom {
-        border-top: 1px solid #aaa;
+        /* border-top: 1px solid #aaa; */
         position: absolute;
         bottom: 0;
     }
@@ -334,12 +334,6 @@
     line.y-axis-bottom {
         stroke : #aaa;
         stroke-width: 1px;
-    }
-
-    div.y-axis-bottom {
-        border-top: 1px solid #aaa;
-        position: absolute;
-        bottom: 0;
     }
 
     .bar-plot-left-axis {

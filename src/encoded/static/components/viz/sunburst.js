@@ -178,6 +178,7 @@ var SunBurst = React.createClass({
 
                         if      (typeof field.title === 'string')   node.title = field.title;
                         else if (typeof field.title === 'function') node.title = field.title.apply(field.title, callbackArgs);
+                        else if (typeof field.title === 'undefined')node.title = Filters.Field.toName(field.field);
                         
                         if      (typeof field.fallbackSize === 'number')   node.fallbackSize = field.fallbackSize;
                         else if (typeof field.fallbackSize === 'function') node.fallbackSize = field.fallbackSize.apply(field.fallbackSize, callbackArgs);
@@ -367,6 +368,7 @@ var SunBurst = React.createClass({
                 'gap' : 5,
                 'maxBarWidth' : 60,
                 'labelRotation' : 30,
+                'maxLabelWidth' : null,
                 'labelWidth' : 200,
                 'offset' : {
                     'top' : 18,
@@ -1081,9 +1083,8 @@ var SunBurst = React.createClass({
         }
 
         function renderYAxisBottom(){
-            if (!paths || !this.props.schemas) return null;
-            //var labels = [];//_.groupBy(paths, '')
-            console.log(paths);
+            if (!paths || !this.props.schemas) return null; // Need schemas for readable field names.
+
             // Exclude first item (root node)
             var labels = paths.slice(1).map((pathGroup, i) => {
                 return {

@@ -137,6 +137,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             'fetching'              : false,
             'chartFieldsBarPlot'    : [
                 { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
+                { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
                 { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
                 //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
             ],
@@ -150,14 +151,14 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 },
                 { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
                 { title : "Biosample", field : 'experiments_in_set.biosample.biosource_summary' },
-                //{ title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
-                {
-                    title : "Digestion Enzyme",
-                    field : 'experiments_in_set.digestion_enzyme.name',
-                    description : function(val, id, exps, filteredExps, exp){
-                        return 'Enzyme ' + val;
-                    }
-                },
+                { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
+                //{
+                //    title : "Digestion Enzyme",
+                //    field : 'experiments_in_set.digestion_enzyme.name',
+                //    description : function(val, id, exps, filteredExps, exp){
+                //        return 'Enzyme ' + val;
+                //    }
+                //},
                 {
                     title : "Experiment Set",
                     aggregatefield : "experiment_sets.accession",
