@@ -158,6 +158,14 @@ class ExperimentHiC(Experiment):
             sum_str += (' with ' + de_name)
         return sum_str
 
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
+        return self.experiment_summary(request, experiment_type, digestion_enzyme, biosample)
+
 
 @collection(
     name='experiments-capture-c',
@@ -188,12 +196,21 @@ class ExperimentCaptureC(Experiment):
         if biosample:
             biosamp_props = request.embed(biosample, '@@object')
             biosource = biosamp_props['biosource_summary']
+
             sum_str += (' on ' + biosource)
         if digestion_enzyme:
             de_props = request.embed(digestion_enzyme, '@@object')
             de_name = de_props['name']
             sum_str += (' with ' + de_name)
         return sum_str
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
+        return self.experiment_summary(request, experiment_type, digestion_enzyme, biosample)
 
 
 @collection(
@@ -225,3 +242,11 @@ class ExperimentRepliseq(Experiment):
         if cell_cycle_stage:
             sum_str += (' at ' + cell_cycle_stage)
         return sum_str
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, experiment_type='Undefined', cell_cycle_stage=None, biosample=None):
+        return self.experiment_summary(request, experiment_type, cell_cycle_stage, biosample)

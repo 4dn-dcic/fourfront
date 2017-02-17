@@ -333,6 +333,7 @@ def get_upload(context, request):
 @view_config(name='upload', context=File, request_method='POST',
              permission='edit', validators=[schema_validator({"type": "object"})])
 def post_upload(context, request):
+
     properties = context.upgrade_properties()
     if properties['status'] not in ('uploading', 'upload failed'):
         raise HTTPForbidden('status must be "uploading" to issue new credentials')
@@ -343,6 +344,7 @@ def post_upload(context, request):
     if external is None:
         # Handle objects initially posted as another state.
         bucket = request.registry.settings['file_upload_bucket']
+        # maybe this should be properties.uuid
         uuid = context.uuid
         mapping = context.schema['file_format_file_extension']
         file_extension = mapping[properties['file_format']]

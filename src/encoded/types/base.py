@@ -213,9 +213,9 @@ class Item(snovault.Item):
         "title": "External Reference URIs",
         "description": "External references to this item.",
         "type": "array",
-        "items" : { "type" : "object", "title" : "External Reference", "properties" : {
-                "uri" : { "type" : "string" },
-                "ref" : { "type" : "string" }
+        "items": {"type": "object", "title": "External Reference", "properties": {
+                "uri": {"type": "string"},
+                "ref": {"type": "string"}
             }
         }
     })
@@ -224,7 +224,7 @@ class Item(snovault.Item):
         if dbxrefs and namespaces:
             refs = []
             for r in dbxrefs:
-                refObject = { "ref" : r, "uri" : None }
+                refObject = {"ref": r, "uri": None}
                 refParts = r.split(':')
                 if len(refParts) < 2:
                     refs.append(refObject)
@@ -245,32 +245,23 @@ class Item(snovault.Item):
             return refs
         return []
 
-
     @snovault.calculated_property(schema={
         "title": "Display Title",
         "description": "A calculated title for every object in 4DN",
         "type": "string"
     },)
-    def display_title(self, request):
+    def display_title(self):
         """create a display_title field."""
         display_title = ""
         look_for = [
-                    "experiment_summary",
-                    "biosource_name",
-                    "modification_name_short",
-                    "target_summary_short",
                     "title",
                     "name",
-                    "first_name",
+                    "location_description",
                     "accession",
                     ]
         for field in look_for:
             # special case for user: concatenate first and last names
             display_title = self.properties.get(field, None)
-            if field == 'first_name':
-                more_display_title = self.properties.get('last_name', None)
-                if display_title and more_display_title:
-                    display_title += (' ' + more_display_title)
             if display_title:
                 return display_title
         # if none of the existing terms are available, use @type + date_created
@@ -280,7 +271,6 @@ class Item(snovault.Item):
         # last resort, use uuid
         except:
             return self.properties.get('uuid', None)
-
 
     @snovault.calculated_property(schema={
         "title": "link_id",

@@ -155,6 +155,11 @@
                 "in review by project",
                 "released to project"
             ]
+        },
+        "quality_metric": {
+          "type": "string",
+          "description": "The associated qc reports",
+          "linkTo": "QualityMetric"
         }
     },
     "file_format_file_extension": {
