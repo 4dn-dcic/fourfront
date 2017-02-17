@@ -19,6 +19,16 @@ def biosample_relation(derived_from):
             "biosample": derived_from['@id']}]}
 
 
+def test_biosample_has_display_title(testapp, biosample_1):
+    # accession fallback used for display title here
+    assert biosample_1['display_title'] == biosample_1['accession']
+
+
+# link_id is equal to @id but uses ~ instead of / for embedding purposes
+def test_biosample_has_link_id(testapp, biosample_1):
+    assert biosample_1['link_id'] == biosample_1['@id'].replace('/', '~')
+
+
 # data from test/datafixtures
 def test_update_biosample_relation(testapp, human_biosample, biosample_1):
     patch_res = testapp.patch_json(human_biosample['@id'], biosample_relation(biosample_1))

@@ -60,7 +60,6 @@ var Login = React.createClass({
                 // Dummy click event to close dropdown menu, bypasses document.body.onClick handler (app.js -> App.prototype.handeClick)
                 document.dispatchEvent(new MouseEvent('click'));
 
-                // TODO: should logout redirect to home?
                 this.context.updateUserInfo();
                 this.context.navigate('', {'inPlace':true});
             }
@@ -105,7 +104,7 @@ var Login = React.createClass({
                 <MenuItem id="logoutbtn" onSelect={this.logout} className="global-entry">
                     Log Out
                 </MenuItem>
-            );    
+            );
         }
         return (
             <MenuItem id="loginbtn" onSelect={this.showLock} className="global-entry">

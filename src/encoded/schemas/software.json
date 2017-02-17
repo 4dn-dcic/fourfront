@@ -33,7 +33,7 @@
         },
         "title": {
             "title": "Name_Version",
-            "desription": "Do Not Submit - unique name version combination that is automatically generated",
+            "description": "Do Not Submit - unique name version combination that is automatically generated",
             "type": "string"
         },
         "software_type": {

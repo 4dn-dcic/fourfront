@@ -37,11 +37,11 @@ var expFilters = module.exports = {
             'experiments_in_set.biosample.biosource.individual.organism.name' : 'Primary Organism'
         },
 
-        toName : function(field, schemaOnly = false){
+        toName : function(field, schemas, schemaOnly = false){
             if (!schemaOnly && expFilters.Field.nameMap[field]){
                 return expFilters.Field.nameMap[field];
             } else {
-                var schemaProperty = expFilters.Field.getSchemaProperty(field);
+                var schemaProperty = expFilters.Field.getSchemaProperty(field, schemas);
                 if (schemaProperty && schemaProperty.title){
                     expFilters.Field.nameMap[field] = schemaProperty.title; // Cache in nameMap for faster lookups.
                     return schemaProperty.title;
@@ -53,12 +53,12 @@ var expFilters = module.exports = {
             }
         },
 
-        getSchemaProperty : function(field){
-            var schemas = expFilters.getSchemas && expFilters.getSchemas();
-            if (!schemas) return null;
-            var fieldParts = field.split('.');
-            var baseSchemaProperties = schemas.ExperimentSet.properties;
+        getSchemaProperty : function(field, schemas = null, startAt = 'ExperimentSet'){
+            if (!schemas) schemas = expFilters.getSchemas && expFilters.getSchemas();
+            var baseSchemaProperties = (schemas && schemas[startAt] && schemas[startAt].properties) || null;
+            if (!baseSchemaProperties) return null;
 
+            var fieldParts = field.split('.');
 
             function getNextSchemaProperties(linkToName){
 
@@ -95,7 +95,7 @@ var expFilters = module.exports = {
                 if (nextSchemaProperties) return getProperty(nextSchemaProperties, fieldPartIndex + 1);
             }
 
-            return getProperty(schemas.ExperimentSet.properties, 0);
+            return getProperty(baseSchemaProperties, 0);
 
         }
 
@@ -154,6 +154,7 @@ var expFilters = module.exports = {
         if (returnInsteadOfSave){
             return newObj;
         } else {
+            console.info("Saving new filters:", newObj, "Using AJAX:", useAjax);
             return expFilters.saveChangedFilters(newObj, useAjax, href, callback);
         }
     },
@@ -185,40 +186,45 @@ var expFilters = module.exports = {
 
         var newHref = expFilters.filtersToHref(expSetFilters, href);
 
-        var ajaxCallback = (newContext) => {
+        var navigateFxn = (
+            this.props && typeof this.props.navigate === 'function' ?   this.props.navigate : 
+                typeof expFilters.navigate === 'function' ?     expFilters.navigate : null
+        );
 
-            Alerts.deQueue(Alerts.NoFilterResults);
+        store.dispatch({
+            type: {
+                'expSetFilters' : expSetFilters,
+            }
+        });
 
-            function saveToReduxStore(){
+        if (navigateFxn){
+            navigateFxn(newHref, { replace : true, skipConfirmCheck: true }, ()=>{
+                Alerts.deQueue(Alerts.NoFilterResults);
+                if (typeof callback === 'function') setTimeout(callback, 0);
+            }, ()=>{
+                // Fallback callback
+                Alerts.queue(Alerts.NoFilterResults);
+                if (typeof callback === 'function') setTimeout(callback, 0);
+            }/*, { 'expSetFilters' : expSetFilters }*/);
+        } else {
+            ajax.load(newHref, (newContext) => {
+                Alerts.deQueue(Alerts.NoFilterResults);
                 store.dispatch({
                     type: {
                         'context'       : newContext,
-                        'expSetFilters' : expSetFilters,
+                        //'expSetFilters' : expSetFilters,
                         'href'          : newHref
                     }
                 });
-            }
-
-            var navigateFxn = (
-                this.props && typeof this.props.navigate === 'function' ?   this.props.navigate : 
-                    typeof expFilters.navigate === 'function' ?     expFilters.navigate :
-                        function(navToHref, options, cb){
-                            console.error('No navigate function.');
-                            cb();
-                        }
-            );
-            
-            navigateFxn(newHref, { skipRequest : true, skipUpdateHref : true }, ()=>{
-                saveToReduxStore.call(this);
+                if (typeof callback === 'function') setTimeout(callback, 0);
+            }, 'GET', ()=>{
+                // Fallback callback
+                Alerts.queue(Alerts.NoFilterResults);
                 if (typeof callback === 'function') setTimeout(callback, 0);
             });
-        };
+        }
 
-        ajax.load(newHref, ajaxCallback, 'GET', (newContext)=>{
-            // Fallback    
-            Alerts.queue(Alerts.NoFilterResults);
-            if (typeof callback === 'function') setTimeout(callback, 0);
-        });
+        
 
     },
 
@@ -471,11 +477,11 @@ var expFilters = module.exports = {
             // ToDo: arrays of expSet- and exp- exclusive fields
             if (reverse){
                 return field.replace('experiments_in_set.', '');
+            } else if (field.slice(0, 19) !== 'experiments_in_set.') {
+                return 'experiments_in_set.' + field;
             }
-            return 'experiments_in_set.' + field;
-        } else {
-            return field;
         }
+        return field;
     },
 
 

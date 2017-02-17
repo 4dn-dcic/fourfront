@@ -5,7 +5,8 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    add_default_embeds
     # paths_filtered_by_status,
 )
 
@@ -24,6 +25,7 @@ class Biosource(Item):
     name_key = 'accession'
     schema = load_schema('encoded:schemas/biosource.json')
     embedded = ["individual", "individual.organism"]
+    embedded = add_default_embeds(embedded, schema)
 
     def _update(self, properties, sheets=None):
         name2info = {
@@ -86,3 +88,12 @@ class Biosource(Item):
                 organism_name = organism_props['name']
                 return "whole " + organism_name
         return biosource_type
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, biosource_type, individual=None,
+                      cell_line=None, cell_line_tier=None, tissue=None):
+        return self.biosource_name(request, biosource_type, individual, cell_line, cell_line_tier, tissue)
