@@ -190,7 +190,7 @@ var f = module.exports = {
 
     groupFilesByPairs : function(files_in_experiment){
         // Add 'file_pairs' property containing array of arrays of paired files to each experiment.
-        return _(files_in_experiment).chain()
+        return _(files_in_experiment.slice(0)).chain()
             .sortBy(function(file){ return parseInt(file.paired_end); }) // Bring files w/ paired_end == 1 to top of list.
             .reduce(function(pairsObj, file, files){
                 // Group via { 'file_paired_end_1_ID' : { '1' : file_paired_end_1, '2' : file_paired_end_2,...} }

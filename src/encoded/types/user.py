@@ -82,7 +82,12 @@ class User(Item):
     })
     def title(self, first_name, last_name):
         """return first and last name."""
-        return u'{} {}'.format(first_name, last_name)
+        title = u'{} {}'.format(first_name, last_name)
+        # import pdb; pdb.set_trace()
+        return title
+
+    def display_title(self):
+        return self.title(self.properties['first_name'], self.properties['last_name'])
 
     def __ac_local_roles__(self):
         """return the owner user."""

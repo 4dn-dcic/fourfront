@@ -10,6 +10,7 @@ from .base import (
     # paths_filtered_by_status,
 )
 
+
 @collection(
     name='biosources',
     unique_key='accession',
@@ -87,3 +88,12 @@ class Biosource(Item):
                 organism_name = organism_props['name']
                 return "whole " + organism_name
         return biosource_type
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, biosource_type, individual=None,
+                      cell_line=None, cell_line_tier=None, tissue=None):
+        return self.biosource_name(request, biosource_type, individual, cell_line, cell_line_tier, tissue)

@@ -56,12 +56,12 @@ var expFilters = module.exports = {
             }
         },
 
-        getSchemaProperty : function(field, schemas = null){
+        getSchemaProperty : function(field, schemas = null, startAt = 'ExperimentSet'){
             if (!schemas) schemas = expFilters.getSchemas && expFilters.getSchemas();
-            if (!schemas) return null;
-            var fieldParts = field.split('.');
-            var baseSchemaProperties = schemas.ExperimentSet.properties;
+            var baseSchemaProperties = (schemas && schemas[startAt] && schemas[startAt].properties) || null;
+            if (!baseSchemaProperties) return null;
 
+            var fieldParts = field.split('.');
 
             function getNextSchemaProperties(linkToName){
 
@@ -98,7 +98,7 @@ var expFilters = module.exports = {
                 if (nextSchemaProperties) return getProperty(nextSchemaProperties, fieldPartIndex + 1);
             }
 
-            return getProperty(schemas.ExperimentSet.properties, 0);
+            return getProperty(baseSchemaProperties, 0);
 
         }
 

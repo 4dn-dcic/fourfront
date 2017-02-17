@@ -40,19 +40,20 @@ var Detail = React.createClass({
          * @param {Object} schemas - Object containing schemas for server's JSONized object output.
          * @param {*|*[]} item - Item(s) to render recursively.
          */
-        formValue : function (schemas, item, keyPrefix = '', depth = 0) {
+        formValue : function (schemas, item, keyPrefix = '', atType = 'ExperimentSet', depth = 0) {
             if(Array.isArray(item)) {
                 return (
                     <ul>
                         {   item.length === 0 ? <li><em>None</em></li>
                             :   item.map(function(it, i){
-                                    return <li key={i}>{ Detail.formValue(schemas, it, keyPrefix, depth + 1) }</li>;
+                                    return <li key={i}>{ Detail.formValue(schemas, it, keyPrefix, atType, depth + 1) }</li>;
                                 })
                         }
                     </ul>
                 );
             } else if (typeof item === 'object') {
                 var title = itemTitle({ 'context' : item});
+
                 // if the following is true, we have an embedded object
                 if (item.display_title && item.link_id){
                     var format_id = item.link_id.replace(/~/g, "/")
@@ -71,17 +72,30 @@ var Detail = React.createClass({
                         />
                     );
                 }
-            } else {
-                if (typeof item === 'string' && item.charAt(0) === '/') {
+            } else if (typeof item === 'string'){
+                if (item.charAt(0) === '/') {
                     return (
                         <a key={item} href={item}>
                             {item}
                         </a>
                     );
-                } else {
-                    return(<span key={item}>{item}</span>);
+                } else if (item.slice(0,4) === 'http') {
+                    // Is a URL. Check if we should render it as a link/uri.
+                    var schemaProperty = Filters.Field.getSchemaProperty(keyPrefix, schemas, atType);
+                    if (
+                        schemaProperty &&
+                        typeof schemaProperty.format === 'string' &&
+                        ['uri','url'].indexOf(schemaProperty.format.toLowerCase()) > -1
+                    ){
+                        return (
+                            <a key={item} href={item} target="_blank">
+                                {item}
+                            </a>
+                        );
+                    }
                 }
             }
+            return(<span>{ item }</span>); // Fallback
         },
     },
 
@@ -148,10 +162,10 @@ var Detail = React.createClass({
         return (
             <PartialList
                 persistent={ orderedPersistentKeys.map((key,i) =>
-                    <PartialList.Row key={key} label={Detail.formKey(tips,key)}>{ Detail.formValue(this.props.schemas,context[key], key) }</PartialList.Row>
+                    <PartialList.Row key={key} label={Detail.formKey(tips,key)}>{ Detail.formValue(this.props.schemas,context[key], key, context['@type'][0]) }</PartialList.Row>
                 )}
                 collapsible={ extraKeys.map((key,i) =>
-                    <PartialList.Row key={key} label={Detail.formKey(tips,key)}>{ Detail.formValue(this.props.schemas,context[key], key) }</PartialList.Row>
+                    <PartialList.Row key={key} label={Detail.formKey(tips,key)}>{ Detail.formValue(this.props.schemas,context[key], key, context['@type'][0]) }</PartialList.Row>
                 )}
                 open={this.props.open}
             />
