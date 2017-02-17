@@ -91,7 +91,7 @@
                 }
             ],
             "workflow_argument_name": "sorted_bam_pe",
-            "argument_type": "Output file"
+            "argument_type": "Output processed file"
         },
         {
             "argument_mapping": [
@@ -102,7 +102,7 @@
                 }
             ],
             "workflow_argument_name": "HiC_project_object_hdf5",
-            "argument_type": "Output file"
+            "argument_type": "Output processed file"
         },
         {
             "argument_mapping": [
@@ -113,7 +113,7 @@
                 }
             ],
             "workflow_argument_name": "HiC_distance_function_hdf5",
-            "argument_type": "Output file"
+            "argument_type": "Output processed file"
         },
         {
             "argument_mapping": [
@@ -124,7 +124,7 @@
                 }
             ],
             "workflow_argument_name": "normalized_fend_contact_matrix",
-            "argument_type": "Output file"
+            "argument_type": "Output processed file"
         },
         {
             "argument_mapping": [
@@ -135,7 +135,7 @@
                 }
             ],
             "workflow_argument_name": "normalized_enrich_contact_matrix",
-            "argument_type": "Output file"
+            "argument_type": "Output processed file"
         },
         {
             "argument_mapping": [
@@ -146,7 +146,7 @@
                 }
             ],
             "workflow_argument_name": "expected_enrich_contact_matrix",
-            "argument_type": "Output file"
+            "argument_type": "Output processed file"
         },
         {
             "argument_mapping": [
@@ -157,7 +157,7 @@
                 }
             ],
             "workflow_argument_name": "split_bam2",
-            "argument_type": "Output file"
+            "argument_type": "Output processed file"
         },
         {
             "argument_mapping": [
@@ -168,7 +168,7 @@
                 }
             ],
             "workflow_argument_name": "split_bam1",
-            "argument_type": "Output file"
+            "argument_type": "Output processed file"
         },
         {
             "argument_mapping": [
@@ -179,7 +179,7 @@
                 }
             ],
             "workflow_argument_name": "fend_object_hdf5",
-            "argument_type": "Output file"
+            "argument_type": "Output processed file"
         },
         {
             "argument_mapping": [
@@ -190,7 +190,7 @@
                 }
             ],
             "workflow_argument_name": "HiC_norm_binning_hdf5",
-            "argument_type": "Output file"
+            "argument_type": "Output processed file"
         },
         {
             "argument_mapping": [
@@ -201,7 +201,7 @@
                 }
             ],
             "workflow_argument_name": "HiC_data_object_hdf5",
-            "argument_type": "Output file"
+            "argument_type": "Output processed file"
         },
         {
             "argument_mapping": [
@@ -212,7 +212,7 @@
                 }
             ],
             "workflow_argument_name": "observed_contact_matrix",
-            "argument_type": "Output file"
+            "argument_type": "Output processed file"
         },
         {
             "argument_mapping": [
@@ -223,7 +223,7 @@
                 }
             ],
             "workflow_argument_name": "expected_fend_contact_matrix",
-            "argument_type": "Output file"
+            "argument_type": "Output processed file"
         },
         {
             "argument_mapping": [
@@ -332,7 +332,7 @@
     "uuid": "2324ad76-ff37-4157-8bcc-3ce72b7dace9",
     "award": "1U01CA200059-01",
     "lab": "4dn-dcic-lab",
-    "arguments": [
+"arguments": [
         {
             "argument_mapping": [
                 {
@@ -386,7 +386,7 @@
                 }
             ],
             "workflow_argument_name": "report_zip",
-            "argument_type": "Output file"
+            "argument_type": "Output QC file"
         }
     ],
     "title": "FastQC",
@@ -421,6 +421,20 @@
     "name": "md5",
     "workflow_type": "Data QC",
     "workflow_diagram": "",
+    "arguments": [
+        {
+            "workflow_argument_name": "input_file",
+            "argument_type": "Input file",
+            "argument_mapping": [],
+            "description": ""
+        },
+        {
+            "workflow_argument_name": "report",
+            "argument_type": "Output report file",
+            "argument_mapping": [],
+            "description": ""
+        }
+    ],
     "description": "md5 on uncompressed file"
 },
 {
@@ -432,6 +446,50 @@
     "name": "hi-c-processing-parta",
     "workflow_type": "Hi-C data analysis",
     "workflow_diagram": "",
+    "arguments": [
+        {
+            "workflow_argument_name": "fastq1",
+            "argument_type": "Input file",
+            "argument_mapping": [],
+            "description": ""
+        },
+        {
+            "workflow_argument_name": "fastq2",
+            "argument_type": "Input file",
+            "argument_mapping": [],
+            "description": ""
+        },
+        {
+            "workflow_argument_name": "bwa_index",
+            "argument_type": "Input file",
+            "argument_mapping": [],
+            "description": ""
+        },
+        {
+            "workflow_argument_name": "out_sorted_bam",
+            "argument_type": "Output processed file",
+            "argument_mapping": [],
+            "description": ""
+        },
+        {
+            "workflow_argument_name": "out_sorted_bam_index",
+            "argument_type": "Output processed file",
+            "argument_mapping": [],
+            "description": ""
+        },
+        {
+            "workflow_argument_name": "out_pairs",
+            "argument_type": "Output processed file",
+            "argument_mapping": [],
+            "description": ""
+        },
+        {
+            "workflow_argument_name": "out_pairs_index",
+            "argument_type": "Output processed file",
+            "argument_mapping": [],
+            "description": ""
+        }
+    ],
     "description": "Creating a bam and pairs files from a pair of fastq files"
 }
 
