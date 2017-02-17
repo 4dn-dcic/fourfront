@@ -71,10 +71,13 @@ class ExperimentSet(Item):
     """The experiment set class."""
 
     item_type = 'experiment_set'
+    base_types = ['ExperimentSet'] + Item.base_types
     schema = load_schema('encoded:schemas/experiment_set.json')
     name_key = "accession"
     embedded = ["award",
                 "lab",
+                "produced_in_pub",
+                "publications",
                 "experiments_in_set",
                 "experiments_in_set.protocol",
                 "experiments_in_set.protocol_variation",
@@ -133,7 +136,7 @@ class ExperimentSet(Item):
             "linkTo": "Publication"
         }
     })
-    def publications(self, request):
+    def publications_of_set(self, request):
         pub_coll = list(self.registry['collections']['Publication'])
         pubs = []
         for uuid in pub_coll:

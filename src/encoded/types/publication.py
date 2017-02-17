@@ -153,7 +153,7 @@ class Publication(Item):
     """Publication class."""
     item_type = 'publication'
     schema = load_schema('encoded:schemas/publication.json')
-    embedded = []
+    embedded = ["exp_sets_prod_in_pub", "exp_sets_used_in_pub"]
     embedded = add_default_embeds(embedded, schema)
 
     def _update(self, properties, sheets=None):
