@@ -623,3 +623,14 @@ def test_get_termid_from_uri_funky_uri2():
     uri = 'http://www.ebi.ac.uk/efo/EFO0002784'
     tid = go.get_termid_from_uri(uri)
     assert tid == 'EFO0002784'
+
+
+@pytest.fixture
+def test_owler():
+    from encoded.commands.owltools import Owler
+    return Owler('test.owl')
+
+
+def test_get_term_name_from_rdf(test_owler):
+    print(test_owler)
+    assert False
