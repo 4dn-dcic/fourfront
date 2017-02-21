@@ -48,16 +48,29 @@ var MosaicDetailCursor = module.exports = React.createClass({
         return cursorOffset;
     },
 
-    update : _.debounce(function(state, callback, timesAttempted = 0){
-        if (!this.refs || !this.refs.body){
-            if (this.props.debug) console.warn("Unable to update MosaicDetailCursor, no cursor body component present yet. Times attempted - ", timesAttempted);
-            if (timesAttempted < 3 && state.path && state.path.length > 0){
-                setTimeout(this.update, 100, state, callback, timesAttempted + 1);
-            }
-            return null;
+    getInitialState : function(){
+        return {
+            'title' : 'Title',
+            'term' : 'Title',
+            'field' : 'Field',
+            'path' : [
+                { field : "something1", term : "something2" }
+            ],
+            'totalCounts' : {
+                experiments : 0,
+                experiment_sets : 0,
+                files : 0
+            },
+        };
+    },
+
+    update : function(state = {}, cb = null){
+        if (state.field) state.field = Filters.Field.toName(state.field);
+        else if (Array.isArray(state.path) && state.path.length > 0 && state.path[state.path.length - 1].field){
+            state.field = Filters.Field.toName(state.path[state.path.length - 1].field);
         }
-        return this.refs.body.update(state, callback);
-    }, 50),
+        return this.setState(state, cb);
+    },
 
     render : function(){
         var containDims = {};
@@ -82,7 +95,12 @@ var MosaicDetailCursor = module.exports = React.createClass({
                     top: -10
                 }}
             >
-                <MosaicDetailCursor.Body ref="body" />
+                <MosaicDetailCursor.Body
+                    path={this.state.path}
+                    title={this.state.title}
+                    term={this.state.term}
+                    field={this.state.field}
+                />
             </CursorComponent>
         );
     },
@@ -100,41 +118,14 @@ var MosaicDetailCursor = module.exports = React.createClass({
 
         Body : React.createClass({
 
-            getInitialState : function(){
-                return {
-                    'title' : 'Title',
-                    'term' : 'Title',
-                    'field' : 'Field',
-                    'path' : [
-                        { field : "something1", term : "something2" }
-                    ],
-                    'totalCounts' : {
-                        experiments : 0,
-                        experiment_sets : 0,
-                        files : 0
-                    },
-                };
-            },
-
-            shouldComponentUpdate : function(nextProps, nextState){
-                if (!_.isEqual(this.state, nextState)) return true;
-                return false;
-            },
-
-            update : function(state = {}, cb = null){
-                if (state.field) state.field = Filters.Field.toName(state.field);
-                //console.log(Filters.Field.nameMap);
-                return this.setState(state, cb);
-            },
-
-            getCurrentCounts : function(nodes = this.state.path){
+            getCurrentCounts : function(nodes = this.props.path){
                 if (nodes.length < 1) return null;
                 return MosaicDetailCursor.getCounts(nodes[nodes.length - 1]);
             },
 
-            renderDetailSection : function(state = this.state){
-                if (state.path.length === 0) return null;
-                var currentCounts = this.getCurrentCounts(this.state.path);
+            renderDetailSection : function(props = this.props){
+                if (props.path.length === 0) return null;
+                var currentCounts = this.getCurrentCounts(props.path);
                 if (!currentCounts) return null;
                 return (
                     <div className='row'>
@@ -164,13 +155,14 @@ var MosaicDetailCursor = module.exports = React.createClass({
             },
 
             render : function(){
-                if (Array.isArray(this.state.path) && this.state.path.length === 0){
+                if (Array.isArray(this.props.path) && this.props.path.length === 0){
                     return null;
                 }
+                var leafNode = this.props.path[this.props.path.length - 1];
                 return (
                     <div className="mosaic-cursor-body">
-                        <h6 className="field-title">{ this.state.field }</h6>
-                        <h3 className="details-title">{ this.state.title || this.props.title }</h3>
+                        <h6 className="field-title">{ this.props.field || leafNode.field }</h6>
+                        <h3 className="details-title">{ leafNode.name || leafNode.title || leafNode.term || this.props.title }</h3>
                         <div className="details row">
                             <div className="col-sm-6">
                                 { this.renderDetailSection() }

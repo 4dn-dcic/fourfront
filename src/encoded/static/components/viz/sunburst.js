@@ -9,6 +9,9 @@ var { highlightTerm, unhighlightTerms } = require('./../facetlist');
 var { CursorComponent, RotatedLabel } = require('./components');
 var MosaicDetailCursor = require('./MosaicDetailCursor');
 
+// Share one instance between all charts because D3 selector acts on common class/elem names.
+var mouseleaveTimeout = null;
+
 /**
  * Based on Sunburst D3 Example @ http://bl.ocks.org/kerryrodden/7090426
  * This chart contains NO STATE object, because it is drawn and rendered after mount.
@@ -422,7 +425,7 @@ var SunBurst = React.createClass({
     onPathMouseOver : function(e){
         if (!e || !e.target || !e.target.__data__) {
             // No D3 data attached to event target.
-            this.mouseleave(e);
+            //this.mouseleave(e);
             return null;
         }
         this.mouseoverHandle(e.target.__data__);
@@ -433,6 +436,11 @@ var SunBurst = React.createClass({
      * @param {Object} d - Node datum with depth, etc.
      */
     mouseoverHandle : _.throttle(function(d){
+
+        if (mouseleaveTimeout){
+            clearTimeout(mouseleaveTimeout);
+            mouseleaveTimeout = null;
+        }
 
         var ancestorsArray = SunBurst.getAncestors(d);
         //var siblingArray = SunBurst.getAllNodesAtDepth(
@@ -525,8 +533,9 @@ var SunBurst = React.createClass({
             // Cancel if left to go onto another path.
             if (e && e.relatedTarget && e.relatedTarget.__data__ && e.relatedTarget.__data__.data && e.relatedTarget.__data__ .data.id) return null;
         }
+        if (mouseleaveTimeout) return null;
         var _this = this;
-        setTimeout(function(){ // Wait 50ms (duration of mouseenter throttle) so delayed handler doesn't cancel this mouseleave transition.
+        mouseleaveTimeout = setTimeout(function(){ // Wait 50ms (duration of mouseenter throttle) so delayed handler doesn't cancel this mouseleave transition.
             vizUtil.requestAnimationFrame(function(){
                 // Hide the breadcrumb trail
                 _this.updateBreadcrumbs([], '0%');
