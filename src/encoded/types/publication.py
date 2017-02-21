@@ -2,7 +2,10 @@
 import requests
 import json
 from snovault import (collection, load_schema)
-from .base import Item
+from .base import (
+    Item,
+    add_default_embeds
+)
 from html.parser import HTMLParser
 
 ################################################
@@ -148,6 +151,8 @@ class Publication(Item):
     """Publication class."""
     item_type = 'publication'
     schema = load_schema('encoded:schemas/publication.json')
+    embedded = []
+    embedded = add_default_embeds(embedded, schema)
 
     def _update(self, properties, sheets=None):
         title = ''

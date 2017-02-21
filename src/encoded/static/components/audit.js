@@ -48,6 +48,36 @@ var AuditMixin = module.exports.AuditMixin = {
 
 
 var AuditIndicators = module.exports.AuditIndicators = React.createClass({
+
+    statics : {
+        Header : React.createClass({
+            render : function(){
+                var children = this.props.children || <AuditIndicators context={this.props.context} />;
+                if (children && children.type && children.type.displayName === 'AuditIndicators'){
+                    if (!children.type.prototype.isVisible.call(children)) {
+                        return null; // Invisible
+                    }
+                }
+                return (
+                    <header className="row">
+                        <div className="col-sm-12">
+                            <div className="status-line">
+                                { children }
+                            </div>
+                        </div>
+                    </header>
+                );
+            }
+        }),
+
+        sortAuditLevels : function(audits){
+            if (!audits) return null;
+            return _(Object.keys(audits)).sortBy(function(level) {
+                return -audits[level][0].level;
+            });
+        },
+    },
+    
     contextTypes: {
         auditDetailOpen: React.PropTypes.bool,
         auditStateToggle: React.PropTypes.func,
@@ -55,48 +85,52 @@ var AuditIndicators = module.exports.AuditIndicators = React.createClass({
         hidePublicAudits: React.PropTypes.bool
     },
 
+    
+
+    isVisible : function(sortedAuditLevels = null){
+        if (!this.props.audits) return false;
+        if (!sortedAuditLevels) sortedAuditLevels = AuditIndicators.sortAuditLevels(this.props.audits);
+        if (!sortedAuditLevels) return false;
+        return (
+            (!this.context.hidePublicAudits || this.context.session) &&
+            this.props.audits &&
+            _.keys(this.props.audits).length > 0 &&
+            (this.context.session || !(sortedAuditLevels.length === 1 && sortedAuditLevels[0] === 'DCC_ACTION'))
+        );
+    },
+
     render: function() {
         var auditCounts = {};
         var audits = this.props.audits;
         var loggedIn = this.context.session;
 
-        if ((!this.context.hidePublicAudits || loggedIn) && audits && Object.keys(audits).length) {
-            // Sort the audit levels by their level number, using the first element of each warning category
-            var sortedAuditLevels = _(Object.keys(audits)).sortBy(function(level) {
-                return -audits[level][0].level;
-            });
+        var sortedAuditLevels = AuditIndicators.sortAuditLevels(audits);
+        if (!this.isVisible(sortedAuditLevels)) return null;
 
-            var indicatorClass = "audit-indicators btn btn-default" + (this.context.auditDetailOpen ? ' active' : '') + (this.props.search ? ' audit-search' : '');
 
-            if (loggedIn || !(sortedAuditLevels.length === 1 && sortedAuditLevels[0] === 'DCC_ACTION')) {
-                return (
-                    <button className={indicatorClass} aria-label="Audit indicators" aria-expanded={this.context.auditDetailOpen} aria-controls={this.props.id} onClick={this.context.auditStateToggle}>
-                        {sortedAuditLevels.map(level => {
-                            if (loggedIn || level !== 'DCC_ACTION') {
-                                // Calculate the CSS class for the icon
-                                var levelName = level.toLowerCase();
-                                var btnClass = 'btn-audit btn-audit-' + levelName + ' audit-level-' + levelName;
-                                var iconClass = 'icon audit-activeicon-' + levelName;
-                                var groupedAudits = _(audits[level]).groupBy('category');
+        var indicatorClass = "audit-indicators btn btn-default" + (this.context.auditDetailOpen ? ' active' : '') + (this.props.search ? ' audit-search' : '');
 
-                                return (
-                                    <span className={btnClass} key={level}>
-                                        <i className={iconClass}><span className="sr-only">{'Audit'} {levelName}</span></i>
-                                        {Object.keys(groupedAudits).length}
-                                    </span>
-                                );
-                            }
-                            return null;
-                        })}
-                    </button>
-                );
-            }
+        return (
+            <button className={indicatorClass} aria-label="Audit indicators" aria-expanded={this.context.auditDetailOpen} aria-controls={this.props.id} onClick={this.context.auditStateToggle}>
+                {sortedAuditLevels.map(level => {
+                    if (loggedIn || level !== 'DCC_ACTION') {
+                        // Calculate the CSS class for the icon
+                        var levelName = level.toLowerCase();
+                        var btnClass = 'btn-audit btn-audit-' + levelName + ' audit-level-' + levelName;
+                        var iconClass = 'icon audit-activeicon-' + levelName;
+                        var groupedAudits = _(audits[level]).groupBy('category');
 
-            // Logged out and the only audit level is DCC action, so don't show a button
-            return null;
-        } else {
-            return null;
-        }
+                        return (
+                            <span className={btnClass} key={level}>
+                                <i className={iconClass}><span className="sr-only">{'Audit'} {levelName}</span></i>
+                                {Object.keys(groupedAudits).length}
+                            </span>
+                        );
+                    }
+                    return null;
+                })}
+            </button>
+        );
     }
 });
 

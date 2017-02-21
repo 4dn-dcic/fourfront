@@ -33,12 +33,13 @@
             "default": "1"
         },
         "experiment_type": {
+            "title" : "Experiment Type",
             "enum": [
-            "in situ Hi-C",
-            "dilution Hi-C",
-            "micro-C",
-            "DNase Hi-C"
-          ]
+                "in situ Hi-C",
+                "dilution Hi-C",
+                "micro-C",
+                "DNase Hi-C"
+            ]
         },
         "crosslinking_method": {
             "title": "Crosslinking Method",
