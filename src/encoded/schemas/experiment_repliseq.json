@@ -60,7 +60,13 @@
             "description": "After sorting stage that the cell fraction falls in",
             "type": "string",
             "internal_comment": "Link with a specific ontology",
-            "enum": ["G1a", "G1b", "S1", "S2", "S3", "S4", "G2/M"]
+            "enum": ["G1 phase", "S phase", "G2 phase", "M phase"]
+        },
+        "stage_fraction": {
+            "title": "Cell Cycle Stage Fraction",
+            "description": "A decription of the sub stage prepared after sorting",
+            "comment": "Repliseq experiments can be 2-phase, 6-phase, 8-phase ... This field is used to further describe the fraction represented in this experiment",
+            "type": "string"
         },
         "cell_sorting_protocol": {
             "title": "Sorting Protocol",
