@@ -7,10 +7,11 @@ var querystring = require('querystring');
 var d3 = require('d3');
 var SunBurstChart = require('./viz/sunburst');
 var BarPlotChart = require('./viz/barplot');
+var MosaicDetailCursor = require('./viz/MosaicDetailCursor');
 var { expFxn, Filters, ajax, console, layout, isServerSide } = require('./util');
 var FacetList = require('./facetlist');
 var vizUtil = require('./viz/utilities');
-var { ChartBreadcrumbs, SVGFilters, FetchingView } = require('./viz/components');
+var { SVGFilters, FetchingView } = require('./viz/components');
 
 /**
  * @callback showFunc
@@ -142,6 +143,42 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
             ],
             'chartFieldsHierarchy'  : [
+                //{ 
+                //    field : 'experiments_in_set.biosample.biosource.individual.organism.name',
+                //    title : "Primary Organism",
+                //    name : function(val, id, exps, filteredExps){
+                //        return Filters.Term.toName('experiments_in_set.biosample.biosource.individual.organism.name', val);
+                //    }
+                //},
+                //{ title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
+                //{ title : "Biosample", field : 'experiments_in_set.biosample.biosource_summary' },
+                { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
+                {
+                    title : "Digestion Enzyme",
+                    field : 'experiments_in_set.digestion_enzyme.name',
+                    description : function(val, id, exps, filteredExps, exp){
+                        return 'Enzyme ' + val;
+                    }
+                },
+                {
+                    title : "Experiment Set",
+                    aggregatefield : "experiment_sets.accession",
+                    field : "accession",
+                    isFacet : false,
+                    size : 1
+                },
+                //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" },
+                //{
+                //    title: "Experiment Accession",
+                //    field : 'experiments_in_set.accession',
+                //    //size : function(val, id, exps, filteredExps, exp, parentNode){
+                //    //    return 1 / (_.findWhere(exp.experiment_sets, { 'accession' : parentNode.term }).experiments_in_set);
+                //    //},
+                //    color : "#eee",
+                //    isFacet : false,
+                //}
+            ],
+            'chartFieldsHierarchyRight'  : [
                 { 
                     field : 'experiments_in_set.biosample.biosource.individual.organism.name',
                     title : "Primary Organism",
@@ -151,7 +188,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 },
                 { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
                 { title : "Biosample", field : 'experiments_in_set.biosample.biosource_summary' },
-                { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
+                //{ title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
                 //{
                 //    title : "Digestion Enzyme",
                 //    field : 'experiments_in_set.digestion_enzyme.name',
@@ -473,6 +510,15 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         }
     },
 
+    updatePopover : _.debounce(function(d){
+        return (
+            this.refs &&
+            this.refs.detailCursor &&
+            this.refs.detailCursor.update &&
+            this.refs.detailCursor.update(d)
+        ) || null;
+    }, 200),
+
     render : function(){
 
         var show = this.show();
@@ -504,25 +550,51 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             <div className={"facet-charts show-" + show} key="facet-charts">
                 
                 <div className="row facet-chart-row-1" key="facet-chart-row-1">
-                    <div className={genChartColClassName(1)} key="facet-chart-row-1-chart-1" style={{ height: height }}>
-                        <SunBurstChart
-                            experiments={this.state.experiments}
-                            filteredExperiments={this.state.filteredExperiments}
-                            fields={this.state.chartFieldsHierarchy}
-                            maxFieldDepthIndex={5}
+                    <div className={genChartColClassName(1)} key="facet-chart-row-1-chart-1" style={{ height: height }} ref="sunburstContainer">
+                        <div className="row">
+                            <div className="col-sm-6">
+                                <SunBurstChart
+                                    experiments={this.state.experiments}
+                                    filteredExperiments={this.state.filteredExperiments}
+                                    fields={this.state.chartFieldsHierarchy}
+                                    maxFieldDepthIndex={this.state.chartFieldsHierarchy.length - 1}
 
-                            height={height} width={this.width(0) - 20}
-                            updateBreadcrumbsHoverNodes={(nodes) => this.refs && this.refs.breadcrumbs && this.refs.breadcrumbs.updateHoverNodes(nodes)}
+                                    height={height} width={this.width(0)/2 - 20}
+                                    updateBreadcrumbsHoverNodes={(nodes) => this.refs && this.refs.breadcrumbs && this.refs.breadcrumbs.updateHoverNodes(nodes)}
 
-                            handleClick={this.handleVisualNodeClickToUpdateFilters}
-                            updateStats={this.props.updateStats}
+                                    handleClick={this.handleVisualNodeClickToUpdateFilters}
+                                    updateStats={this.props.updateStats}
+                                    updatePopover={this.updatePopover}
 
-                            expSetFilters={this.props.expSetFilters}
-                            href={this.props.href}
-                            key="sunburst"
-                            schemas={this.props.schemas}
-                            debug
-                        />
+                                    expSetFilters={this.props.expSetFilters}
+                                    href={this.props.href}
+                                    key="sunburst"
+                                    schemas={this.props.schemas}
+                                    debug
+                                />
+                            </div>
+                            <div className="col-sm-6">
+                                <SunBurstChart
+                                    experiments={this.state.experiments}
+                                    filteredExperiments={this.state.filteredExperiments}
+                                    fields={this.state.chartFieldsHierarchyRight}
+                                    maxFieldDepthIndex={this.state.chartFieldsHierarchyRight.length - 1}
+
+                                    height={height} width={this.width(0)/2 - 20}
+                                    updateBreadcrumbsHoverNodes={(nodes) => this.refs && this.refs.breadcrumbs && this.refs.breadcrumbs.updateHoverNodes(nodes)}
+
+                                    handleClick={this.handleVisualNodeClickToUpdateFilters}
+                                    updateStats={this.props.updateStats}
+                                    updatePopover={this.updatePopover}
+
+                                    expSetFilters={this.props.expSetFilters}
+                                    href={this.props.href}
+                                    key="sunburst"
+                                    schemas={this.props.schemas}
+                                    debug
+                                />
+                            </div>
+                        </div>
                         <FetchingView display={this.state.fetching} />
                     </div>
                     <div className={genChartColClassName(2)} key="facet-chart-row-1-chart-2" style={{ height: height }}>
@@ -535,6 +607,15 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                         <FetchingView display={this.state.fetching} />
                     </div>
                 </div>
+                <MosaicDetailCursor
+                    containingElement={(this.refs && this.refs.sunburstContainer) || null}
+                    verticalAlign="center" /* cursor position */
+                    visibilityMargin={_.extend(
+                        SunBurstChart.getDefaultStyleOpts().offset,
+                        { left : -10, right : -10 }
+                    )}
+                    ref="detailCursor"
+                />
             </div>
         );
     }

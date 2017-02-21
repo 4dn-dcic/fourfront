@@ -6,7 +6,7 @@ var url = require('url');
 var d3 = require('d3');
 var vizUtil = require('./utilities');
 var { expFxn, Filters, console, object, isServerSide } = require('../util');
-var ChartBreadcrumbs = require('./components/ChartBreadcrumbs');
+var ActiveFiltersBar = require('./components/ActiveFiltersBar');
 
 
 var HoverStatistics = module.exports = React.createClass({
@@ -166,8 +166,7 @@ var HoverStatistics = module.exports = React.createClass({
                     <div className="crumbs-label">
                         Filtered by
                     </div>
-                    <ChartBreadcrumbs
-                        ref="breadcrumbs"
+                    <ActiveFiltersBar
                         expSetFilters={this.props.expSetFilters}
                         invisible={!this.state.mounted}
                         orderedFieldNames={null}

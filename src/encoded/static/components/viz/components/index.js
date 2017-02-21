@@ -5,7 +5,7 @@
  */
 
 
-module.exports.ChartBreadcrumbs = require('./ChartBreadcrumbs');
+module.exports.ActiveFiltersBar = require('./ActiveFiltersBar');
 module.exports.SVGFilters = require('./SVGFilters');
 module.exports.FetchingView = require('./FetchingView');
 module.exports.Legend = require('./Legend');

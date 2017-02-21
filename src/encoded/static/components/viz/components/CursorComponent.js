@@ -141,8 +141,8 @@ var CursorComponent = module.exports = React.createClass({
         this.setState({
             x: e.clientX + scrollX, //(window.scrollX || window.pageXOffset),
             y: e.clientY + scrollY, //(window.scrollY || window.pageYOffset),
-            offsetX: e.clientX - offset.left,
-            offsetY: e.clientY - offset.top
+            offsetX: e.clientX + scrollX - offset.left,
+            offsetY: e.clientY + scrollY - offset.top
         });
     }, 100, { trailing: false }),
 

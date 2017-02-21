@@ -589,9 +589,9 @@
 
     g.field.highlight {
         path {
-            opacity : 0.25;
+            opacity : 0.125;
             &.highlight {
-                opacity: 1;
+                opacity: 0.25;
             }
         }
     }
@@ -769,18 +769,46 @@
 /**** Cursor Component(s) ****/
 
 .cursor-component-container {
-    background-color: #fff;
-    box-shadow: 1px 1px 6px rgba(0,0,0,0.3);
+    
     z-index: 1000;
     position: absolute;
     top: 0;
     left: 0;
-    border-radius: 5px;
-    overflow: hidden;
     //display: none !important;
     opacity: 1;
     transition: opacity .25s, transform .05s linear;
     pointer-events: none;
+
+    .mosaic-cursor-body {
+        background-color: #fff;
+        box-shadow: 0px 1px 6px rgba(0,0,0,0.3);
+        border-radius: 5px;
+        overflow: hidden;
+
+        > .field-title {
+            padding: 7px 10px 0px;
+            margin: 0;
+            font-weight: 300;
+        }
+        > .details-title {
+            padding: 0 10px 7px;
+            border-bottom: 1px solid #ddd;
+            font-size: 1.2rem;
+            margin: 0;
+            font-weight: 300;
+        }
+
+        .details.row {
+            font-weight: 0.85rem;
+
+            .count-val {
+                font-weight: 500;
+                text-align: right;
+            }
+
+        }
+    }
+
 }
 
 

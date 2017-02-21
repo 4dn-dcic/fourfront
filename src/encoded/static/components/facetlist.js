@@ -411,18 +411,18 @@ var FacetList = module.exports = React.createClass({
 
             vizUtil.requestAnimationFrame(function(){
 
-                _.each(document.querySelectorAll('[data-field]'), function(fieldContainerElement){
+                _.each(document.querySelectorAll('[data-field]:not(.no-highlight)'), function(fieldContainerElement){
                     setHighlightClass(fieldContainerElement, true);
                 });
 
                 if (color.length > 0){
-                    _.each(document.querySelectorAll('[data-field' + (field ? '="' + field + '"' : '') + ']'), function(fieldContainerElement){
+                    _.each(document.querySelectorAll('[data-field' + (field ? '="' + field + '"' : '') + ']:not(.no-highlight)'), function(fieldContainerElement){
                         setHighlightClass(fieldContainerElement, color.length === 0);
                     });
                 }
 
                 // unhighlight previously selected terms, if any.
-                _.each(document.querySelectorAll('[data-term]'), function(termElement){
+                _.each(document.querySelectorAll('[data-term]:not(.no-highlight)'), function(termElement){
                     var dataField = termElement.getAttribute('data-field');
                     if (field && dataField && dataField === field) return; // Skip, we need to leave as highlighted as also our field container.
                     var isSVG = setHighlightClass(termElement, true);
@@ -430,7 +430,7 @@ var FacetList = module.exports = React.createClass({
                 });
 
                 if (color.length > 0){
-                    _.each(document.querySelectorAll('[data-term="' + term + '"]'), function(termElement){
+                    _.each(document.querySelectorAll('[data-term="' + term + '"]:not(.no-highlight)'), function(termElement){
                         var isSVG = setHighlightClass(termElement, color.length === 0);
                         if (!isSVG && termElement.className.indexOf('no-highlight-color') === -1) termElement.style.backgroundColor = color;
                     });

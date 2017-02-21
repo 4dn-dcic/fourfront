@@ -420,7 +420,11 @@ var SunBurst = React.createClass({
     },
 
     onPathMouseOver : function(e){
-        if (!e || !e.target || !e.target.__data__) return null; // No D3 data attached to event target.
+        if (!e || !e.target || !e.target.__data__) {
+            // No D3 data attached to event target.
+            this.mouseleave(e);
+            return null;
+        }
         this.mouseoverHandle(e.target.__data__);
     },
 
@@ -430,40 +434,66 @@ var SunBurst = React.createClass({
      */
     mouseoverHandle : _.throttle(function(d){
 
-        //var sequenceArray = SunBurst.getAncestors(d);
-        var siblingArray = SunBurst.getAllNodesAtDepth(
-            this.root,
-            d.depth,
-            function(n){ return n.data.term === d.data.term; }//.bind(this)
+        var ancestorsArray = SunBurst.getAncestors(d);
+        //var siblingArray = SunBurst.getAllNodesAtDepth(
+        //    this.root,
+        //    d.depth,
+        //    function(n){ return n.data.term === d.data.term; }//.bind(this)
+        //);
+
+        var currentNodeCounts = {
+            experiments : d.data.active || d.data.experiments || 0,
+            experiment_sets : d.data.experiment_sets || 0,
+            files : d.data.activeFiles || d.data.files || 0
+        };
+
+        /*
+        var totalCounts = _.reduce(
+            siblingArray, (m, n) => {
+                if (n.data.active || !this.root.data.active) {
+                    m.experiments += n.data.active || n.data.experiments || 0;
+                    m.experiment_sets += n.data.experiment_sets || 0;
+                    m.files += n.data.activeFiles || n.data.files || 0;
+                    return m;
+                } else return m;
+            }, {
+                experiments : 0,
+                experiment_sets : 0,
+                files : 0
+            }
         );
-
-        var expCount = d.data.active || d.data.experiments || null;
-        var expSetCount = d.data.experiment_sets || null;
-
-        var totalCounts = _.reduce(siblingArray, (m, n) => {
-            if (n.data.active || !this.root.data.active) {
-                m.experiments += n.data.active || n.data.experiments || 0;
-                m.experiment_sets += n.data.experiment_sets || 0;
-                m.files += n.data.activeFiles || n.data.files || 0;
-                return m;
-            } else return m;
-        }, {
-            experiments : 0,
-            experiment_sets : 0,
-            files : 0
-        });
+        */
 
         // .appendChild used to be faster than .innerHTML but seems
         // innerHTML is better now (?) https://jsperf.com/appendchild-vs-documentfragment-vs-innerhtml/24
-        if (expCount !== null){
-            if (typeof this.props.updateStats === 'function'){
-                this.props.updateStats({
-                    'experiments' : totalCounts.experiments,//expCount,
-                    'experiment_sets' : totalCounts.experiment_sets,//expSetCount,
-                    'files' : totalCounts.files//d.activeFiles || d.files || 0
-                });
+        if (currentNodeCounts.experiments){
+            //if (typeof this.props.updateStats === 'function'){
+            //    this.props.updateStats(currentNodeCounts);
+            //}
+
+            /*
+            if (this.refs && this.refs.detailCursor && typeof this.refs.detailCursor.update === 'function'){
+                this.refs.detailCursor.update({
+                    term : d.data.term,
+                    title : d.data.name
+                })
             }
+            */
         }
+
+        if (typeof this.props.updatePopover === 'function'){
+            this.props.updatePopover({
+                term : d.data.term,
+                title : d.data.name,
+                field : d.data.field,
+                color : vizUtil.colorForNode(d),
+                path : ancestorsArray.map(function(n){
+                    return n.data;
+                })
+            });
+        }
+
+        //console.log(ancestorsArray);
 
         vizUtil.requestAnimationFrame(()=>{
             if (d.data.field && d.data.term) highlightTerm(d.data.field, d.data.term, vizUtil.colorForNode(d));
@@ -474,7 +504,7 @@ var SunBurst = React.createClass({
             var finalSelection = d3.selectAll("svg.sunburst-svg-chart path")
                 .classed("hover", false)
                 .filter(function(node){
-                    return _.find(siblingArray, function(sNode){ return sNode.data.id === node.data.id; }) || false;
+                    return _.find(ancestorsArray, function(sNode){ return sNode.data.id === node.data.id; }) || false;
                 })
                 .classed("hover", true);
 
@@ -485,13 +515,13 @@ var SunBurst = React.createClass({
 
         });
 
-        //this.updateBreadcrumbs(sequenceArray);
+        //this.updateBreadcrumbs(ancestorsArray);
     }, 100),
 
     // Restore everything to full opacity when moving off the visualization.
     mouseleave : function(e) {
         if (e) {
-            e.persist();
+            //e.persist();
             // Cancel if left to go onto another path.
             if (e && e.relatedTarget && e.relatedTarget.__data__ && e.relatedTarget.__data__.data && e.relatedTarget.__data__ .data.id) return null;
         }
@@ -508,6 +538,17 @@ var SunBurst = React.createClass({
                 unhighlightTerms();
 
                 _this.resetActiveExperimentsCount();
+
+                if (typeof _this.props.updatePopover === 'function'){
+                    _this.props.updatePopover({
+                        term : null,
+                        title : null,
+                        field : null,
+                        color : null,
+                        path : []
+                    });
+                }
+
             });
         }, 150);
     },
@@ -1099,11 +1140,13 @@ var SunBurst = React.createClass({
         }
 
         function renderCursorComponent(){
+            return null;
             var cursorContainmentContainerElement = (this.refs && this.refs.svgElem) || null;
             return (
                 <MosaicDetailCursor
                     containingElement={cursorContainmentContainerElement}
                     verticalAlign="center"
+                    ref="detailCursor"
                 />
             );
         }
