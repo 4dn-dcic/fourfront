@@ -465,5 +465,161 @@ def test_get_all_ancestors(terms):
         if tid == 'id8':
             assert len(closure) == 6
             okids = ['id6', 'id7', 'id1', 'id2', 'id3']
-        if okids:   
+        if okids:
             assert [_id in okids for _id in closure]
+
+
+def test_combine_all_parents_w_no_parents():
+    term = {'term_id': 'id1'}
+    term = go._combine_all_parents(term)
+    assert not term['all_parents']  # both should be empty lists
+    assert not term['development']
+
+
+def test_combine_all_parents_w_empty_parents():
+    term = {'term_id': 'id1', 'parents': [], 'relationships': [],
+            'develops_from': [], 'has_part_inverse': []}
+    term = go._combine_all_parents(term)
+    assert not term['all_parents']  # both should be empty lists
+    assert not term['development']
+
+
+def test_combine_all_parents_w_one_parent():
+    term = {'term_id': 'id1', 'parents': ['id2'], 'relationships': [],
+            'develops_from': [], 'has_part_inverse': []}
+    term = go._combine_all_parents(term)
+    assert len(term['all_parents']) == 1
+    assert term['all_parents'][0] == 'id2'
+    assert term['development'] == term['all_parents']
+
+
+def test_combine_all_parents_w_two_parents():
+    term = {'term_id': 'id1', 'parents': ['id2', 'id3'], 'relationships': [],
+            'develops_from': [], 'has_part_inverse': []}
+    term = go._combine_all_parents(term)
+    assert len(term['all_parents']) == 2
+    assert 'id2' in term['all_parents']
+    assert 'id3' in term['all_parents']
+    assert term['development'] == term['all_parents']
+
+
+def test_combine_all_parents_w_two_same_parents():
+    term = {'term_id': 'id1', 'parents': ['id2', 'id2'], 'relationships': [],
+            'develops_from': [], 'has_part_inverse': []}
+    term = go._combine_all_parents(term)
+    assert len(term['all_parents']) == 1
+    assert term['all_parents'][0] == 'id2'
+    assert term['development'] == term['all_parents']
+
+
+def test_combine_all_parents_w_parent_and_relationship_diff():
+    term = {'term_id': 'id1', 'parents': ['id2'], 'relationships': ['id3'],
+            'develops_from': [], 'has_part_inverse': []}
+    term = go._combine_all_parents(term)
+    assert len(term['all_parents']) == 2
+    assert 'id2' in term['all_parents']
+    assert 'id3' in term['all_parents']
+    assert term['development'] == term['all_parents']
+
+
+def test_combine_all_parents_w_parent_and_relationship_same():
+    term = {'term_id': 'id1', 'parents': ['id2'], 'relationships': ['id2'],
+            'develops_from': [], 'has_part_inverse': []}
+    term = go._combine_all_parents(term)
+    assert len(term['all_parents']) == 1
+    assert term['all_parents'][0] == 'id2'
+    assert term['development'] == term['all_parents']
+
+
+def test_combine_all_parents_w_parent_and_develops_from_diff():
+    term = {'term_id': 'id1', 'parents': ['id2'], 'relationships': [],
+            'develops_from': ['id3'], 'has_part_inverse': []}
+    term = go._combine_all_parents(term)
+    assert len(term['all_parents']) == 1
+    assert len(term['development']) == 2
+    assert term['all_parents'][0] == 'id2'
+    assert 'id2' in term['development']
+    assert 'id3' in term['development']
+
+
+def test_combine_all_parents_w_parent_and_develops_from_same():
+    term = {'term_id': 'id1', 'parents': ['id2'], 'relationships': [],
+            'develops_from': ['id2'], 'has_part_inverse': []}
+    term = go._combine_all_parents(term)
+    assert len(term['all_parents']) == 1
+    assert term['all_parents'][0] == 'id2'
+    assert term['development'] == term['all_parents']
+
+
+def test_combine_all_parents_w_only_develops_from():
+    term = {'term_id': 'id1', 'parents': [], 'relationships': [],
+            'develops_from': ['id2'], 'has_part_inverse': []}
+    term = go._combine_all_parents(term)
+    assert not term['all_parents']
+    assert len(term['development']) == 1
+    assert term['development'][0] == 'id2'
+
+
+def test_combine_all_parents_w_has_part_inverse_only():
+    term = {'term_id': 'id1', 'parents': [], 'relationships': [],
+            'develops_from': [], 'has_part_inverse': ['id2']}
+    term = go._combine_all_parents(term)
+    assert not term['all_parents']  # both should be empty lists
+    assert not term['development']
+
+
+def test_combine_all_parents_w_has_part_inverse_to_exclude():
+    term = {'term_id': 'id1', 'parents': [], 'relationships': [],
+            'develops_from': ['id2'], 'has_part_inverse': ['id2']}
+    term = go._combine_all_parents(term)
+    assert not term['all_parents']  # both should be empty lists
+    assert not term['development']
+
+
+def test_combine_all_parents_w_has_part_inverse_to_exclude_plus_others():
+    term = {'term_id': 'id1', 'parents': ['id2'], 'relationships': [],
+            'develops_from': ['id3', 'id4', 'id5'], 'has_part_inverse': ['id4', 'id5', 'id6']}
+    term = go._combine_all_parents(term)
+    assert len(term['all_parents']) == 1
+    assert len(term['development']) == 2
+    assert term['all_parents'][0] == 'id2'
+    assert 'id2' in term['development']
+    assert 'id3' in term['development']
+
+
+def test_has_human_empty():
+    l = []
+    assert not go._has_human(l)
+
+
+def test_has_human_no_human():
+    l = ['http://purl.obolibrary.org/obo/BFO_0000051']
+    assert not go._has_human(l)
+
+
+def test_has_human_human():
+    l = ['http://purl.obolibrary.org/obo/BFO_0000051', 'http://purl.obolibrary.org/obo/NCBITaxon_9606']
+    assert go._has_human(l)
+
+
+def test_get_termid_from_uri_no_uri():
+    uri = ''
+    assert not go.get_termid_from_uri(uri)
+
+
+def test_get_termid_from_uri_valid_uri():
+    uri = 'http://www.ebi.ac.uk/efo/EFO_0002784'
+    tid = go.get_termid_from_uri(uri)
+    assert tid == 'EFO:0002784'
+
+
+def test_get_termid_from_uri_funky_uri1():
+    uri = 'http://www.ebi.ac.uk/efo/EFO_UFO_0002784'
+    tid = go.get_termid_from_uri(uri)
+    assert tid == 'EFO:UFO:0002784'
+
+
+def test_get_termid_from_uri_funky_uri2():
+    uri = 'http://www.ebi.ac.uk/efo/EFO0002784'
+    tid = go.get_termid_from_uri(uri)
+    assert tid == 'EFO0002784'

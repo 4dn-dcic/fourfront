@@ -54,6 +54,9 @@ def iterative_parents(nodes, terms, data):
 
 
 def get_all_ancestors(term, terms, field):
+    '''Adds a list of all the term's ancestors to a term up to the root
+        of the ontology and adds to closure fields - used in adding slims
+    '''
     closure = 'closure'
     if field == 'development':
         closure = 'closure_with_develops_from'
@@ -67,6 +70,13 @@ def get_all_ancestors(term, terms, field):
 
 
 def _combine_all_parents(term):
+    '''internal method to combine the directly related terms into 2 uniqued lists
+        of all_parents or development terms that will be used as starting terms
+        to generate closures of all ancestors
+
+        the development terms have those with has_part_inverse filtered out to
+        prevent over expansion of the ancestors to incorrect associations
+    '''
     parents = set()
     relations = set()
     develops = set()
@@ -85,6 +95,7 @@ def _combine_all_parents(term):
 
 
 def _has_human(cols):
+    '''True if human taxon is part of the collection'''
     ans = False
     if cols and HUMAN_TAXON in cols:
         ans = True
@@ -415,15 +426,6 @@ def remove_obsoletes_and_unnamed(terms):
              if ('parents' not in term) or ('ObsoleteClass' not in term['parents'])}
     terms = {termid: term for termid, term in terms.items()
              if 'term_name' in term and (term['term_name'] and not term['term_name'].lower().startswith('obsolete'))}
-    # for termid, term in terms.items():
-    #     if 'parents' in term:
-    #         if 'ObsoleteClass' in term['parents']:
-    #             del terms[termid]
-    #     elif 'term_name' in term:
-    #         if not term['term_name']:
-    #             del terms[termid]
-    #         elif term['term_name'].lower().startswith('obsolete'):
-    #             del terms[termid]
     return terms
 
 
@@ -519,9 +521,6 @@ def main():
     ontologies = get_ontologies(connection, args.ontologies)
     slim_terms = get_slim_terms(connection)
 
-    # for testing with local copy of file pass in ontologies EFO
-    # ontologies[0]['download_url'] = '/Users/andrew/Documents/work/untracked_work_ff/test_families.owl'
-
     # start iteratively downloading and processing ontologies
     terms = {}
     for ontology in ontologies:
@@ -534,6 +533,9 @@ def main():
     if terms:
         terms = add_slim_terms(terms, slim_terms)
         terms = remove_obsoletes_and_unnamed(terms)
+        # at the moment we're writing json output but consider updating db directly
+        # including checks for removal of terms already in db from ontologies
+        # and audits for items linked to terms
         write_outfile(terms, args.outfile)
 
 
