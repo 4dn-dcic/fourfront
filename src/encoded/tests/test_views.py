@@ -9,10 +9,17 @@ def _type_length():
     import codecs
     import json
     utf8 = codecs.getreader("utf-8")
-    return {
+    type_length_dict = {
         name: len(json.load(utf8(resource_stream('encoded', 'tests/data/inserts/%s.json' % name))))
         for name in ORDER
     }
+    # hot fix for Replicate exp set / exp set counts
+    try:
+        type_length_dict['experiment_set'] = type_length_dict.get('experiment_set', 0) +
+        type_length_dict.get('experiment_set_replicate', 0)
+    except:
+        pass
+    return type_length_dict
 
 
 TYPE_LENGTH = _type_length()
