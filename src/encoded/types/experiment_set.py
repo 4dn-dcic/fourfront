@@ -3,6 +3,7 @@
 from pyramid.threadlocal import get_current_request
 
 from snovault import (
+    calculated_property,
     collection,
     load_schema,
     AfterModified,
@@ -14,6 +15,23 @@ from .base import (
     Item,
     add_default_embeds
 )
+
+import datetime
+
+
+def is_newer_than(d1, d2):
+    '''Takes 2 strings in format YYYY-MM-DD and tries to convert to date
+        and if successful returns True if first string is more recent than
+        second string, otherwise returns False
+    '''
+    try:
+        date1 = datetime.datetime.strptime(d1, '%Y-%m-%d').date()
+        date2 = datetime.datetime.strptime(d2, '%Y-%m-%d').date()
+        if date1 > date2:
+            return True
+    except:
+        pass
+    return False
 
 
 def invalidate_linked_items(item, field, updates=None):
@@ -53,10 +71,13 @@ class ExperimentSet(Item):
     """The experiment set class."""
 
     item_type = 'experiment_set'
+    base_types = ['ExperimentSet'] + Item.base_types
     schema = load_schema('encoded:schemas/experiment_set.json')
     name_key = "accession"
     embedded = ["award",
                 "lab",
+                "produced_in_pub",
+                "publications",
                 "experiments_in_set",
                 "experiments_in_set.protocol",
                 "experiments_in_set.protocol_variation",
@@ -81,6 +102,54 @@ class ExperimentSet(Item):
         super(ExperimentSet, self)._update(properties, sheets)
         if 'experiments_in_set' in properties:
             invalidate_linked_items(self, 'experiments_in_set')
+
+    @calculated_property(schema={
+        "title": "Produced in Publication",
+        "description": "The Publication in which this Experiment Set was produced.",
+        "type": "string",
+        "linkTo": "Publication"
+    })
+    def produced_in_pub(self, request):
+        pub_coll = list(self.registry['collections']['Publication'])
+        ppub = None
+        newest = None
+        for uuid in pub_coll:
+            pub = self.collection.get(uuid)
+            if pub.properties.get('exp_sets_prod_in_pub'):
+                for eset in pub.properties['exp_sets_prod_in_pub']:
+                    if str(eset) == str(self.uuid):
+                        pubdate = pub.properties['date_published']
+                        if not newest or is_newer_than(pubdate, newest):
+                            newest = pubdate
+                            ppub = str(uuid)
+        if ppub is not None:
+            ppub = '/publication/' + ppub
+        return ppub
+
+    @calculated_property(schema={
+        "title": "Publications",
+        "description": "Publications associated with this Experiment Set.",
+        "type": "array",
+        "items": {
+            "title": "Publication",
+            "type": "string",
+            "linkTo": "Publication"
+        }
+    })
+    def publications_of_set(self, request):
+        pub_coll = list(self.registry['collections']['Publication'])
+        pubs = []
+        for uuid in pub_coll:
+            expsets = []
+            pub = self.collection.get(uuid)
+            if pub.properties.get('exp_sets_prod_in_pub'):
+                expsets.extend(pub.properties['exp_sets_prod_in_pub'])
+            if pub.properties.get('exp_sets_used_in_pub'):
+                expsets.extend(pub.properties['exp_sets_used_in_pub'])
+            for expset in expsets:
+                if str(expset) == str(self.uuid):
+                    pubs.append('/publication/' + str(uuid))
+        return list(set(pubs))
 
 
 @collection(
