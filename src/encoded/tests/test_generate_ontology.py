@@ -1,7 +1,7 @@
 import os
 import pytest
-pytestmark = pytest.mark.working
 from encoded.commands import generate_ontology as go
+pytestmark = pytest.mark.working
 
 
 def test_parse_args_defaults():
@@ -465,5 +465,5 @@ def test_get_all_ancestors(terms):
         if tid == 'id8':
             assert len(closure) == 6
             okids = ['id6', 'id7', 'id1', 'id2', 'id3']
-        if okids:   
+        if okids:
             assert [_id in okids for _id in closure]
