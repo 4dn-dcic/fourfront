@@ -15,8 +15,8 @@ def _type_length():
     }
     # hot fix for Replicate exp set / exp set counts
     try:
-        type_length_dict['experiment_set'] = type_length_dict.get('experiment_set', 0) +
-        type_length_dict.get('experiment_set_replicate', 0)
+        sum_exp_set = type_length_dict.get('experiment_set', 0) + type_length_dict.get('experiment_set_replicate', 0)
+        type_length_dict['experiment_set'] = sum_exp_set
     except:
         pass
     return type_length_dict
