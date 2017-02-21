@@ -81,10 +81,12 @@
                         "description": "type of the argument",
                         "type": "string",
                         "enum" : [
-                            "",
                             "Input file",
-                            "Output file",
-                            "parameter"
+                            "Output processed file",
+                            "Output QC file",
+                            "Output report file",
+                            "parameter",
+                            "NA"
                         ]
                     },
                     "description": {
