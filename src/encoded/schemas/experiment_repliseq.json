@@ -55,12 +55,12 @@
             "description": "Identifier for the specific lot of antibody used",
             "type": "string"
         },
-        "cell_cycle_stage": {
-            "title": "Cell Cycle Stage",
-            "description": "After sorting stage that the cell fraction falls in",
+        "cell_cycle_phase": {
+            "title": "Cell Cycle Phase",
+            "description": "After sorting the cell cycle phase that the cell fraction falls in",
             "type": "string",
             "internal_comment": "Link with a specific ontology",
-            "enum": ["G1 phase", "S phase", "G2 phase", "M phase"]
+            "enum": ["G1", "S", "G2", "M"]
         },
         "stage_fraction": {
             "title": "Cell Cycle Stage Fraction",
