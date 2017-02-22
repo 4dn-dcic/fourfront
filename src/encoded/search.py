@@ -563,9 +563,8 @@ def format_facets(es_results, facets, used_filters, schemas, total):
             resultFacet['terms'] = aggregations[agg_name][agg_name]['buckets']
             
         # Choosing to show facets with one term for summary info on search it provides
-        # Disabled -- if one result it is styled on front-end as 'summary' accordingly.
-        #if len(terms) < 1:
-        #    continue
+        if len(resultFacet.get('terms', [])) < 1:
+            continue
 
         result.append(resultFacet)
 
