@@ -44,7 +44,7 @@ class WorkflowRun(Item):
                 'output_files.workflow_argument_name',
                 'output_files.value',
                 'output_files.value.file_format',
-                'output_quality_metrics.workflow_argument_name',
+                'output_quality_metrics.name',
                 'output_quality_metrics.value']
     embedded = add_default_embeds(embedded, schema)
 
