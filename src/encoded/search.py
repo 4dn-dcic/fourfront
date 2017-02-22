@@ -420,6 +420,8 @@ def set_filters(request, query, result):
         # Add filter to query
         if field.startswith('audit'):
             query_field = field
+        elif field == 'type':
+            query_field = 'embedded.@type.raw'
         else:
             query_field = 'embedded.' + field + '.raw'
 
