@@ -37,7 +37,9 @@ class WorkflowRun(Item):
 
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
-    embedded = ['workflow']
+    embedded = ['workflow',
+                'file',
+                'quality_metric']
     embedded = add_default_embeds(embedded, schema)
 
 
