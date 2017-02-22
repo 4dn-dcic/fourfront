@@ -626,11 +626,23 @@ def test_get_termid_from_uri_funky_uri2():
 
 
 @pytest.fixture
-def test_owler():
+def uberon_owler():
     from encoded.commands.owltools import Owler
-    return Owler('test.owl')
+    return Owler('src/encoded/tests/data/documents/test_uberon.owl')
 
 
-def test_get_term_name_from_rdf(test_owler):
-    print(test_owler)
-    assert False
+def test_get_term_name_from_rdf_no_name(uberon_owler):
+    name = go.get_term_name_from_rdf('pickle', uberon_owler)
+    assert not name
+
+
+def test_get_term_name_from_rdf_has_name(uberon_owler):
+    class_ = go.convert2URIRef('http://purl.obolibrary.org/obo/UBERON_0000101')
+    name = go.get_term_name_from_rdf(class_, uberon_owler)
+    assert name == 'lobe of lung'
+
+
+def test_get_term_name_from_rdf_has_name(uberon_owler):
+    class_ = go.convert2URIRef('http://purl.obolibrary.org/obo/UBERON_0000001')
+    name = go.get_term_name_from_rdf(class_, uberon_owler)
+    assert not name
