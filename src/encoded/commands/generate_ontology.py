@@ -8,6 +8,7 @@ from encoded.commands.owltools import (
     Owler,
     splitNameFromNamespace,
     convert2URIRef,
+    isURIRef,
     isBlankNode,
     getObjectLiteralsOfType,
     subClassOf,
@@ -97,8 +98,12 @@ def _combine_all_parents(term):
 def _has_human(cols):
     '''True if human taxon is part of the collection'''
     ans = False
-    if cols and HUMAN_TAXON in cols:
-        ans = True
+    human = HUMAN_TAXON
+    if cols:
+        if isURIRef(cols[0]):
+            human = convert2URIRef(human)
+        if human in cols:
+            ans = True
     return ans
 
 
