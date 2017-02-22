@@ -602,6 +602,13 @@ def test_has_human_human():
     assert go._has_human(l)
 
 
+def test_has_human_uriref_human():
+    uri = 'http://purl.obolibrary.org/obo/NCBITaxon_9606'
+    uri = go.convert2URIRef(uri)
+    l = [uri]
+    assert go._has_human(l)
+
+
 def test_get_termid_from_uri_no_uri():
     uri = ''
     assert not go.get_termid_from_uri(uri)
@@ -631,18 +638,53 @@ def uberon_owler():
     return Owler('src/encoded/tests/data/documents/test_uberon.owl')
 
 
+@pytest.fixture
+def uberon_owler2():
+    from encoded.commands.owltools import Owler
+    return Owler('src/encoded/tests/data/documents/test_uberon2.owl')
+
+
+@pytest.fixture
+def ll_class():
+    return go.convert2URIRef('http://purl.obolibrary.org/obo/UBERON_0000101')
+
+
 def test_get_term_name_from_rdf_no_name(uberon_owler):
     name = go.get_term_name_from_rdf('pickle', uberon_owler)
     assert not name
 
 
-def test_get_term_name_from_rdf_has_name(uberon_owler):
-    class_ = go.convert2URIRef('http://purl.obolibrary.org/obo/UBERON_0000101')
-    name = go.get_term_name_from_rdf(class_, uberon_owler)
+def test_get_term_name_from_rdf_has_name(uberon_owler, ll_class):
+    name = go.get_term_name_from_rdf(ll_class, uberon_owler)
     assert name == 'lobe of lung'
 
 
-def test_get_term_name_from_rdf_has_name(uberon_owler):
+def test_get_term_name_from_rdf_no_term(uberon_owler):
     class_ = go.convert2URIRef('http://purl.obolibrary.org/obo/UBERON_0000001')
     name = go.get_term_name_from_rdf(class_, uberon_owler)
     assert not name
+
+
+def test_create_term_dict(mocker, ll_class, uberon_owler):
+    with mocker.patch('encoded.commands.generate_ontology.get_term_name_from_rdf',
+                      return_value='lung lobe'):
+        term = go.create_term_dict(ll_class, 'termid', uberon_owler, 'ontid')
+        assert term['term_name'] == 'lung lobe'
+        assert term['term_id'] == 'termid'
+        assert term['source_ontology'] == 'ontid'
+        assert term['namespace'] == 'http://purl.obolibrary.org/obo'
+        assert term['term_url'] == 'http://purl.obolibrary.org/obo/UBERON_0000101'
+
+
+def test_add_term_and_info(uberon_owler2):
+    testid = 'UBERON:0001772'
+    relid = 'UBERON:0010304'
+    for c in uberon_owler2.allclasses:
+        if not c.__str__().startswith('http'):
+            test_class = c
+    parent = go.convert2URIRef('http://purl.obolibrary.org/obo/UBERON_0001772')
+    terms = go._add_term_and_info(test_class, parent, 'test_rel', uberon_owler2, {})
+    assert testid in terms
+    term = terms[testid]
+    assert term['term_id'] == testid
+    assert relid in term['test_rel']

@@ -141,13 +141,16 @@ def create_term_dict(class_, termid, data, ontology_id=None):
     return term
 
 
-def add_term_and_info(class_, term, relationship, data, terms):
+def _add_term_and_info(class_, parent_uri, relationship, data, terms):
+    '''Internal function to add new terms that are part of an IntersectionOf
+        along with the appropriate relationships
+    '''
     if not terms:
         terms = {}
     for subclass in data.rdfGraph.objects(class_, subClassOf):
-        term_id = get_termid_from_uri(term)
+        term_id = get_termid_from_uri(parent_uri)
         if terms.get(term_id) is None:
-            terms[term_id] = create_term_dict(class_, term_id, data)
+            terms[term_id] = create_term_dict(parent_uri, term_id, data)
         if terms[term_id].get(relationship) is None:
             terms[term_id][relationship] = []
         terms[term_id][relationship].append(get_termid_from_uri(subclass))
@@ -169,10 +172,13 @@ def process_intersection_of(class_, intersection, data, terms):
         # get restriction terms and add to col_list as string
         col_list.append(col.__str__())
     if _has_human(col_list):
+        print('WE HAVE HUMAN')
         if PART_OF in col_list:
-            terms = add_term_and_info(class_, collection[0], 'part_of', data, terms)
+            print('COL-0 = ', collection[0])
+            print('CLASS = ', class_.__str__())
+            terms = _add_term_and_info(class_, collection[0], 'part_of', data, terms)
         elif DEVELOPS_FROM in col_list:
-            terms = add_term_and_info(class_, collection[0], 'develops_from', data, terms)
+            terms = _add_term_and_info(class_, collection[0], 'develops_from', data, terms)
     return terms
 
 
@@ -258,8 +264,8 @@ def get_definitions(class_, data, definition_terms):
 
 def _cleanup_non_fields(terms):
     to_delete = ['relationships', 'all_parents', 'development',
-                 'has_part_inverse', 'develops_from', 'closure',
-                 'closure_with_develops_from']
+                 'has_part_inverse', 'develops_from', 'part_of',
+                 'closure', 'closure_with_develops_from']
     for termid, term in terms.items():
         for field in to_delete:
             if field in term:
