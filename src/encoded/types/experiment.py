@@ -25,6 +25,7 @@ class Experiment(Item):
     base_types = ['Experiment'] + Item.base_types
     schema = load_schema('encoded:schemas/experiment.json')
     embedded = ["protocol", "protocol_variation", "lab", "award", "experiment_sets",
+                "produced_in_pub", "publications_of_exp",
                 "biosample", "biosample.biosource", "biosample.modifications",
                 "biosample.treatments", "biosample.biosource.individual.organism"]
     embedded = add_default_embeds(embedded, schema)
@@ -123,6 +124,43 @@ class Experiment(Item):
                     s = prefix + str(uuid)
                     sets.append(s)
         return list(set(sets))
+
+    @calculated_property(schema={
+        "title": "Produced in Publication",
+        "description": "The Publication in which this Experiment was produced.",
+        "type": "string",
+        "linkTo": "Publication"
+    })
+    def produced_in_pub(self, request):
+        ppub = None
+        # print(self.properties)
+        if self.properties.get('experiment_sets', None) is not None:
+            esets = properties['experiment_sets']
+            for uuid in esets:
+                eset = self.collection.get(uuid)
+                if eset['produced_in_pub']:
+                    ppub = eset['produced_in_pub']
+        return ppub
+
+    @calculated_property(schema={
+        "title": "Publications",
+        "description": "Publications associated with this Experiment.",
+        "type": "array",
+        "items": {
+            "title": "Publication",
+            "type": "string",
+            "linkTo": "Publication"
+        }
+    })
+    def publications_of_exp(self, request):
+        pubs = None
+        if self.properties.get('experiment_sets', None) is not None:
+            esets = properties['experiment_sets']
+            for uuid in esets:
+                eset = self.collection.get(uuid)
+                if eset['publications_of_set']:
+                    pubs = eset['publications_of_set']
+        return pubs
 
 
 @collection(
