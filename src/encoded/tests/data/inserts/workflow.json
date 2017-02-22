@@ -238,8 +238,8 @@
                     "step_argument_type": "Output file or parameter"
                 }
             ],
-            "workflow_argument_name": "",
-            "argument_type": ""
+            "workflow_argument_name": "NA",
+            "argument_type": "NA"
         },
         {
             "argument_mapping": [
@@ -254,8 +254,8 @@
                     "step_argument_type": "Output file or parameter"
                 }
             ],
-            "workflow_argument_name": "",
-            "argument_type": ""
+            "workflow_argument_name": "NA",
+            "argument_type": "NA"
         },
         {
             "argument_mapping": [
@@ -270,8 +270,8 @@
                     "step_argument_type": "Output file or parameter"
                 }
             ],
-            "workflow_argument_name": "",
-            "argument_type": ""
+            "workflow_argument_name": "NA",
+            "argument_type": "NA"
         },
         {
             "argument_mapping": [
@@ -286,8 +286,8 @@
                     "step_argument_type": "Output file or parameter"
                 }
             ],
-            "workflow_argument_name": "",
-            "argument_type": ""
+            "workflow_argument_name": "NA",
+            "argument_type": "NA"
         },
         {
             "argument_mapping": [
@@ -302,8 +302,8 @@
                     "step_argument_type": "Output file or parameter"
                 }
             ],
-            "workflow_argument_name": "",
-            "argument_type": ""
+            "workflow_argument_name": "NA",
+            "argument_type": "NA"
         }
     ],
     "title": "GITAR",
