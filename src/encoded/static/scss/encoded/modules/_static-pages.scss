@@ -218,11 +218,11 @@ h5.fourDN-header {
 				display: block;
 				transition: color .5s .25s;
 				font-weight: 400;
-				padding: 7px 0px 8px 22px;
+				padding: 6px 0px 6px 22px;
 				border-top: 1px dotted transparent;
 				border-bottom: 1px dotted transparent;
-				margin-bottom: -4px;
-				margin-top: -3px;
+				margin-bottom: 0;
+				margin-top: 0;
 				margin-left: -20px;
 				&:focus {
 					text-decoration: none;
@@ -231,8 +231,6 @@ h5.fourDN-header {
 				&:hover {
 					text-decoration: none;
 					color: #042d50;
-					border-top-color: #ddd;
-					border-bottom-color: #ddd;
 					//box-shadow: 0 6px 7px -8px rgba(0,0,0,0.5);
 					transition: color 0s;
 				}

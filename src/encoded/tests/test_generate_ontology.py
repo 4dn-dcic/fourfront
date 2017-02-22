@@ -1,7 +1,7 @@
 import os
 import pytest
-pytestmark = pytest.mark.working
 from encoded.commands import generate_ontology as go
+pytestmark = pytest.mark.working
 
 
 def test_parse_args_defaults():
