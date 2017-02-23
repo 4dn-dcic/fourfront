@@ -118,7 +118,7 @@ class File(Item):
     item_type = 'file'
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
-    embedded = ['lab']
+    embedded = ['lab', 'file_format']
     embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 

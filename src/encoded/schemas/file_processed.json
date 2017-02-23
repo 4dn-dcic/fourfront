@@ -21,53 +21,28 @@
     "properties": {
         "schema_version": {
             "default": "1"
-        },
+        }, 
         "file_format": {
-            "title": "File format",
+            "title": "File Format",
             "type": "string",
             "enum": [
                 "bam",
                 "bai",
-                "bed",
-                "bigBed",
-                "bigWig",
-                "fasta",
-                "fastq",
-                "gff",
-                "gtf",
-                "hdf5",
-                "tsv",
-                "csv",
-                "tar",
-                "tagAlign",
-                "wig",
+                "pairs",
+                "pairs_px2",
+                "cool",
+                "hic",
                 "other"
             ]
         }
-    },
-    "file_format_file_extension": {
-        "2bit": ".2bit",
-        "CEL": ".cel.gz",
+     },
+     "file_format_file_extension": {
         "bam": ".bam",
-        "bed": ".bed.gz",
-        "bigBed": ".bigBed",
-        "bigWig": ".bigWig",
-        "csfasta": ".csfasta.gz",
-        "csqual": ".csqual.gz",
-        "fasta": ".fasta.gz",
-        "fastq": ".fastq.gz",
-        "gff": ".gff.gz",
-        "gtf": ".gtf.gz",
-        "hdf5": ".h5",
-        "idat": ".idat",
-        "rcc": ".rcc",
-        "tagAlign": ".tagAlign.gz",
-        "tar": ".tar.gz",
-        "tsv": ".tsv",
-        "csv": ".csv",
-        "vcf": ".vcf.gz",
-        "wig": ".wig.gz",
-        "sam": ".sam.gz",
-        "other": "no_file_extension"
+        "bai": ".bam.bai",
+        "pairs": ".pairs.txt.gz",
+        "pairs_px2": ".pairs.txt.gz.px2",
+        "cool": ".cool",
+        "hic": ".hic",
+        "other": ""
     }
 }
