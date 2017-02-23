@@ -2,25 +2,10 @@
   <rdf:RDF xmlns="http://purl.obolibrary.org/obo/uberon/ext.owl#"
        xml:base="http://purl.obolibrary.org/obo/uberon/ext.owl"
        xmlns:owl="http://www.w3.org/2002/07/owl#"
-       xmlns:oboInOwl="http://www.geneontology.org/formats/oboInOwl#"
        xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-       xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-       xmlns:obo="http://purl.obolibrary.org/obo/">
+       xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
       <owl:Ontology rdf:about="http://purl.obolibrary.org/obo/uberon/ext.owl">
-          <owl:versionIRI rdf:resource="http://purl.obolibrary.org/obo/uberon/releases/2017-02-05/ext.owl"/>
       </owl:Ontology>
-
-  <owl:AnnotationProperty rdf:about="http://purl.obolibrary.org/obo/IAO_0000115">
-      <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">definition</rdfs:label>
-  </owl:AnnotationProperty>
-  <owl:AnnotationProperty rdf:about="http://www.geneontology.org/formats/oboInOwl#hasExactSynonym">
-      <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">has_exact_synonym</rdfs:label>
-  </owl:AnnotationProperty>
-  <owl:AnnotationProperty rdf:about="http://www.geneontology.org/formats/oboInOwl#hasOBONamespace">
-      <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">has_obo_namespace</rdfs:label>
-  </owl:AnnotationProperty>
-  <owl:AnnotationProperty rdf:about="http://www.geneontology.org/formats/oboInOwl#id"/>
-  <owl:AnnotationProperty rdf:about="http://www.geneontology.org/formats/oboInOwl#ontology"/>
   <owl:AnnotationProperty rdf:about="http://www.w3.org/2000/01/rdf-schema#label"/>
 
 
@@ -35,10 +20,6 @@
               <owl:someValuesFrom rdf:resource="http://purl.obolibrary.org/obo/UBERON_0002048"/>
           </owl:Restriction>
       </rdfs:subClassOf>
-      <obo:IAO_0000115 rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A lung lobe is one of the rounded projections that compose the lung[GO].</obo:IAO_0000115>
-      <oboInOwl:hasExactSynonym rdf:datatype="http://www.w3.org/2001/XMLSchema#string">lung lobe</oboInOwl:hasExactSynonym>
-      <oboInOwl:hasOBONamespace rdf:datatype="http://www.w3.org/2001/XMLSchema#string">uberon</oboInOwl:hasOBONamespace>
-      <oboInOwl:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">UBERON:0000101</oboInOwl:id>
       <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">lobe of lung</rdfs:label>
   </owl:Class>
 
@@ -61,10 +42,6 @@
               <owl:someValuesFrom rdf:resource="http://purl.obolibrary.org/obo/UBERON_0000118"/>
           </owl:Restriction>
       </rdfs:subClassOf>
-      <obo:IAO_0000115 rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Respiration organ that develops as an oupocketing of the esophagus.</obo:IAO_0000115>
-      <oboInOwl:hasExactSynonym rdf:datatype="http://www.w3.org/2001/XMLSchema#string">pulmo</oboInOwl:hasExactSynonym>
-      <oboInOwl:hasOBONamespace rdf:datatype="http://www.w3.org/2001/XMLSchema#string">uberon</oboInOwl:hasOBONamespace>
-      <oboInOwl:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">UBERON:0002048</oboInOwl:id>
       <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">lung</rdfs:label>
   </owl:Class>
 </rdf:RDF>

@@ -172,10 +172,9 @@ def process_intersection_of(class_, intersection, data, terms):
         # get restriction terms and add to col_list as string
         col_list.append(col.__str__())
     if _has_human(col_list):
-        print('WE HAVE HUMAN')
         if PART_OF in col_list:
-            print('COL-0 = ', collection[0])
-            print('CLASS = ', class_.__str__())
+            # print('COL-0 = ', collection[0])
+            # print('CLASS = ', class_.__str__())
             terms = _add_term_and_info(class_, collection[0], 'part_of', data, terms)
         elif DEVELOPS_FROM in col_list:
             terms = _add_term_and_info(class_, collection[0], 'develops_from', data, terms)
@@ -197,7 +196,7 @@ def process_blank_node(class_, data, terms):
     return terms
 
 
-def _find_and_add_parent_of(parent, child_id, data, terms, has_part=False, relation=None):
+def _find_and_add_parent_of(parent, child, data, terms, has_part=False, relation=None):
     '''Add parent terms with the provided relationship to the 'relationships'
         field of the term - treating has_part specially
 
@@ -205,6 +204,7 @@ def _find_and_add_parent_of(parent, child_id, data, terms, has_part=False, relat
         our default is a  'relationships' field - but can pass in a specific
         relation string eg. develops_from and that will get added as field
     '''
+    child_id = get_termid_from_uri(child)
     for obj in data.rdfGraph.objects(parent, SomeValuesFrom):
         if not isBlankNode(obj):
             objid = get_termid_from_uri(obj)
@@ -213,8 +213,9 @@ def _find_and_add_parent_of(parent, child_id, data, terms, has_part=False, relat
                 relation = 'has_part_inverse'
                 term2add = child_id
                 child_id = objid
+                child = obj
                 if child_id not in terms:
-                    terms[child_id] = create_term_dict(convert2URIRef(child_id), child_id, data)
+                    terms[child_id] = create_term_dict(child, child_id, data)
             if relation is None:
                 relation = 'relationships'
             if not terms[child_id].get(relation):
@@ -223,10 +224,11 @@ def _find_and_add_parent_of(parent, child_id, data, terms, has_part=False, relat
     return terms
 
 
-def process_parents(class_, termid, data, terms):
+def process_parents(class_, data, terms):
     '''Gets the parents of the class - direct and those linked via
         specified relationship types
     '''
+    termid = get_termid_from_uri(class_)
     for parent in data.get_classDirectSupers(class_, excludeBnodes=False):
         rtypes = {PART_OF: 'part_of',
                   DEVELOPS_FROM: 'develops_from',
@@ -242,7 +244,8 @@ def process_parents(class_, termid, data, terms):
                         has_part = True
                     if rtypes[rel] == 'develops_from':
                         relation = rtypes[rel]
-                    terms = _find_and_add_parent_of(parent, termid, data, terms, has_part, relation)
+                    # terms = _find_and_add_parent_of(parent, termid, data, terms, has_part, relation)
+                    terms = _find_and_add_parent_of(parent, class_, data, terms, has_part, relation)
         else:
             if not terms[termid].get('parents'):
                 terms[termid]['parents'] = []
@@ -263,13 +266,20 @@ def get_definitions(class_, data, definition_terms):
 
 
 def _cleanup_non_fields(terms):
+    '''Removes unwanted fields and empty terms from final json'''
     to_delete = ['relationships', 'all_parents', 'development',
                  'has_part_inverse', 'develops_from', 'part_of',
                  'closure', 'closure_with_develops_from']
+    tids2delete = []
     for termid, term in terms.items():
-        for field in to_delete:
-            if field in term:
-                del term[field]
+        if not term:
+            tids2delete.append(termid)
+        else:
+            for field in to_delete:
+                if field in term:
+                    del term[field]
+    for tid in tids2delete:
+        del terms[tid]
     return terms
 
 
@@ -480,7 +490,8 @@ def download_and_process_owl(ontology, connection, terms):
                 if 'source_ontology' not in terms[termid]:
                     terms[termid]['source_ontology'] = ontology['uuid']
             # deal with parents
-            terms = process_parents(class_, termid, data, terms)
+            # terms = process_parents(class_, termid, data, terms)
+            terms = process_parents(class_, data, terms)
     # add synonyms and definitions
     terms = add_additional_term_info(terms, data, synonym_terms, definition_terms)
     return terms

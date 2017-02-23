@@ -645,6 +645,18 @@ def uberon_owler2():
 
 
 @pytest.fixture
+def uberon_owler3():
+    from encoded.commands.owltools import Owler
+    return Owler('src/encoded/tests/data/documents/test_uberon3.owl')
+
+
+@pytest.fixture
+def uberon_owler4():
+    from encoded.commands.owltools import Owler
+    return Owler('src/encoded/tests/data/documents/test_uberon4.owl')
+
+
+@pytest.fixture
 def ll_class():
     return go.convert2URIRef('http://purl.obolibrary.org/obo/UBERON_0000101')
 
@@ -680,7 +692,7 @@ def test_add_term_and_info(uberon_owler2):
     testid = 'UBERON:0001772'
     relid = 'UBERON:0010304'
     for c in uberon_owler2.allclasses:
-        if not c.__str__().startswith('http'):
+        if go.isBlankNode(c):
             test_class = c
     parent = go.convert2URIRef('http://purl.obolibrary.org/obo/UBERON_0001772')
     terms = go._add_term_and_info(test_class, parent, 'test_rel', uberon_owler2, {})
@@ -688,3 +700,107 @@ def test_add_term_and_info(uberon_owler2):
     term = terms[testid]
     assert term['term_id'] == testid
     assert relid in term['test_rel']
+
+
+def test_process_intersection_of(uberon_owler3):
+    terms = {}
+    for c in uberon_owler3.allclasses:
+        for i in uberon_owler3.rdfGraph.objects(c, go.IntersectionOf):
+            terms = go.process_intersection_of(c, i, uberon_owler3, terms)
+    assert len(terms) == 1
+    term = list(terms.values())[0]
+    assert len(term['part_of']) == 1
+    assert term['part_of'][0] == 'UBERON:1'
+    assert len(term['develops_from']) == 1
+    assert term['develops_from'][0] == 'UBERON:2'
+
+
+def test_process_blank_node(uberon_owler3):
+    terms = {}
+    for c in uberon_owler3.allclasses:
+        terms = go.process_blank_node(c, uberon_owler3, terms)
+    assert len(terms) == 1
+    assert 'UBERON:0001772' in terms
+
+
+def test_find_and_add_parent_of(uberon_owler4):
+    tid = 'CL:0002553'
+    terms = {tid: {'term_id': tid}}
+    relids = ['UBERON:0002048', 'OBI:0000456', 'CL:0000058', 'CL:0000133']
+    relation = None
+    for c in uberon_owler4.allclasses:
+        for i, p in enumerate(uberon_owler4.get_classDirectSupers(c, excludeBnodes=False)):
+            if go.isBlankNode(p):
+                has_part = False
+                if i == 0:
+                    has_part = True
+                terms = go._find_and_add_parent_of(p, c, uberon_owler4, terms, has_part, relation)
+    assert len(terms) == 2
+    print(terms)
+    for termid, term in terms.items():
+        if termid == tid:
+            assert len(term['relationships']) == 3
+            for t in term['relationships']:
+                assert t in relids
+        else:
+            assert termid in relids
+            assert len(term['has_part_inverse']) == 1
+            assert term['has_part_inverse'][0] == tid
+
+
+def test_process_parents(uberon_owler4):
+    tids = ['CL:0002553', 'CL:0000058']
+    relids = ['OBI:0000456', 'UBERON:0002048']
+    terms = {tids[0]: {'term_id': tids[0]}}
+    for c in uberon_owler4.allclasses:
+        terms = go.process_parents(c, uberon_owler4, terms)
+    print(terms)
+    assert len(terms) == 2
+    term1 = terms[tids[0]]
+    term2 = terms[tids[1]]
+    assert term1['develops_from'][0] == 'CL:0000133'
+    assert term1['parents'][0] == 'UBERON:0010313'
+    assert len(term1['relationships']) == 2
+    for r in relids:
+        assert r in term1['relationships']
+    assert term2['has_part_inverse'][0] == tids[0]
+
+
+@pytest.fixture
+def terms_w_stuff():
+    return {
+        'term1': {
+            'term_id': 't1',
+            'term_name': 'term1',
+            'relationships': ['rel1', 'rel2'],
+            'all_parents': ['p'],
+            'development': 'd',
+            'has_part_inverse': [],
+            'develops_from': '',
+            'part_of': ['p1'],
+            'closure': [],
+            'closure_with_develops_from': None
+        },
+        'term2': {
+            'term_id': 't1',
+            'term_name': 'term1'
+        },
+        'term3': {},
+        'term4': None
+    }
+
+
+def test_cleanup_non_fields(terms_w_stuff):
+    to_delete = ['relationships', 'all_parents', 'development',
+                 'has_part_inverse', 'develops_from', 'part_of',
+                 'closure', 'closure_with_develops_from']
+    to_keep = ['term_id', 'term_name']
+    for d in to_delete + to_keep:
+        assert d in terms_w_stuff['term1']
+    terms = go._cleanup_non_fields(terms_w_stuff)
+    assert len(terms) == 2
+    assert terms['term1'] == terms['term2']
+    for d in to_delete:
+        assert d not in terms['term1']
+    for k in to_keep:
+        assert k in terms['term1']
