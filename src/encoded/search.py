@@ -431,7 +431,7 @@ def set_filters(request, query, result):
                 'terms' : { query_field : used_filters[field] }
             })
         else:
-            # Update query['filters']['and']['filters'][N] where N === { 'terms' : ... } 
+            # Update query['filters']['and']['filters'][N] where N === { 'terms' : ... }
             # with term.
             query_filters.remove({
                 'terms' : { query_field : used_filters[field] }
@@ -480,7 +480,7 @@ def set_facets(facets, used_filters, principals, doc_types):
     """
 
     aggs = {}
-    facetFields = dict(facets).keys() # List of first entry of tuples in facets list. 
+    facetFields = dict(facets).keys() # List of first entry of tuples in facets list.
     # E.g. 'type','experimentset_type','experiments_in_set.award.project', ...
 
     for field in facetFields:
@@ -514,7 +514,7 @@ def set_facets(facets, used_filters, principals, doc_types):
         for q_field, q_terms in used_filters.items():
             if q_field not in facetFields:
                 continue
-            
+
             if q_field == field:
                 continue
 
