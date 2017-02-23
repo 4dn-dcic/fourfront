@@ -139,11 +139,11 @@ var MosaicDetailCursor = module.exports = React.createClass({
                     },
 
                     render : function(){
-                        var offsetPerCrumb = 10;
+                        var offsetPerDescendent = 10;
                         var isEmpty = this.props.path.length < 2;
                         if (isEmpty) return null;
 
-                        var maxSkewOffset = (this.props.path.length - 2) * offsetPerCrumb;
+                        //var maxSkewOffset = (this.props.path.length - 2) * offsetPerCrumb;
                         
                         return (
                             <div className={'detail-crumbs' + (isEmpty ? ' no-children' : '')}>
@@ -155,9 +155,8 @@ var MosaicDetailCursor = module.exports = React.createClass({
                                                 data-depth={i}
                                                 className={"crumb row" + (i===0 ? ' first' : '')}
                                                 key={i}
-                                                style={{ /*, paddingRight : maxSkewOffset - (offsetPerCrumb * i) */ }}
                                             >
-                                                <div className="field col-sm-5" style={{ paddingLeft : offsetPerCrumb * i + 10 }}>
+                                                <div className="field col-sm-5" style={ i === 0 ? null : { paddingLeft : 10 + offsetPerDescendent }}>
                                                     { Filters.Field.toName(n.field) }
                                                 </div>
                                                 <div className="name col-sm-5">
@@ -213,7 +212,7 @@ var MosaicDetailCursor = module.exports = React.createClass({
                             <small className="pull-right sets-label">Exp Sets</small>
                             { 
                                 this.props.path.length > 1 ?
-                                <small> &gt; </small> : null
+                                <small className="descendent-prefix"> &gt; </small> : null
                             }{ this.props.field || leafNode.field }
                             {/* this.props.filteredOut ?
                                 <small className="filtered-out-label"> (filtered out)</small>

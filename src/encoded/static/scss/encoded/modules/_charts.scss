@@ -849,6 +849,12 @@
             padding: 7px 10px 1px;
             margin: 0;
             font-weight: 300;
+            .descendent-prefix {
+                width: 10px;
+                float: left;
+                display: block;
+                margin-top: 2px;
+            }
         }
         > .details-title {
             padding: 0 10px 7px;

@@ -615,7 +615,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                     containingElement={(this.refs && this.refs.sunburstContainer) || null}
                     verticalAlign="center" /* cursor position */
                     visibilityMargin={{ left : -10, right : -10, bottom : -50, top: -18 }}
-                    /* debugStyle={true} -- keep this Component always visible so we can style it */
+                    //debugStyle /* -- keep this Component always visible so we can style it */
                     ref="detailCursor"
                 />
             </div>
