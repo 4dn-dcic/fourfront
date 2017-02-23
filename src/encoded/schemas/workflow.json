@@ -89,6 +89,22 @@
                             "NA"
                         ]
                     },
+                    "argument_format":{
+                        "title": "Workflow argument format",
+                        "description": "format of the argument",
+                        "type": "string",
+                        "enum" : [
+                            "fastq",
+                            "bam",
+                            "bai",
+                            "pairs",
+                            "pairs_px2",
+                            "cool",
+                            "hic",
+                            "bwaIndex",
+                            "other"
+                        ]
+                    },
                     "description": {
                         "title": "description",
                         "description": "description of the argument",

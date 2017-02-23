@@ -258,8 +258,8 @@ var FormattedInfoBlock = module.exports = React.createClass({
                 typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-users" : null),
                 includeLabel ? "Lab" : null,
                 details_lab && includeDetail ?
-                        (details_lab.city) + 
-                        (details_lab.state ? ', ' + details_lab.state : '') + 
+                        (details_lab.city ? details_lab.city + ', ' : '') + 
+                        (details_lab.state ? details_lab.state : '') + 
                         (details_lab.postal_code ? ' ' + details_lab.postal_code : '' ) +
                         (details_lab.country ? ', ' + details_lab.country : '')
                     : ( includeDetail ? true : null ),

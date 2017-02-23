@@ -20,24 +20,7 @@
         },
         "file_format": {
             "title": "File Format",
-            "type": "string",
-            "enum": [
-                "bam",
-                "bai",
-                "bed",
-                "bigBed",
-                "bigWig",
-                "fasta",
-                "fastq",
-                "gff",
-                "gtf",
-                "hdf5",
-                "tsv",
-                "csv",
-                "tar",
-                "tagAlign",
-                "wig"
-            ]
+            "type": "string"
         },
         "file_type": {
             "title": "File Type",
@@ -163,27 +146,5 @@
         }
     },
     "file_format_file_extension": {
-        "2bit": ".2bit",
-        "CEL": ".cel.gz",
-        "bam": ".bam",
-        "bed": ".bed.gz",
-        "bigBed": ".bigBed",
-        "bigWig": ".bigWig",
-        "csfasta": ".csfasta.gz",
-        "csqual": ".csqual.gz",
-        "fasta": ".fasta.gz",
-        "fastq": ".fastq.gz",
-        "gff": ".gff.gz",
-        "gtf": ".gtf.gz",
-        "hdf5": ".h5",
-        "idat": ".idat",
-        "rcc": ".rcc",
-        "tagAlign": ".tagAlign.gz",
-        "tar": ".tar.gz",
-        "tsv": ".tsv",
-        "csv": ".csv",
-        "vcf": ".vcf.gz",
-        "wig": ".wig.gz",
-        "sam": ".sam.gz"
     }
 }
