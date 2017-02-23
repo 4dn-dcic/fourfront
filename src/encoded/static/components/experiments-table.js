@@ -76,6 +76,11 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
             facets = null,  // Required if want to get ignored filters by missing facet(s).
             useSet = false  // Return as array instead of set.
         ){
+            if (!Array.isArray(allExperiments)){
+                 // no experiments
+                 if (useSet) return new Set();
+                 return [];
+            }
             // TODO: If filters === null then filters = store.getState().expSetFilters ?
             if (Array.isArray(allExperiments[0].experiments_in_set)){
                 // We got experiment sets, not experiments. Lets fix that (convert to arr of experiments).
@@ -582,6 +587,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
     updateColumnWidths : function(){
         // Scale/expand width of columns to fit available width, if any.
         var origColumnWidths;
+        if (!this.refs.header) return null;
         if (!this.cache.origColumnWidths){
             origColumnWidths = _.map(this.refs.header.children, function(c){
                 if ( // For tests/server-side
@@ -928,11 +934,19 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
         return (
             <div className={"expset-experiments" + (this.state.mounted ? ' mounted' : '')}>
-                <div className="headers expset-headers" ref="header">
-                    { this.columnHeaders().map(renderHeader) }
-                </div>
-                { this.props.experimentSetType && typeof this.renderers[this.props.experimentSetType] === 'function' ?
-                    this.renderers[this.props.experimentSetType].call(this) : this.renderers.default.call(this) }
+                {
+                    !Array.isArray(this.props.experimentArray) ?
+                    <h6 className="text-center text-400"><em>No experiments</em></h6>
+                    :
+                    <div className="headers expset-headers" ref="header">
+                        { this.columnHeaders().map(renderHeader) }
+                    </div>
+                }
+
+                {   !Array.isArray(this.props.experimentArray) ? null :
+                    this.props.experimentSetType && typeof this.renderers[this.props.experimentSetType] === 'function' ?
+                        this.renderers[this.props.experimentSetType].call(this) : this.renderers.default.call(this)
+                }
             </div>
         );
     }
