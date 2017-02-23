@@ -103,6 +103,7 @@ var RotatedLabel = module.exports = React.createClass({
                             if (!props.appendOffset && props.deRotateAppend) childProps.appendOffset = 3;
                             if (typeof label.opacity !== 'undefined')   childProps.opacity = label.opacity;
                             else if (typeof props.opacity !== 'undefined')   childProps.opacity = props.opacity;
+                            if (label.color)        childProps.color = label.color;
                             return React.createElement(RotatedLabel, childProps);
                         }) }
                     </div>
@@ -266,6 +267,9 @@ var RotatedLabel = module.exports = React.createClass({
                     <span className="inner" style={this.props.lineHeight ? {
                         lineHeight : this.props.lineHeight + 'px'
                     } : null }>
+                        { this.props.color ? 
+                            <i className="icon icon-circle color-indicator" style={{ color : this.props.color }}/>
+                        : null }
                         { this.state && this.state.expanded ? 
                             this.props.label
                             : (this.state && this.state.shortLabel) || this.props.label

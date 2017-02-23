@@ -224,7 +224,7 @@ var BarPlot = React.createClass({
                 }
             }, []).forEach(function(b){
                 if (typeof fields[b.field] === 'undefined') fields[b.field] = { 'field' : b.field, 'terms' : {}, 'name' : Filters.Field.toName(b.field, schemas) };
-                fields[b.field].terms[b.term] = { 'term' : b.term, 'name' : b.name || Filters.Term.toName(b.field, b.term), 'color' : vizUtil.colorForNode(b) };
+                fields[b.field].terms[b.term] = { 'term' : b.term, 'name' : b.name || Filters.Term.toName(b.field, b.term), 'color' : vizUtil.colorForNode(b, true) };
             });
             fields = _.values(fields);
             fields.forEach(function(f){ f.terms = _.values(f.terms); });
@@ -633,7 +633,8 @@ var BarPlot = React.createClass({
                                 name : b.name || b.term,
                                 term : b.term,
                                 x: b.attr.x,
-                                opacity : _this.state.transitioning && (b.removing || !b.existing) ? 0 : ''
+                                opacity : _this.state.transitioning && (b.removing || !b.existing) ? 0 : '',
+                                color : vizUtil.colorForNode(b, true)
                             }; 
                         })}
                         labelClassName="y-axis-label no-highlight-color"

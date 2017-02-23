@@ -59,6 +59,10 @@ var MosaicDetailCursor = module.exports = React.createClass({
         };
     },
 
+    componentDidMount : function(){
+        console.log('Mounted MouseDetailCursor');
+    },
+
     update : function(state = {}, cb = null){
         if (state.field) state.field = Filters.Field.toName(state.field);
         else if (Array.isArray(state.path) && state.path.length > 0 && state.path[state.path.length - 1].field){

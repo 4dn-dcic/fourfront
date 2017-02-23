@@ -71,9 +71,11 @@ var CursorComponent = module.exports = React.createClass({
     },
 
     componentWillUnmount : function() {
+        console.log('Will unmount CursorComponent');
         document.removeEventListener('mousemove', this._onMouseMove);
         document.body.removeChild(this.portalElement);
         this.portalElement = null;
+        this.setState({ 'mounted' : false });
     },
 
     getHoverComponentDimensions : function(){
@@ -110,10 +112,9 @@ var CursorComponent = module.exports = React.createClass({
     },
 
     componentDidUpdate : function() {
-        
+        if (!this.state.mounted) return;
         vizUtil.requestAnimationFrame(()=>{
             //console.log('Updated CursorComponent', this.state);
-            if (!this.state.mounted) return;
             var hoverComponentDimensions = this.getHoverComponentDimensions();
             var isVisible = this.isVisible();
 

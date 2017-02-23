@@ -19,7 +19,7 @@ var mouseleaveTimeout = null;
  * We re-render chart (via shouldComponentUpdate(), reset()) only when data has changed, or needs to be redrawn due to dimension change.
  */
 
-var SunBurst = React.createClass({
+var MosaicChart = React.createClass({
 
     statics : {
         /**
@@ -53,7 +53,7 @@ var SunBurst = React.createClass({
                         m.push(childNode);
                     }
                 } else if ((childNode.depth < depth) && Array.isArray(childNode.children)){
-                    m = m.concat(SunBurst.getAllNodesAtDepth(childNode, depth, filter));
+                    m = m.concat(MosaicChart.getAllNodesAtDepth(childNode, depth, filter));
                 }
                 return m;
             },[]);
@@ -413,7 +413,7 @@ var SunBurst = React.createClass({
             'handleClick' : function(e){
                 console.log('Default Click Handler, clicked on:', e.target);
             },
-            'styleOptions' : null, // @see SunBurst.getDefaultStyleOpts for possible options.
+            'styleOptions' : null, // @see MosaicChart.getDefaultStyleOpts for possible options.
             'doManualTransitions' : false,
             'debug' : false
         };
@@ -423,7 +423,7 @@ var SunBurst = React.createClass({
         return { 'mounted' : false, 'transitioning' : false };
     },
 
-    styleOptions : function(){ return vizUtil.extendStyleOptions(this.props.styleOptions, SunBurst.getDefaultStyleOpts()); },
+    styleOptions : function(){ return vizUtil.extendStyleOptions(this.props.styleOptions, MosaicChart.getDefaultStyleOpts()); },
 
     resetActiveExperimentsCount : function(){
         var rootNode = this.getRootNode();
@@ -455,8 +455,8 @@ var SunBurst = React.createClass({
      */
     mouseoverHandle : _.throttle(function(d){
 
-        var ancestorsArray = SunBurst.getAncestors(d);
-        var siblingArray = SunBurst.getAllNodesAtDepth(
+        var ancestorsArray = MosaicChart.getAncestors(d);
+        var siblingArray = MosaicChart.getAllNodesAtDepth(
             this.root,
             d.depth,
             function(n){ return n.data.term === d.data.term; }//.bind(this)
@@ -699,7 +699,7 @@ var SunBurst = React.createClass({
     },
 
     componentDidMount : function(){
-        if (this.props.debug) console.log("Mounted Sunburst chart");
+        if (this.props.debug) console.log("Mounted MosaicChart");
         /**
          * Manage own state for this component (ex. mounted state) so don't need to re-render and re-initialize chart each time.
          */
@@ -717,9 +717,9 @@ var SunBurst = React.createClass({
      * Determine if should change state.transitioning to true and/or perform manual transitions. Use from lifecycle methods.
      * 
      * @param {Object} nextProps - Most recent props received (can be nextProps or this.props, depending on lifecycle method used).
-     * @param {Object} nextProps.data - Hierarchial data as returned by @see SunBurst.transformDataForChart.
+     * @param {Object} nextProps.data - Hierarchial data as returned by @see MosaicChart.transformDataForChart.
      * @param {Object} pastProps - Previous props which we have (can be pastProps or this.props, depending on lifecycle method used).
-     * @param {Object} pastProps.data - Hierarchial data as returned by @see SunBurst.transformDataForChart.
+     * @param {Object} pastProps.data - Hierarchial data as returned by @see MosaicChart.transformDataForChart.
      */
     shouldPerformManualTransitions : function(nextProps, pastProps){
         return !!(
@@ -742,7 +742,7 @@ var SunBurst = React.createClass({
             this.getPathsToManuallyTransition().interrupt();
         }
         if (this.shouldPerformManualTransitions(nextProps, this.props)){
-            console.log("SunBurst WILL PERFORM MANUAL TRANSITIONS.");
+            console.log("MosaicChart WILL PERFORM MANUAL TRANSITIONS.");
             this.setState({ 'transitioning' : true });
         }
     },
@@ -768,7 +768,7 @@ var SunBurst = React.createClass({
 
     componentDidUpdate : function(pastProps, pastState){
 
-        if (this.props.debug) console.info("Sunburst chart updated");
+        if (this.props.debug) console.info("MosaicChart updated");
 
         if (this.justMounted){
             this.justMounted = false; // unset (execs after render)
@@ -795,13 +795,13 @@ var SunBurst = React.createClass({
     },
 
     transitionPathsD3ThenEndTransitionState : function(duration = 750){
-        if (this.props.debug) console.info("Starting D3 transition on SunBurst.");
+        if (this.props.debug) console.info("Starting D3 transition on MosaicChart.");
 
         var existingToTransition = this.getPathsToManuallyTransition();
 
         // Since 'on end' callback is called many times (multiple paths transition), defer until called for each.
         var transitionCompleteCallback = _.after(existingToTransition.nodes().length, ()=>{
-            if (this.props.debug) console.info('Finished D3 transition on SunBurst.');
+            if (this.props.debug) console.info('Finished D3 transition on MosaicChart.');
             this.setState({ transitioning : false });
         });
 
@@ -837,7 +837,7 @@ var SunBurst = React.createClass({
      * @param {number} pastProps.height - Height value (we determine own width value).
      */
     scaleChart : function(nextProps, pastProps){
-        if (this.props.debug) console.info('Scaling SunBurst Chart');
+        if (this.props.debug) console.info('Scaling MosaicChart');
         //var oldWidth = pastProps.width || this.lastWidth;
         //var newWidth = this.width();
         var oldWidth = this.width(pastProps.width);
@@ -856,7 +856,7 @@ var SunBurst = React.createClass({
                 vizUtil.requestAnimationFrame(() => {
                     this.refs.chart.style.transition = 'none'; // No transition before next update of transform style prop
                     this.refs.chart.style.transform = 'none';
-                    console.info("Ending scale transition on SunBurst.");
+                    console.info("Ending scale transition on MosaicChart.");
                     this.forceUpdate();
                     setTimeout(()=>{
                         this.refs.chart.style.transition = '';
@@ -892,15 +892,15 @@ var SunBurst = React.createClass({
      * Generates React Path components for chart which themselves render out a React SVG path element with proper 'd' attribute.
      * 
      * @return {Object[]} Array of React Path components to include in and output out of render method.
-     * @see SunBurst.Path
-     * @see SunBurst.transformDataForChart
+     * @see MosaicChart.Path
+     * @see MosaicChart.transformDataForChart
      */
     generatePaths : function(){
 
         //console.log('EXPS', this.props.experiments.slice(10));
 
-        this.root = SunBurst.sortAndSizeTreeDataD3(
-            SunBurst.transformDataForChart(
+        this.root = MosaicChart.sortAndSizeTreeDataD3(
+            MosaicChart.transformDataForChart(
                 this.props.experiments,
                 this.props.filteredExperiments,
                 this.props.fields,
@@ -1228,4 +1228,4 @@ var SunBurst = React.createClass({
 
 });
 
-module.exports = SunBurst;
+module.exports = MosaicChart;

@@ -277,6 +277,17 @@
                 position: relative;
                 //vertical-align: sub;
             }
+            .color-indicator {
+                font-size: 0.85rem;
+                position: absolute;
+                left: -14px;
+                display: block;
+                line-height: 14px;
+                width: 12px;
+                text-align: center;
+                transition: transform .5s;
+                transform: scale3d(0.5, 0.5, 0.5);
+            }
             .append {
                 position: absolute;
                 right : -10px;
@@ -313,6 +324,10 @@
         &.highlight > .label-text {
             .append {
                 opacity : 1;
+            }
+            .color-indicator {
+                font-size: 0.85rem;
+                transform : scale3d(1, 1, 1);
             }
         }
 
@@ -591,7 +606,7 @@
         path {
             opacity : 0.125;
             &.highlight {
-                opacity: 0.25;
+                opacity: 1;
             }
         }
     }

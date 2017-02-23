@@ -5,13 +5,14 @@ var _ = require('underscore');
 var url = require('url');
 var querystring = require('querystring');
 var d3 = require('d3');
-var SunBurstChart = require('./viz/sunburst');
+var MosaicChart = require('./viz/MosaicChart');
 var BarPlotChart = require('./viz/barplot');
 var MosaicDetailCursor = require('./viz/MosaicDetailCursor');
 var { expFxn, Filters, ajax, console, layout, isServerSide } = require('./util');
 var FacetList = require('./facetlist');
 var vizUtil = require('./viz/utilities');
 var { SVGFilters, FetchingView } = require('./viz/components');
+var ChartDataController = require('./viz/chart-data-controller');
 
 /**
  * @callback showFunc
@@ -268,16 +269,16 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
     componentWillReceiveProps : function(nextProps){
 
         /** 
-         * Given list of fields from inner to outer circle of sunburst chart, 
+         * Given list of fields from inner to outer circle of MosaicChart, 
          * check if one is part of selected expSetFilters,
          * and if so, add to sequenceArray for ChartBreadcrumbs. 
          */
         /*
         function updatedBreadcrumbsSequence(){
             var sequence = [];
-            if (typeof this.refs.sunburstChart === 'undefined') return sequence;
+            if (typeof this.refs.mosaicChart === 'undefined') return sequence;
             
-            var chartFields = this.refs.sunburstChart.getRootNode().data.fields;
+            var chartFields = this.refs.mosaicChart.getRootNode().data.fields;
             var filters = nextProps.expSetFilters;
             var term, node;
 
@@ -286,7 +287,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                     if (filters[chartFields[i]].size === 1) {
                         // Grab first node (for colors, name, etc.) with matching term and append to sequence.
                         term = filters[chartFields[i]].values().next().value;
-                        node = SunBurstChart.findNode(this.refs.sunburstChart.getRootNode(), function(n){
+                        node = MosaicChart.findNode(this.refs.mosaicChart.getRootNode(), function(n){
                             return n.data.term && n.data.term === term;
                         });
                         if (typeof node !== 'undefined') {
@@ -427,7 +428,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
                 // If not selected, add any ancestor nodes' terms to filters as well.
                 if (typeof this.props.expSetFilters[node.data.field] === 'undefined' || !this.props.expSetFilters[node.data.field].has(node.data.term)){
-                    var sequenceArray = SunBurstChart.getAncestors(node);
+                    var sequenceArray = MosaicChart.getAncestors(node);
                     var i;
                     for (i = 0; i < sequenceArray.length; i++){
                         // Check if clicked on a term that's already set, then unset it to re-set it later down.
@@ -548,12 +549,12 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             <div className={"facet-charts show-" + show} key="facet-charts">
                 
                 <div className="row facet-chart-row-1" key="facet-chart-row-1">
-                    <div className={genChartColClassName(1)} key="facet-chart-row-1-chart-1" style={{ height: height }} ref="sunburstContainer">
+                    <div className={genChartColClassName(1)} key="facet-chart-row-1-chart-1" style={{ height: height }} ref="mosaicContainer">
                         <div className="row">
                             <div className="col-sm-6" style={{
                                 width : (this.state.chartFieldsHierarchy.length / (this.state.chartFieldsHierarchyRight.length + this.state.chartFieldsHierarchy.length)) * 100 + '%'
                             }}>
-                                <SunBurstChart
+                                <MosaicChart
                                     experiments={this.state.experiments}
                                     filteredExperiments={this.state.filteredExperiments}
                                     fields={this.state.chartFieldsHierarchy}
@@ -577,7 +578,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                             <div className="col-sm-6" style={{
                                 width : (this.state.chartFieldsHierarchyRight.length / (this.state.chartFieldsHierarchyRight.length + this.state.chartFieldsHierarchy.length)) * 100 + '%'
                             }}>
-                                <SunBurstChart
+                                <MosaicChart
                                     experiments={this.state.experiments}
                                     filteredExperiments={this.state.filteredExperiments}
                                     fields={this.state.chartFieldsHierarchyRight}
@@ -602,7 +603,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                         <FetchingView display={this.state.fetching} />
                     </div>
                     <div className={genChartColClassName(2)} key="facet-chart-row-1-chart-2" style={{ height: height }}>
-                        <BarPlotChart 
+                        <BarPlotChart
                             experiments={this.state.filteredExperiments || this.state.experiments}
                             fields={this.state.chartFieldsBarPlot}
                             width={this.width(1) - 20} height={height}
@@ -612,7 +613,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                     </div>
                 </div>
                 <MosaicDetailCursor
-                    containingElement={(this.refs && this.refs.sunburstContainer) || null}
+                    containingElement={(this.refs && this.refs.mosaicContainer) || null}
                     verticalAlign="center" /* cursor position */
                     visibilityMargin={{ left : -10, right : -10, bottom : -50, top: -18 }}
                     //debugStyle /* -- keep this Component always visible so we can style it */
