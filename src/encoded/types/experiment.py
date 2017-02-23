@@ -24,8 +24,8 @@ class Experiment(Item):
 
     base_types = ['Experiment'] + Item.base_types
     schema = load_schema('encoded:schemas/experiment.json')
-    embedded = ["protocol", "protocol_variation", "lab", "award", "biosample",
-                "biosample.biosource", "biosample.modifications",
+    embedded = ["protocol", "protocol_variation", "lab", "award", "experiment_sets",
+                "biosample", "biosample.biosource", "biosample.modifications",
                 "biosample.treatments", "biosample.biosource.individual.organism"]
     embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'

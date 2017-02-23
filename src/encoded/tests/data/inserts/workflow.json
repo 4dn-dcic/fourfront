@@ -353,6 +353,7 @@
                 }
             ],
             "workflow_argument_name": "input_fastq",
+            "argument_format": "fastq",
             "argument_type": "Input file"
         },
         {
@@ -425,6 +426,7 @@
         {
             "workflow_argument_name": "input_file",
             "argument_type": "Input file",
+            "argument_format": "fastq",
             "argument_mapping": [],
             "description": ""
         },
@@ -450,42 +452,49 @@
         {
             "workflow_argument_name": "fastq1",
             "argument_type": "Input file",
+            "argument_format": "fastq",
             "argument_mapping": [],
             "description": ""
         },
         {
             "workflow_argument_name": "fastq2",
             "argument_type": "Input file",
+            "argument_format": "fastq",
             "argument_mapping": [],
             "description": ""
         },
         {
             "workflow_argument_name": "bwa_index",
             "argument_type": "Input file",
+            "argument_format": "bwaIndex",
             "argument_mapping": [],
             "description": ""
         },
         {
             "workflow_argument_name": "out_sorted_bam",
             "argument_type": "Output processed file",
+            "argument_format": "bam",
             "argument_mapping": [],
             "description": ""
         },
         {
             "workflow_argument_name": "out_sorted_bam_index",
             "argument_type": "Output processed file",
+            "argument_format": "bai",
             "argument_mapping": [],
             "description": ""
         },
         {
             "workflow_argument_name": "out_pairs",
             "argument_type": "Output processed file",
+            "argument_format": "pairs",
             "argument_mapping": [],
             "description": ""
         },
         {
             "workflow_argument_name": "out_pairs_index",
             "argument_type": "Output processed file",
+            "argument_format": "pairs_px2",
             "argument_mapping": [],
             "description": ""
         }
