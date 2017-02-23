@@ -61,6 +61,7 @@ var CursorComponent = module.exports = React.createClass({
 
     componentDidMount : function() {
         if (isServerSide()) return null;
+        console.log('Mounted CursorComponent');
         if (!this.portalElement) {
             this.portalElement = document.createElement('div');
             document.body.appendChild(this.portalElement);
@@ -97,6 +98,7 @@ var CursorComponent = module.exports = React.createClass({
 
     isVisible : function(cursorContainmentDims = null, visibilityMargin = null){
         if (typeof this.props.isVisible === 'boolean') return this.props.isVisible;
+        if (this.props.debugStyle) return true;
         if (!cursorContainmentDims) cursorContainmentDims = this.getCursorContainmentDimensions();
         if (!visibilityMargin) visibilityMargin = this.visibilityMargin();
         return (
@@ -110,7 +112,7 @@ var CursorComponent = module.exports = React.createClass({
     componentDidUpdate : function() {
         
         vizUtil.requestAnimationFrame(()=>{
-
+            //console.log('Updated CursorComponent', this.state);
             if (!this.state.mounted) return;
             var hoverComponentDimensions = this.getHoverComponentDimensions();
             var isVisible = this.isVisible();
@@ -133,17 +135,25 @@ var CursorComponent = module.exports = React.createClass({
 
     _onMouseMove : _.throttle(function(e) {
         var offset = layout.getElementOffset(this.props.containingElement || this.refs.base) || { left : this.props.offsetLeft || 0, top: this.props.offsetRight || 0 };
-        //console.log('OFFSET', offset, layout.getElementOffset(this.refs.base))
 
         var scrollX = (typeof window.pageXOffset !== 'undefined') ? window.pageXOffset : (document.documentElement || document.body.parentNode || document.body).scrollLeft;
         var scrollY = (typeof window.pageYOffset !== 'undefined') ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
 
-        this.setState({
-            x: e.clientX + scrollX, //(window.scrollX || window.pageXOffset),
-            y: e.clientY + scrollY, //(window.scrollY || window.pageYOffset),
-            offsetX: e.clientX + scrollX - offset.left,
-            offsetY: e.clientY + scrollY - offset.top
-        });
+        if (this.props.debugStyle){
+            this.setState({
+                x : offset.left + 100,
+                y : offset.top + 100,
+                offsetX : 100,
+                offsetY : 100
+            });
+        } else {
+            this.setState({
+                x: e.clientX + scrollX, //(window.scrollX || window.pageXOffset),
+                y: e.clientY + scrollY, //(window.scrollY || window.pageYOffset),
+                offsetX: e.clientX + scrollX - offset.left,
+                offsetY: e.clientY + scrollY - offset.top
+            });
+        }
     }, 100, { trailing: false }),
 
     _handleClick : function(e) {

@@ -143,6 +143,8 @@ var SunBurst = React.createClass({
                 'activeFiles' : 0
             };
 
+            var duplicateExpSetCounts = {}; // Keep track of duplicates and set on expset nodes.
+
             // Ideally (for readability) would looping over each experiment & grab property of each instead of biosource 
             // (biosource is metadata property on experiment)
             // but experiment.biosample.biosource is an array so might miss some.
@@ -217,6 +219,11 @@ var SunBurst = React.createClass({
                         }
 
                         if (field.field === 'accession') {
+                            if (typeof duplicateExpSetCounts[term] === 'undefined'){
+                                duplicateExpSetCounts[term] = { setCount : 0, expCount : 0 };
+                            }
+                            duplicateExpSetCounts[term].setCount++;
+                            duplicateExpSetCounts[term].expCount++;
                             attachToNode.children[term].experiment_sets = 1;
                         } else { 
                             addExpSetsToNode(attachToNode.children[term]);
@@ -328,7 +335,14 @@ var SunBurst = React.createClass({
             }
 
             function experimentSetSetsToCounts(node){
-                if (node.experiment_sets instanceof Set)    node.experiment_sets = node.experiment_sets.size;
+                if (node.field === 'accession'){
+                    node.duplicates = duplicateExpSetCounts[node.term].setCount;
+                    node.total_experiments = duplicateExpSetCounts[node.term].expCount;
+                } 
+                if (node.experiment_sets instanceof Set) {
+                    node.experiment_sets = node.experiment_sets.size;
+                }
+                // Recurse
                 if (Array.isArray(node.children))           node.children.map(experimentSetSetsToCounts);
             }
 
@@ -425,8 +439,12 @@ var SunBurst = React.createClass({
     onPathMouseOver : function(e){
         if (!e || !e.target || !e.target.__data__) {
             // No D3 data attached to event target.
-            //this.mouseleave(e);
+            this.mouseleave(e);
             return null;
+        }
+        if (mouseleaveTimeout){
+            clearTimeout(mouseleaveTimeout);
+            mouseleaveTimeout = null;
         }
         this.mouseoverHandle(e.target.__data__);
     },
@@ -437,17 +455,12 @@ var SunBurst = React.createClass({
      */
     mouseoverHandle : _.throttle(function(d){
 
-        if (mouseleaveTimeout){
-            clearTimeout(mouseleaveTimeout);
-            mouseleaveTimeout = null;
-        }
-
         var ancestorsArray = SunBurst.getAncestors(d);
-        //var siblingArray = SunBurst.getAllNodesAtDepth(
-        //    this.root,
-        //    d.depth,
-        //    function(n){ return n.data.term === d.data.term; }//.bind(this)
-        //);
+        var siblingArray = SunBurst.getAllNodesAtDepth(
+            this.root,
+            d.depth,
+            function(n){ return n.data.term === d.data.term; }//.bind(this)
+        );
 
         var currentNodeCounts = {
             experiments : d.data.active || d.data.experiments || 0,
@@ -494,6 +507,7 @@ var SunBurst = React.createClass({
                 term : d.data.term,
                 title : d.data.name,
                 field : d.data.field,
+                filteredOut : (this.root && this.root.data.active && !d.data.active) || false,
                 color : vizUtil.colorForNode(d),
                 path : ancestorsArray.map(function(n){
                     return n.data;
@@ -504,41 +518,54 @@ var SunBurst = React.createClass({
         //console.log(ancestorsArray);
 
         vizUtil.requestAnimationFrame(()=>{
+
             if (d.data.field && d.data.term) highlightTerm(d.data.field, d.data.term, vizUtil.colorForNode(d));
 
             // Fade all the segments.
             // Then highlight only those that are an ancestor of the current segment.
+
+            var initSelection = d3.selectAll("svg.sunburst-svg-chart path")
+                .classed("hover", false);
             
-            var finalSelection = d3.selectAll("svg.sunburst-svg-chart path")
-                .classed("hover", false)
+            var ancestorSelection = initSelection
                 .filter(function(node){
                     return _.find(ancestorsArray, function(sNode){ return sNode.data.id === node.data.id; }) || false;
                 })
                 .classed("hover", true);
 
+            //var siblingSelection = initSelection
+            //    .filter(function(node){
+            //        return _.find(siblingArray, function(sNode){ return sNode.data.id === node.data.id; }) || false;
+            //    })
+            //    .classed("hover", true);
+
             d3.selectAll("svg.sunburst-svg-chart > g").classed('hover',
-                finalSelection && Array.isArray(finalSelection._groups) && finalSelection._groups[0].length > 0
+                ancestorSelection && Array.isArray(ancestorSelection._groups) && ancestorSelection._groups[0].length > 0
             );
             
 
         });
 
         //this.updateBreadcrumbs(ancestorsArray);
-    }, 100),
+    }, 50),
 
     // Restore everything to full opacity when moving off the visualization.
     mouseleave : function(e) {
         if (e) {
             //e.persist();
             // Cancel if left to go onto another path.
-            if (e && e.relatedTarget && e.relatedTarget.__data__ && e.relatedTarget.__data__.data && e.relatedTarget.__data__ .data.id) return null;
+            if (e && e.relatedTarget && e.relatedTarget.__data__ 
+                && e.relatedTarget.__data__.data && e.relatedTarget.__data__ .data.id
+            ) return null;
         }
-        if (mouseleaveTimeout) return null;
+        if (mouseleaveTimeout){
+            return null;
+        }
         var _this = this;
         mouseleaveTimeout = setTimeout(function(){ // Wait 50ms (duration of mouseenter throttle) so delayed handler doesn't cancel this mouseleave transition.
             vizUtil.requestAnimationFrame(function(){
                 // Hide the breadcrumb trail
-                _this.updateBreadcrumbs([], '0%');
+                //_this.updateBreadcrumbs([], '0%');
 
                 // Transition each segment to full opacity and then reactivate it.
                 d3.selectAll("svg.sunburst-svg-chart path, svg.sunburst-svg-chart > g").classed('hover', false);
@@ -546,7 +573,7 @@ var SunBurst = React.createClass({
 
                 unhighlightTerms();
 
-                _this.resetActiveExperimentsCount();
+                //_this.resetActiveExperimentsCount();
 
                 if (typeof _this.props.updatePopover === 'function'){
                     _this.props.updatePopover({
@@ -557,6 +584,8 @@ var SunBurst = React.createClass({
                         path : []
                     });
                 }
+
+                mouseleaveTimeout = null;
 
             });
         }, 150);
@@ -651,12 +680,20 @@ var SunBurst = React.createClass({
 
     generateRectPath : function(node){
         var path = d3.path();
-        var args = [
-            node.y0,
-            node.x0,
-            node.y1 - node.y0,
-            node.x1 - node.x0
+
+        var args = [            // ROTATE D3 PARTITION
+            node.y0,            // X
+            node.x0,            // Y
+            node.y1 - node.y0,  // Width
+            node.x1 - node.x0   // Height
         ];
+        if (node.data.field === 'accession'){
+            //console.log(node.data.term, node.data.active, node.data.experiments, node.data.total_experiments, node.data.duplicates);
+            // If ExpSet w/ only some experiments matching filters, decrease width relatively.
+            if ((node.data.active || node.data.experiments) < node.data.total_experiments){
+                args[2] = args[2] * ((node.data.active || node.data.experiments) / node.data.total_experiments);
+            }
+        }
         path.rect.apply(path, args);
         return path;
     },

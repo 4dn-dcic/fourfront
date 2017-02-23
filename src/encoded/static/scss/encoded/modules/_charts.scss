@@ -604,15 +604,18 @@
         &:not(.filtered-out){
             //opacity : 0.66;
         }
-        &.hover, &.term-is-set {
-            opacity: 0.66;
+        &.highlight {
+            opacity: 0.5 !important;
+        }
+        &.hover {
+            opacity: 0.66 !important;
             transition: opacity 0.5s .2s;
-            &.filtered-out {
-                opacity : 0.66 !important;
+            &.term-is-set.filtered-out {
+                opacity : 0.5 !important;
             }
         }
-        &.hover.term-is-set {
-            opacity: 1;
+        &:hover, &:hover.term-is-set.filtered-out {
+            opacity: 1 !important;
         }
     }
 
@@ -785,8 +788,65 @@
         border-radius: 5px;
         overflow: hidden;
 
+        .detail-crumbs {
+            padding: 6px 10px 5px;
+            border-bottom: 1px dotted #ddd;
+
+            .crumb-header {
+                font-size: 0.825rem;
+                padding-bottom: 7px;
+                margin-bottom: 6px;
+                border-bottom: 1px dotted #ccc;
+            }
+
+            &.no-children {
+                padding-bottom: 0;
+                border-bottom: none;
+                .crumb-header {
+                    margin-bottom: 0;
+                }
+            }
+
+            .crumb {
+                position: relative;
+                font-size: 0.75rem;
+                padding-top: 1px;
+                > * {
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                }
+                .field {
+                    font-weight: 300;
+                    padding-right: 0;
+                    position: relative;
+                }
+                .field:after {
+                    content : ':';
+                }
+
+                &:not([data-depth="0"]) .field:before {
+                    content : '>';
+                    position: absolute;
+                    margin-left: -10px;
+                    font-weight: 200;
+                    color : #aaa;
+                }
+
+                .name {
+                    padding-left: 5px;
+                    padding-right: 0px;
+                }
+
+                .count {
+                    padding-left: 5px;
+                    overflow: visible;
+                }
+            }
+        }
+
         > .field-title {
-            padding: 7px 10px 0px;
+            padding: 7px 10px 1px;
             margin: 0;
             font-weight: 300;
         }
@@ -796,10 +856,23 @@
             font-size: 1.2rem;
             margin: 0;
             font-weight: 300;
+            .term-color-indicator {
+                float: left;
+                position: relative;
+                font-size: 0.85rem;
+                top: 5px;
+                padding-right: 6px;
+                padding-left: 2px;
+                transition: color .5s;
+            }
         }
 
         .details.row {
-            font-weight: 0.85rem;
+            font-size: 0.85rem;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            padding-left: 10px;
+            padding-right: 10px;
 
             .count-val {
                 font-weight: 500;

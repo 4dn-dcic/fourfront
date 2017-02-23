@@ -382,11 +382,11 @@ var FacetList = module.exports = React.createClass({
 
             function setHighlightClass(el, off = false){
                 var isSVG, className;
-                //if (el.nodeName.toLowerCase() === 'g')console.dir(el);
+                //if (el.nodeName.toLowerCase() === 'path') console.log(el);
                 if (el.className.baseVal) {
                     isSVG = true;
                     className = el.className.baseVal;
-                    //if (el.nodeName.toLowerCase() === 'g')console.log('isSVG', off);
+                    //if (el.nodeName.toLowerCase() === 'path')console.log('isSVG', off);
                 } else {
                     isSVG = false;
                     className = el.className;
@@ -411,13 +411,18 @@ var FacetList = module.exports = React.createClass({
 
             vizUtil.requestAnimationFrame(function(){
 
+                var colorIsSet =
+                    (color === null || color === false) ? false :
+                    (typeof color === 'string') ? color.length > 0 :
+                    (typeof color === 'object') ? true : false;
+
                 _.each(document.querySelectorAll('[data-field]:not(.no-highlight)'), function(fieldContainerElement){
                     setHighlightClass(fieldContainerElement, true);
                 });
 
-                if (color.length > 0){
+                if (colorIsSet){
                     _.each(document.querySelectorAll('[data-field' + (field ? '="' + field + '"' : '') + ']:not(.no-highlight)'), function(fieldContainerElement){
-                        setHighlightClass(fieldContainerElement, color.length === 0);
+                        setHighlightClass(fieldContainerElement, false);
                     });
                 }
 
@@ -429,9 +434,9 @@ var FacetList = module.exports = React.createClass({
                     if (!isSVG && termElement.className.indexOf('no-highlight-color') === -1) termElement.style.backgroundColor = '';
                 });
 
-                if (color.length > 0){
+                if (colorIsSet){
                     _.each(document.querySelectorAll('[data-term="' + term + '"]:not(.no-highlight)'), function(termElement){
-                        var isSVG = setHighlightClass(termElement, color.length === 0);
+                        var isSVG = setHighlightClass(termElement, false);
                         if (!isSVG && termElement.className.indexOf('no-highlight-color') === -1) termElement.style.backgroundColor = color;
                     });
                 }

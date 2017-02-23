@@ -22,11 +22,12 @@ var MosaicDetailCursor = module.exports = React.createClass({
                 containinHeight : 300
             },
             'width' : 240,
-            'height': 150,
+            'height': 30,
             'horizontalAlign' : 'left',
             'horizontalOffset' : 10,
             'verticalAlign' : 'top',
-            'verticalOffset' : 10
+            'verticalOffset' : 10,
+            'debugStyle' : false
         };
     },
 
@@ -53,14 +54,8 @@ var MosaicDetailCursor = module.exports = React.createClass({
             'title' : 'Title',
             'term' : 'Title',
             'field' : 'Field',
-            'path' : [
-                { field : "something1", term : "something2" }
-            ],
-            'totalCounts' : {
-                experiments : 0,
-                experiment_sets : 0,
-                files : 0
-            },
+            'filteredOut' : false,
+            'path' : [],
         };
     },
 
@@ -69,6 +64,7 @@ var MosaicDetailCursor = module.exports = React.createClass({
         else if (Array.isArray(state.path) && state.path.length > 0 && state.path[state.path.length - 1].field){
             state.field = Filters.Field.toName(state.path[state.path.length - 1].field);
         }
+        if (this.props.debugStyle && state.path && state.path.length === 0) return null;
         return this.setState(state, cb);
     },
 
@@ -94,12 +90,14 @@ var MosaicDetailCursor = module.exports = React.createClass({
                     bottom: -50,
                     top: -10
                 }}
+                debugStyle={this.props.debugStyle}
             >
                 <MosaicDetailCursor.Body
                     path={this.state.path}
                     title={this.state.title}
                     term={this.state.term}
                     field={this.state.field}
+                    filteredOut={this.state.filteredOut}
                 />
             </CursorComponent>
         );
@@ -109,7 +107,7 @@ var MosaicDetailCursor = module.exports = React.createClass({
 
         getCounts : function(d){
             return {
-                experiments : d.active || d.experiments || 0,
+                experiments : d.experiments || 0,
                 experiments_active : d.active || 0,
                 experiment_sets : d.experiment_sets || 0,
                 files : d.activeFiles || d.files || 0
@@ -117,6 +115,68 @@ var MosaicDetailCursor = module.exports = React.createClass({
         },
 
         Body : React.createClass({
+
+            statics : {
+
+                Crumbs : React.createClass({
+
+                    header : function(isEmpty = false){
+                        return (
+                            <div className="crumb-header row">
+                                <div className="field col-sm-5">
+                                    Looking at
+                                </div>
+                                <div className="name col-sm-2">
+                                    
+                                </div>
+                                { isEmpty ? null :
+                                <div className="count col-sm-5 text-right">
+                                    # Sets
+                                </div>
+                                }
+                            </div>
+                        );
+                    },
+
+                    render : function(){
+                        var offsetPerCrumb = 10;
+                        var isEmpty = this.props.path.length < 2;
+                        if (isEmpty) return null;
+
+                        var maxSkewOffset = (this.props.path.length - 2) * offsetPerCrumb;
+                        
+                        return (
+                            <div className={'detail-crumbs' + (isEmpty ? ' no-children' : '')}>
+                                {/* this.header(isEmpty) */}
+                                {
+                                    this.props.path.slice(0,-1).map(function(n, i){
+                                        return (
+                                            <div
+                                                data-depth={i}
+                                                className={"crumb row" + (i===0 ? ' first' : '')}
+                                                key={i}
+                                                style={{ /*, paddingRight : maxSkewOffset - (offsetPerCrumb * i) */ }}
+                                            >
+                                                <div className="field col-sm-5" style={{ paddingLeft : offsetPerCrumb * i + 10 }}>
+                                                    { Filters.Field.toName(n.field) }
+                                                </div>
+                                                <div className="name col-sm-5">
+                                                    { n.name || n.term }
+                                                </div>
+                                                <div className="count col-sm-2 pull-right text-right">
+                                                    { n.experiment_sets }
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                }
+                            </div>
+                        );
+                    }
+
+                })
+
+            },
 
             getCurrentCounts : function(nodes = this.props.path){
                 if (nodes.length < 1) return null;
@@ -129,26 +189,13 @@ var MosaicDetailCursor = module.exports = React.createClass({
                 if (!currentCounts) return null;
                 return (
                     <div className='row'>
-
-                        <div className="col-sm-3 count-val">
-                            { currentCounts.experiment_sets }
-                        </div>
-                        <div className="col-sm-9">
-                            Experiment Sets
+                        <div className="col-sm-2"></div>
+                        <div className="col-sm-6 text-right">
+                            { currentCounts.experiments }<small> Experiments</small>
                         </div>
 
-                        <div className="col-sm-3 count-val">
-                            { currentCounts.experiments }
-                        </div>
-                        <div className="col-sm-9">
-                            Experiments
-                        </div>
-
-                        <div className="col-sm-3 count-val">
-                            { currentCounts.files }
-                        </div>
-                        <div className="col-sm-9">
-                            Files
+                        <div className="col-sm-4 text-right">
+                            { currentCounts.files }<small> Files</small>
                         </div>
                     </div>
                 );
@@ -161,14 +208,31 @@ var MosaicDetailCursor = module.exports = React.createClass({
                 var leafNode = this.props.path[this.props.path.length - 1];
                 return (
                     <div className="mosaic-cursor-body">
-                        <h6 className="field-title">{ this.props.field || leafNode.field }</h6>
-                        <h3 className="details-title">{ leafNode.name || leafNode.title || leafNode.term || this.props.title }</h3>
-                        <div className="details row">
-                            <div className="col-sm-6">
-                                { this.renderDetailSection() }
+                        <MosaicDetailCursor.Body.Crumbs path={this.props.path} />
+                        <h6 className="field-title">
+                            <small className="pull-right sets-label">Exp Sets</small>
+                            { 
+                                this.props.path.length > 1 ?
+                                <small> &gt; </small> : null
+                            }{ this.props.field || leafNode.field }
+                            {/* this.props.filteredOut ?
+                                <small className="filtered-out-label"> (filtered out)</small>
+                            : null */}
+                        </h6>
+                        <h3 className="details-title">
+                            <i
+                                className="term-color-indicator icon icon-circle"
+                                style={{ color : leafNode.color || vizUtil.colorForNode(leafNode) }}
+                            />
+                            <div className="pull-right count">
+                                { leafNode.experiment_sets }
                             </div>
-                            <div className="col-sm-6">
-                                Chart
+                            <span>{ leafNode.name || leafNode.title || leafNode.term || this.props.title }</span>
+                            
+                        </h3>
+                        <div className="details row">
+                            <div className="col-sm-12">
+                                { this.renderDetailSection() }
                             </div>
                         </div>
                     </div>

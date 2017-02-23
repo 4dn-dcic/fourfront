@@ -397,8 +397,6 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
     getFieldsRequiredURLQueryPart : function(){ return FacetCharts.getFieldsRequiredURLQueryPart(this.props.fieldsToFetch); },
 
-    colorForNode : function(node){ return vizUtil.colorForNode(node, this.props.colors); },
-
     handleVisualNodeClickToUpdateFilters : _.throttle(function(node){
 
         if (typeof node.target !== 'undefined' && typeof node.target.nodeName === 'string'){
@@ -552,14 +550,17 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 <div className="row facet-chart-row-1" key="facet-chart-row-1">
                     <div className={genChartColClassName(1)} key="facet-chart-row-1-chart-1" style={{ height: height }} ref="sunburstContainer">
                         <div className="row">
-                            <div className="col-sm-6">
+                            <div className="col-sm-6" style={{
+                                width : (this.state.chartFieldsHierarchy.length / (this.state.chartFieldsHierarchyRight.length + this.state.chartFieldsHierarchy.length)) * 100 + '%'
+                            }}>
                                 <SunBurstChart
                                     experiments={this.state.experiments}
                                     filteredExperiments={this.state.filteredExperiments}
                                     fields={this.state.chartFieldsHierarchy}
                                     maxFieldDepthIndex={this.state.chartFieldsHierarchy.length - 1}
 
-                                    height={height} width={this.width(0)/2 - 20}
+                                    height={height}
+                                    width={(this.width(0)) * (this.state.chartFieldsHierarchy.length / (this.state.chartFieldsHierarchyRight.length + this.state.chartFieldsHierarchy.length)) - 20}
                                     updateBreadcrumbsHoverNodes={(nodes) => this.refs && this.refs.breadcrumbs && this.refs.breadcrumbs.updateHoverNodes(nodes)}
 
                                     handleClick={this.handleVisualNodeClickToUpdateFilters}
@@ -573,14 +574,17 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                                     debug
                                 />
                             </div>
-                            <div className="col-sm-6">
+                            <div className="col-sm-6" style={{
+                                width : (this.state.chartFieldsHierarchyRight.length / (this.state.chartFieldsHierarchyRight.length + this.state.chartFieldsHierarchy.length)) * 100 + '%'
+                            }}>
                                 <SunBurstChart
                                     experiments={this.state.experiments}
                                     filteredExperiments={this.state.filteredExperiments}
                                     fields={this.state.chartFieldsHierarchyRight}
                                     maxFieldDepthIndex={this.state.chartFieldsHierarchyRight.length - 1}
 
-                                    height={height} width={this.width(0)/2 - 20}
+                                    height={height}
+                                    width={(this.width(0)) * (this.state.chartFieldsHierarchyRight.length / (this.state.chartFieldsHierarchyRight.length + this.state.chartFieldsHierarchy.length)) - 20 }
                                     updateBreadcrumbsHoverNodes={(nodes) => this.refs && this.refs.breadcrumbs && this.refs.breadcrumbs.updateHoverNodes(nodes)}
 
                                     handleClick={this.handleVisualNodeClickToUpdateFilters}
@@ -610,10 +614,8 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 <MosaicDetailCursor
                     containingElement={(this.refs && this.refs.sunburstContainer) || null}
                     verticalAlign="center" /* cursor position */
-                    visibilityMargin={_.extend(
-                        SunBurstChart.getDefaultStyleOpts().offset,
-                        { left : -10, right : -10 }
-                    )}
+                    visibilityMargin={{ left : -10, right : -10, bottom : -50, top: -18 }}
+                    /* debugStyle={true} -- keep this Component always visible so we can style it */
                     ref="detailCursor"
                 />
             </div>
