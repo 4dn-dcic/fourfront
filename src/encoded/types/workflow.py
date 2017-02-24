@@ -26,6 +26,7 @@ class Workflow(Item):
                 'workflow_steps.step_name']
     embedded = add_default_embeds(embedded, schema)
 
+
 @collection(
     name='workflow-runs',
     properties={
@@ -36,6 +37,7 @@ class WorkflowRun(Item):
     """The WorkflowRun class that describes execution of a workflow."""
 
     item_type = 'workflow_run'
+    base_types = ['WorkflowRun'] + Item.base_types
     schema = load_schema('encoded:schemas/workflow_run.json')
     embedded = ['workflow',
                 'input_files.workflow_argument_name',
