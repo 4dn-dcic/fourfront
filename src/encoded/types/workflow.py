@@ -26,6 +26,7 @@ class Workflow(Item):
                 'workflow_steps.step_name']
     embedded = add_default_embeds(embedded, schema)
 
+
 @collection(
     name='workflow-runs',
     properties={
