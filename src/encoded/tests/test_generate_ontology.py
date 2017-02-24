@@ -202,6 +202,53 @@ def terms_w_closures(term_w_closure):
             term_w_two, term_wo_slim, term_w_none]
 
 
+@pytest.fixture
+def terms_w_rels():
+    return {
+        'a_term1': {
+            'term_id': 'a_term1',
+            'term_name': 'name1'
+        },
+        'id2': {
+            'term_id': 'id2',
+            'term_name': 'name2',
+            'parents': ['a_term1', 'ObsoleteClass']
+        },
+        'id3': {
+            'term_id': 'id3',
+            'term_name': 'obsolete name',
+            'relationships': ['id2']
+        },
+        'id4': {
+            'term_id': 'id4',
+            'term_name': 'Obsolete name',
+            'relationships': ['a_term1', 'id2']
+        },
+        'd_term1': {
+            'term_id': 'd_term1',
+            'term_name': ''
+        },
+        'id6': {
+            'term_id': 'id6',
+            'develops_from': ['id7'],
+            'parents': ['id2']
+        },
+        'id7': {
+            'term_id': 'id7',
+            'parents': ['d_term1']
+        },
+        'id8': {
+            'term_id': 'id8',
+            'develops_from': ['id7', 'id3']
+        },
+        'id9': {
+            'term_id': 'id9',
+            'has_part_inverse': ['id3'],
+            'develops_from': ['id3']
+        }
+    }
+
+
 def test_add_slim_to_term(terms_w_closures, slim_term_list):
     slim_ids = ['uuida1', 'uuidd1', 'uuida2']
     for i, term in enumerate(terms_w_closures):
@@ -216,6 +263,40 @@ def test_add_slim_to_term(terms_w_closures, slim_term_list):
                 assert t in slim_ids
         elif i > 3:
             assert 'slim_terms' not in test_term
+
+
+def test_add_slim_terms(terms_w_rels, slim_term_list):
+    terms = go.add_slim_terms(terms_w_rels, slim_term_list)
+    print(terms)
+    for tid, term in terms.items():
+        if tid == 'id6':
+            assert len(term['slim_terms']) == 2
+            assert 'uuidd1' in term['slim_terms']
+            assert 'uuida1' in term['slim_terms']
+        elif tid == 'id9':
+            assert 'slim_terms' not in term
+        else:
+            assert len(term['slim_terms']) == 1
+            if tid in ['a_term1', 'id2', 'id3', 'id4']:
+                assert term['slim_terms'][0] == 'uuida1'
+            elif tid in ['d_term1', 'id7', 'id8']:
+                assert term['slim_terms'][0] == 'uuidd1'
+
+
+def test_remove_obsoletes_and_unnamed_obsoletes(terms_w_rels):
+    ids = ['a_term1', 'id2', 'id3', 'id4', 'd_term1', 'id6', 'id7', 'id8', 'id9']
+    for i in ids:
+        assert i in terms_w_rels
+    terms = go.remove_obsoletes_and_unnamed(terms_w_rels)
+    remaining = ids.pop(0)
+    assert remaining in terms
+    for i in ids:
+        assert i not in terms
+
+
+
+def test_remove_obsoletes_and_unnamed_unnamed(terms_w_rels):
+    pass
 
 
 test_syn_terms = [
@@ -709,8 +790,8 @@ def test_process_intersection_of(uberon_owler3):
             terms = go.process_intersection_of(c, i, uberon_owler3, terms)
     assert len(terms) == 1
     term = list(terms.values())[0]
-    assert len(term['part_of']) == 1
-    assert term['part_of'][0] == 'UBERON:1'
+    assert len(term['relationships']) == 1
+    assert term['relationships'][0] == 'UBERON:1'
     assert len(term['develops_from']) == 1
     assert term['develops_from'][0] == 'UBERON:2'
 

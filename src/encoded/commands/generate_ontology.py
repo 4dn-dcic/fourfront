@@ -175,7 +175,7 @@ def process_intersection_of(class_, intersection, data, terms):
         if PART_OF in col_list:
             # print('COL-0 = ', collection[0])
             # print('CLASS = ', class_.__str__())
-            terms = _add_term_and_info(class_, collection[0], 'part_of', data, terms)
+            terms = _add_term_and_info(class_, collection[0], 'relationships', data, terms)
         elif DEVELOPS_FROM in col_list:
             terms = _add_term_and_info(class_, collection[0], 'develops_from', data, terms)
     return terms
@@ -268,8 +268,10 @@ def get_definitions(class_, data, definition_terms):
 def _cleanup_non_fields(terms):
     '''Removes unwanted fields and empty terms from final json'''
     to_delete = ['relationships', 'all_parents', 'development',
-                 'has_part_inverse', 'develops_from', 'part_of',
-                 'closure', 'closure_with_develops_from']
+                 'has_part_inverse', 'develops_from',
+                 'closure', 'closure_with_develops_from',
+                 'achieves_planned_objective', 'part_of'  # these 2 should never be present
+                 ]
     tids2delete = []
     for termid, term in terms.items():
         if not term:
