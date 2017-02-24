@@ -26,5 +26,23 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "aliases": ["dcic:test_targ3"]
+    },
+    {
+        "uuid": "d1115d5e-40aa-43bc-b81c-32c70c9afb21",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "aliases": ["dcic:test_targ4"],
+        "description": "A sample protein target",
+        "targeted_proteins": ["XPO1_HUMAN"]
+    },
+    {
+        "uuid": "d1115d5e-40aa-43bc-b81c-32c70c9afb78",
+        "award": "1U01CA200059-01",
+        "lab": "4dn-dcic-lab",
+        "submitted_by": "wrangler@wrangler.com",
+        "aliases": ["dcic:test_targ5"],
+        "description": "A sample RNA target",
+        "targeted_RNA": ["NM_003529.2"]
     }
 ]

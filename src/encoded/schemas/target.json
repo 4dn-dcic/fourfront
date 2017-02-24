@@ -39,10 +39,36 @@
             }
         },
         "targeted_region": {
-            "title": "Targeted Genomic Region",
+            "title": "Targeted Genomic Regions",
             "description": "The genome assembly, chromosome and coordinates of the region that is targeted",
-            "type": "string",
-            "linkTo": "GenomicRegion"
+            "type": "array",
+            "items": {
+                "title": "Targeted Genomic Regions",
+                "type": "string",
+                "linkTo": "GenomicRegion"
+            }
+        },
+        "targeted_proteins": {
+            "title": "Targeted Proteins",
+            "description": "Use UniProt Protein names (e.g. H31_HUMAN)",
+            "type": "array",
+            "items": {
+                "title": "Protein",
+                "description": "UniProt protein name",
+                "internal_comment": "Can we validate against Uniprot?",
+                "type": "string"
+            }
+        },
+        "targeted_rnas": {
+            "title": "Targeted RNAs",
+            "description": "Use RefSeq identifiers (e.g. NM_003529.2)",
+            "type": "array",
+            "items": {
+                "title": "RNA",
+                "description": "Gene symbol for targeted gene",
+                "internal_comment": "Can we validate against RefSeq?",
+                "type": "string"
+            }
         }
     }
 }
