@@ -261,6 +261,7 @@ var BarPlot = React.createClass({
 
     propTypes : {
         'experiments'   : React.PropTypes.array,
+        'filteredExperiments' : React.PropTypes.array,
         'fields'        : React.PropTypes.array,
         'styleOptions'  : React.PropTypes.shape({
             'gap'           : React.PropTypes.number,
@@ -306,11 +307,16 @@ var BarPlot = React.createClass({
     },
 
     shouldPerformManualTransitions : function(nextProps, pastProps){
-        return !!(!_.isEqual(pastProps.experiments, nextProps.experiments) || pastProps.height !== nextProps.height);
+        return !!(
+            !_.isEqual(pastProps.experiments, nextProps.experiments) ||
+            pastProps.height !== nextProps.height ||
+            !_.isEqual(pastProps.filteredExperiments, nextProps.filteredExperiments)
+        );
     },
 
     componentWillReceiveProps : function(nextProps){
         if (this.shouldPerformManualTransitions(nextProps, this.props)){
+            console.log('WILL DO SLOW TRANSITION');
             this.setState({ transitioning : true });
         }
     },
@@ -328,7 +334,6 @@ var BarPlot = React.createClass({
         return;
 
         // THE BELOW IF BLOCK IS NO LONGER NECESSARY AS CONVERTED TO HTML ELEMS, KEEPING FOR IF NEEDED IN FUTURE.
-        // shouldPerformManualTransitions WILL ALWAYS RETURN FALSE CURRENTLY.
         /*
         if (this.shouldPerformManualTransitions(this.props, pastProps)){
             if (typeof this.pastBars !== 'undefined'){
@@ -382,7 +387,6 @@ var BarPlot = React.createClass({
 
             bar : function(d, index, all, styleOpts = null, existingBars = this.pastBars){
                 var transitioning = this.state.transitioning; // Cache state.transitioning to avoid risk of race condition in ref function.
-
                 if (!styleOpts) styleOpts = this.styleOptions();
 
                 var prevBarExists = function(){ return typeof existingBars[d.term] !== 'undefined' && existingBars[d.term] !== null; };
@@ -540,7 +544,10 @@ var BarPlot = React.createClass({
                 return style;
             }
 
-            var barParts = Array.isArray(d.bars) ? d.bars.map(this.renderParts.barPart.bind(this)) : this.renderParts.barPart.call(this, d);
+            var barParts = Array.isArray(d.bars) ? 
+                d.bars.map(this.renderParts.barPart.bind(this))
+                :
+                this.renderParts.barPart.call(this, d);
 
             return (
                 <div
@@ -705,7 +712,7 @@ var BarPlot = React.createClass({
 
         var barData = BarPlot.genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
             BarPlot.genChartData( // Get counts by term per field.
-                this.props.experiments,
+                this.props.filteredExperiments || this.props.experiments,
                 this.props.fields,
                 'experiments'
             ),

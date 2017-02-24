@@ -1,5 +1,6 @@
 'use strict';
 
+var React = require('react');
 var _ = require('underscore');
 var { expFxn, Filters, ajax, console, layout, isServerSide } = require('./../util');
 
@@ -9,9 +10,6 @@ var { expFxn, Filters, ajax, console, layout, isServerSide } = require('./../uti
 
 var refs = {
     store       : null,
-    navigate    : null,
-    schemas     : null,
-    updateStats : null,
     requestURLBase : '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&from=0',
     fieldsToFetch : [ // What fields we need from /browse/... for this chart.
         'accession',
@@ -33,6 +31,7 @@ var refs = {
         'experiments_in_set.biosample.biosource.individual.organism.scientific_name',
         'experiments_in_set.digestion_enzyme.name'
     ],
+    expSetFilters : null,
 };
 
 var state = {
@@ -119,47 +118,137 @@ var state = {
     ]
 };
 
+var providerCallbacks = {};
+
+var reduxSubscription = null;
+var isInitialized = false;
+
 var ChartDataController = module.exports = {
+
+    debugging : true,
+
+    Provider : React.createClass({
+
+        propTypes : {
+            'id' : React.PropTypes.string.isRequired,
+            'children' : React.PropTypes.object.isRequired
+        },
+
+        componentWillMount : function(){
+            ChartDataController.registerUpdateCallback(()=>{
+                this.forceUpdate();
+            }, this.props.id);
+        },
+
+        componentWillUnmount : function(){
+            ChartDataController.unregisterUpdateCallback(this.props.id);
+        },
+
+        render : function(){
+            var childChartProps = _.extend({}, this.props.children.props);
+            childChartProps.experiments = state.experiments;
+            childChartProps.filteredExperiments = state.filteredExperiments;
+            return React.cloneElement(this.props.children, childChartProps);
+        }
+
+    }),
 
     /** 
      * This function must be called before this component is used anywhere else.
      */
-    initialize : function(schemas = null, navigateFxn = null, updateStatsFxn = null){
+    initialize : function(
+        requestURLBase = null,
+        callback = null
+    ){
         if (!refs.store) {
             refs.store = require('./../../store');
         }
-        if (!refs.navigate && navigateFxn) {
-            refs.navigate = navigateFxn;
+        if (requestURLBase){
+            refs.requestURLBase = requestURLBase;
         }
-        if (!refs.schemas && schemas){
-            refs.schemas = schemas;
+
+        if (reduxSubscription !== null) {
+            reduxSubscription(); // Unsubscribe current listener.
         }
-        if (!refs.updateStats && updateStatsFxn){
-            refs.updateStats = updateStatsFxn;
-        }
+
+        // Subscribe to Redux store updates to listen for changed expSetFilters.
+        reduxSubscription = refs.store.subscribe(function(){
+            var prevExpSetFilters = refs.expSetFilters;
+            var reduxStoreState = refs.store.getState();
+            refs.expSetFilters = reduxStoreState.expSetFilters;
+
+            if (prevExpSetFilters !== refs.expSetFilters || !_.isEqual(refs.expSetFilters, prevExpSetFilters)){
+                ChartDataController.handleUpdatedFilters(refs.expSetFilters, function(){
+                    _.forEach(providerCallbacks, function(pcb){
+                        pcb(state);
+                    });
+                });
+            }
+        });
+
+        ChartDataController.fetchUnfilteredAndFilteredExperiments(null, callback);
+        isInitialized = true;
+    },
+
+    isInitialized : function(){
+        return isInitialized;
+    },
+
+    registerUpdateCallback : function(callback, uniqueID = 'global'){
+        if (typeof callback !== 'function') throw Error("callback must be a function.");
+        if (typeof uniqueID !== 'string') throw Error("uniqueID must be a string.");
+        providerCallbacks[uniqueID] = callback;
+    },
+
+    unregisterUpdateCallback : function(uniqueID){
+        if (typeof uniqueID !== 'string') throw Error("uniqueID must be a string.");
+        delete providerCallbacks[uniqueID];
     },
 
     getState : function(){ return _.clone(state); },
 
     setState : function(updatedState = {}, callback = null){
         _.extend(state, updatedState);
+        if (updatedState.experiments || updatedState.filteredExperiments){
+            _.forEach(providerCallbacks, function(pcb){
+                pcb(state);
+            });
+        }
         if (typeof callback === 'function'){
             return callback(state);
         }
     },
 
-    fetchUnfilteredAndFilteredExperiments : function(storeState = null, callback = null, extraState = {}){
-        if (!storeState || !storeState.expSetFilters || !storeState.href){
-            storeState = refs.store.getState();
+    sync : function(callback){
+        if (!isInitialized) throw Error("Not initialized.");
+        ChartDataController.fetchUnfilteredAndFilteredExperiments(null, callback);
+    },
+
+    handleUpdatedFilters : function(expSetFilters, callback){
+        if (_.keys(expSetFilters).length === 0 && Array.isArray(state.experiments)){
+            ChartDataController.setState({ filteredExperiments : null }, callback);
+        } else {
+            ChartDataController.fetchAndSetFilteredExperiments(callback);
         }
-        var filtersSet = _.keys(storeState.expSetFilters).length > 0;
-        var experiments, filteredExperiments = null;
+    },
+
+
+
+
+
+
+    fetchUnfilteredAndFilteredExperiments : function(reduxStoreState = null, callback = null){
+        if (!reduxStoreState || !reduxStoreState.expSetFilters || !reduxStoreState.href){
+            reduxStoreState = refs.store.getState();
+        }
+        var filtersSet = _.keys(reduxStoreState.expSetFilters).length > 0;
+        var experiments = null, filteredExperiments = null;
 
         var cb = _.after(filtersSet ? 2 : 1, function(){
-            ChartDataController.setState(_.extend({ 
+            ChartDataController.setState({
                 'experiments' : experiments,
                 'filteredExperiments' : filteredExperiments
-            }, extraState), callback);
+            }, callback);
 
         });
 
@@ -174,7 +263,7 @@ var ChartDataController = module.exports = {
         if (filtersSet){
             ajax.load(
                 ChartDataController.getFilteredContextHref(
-                    storeState.expSetFilters, storeState.href
+                    reduxStoreState.expSetFilters, reduxStoreState.href
                 ) + ChartDataController.getFieldsRequiredURLQueryPart(),
                 function(filteredContext){
                     filteredExperiments = expFxn.listAllExperimentsFromExperimentSets(filteredContext['@graph']);
@@ -185,28 +274,24 @@ var ChartDataController = module.exports = {
 
     },
 
-    fetchAndSetUnfilteredExperiments : function(extraState = {}){
+    fetchAndSetUnfilteredExperiments : function(callback = null){
         ajax.load(
             refs.requestURLBase + ChartDataController.getFieldsRequiredURLQueryPart(),
             function(allExpsContext){
-                ChartDataController.setState(
-                    _.extend(extraState, {
-                        'experiments' : expFxn.listAllExperimentsFromExperimentSets(allExpsContext['@graph'])
-                    })
-                );
+                ChartDataController.setState({
+                    'experiments' : expFxn.listAllExperimentsFromExperimentSets(allExpsContext['@graph'])
+                }, callback);
             }
         );
     },
 
-    fetchAndSetFilteredExperiments : function(extraState = {}){
+    fetchAndSetFilteredExperiments : function(callback = null){
         ajax.load(
-            ChartDataController.getFilteredContextHref(props) + ChartDataController.getFieldsRequiredURLQueryPart(),
+            ChartDataController.getFilteredContextHref() + ChartDataController.getFieldsRequiredURLQueryPart(),
             function(filteredContext){
-                ChartDataController.setState(
-                    _.extend(extraState, {
-                        'filteredExperiments' : expFxn.listAllExperimentsFromExperimentSets(filteredContext['@graph'])
-                    })
-                );
+                ChartDataController.setState({
+                    'filteredExperiments' : expFxn.listAllExperimentsFromExperimentSets(filteredContext['@graph'])
+                }, callback);
             },
             'GET',
             function(){

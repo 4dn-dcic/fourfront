@@ -30,60 +30,6 @@ var ChartDataController = require('./viz/chart-data-controller');
  */
 
 var FacetCharts = module.exports.FacetCharts = React.createClass({
-
-    statics : {
-
-        /** Check if data is valid; must be array of experiment_sets w/ minimally-needed properties. */
-        isContextDataValid : function(context){
-            if (typeof context['@graph'] === 'undefined') return false;
-
-            var experiment_sets = context['@graph'];
-            if (!Array.isArray(experiment_sets)) return false;
-            if (experiment_sets.length === 0) return true; // Valid but no data.
-            
-            var expset = experiment_sets[0];
-            if (!Array.isArray(expset.experiments_in_set)) return false;
-            if (expset.experiments_in_set.length === 0) return true; // Valid but no data.
-            
-            var exp = expset.experiments_in_set[0];
-            if (typeof exp.accession === 'undefined') return false;
-            if (typeof exp.experiment_summary === 'undefined') return false;
-            if (typeof exp.biosample !== 'object') return false;
-            if (typeof exp.biosample.biosource_summary !== 'string') return false;
-            if (typeof exp.biosample.biosource === 'undefined') return false;
-
-            var biosource = Array.isArray(exp.biosample.biosource) ? 
-                (exp.biosample.biosource.length > 0 ? exp.biosample.biosource[0] : null) : exp.biosample.biosource;
-
-            if (biosource === null) return false;
-            if (typeof biosource.individual !== 'object' || !biosource.individual) return false;
-            if (typeof biosource.individual.organism !== 'object' || !biosource.individual.organism) return false;
-            if (typeof biosource.individual.organism.name !== 'string') return false;
-            if (typeof biosource.individual.organism.scientific_name !== 'string') return false;
-            return true;
-        },
-
-        getExperimentsFromContext : function(context){
-            if (!context) return null;
-            if (!FacetCharts.isContextDataValid(context)) return null;
-            return expFxn.listAllExperimentsFromExperimentSets(context['@graph']);
-        },
-
-        /** Not used/necessary, keeping for future if needed. */
-        isBrowserMSEdge : function(){
-            if (isServerSide()) return false;
-            if (document.documentElement.className.indexOf('no-uaEdge') > -1) return false;
-            if (document.documentElement.className.indexOf('uaEdge') > -1) return true;
-            return true;
-        },
-
-        getFieldsRequiredURLQueryPart : function(fields){
-            return fields.map(function(fieldToIncludeInResult){
-                return '&field=' + fieldToIncludeInResult;
-            }).join('');
-        },
-        
-    },
     
     getDefaultProps : function(){
         return {
@@ -93,31 +39,9 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 if (path.indexOf('/browse/') > -1) return true;
                 return false;
             },
-            'context' : null,
-            'ajax' : true,
             'views' : ['small', 'large'],
             'requestURLBase' : '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&from=0',
-            'fieldsToFetch' : [ // What fields we need from /browse/... for this chart.
-                'accession',
-                'experiments_in_set.experiment_summary',
-                'experiments_in_set.experiment_type',
-                'experiments_in_set.accession',
-                //'experiments_in_set.status',
-                //'experiments_in_set.files.file_type',
-                'experiments_in_set.files.accession',
-                'experiments_in_set.filesets.files_in_set.accession',
-                //'experiments_in_set.biosample.description',
-                //'experiments_in_set.biosample.modifications_summary_short',
-                'experiments_in_set.biosample.biosource_summary',
-                //'experiments_in_set.biosample.accession',
-                //'experiments_in_set.biosample.biosource.description',
-                'experiments_in_set.biosample.biosource.biosource_name',
-                'experiments_in_set.biosample.biosource.biosource_type',
-                'experiments_in_set.biosample.biosource.individual.organism.name',
-                'experiments_in_set.biosample.biosource.individual.organism.scientific_name',
-                'experiments_in_set.digestion_enzyme.name'
-            ],
-            colWidthPerScreenSize : {
+            'colWidthPerScreenSize' : {
                 'small' : [
                     {'xs' : 12, 'sm' : 6,  'md' : 4, 'lg' : 3},
                     {'xs' : 12, 'sm' : 6,  'md' : 8, 'lg' : 9}
@@ -132,11 +56,11 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
     getInitialState : function(){
         return {
-            'experiments'           : null, //FacetCharts.getExperimentsFromContext(this.props.context),
-            'filteredExperiments'   : null,
             'mounted'               : false,
             'selectedNodes'         : [],   // expSetFilters, but with nodes (for colors, etc.) for breadcrumbs,
             'fetching'              : false,
+            /*
+            TODO: Might bring these back here.
             'chartFieldsBarPlot'    : [
                 { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
                 { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
@@ -215,11 +139,11 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 //    isFacet : false,
                 //}
             ]
+            */
         };
     },
 
     componentDidMount : function(){
-        if (this.props.debug) console.log('Mounted FacetCharts');
 
         if (!isServerSide() && typeof window !== 'undefined'){
             var _this = this;
@@ -229,13 +153,17 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             window.addEventListener('resize', this.debouncedResizeHandler);
         }
 
-        if (this.props.ajax && this.state.experiments === null){
-
-            if (this.props.debug) console.log('FacetCharts - fetching all experiments from ' + this.props.requestURLBase);
-            this.fetchUnfilteredAndFilteredExperiments(this.props, { 'mounted' : true });
-
+        if (!ChartDataController.isInitialized()){
+            ChartDataController.initialize(
+                this.props.requestURLBase,
+                ()=>{
+                    if (this.props.debug) console.log("Mounted FacetCharts after initializing ChartDataController:", ChartDataController.getState());
+                    this.setState({ mounted : true });
+                }
+            );
         } else {
-            this.setState({ 'mounted' : true });
+            if (this.props.debug) console.log('Mounted FacetCharts');
+            this.setState({ mounted : true });
         }
 
     },
@@ -249,13 +177,12 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
     shouldComponentUpdate : function(nextProps, nextState){
         if (this.props.debug) console.log('FacetChart next props & state:', nextProps, nextState);
+        if ( nextState.mounted && this.state.session !== nextState.session ){
+            // Refetch on login/out. TODO: Bring this into ChartDataController.
+            ChartDataController.sync(()=>this.forceUpdate());
+        }
         if (
-            !_.isEqual(this.state, nextState) ||
-            !_.isEqual(this.state.experiments, nextState.experiments) ||
-            !_.isEqual(this.state.filteredExperiments, nextState.filteredExperiments) ||
             this.props.schemas !== nextProps.schemas ||
-            this.state.session !== nextState.session ||
-            this.state.fetching !== nextState.fetching ||
             this.show(nextProps) !== this.show(this.props) ||
             (nextState.mounted !== this.state.mounted)
         ){
@@ -304,100 +231,32 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         }
         */
 
-        var newState = {};
+        //var newState = {};
 
-        if (
-            nextProps.expSetFilters !== this.props.expSetFilters
-        ){
-            
-            // Update experiments
-            //if (FacetCharts.isContextDataValid(nextProps.context)){
-            //    newState.experiments = FacetCharts.getExperimentsFromContext(nextProps.context);
-            //}
-
-            // Update breadcrumbs
-            // newState.selectedNodes = updatedBreadcrumbsSequence.call(this);
-
-            // Unset filtered experiments if no filters.
-            if (_.keys(nextProps.expSetFilters).length === 0 && Array.isArray(this.state.experiments)){
-                newState.filteredExperiments = null;
-            } else {
-                newState.fetching = true;
-            }
-        }
-
-        if (nextProps.session !== this.props.session){
-            newState.fetching = true;
-        }
-
-        if (Object.keys(newState).length > 0) this.setState(newState);
+        //if (Object.keys(newState).length > 0) this.setState(newState);
     },
 
     componentDidUpdate: function(pastProps, pastState){
-
+        /*
         if (pastProps.requestURLBase !== this.props.requestURLBase || pastProps.session !== this.props.session) {
-            this.fetchUnfilteredAndFilteredExperiments(this.props, { 'fetching' : false });
+            ChartDataController.initialize(
+                this.props.schemas,
+                this.props.navigate,
+                this.props.updateState,
+                this.props.requestURLBase,
+                ()=>{
+                    this.setState({ 'fetching' : false });
+                }
+            );
         } else if (pastProps.expSetFilters !== this.props.expSetFilters || !_.isEqual(pastProps.expSetFilters, this.props.expSetFilters)){
-            if (_.keys(this.props.expSetFilters).length > 0){
-                this.fetchAndSetFilteredExperiments(this.props, { 'fetching' : false });
-            } else {
-                // @see componentWillReceiveProps (set state.filteredExperiments = null)
-            }
-        }
-    },
-
-    fetchUnfilteredAndFilteredExperiments : function(props, extraState = {}){
-        var filtersSet = _.keys(this.props.expSetFilters).length > 0;
-        var experiments, filteredExperiments = null;
-
-        var cb = _.after(filtersSet ? 2 : 1, function(){
-            this.setState(_.extend({ 
-                'experiments' : experiments,
-                'filteredExperiments' : filteredExperiments
-            }, extraState));
-        }.bind(this));
-
-        ajax.load(props.requestURLBase + this.getFieldsRequiredURLQueryPart(), (allExpsContext)=>{
-            experiments = expFxn.listAllExperimentsFromExperimentSets(allExpsContext['@graph']);
-            cb();
-        });
-
-        if (filtersSet){
-            ajax.load(this.getFilteredContextHref(props) + this.getFieldsRequiredURLQueryPart(), (filteredContext)=>{
-                filteredExperiments = expFxn.listAllExperimentsFromExperimentSets(filteredContext['@graph']);
-                cb();
+            ChartDataController.handleUpdatedFilters(this.props.expSetFilters, ()=>{
+                this.setState({ 'fetching' : false });
             });
         }
-
+        */
+        console.log('Updated FacetCharts', this.state);
     },
-
-    fetchAndSetUnfilteredExperiments : function(props = this.props, extraState = {}){
-        ajax.load(props.requestURLBase + this.getFieldsRequiredURLQueryPart(), (allExpsContext)=>{
-            this.setState(
-                _.extend(extraState, {
-                    'experiments' : expFxn.listAllExperimentsFromExperimentSets(allExpsContext['@graph'])
-                })
-            );
-        });
-    },
-
-    fetchAndSetFilteredExperiments : function(props = this.props, extraState = {}){
-        ajax.load(this.getFilteredContextHref(props) + this.getFieldsRequiredURLQueryPart(), (filteredContext)=>{
-            this.setState(
-                _.extend(extraState, {
-                    'filteredExperiments' : expFxn.listAllExperimentsFromExperimentSets(filteredContext['@graph'])
-                })
-            );
-        }, 'GET', ()=>{
-            // Fallback (no results or lost connection)
-            this.setState(extraState);
-        });
-    },
-
-    getFilteredContextHref : function(props = this.props){ return Filters.filtersToHref(props.filters, props.href, 0, 'all', '/browse/'); },
-
-    getFieldsRequiredURLQueryPart : function(){ return FacetCharts.getFieldsRequiredURLQueryPart(this.props.fieldsToFetch); },
-
+    
     handleVisualNodeClickToUpdateFilters : _.throttle(function(node){
 
         if (typeof node.target !== 'undefined' && typeof node.target.nodeName === 'string'){
@@ -545,6 +404,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             );
         }
 
+        var chartDataState = ChartDataController.getState();
         return (
             <div className={"facet-charts show-" + show} key="facet-charts">
                 
@@ -552,63 +412,65 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                     <div className={genChartColClassName(1)} key="facet-chart-row-1-chart-1" style={{ height: height }} ref="mosaicContainer">
                         <div className="row">
                             <div className="col-sm-6" style={{
-                                width : (this.state.chartFieldsHierarchy.length / (this.state.chartFieldsHierarchyRight.length + this.state.chartFieldsHierarchy.length)) * 100 + '%'
+                                width : (chartDataState.chartFieldsHierarchy.length / (chartDataState.chartFieldsHierarchyRight.length + chartDataState.chartFieldsHierarchy.length)) * 100 + '%'
+                                //width : (this.state.chartFieldsHierarchy.length / (this.state.chartFieldsHierarchyRight.length + this.state.chartFieldsHierarchy.length)) * 100 + '%'
                             }}>
-                                <MosaicChart
-                                    experiments={this.state.experiments}
-                                    filteredExperiments={this.state.filteredExperiments}
-                                    fields={this.state.chartFieldsHierarchy}
-                                    maxFieldDepthIndex={this.state.chartFieldsHierarchy.length - 1}
+                                <ChartDataController.Provider id="mosaic1">
+                                    <MosaicChart
+                                        fields={chartDataState.chartFieldsHierarchy}
+                                        maxFieldDepthIndex={chartDataState.chartFieldsHierarchy.length - 1}
 
-                                    height={height}
-                                    width={(this.width(0)) * (this.state.chartFieldsHierarchy.length / (this.state.chartFieldsHierarchyRight.length + this.state.chartFieldsHierarchy.length)) - 20}
-                                    updateBreadcrumbsHoverNodes={(nodes) => this.refs && this.refs.breadcrumbs && this.refs.breadcrumbs.updateHoverNodes(nodes)}
+                                        height={height}
+                                        width={(this.width(0)) * (chartDataState.chartFieldsHierarchy.length / (chartDataState.chartFieldsHierarchyRight.length + chartDataState.chartFieldsHierarchy.length)) - 20}
+                                        updateBreadcrumbsHoverNodes={(nodes) => this.refs && this.refs.breadcrumbs && this.refs.breadcrumbs.updateHoverNodes(nodes)}
 
-                                    handleClick={this.handleVisualNodeClickToUpdateFilters}
-                                    updateStats={this.props.updateStats}
-                                    updatePopover={this.updatePopover}
+                                        handleClick={this.handleVisualNodeClickToUpdateFilters}
+                                        updateStats={this.props.updateStats}
+                                        updatePopover={this.updatePopover}
 
-                                    expSetFilters={this.props.expSetFilters}
-                                    href={this.props.href}
-                                    key="sunburst"
-                                    schemas={this.props.schemas}
-                                    debug
-                                />
+                                        expSetFilters={this.props.expSetFilters}
+                                        href={this.props.href}
+                                        key="sunburst"
+                                        schemas={this.props.schemas}
+                                        debug
+                                    />
+                                </ChartDataController.Provider>
                             </div>
                             <div className="col-sm-6" style={{
-                                width : (this.state.chartFieldsHierarchyRight.length / (this.state.chartFieldsHierarchyRight.length + this.state.chartFieldsHierarchy.length)) * 100 + '%'
+                                width : (chartDataState.chartFieldsHierarchyRight.length / (chartDataState.chartFieldsHierarchyRight.length + chartDataState.chartFieldsHierarchy.length)) * 100 + '%'
                             }}>
-                                <MosaicChart
-                                    experiments={this.state.experiments}
-                                    filteredExperiments={this.state.filteredExperiments}
-                                    fields={this.state.chartFieldsHierarchyRight}
-                                    maxFieldDepthIndex={this.state.chartFieldsHierarchyRight.length - 1}
+                                <ChartDataController.Provider id="mosaic2">
+                                    <MosaicChart
+                                        fields={chartDataState.chartFieldsHierarchyRight}
+                                        maxFieldDepthIndex={chartDataState.chartFieldsHierarchyRight.length - 1}
 
-                                    height={height}
-                                    width={(this.width(0)) * (this.state.chartFieldsHierarchyRight.length / (this.state.chartFieldsHierarchyRight.length + this.state.chartFieldsHierarchy.length)) - 20 }
-                                    updateBreadcrumbsHoverNodes={(nodes) => this.refs && this.refs.breadcrumbs && this.refs.breadcrumbs.updateHoverNodes(nodes)}
+                                        height={height}
+                                        width={(this.width(0)) * (chartDataState.chartFieldsHierarchyRight.length / (chartDataState.chartFieldsHierarchyRight.length + chartDataState.chartFieldsHierarchy.length)) - 20 }
+                                        updateBreadcrumbsHoverNodes={(nodes) => this.refs && this.refs.breadcrumbs && this.refs.breadcrumbs.updateHoverNodes(nodes)}
 
-                                    handleClick={this.handleVisualNodeClickToUpdateFilters}
-                                    updateStats={this.props.updateStats}
-                                    updatePopover={this.updatePopover}
+                                        handleClick={this.handleVisualNodeClickToUpdateFilters}
+                                        updateStats={this.props.updateStats}
+                                        updatePopover={this.updatePopover}
 
-                                    expSetFilters={this.props.expSetFilters}
-                                    href={this.props.href}
-                                    key="sunburst"
-                                    schemas={this.props.schemas}
-                                    debug
-                                />
+                                        expSetFilters={this.props.expSetFilters}
+                                        href={this.props.href}
+                                        key="sunburst"
+                                        schemas={this.props.schemas}
+                                        debug
+                                    />
+                                </ChartDataController.Provider>
                             </div>
                         </div>
                         <FetchingView display={this.state.fetching} />
                     </div>
                     <div className={genChartColClassName(2)} key="facet-chart-row-1-chart-2" style={{ height: height }}>
-                        <BarPlotChart
-                            experiments={this.state.filteredExperiments || this.state.experiments}
-                            fields={this.state.chartFieldsBarPlot}
-                            width={this.width(1) - 20} height={height}
-                            schemas={this.props.schemas}
-                        />
+                        <ChartDataController.Provider id="barplot1">
+                            <BarPlotChart
+                                fields={chartDataState.chartFieldsBarPlot}
+                                width={this.width(1) - 20} height={height}
+                                schemas={this.props.schemas}
+                            />
+                        </ChartDataController.Provider>
                         <FetchingView display={this.state.fetching} />
                     </div>
                 </div>
