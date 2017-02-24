@@ -1,0 +1,739 @@
+
+.facet-charts {
+    transition: opacity 0.75s;
+    opacity : 1;
+    margin-top: 64px;
+    &.loading {
+        opacity : 0.125;
+        text-align: center;
+
+        > i {
+            font-size: 2rem;
+            color: #000;
+            position: relative;
+        }
+
+    }
+
+    .facet-charts-description {
+        height : 30px;
+        line-height: 30px;
+        font-weight: 500;
+        position: relative;
+    }
+
+    path.clickable {
+        //cursor : pointer;
+    }
+
+    > .facet-chart-row-1 > div {
+        transition : width .75s ease-out;
+        position: relative;
+    }
+
+}
+
+/** Individual and standalone chart styles **/
+
+.chart-container {
+    transition: opacity .75s, transform .75s ease-out;
+    opacity: 1;
+
+    .chart {
+        position: relative;
+        transition: transform .75s ease-out, top .75s;
+    }
+
+    &.no-data {
+        opacity: 0;
+
+        .chart {
+            transform: scale3d(0.8,0.8,0.8);
+        }
+    }
+
+    div.y-axis-bottom {
+        border-top: 1px solid #aaa;
+        position: absolute;
+        bottom: 0;
+    }
+
+}
+
+.chart {
+    position: relative;
+}
+
+/** Common Breadcrumbs **/
+
+.chart-breadcrumbs-container {
+    .crumbs-title {
+        font-weight: 500;
+        margin-bottom: 6px;
+        font-size: 1rem;
+    }
+}
+
+.chart-breadcrumbs {
+    position: relative;
+    height: 26px;
+    line-height: 26px;
+    margin: 0;
+
+    .field-group {
+        display: inline-block;
+        margin-right: 14px;
+        position: relative;
+        z-index: 1;
+        transition: z-index .5s;
+
+        > .field-label {
+            position: absolute;
+            bottom: -24px;
+            font-size: 0.85rem;
+            line-height: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            left: -3px;
+            min-width: 100%;
+            width: 100%;
+            box-sizing: content-box;
+            padding: 5px 3px 4px 3px;
+            text-transform: capitalize;
+            border-radius: 1px;
+            border-top: 1px solid transparent;
+            box-shadow: 0px 5px 3px -14px rgba(0,0,0,0);
+            transition: box-shadow .5s, width .5s, background-color .5s, border-color .5s;
+        }
+        &:last-child {
+            margin-right: 0;
+            > .field-label {
+                overflow: visible;
+            }
+        }
+        &:hover {
+            z-index: 10;
+            > .field-label {
+                z-index: 10;
+                //overflow: visible;
+                //right: auto;
+                //max-width: 320px;
+                width: 150px;
+                //box-shadow: 0px 5px 3px -4px rgba(0,0,0,0.2);
+                background-color: #fff;
+                border-top-color: #888;
+            }
+        }
+        &:before {
+            content: '';
+            position: absolute;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            height: 3px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+        &:not(:last-child):after {
+            content: "&";
+            position: absolute;
+            font-size: 0.8rem;
+            right: -10px;
+            color: #555;
+        }
+    }
+
+    .chart-crumb {
+        display: inline-block;
+        margin-bottom: 2px;
+        height: inherit;
+        line-height: inherit;
+        position: relative;
+        transition: opacity 0.5s, background-color .5s;
+        color: #fff;
+        font-weight: 500;
+        padding: 0 12px;
+        > .icon-container {
+            padding-left: 7px;
+            cursor: pointer;
+            opacity: 0.5;
+            &:hover {
+                opacity : 1;
+            }
+        }
+    }
+
+    &:not(.sequential){
+        
+        .chart-crumb {
+            border-radius: 3px;
+            position: relative;
+            &:not(:last-of-type){
+                margin-right: 7px;
+            }
+            &:not(:last-of-type):after {
+                content: "|";
+                position: absolute;
+                font-size: 0.8rem;
+                right: -5px;
+                color: #555;
+            }
+        }
+    }
+
+    &.sequential {
+        overflow: visible;
+        margin-left: -12px;
+
+        &:before {
+            content : '';
+            position: absolute;
+            z-index: 1;
+            height: 54px;
+            width: 12px;
+            background-color: #fff;
+            left: 0;
+            top: 0;
+        }
+
+        .chart-crumb {
+            padding: 0 12px 0 25px;  
+
+            &:not(:first-child) {
+                padding-left: 25px;
+            }
+
+            &:not(:last-child){
+                &:after {
+                    //content: '\f105';
+                    content: '';
+                    //font-family: FontAwesome;
+                    position: absolute;
+                    transform: rotateZ(45deg);
+                    height: 18px;
+                    width: 18px;
+                    box-sizing: content-box;
+                    border-top: 2px solid #fff;
+                    border-right: 2px solid #fff;
+                    z-index: 2;
+                    background-color: inherit;
+                    right: -11px;
+                    top: 3px;
+                    color: #bbb;
+                }
+            }
+
+            &:first-child {
+                border-top-left-radius: 3px;
+                border-bottom-left-radius: 3px;
+            }
+
+            &:last-child {
+                //background-color: transparent !important;
+                //color: #333;
+                //padding-right: 0px;
+                border-top-right-radius: 3px;
+                border-bottom-right-radius: 3px;
+            }
+
+        }
+    }
+
+    [data-field="experiments_in_set.biosample.biosource.biosource_type"]{
+        text-transform: capitalize;
+    }
+
+}
+
+/** Bar Plot Chart Style(s) **/
+
+.bar-plot-chart { // SVG is top-level element rendered by component;
+    display: block;
+    position: absolute;
+    transition: height .75s ease-out;
+    //overflow: hidden;
+
+    line.y-axis-top {
+        stroke: #ccc;
+        stroke-width: 1px;
+    }
+
+    line.y-axis-bottom {
+        stroke : #aaa;
+        stroke-width: 1px;
+    }
+
+    div.y-axis-bottom {
+        border-top: 1px solid #aaa;
+        position: absolute;
+        bottom: 0;
+    }
+
+    .bar-plot-left-axis {
+        border-right: 1px solid #ddd;
+        position: absolute;
+        left: 0;
+        top: 0;
+        transition: height .75s ease-out;
+        z-index: 0;
+        .axis-step {
+            position: absolute;
+            left: 0;
+            right: 0;
+            text-align: right;
+            transition: bottom .75s ease-out;
+            z-index: 0;
+            &:before {
+                content : '';
+                border-top: 1px solid #ddd;
+                width: 10px;
+                right: 0;
+                bottom: 0;
+                position: absolute;
+            }
+            .axis-bg-line {
+                border-top: 1px dotted #f0f0f0;
+                width: 1000px;
+                right: -1000px;
+                position: absolute;
+                display: block;
+                top: -1px;
+                transition: width .75s;
+            }
+            &.last {
+                .axis-label {
+                    display: none;
+                }
+                &:before {
+                    border-top-color: #ddd;
+                    width: 5px;
+                }
+            }
+            .axis-label {
+                text-align: right;
+                position: absolute;
+                right: 15px;
+                font-size: 0.75rem;
+                top: -8px;
+            }
+        }
+    }
+
+    .chart-bar {
+        transition: transform .75s ease-out, opacity .5s;
+        position: absolute;
+
+        .bar-top-label {
+            display: block;
+            text-align: center;
+            width: 100%;
+        }
+
+        &.larger-height .bar-top-label {
+            position: absolute;
+            top: 50%;
+            margin-top: -10px;
+            color: #fff;
+            z-index: 2;
+        }
+
+        .bar-part {
+            opacity: 1;
+            transition: opacity 0.5s, height .75s ease-out, width .75s;
+            /*
+            &:first-of-type {
+                border-top-left-radius: 3px;
+                border-top-right-radius: 3px;
+            }
+
+            &:last-of-type {
+                border-bottom-left-radius: 3px;
+                border-bottom-right-radius: 3px;
+            }
+            */
+        }
+
+        > rect {
+            fill-opacity: 1;
+            transition : fill-opacity .5s;
+        }
+
+    }
+
+    .y-axis-label {
+        opacity: 1;
+        transition: opacity .5s, transform .75s ease-out;
+        position: absolute;
+
+        > .label-text {
+            display: block;
+            transform-origin: 100% 0;
+            text-align: right;
+            position: relative;
+            font-size: 0.85rem;
+            line-height: 1.2rem;
+            &.auto-rotation {
+                transition: transform 1s, left 1s;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+    }
+
+    &.highlight {
+        .chart-bar > rect {
+            fill-opacity: 0.4;
+        }
+        .chart-bar .bar-part {
+            opacity: 0.4;
+        }
+        .chart-bar.highlight {
+            > rect {
+                fill-opacity: 1;
+            }
+            .bar-part {
+                opacity: 1;
+                &.multiple-parts {
+                    opacity : 1;
+                }
+            }
+        }
+        .y-axis-label {
+            opacity : 0.4;
+            &.highlight {
+                opacity : 1;
+            }
+        }
+    }
+
+    &:not(.highlight) .chart-bar.highlight {
+        .bar-part {
+            opacity: 1;
+            &.multiple-parts {
+                opacity : 0.1;
+                border-radius: 0;
+                &.highlight {
+                    opacity : 1;
+                }
+            }
+        }
+    }
+
+    .chart-color-legend {
+        position: absolute;
+        right: 20px;
+        top: 0;
+        padding: 14px 16px 14px;
+        background-color: #fff;
+        min-width: 200px;
+        //border: 1px solid #eee;
+        //border-radius: 1px;
+
+        .legend-title {
+            margin-bottom: 1px;
+            margin-top: 0px;
+        }
+
+        .color-patch {
+            display: inline-block;
+            height: 12px;
+            width: 12px;
+            margin-right: 6px;
+            position: relative;
+            top: 1px;
+            transition: opacity .25s;
+            //border: 1px solid #000;
+        }
+
+        .highlight .color-patch {
+            opacity : 0.125;
+            &.highlight {
+                opacity : 1;
+            }
+        }
+
+        .field {
+            .legend-field-title {
+                margin-top: 1px;
+            }
+            > .color-patch {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+            }
+
+            .term {
+                font-size: 0.85rem;
+                
+            }
+
+        }
+    }
+
+}
+
+/** Sunburst Chart Style(s) **/
+
+.chart-container-sunburst {
+    position: relative;
+}
+
+.fetching-view {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    text-align: center;
+    opacity : 1;
+    background-color: rgba(255,255,255,0.75);
+    transition: opacity .5s;
+    z-index: 10;
+    &.invisible {
+        opacity : 0;
+        z-index: -1;
+    }
+    > .inner {
+        top: 50%;
+        margin-top: -20px;
+        position: absolute;
+        left: 0;
+        right: 0;
+        text-align: center;
+        > i.icon {
+            color: #888;
+            font-size: 1.5rem;
+        }
+    }
+}
+
+.chart-container-sunburst .chart,
+.chart-sunburst.chart-zoombox {
+
+    position: relative;
+
+    path {
+        stroke: #fff;
+        transition: opacity 1s;
+        opacity : 1;
+        position: relative;
+        &.removing {
+            opacity : 0 !important;
+            z-index: -1;
+            transition: opacity .75s !important;
+        }
+        &.root-node {
+            fill: #eee !important;
+        }
+        &.filtered-out {
+            opacity : 0.1 !important;
+            transition: opacity 1s !important;
+        }
+        &.term-is-not-set {
+            opacity: 0.4;
+        }
+        &.clickable {
+            //cursor : pointer;
+        }
+    }
+
+    svg g.group-container:hover path,
+    svg g.group-container.hover path {
+        transition: opacity 0.25s;
+        opacity: 0.3;
+        &:not(.filtered-out){
+            //opacity : 0.66;
+        }
+        &.hover, &.term-is-set {
+            opacity: 0.75;
+            &.filtered-out {
+                opacity : 0.75 !important;
+            }
+        }
+        &:hover {
+            opacity: 1;
+        }
+    }
+
+    .y-axis-top {
+        position: relative;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 50px;
+        border-bottom: 1px solid #aaa;
+        .top-label {
+            position: absolute;
+            height: inherit;
+            text-align: center;
+            opacity: 0;
+            &.active {
+                opacity: 0.5;
+                cursor: pointer;
+                &:hover {
+                    opacity : 0.75;
+                }
+            }
+        }
+    }
+
+    circle.bounding-circle {
+        opacity : 0;
+    }
+
+    .explanation {
+        color:#888;
+        opacity: 1;
+        transition: opacity .3s;
+        padding-top: 14px;
+
+        &.align-to-right {
+            text-align: right;
+            position: absolute;
+            right : 0;
+            bottom: 0;
+            padding-top: 2px;
+            border-top: 1px solid #ddd;
+        }
+
+        &.invisible {
+            opacity: 0;
+            transition: opacity 1s;
+        }
+
+        .experiments-count {
+            font-size: 1.5rem;
+            line-height: 2rem;
+            font-weight: 300;
+            color: rgba(100, 100, 100, 1);
+            transition: color 0.3s;
+            
+
+            &.invisible {
+                opacity: 0;
+                transition: opacity 1s;
+                
+            }
+            &.half-visible {
+                color: rgba(100, 100, 100, 0.66);
+            }
+            &:not(.align-to-right){
+                display: inline-block;
+            }
+            
+        }
+
+        .experiments-count-label {
+            position: relative;
+            display: inline-block;
+            font-size: 1.125rem;
+            line-height: 1rem;
+            margin-left: 7px;
+            top: -2px;
+            transition: opacity 1s;
+            opacity : 0.66;
+            font-weight: 300;
+            &.align-to-right {
+                display: block;
+                margin-left: 0;
+                top: -1px;
+            }
+            .facet-charts.show-small & {
+                font-size: .975rem;
+            }
+        }
+
+    }
+
+    .explanation-old {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-top: -100px;
+        width: 140px;
+        text-align: center;
+        color:#888;
+        z-index: -1;
+        opacity: 1;
+        transition: opacity .3s;
+
+        &.invisible {
+            opacity: 0;
+            transition: opacity 1s;
+        }
+
+        .experiments-count {
+            font-size: 1.5rem;
+            line-height: 2rem;
+            font-weight: 300;
+            color: rgba(100, 100, 100, 1);
+            transition: color 0.3s;
+
+            .facet-charts.show-large & {
+                font-size: 2.5rem;
+                font-weight: 300;
+                line-height: 3rem;
+            }
+            &.invisible {
+                opacity: 0;
+                transition: opacity 1s;
+                
+            }
+            &.half-visible {
+                color: rgba(100, 100, 100, 0.66);
+            }
+            &:after {
+                content: "Experiments";
+                position: relative;
+                font-size: 1.125rem;
+                line-height: 1rem;
+                display: block;
+                width: 100%;
+                text-align: center;
+            }
+            .facet-charts.show-small &:after {
+                font-size: .975rem;
+            }
+        }
+
+    }
+
+}
+
+.chart-container-sunburst:hover .chart .explanation .experiments-count-label {
+    opacity : 1;
+}
+
+
+/**** Zoom Cursor ****/
+
+
+.cursor-zoom-magnifier-container {
+    background-color: #fff;
+    box-shadow: 1px 1px 6px rgba(0,0,0,0.3);
+    z-index: 1000;
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 50%;
+    overflow: hidden;
+    //display: none !important;
+    opacity: 1;
+    transition: opacity .25s, transform .05s linear;
+
+    .cursor-zoom-magnifier {
+        position: static;
+
+        > .inner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition : transform .05s linear;
+        }
+
+    }
+
+}

@@ -18,6 +18,8 @@
         "Adapter Content": "PASS",
         "Overrepresented sequences": "PASS",
         "Per sequence quality scores": "PASS",
-        "Per base N content": "PASS"
+        "Per base N content": "PASS",
+        "overall_quality_status": "PASS",
+        "url" : "https://s3.amazonaws.com/elasticbeanstalk-encoded-4dn-wfoutput-files/4DNFIW7Q5UDL/fastqc_report.html"
 }
 ]

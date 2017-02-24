@@ -1,5 +1,5 @@
 from rdflib import ConjunctiveGraph, exceptions, Namespace
-from rdflib import RDFS, RDF, BNode
+from rdflib import RDFS, RDF, BNode, URIRef
 from rdflib.collection import Collection
 
 
@@ -19,6 +19,15 @@ IntersectionOf = OWLNS["intersectionOf"]
 DEFAULT_LANGUAGE = "en"
 
 
+def convert2URIRef(astring):
+    '''converts a string to a URIRef type'''
+    try:
+        astring = URIRef(astring)
+    except:
+        pass
+    return astring
+
+
 def inferNamespacePrefix(aUri):
     stringa = aUri.__str__()
     try:
@@ -29,13 +38,15 @@ def inferNamespacePrefix(aUri):
 
 
 def splitNameFromNamespace(aUri):
+    name = ''
     stringa = aUri.__str__()
     try:
         ns = stringa.split("#")[0]
         name = stringa.split("#")[1]
     except:
         ns = stringa.rsplit("/", 1)[0]
-        name = stringa.rsplit("/", 1)[1]
+        if '/' in stringa:
+            name = stringa.rsplit("/", 1)[1]
     return (name, ns)
 
 
@@ -84,6 +95,20 @@ def removeDuplicates(seq, idfun=None):
         return result
     else:
         return []
+
+
+def getObjectLiteralsOfType(class_, data, terms):
+    '''Given a class identifier, rdfGraph and predicate URIRefs
+        Returns the list of unique object literals
+    '''
+    objects = {}
+    for term in terms:
+        obj = []
+        for o in data.rdfGraph.objects(class_, term):
+            obj += [o]
+        obj = [str(s) for s in obj]
+        objects.update(dict(zip(obj, [1] * len(obj))))
+    return list(objects.keys())
 
 
 class Owler(object):

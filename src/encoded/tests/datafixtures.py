@@ -12,16 +12,6 @@ def lab(testapp):
 
 
 @pytest.fixture
-def remc_lab(testapp):
-    item = {
-        'name': 'remc-lab',
-        'title': 'REMC lab',
-        'status': 'current'
-    }
-    return testapp.post_json('/lab', item).json['@graph'][0]
-
-
-@pytest.fixture
 def admin(testapp):
     item = {
         'first_name': 'Test',
@@ -30,20 +20,6 @@ def admin(testapp):
         'groups': ['admin'],
         'status': 'current'
     }
-    # User @@object view has keys omitted.
-    res = testapp.post_json('/user', item)
-    return testapp.get(res.location).json
-
-
-@pytest.fixture
-def wrangler(testapp):
-    item = {
-        'first_name': 'Wrangler',
-        'last_name': 'Admin',
-        'email': 'wrangler@example.org',
-        'groups': ['admin'],
-    }
-
     # User @@object view has keys omitted.
     res = testapp.post_json('/user', item)
     return testapp.get(res.location).json
@@ -65,36 +41,6 @@ def submitter(testapp, lab, award):
 
 
 @pytest.fixture
-def lab_viewer(testapp, lab, award):
-    item = {
-        'first_name': 'ENCODE',
-        'last_name': 'lab viewer',
-        'email': 'encode_viewer@example.org',
-        'lab': lab['name'],
-        'status': 'current',
-        'viewing_groups': [award['viewing_group']]
-    }
-    # User @@object view has keys omitted.
-    res = testapp.post_json('/user', item)
-    return testapp.get(res.location).json
-
-
-@pytest.fixture
-def remc_submitter(testapp, remc_lab, remc_award):
-    item = {
-        'first_name': 'REMC',
-        'last_name': 'Submitter',
-        'email': 'remc_submitter@example.org',
-        'submits_for': [remc_lab['@id']],
-        'viewing_groups': [remc_award['viewing_group']],
-        'status': 'current'
-    }
-    # User @@object view has keys omitted.
-    res = testapp.post_json('/user', item)
-    return testapp.get(res.location).json
-
-
-@pytest.fixture
 def access_key(testapp, submitter):
     description = 'My programmatic key'
     item = {
@@ -108,48 +54,11 @@ def access_key(testapp, submitter):
 
 
 @pytest.fixture
-def viewing_group_member(testapp, award):
-    item = {
-        'first_name': 'Viewing',
-        'last_name': 'Group',
-        'email': 'viewing_group_member@example.org',
-        'viewing_groups': [award['viewing_group']],
-        'status': 'current'
-    }
-    # User @@object view has keys omitted.
-    res = testapp.post_json('/user', item)
-    return testapp.get(res.location).json
-
-
-@pytest.fixture
 def award(testapp):
     item = {
         'name': 'encode3-award',
         'description': 'ENCODE test award',
         'viewing_group': '4DN',
-    }
-    return testapp.post_json('/award', item).json['@graph'][0]
-
-
-@pytest.fixture
-def remc_award(testapp):
-    item = {
-        'name': 'remc-award',
-        'description': 'REMC test award',
-        'viewing_group': 'Not 4DN',
-    }
-    return testapp.post_json('/award', item).json['@graph'][0]
-
-
-@pytest.fixture
-def encode2_award(testapp):
-    item = {
-        # upgrade/shared.py ENCODE2_AWARDS
-        'uuid': '1a4d6443-8e29-4b4a-99dd-f93e72d42418',
-        'name': 'encode2-award',
-        'rfa': 'ENCODE2',
-        'project': 'ENCODE',
-        'viewing_group': 'ENCODE',
     }
     return testapp.post_json('/award', item).json['@graph'][0]
 
@@ -201,6 +110,17 @@ def mboI(testapp, worthington_biochemical, lab, award):
 
 
 @pytest.fixture
+def lung_biosource(testapp, lab, award):
+    item = {
+        "biosource_type": "tissue",
+        "tissue": "lung",
+        'award': award['@id'],
+        'lab': lab['@id'],
+    }
+    return testapp.post_json('/biosource', item).json['@graph'][0]
+
+
+@pytest.fixture
 def tissue_biosample(testapp, lung_biosource, lab, award):
     item = {
         'description': "Tissue Biosample",
@@ -221,18 +141,6 @@ def protocol(testapp, lab, award):
 
 
 @pytest.fixture
-def GM12878_biosource(testapp, lab, award):
-    item = {
-        "accession": "4DNSR000AAQ1",
-        "biosource_type": "immortalized cell line",
-        "cell_line": "GM12878",
-        'award': award['@id'],
-        'lab': lab['@id'],
-    }
-    return testapp.post_json('/biosource', item).json['@graph'][0]
-
-
-@pytest.fixture
 def F123_biosource(testapp, lab, award):
     item = {
         "accession": "4DNSR000AAQ2",
@@ -240,28 +148,6 @@ def F123_biosource(testapp, lab, award):
         "cell_line": "F123-CASTx129",
         'award': award['@id'],
         'lab': lab['@id'],
-    }
-    return testapp.post_json('/biosource', item).json['@graph'][0]
-
-
-@pytest.fixture
-def lung_biosource(testapp, lab, award):
-    item = {
-        "biosource_type": "tissue",
-        "tissue": "lung",
-        'award': award['@id'],
-        'lab': lab['@id'],
-    }
-    return testapp.post_json('/biosource', item).json['@graph'][0]
-
-
-@pytest.fixture
-def whole_biosource(testapp, human_individual, lab, award):
-    item = {
-        "biosource_type": "whole organisms",
-        "individual": human_individual['@id'],
-        'award': award['@id'],
-        'lab': lab['@id']
     }
     return testapp.post_json('/biosource', item).json['@graph'][0]
 
@@ -282,14 +168,18 @@ def human_biosource(testapp, human_individual, worthington_biochemical, lab, awa
 
 
 @pytest.fixture
-def human(testapp):
-    item = {
-        'uuid': '7745b647-ff15-4ff3-9ced-b897d4e2983c',
-        'name': 'human',
-        'scientific_name': 'Homo sapiens',
-        'taxon_id': '9606',
-    }
-    return testapp.post_json('/organism', item).json['@graph'][0]
+def human_data():
+    return {
+            'uuid': '7745b647-ff15-4ff3-9ced-b897d4e2983c',
+            'name': 'human',
+            'scientific_name': 'Homo sapiens',
+            'taxon_id': '9606',
+           }
+
+
+@pytest.fixture
+def human(testapp, human_data):
+    return testapp.post_json('/organism', human_data).json['@graph'][0]
 
 
 @pytest.fixture
@@ -319,66 +209,8 @@ def experiment_set(testapp, lab, award):
     return testapp.post_json('/experiment_set', item).json['@graph'][0]
 
 
-@pytest.fixture
-def experiment_set_custom(testapp, lab, award):
-    item = {
-        'lab': lab['@id'],
-        'award': award['@id'],
-        'experimentset_type': 'custom',
-        'status': 'in review by lab'
-    }
-    return testapp.post_json('/experiment_set', item).json['@graph'][0]
-
-
 # fixtures for testing calculated experiment_sets property in experiment_set
 # and also for _update method of experiment_set_replicate (and experiment_set)
-@pytest.fixture
-def custom_experiment_set(testapp, lab, award):
-    item = {
-        'lab': lab['@id'],
-        'award': award['@id'],
-        'description': 'test experiment set',
-        'experimentset_type': 'custom',
-        'status': 'in review by lab'
-    }
-    return testapp.post_json('/experiment_set', item).json['@graph'][0]
-
-
-@pytest.fixture
-def replicate_experiment_set(testapp, lab, award):
-    item = {
-        'lab': lab['@id'],
-        'award': award['@id'],
-        'description': 'test replicate set',
-        'experimentset_type': 'replicate',
-        'status': 'in review by lab'
-    }
-    return testapp.post_json('/experiment_set_replicate', item).json['@graph'][0]
-
-
-@pytest.fixture
-def sop_map_data(protocol, lab, award):
-    return {
-        "sop_name": "in situ Hi-C SOP map",
-        "sop_version": 1,
-        'lab': lab['@id'],
-        'award': award['@id'],
-        "associated_item_type": "ExperimentHiC",
-        "id_values": ["micro-C"],
-        "notes": "This is just a dummy insert not linked to true SOP protocol",
-        "description": "Fields with specified defaults in the SOP for in situ Hi-C experiments as per ??",
-        "sop_protocol": protocol['@id'],
-        "fields_with_default": [
-            {"field_name": "digestion_enzyme", "field_value": "MboI"},
-        ]
-    }
-
-
-@pytest.fixture
-def sop_map(testapp, sop_map_data):
-    return testapp.post_json("/sop_map", sop_map_data).json['@graph'][0]
-
-
 @pytest.fixture
 def experiment(testapp, experiment_data):
     return testapp.post_json('/experiment_hi_c', experiment_data).json['@graph'][0]
@@ -504,39 +336,6 @@ def publication(testapp, lab, award):
 
 
 @pytest.fixture
-def publication_PMID(testapp, lab, award):
-    item = {
-        'uuid': '8312fc0c-b241-4cb2-9b01-143891055000',
-        'award': award['@id'],
-        'lab': lab['@id'],
-        'ID': "PMID:26673895",
-    }
-    return testapp.post_json('/publication', item).json['@graph'][0]
-
-
-@pytest.fixture
-def publication_doi_pubmed(testapp, lab, award):
-    item = {
-        'uuid': '8312fc0c-b241-4cb2-9b01-143891055001',
-        'award': award['@id'],
-        'lab': lab['@id'],
-        'ID': "doi:10.1093/nar/gkv1046",
-    }
-    return testapp.post_json('/publication', item).json['@graph'][0]
-
-
-@pytest.fixture
-def publication_doi_biorxiv(testapp, lab, award):
-    item = {
-        'uuid': '8312fc0c-b241-4cb2-9b01-143891055002',
-        'award': award['@id'],
-        'lab': lab['@id'],
-        'ID': "doi:10.1101/000091"
-    }
-    return testapp.post_json('/publication', item).json['@graph'][0]
-
-
-@pytest.fixture
 def publication_tracking(testapp, lab, award):
     item = {
         'uuid': '8312fc0c-b241-4cb2-9b01-1438910550ac',
@@ -583,6 +382,21 @@ def document(testapp, lab, award):
 
 
 @pytest.fixture
+def workflow_run_sbg(testapp, lab, award, workflow_bam):
+    item = {'run_platform': 'SBG',
+            'parameters': [],
+            'workflow':  workflow_bam['@id'],
+            'title': u'md5 run 2017-01-20 13:16:11.026176',
+            'sbg_import_ids': [u'TBCKPdzfUE9DpvtzO6yb9yoIvO81RaZd'],
+            'award': award['@id'],
+            'sbg_task_id': '1235',
+            'lab': lab['@id'],
+            'sbg_mounted_volume_ids': ['4dn_s32gkz1s7x','4dn_s33xkquabu'],
+            'run_status': 'started',
+           }
+    return testapp.post_json('/workflow_run_sbg', item).json['@graph'][0]
+
+@pytest.fixture
 def human_biosample(testapp, human_biosource, lab, award):
     item = {
         "description": "GM12878 prepared for Hi-C",
@@ -598,46 +412,6 @@ def human_biosample(testapp, human_biosource, lab, award):
 
 
 @pytest.fixture
-def biosample_1(testapp, human_biosource, lab, award):
-    item = {
-        'description': "GM12878 prepared for Hi-C",
-        'biosource': [human_biosource['@id'], ],
-        'award': award['@id'],
-        'lab': lab['@id'],
-    }
-    return testapp.post_json('/biosample', item).json['@graph'][0]
-
-
-@pytest.fixture
-def biosample_2(testapp, human_biosource, lab, award):
-    item = {
-        'description': "GM12878 prepared for Hi-C",
-        'biosource': [human_biosource['@id'], ],
-        'award': award['@id'],
-        'lab': lab['@id']
-    }
-    return testapp.post_json('/biosample', item).json['@graph'][0]
-
-
-@pytest.fixture
-def donor_1(testapp, lab, award):
-    item = {
-        'award': award['@id'],
-        'lab': lab['@id'],
-    }
-    return testapp.post_json('/individual_human', item, status=201).json['@graph'][0]
-
-
-@pytest.fixture
-def donor_2(testapp, lab, award):
-    item = {
-        'award': award['@id'],
-        'lab': lab['@id'],
-    }
-    return testapp.post_json('/individual_human', item, status=201).json['@graph'][0]
-
-
-@pytest.fixture
 def software_bam(testapp, lab, award):
     # TODO: ASK_ANDY do we want software_type to be an array?
     item = {
@@ -648,18 +422,6 @@ def software_bam(testapp, lab, award):
         'award': award['@id']
     }
     return testapp.post_json('/software', item).json['@graph'][0]
-
-
-@pytest.fixture
-def analysis_step_bam(testapp, software_bam, lab, award):
-    item = {
-        'name': 'bamqc',
-        'software_used': software_bam['@id'],
-        "version": "1",
-        'lab': lab['@id'],
-        'award': award['@id'],
-    }
-    return testapp.post_json('/analysis_step', item).json['@graph'][0]
 
 
 @pytest.fixture
@@ -694,95 +456,3 @@ def workflow_mapping(testapp, workflow_bam, lab, award):
         ]
     }
     return testapp.post_json('/workflow_mapping', item).json['@graph'][0]
-
-
-@pytest.fixture
-def target_w_genes(testapp, lab, award):
-    item = {
-        "targeted_genes": ["eeny", "meeny"],
-        'award': award['@id'],
-        'lab': lab['@id'],
-    }
-    return testapp.post_json('/target', item).json['@graph'][0]
-
-
-@pytest.fixture
-def target_w_region(testapp, genomic_region_w_chrloc, lab, award):
-    item = {
-        "targeted_region": genomic_region_w_chrloc['@id'],
-        'award': award['@id'],
-        'lab': lab['@id'],
-    }
-    return testapp.post_json('/target', item).json['@graph'][0]
-
-
-@pytest.fixture
-def target_w_desc(testapp, lab, award):
-    item = {
-        "description": "I'm a region",
-        'award': award['@id'],
-        'lab': lab['@id'],
-    }
-    return testapp.post_json('/target', item).json['@graph'][0]
-
-
-@pytest.fixture
-def targets(target_w_desc, target_w_region, target_w_genes):
-    return {'target_w_desc': target_w_desc,
-            'target_w_region': target_w_region,
-            'target_w_genes': target_w_genes
-            }
-
-
-@pytest.fixture
-def basic_genomic_region(testapp, lab, award):
-    item = {
-        "genome_assembly": "GRCh38",
-        'award': award['@id'],
-        'lab': lab['@id'],
-    }
-    return testapp.post_json('/genomic_region', item).json['@graph'][0]
-
-
-@pytest.fixture
-def genomic_region_w_chrloc(testapp, lab, award):
-    item = {
-        "genome_assembly": "GRCh38",
-        "chromosome": "X",
-        "start_coordinate": 1,
-        "end_coordinate": 3,
-        'award': award['@id'],
-        'lab': lab['@id']
-    }
-    return testapp.post_json('/genomic_region', item).json['@graph'][0]
-
-
-@pytest.fixture
-def genomic_region_w_onlyendloc(testapp, lab, award):
-    item = {
-        "genome_assembly": "assembly",
-        "end_coordinate": 3,
-        'award': award['@id'],
-        'lab': lab['@id']
-    }
-    return testapp.post_json('/genomic_region', item).json['@graph'][0]
-
-
-@pytest.fixture
-def genomic_regions(genomic_region_w_onlyendloc, genomic_region_w_chrloc, basic_genomic_region, lab, award):
-    return {'genomic_region_w_onlyendloc': genomic_region_w_onlyendloc,
-            'genomic_region_w_chrloc': genomic_region_w_chrloc,
-            'basic_genomic_region': basic_genomic_region,
-            'award': award['@id'],
-            'lab': lab['@id']
-            }
-
-
-@pytest.fixture
-def encode_lab(testapp):
-    item = {
-        'name': 'encode-processing-pipeline',
-        'title': 'ENCODE Processing Pipeline',
-        'status': 'current'
-    }
-    return testapp.post_json('/lab', item, status=201).json['@graph'][0]

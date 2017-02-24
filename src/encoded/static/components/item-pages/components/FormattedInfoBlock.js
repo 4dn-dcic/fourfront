@@ -2,7 +2,7 @@
 
 var React = require('react');
 var _ = require('underscore');
-var { ajaxLoad, isServerSide, console } = require('./objectutils');
+var { ajax, console, isServerSide } = require('./../../util');
 
 /**
  * Optional container of FormattedInfoBlocks, wrapping them in a <UL> and <LI> elements.
@@ -35,7 +35,7 @@ var FormattedInfoBlockList = React.createClass({
             endpoints.forEach(function(endpoint, i){
 
                 console.log('Obtaining ' + propertyName + '[' + i + '] via AJAX from ' + endpoint);
-                ajaxLoad(endpoint + '?format=json&frame=embedded', function(result){
+                ajax.load(endpoint + '?format=json&frame=embedded', function(result){
                     results[i] = result;
                     console.log('Obtained ' + propertyName + '[' + i + '] via AJAX.');
                     if (results.length == endpoints.length){
@@ -199,7 +199,7 @@ var FormattedInfoBlock = module.exports = React.createClass({
          */
         ajaxPropertyDetails : function(endpoint, propertyName, callback = null){
             console.info('Obtaining details_' + propertyName + ' via AJAX.');
-            ajaxLoad(endpoint + '?format=json&frame=embedded', function(result){
+            ajax.load(endpoint + '?format=json&frame=embedded', function(result){
                 var newStateAddition = {};
                 newStateAddition['details_' + propertyName] = result;
                 this.setState(newStateAddition, ()=>{
@@ -216,6 +216,27 @@ var FormattedInfoBlock = module.exports = React.createClass({
                 };
                 this.setState(newStateAddition);
             }.bind(this));
+        },
+
+        /** Use like a mixin from a component which parents a FormattedInfoBlock(s) */
+        onMountMaybeFetch : function(propertyName = 'lab', contextProperty = this.props.context.lab, cb = null){
+            if (typeof contextProperty == 'string' && contextProperty.length > 0){
+                FormattedInfoBlock.ajaxPropertyDetails.call(this, contextProperty, propertyName, cb);
+                return true;
+            } 
+            if (contextProperty && typeof contextProperty === 'object'){
+                if (
+                    _.keys(contextProperty).length <= 3 &&
+                    typeof contextProperty.link_id === 'string' &&
+                    typeof contextProperty.display_title === 'string'
+                ){
+                    FormattedInfoBlock.ajaxPropertyDetails.call(
+                        this, contextProperty.link_id.replace(/~/g,'/'), propertyName, cb
+                    );
+                    return true;
+                }
+            }
+            return false;
         },
 
         /**
@@ -285,7 +306,7 @@ var FormattedInfoBlock = module.exports = React.createClass({
                     key={key}
                     label={label}
                     iconClass={iconClass}
-                    title={detail ? detail.title : null }
+                    title={(detail && detail.title) || null }
                     titleHref={detail && detail['@id'] ? detail['@id'] : null }
                     extraContainerClassName={extraContainerClassName}
                     extraDetailClassName={extraDetailClassName}

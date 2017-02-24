@@ -4,6 +4,7 @@ var React = require('react');
 var d3 = require('d3');
 var _ = require('underscore');
 var globals = require('./../globals');
+var { getElementTop } = require('./../util/layout');
 
 var TableOfContents = module.exports = React.createClass({
 
@@ -65,7 +66,7 @@ var TableOfContents = module.exports = React.createClass({
                 if (this.props.link === "top") {
                     elementTop = 0;
                 } else if (typeof this.props.link === 'string'){
-                    elementTop = TableOfContents.getElementTop(this.getTargetElement());
+                    elementTop = getElementTop(this.getTargetElement());
                 } else {
                     return null;
                 }
@@ -111,7 +112,7 @@ var TableOfContents = module.exports = React.createClass({
                     elemTop = 0;
                 } else {
                     targetElem = this.getTargetElement(props.link);
-                    elemTop = TableOfContents.getElementTop(targetElem);
+                    elemTop = getElementTop(targetElem);
                     if (props.mounted && document && document.body && document.body.scrollHeight && window && window.innerHeight){
                         // Try to prevent from trying to scroll past max scrollable height.
                         elemTop = Math.min(document.body.scrollHeight - window.innerHeight, elemTop);
@@ -126,7 +127,7 @@ var TableOfContents = module.exports = React.createClass({
                         nextHeaderTop = props.nextHeader;
                     } else {
                         var nextHeaderElement = this.getNextHeaderElement(props);
-                        if (nextHeaderElement) nextHeaderTop = TableOfContents.getElementTop(nextHeaderElement);
+                        if (nextHeaderElement) nextHeaderTop = getElementTop(nextHeaderElement);
                     }
                     
                     if (
@@ -307,14 +308,6 @@ var TableOfContents = module.exports = React.createClass({
                 );
             }
         }),
-
-        getElementTop : function(el){
-            if (!(typeof window !== 'undefined' && window && document && document.body)) return null;
-            if (!el || typeof el.getBoundingClientRect !== 'function') return null;
-            var bodyRect = document.body.getBoundingClientRect();
-            var boundingRect = el.getBoundingClientRect();
-            return boundingRect.top - bodyRect.top;
-        },
 
         /** Taken from https://gist.github.com/mathewbyrne/1280286 */
         slugify : function (text) {

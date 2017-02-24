@@ -15,6 +15,7 @@ from snovault import (
 )
 from .base import (
     Item,
+    add_default_embeds
 )
 
 
@@ -51,6 +52,7 @@ class Lab(Item):
     schema = load_schema('encoded:schemas/lab.json')
     name_key = 'name'
     embedded = ['awards']
+    embedded = add_default_embeds(embedded, schema)
 
     STATUS_ACL = {
         'current': ALLOW_EVERYONE_VIEW_AND_SUBMITTER_EDIT,

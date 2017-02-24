@@ -81,10 +81,28 @@
                         "description": "type of the argument",
                         "type": "string",
                         "enum" : [
-                            "",
                             "Input file",
-                            "Output file",
-                            "parameter"
+                            "Output processed file",
+                            "Output QC file",
+                            "Output report file",
+                            "parameter",
+                            "NA"
+                        ]
+                    },
+                    "argument_format":{
+                        "title": "Workflow argument format",
+                        "description": "format of the argument",
+                        "type": "string",
+                        "enum" : [
+                            "fastq",
+                            "bam",
+                            "bai",
+                            "pairs",
+                            "pairs_px2",
+                            "cool",
+                            "hic",
+                            "bwaIndex",
+                            "other"
                         ]
                     },
                     "description": {

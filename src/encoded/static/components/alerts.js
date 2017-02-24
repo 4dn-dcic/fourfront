@@ -9,28 +9,42 @@ var Alerts = module.exports = React.createClass({
 
     statics : {
         queue : function(alert, callback){
+            var currentAlerts = store.getState().alerts;
+            if (_.pluck(currentAlerts, 'title').indexOf(alert.title) > -1) return null; // Same alert is already set.
             store.dispatch({
-                type: { 'alerts' : store.getState().alerts.concat([alert]) }
+                type: { 'alerts' : currentAlerts.concat([alert]) }
             });
         },
         deQueue : function(alert, callback){
+            var currentAlerts = store.getState().alerts;
+            currentAlerts = currentAlerts.filter(function(a){ return a.title != alert.title; });
             store.dispatch({
-                type: { 'alerts' : _.without(store.getState().alerts, alert) }
+                type: { 'alerts' : currentAlerts }
             });
         },
+
         // Common alert definitions
-        LoggedOut : {"title" : "Logged Out", "message" : "You have been logged out due to an expired session."}
+        LoggedOut : {
+            "title"     : "Logged Out",
+            "message"   : "You have been logged out due to an expired session.",
+            "style"     : 'danger'
+        },
+        NoFilterResults : {
+            'title'     : "No Results",
+            'message'   : "Selecting this filter returned no results so it was deselected.",
+            'style'     : "warning"
+        }
     },
 
-    getInitialState : function(){ 
+    getInitialState : function(){
         return {
             'dismissing' : []
-        }; 
+        };
     },
 
     render : function(){
         if (this.props.alerts.length === 0) return null;
-        
+
         function dismiss(index){
             var currentAlert = this.props.alerts.slice(index, index + 1)[0];
             var dismissing = _.clone(this.state.dismissing);
@@ -48,10 +62,10 @@ var Alerts = module.exports = React.createClass({
 
         return (
             <div className="alerts">
-            { 
+            {
                 this.props.alerts.map(function(alert,i){
                     return (
-                        <Fade 
+                        <Fade
                             key={'alert-' + i}
                             timeout={500}
                             in={ _.findIndex(this.state.dismissing, alert) === -1 }

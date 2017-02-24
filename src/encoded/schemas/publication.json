@@ -85,10 +85,7 @@
             "items": {
                 "title": "Experiment Set",
                 "type": "string",
-                "anyOf": [
-                    {"linkTo": "ExperimentSet"},
-                    {"linkTo": "ExperimentSetReplicate"}
-                ]
+                "linkTo": "ExperimentSet"
             }
         },
         "exp_sets_used_in_pub": {
@@ -100,17 +97,15 @@
             "items": {
                 "title": "Experiment Set",
                 "type": "string",
-                "anyOf": [
-                    {"linkTo": "ExperimentSet"},
-                    {"linkTo": "ExperimentSetReplicate"}
-                ]
+                "linkTo": "ExperimentSet"
             }
         },
         "title": {
             "title": "Title",
             "description": "DON'T SUBMIT, auto-generated.",
             "uniqueKey": true,
-            "type": "string"
+            "type": "string",
+            "exclude_from": "edit"
         },
         "abstract": {
             "title": "Abstract",

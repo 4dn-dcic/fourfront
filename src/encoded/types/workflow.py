@@ -7,6 +7,7 @@ from snovault import (
 )
 from .base import (
     Item,
+    add_default_embeds
 )
 
 
@@ -23,6 +24,7 @@ class Workflow(Item):
     schema = load_schema('encoded:schemas/workflow.json')
     embedded = ['workflow_steps.step',
                 'workflow_steps.step_name']
+    embedded = add_default_embeds(embedded, schema)
 
 @collection(
     name='workflow-runs',
@@ -35,7 +37,16 @@ class WorkflowRun(Item):
 
     item_type = 'workflow_run'
     schema = load_schema('encoded:schemas/workflow_run.json')
-    embedded = ['workflow']
+    embedded = ['workflow',
+                'input_files.workflow_argument_name',
+                'input_files.value',
+                'input_files.value.file_format',
+                'output_files.workflow_argument_name',
+                'output_files.value',
+                'output_files.value.file_format',
+                'output_quality_metrics.name',
+                'output_quality_metrics.value']
+    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -50,6 +61,7 @@ class WorkflowRunSbg(WorkflowRun):
     item_type = 'workflow_run_sbg'
     schema = load_schema('encoded:schemas/workflow_run_sbg.json')
     embedded = WorkflowRun.embedded
+    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -63,3 +75,5 @@ class WorkflowMapping(Item):
 
     item_type = 'workflow_mapping'
     schema = load_schema('encoded:schemas/workflow_mapping.json')
+    embedded = []
+    embedded = add_default_embeds(embedded, schema)

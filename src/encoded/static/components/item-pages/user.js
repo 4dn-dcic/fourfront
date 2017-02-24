@@ -4,15 +4,15 @@
 'use strict';
 
 var React = require('react');
-var globals = require('./globals');
-var store = require('../store');
-var { Modal, Alert } = require('react-bootstrap');
-var { ItemStore } = require('./lib/store');
-var { ajaxLoad, DateUtility, console, JWT } = require('./objectutils');
-var FormattedInfoBlock = require('./formatted-info-block');
 var _ = require('underscore');
-var { EditableField, FieldSet } = require('./forms');
+var { Modal, Alert } = require('react-bootstrap');
 var jwt = require('jsonwebtoken');
+var { ItemStore } = require('./../lib/store');
+var globals = require('./../globals');
+var store = require('./../../store');
+var { ajax, JWT, console, DateUtility } = require('./../util');
+var FormattedInfoBlock = require('./components/FormattedInfoBlock');
+var { EditableField, FieldSet } = require('./../forms');
 
 
 class AccessKeyStore extends ItemStore {
@@ -35,7 +35,6 @@ var AccessKeyTable = React.createClass({
             'first_name' : React.PropTypes.string,
             'last_name' : React.PropTypes.string,
             'groups' : React.PropTypes.array,
-            'lab' : React.PropTypes.string,
             'status' : React.PropTypes.string,
             'timezone' : React.PropTypes.string,
             'job_title' : React.PropTypes.string,
@@ -234,7 +233,7 @@ var User = module.exports.User = React.createClass({
             'last_name' : React.PropTypes.string,
             'title' : React.PropTypes.string,
             'groups' : React.PropTypes.array,
-            'lab' : React.PropTypes.string,
+            'lab' : React.PropTypes.object,
             'status' : React.PropTypes.string,
             'timezone' : React.PropTypes.string,
             'job_title' : React.PropTypes.string
@@ -413,9 +412,15 @@ var ProfileWorkFields = React.createClass({
     },
 
     componentDidMount : function(){
+
+        if (!this.state.details_lab){
+            this.isLabFetched = FormattedInfoBlock.onMountMaybeFetch.call(this, 'lab', this.props.user.lab, (detail) => this.updateAwardsList([detail]) );
+        }
+
         if (typeof this.props.user.lab == 'string' && !this.state.details_lab){
             // Fetch lab info & update into User instance state via the -for mixin-like-usage ajaxPropertyDetails func.
-            FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.user.lab, 'lab', (detail) => this.updateAwardsList([detail]) );
+            
+            //FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.user.lab, 'lab', (detail) => this.updateAwardsList([detail]) );
         }
     },
 
@@ -446,7 +451,11 @@ var ProfileWorkFields = React.createClass({
      */
     updateAwardsList : function(labDetails){
         var currentAwardsList = (this.state.awards_list || []).slice(0);
-        var currentAwardsListIDs = currentAwardsList.map((awd) => awd['@id']);
+        var currentAwardsListIDs = currentAwardsList.map((awd) => {
+            if (typeof awd === 'string') return awd;
+            if (typeof awd['@id'] === 'string') return awd['@id'];
+            if (typeof awd.link_id === 'string') return awd.link_id.replace(/~/g, "/");
+        });
         var newAwards = this.getAwardsList(labDetails);
         for (var i = 0; i < newAwards.length; i++){
             if (currentAwardsListIDs.indexOf(newAwards[i]['@id']) === -1){
@@ -472,8 +481,8 @@ var ProfileWorkFields = React.createClass({
                         <label htmlFor="lab">Primary Lab</label>
                     </div>
                     <div id="lab" className="col-sm-9 value">
-                        { typeof user.lab === 'string' ? 
-                            FormattedInfoBlock.Lab(this.state.details_lab, false, false)
+                        { typeof user.lab !== 'undefined' ?
+                            FormattedInfoBlock.Lab(this.isLabFetched ? this.state.details_lab : user.lab, false, false)
                             : 
                             <span className="not-set">No Labs</span>
                         }
@@ -592,7 +601,7 @@ var ImpersonateUserForm = React.createClass({
         if(userInfo){
             reqHeaders['Authorization'] = 'Bearer '+idToken;
         }
-        ajaxLoad(url, callbackFxn, 'POST', fallbackFxn, jsonData, reqHeaders);
+        ajax.load(url, callbackFxn, 'POST', fallbackFxn, jsonData, reqHeaders);
     }
 });
 globals.content_views.register(ImpersonateUserForm, 'Portal', 'impersonate-user');

@@ -2,14 +2,15 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 var url = require('url');
+var querystring = require('querystring');
 var _ = require('underscore');
 var globals = require('./globals');
 var browse = module.exports;
-var { MenuItem, DropdownButton, ButtonToolbar, Table, Checkbox, Button, Panel } = require('react-bootstrap');
+var { MenuItem, DropdownButton, ButtonToolbar, ButtonGroup, Table, Checkbox, Button, Panel } = require('react-bootstrap');
 var store = require('../store');
 var FacetList = require('./facetlist');
 var { ExperimentsTable, getFileDetailContainer } = require('./experiments-table');
-var { isServerSide } = require('./objectutils');
+var { isServerSide, expFxn, Filters } = require('./util');
 var { AuditIndicators, AuditDetail, AuditMixin } = require('./audit');
 var { FlexibleDescriptionBox } = require('./experiment-common');
 
@@ -71,7 +72,8 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         targetFiles : React.PropTypes.instanceOf(Set),
         rowNumber : React.PropTypes.number,
         facets : React.PropTypes.array,
-        selectAllFilesInitially : React.PropTypes.bool
+        selectAllFilesInitially : React.PropTypes.bool,
+        useAjax : React.PropTypes.bool
     },
 
     getInitialState : function(){
@@ -105,8 +107,8 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
     pairsAndFiles : function(){
         // Combine file pairs and unpaired files into one array. [ [filePairEnd1, filePairEnd2], [...], fileUnpaired1, fileUnpaired2, ... ]
         // Length will be file_pairs.length + unpaired_files.length, e.g. files other than first file in a pair are not counted.
-        return ExperimentsTable.funcs.listAllFilePairs(this.props.experimentArray).concat(
-            ExperimentsTable.funcs.listAllUnpairedFiles(this.props.experimentArray)
+        return expFxn.listAllFilePairs(this.props.experimentArray).concat(
+            expFxn.listAllUnpairedFiles(this.props.experimentArray)
         ); // (can always _.flatten() this or map out first file per pair, e.g. for targetFiles below)
     },
 
@@ -198,6 +200,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
             /* Removed props.facets & props.expSetFilters as passing in props.passExperiments as experimentArray. */
             return (
                 <ExperimentsTable
+                    key='experiments-table'
                     columnHeaders={[
                         { className: 'file-detail', title : 'File Type'},
                         { className: 'file-detail', title : 'File Info'}
@@ -206,6 +209,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                     replicateExpsArray={this.props.replicateExpsArray}
                     experimentSetType={this.props.experimentSetType}
                     parentController={this}
+                    useAjax={this.props.useAjax}
                 />
             );
         }
@@ -217,7 +221,7 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
         var indeterminate = this.state.selectedFiles.size > 0 && this.state.selectedFiles.size < files.length;
 
         return (
-            <tbody className={"expset-section expset-entry-passed " + (this.state.open ? "open" : "closed")} data-row={this.props.rowNumber}>
+            <tbody data-key={this.props['data-key']} className={"expset-section expset-entry-passed " + (this.state.open ? "open" : "closed")} data-row={this.props.rowNumber}>
                 <tr className="expset-table-row">
                     <td className="expset-table-cell dropdown-button-cell">
                         <Button bsSize="xsmall" className="expset-button icon-container" onClick={this.handleToggle}>
@@ -439,35 +443,63 @@ var ResultTable = browse.ResultTable = React.createClass({
 
     propTypes : {
         // Props' type validation based on contents of this.props during render.
-        searchBase      : React.PropTypes.string,
+        href            : React.PropTypes.string.isRequired,
         context         : React.PropTypes.object.isRequired,
-        expSetFilters   : React.PropTypes.object,
+        expSetFilters   : React.PropTypes.object.isRequired,
         fileFormats     : React.PropTypes.array,
         fileStats       : React.PropTypes.object,
         targetFiles     : React.PropTypes.instanceOf(Set),
-        onChange        : React.PropTypes.func
+        onChange        : React.PropTypes.func,
+        useAjax         : React.PropTypes.bool,
+        navigate        : React.PropTypes.func.isRequired
+    },
+
+    getPageAndLimitFromURL : function(href){
+        // Grab limit & page (via '(from / limit) + 1 ) from URL, if available.
+        var urlParts = url.parse(href, true);
+        var limit = parseInt(urlParts.query.limit || Filters.getLimit() || 25);
+        var from  = parseInt(urlParts.query.from  || 0);
+        if (isNaN(limit)) limit = 25;
+        if (isNaN(from)) from = 0;
+        
+        return {
+            'page' : (from / limit) + 1,
+            'limit' : limit
+        }
     },
 
     getInitialState: function(){
-        return {
+        // Grab limit & page (via '(from' / 'limit') + 1 ) from URL, if available.
+        var pageAndLimit = this.getPageAndLimitFromURL(this.props.href);
+
+        // Have Filters use our state.limit, until another component overrides.
+        Filters.getLimit = function(){
+            return (this && this.state && this.state.limit) || 25;
+        }.bind(this);
+        
+        return _.extend({
             sortColumn: null,
             sortReverse: false,
             overflowingRight : false,
             // We need to get the below outta state once graph-ql is in; temporarily stored in state for performance.
-            passedExperiments : ExperimentsTable.getPassedExperiments(
-                this.props.context['@graph'],
-                this.props.expSetFilters,
-                'missing-facets',
-                this.props.context.facets,
-                true
-            )
-        }
+            passedExperiments : 
+                this.props.useAjax ? null :
+                    ExperimentsTable.getPassedExperiments(
+                        this.props.context['@graph'],
+                        this.props.expSetFilters,
+                        'missing-facets',
+                        this.props.context.facets,
+                        true
+                    )
+        }, this.getPageAndLimitFromURL(this.props.href));
     },
 
     getDefaultProps: function() {
         // 'restrictions' object migrated to facetlist.js > FacetList
         return {
-            searchBase: ''
+            'href': '/browse/',
+            'debug' : false,
+            'useAjax' : true
         };
     },
 
@@ -480,18 +512,124 @@ var ResultTable = browse.ResultTable = React.createClass({
     componentWillReceiveProps : function(newProps){
         var newState = {};
 
+        // Update visible experiments via client-side filtering IF not using ajax.
         if (this.props.expSetFilters !== newProps.expSetFilters || this.props.context !== newProps.context){
-            newState.passedExperiments = ExperimentsTable.getPassedExperiments(
-                newProps.context['@graph'],
-                newProps.expSetFilters,
-                'missing-facets',
-                newProps.context.facets,
-                true
-            );
+            if (!this.props.useAjax){
+                newState.passedExperiments = ExperimentsTable.getPassedExperiments(
+                    newProps.context['@graph'],
+                    newProps.expSetFilters,
+                    'missing-facets',
+                    newProps.context.facets,
+                    true
+                );
+            }
+        }
+
+        // Update page re: href.
+        if (this.props.href !== newProps.href){
+            var pageAndLimit = this.getPageAndLimitFromURL(newProps.href);
+            if (pageAndLimit.page !== this.state.page) newState.page = pageAndLimit.page;
+            if (pageAndLimit.limit !== this.state.limit) newState.limit = pageAndLimit.limit;
         }
 
         if (Object.keys(newState).length > 0){
             this.setState(newState);
+        }
+    },
+
+    changePage : _.throttle(function(page = null){
+        
+        if (typeof this.props.navigate !== 'function') throw new Error("Browse doesn't have props.navigate()");
+        if (typeof this.props.href !== 'string') throw new Error("Browse doesn't have props.href.");
+
+        page = Math.min( // Correct page, so don't go past # available or under 1.
+            Math.max(page, 1),
+            Math.ceil(this.props.context.total / this.state.limit)
+        );
+
+        var urlParts = url.parse(this.props.href, true);
+        var previousFrom = parseInt(urlParts.query.from || 0);
+
+        if ( // Check page from URL and state to see if same and if so, cancel navigation.
+            page === this.state.page && 
+            page === Math.ceil(previousFrom / this.state.limit) + 1
+        ){
+            console.warn("Already on page " + page);
+            return;
+        }
+
+        if (typeof urlParts.query.limit === 'number'){
+            urlParts.query.from = (urlParts.query.limit * (page - 1)) + '';
+        } else {
+            urlParts.query.from = (Filters.getLimit() * (page - 1)) + '';
+        }
+        urlParts.search = '?' + querystring.stringify(urlParts.query);
+        this.setState({ 'changingPage' : true }, ()=>{
+            this.props.navigate(
+                url.format(urlParts),
+                { 'replace' : true },
+                ()=>{
+                    this.setState({ 
+                        'changingPage' : false,
+                        'page' : page
+                    }
+                );
+            });
+        });
+    }, 250),
+
+    changeLimit : _.throttle(function(limit = 25){
+        
+        if (typeof this.props.navigate !== 'function') throw new Error("Browse doesn't have props.navigate()");
+        if (typeof this.props.href !== 'string') throw new Error("Browse doesn't have props.href.");
+
+        var urlParts = url.parse(this.props.href, true);
+        var previousLimit = parseInt(urlParts.query.limit || 25);
+        var previousFrom = parseInt(urlParts.query.from || 0);
+        var previousPage = parseInt(Math.ceil(urlParts.query.from / previousLimit)) + 1;
+
+        if ( // Check page from URL and state to see if same and if so, cancel navigation.
+            limit === this.state.limit &&
+            limit === previousLimit
+        ){
+            console.warn("Already have limit " + limit);
+            return;
+        }
+
+        urlParts.query.limit = limit + '';
+        urlParts.query.from = parseInt(Math.max(Math.floor(previousFrom / limit), 0) * limit);
+        urlParts.search = '?' + querystring.stringify(urlParts.query);
+        var newHref = url.format(urlParts);
+
+        this.setState({ 'changingPage' : true }, ()=>{
+            this.props.navigate(
+                newHref,
+                { 'replace' : true },
+                ()=>{
+                    this.setState({ 
+                        'changingPage' : false,
+                        'limit' : limit,
+                    }
+                );
+            });
+        });
+    }, 250),
+
+    shouldComponentUpdate : function(nextProps, nextState){
+        if (this.props.context !== nextProps.context) return true;
+        if (this.state.page !== nextState.page) return true;
+        if (this.state.changingPage !== nextState.changingPage) return true;
+        if (this.state.passedExperiments !== nextState.passedExperiments) return true;
+        if (this.state.sortColumn !== nextState.sortColumn) return true;
+        if (this.state.sortReverse !== nextState.sortReverse) return true;
+        if (this.state.overflowingRight !== nextState.overflowingRight) return true;
+        if (this.props.searchBase !== nextProps.searchBase) return true;
+        return false;
+    },
+
+    componentDidUpdate : function(pastProps, pastState){
+        if (this.props.debug) { 
+            console.log('ResultTable updated.');
         }
     },
 
@@ -554,114 +692,158 @@ var ResultTable = browse.ResultTable = React.createClass({
         }
     },
 
-    formatExperimentSetListings : function(passExperiments, facets = null){
-        // use first experiment set to grap type (all types are the same in any given graph)
+    getSelectedFiles : function(){
+        if (!this.experimentSetRows) return null;
+        return _(this.experimentSetRows).chain()
+            .pairs()
+            .map(function(expRow){
+                return [expRow[0], expRow[1].state.selectedFiles];
+            })
+            .object()
+            .value();
+    },
+
+    getColumnValues : function(experiment_set){
+        var experimentArray = experiment_set.experiments_in_set;
         var columnTemplate = this.getTemplate('column');
+        var columns = {};
+        var firstExp = experimentArray[0]; // use only for replicates
+        var accession = experiment_set.accession ? experiment_set.accession : "Experiment Set";
+
+        // Experiment Set Row Columns
+        for (var i=0; i<Object.keys(columnTemplate).length;i++) {
+            if(Object.keys(columnTemplate)[i] === 'Exps'){
+                columns[Object.keys(columnTemplate)[i]] = experimentArray.length;
+                continue;
+            }else if(Object.keys(columnTemplate)[i] === 'Accession'){
+                columns[Object.keys(columnTemplate)[i]] = accession;
+                continue;
+            }
+            var splitFilters = columnTemplate[Object.keys(columnTemplate)[i]].split('.');
+            var valueProbe = firstExp;
+            try {
+                for (var j=0; j<splitFilters.length;j++){
+                    valueProbe = Array.isArray(valueProbe) ? valueProbe[0][splitFilters[j]] : valueProbe[splitFilters[j]];
+                }
+            } catch (e) {
+                console.error("Could not find value for " + splitFilters.join('.') + " in exp", firstExp);
+                valueProbe = "N/A";
+            }
+            columns[Object.keys(columnTemplate)[i]] = valueProbe;
+        }
+
+        return columns;
+    },
+
+    getAdditionaInfoSection : function(firstExp){
+        // Experiment Set Row Add'l Info (Lab, etc.)
         var addInfoTemplate = this.getTemplate('additional-info');
-
-        var resultListings = [],
-            resultCount = 0;
-
-        if (facets === null){
-            facets = FacetList.adjustedFacets(this.props.context.facets);
+        var addInfo = {};
+        for (var i=0; i<Object.keys(addInfoTemplate).length;i++){
+            var splitFilters = addInfoTemplate[Object.keys(addInfoTemplate)[i]].split('.');
+            var valueProbe = firstExp;
+            for (var j=0; j<splitFilters.length;j++){
+                valueProbe = Array.isArray(valueProbe) ? valueProbe[0][splitFilters[j]] : valueProbe[splitFilters[j]];
+            }
+            addInfo[Object.keys(addInfoTemplate)[i]] = valueProbe;
         }
 
-        this.props.context['@graph'].map(function (result) {
-            var experimentArray = result.experiments_in_set;
-            if(experimentArray.length == 0){
-                return; // ignore if no expts in the expt set
-            }
+        return addInfo;
+    },
 
-            var accession = result.accession ? result.accession : "Experiment Set";
-            var intersection = new Set(experimentArray.filter(x => passExperiments.has(x)));
-            var columns = {};
-            var addInfo = {};
-            var firstExp = experimentArray[0]; // use only for replicates
+    formatExperimentSetListings : function(facets = null){
 
-            // Experiment Set Row Columns
-            for (var i=0; i<Object.keys(columnTemplate).length;i++) {
-                if(Object.keys(columnTemplate)[i] === 'Exps'){
-                    columns[Object.keys(columnTemplate)[i]] = experimentArray.length;
-                    continue;
-                }else if(Object.keys(columnTemplate)[i] === 'Accession'){
-                    columns[Object.keys(columnTemplate)[i]] = accession;
-                    continue;
-                }
-                var splitFilters = columnTemplate[Object.keys(columnTemplate)[i]].split('.');
-                var valueProbe = firstExp;
-                for (var j=0; j<splitFilters.length;j++){
-                    valueProbe = Array.isArray(valueProbe) ? valueProbe[0][splitFilters[j]] : valueProbe[splitFilters[j]];
-                }
-                columns[Object.keys(columnTemplate)[i]] = valueProbe;
-            }
+        if (!Array.isArray(this.props.context['@graph']) || this.props.context['@graph'].length === 0) return null;
+        
+        var resultCount = 0;
 
-            // Experiment Set Row Add'l Info (Lab, etc.)
-            for (var i=0; i<Object.keys(addInfoTemplate).length;i++){
-                var splitFilters = addInfoTemplate[Object.keys(addInfoTemplate)[i]].split('.');
-                var valueProbe = firstExp;
-                for (var j=0; j<splitFilters.length;j++){
-                    valueProbe = Array.isArray(valueProbe) ? valueProbe[0][splitFilters[j]] : valueProbe[splitFilters[j]];
-                }
-                addInfo[Object.keys(addInfoTemplate)[i]] = valueProbe;
-            }
+        function buildRowComponent(experiment_set, passExps = null){
 
-            if(intersection.size > 0){
-                var keyVal = "";
-                if (this.state.sortColumn){
-                    keyVal = columns[this.state.sortColumn];
-                }
-                resultListings.push(
-                    <ExperimentSetRow
-                        addInfo={addInfo}
-                        description={result.description}
-                        columns={columns}
-                        expSetFilters={this.props.expSetFilters}
-                        experimentSetType={result.experimentset_type}
-                        selectAllFilesInitially={true}
-                        targetFiles={this.props.targetFiles}
-                        href={result['@id']}
-                        experimentArray={experimentArray}
-                        replicateExpsArray={result.replicate_exps}
-                        passExperiments={intersection}
-                        key={keyVal+result['@id']}
-                        rowNumber={resultCount++}
-                        facets={facets}
-                        fileStats={this.props.fileStats}
-                    />
-                );
-            }
-        }.bind(this));
+            var columns = this.getColumnValues(experiment_set);
+            var addInfo = this.getAdditionaInfoSection(experiment_set.experiments_in_set[0]);
 
-        // Sort
-        if(this.state.sortColumn){
-            resultListings.sort(function(a,b){
-                a = a.key.split('/')[0];
-                b = b.key.split('/')[0];
-                if (this.state.sortReverse) {
-                    var b2 = b;
-                    b = a;
-                    a = b2;
-                }
-                if(!isNaN(a)){
-                    return (a - b);
-                } else {
-                    //return(a.localeCompare(b));
-                    // Above doesn't assign consistently right values to letters/numbers, e.g. sometimes an int > a letter
-                    // Not sure how important.
-                    if (a < b) return -1;
-                    else if (a > b) return 1;
-                    else return 0;
-                }
-            }.bind(this));
+            return <ExperimentSetRow
+                    ref={(r)=>{
+                        // Cache component instance.
+                        this.experimentSetRows[experiment_set['@id']] = r;
+                    }}
+                    addInfo={addInfo}
+                    description={experiment_set.description}
+                    columns={columns}
+                    expSetFilters={this.props.expSetFilters}
+                    experimentSetType={experiment_set.experimentset_type}
+                    selectAllFilesInitially={true}
+                    targetFiles={this.props.targetFiles}
+                    href={experiment_set['@id']}
+                    experimentArray={experiment_set.experiments_in_set}
+                    replicateExpsArray={experiment_set.replicate_exps}
+                    passExperiments={passExps || new Set(experiment_set.experiments_in_set) }
+                    sort-value={this.state.sortColumn ? columns[this.state.sortColumn] : experiment_set['@id']}
+                    key={experiment_set['@id']}
+                    data-key={experiment_set['@id']}
+                    rowNumber={resultCount++}
+                    facets={facets || FacetList.adjustedFacets(this.props.context.facets)}
+                    fileStats={this.props.fileStats}
+                    useAjax={this.props.useAjax}
+                />;
         }
 
-        if (resultCount === 0) return null;
-        return resultListings;
+        var sortFxn = function(a,b){
+            a = a.props['sort-value'];
+            b = b.props['sort-value'];
+            if (this.state.sortReverse) {
+                var b2 = b;
+                b = a;
+                a = b2;
+            }
+            if(!isNaN(a)){
+                return (a - b);
+            } else {
+                //return(a.localeCompare(b));
+                // Above doesn't assign consistently right values to letters/numbers, e.g. sometimes an int > a letter
+                // Not sure how important.
+                if (a < b) return -1;
+                else if (a > b) return 1;
+                else return 0;
+            }
+        }.bind(this);
+
+
+        if (this.props.useAjax){
+            return this.props.context['@graph']
+                .map((expSet) => buildRowComponent.call(this, expSet))
+                .sort(sortFxn);
+        } else {
+            return this.props.context['@graph']
+                .filter(function(expSet){ return expSet.experiments_in_set.length > 0; })
+                .map(function(expSet){
+                    return { 
+                        'intersection' : new Set(expSet.experiments_in_set.filter(x => this.state.passExperiments.has(x))),
+                        'set' : expSet
+                    };
+                })
+                .filter(function(expSetContainer){
+                    return expSetContainer.intersection.size > 0;
+                })
+                .map((expSetContainer) => buildRowComponent.call(this, expSetContainer.set, expSetContainer.intersection))
+                .sort(sortFxn);
+        }
     },
 
     renderTable : function(){
-        var formattedExperimentSetListings = this.formatExperimentSetListings(this.state.passedExperiments);
+        if (this.props.debug) console.log('Rendering ResultTable.');
+        var formattedExperimentSetListings = this.formatExperimentSetListings();
         if (!formattedExperimentSetListings) return null;
+
+        console.log('RENDER TABLE EXP LISTINGS', formattedExperimentSetListings);
+
+        this.experimentSetRows = {}; // ExperimentSetRow instances stored here, keyed by @id, to get selectFiles from (?).
+        var maxPage = Math.ceil(this.props.context.total / this.state.limit);
+
+        var handleLimitSelect = function(eventKey, e){
+            e.target.blur();
+            return this.changeLimit(eventKey);
+        }.bind(this);
 
         return (
             <div className={
@@ -669,23 +851,64 @@ var ResultTable = browse.ResultTable = React.createClass({
                 (this.state.overflowingRight ? " overflowing" : "")
             }>
 
-                <h5 className='browse-title'>
-                    Showing {formattedExperimentSetListings.length} of {this.totalResultCount()} experiment sets.
-                </h5>
 
-                <div className="expset-table-container" ref="expSetTableContainer">
-                    <Table className="expset-table expsets-table" condensed id="result-table">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th></th>
-                                { this.formatColumnHeaders(this.getTemplate('column')) }
-                            </tr>
-                        </thead>
-                        { formattedExperimentSetListings }
-                    </Table>
+                <div className="row above-chart-row">
+                    <div className="col-sm-6 col-xs-12">
+                        <h5 className='browse-title'>
+                            Showing {formattedExperimentSetListings.length} of { this.props.context.total } experiment sets.
+                        </h5>
+                    </div>
+                    <div className="col-sm-6 col-xs-12">
+                        
+                        <ButtonToolbar className="pull-right">
+                            
+                                <DropdownButton title={
+                                    <span className="text-small">
+                                        <i className="icon icon-list icon-fw" style={{ fontSize: '0.825rem' }}></i> Show {this.state.limit}
+                                    </span>
+                                } id="bg-nested-dropdown">
+                                    <MenuItem eventKey={10} onSelect={handleLimitSelect}>Show 10</MenuItem>
+                                    <MenuItem eventKey={25} onSelect={handleLimitSelect}>Show 25</MenuItem>
+                                    <MenuItem eventKey={50} onSelect={handleLimitSelect}>Show 50</MenuItem>
+                                    <MenuItem eventKey={100} onSelect={handleLimitSelect}>Show 100</MenuItem>
+                                    <MenuItem eventKey={250} onSelect={handleLimitSelect}>Show 250</MenuItem>
+                                </DropdownButton>
+                            
+                            <ButtonGroup>
+                                
+                                <Button disabled={this.state.changingPage || this.state.page === 1} onClick={this.state.changingPage === true ? null : (e)=>{
+                                    this.changePage(this.state.page - 1);
+                                }}><i className="icon icon-angle-left icon-fw"></i></Button>
+                            
+                                <Button disabled style={{ minWidth : 120 }}>
+                                    { this.state.changingPage === true ? 
+                                        <i className="icon icon-spin icon-circle-o-notch" style={{ opacity : 0.5 }}></i>
+                                        : 'Page ' + this.state.page + ' of ' + maxPage
+                                    }
+                                </Button>
+                            
+                                <Button disabled={this.state.changingPage || this.state.page === maxPage} onClick={this.state.changingPage === true ? null : (e)=>{
+                                    this.changePage(this.state.page + 1);
+                                }}><i className="icon icon-angle-right icon-fw"></i></Button>
+                                
+                            </ButtonGroup>
+                        </ButtonToolbar>
+                    </div>
                 </div>
-
+                <div className="row">
+                    <div className="expset-table-container col-sm-12" ref="expSetTableContainer">
+                        <Table className="expset-table expsets-table" condensed id="result-table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    { this.formatColumnHeaders(this.getTemplate('column')) }
+                                </tr>
+                            </thead>
+                            { formattedExperimentSetListings }
+                        </Table>
+                    </div>
+                </div>
             </div>
         );
     },
@@ -702,10 +925,16 @@ var ResultTable = browse.ResultTable = React.createClass({
                             experimentSetListJSON={this.props.context['@graph']}
                             orientation="vertical"
                             expSetFilters={this.props.expSetFilters}
+                            browseFilters={{
+                                filters : this.props.context.filters || null,
+                                clear_filters : this.props.context.clear_filters || null
+                            }}
                             facets={facets}
-                            onFilter={this.onFilter}
                             ignoredFilters={ignoredFilters}
                             className="with-header-bg"
+                            href={this.props.href}
+                            navigate={this.props.navigate}
+                            useAjax={true}
                         />
                     </div>
                     :
@@ -714,13 +943,6 @@ var ResultTable = browse.ResultTable = React.createClass({
                 { this.renderTable() }
             </div>
         );
-    },
-
-    onFilter: function(e) {
-        var search = e.currentTarget.getAttribute('href');
-        this.props.onChange(search);
-        e.stopPropagation();
-        e.preventDefault();
     }
 });
 
@@ -748,6 +970,10 @@ var FileButton = browse.FileButton = React.createClass({
 });
 
 var ControlsAndResults = browse.ControlsAndResults = React.createClass({
+
+    // TODO: ADJUST THIS!!! SELECTED FILES ARE NO LONGER GUARANTEED TO BE IN DOM!!!!!
+    // They are now in ExperimentSetRows state. We need to grab state.selectedFiles from each.
+    // We may in future store selectedFiles completely in Redux store or localStorage to allow a 'shopping cart' -like experience.
 
     getInitialState: function(){
         var initStats = {};
@@ -789,6 +1015,10 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
         e.preventDefault();
     },
 
+    /** 
+     * DEPRECATED (probably), get current selected files sets via this.getSelectedFiles(), keyed by experiment set @id. 
+     * Use _.flatten(_.values(this.getSelectedFiles())) to get single array of selected files, maybe also wrapped in a _.uniq() if files might be shared between expsets.
+     */
     downloadFiles: function(e){
         e.preventDefault();
         var currStats = findFiles(this.props.fileFormats);
@@ -797,6 +1027,7 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
         console.log(checkedFiles);
     },
 
+    /** DEPRECATED */
     selectFiles: function(format, selected){
         var newSet = this.state.filesToFind;
         if(newSet.has(format) && selected){
@@ -807,6 +1038,11 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
         this.setState({
             filesToFind: newSet
         });
+    },
+
+    getSelectedFiles : function(){
+        if (!this.refs.resultTable) return null;
+        return this.refs.resultTable.getSelectedFiles();
     },
 
     render: function(){
@@ -850,7 +1086,17 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
                     </div>
                 </div>*/}
 
-                <ResultTable {...this.props} targetFiles={targetFiles} fileStats={this.state.fileStats} />
+                <ResultTable
+                    ref="resultTable"
+                    targetFiles={targetFiles}
+                    fileStats={this.state.fileStats}
+                    context={this.props.context}
+                    expSetFilters={this.props.expSetFilters}
+                    session={this.props.session}
+                    href={this.props.href}
+                    navigate={this.props.navigate}
+                    useAjax={this.props.useAjax}
+                />
 
             </div>
 
@@ -865,11 +1111,28 @@ var Browse = browse.Browse = React.createClass({
         navigate: React.PropTypes.func
     },
 
+    propTypes : {
+        'context' : React.PropTypes.object.isRequired,
+        'expSetFilters' : React.PropTypes.object,
+        'session' : React.PropTypes.bool,
+        'schemas' : React.PropTypes.object,
+        'navigate' : React.PropTypes.func,
+    },
+
+    shouldComponentUpdate : function(nextProps, nextState){
+        if (this.props.context !== nextProps.context) return true;
+        if (this.props.expSetFilters !== nextProps.expSetFilters) return true;
+        if (this.props.session !== nextProps.session) return true;
+        if (this.props.href !== nextProps.href) return true;
+        return false; // We don't care about props.schemas or props.expIncomplete props (other views might), so we can skip re-render.
+    },
+
     componentWillMount: function() {
         //var searchBase = url.parse(this.context.location_href).search || '';
     },
 
     render: function() {
+        console.log('BROWSE PROPS', this.props);
         var context = this.props.context;
         var fileFormats = findFormats(context['@graph']);
 
@@ -878,9 +1141,10 @@ var Browse = browse.Browse = React.createClass({
             return <div className="error-page"><h4>{context.notification}</h4></div>
         }
         var results = context['@graph'];
-        var searchBase = url.parse(this.context.location_href).search || '';
+        var searchBase = url.parse(this.props.href || this.context.location_href).search || '';
 
         // browse is only for experiment sets
+        console.log(this.props.href, this.context.location_href, searchBase);
         if(searchBase.indexOf('?type=ExperimentSetReplicate') === -1){
             return(
                 <div className="error-page">
@@ -901,20 +1165,16 @@ var Browse = browse.Browse = React.createClass({
 
                 <ControlsAndResults
                     {...this.props}
-                    key={undefined}
+                    key="controlsAndResults"
                     fileFormats={fileFormats}
-                    searchBase={searchBase}
+                    href={this.props.href || this.context.location_href}
                     onChange={this.context.navigate}
+                    navigate={this.props.navigate || this.context.navigate}
+                    useAjax={true}
                 />
 
             </div>
         );
-
-        /**
-         * Re: removing .panel above: .panel not really needed; adds extra outer padding which causes
-         * non-alignment w/ navbar logo.
-         */
-
     }
 });
 

@@ -9,10 +9,17 @@ def _type_length():
     import codecs
     import json
     utf8 = codecs.getreader("utf-8")
-    return {
+    type_length_dict = {
         name: len(json.load(utf8(resource_stream('encoded', 'tests/data/inserts/%s.json' % name))))
         for name in ORDER
     }
+    # hot fix for Replicate exp set / exp set counts
+    try:
+        sum_exp_set = type_length_dict.get('experiment_set', 0) + type_length_dict.get('experiment_set_replicate', 0)
+        type_length_dict['experiment_set'] = sum_exp_set
+    except:
+        pass
+    return type_length_dict
 
 
 TYPE_LENGTH = _type_length()
@@ -147,15 +154,16 @@ def test_load_sample_data(
         human_biosource,
         submitter,
         workflow_mapping,
+        workflow_run_sbg,
         ):
     assert True, 'Fixtures have loaded sample data'
 
 
 def test_abstract_collection(testapp, experiment):
-    #TODO: ASK_BEN how to get experiment to function as catch all
+    # TODO: ASK_BEN how to get experiment to function as catch all
     pass
-    #testapp.get('/experiment/{accession}'.format(**experiment))
-    #testapp.get('/expermient/{accession}'.format(**experiment))
+    # testapp.get('/experiment/{accession}'.format(**experiment))
+    # testapp.get('/expermient/{accession}'.format(**experiment))
 
 
 @pytest.mark.slow
@@ -164,7 +172,7 @@ def test_load_workbook(workbook, testapp, item_type, length):
     # testdata must come before testapp in the funcargs list for their
     # savepoints to be correctly ordered.
     res = testapp.get('/%s/?limit=all' % item_type).maybe_follow(status=200)
-    #TODO ASK_BEN about inherited collections i.e. protocol
+    # TODO ASK_BEN about inherited collections i.e. protocol
     assert len(res.json['@graph']) == length
 
 

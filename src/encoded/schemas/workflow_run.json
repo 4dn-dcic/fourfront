@@ -156,6 +156,11 @@
                 "SBG",
                 "Tibanna"
             ]
+        },
+        "run_url": {
+            "type": "string",
+            "description": "Url to AWS run info",
+            "format": "uri"
         }
     }
 }

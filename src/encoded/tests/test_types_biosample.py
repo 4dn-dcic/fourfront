@@ -3,9 +3,30 @@ from snovault.schema_utils import load_schema
 pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
+@pytest.fixture
+def biosample_1(testapp, human_biosource, lab, award):
+    item = {
+        'description': "GM12878 prepared for Hi-C",
+        'biosource': [human_biosource['@id'], ],
+        'award': award['@id'],
+        'lab': lab['@id'],
+    }
+    return testapp.post_json('/biosample', item).json['@graph'][0]
+
+
 def biosample_relation(derived_from):
     return {"biosample_relation": [{"relationship_type": "derived from",
             "biosample": derived_from['@id']}]}
+
+
+def test_biosample_has_display_title(testapp, biosample_1):
+    # accession fallback used for display title here
+    assert biosample_1['display_title'] == biosample_1['accession']
+
+
+# link_id is equal to @id but uses ~ instead of / for embedding purposes
+def test_biosample_has_link_id(testapp, biosample_1):
+    assert biosample_1['link_id'] == biosample_1['@id'].replace('/', '~')
 
 
 # data from test/datafixtures

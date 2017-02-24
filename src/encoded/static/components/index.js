@@ -1,19 +1,22 @@
 'use strict';
 
 // Require all components to ensure javascript load ordering
+
 require('./lib');
+require('./util');
 require('./app');
 require('./collection');
 require('./footer');
 require('./globals');
+require('./static-pages/static-page-base');
 require('./static-pages/home');
 require('./static-pages/help');
 require('./static-pages/about');
-require('./item');
-require('./objectutils');
 require('./facetlist');
-require('./experiment-set-view');
-require('./user');
+require('./item-pages/item-view');
+require('./item-pages/experiment-set-view');
+require('./item-pages/item');
+require('./item-pages/user');
 require('./statuslabel');
 require('./navigation');
 require('./inputs');

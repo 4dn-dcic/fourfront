@@ -7,8 +7,10 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    add_default_embeds
 )
+
 
 @abstract_collection(
     name='experiments',
@@ -21,10 +23,11 @@ class Experiment(Item):
     """The main experiment class."""
 
     base_types = ['Experiment'] + Item.base_types
-    embedded = ["protocol", "protocol_variation", "lab", "award", "biosample",
-                "biosample.biosource", "biosample.modifications",
-                "biosample.treatments", "biosample.biosource.individual.organism",
-                "experiment_sets"]
+    schema = load_schema('encoded:schemas/experiment.json')
+    embedded = ["protocol", "protocol_variation", "lab", "award", "experiment_sets",
+                "biosample", "biosample.biosource", "biosample.modifications",
+                "biosample.treatments", "biosample.biosource.individual.organism"]
+    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
     def generate_mapid(self, experiment_type, num):
@@ -135,6 +138,7 @@ class ExperimentHiC(Experiment):
     item_type = 'experiment_hi_c'
     schema = load_schema('encoded:schemas/experiment_hi_c.json')
     embedded = Experiment.embedded + ["digestion_enzyme", "submitted_by"]
+    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -153,6 +157,14 @@ class ExperimentHiC(Experiment):
             de_name = de_props['name']
             sum_str += (' with ' + de_name)
         return sum_str
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
+        return self.experiment_summary(request, experiment_type, digestion_enzyme, biosample)
 
 
 @collection(
@@ -171,6 +183,7 @@ class ExperimentCaptureC(Experiment):
                                       "targeted_regions",
                                       "targeted_regions.target",
                                       "targeted_regions.oligo_file"]
+    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -183,12 +196,21 @@ class ExperimentCaptureC(Experiment):
         if biosample:
             biosamp_props = request.embed(biosample, '@@object')
             biosource = biosamp_props['biosource_summary']
+
             sum_str += (' on ' + biosource)
         if digestion_enzyme:
             de_props = request.embed(digestion_enzyme, '@@object')
             de_name = de_props['name']
             sum_str += (' with ' + de_name)
         return sum_str
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, experiment_type='Undefined', digestion_enzyme=None, biosample=None):
+        return self.experiment_summary(request, experiment_type, digestion_enzyme, biosample)
 
 
 @collection(
@@ -203,6 +225,7 @@ class ExperimentRepliseq(Experiment):
     item_type = 'experiment_repliseq'
     schema = load_schema('encoded:schemas/experiment_repliseq.json')
     embedded = Experiment.embedded + ["submitted_by"]
+    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
     @calculated_property(schema={
@@ -219,3 +242,11 @@ class ExperimentRepliseq(Experiment):
         if cell_cycle_stage:
             sum_str += (' at ' + cell_cycle_stage)
         return sum_str
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, experiment_type='Undefined', cell_cycle_stage=None, biosample=None):
+        return self.experiment_summary(request, experiment_type, cell_cycle_stage, biosample)

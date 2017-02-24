@@ -4,7 +4,7 @@ var jsonScriptEscape = require('../libs/jsonScriptEscape');
 var globals = require('./globals');
 var ErrorPage = require('./error');
 var Navigation = require('./navigation');
-
+var Action = require('./action');
 var Footer = require('./footer');
 var url = require('url');
 var _ = require('underscore');
@@ -12,16 +12,34 @@ var store = require('../store');
 var browse = require('./browse');
 var origin = require('../libs/origin');
 var serialize = require('form-serialize');
-var { ajaxLoad, ajaxPromise, JWT, console, responsiveGridState, isServerSide } = require('./objectutils');
+var { Filters, ajax, JWT, console, isServerSide } = require('./util');
 var Alerts = require('./alerts');
 var jwt = require('jsonwebtoken');
+var { FacetCharts } = require('./facetcharts');
+var makeTitle = require('./item-pages/item').title;
 
 var dispatch_dict = {}; //used to store value for simultaneous dispatch
 
 var portal = {
     portal_title: '4DN Data Portal',
     global_sections: [
-        {id: 'browse', sid:'sBrowse', title: 'Browse', url: '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all'},
+        {
+            id: 'browse',
+            sid:'sBrowse',
+            title: 'Browse',
+            //url: '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all',
+            url : function(currentUrlParts){
+                if (!currentUrlParts) return '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all'; // Default/fallback
+                return Filters.filtersToHref(
+                    store.getState().expSetFilters,
+                    currentUrlParts.protocol + '//' + currentUrlParts.host + '/browse/'
+                );
+            },
+            active : function(currentWindowPath){
+                if (currentWindowPath && currentWindowPath.indexOf('/browse/') > -1) return true;
+                return false;
+            }
+        },
         {id: 'help', sid:'sHelp', title: 'Help', children: [
             {id: 'gettingstarted', title: 'Getting started', url: '/help', children : [
                 {id: 'metadatastructure', title: 'Metadata structure', url: '/help#metadata-structure'},
@@ -65,7 +83,7 @@ class Timeout {
  * It lives for the entire duration the page is loaded.
  */
 var App = React.createClass({
-    SLOW_REQUEST_TIME: 250,
+    SLOW_REQUEST_TIME: 750,
     historyEnabled: !!(typeof window != 'undefined' && window.history && window.history.pushState),
 
     /**
@@ -84,6 +102,7 @@ var App = React.createClass({
     },
 
     getInitialState: function() {
+        console.log('APP FILTERS', Filters.hrefToFilters(this.props.href));
         // Todo: Migrate session & user_actions to redux store?
         var session = false;
         var user_actions = [];
@@ -99,12 +118,15 @@ var App = React.createClass({
         // user_info.details is kept in sync to client-side via browser.js, user_info.user_actions is not.
         // Don't use user_actions unless session is also true.
         // user_actions is only set client-side upon login (it cannot expire unless logout).
-        var user_info = JWT.getUserInfo(); 
+        var user_info = JWT.getUserInfo();
         if (user_info && typeof user_info.user_actions !== 'undefined' && Array.isArray(user_info.user_actions)){
             user_actions = user_info.user_actions;
         }
 
-       console.log("App Initial State: ", session, user_actions);
+        // Save navigate fxn and other req'd stuffs to Filters.
+        Filters.navigate = this.navigate;
+
+        console.log("App Initial State: ", session, user_actions);
 
         return {
             'errors': [],
@@ -203,15 +225,36 @@ var App = React.createClass({
             if (typeof callback === 'function') callback(this.state.schemas);
             return this.state.schemas;
         }
-        ajaxPromise('/profiles/?format=json').then(data => {
+        ajax.promise('/profiles/?format=json').then(data => {
             if (this.contentTypeIsJSON(data)){
                 this.setState({
                     schemas: data
                 }, () => {
+                    // Let Filters have access to schemas for own functions.
+                    Filters.getSchemas = () => this.state.schemas;
                     if (typeof callback === 'function') callback(data);
                 });
             }
         });
+    },
+
+    getStatsComponent : function(){
+        if (!this.refs || !this.refs.navigation) return null;
+        if (!this.refs.navigation.refs) return null;
+        if (!this.refs.navigation.refs.stats) return null;
+        return this.refs.navigation.refs.stats;
+    },
+
+    updateStats : function(counts, totals = false, callback = null){
+        var statsComponent = this.getStatsComponent();
+        if (statsComponent){
+            if (!totals){
+                return statsComponent.updateCurrentCounts(counts, callback);
+            } else {
+                return statsComponent.updateTotalCounts(counts, callback);
+            }
+        }
+        return null;
     },
 
     // When current dropdown changes; componentID is _rootNodeID of newly dropped-down component
@@ -276,7 +319,7 @@ var App = React.createClass({
                 JWT.saveUserInfo(response);
                 this.updateUserInfo(callback);
             }, error => {
-                // error, clear JWT token from cookie & user_info from localStorage (via JWT.remove()) 
+                // error, clear JWT token from cookie & user_info from localStorage (via JWT.remove())
                 // and unset state.session & state.user_actions (via this.updateUserInfo())
                 JWT.remove();
                 this.updateUserInfo(callback);
@@ -291,7 +334,8 @@ var App = React.createClass({
         globals.bindEvent(window, 'keydown', this.handleKey);
 
         this.authenticateUser();
-        this.loadSchemas(); // Load schemas into app.state, access them where needed via props (preferred, safer) or this.context.
+        // Load schemas into app.state, access them where needed via props (preferred, safer) or this.context.
+        this.loadSchemas();
 
         var query_href;
         if(document.querySelector('link[rel="canonical"]')){
@@ -354,7 +398,7 @@ var App = React.createClass({
             url = url.slice(0, url_hash);
         }
         var data = options.body ? options.body : null;
-        var request = ajaxPromise(url, http_method, headers, data, options.cache === false ? false : true);
+        var request = ajax.promise(url, http_method, headers, data, options.cache === false ? false : true);
         request.xhr_begin = 1 * new Date();
         request.then(response => {
             request.xhr_end = 1 * new Date();
@@ -366,12 +410,12 @@ var App = React.createClass({
         // get user actions (a function of log in) from local storage
         var userActions = [];
         var session = false;
-        var userInfo = JWT.getUserInfo(); 
+        var userInfo = JWT.getUserInfo();
         if (userInfo){
             userActions = userInfo.user_actions;
             session = true;
         }
-        
+
         var stateChange = {};
         if (!_.isEqual(userActions, this.state.user_actions)) stateChange.user_actions = userActions;
         if (session != this.state.session) stateChange.session = session;
@@ -443,6 +487,7 @@ var App = React.createClass({
             if (this.refs && this.refs.navigation){
                 this.refs.navigation.closeMobileMenu();
             }
+            if (target && target.blur) target.blur();
         }
     },
 
@@ -497,15 +542,18 @@ var App = React.createClass({
             if (request && this.requestCurrent) {
                 // Abort the current request, then remember we've aborted it so that we don't render
                 // the Network Request Error page.
-                if (request && typeof request.abort === 'function') request.abort();
+                if (request && typeof request.abort === 'function'){
+                    request.abort();
+                    console.warn("Aborted previous request", request);
+                }
                 this.requestAborted = true;
                 this.requestCurrent = false;
             }
             store.dispatch({
-                type: {'context': event.state}
-            });
-            store.dispatch({
-                type: {'href': href}
+                type: {
+                    'href': href,
+                    'context': event.state
+                }
             });
 
         }
@@ -524,15 +572,15 @@ var App = React.createClass({
         return true;
     },
 
-    navigate: function (href, options = {}, callback = null) {
+    navigate: function (href, options = {}, callback = null, fallbackCallback = null, includeReduxDispatch = {}) {
         // options.skipRequest only used by collection search form
         // options.replace only used handleSubmit, handlePopState, handlePersonaLogin
-        
+
         var fragment;
 
         function setupRequest(targetHref){
             targetHref = url.resolve(this.props.href, targetHref);
-            if (!this.confirmNavigation(targetHref, options)) {
+            if (!options.skipConfirmCheck && !this.confirmNavigation(targetHref, options)) {
                 return false;
             }
             // Strip url fragment.
@@ -575,16 +623,18 @@ var App = React.createClass({
                 } else {
                     window.history.pushState(window.state, '', href + fragment);
                 }
-                store.dispatch({
-                    type: {'href':href + fragment}
-                });
+                if (!options.skipUpdateHref) {
+                    store.dispatch({
+                        type: {'href':href + fragment}
+                    });
+                }
                 return null;
             }
 
             var request = this.fetch(
-                href.match(/\?./) ? href + '&format=json' : href + '?format=json',  // URL
+                href,
                 {
-                    'headers': {}, // Filled in by ajaxPromise
+                    'headers': {}, // Filled in by ajax.promise
                     'cache' : options.cache === false ? false : true
                 }
             );
@@ -599,7 +649,7 @@ var App = React.createClass({
                     // store.dispatch({
                     //     type: {'slow':true}
                     // });
-
+                    this.setState({ 'slowLoad' : true });
                 } else {
                     // Request has returned data
                     this.requestCurrent = false;
@@ -608,7 +658,7 @@ var App = React.createClass({
 
             var promise = request.then((response)=>{
                 // Check/handle server-provided error code/message(s).
-                
+
                 if (response.code === 403){
 
                     var jwtHeader = null;
@@ -625,7 +675,7 @@ var App = React.createClass({
                         (jwtHeader === 'expired')
                     ){
                         JWT.remove();
-                        
+
                         // Wait until request(s) complete before setting notification (callback is called later in promise chain)
                         var oldCallback = callback;
                         callback = function(response){
@@ -680,18 +730,23 @@ var App = React.createClass({
 
                 return response;
             })
-            .then(this.receiveContextResponse)
+            .then(response => this.receiveContextResponse(response,includeReduxDispatch))
             .then(response => {
+                this.state.slowLoad && this.setState({'slowLoad' : false});
                 if (typeof callback == 'function'){
                     callback(response);
                 }
             });
 
-            if (!options.replace) {
+            if (!options.replace && !options.dontScrollToTop) {
                 promise = promise.then(this.scrollTo);
             }
 
             promise.catch((err)=>{
+                this.state.slowLoad && this.setState({'slowLoad' : false});
+                if (typeof fallbackCallback == 'function'){
+                    fallbackCallback(err);
+                }
                 if (err.message !== 'HTTPForbidden'){
                     console.error('Error in App.navigate():', err);
                     throw err; // Bubble it up.
@@ -705,14 +760,18 @@ var App = React.createClass({
         }
 
         if (setupRequest.call(this, href)){
-            return doRequest.call(this, true);
+            var request = doRequest.call(this, true);
+            if (request === null){
+                if (typeof callback === 'function') callback();
+            }
+            return request;
         } else {
             return null; // Was handled by setupRequest (returns false)
         }
 
     },
 
-    receiveContextResponse: function (data) {
+    receiveContextResponse: function (data, extendDispatchDict = {}) {
         // title currently ignored by browsers
         try {
             window.history.replaceState(data, '', window.location.href);
@@ -734,7 +793,7 @@ var App = React.createClass({
             this.requestAborted = false;
         }
         store.dispatch({
-            type: dispatch_dict
+            type: _.extend({},dispatch_dict,extendDispatchDict)
         });
         dispatch_dict={};
         return data;
@@ -795,13 +854,25 @@ var App = React.createClass({
         var routeList = canonical.split("/");
         var lowerList = [];
         var scrollList = [];
+        var actionList = [];
         routeList.map(function(value) {
             if (value.includes('#') && value.charAt(0) !== "#"){
                 var navSplit = value.split("#");
                 lowerList.push(navSplit[0].toLowerCase());
-                scrollList.push(navSplit[1].toLowerCase());
+                if (navSplit[1].charAt(0) === '!'){
+                    actionList.push(navSplit[1].toLowerCase());
+                }else{
+                    scrollList.push(navSplit[1].toLowerCase());
+                }
             }else if(value.charAt(0) !== "!" && value.length > 0){
-                lowerList.push(value.toLowerCase());
+                // test for edit handle
+                if (value == '#!edit'){
+                    actionList.push('edit');
+                }else if (value == '#!create'){
+                    actionList.push('create');
+                }else{
+                    lowerList.push(value.toLowerCase());
+                }
             }
         });
         var currRoute = lowerList.slice(1); // eliminate http
@@ -828,6 +899,43 @@ var App = React.createClass({
         }else if(status){
             content = <ErrorPage currRoute={currRoute[currRoute.length-1]} status={status}/>;
             title = 'Error';
+        }else if(actionList.length == 1){
+            // check if the desired action is allowed per user (in the context)
+            var contextActionNames = this.listActionsFor('context').map(function(act){
+                return act.name || '';
+            });
+            // see if desired actions is not allowed for current user
+            if (!_.contains(contextActionNames, actionList[0])){
+                content = <ErrorPage status={'forbidden'}/>;
+                title = 'Action not permitted';
+            }else{
+                ContentView = globals.content_views.lookup(context, current_action);
+                if (ContentView){
+                    content = (
+                        <Action
+                            context={context}
+                            schemas={this.state.schemas}
+                            expSetFilters={this.props.expSetFilters}
+                            expIncompleteFacets={this.props.expIncompleteFacets}
+                            session={this.state.session}
+                            key={key}
+                            navigate={this.navigate}
+                            href={this.props.href}
+                            edit={actionList[0] == 'edit'}
+                        />
+                    );
+                    title = makeTitle({'context': context});
+                    if (title && title != 'Home') {
+                        title = title + ' – ' + portal.portal_title;
+                    } else {
+                        title = portal.portal_title;
+                    }
+                }else{
+                    // Handle the case where context is not loaded correctly
+                    content = <ErrorPage status={null}/>;
+                    title = 'Error';
+                }
+            }
         }else if (context) {
             var ContentView = globals.content_views.lookup(context, current_action);
             if (ContentView){
@@ -838,6 +946,7 @@ var App = React.createClass({
                         expSetFilters={this.props.expSetFilters}
                         expIncompleteFacets={this.props.expIncompleteFacets}
                         session={this.state.session}
+                        key={key}
                         navigate={this.navigate}
                         href={this.props.href}
                     />
@@ -865,6 +974,7 @@ var App = React.createClass({
             <html lang="en">
                 <head>
                     <meta charSet="utf-8"/>
+                    <meta httpEquiv="Content-Type" content="text/html, charset=UTF-8"/>
                     <meta httpEquiv="X-UA-Compatible" content="IE=edge"/>
                     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
                     <meta name="google-site-verification" content="t0PnhAqm80xyWalBxJHZdld9adAk40SHjUyPspYNm7I" />
@@ -877,7 +987,7 @@ var App = React.createClass({
                     <script data-prop-name="user_details" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: jsonScriptEscape(JSON.stringify(JWT.getUserDetails())) /* Kept up-to-date in browser.js */
                     }}></script>
-                    <script data-prop-name="inline" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
+                    <script data-prop-name="inline" type="application/javascript" charSet="utf-8" dangerouslySetInnerHTML={{__html: this.props.inline}}></script>
                     <link rel="stylesheet" href="/static/css/style.css" />
                     <link href="/static/font/ss-gizmo.css" rel="stylesheet" />
                     <link href="/static/font/ss-black-tie-regular.css" rel="stylesheet" />
@@ -889,12 +999,35 @@ var App = React.createClass({
                     <script data-prop-name="alerts" type="application/ld+json" dangerouslySetInnerHTML={{
                         __html: jsonScriptEscape(JSON.stringify(this.props.alerts))
                     }}></script>
+                    <script data-prop-name="expSetFilters" type="application/ld+json" dangerouslySetInnerHTML={{
+                        __html: jsonScriptEscape(JSON.stringify(Filters.convertExpSetFiltersTerms(this.props.expSetFilters, 'array')))
+                    }}></script>
+                    <div id="slow-load-container" className={this.state.slowLoad ? 'visible' : null}>
+                        <div className="inner">
+                            <i className="icon icon-circle-o-notch"/>
+                            { /*<img src="/static/img/ajax-loader.gif"/>*/ }
+                        </div>
+                    </div>
                     <div id="slot-application">
                         <div id="application" className={appClass}>
                             <div className="loading-spinner"></div>
                             <div id="layout" onClick={this.handleLayoutClick} onKeyPress={this.handleKey}>
-                                <Navigation href={ this.props.href } session={this.state.session} ref="navigation" />
-                                <div id="content" className="container" key={key}>
+                                <Navigation
+                                    href={this.props.href}
+                                    session={this.state.session}
+                                    expSetFilters={this.props.expSetFilters}
+                                    ref="navigation"
+                                />
+                                <div id="content" className="container">
+                                    <FacetCharts
+                                        href={this.props.href}
+                                        context={this.props.context}
+                                        expSetFilters={this.props.expSetFilters}
+                                        navigate={this.navigate}
+                                        updateStats={this.updateStats}
+                                        schemas={this.state.schemas}
+                                        session={this.state.session}
+                                    />
                                     <Alerts alerts={this.props.alerts} />
                                     { content }
                                 </div>

@@ -17,7 +17,8 @@ from pyramid.traversal import (
 )
 import snovault
 # from ..schema_formats import is_accession
-from snovault.resource_views import item_view_page_object
+from snovault.crud_views import collection_add as sno_collection_add
+from snovault.validators import validate_item_content_post
 
 
 @lru_cache()
@@ -122,6 +123,19 @@ class Collection(snovault.Collection, AbstractCollection):
             self.__acl__ = ALLOW_SUBMITTER_ADD
 
 
+@view_config(context=Collection, permission='add', request_method='POST',
+             validators=[validate_item_content_post])
+def collection_add(context, request, render=None):
+    check_only = request.params.get('check_only', False)
+
+    if check_only:
+        return {'status': "success",
+                '@type': ['result'],
+                }
+
+    return sno_collection_add(context, request, render)
+
+
 class Item(snovault.Item):
     """smth."""
 
@@ -195,12 +209,83 @@ class Item(snovault.Item):
             keys['accession'].append(properties['accession'])
         return keys
 
-# make it so any item page defaults to using the object, not embedded, view
-@view_config(context=Item, permission='view', request_method='GET', name='page')
-def item_page_view(context, request):
-    """Return the frame=object view rather than embedded view by default."""
-    properties = item_view_page_object(context, request)
-    return properties
+    @snovault.calculated_property(schema={
+        "title": "External Reference URIs",
+        "description": "External references to this item.",
+        "type": "array",
+        "items": {"type": "object", "title": "External Reference", "properties": {
+                "uri": {"type": "string"},
+                "ref": {"type": "string"}
+            }
+        }
+    })
+    def external_references(self, request, dbxrefs=None):
+        namespaces = request.registry.settings.get('snovault.jsonld.namespaces')
+        if dbxrefs and namespaces:
+            refs = []
+            for r in dbxrefs:
+                refObject = {"ref": r, "uri": None}
+                refParts = r.split(':')
+                if len(refParts) < 2:
+                    refs.append(refObject)
+                    continue
+                refPrefix = refParts[0]
+                refID = refParts[1]
+                baseUri = namespaces.get(refPrefix)
+                if not baseUri:
+                    refs.append(refObject)
+                    continue
+
+                if '{reference_id}' in baseUri:
+                    refObject['uri'] = baseUri.replace('{reference_id}', refID, 1)
+                else:
+                    refObject['uri'] = baseUri + refID
+                refs.append(refObject)
+
+            return refs
+        return []
+
+    @snovault.calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    },)
+    def display_title(self):
+        """create a display_title field."""
+        display_title = ""
+        look_for = [
+                    "title",
+                    "name",
+                    "location_description",
+                    "accession",
+                    ]
+        for field in look_for:
+            # special case for user: concatenate first and last names
+            display_title = self.properties.get(field, None)
+            if display_title:
+                return display_title
+        # if none of the existing terms are available, use @type + date_created
+        try:
+            type_date = self.__class__.__name__ + " from " + self.properties.get("date_created", None)[:10]
+            return type_date
+        # last resort, use uuid
+        except:
+            return self.properties.get('uuid', None)
+
+    @snovault.calculated_property(schema={
+        "title": "link_id",
+        "description": "A copy of @id that can be embedded. Uses ~ instead of /",
+        "type": "string"
+    },)
+    def link_id(self, request):
+        """create the link_id field, which is a copy of @id using ~ instead of /"""
+        path_str = request.path if request.path else self.properties.get('accession', None)
+        if path_str:
+            path_split = path_str.split('/')
+            if len(path_split) == 4 and '@@' in path_split[-1]:
+                path_str = '~'.join(path_split[:-1]) + '~'
+            return path_str
+
 
 class SharedItem(Item):
     """An Item visible to all authenticated users while "proposed" or "in progress"."""
@@ -241,12 +326,43 @@ def edit(context, request):
 
 
 @snovault.calculated_property(context=Item, category='action')
-def edit_json(context, request):
+def create(context, request):
     """smth."""
     if request.has_permission('edit'):
         return {
-            'name': 'edit-json',
-            'title': 'Edit JSON',
+            'name': 'create',
+            'title': 'Create',
             'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
-            'href': '{item_uri}#!edit-json'.format(item_uri=request.resource_path(context)),
+            'href': '{item_uri}#!create'.format(item_uri=request.resource_path(context)),
         }
+
+
+def add_default_embeds(embeds, schema={}):
+    """Perform default processing on the embeds list.
+    This adds display_title to any non-fully embedded linkTo field and defaults
+    to using the @id and display_title of non-embedded linkTo's
+    """
+
+    embedded_base_fields = []
+    fields_to_process = []
+    # find pre-existing fields
+    for field in embeds:
+        split_field = field.strip().split('.')
+        if len(split_field) > 1:
+            embed_path = '.'.join(split_field[:-1])
+            if embed_path not in embeds and embed_path not in fields_to_process:
+                fields_to_process.append(embed_path)
+        elif len(split_field) == 1:
+            embedded_base_fields.append(split_field)
+    processed_fields = [field + '.display_title' for field in fields_to_process]
+    processed_fields += [field + '.link_id' for field in fields_to_process]
+    if('properties' not in schema.keys()):
+        return processed_fields + embeds
+    # automatically embed top level linkTo's not already embedded
+    for key, val in schema['properties'].items():
+        if key not in embedded_base_fields and 'linkTo' in val:
+            if key + '.link_id' not in processed_fields:
+                processed_fields.append(key + '.link_id')
+            if key + '.display_title' not in processed_fields:
+                processed_fields.append(key + '.display_title')
+    return processed_fields + embeds
