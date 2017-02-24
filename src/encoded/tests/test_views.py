@@ -14,6 +14,7 @@ def _type_length():
         for name in ORDER
     }
     # hot fix for Inherited Non-Abstract Collections
+    # list of parent object and children (nested list)
     inherited_list = [
      ["experiment_set", ["experiment_set_replicate"]],
      ["workflow_run", ["workflow_run_sbg"]],
