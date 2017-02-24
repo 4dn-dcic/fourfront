@@ -245,13 +245,13 @@ var App = React.createClass({
         return this.refs.navigation.refs.stats;
     },
 
-    updateStats : function(counts, totals = false, callback = null){
+    updateStats : function(currentCounts, totalCounts = null, callback = null){
         var statsComponent = this.getStatsComponent();
         if (statsComponent){
-            if (!totals){
-                return statsComponent.updateCurrentCounts(counts, callback);
+            if (!totalCounts){
+                return statsComponent.updateCurrentCounts(currentCounts, callback);
             } else {
-                return statsComponent.updateTotalCounts(counts, callback);
+                return statsComponent.updateCurrentAndTotalCounts(currentCounts, totalCounts, callback);
             }
         }
         return null;

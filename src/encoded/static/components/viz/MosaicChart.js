@@ -7,7 +7,6 @@ var vizUtil = require('./utilities');
 var { expFxn, Filters, console, object, isServerSide } = require('./../util');
 var { highlightTerm, unhighlightTerms } = require('./../facetlist');
 var { CursorComponent, RotatedLabel } = require('./components');
-var MosaicDetailCursor = require('./MosaicDetailCursor');
 
 // Share one instance between all charts because D3 selector acts on common class/elem names.
 var mouseleaveTimeout = null;
@@ -1182,18 +1181,6 @@ var MosaicChart = React.createClass({
                         isMounted={this.state.mounted}
                     />
                 </div>
-            );
-        }
-
-        function renderCursorComponent(){
-            return null;
-            var cursorContainmentContainerElement = (this.refs && this.refs.svgElem) || null;
-            return (
-                <MosaicDetailCursor
-                    containingElement={cursorContainmentContainerElement}
-                    verticalAlign="center"
-                    ref="detailCursor"
-                />
             );
         }
 

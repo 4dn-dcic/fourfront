@@ -56,6 +56,18 @@ var QuickInfoBar = module.exports = React.createClass({
         return false;
     },
 
+    updateCurrentAndTotalCounts : function(current, total, callback){
+        this.setState({
+            'count_experiments' : current.experiments,
+            'count_experiment_sets' : current.experiment_sets,
+            'count_files' : current.files,
+            'count_experiments_total' : total.experiments,
+            'count_experiment_sets_total' : total.experiment_sets,
+            'count_files_total' : total.files
+        }, typeof callback === 'function' ? callback() : null);
+        return true;
+    },
+
     updateCurrentCounts : function(newCounts, callback){
         this.setState({
             'count_experiments' : newCounts.experiments,
@@ -115,7 +127,8 @@ var QuickInfoBar = module.exports = React.createClass({
     renderStats : function(){
         var areAnyFiltersSet = (this.props.expSetFilters && _.keys(this.props.expSetFilters).length > 0);
         var stats;
-        if (this.props.showCurrent || this.state.showCurrent){
+        //if (this.props.showCurrent || this.state.showCurrent){
+        if (this.state.count_experiment_sets || this.state.count_experiments || this.state.count_files) {
             stats = {
                 'experiment_sets' : this.state.count_experiment_sets,
                 'experiments' : this.state.count_experiments,
@@ -137,7 +150,7 @@ var QuickInfoBar = module.exports = React.createClass({
             }}>
                 <div className="left-side clearfix">
                     <QuickInfoBar.Stat
-                        shortLabel="Exp. Sets"
+                        shortLabel="Experiment Sets"
                         longLabel="Experiment Sets"
                         id={this.props.id}
                         classNameID="expsets"
@@ -145,7 +158,7 @@ var QuickInfoBar = module.exports = React.createClass({
                         key={0}
                     />
                     <QuickInfoBar.Stat
-                        shortLabel="Exps"
+                        shortLabel="Experiments"
                         longLabel="Experiments"
                         id={this.props.id}
                         classNameID="experiments"

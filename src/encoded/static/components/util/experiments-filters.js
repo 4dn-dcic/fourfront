@@ -403,8 +403,8 @@ var expFilters = module.exports = {
         if (urlParts.pathname.indexOf('/browse/') > -1){
             if (typeof urlParts.query.type !== 'string') baseQuery.push(['type','ExperimentSetReplicate']);
             else baseQuery.push(['type', urlParts.query.type]);
-            if (typeof urlParts.query.experimentset_type !== 'string') baseQuery.push(['experimentset_type','replicate']);
-            else baseQuery.push(['experimentset_type', urlParts.query.experimentset_type]);
+            //if (typeof urlParts.query.experimentset_type !== 'string') baseQuery.push(['experimentset_type','replicate']);
+            //else baseQuery.push(['experimentset_type', urlParts.query.experimentset_type]);
         } else if (urlParts.pathname.indexOf('/search/') > -1){
             if (typeof urlParts.query.type !== 'string') baseQuery.push(['type','Item']);
             else baseQuery.push(['type', urlParts.query.type]);

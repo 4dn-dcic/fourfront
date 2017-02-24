@@ -8,7 +8,7 @@ var { expFxn, Filters, console, object, isServerSide } = require('./../util');
 var { highlightTerm, unhighlightTerms } = require('./../facetlist');
 var { CursorComponent } = require('./components');
 
-var MosaicDetailCursor = module.exports = React.createClass({
+var ChartDetailCursor = module.exports = React.createClass({
 
     getDefaultProps : function(){
         return {
@@ -96,7 +96,7 @@ var MosaicDetailCursor = module.exports = React.createClass({
                 }}
                 debugStyle={this.props.debugStyle}
             >
-                <MosaicDetailCursor.Body
+                <ChartDetailCursor.Body
                     path={this.state.path}
                     title={this.state.title}
                     term={this.state.term}
@@ -183,7 +183,7 @@ var MosaicDetailCursor = module.exports = React.createClass({
 
             getCurrentCounts : function(nodes = this.props.path){
                 if (nodes.length < 1) return null;
-                return MosaicDetailCursor.getCounts(nodes[nodes.length - 1]);
+                return ChartDetailCursor.getCounts(nodes[nodes.length - 1]);
             },
 
             renderDetailSection : function(props = this.props){
@@ -211,7 +211,7 @@ var MosaicDetailCursor = module.exports = React.createClass({
                 var leafNode = this.props.path[this.props.path.length - 1];
                 return (
                     <div className="mosaic-cursor-body">
-                        <MosaicDetailCursor.Body.Crumbs path={this.props.path} />
+                        <ChartDetailCursor.Body.Crumbs path={this.props.path} />
                         <h6 className="field-title">
                             <small className="pull-right sets-label">Exp Sets</small>
                             { 

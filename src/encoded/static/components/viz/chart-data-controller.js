@@ -10,7 +10,8 @@ var { expFxn, Filters, ajax, console, layout, isServerSide } = require('./../uti
 
 var refs = {
     store       : null,
-    requestURLBase : '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&from=0',
+    requestURLBase : null,//'/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&from=0',
+    updateStats : null, // Function to update stats @ top of page.
     fieldsToFetch : [ // What fields we need from /browse/... for this chart.
         'accession',
         'experiments_in_set.experiment_summary',
@@ -38,6 +39,8 @@ var state = {
     experiments         : null,
     filteredExperiments : null,
     fetching            : false,
+
+    // the below field definitions will likely be moved out of here eventually
     chartFieldsBarPlot  : [
         { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
         { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
@@ -118,15 +121,35 @@ var state = {
     ]
 };
 
+/** Private state & functions **/
+
 var providerCallbacks = {};
+var providerLoadStartCallbacks = {};
+
+function notifyUpdateCallbacks(){ // After load & update, call registered Update callbacks.
+    console.log('Notifying update callbacks',_.keys(providerCallbacks));
+    _.forEach(providerCallbacks, function(pcb){
+        pcb(state);
+    });
+}
+
+function notifyLoadStartCallbacks(){ // Before load, call registered Load Start callbacks.
+    console.log('Notifying load start callbacks', _.keys(providerLoadStartCallbacks));
+    _.forEach(providerLoadStartCallbacks, function(plscb){
+        plscb(state);
+    });
+}
+
 
 var reduxSubscription = null;
 var isInitialized = false;
 
 var ChartDataController = module.exports = {
 
-    debugging : true,
-
+    /**
+     * Use this component to wrap individual charts and provide them with source of experiments data via
+     * props.experiments and props.filteredExperiments. Also provides expSetFilters from redux store.
+     */
     Provider : React.createClass({
 
         propTypes : {
@@ -145,9 +168,13 @@ var ChartDataController = module.exports = {
         },
 
         render : function(){
+            // Set 'experiments' and 'filteredExperiments' props on props.children.
             var childChartProps = _.extend({}, this.props.children.props);
             childChartProps.experiments = state.experiments;
             childChartProps.filteredExperiments = state.filteredExperiments;
+            childChartProps.expSetFilters = refs.expSetFilters;
+            
+
             return React.cloneElement(this.props.children, childChartProps);
         }
 
@@ -158,13 +185,17 @@ var ChartDataController = module.exports = {
      */
     initialize : function(
         requestURLBase = null,
+        updateStats = null,
         callback = null
     ){
         if (!refs.store) {
             refs.store = require('./../../store');
         }
-        if (requestURLBase){
+        if (typeof requestURLBase === 'string'){
             refs.requestURLBase = requestURLBase;
+        }
+        if (typeof updateStats === 'function'){
+            refs.updateStats = updateStats;
         }
 
         if (reduxSubscription !== null) {
@@ -178,26 +209,37 @@ var ChartDataController = module.exports = {
             refs.expSetFilters = reduxStoreState.expSetFilters;
 
             if (prevExpSetFilters !== refs.expSetFilters || !_.isEqual(refs.expSetFilters, prevExpSetFilters)){
-                ChartDataController.handleUpdatedFilters(refs.expSetFilters, function(){
-                    _.forEach(providerCallbacks, function(pcb){
-                        pcb(state);
-                    });
-                });
+                ChartDataController.handleUpdatedFilters(refs.expSetFilters, notifyUpdateCallbacks);
             }
         });
 
-        ChartDataController.fetchUnfilteredAndFilteredExperiments(null, callback);
+        ChartDataController.fetchUnfilteredAndFilteredExperiments(null, function(){
+            ChartDataController.updateStats();
+            callback(state);
+        });
         isInitialized = true;
     },
 
+    /** Whether component has been initialized and may be used. */
     isInitialized : function(){
         return isInitialized;
     },
 
+    /** 
+     * For React components to register an "update me" function, i.e. forceUpdate,
+     * to be called when new experiments/filteredExperiments has finished loading from back-end.
+     * 
+     * @param {function} callback - The callback function to call.
+     * @param {string}   uniqueID - A unique identifier for the registered callback, to be used for removal.
+     * @return {function}   A function which may be called to unregister the callback, in lieu of ChartDataController.unregisterUpdateCallback.
+     */
     registerUpdateCallback : function(callback, uniqueID = 'global'){
         if (typeof callback !== 'function') throw Error("callback must be a function.");
         if (typeof uniqueID !== 'string') throw Error("uniqueID must be a string.");
         providerCallbacks[uniqueID] = callback;
+        return function(){
+            return ChartDataController.unregisterUpdateCallback(uniqueID);
+        }
     },
 
     unregisterUpdateCallback : function(uniqueID){
@@ -205,20 +247,42 @@ var ChartDataController = module.exports = {
         delete providerCallbacks[uniqueID];
     },
 
-    getState : function(){ return _.clone(state); },
+    /** Same as registerUpdateCallback but for when starting AJAX fetch of data. */
+    registerLoadStartCallback : function(callback, uniqueID = 'global'){
+        if (typeof callback !== 'function') throw Error("callback must be a function.");
+        if (typeof uniqueID !== 'string') throw Error("uniqueID must be a string.");
+        providerLoadStartCallbacks[uniqueID] = callback;
+        return function(){
+            return ChartDataController.unregisterUpdateCallback(uniqueID);
+        }
+    },
+
+    unregisterLoadStartCallback : function(uniqueID){
+        if (typeof uniqueID !== 'string') throw Error("uniqueID must be a string.");
+        delete providerLoadStartCallbacks[uniqueID];
+    },
+
+    getState : function(){ return state; },
 
     setState : function(updatedState = {}, callback = null){
+        
+        var expsChanged = (
+            updatedState.experiments !== state.experiments || updatedState.filteredExperiments !== state.filteredExperiments ||
+            !_.isEqual(updatedState.experiments, state.experiments) || !_.isEqual(updatedState.filteredExperiments, state.filteredExperiments)
+        )
+
         _.extend(state, updatedState);
-        if (updatedState.experiments || updatedState.filteredExperiments){
-            _.forEach(providerCallbacks, function(pcb){
-                pcb(state);
-            });
+
+        if (expsChanged){
+            ChartDataController.updateStats();
+            notifyUpdateCallbacks();
         }
-        if (typeof callback === 'function'){
+        if (typeof callback === 'function' && callback !== notifyUpdateCallbacks){
             return callback(state);
         }
     },
 
+    /** Fetch new data from back-end regardless of expSetFilters state, e.g. for when session has changed. */
     sync : function(callback){
         if (!isInitialized) throw Error("Not initialized.");
         ChartDataController.fetchUnfilteredAndFilteredExperiments(null, callback);
@@ -232,8 +296,39 @@ var ChartDataController = module.exports = {
         }
     },
 
+    updateStats : function(){
+        if (typeof refs.updateStats !== 'function'){
+            throw Error("Not initialized with updateStats callback.");
+        }
 
+        var current, total;
 
+        function getCounts(){
+            var expSets = _.reduce(state.filteredExperiments || state.experiments, function(m,exp){
+                if (exp.experiment_sets) return new Set([...m, ..._.pluck(exp.experiment_sets, 'accession')]);
+                return m;
+            }, new Set());
+            return {
+                'experiment_sets' : expSets.size,
+                'experiments' : (state.filteredExperiments || state.experiments).length,
+                'files' : expFxn.fileCountFromExperiments(state.filteredExperiments || state.experiments)
+            };
+        }
+
+        if (state.filteredExperiments !== null){
+            current = getCounts(state.filteredExperiments);
+        } else {
+            current = {
+                'experiment_sets' : null,
+                'experiments' : null,
+                'files' : null
+            };
+        }
+
+        total = getCounts(state.experiments);
+
+        refs.updateStats(current, total);
+    },
 
 
 
@@ -251,6 +346,8 @@ var ChartDataController = module.exports = {
             }, callback);
 
         });
+
+        notifyLoadStartCallbacks();
 
         ajax.load(
             refs.requestURLBase + ChartDataController.getFieldsRequiredURLQueryPart(),
@@ -275,6 +372,7 @@ var ChartDataController = module.exports = {
     },
 
     fetchAndSetUnfilteredExperiments : function(callback = null){
+        notifyLoadStartCallbacks();
         ajax.load(
             refs.requestURLBase + ChartDataController.getFieldsRequiredURLQueryPart(),
             function(allExpsContext){
@@ -286,6 +384,7 @@ var ChartDataController = module.exports = {
     },
 
     fetchAndSetFilteredExperiments : function(callback = null){
+        notifyLoadStartCallbacks();
         ajax.load(
             ChartDataController.getFilteredContextHref() + ChartDataController.getFieldsRequiredURLQueryPart(),
             function(filteredContext){

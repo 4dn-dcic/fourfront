@@ -7,7 +7,7 @@ var querystring = require('querystring');
 var d3 = require('d3');
 var MosaicChart = require('./viz/MosaicChart');
 var BarPlotChart = require('./viz/barplot');
-var MosaicDetailCursor = require('./viz/MosaicDetailCursor');
+var ChartDetailCursor = require('./viz/ChartDetailCursor');
 var { expFxn, Filters, ajax, console, layout, isServerSide } = require('./util');
 var FacetList = require('./facetlist');
 var vizUtil = require('./viz/utilities');
@@ -42,13 +42,16 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             'views' : ['small', 'large'],
             'requestURLBase' : '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&from=0',
             'colWidthPerScreenSize' : {
+                /* Previous, for mosaic: */
                 'small' : [
-                    {'xs' : 12, 'sm' : 6,  'md' : 4, 'lg' : 3},
-                    {'xs' : 12, 'sm' : 6,  'md' : 8, 'lg' : 9}
+                    //{'xs' : 12, 'sm' : 6,  'md' : 4, 'lg' : 3}, // For old mosaic
+                    {'xs' : 12, 'sm' : 6,  'md' : 8, 'lg' : 9},
+                    {'xs' : 12, 'sm' : 12, 'md' : 4, 'lg' : 3}
                 ],
                 'large' : [
-                    {'xs' : 12, 'sm' : 12, 'md' : 4, 'lg' : 3},
-                    {'xs' : 12, 'sm' : 12, 'md' : 8, 'lg' : 9}
+                    //{'xs' : 12, 'sm' : 12, 'md' : 4, 'lg' : 3}, // For old mosaic
+                    {'xs' : 12, 'sm' : 12, 'md' : 8, 'lg' : 9},
+                    {'xs' : 12, 'sm' : 12, 'md' : 4, 'lg' : 3}
                 ]
             }
         };
@@ -153,17 +156,22 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             window.addEventListener('resize', this.debouncedResizeHandler);
         }
 
+        var newState = {
+            mounted : true
+        };
+
         if (!ChartDataController.isInitialized()){
             ChartDataController.initialize(
                 this.props.requestURLBase,
+                this.props.updateStats,
                 ()=>{
                     if (this.props.debug) console.log("Mounted FacetCharts after initializing ChartDataController:", ChartDataController.getState());
-                    this.setState({ mounted : true });
+                    this.setState(newState);
                 }
             );
         } else {
             if (this.props.debug) console.log('Mounted FacetCharts');
-            this.setState({ mounted : true });
+            this.setState(newState);
         }
 
     },
@@ -178,7 +186,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
     shouldComponentUpdate : function(nextProps, nextState){
         if (this.props.debug) console.log('FacetChart next props & state:', nextProps, nextState);
         if ( nextState.mounted && this.state.session !== nextState.session ){
-            // Refetch on login/out. TODO: Bring this into ChartDataController.
+            // Refetch on login/out. TODO: Bring this into ChartDataController or App.
             ChartDataController.sync(()=>this.forceUpdate());
         }
         if (
@@ -237,23 +245,6 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
     },
 
     componentDidUpdate: function(pastProps, pastState){
-        /*
-        if (pastProps.requestURLBase !== this.props.requestURLBase || pastProps.session !== this.props.session) {
-            ChartDataController.initialize(
-                this.props.schemas,
-                this.props.navigate,
-                this.props.updateState,
-                this.props.requestURLBase,
-                ()=>{
-                    this.setState({ 'fetching' : false });
-                }
-            );
-        } else if (pastProps.expSetFilters !== this.props.expSetFilters || !_.isEqual(pastProps.expSetFilters, this.props.expSetFilters)){
-            ChartDataController.handleUpdatedFilters(this.props.expSetFilters, ()=>{
-                this.setState({ 'fetching' : false });
-            });
-        }
-        */
         console.log('Updated FacetCharts', this.state);
     },
     
@@ -358,13 +349,13 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
     },
 
     /** We want a square for circular charts, so we determine WIDTH available for first chart (which is circular), and return that as height. */
-    width : function(chartIndex = 0, show = null){
+    width : function(chartNumber = 0, show = null){
         if (!show) show = this.show();
         if (!show) return null;
         if (!this.state.mounted || isServerSide()){
-            return 1160 * (this.props.colWidthPerScreenSize[show][chartIndex].lg / 12); // Full width container size (1160) 
+            return 1160 * (this.props.colWidthPerScreenSize[show][chartNumber - 1].lg / 12); // Full width container size (1160) 
         } else {
-            return (layout.gridContainerWidth() + 20) * (this.props.colWidthPerScreenSize[show][chartIndex][layout.responsiveGridState()] / 12);
+            return (layout.gridContainerWidth() + 20) * (this.props.colWidthPerScreenSize[show][chartNumber - 1][layout.responsiveGridState()] / 12);
         }
     },
 
@@ -409,11 +400,11 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             <div className={"facet-charts show-" + show} key="facet-charts">
                 
                 <div className="row facet-chart-row-1" key="facet-chart-row-1">
+                    {/*
                     <div className={genChartColClassName(1)} key="facet-chart-row-1-chart-1" style={{ height: height }} ref="mosaicContainer">
                         <div className="row">
                             <div className="col-sm-6" style={{
                                 width : (chartDataState.chartFieldsHierarchy.length / (chartDataState.chartFieldsHierarchyRight.length + chartDataState.chartFieldsHierarchy.length)) * 100 + '%'
-                                //width : (this.state.chartFieldsHierarchy.length / (this.state.chartFieldsHierarchyRight.length + this.state.chartFieldsHierarchy.length)) * 100 + '%'
                             }}>
                                 <ChartDataController.Provider id="mosaic1">
                                     <MosaicChart
@@ -428,7 +419,6 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                                         updateStats={this.props.updateStats}
                                         updatePopover={this.updatePopover}
 
-                                        expSetFilters={this.props.expSetFilters}
                                         href={this.props.href}
                                         key="sunburst"
                                         schemas={this.props.schemas}
@@ -452,7 +442,6 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                                         updateStats={this.props.updateStats}
                                         updatePopover={this.updatePopover}
 
-                                        expSetFilters={this.props.expSetFilters}
                                         href={this.props.href}
                                         key="sunburst"
                                         schemas={this.props.schemas}
@@ -463,18 +452,20 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                         </div>
                         <FetchingView display={this.state.fetching} />
                     </div>
-                    <div className={genChartColClassName(2)} key="facet-chart-row-1-chart-2" style={{ height: height }}>
+                    */}
+                    <div className={genChartColClassName(1)} key="facet-chart-row-1-chart-2" style={{ height: height }}>
                         <ChartDataController.Provider id="barplot1">
                             <BarPlotChart
                                 fields={chartDataState.chartFieldsBarPlot}
                                 width={this.width(1) - 20} height={height}
                                 schemas={this.props.schemas}
+                                updatePopover={this.updatePopover}
                             />
                         </ChartDataController.Provider>
                         <FetchingView display={this.state.fetching} />
                     </div>
                 </div>
-                <MosaicDetailCursor
+                <ChartDetailCursor
                     containingElement={(this.refs && this.refs.mosaicContainer) || null}
                     verticalAlign="center" /* cursor position */
                     visibilityMargin={{ left : -10, right : -10, bottom : -50, top: -18 }}
