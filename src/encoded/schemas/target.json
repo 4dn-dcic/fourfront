@@ -69,6 +69,17 @@
                 "internal_comment": "Can we validate against RefSeq?",
                 "type": "string"
             }
+        },
+        "targeted_structure": {
+            "title": "Targeted Cellular Structure",
+            "description": "Choose from the list",
+            "type": "string",
+            "enum": [
+                "Cell membrane",
+                "Nucleolus",
+                "NPC",
+                "Microtubules"
+            ]
         }
     }
 }

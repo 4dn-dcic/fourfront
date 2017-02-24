@@ -28,11 +28,11 @@
             "type": "string"
         },
         "target": {
-            "title": "Targets for labelling",
+            "title": "Targets of labelling",
             "description": "Protein/RNA/DNA or cellular structure targeted for labeling",
             "type": "array",
             "items": {
-                "title": "Targets for labelling",
+                "title": "Target of labelling",
                 "linkTo": "Target"
             }
         },
@@ -42,7 +42,7 @@
             "type": "array",
             "items": {
                 "title": "Targets for labelling",
-                "type": "Probe"
+                "linkTo": "Probe"
             }
         },
         "labels": {

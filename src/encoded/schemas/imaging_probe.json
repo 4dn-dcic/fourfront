@@ -1,7 +1,7 @@
 {
     "title": "Imaging probe",
-    "description": "Schema for submitting a labeling path from taget to the label.",
-    "id": "/profiles/labeling_path.json",
+    "description": "Schema for submitting a imaging probe from taget to the label.",
+    "id": "/profiles/imaging_probe.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["award", "lab"],
