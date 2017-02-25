@@ -805,12 +805,14 @@ def test_find_and_add_parent_of(uberon_owler4):
     terms = {tid: {'term_id': tid}}
     relids = ['UBERON:0002048', 'OBI:0000456', 'CL:0000058', 'CL:0000133']
     relation = None
+    seen = False
     for c in uberon_owler4.allclasses:
         for i, p in enumerate(uberon_owler4.get_classDirectSupers(c, excludeBnodes=False)):
             if go.isBlankNode(p):
                 has_part = False
-                if i == 0:
+                if not seen:
                     has_part = True
+                    seen = True
                 terms = go._find_and_add_parent_of(p, c, uberon_owler4, terms, has_part, relation)
     assert len(terms) == 2
     print(terms)
