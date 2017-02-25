@@ -6,13 +6,14 @@ var url = require('url');
 var querystring = require('querystring');
 var d3 = require('d3');
 var MosaicChart = require('./viz/MosaicChart');
-var BarPlotChart = require('./viz/barplot');
+var BarPlotChart = require('./viz/BarPlotChart');
 var ChartDetailCursor = require('./viz/ChartDetailCursor');
 var { expFxn, Filters, ajax, console, layout, isServerSide } = require('./util');
 var FacetList = require('./facetlist');
 var vizUtil = require('./viz/utilities');
-var { SVGFilters, FetchingView } = require('./viz/components');
+var { SVGFilters, FetchingView, Legend } = require('./viz/components');
 var ChartDataController = require('./viz/chart-data-controller');
+
 
 /**
  * @callback showFunc
@@ -45,13 +46,13 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 /* Previous, for mosaic: */
                 'small' : [
                     //{'xs' : 12, 'sm' : 6,  'md' : 4, 'lg' : 3}, // For old mosaic
-                    {'xs' : 12, 'sm' : 6,  'md' : 8, 'lg' : 9},
-                    {'xs' : 12, 'sm' : 12, 'md' : 4, 'lg' : 3}
+                    {'xs' : 12, 'sm' : 9,  'md' : 9, 'lg' : 9},
+                    {'xs' : 12, 'sm' : 3, 'md' : 3, 'lg' : 3}
                 ],
                 'large' : [
                     //{'xs' : 12, 'sm' : 12, 'md' : 4, 'lg' : 3}, // For old mosaic
-                    {'xs' : 12, 'sm' : 12, 'md' : 8, 'lg' : 9},
-                    {'xs' : 12, 'sm' : 12, 'md' : 4, 'lg' : 3}
+                    {'xs' : 12, 'sm' : 9, 'md' : 9, 'lg' : 9},
+                    {'xs' : 12, 'sm' : 3, 'md' : 3, 'lg' : 3}
                 ]
             }
         };
@@ -191,6 +192,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         }
         if (
             this.props.schemas !== nextProps.schemas ||
+            !_.isEqual(this.props.schemas, nextProps.schemas) ||
             this.show(nextProps) !== this.show(this.props) ||
             (nextState.mounted !== this.state.mounted)
         ){
@@ -242,6 +244,9 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         //var newState = {};
 
         //if (Object.keys(newState).length > 0) this.setState(newState);
+        if (!this.show(this.props) && this.show(nextProps) && !isServerSide()) {
+            setTimeout(this.forceUpdate.bind(this), 50);
+        }
     },
 
     componentDidUpdate: function(pastProps, pastState){
@@ -395,7 +400,11 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             );
         }
 
+        console.log('SCHEMAS AT RENDER', this.props.schemas);
+
         var chartDataState = ChartDataController.getState();
+        var legendFields = (this.refs && this.refs.barplotChart && this.refs.barplotChart.getLegendData()) || null;
+
         return (
             <div className={"facet-charts show-" + show} key="facet-charts">
                 
@@ -453,16 +462,37 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                         <FetchingView display={this.state.fetching} />
                     </div>
                     */}
-                    <div className={genChartColClassName(1)} key="facet-chart-row-1-chart-2" style={{ height: height }}>
+                    <div className={genChartColClassName(1)} key="facet-chart-row-1-chart-1" style={{ height: height }}>
                         <ChartDataController.Provider id="barplot1">
                             <BarPlotChart
                                 fields={chartDataState.chartFieldsBarPlot}
                                 width={this.width(1) - 20} height={height}
                                 schemas={this.props.schemas}
                                 updatePopover={this.updatePopover}
+                                ref="barplotChart"
+                                primaryField="experiments_in_set.biosample.biosource_summary"
+                                secondaryField={null}
+
                             />
                         </ChartDataController.Provider>
                         <FetchingView display={this.state.fetching} />
+                    </div>
+                    <div className={genChartColClassName(2)} key="facet-chart-row-1-chart-2" style={{ height: height }}>
+                        <Legend
+                            fields={legendFields}
+                            schemas={this.props.schemas}
+                            width={this.width(2) - 20}
+                            title={
+                                <div>
+                                    <h6 className="text-400 legend-title">
+                                        { this.refs && this.refs.barplotChart && typeof this.refs.barplotChart.getTopLevelField === 'function' ?
+                                            Filters.Field.toName(this.refs.barplotChart.getTopLevelField(), this.props.schemas)
+                                        : null }
+                                        <br/><span className="text-300">divided into</span>
+                                    </h6>
+                                </div>
+                            }
+                        />
                     </div>
                 </div>
                 <ChartDetailCursor

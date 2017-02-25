@@ -49,7 +49,7 @@ var layout = module.exports = {
      * 
      * @param {string}  originalText
      * @param {number}  maxChars
-     * @param (boolean) [addEllipsis=true]
+     * @param {boolean} [addEllipsis=true]
      * @param {string}  [splitOn=' ']
      */
     shortenString : function(originalText, maxChars = 28, addEllipsis = true, splitOn = ' '){

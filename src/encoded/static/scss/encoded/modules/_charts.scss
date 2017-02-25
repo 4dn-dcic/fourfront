@@ -483,57 +483,6 @@
         }
     }
 
-    .chart-color-legend {
-        position: absolute;
-        right: 20px;
-        top: 0;
-        padding: 14px 16px 14px;
-        background-color: #fff;
-        min-width: 200px;
-        //border: 1px solid #eee;
-        //border-radius: 1px;
-
-        .legend-title {
-            margin-bottom: 1px;
-            margin-top: 0px;
-        }
-
-        .color-patch {
-            display: inline-block;
-            height: 12px;
-            width: 12px;
-            margin-right: 6px;
-            position: relative;
-            top: 1px;
-            transition: opacity .25s;
-            //border: 1px solid #000;
-        }
-
-        .highlight .color-patch {
-            opacity : 0.125;
-            &.highlight {
-                opacity : 1;
-            }
-        }
-
-        .field {
-            .legend-field-title {
-                margin-top: 1px;
-            }
-            > .color-patch {
-                width: 10px;
-                height: 10px;
-                border-radius: 50%;
-            }
-
-            .term {
-                font-size: 0.85rem;
-                
-            }
-
-        }
-    }
-
 }
 
 /** Sunburst Chart Style(s) **/
@@ -781,6 +730,64 @@
 
 .chart-container-sunburst:hover .chart .explanation .experiments-count-label {
     opacity : 1;
+}
+
+
+/**** Legend Style *****/
+
+.chart-color-legend {
+    /*
+    position: absolute;
+    right: 20px;
+    top: 0;
+    */
+    padding: 14px 16px 14px;
+    background-color: #fff;
+    min-width: 200px;
+    opacity : 1;
+    transition: opacity .75s;
+    //border: 1px solid #eee;
+    //border-radius: 1px;
+
+    .legend-title {
+        margin-bottom: 1px;
+        margin-top: 0px;
+    }
+
+    .color-patch {
+        display: inline-block;
+        height: 12px;
+        width: 12px;
+        margin-right: 6px;
+        position: relative;
+        top: 1px;
+        transition: opacity .25s;
+        //border: 1px solid #000;
+    }
+
+    .highlight .color-patch {
+        opacity : 0.125;
+        &.highlight {
+            opacity : 1;
+        }
+    }
+
+    .field {
+        .legend-field-title {
+            margin-top: 1px;
+        }
+        > .color-patch {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .term {
+            font-size: 0.85rem;
+            
+        }
+
+    }
 }
 
 

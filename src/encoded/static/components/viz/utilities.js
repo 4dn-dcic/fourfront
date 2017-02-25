@@ -81,7 +81,9 @@ var vizUtil = module.exports = {
         return (vizUtil.colorCacheByField[field][term] && vizUtil.colorCacheByField[field][term].color) || null;
     },
 
-    colorForNode : function(node, cachedOnly = false, palette = null, predefinedColors = null){
+    colorForNode : function(node, cachedOnly = false, palette = null, predefinedColors = null, nullInsteadOfDefaultColor = false){
+        var defaultColor = nullInsteadOfDefaultColor ? null : '#aaaaaa';
+        
         var nodeDatum = node.data || node, // Handle both pre-D3-ified and post-D3-ified nodes.
             field = nodeDatum.field || null,
             term = (nodeDatum.term && nodeDatum.term.toLowerCase()) || null;
@@ -90,7 +92,7 @@ var vizUtil = module.exports = {
         if (nodeDatum.color){
             return nodeDatum.color;
         } else if (field === 'accession'){ // This is an experiment_set node. We give it a unique color.
-            return '#aaaaaa';
+            return defaultColor;
         }
 
         // Grab from existing cache, if set.
@@ -105,7 +107,7 @@ var vizUtil = module.exports = {
             return vizUtil.addToColorCacheByField(field, term, predefinedColors[term]);
         }
 
-        if (cachedOnly) return '#aaaaaa'; // Default
+        if (cachedOnly) return defaultColor;
 
         // Set a cycled palette color
         return vizUtil.addToColorCacheByField(field, term, null, palette || 'muted');

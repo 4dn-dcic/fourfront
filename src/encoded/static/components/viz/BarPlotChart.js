@@ -4,7 +4,7 @@ var React = require('react');
 var _ = require('underscore');
 var d3 = require('d3');
 var vizUtil = require('./utilities');
-var { Legend, RotatedLabel } = require('./components');
+var { RotatedLabel } = require('./components');
 var { console, object, isServerSide, expFxn, Filters } = require('../util');
 var { highlightTerm, unhighlightTerms } = require('./../facetlist');
 
@@ -16,7 +16,7 @@ var BarPlot = React.createClass({
         genChartData : function(
             experiments = [],
             fields = [{ 'name' : 'Biosample' , field : 'experiments_in_set.biosample.biosource_summary' }],
-            experimentsOrSets='experiments'
+            experimentsOrSets='experiments',
         ){
 
             // Add terms and total for each field.
@@ -92,7 +92,7 @@ var BarPlot = React.createClass({
                             'total' : 0,
                             'term' : term[0],
                             'terms' : {} 
-                        } 
+                        }
                     ];
                 })
                 .object()
@@ -149,9 +149,20 @@ var BarPlot = React.createClass({
             fields,
             availWidth = 400,
             availHeight = 400,
-            styleOpts = BarPlot.getDefaultStyleOpts()
+            styleOpts = BarPlot.getDefaultStyleOpts(),
+            primaryField = null,
+            secondaryField = null
         ){
-            var topIndex = BarPlot.firstPopulatedFieldIndex(fields);
+
+            var topIndex;
+
+            if (primaryField) {
+                topIndex = _.findIndex(fields, { 'field' : primaryField });
+            }
+            if (!topIndex) {
+                topIndex = BarPlot.firstPopulatedFieldIndex(fields);
+            }
+            
             var numberOfTerms = _.keys(fields[topIndex].terms).length;
             var largestExpCountForATerm = _.reduce(fields[topIndex].terms, function(m,t){
                 return Math.max(m, typeof t === 'number' ? t : t.total);
@@ -243,7 +254,7 @@ var BarPlot = React.createClass({
                 'offset' : {
                     'top' : 18,
                     'bottom' : 50,
-                    'left' : 80,
+                    'left' : 50,
                     'right' : 0
                 }
             };
@@ -379,6 +390,17 @@ var BarPlot = React.createClass({
             }
         }
         */
+    },
+
+    /** Call this function, e.g. through refs, to grab fields and terms for a/the Legend component. */
+    getLegendData : function(){
+        if (!this.barData) return null;
+        return BarPlot.barDataToLegendData(this.barData, this.props.schemas || null);
+    },
+
+    getTopLevelField : function(){
+        if (!this.barData) return null;
+        return this.barData.fields[this.barData.fieldIndex].field;
     },
 
     renderParts : {
@@ -641,7 +663,7 @@ var BarPlot = React.createClass({
                                 term : b.term,
                                 x: b.attr.x,
                                 opacity : _this.state.transitioning && (b.removing || !b.existing) ? 0 : '',
-                                color : vizUtil.colorForNode(b, true)
+                                color : vizUtil.colorForNode(b, true, null, null, true)
                             }; 
                         })}
                         labelClassName="y-axis-label no-highlight-color"
@@ -710,7 +732,7 @@ var BarPlot = React.createClass({
         this.pastBars = _.clone(this.bars); // Difference between current and pastBars used to determine which bars to do D3 transitions on (if any).
         this.bars = {}; // ref to 'g' element is stored here.
 
-        var barData = BarPlot.genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
+        this.barData = BarPlot.genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
             BarPlot.genChartData( // Get counts by term per field.
                 this.props.filteredExperiments || this.props.experiments,
                 this.props.fields,
@@ -721,10 +743,10 @@ var BarPlot = React.createClass({
             this.styleOptions()
         );
 
-        console.log('BARDATA', barData);
+        console.log('BARDATA', this.barData);
 
         // Bars from current dataset/filters only.
-        var currentBars = barData.bars.map((d)=>{
+        var currentBars = this.barData.bars.map((d)=>{
             // Determine whether bar existed before, for this.renderParts.bar render func.
             return _.extend(d, { 
                 'existing' : typeof this.pastBars[d.term] !== 'undefined' && this.pastBars[d.term] !== null
@@ -735,7 +757,7 @@ var BarPlot = React.createClass({
 
         // If transitioning, get D3 datums of existing bars which need to transition out and add removing=true property to inform this.renderParts.bar.
         if (this.state.transitioning){
-            var barsToRemove = _.difference(  _.keys(this.pastBars),  _.pluck(barData.bars, 'term')).map((barTerm) => {
+            var barsToRemove = _.difference(  _.keys(this.pastBars),  _.pluck(this.barData.bars, 'term')).map((barTerm) => {
                 return _.extend(this.pastBars[barTerm].__data__, { 'removing' : true });
             });
             allBars = barsToRemove.concat(currentBars);
@@ -752,20 +774,12 @@ var BarPlot = React.createClass({
                 className="bar-plot-chart chart-container"
                 key="container"
                 ref="container"
-                data-field={this.props.fields[barData.fieldIndex].field}
+                data-field={this.props.fields[this.barData.fieldIndex].field}
                 style={{ height : availHeight, width: availWidth }}
             >
-                { this.renderParts.leftAxis.call(this, availWidth, availHeight, barData, styleOpts) }
+                { this.renderParts.leftAxis.call(this, availWidth, availHeight, this.barData, styleOpts) }
                 { barComponents }
                 { this.renderParts.bottomYAxis.call(this, availWidth, availHeight, allBars, styleOpts) }
-                <Legend fields={BarPlot.barDataToLegendData(barData, this.props.schemas || null)} title={
-                    <div>
-                        <h6 className="text-400 legend-title">
-                            { Filters.Field.toName(barData.fields[barData.fieldIndex].field, this.props.schemas) }
-                            <br/><span className="text-300">divided into</span>
-                        </h6>
-                    </div>
-                } />
             </div>
         );
         /*
