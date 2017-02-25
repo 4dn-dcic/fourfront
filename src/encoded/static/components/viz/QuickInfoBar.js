@@ -136,9 +136,9 @@ var QuickInfoBar = module.exports = React.createClass({
             };
         } else {
             stats = {
-                'experiment_sets' : this.state.count_experiment_sets_total,
-                'experiments' : this.state.count_experiments_total,
-                'files' : this.state.count_files_total
+                'experiment_sets' : this.state.count_experiment_sets_total || 0,
+                'experiments' : this.state.count_experiments_total || 0,
+                'files' : this.state.count_files_total || 0
             };
         }
         var className = "inner container";

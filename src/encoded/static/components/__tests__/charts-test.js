@@ -8,7 +8,7 @@ jest.dontMock('underscore');
 
 
 describe('Testing FacetCharts with a dummy sinon response returning test @graph', function() {
-    var React, FacetCharts, testItem, TestUtils, page, store, context, filters, _, Wrapper, href, sinon, server;
+    var React, FacetCharts, ChartDataController, testItem, TestUtils, page, store, context, filters, _, Wrapper, href, sinon, server;
 
     beforeAll(function() {
         React = require('react');
@@ -16,6 +16,7 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
         FacetCharts = require('./../facetcharts').FacetCharts;
+        ChartDataController = require('./../viz/chart-data-controller');
         context = require('../testdata/browse/context-limited-fields'); // We need to sinon fake server to give us this.
         href = "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=25&from=0";
 
@@ -45,8 +46,8 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
         
         server.respondWith(
             "GET",
-            "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&from=0" +
-                FacetCharts.getFieldsRequiredURLQueryPart(fieldsToFetch),
+            "/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&from=0"
+                + ChartDataController.getFieldsRequiredURLQueryPart(fieldsToFetch),
             [
                 200, 
                 { "Content-Type" : "application/json" },
@@ -70,20 +71,26 @@ describe('Testing FacetCharts with a dummy sinon response returning test @graph'
         server.restore();
     });
 
+    /*
     it('Has chart elements such as SVG, bar parts', function() {
         server.respond();
         jest.runAllTimers();
         var svg = TestUtils.scryRenderedDOMComponentsWithClass(page, 'sunburst-svg-chart');
         expect(svg.length).toBe(1);
     });
+    */
 
+    /*
     it('Has multiple paths that theoretically may be clicked (have field & term related to them)', function() {
         var exClickablePaths = TestUtils.scryRenderedDOMComponentsWithClass(page, 'clickable');
         expect(exClickablePaths.length).toBeGreaterThan(1);
         console.log('CHARTS-TEST: Found ' + exClickablePaths.length + ' SVG paths which could be clickable.');
     });
+    */
 
     it('Has bars, divided into bar parts, with labels', function() {
+        server.respond();
+        jest.runAllTimers();
         var bars = TestUtils.scryRenderedDOMComponentsWithClass(page, 'chart-bar');
         var barParts = TestUtils.scryRenderedDOMComponentsWithClass(page, 'bar-part');
         expect(bars.length).toBeGreaterThan(1);
