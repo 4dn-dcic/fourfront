@@ -1,5 +1,6 @@
 import os
 import pytest
+from collections import OrderedDict
 from encoded.commands import generate_ontology as go
 pytestmark = pytest.mark.working
 
@@ -292,11 +293,6 @@ def test_remove_obsoletes_and_unnamed_obsoletes(terms_w_rels):
     assert remaining in terms
     for i in ids:
         assert i not in terms
-
-
-
-def test_remove_obsoletes_and_unnamed_unnamed(terms_w_rels):
-    pass
 
 
 test_syn_terms = [
@@ -885,3 +881,40 @@ def test_cleanup_non_fields(terms_w_stuff):
         assert d not in terms['term1']
     for k in to_keep:
         assert k in terms['term1']
+
+
+@pytest.fixture
+def mock_get_synonyms(mocker):
+    syn_lists = [[], ['syn1'], ['syn1', 'syn2']]
+    return mocker.patch('encoded.commands.generate_ontology.get_synonyms', side_effect=syn_lists)
+
+
+@pytest.fixture
+def mock_get_definitions(mocker):
+    def_lists = [[], ['def1'], ['def1', 'def2']]
+    return mocker.patch('encoded.commands.generate_ontology.get_synonyms', side_effect=def_lists)
+
+def test_add_additional_term_info(mocker):
+    syn_lists = [[], ['syn1'], ['syn1', 'syn2']]
+    def_lists = [[], ['def1'], ['def1', 'def2']]
+    terms = {'t1': {'term_id': 't1', 'term_url': 'term1'},
+             't2': {'term_id': 't2', 'term_url': 'term2'},
+             't3': {'term_id': 't3', 'term_url': 'term3'}}
+    terms = OrderedDict(sorted(terms.items(), key = lambda t: t[0]))
+    with mocker.patch('encoded.commands.generate_ontology.convert2URIRef', return_value='blah'):
+        with mocker.patch('encoded.commands.generate_ontology.get_synonyms', side_effect=syn_lists):
+            with mocker.patch('encoded.commands.generate_ontology.get_definitions', side_effect=def_lists):
+                result = go.add_additional_term_info(terms, 'data', 'synterms', 'defterms')
+                for tid, term in result.items():
+                    if tid == 't3':
+                        assert term['definition'] == 'def1'
+                        assert len(term['synonyms']) == 2
+                        assert 'syn1' in term['synonyms']
+                        assert 'syn2' in term['synonyms']
+                    elif tid == 't2':
+                        assert term['definition'] == 'def1'
+                        assert len(term['synonyms']) == 1
+                        assert term['synonyms'][0] == 'syn1'
+                    else:
+                        assert 'synonyms' not in term
+                        assert 'definition' not in term
