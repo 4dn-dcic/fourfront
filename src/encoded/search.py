@@ -563,7 +563,7 @@ def format_facets(es_results, facets, used_filters, schemas, total):
         if agg_name in aggregations:
             resultFacet['total'] = aggregations[agg_name]['doc_count']
             resultFacet['terms'] = aggregations[agg_name][agg_name]['buckets']
-            
+
         # Choosing to show facets with one term for summary info on search it provides
         if len(resultFacet.get('terms', [])) < 1:
             continue
