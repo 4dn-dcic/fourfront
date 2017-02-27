@@ -249,7 +249,10 @@ var ChartDataController = module.exports = {
         isInitialized = true;
     },
 
-    /** Whether component has been initialized and may be used. */
+    /**
+     * Whether component has been initialized and may be used.
+     * @returns {boolean} True if initialized.
+     */
     isInitialized : function(){
         return isInitialized;
     },
@@ -260,7 +263,7 @@ var ChartDataController = module.exports = {
      * 
      * @param {function} callback - Function to be called upon loading 'experiments' or 'all experiments'. If registering from a React component, should include this.forceUpdate() or this.setState(..).
      * @param {string}   uniqueID - A unique identifier for the registered callback, to be used for removal or overwrites.
-     * @return {function}   A function which may be called to unregister the callback, in lieu of ChartDataController.unregisterUpdateCallback.
+     * @returns {function}   A function which may be called to unregister the callback, in lieu of ChartDataController.unregisterUpdateCallback.
      */
     registerUpdateCallback : function(callback, uniqueID = 'global', overwrite=false){
         if (typeof callback !== 'function') throw Error("callback must be a function.");
