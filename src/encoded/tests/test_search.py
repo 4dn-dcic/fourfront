@@ -4,6 +4,7 @@ import pytest
 pytestmark = [pytest.mark.setone, pytest.mark.working, pytest.mark.schema]
 
 
+@pytest.mark.slow
 def test_search_view(workbook, testapp):
     res = testapp.get('/search/?type=Item').json
     assert res['@type'] == ['Search']
@@ -17,6 +18,7 @@ def test_search_view(workbook, testapp):
     assert '@graph' in res
 
 
+@pytest.mark.slow
 def test_search_with_no_query(workbook, testapp):
     # using /search/ (with no query) should default to /search/?type=Item
     # thus, should satisfy same assertions as test_searcg_view

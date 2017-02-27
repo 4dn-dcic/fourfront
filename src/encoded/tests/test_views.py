@@ -45,6 +45,7 @@ PUBLIC_COLLECTIONS = [
 ]
 
 
+@pytest.mark.slow
 def test_home(anonhtmltestapp):
     res = anonhtmltestapp.get('/', status=200)
     assert res.body.startswith(b'<!DOCTYPE html>')
@@ -60,30 +61,35 @@ def test_home_app_version(testapp):
     assert 'app_version' in res.json
 
 
+@pytest.mark.slow
 def test_vary_html(anonhtmltestapp):
     res = anonhtmltestapp.get('/', status=200)
     assert res.vary is not None
     assert 'Accept' in res.vary
 
 
+@pytest.mark.slow
 def test_vary_json(anontestapp):
     res = anontestapp.get('/', status=200)
     assert res.vary is not None
     assert 'Accept' in res.vary
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('item_type', [k for k in TYPE_LENGTH if k != 'user'])
 def test_collections_anon(workbook, anontestapp, item_type):
     res = anontestapp.get('/' + item_type).follow(status=200)
     assert '@graph' in res.json
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('item_type', [k for k in TYPE_LENGTH if k != 'user'])
 def test_html_collections_anon(workbook, anonhtmltestapp, item_type):
     res = anonhtmltestapp.get('/' + item_type).follow(status=200)
     assert res.body.startswith(b'<!DOCTYPE html>')
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize('item_type', TYPE_LENGTH)
 def test_html_collections(workbook, htmltestapp, item_type):
     res = htmltestapp.get('/' + item_type).follow(status=200)
@@ -130,22 +136,6 @@ def test_json_basic_auth(anonhtmltestapp):
     value = "Authorization: Basic %s" % ascii_native_(b64encode(b'nobody:pass'))
     res = anonhtmltestapp.get(url, headers={'Authorization': value}, status=403)
     assert res.content_type == 'application/json'
-
-
-def _test_antibody_approval_creation(testapp):
-    from urllib.parse import urlparse
-    new_antibody = {'foo': 'bar'}
-    res = testapp.post_json('/antibodies/', new_antibody, status=201)
-    assert res.location
-    assert '/profiles/result' in res.json['@type']['profile']
-    assert res.json['@graph'] == [{'href': urlparse(res.location).path}]
-    res = testapp.get(res.location, status=200)
-    assert '/profiles/antibody_approval' in res.json['@type']
-    data = res.json
-    for key in new_antibody:
-        assert data[key] == new_antibody[key]
-    res = testapp.get('/antibodies/', status=200)
-    assert len(res.json['@graph']) == 1
 
 
 def test_load_sample_data(
@@ -226,6 +216,7 @@ def test_collection_post_bad_(anontestapp):
     anontestapp.post_json('/organism', {}, headers={'Authorization': value}, status=403)
 
 
+@pytest.mark.slow
 def test_collection_actions_filtered_by_permission(workbook, testapp, anontestapp):
     res = testapp.get('/protocols/')
     assert any(action for action in res.json.get('actions', []) if action['name'] == 'add')
