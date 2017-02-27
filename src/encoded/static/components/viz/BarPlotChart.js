@@ -152,6 +152,8 @@ var BarPlot = React.createClass({
          * @param {number} [availWidth=400] - Available width, in pixels, for chart.
          * @param {number} [availHeight=400] - Available width, in pixels, for chart.
          * @param {Object} [styleOpts=BarPlot.getDefaultStyleOpts()] - Style settings for chart which may contain chart offsets (for axes).
+         * @param {boolean} [useOnlyPopulatedFields=false] - Determine which fields to show via checking for which fields have multiple terms present.
+         * 
          * @return {Object} Object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally.
          */
         genChartBarDims : function(
@@ -159,16 +161,12 @@ var BarPlot = React.createClass({
             availWidth = 400,
             availHeight = 400,
             styleOpts = BarPlot.getDefaultStyleOpts(),
-            primaryField = null,
-            secondaryField = null
+            useOnlyPopulatedFields = false
         ){
 
-            var topIndex;
+            var topIndex = 0;
 
-            if (primaryField) {
-                topIndex = _.findIndex(fields, { 'field' : primaryField });
-            }
-            if (!topIndex) {
+            if (useOnlyPopulatedFields) {
                 topIndex = BarPlot.firstPopulatedFieldIndex(fields);
             }
             

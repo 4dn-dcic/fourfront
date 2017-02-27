@@ -415,6 +415,9 @@ var ProfileWorkFields = React.createClass({
 
         if (!this.state.details_lab){
             this.isLabFetched = FormattedInfoBlock.onMountMaybeFetch.call(this, 'lab', this.props.user.lab, (detail) => this.updateAwardsList([detail]) );
+            if (!this.isLabFetched){
+                this.updateAwardsList([this.props.user.lab]);
+            }
         }
 
         if (typeof this.props.user.lab == 'string' && !this.state.details_lab){
@@ -433,16 +436,24 @@ var ProfileWorkFields = React.createClass({
      * @param {Object[]} labDetails - Array of lab objects with embedded award details.
      * @return {Object[]} List of all unique awards in labs.
      */
-    getAwardsList : function(labDetails){
+    getAwardsList : function(labDetails, callback){
         // Awards are embedded within labs, so we get full details.
         var awardsList = [];
+
+        function addAwardToList(award){
+            if (awardsList.indexOf(labDetails[i].awards[j]) === -1){
+                awardsList.push(labDetails[i].awards[j]);
+            }
+        }
+
         for (var i = 0; i < labDetails.length; i++){
             if (typeof labDetails[i].awards !== 'undefined' && Array.isArray(labDetails[i].awards)){
                 for (var j = 0; j < labDetails[i].awards.length; j++){
-                    if (awardsList.indexOf(labDetails[i].awards[j]) === -1) awardsList.push(labDetails[i].awards[j]);
+                    addAwardToList(labDetails[i].awards[j]);
                 }
             }
         }
+        
         return awardsList;
     },
 
@@ -459,6 +470,9 @@ var ProfileWorkFields = React.createClass({
             if (typeof awd.link_id === 'string') return awd.link_id.replace(/~/g, "/");
         });
         var newAwards = this.getAwardsList(labDetails);
+        this.getAwardsList(labDetails, function(newAwards){
+
+        });
         for (var i = 0; i < newAwards.length; i++){
             if (currentAwardsListIDs.indexOf(newAwards[i]['@id']) === -1){
                 currentAwardsList.push(newAwards[i]);
