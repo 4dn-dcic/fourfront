@@ -83,7 +83,6 @@ class User(Item):
     def title(self, first_name, last_name):
         """return first and last name."""
         title = u'{} {}'.format(first_name, last_name)
-        # import pdb; pdb.set_trace()
         return title
 
     def display_title(self):

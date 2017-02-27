@@ -27,6 +27,12 @@ class SopMap(Item):
     embedded = add_default_embeds(embedded, schema)
 
     def _update(self, properties, sheets=None):
+        self.calc_props_schema = {}
+        if self.registry and self.registry['calculated_properties']:
+            for calc_props_key, calc_props_val in self.registry['calculated_properties'].props_for(self).items():
+                if calc_props_val.schema:
+                    self.calc_props_schema[calc_props_key] = calc_props_val.schema
+        self.embedded = add_default_embeds(self.embedded, self.calc_props_schema)
         delim = '_'
         id_string = properties["associated_item_type"] + delim
         if "id_values" in properties.keys():

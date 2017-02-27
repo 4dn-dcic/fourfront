@@ -123,6 +123,12 @@ class File(Item):
     name_key = 'accession'
 
     def _update(self, properties, sheets=None):
+        self.calc_props_schema = {}
+        if self.registry and self.registry['calculated_properties']:
+            for calc_props_key, calc_props_val in self.registry['calculated_properties'].props_for(self).items():
+                if calc_props_val.schema:
+                    self.calc_props_schema[calc_props_key] = calc_props_val.schema
+        self.embedded = add_default_embeds(self.embedded, self.calc_props_schema)
         if not properties:
             return
 

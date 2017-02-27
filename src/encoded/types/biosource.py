@@ -28,6 +28,12 @@ class Biosource(Item):
     embedded = add_default_embeds(embedded, schema)
 
     def _update(self, properties, sheets=None):
+        self.calc_props_schema = {}
+        if self.registry and self.registry['calculated_properties']:
+            for calc_props_key, calc_props_val in self.registry['calculated_properties'].props_for(self).items():
+                if calc_props_val.schema:
+                    self.calc_props_schema[calc_props_key] = calc_props_val.schema
+        self.embedded = add_default_embeds(self.embedded, self.calc_props_schema)
         name2info = {
             'H1-hESC': ['Tier 1', 'EFO_0003042'],
             'GM12878': ['Tier 1', 'EFO_0002784'],

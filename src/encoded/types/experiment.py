@@ -55,6 +55,12 @@ class Experiment(Item):
         return None
 
     def _update(self, properties, sheets=None):
+        self.calc_props_schema = {}
+        if self.registry and self.registry['calculated_properties']:
+            for calc_props_key, calc_props_val in self.registry['calculated_properties'].props_for(self).items():
+                if calc_props_val.schema:
+                    self.calc_props_schema[calc_props_key] = calc_props_val.schema
+        self.embedded = add_default_embeds(self.embedded, self.calc_props_schema)
         # if the sop_mapping field is not present see if it should be
         if 'sop_mapping' not in properties.keys():
             sopmap = self.find_current_sop_map(properties['experiment_type'])

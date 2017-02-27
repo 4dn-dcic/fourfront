@@ -8,8 +8,8 @@ def lab(testapp):
         'title': 'ENCODE lab',
         'status': 'current'
     }
-    return testapp.post_json('/lab', item).json['@graph'][0]
-
+    res = testapp.post_json('/lab', item)
+    return testapp.get(res.location).json
 
 @pytest.fixture
 def admin(testapp):
