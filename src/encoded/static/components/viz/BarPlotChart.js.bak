@@ -35,20 +35,11 @@ var BarPlot = React.createClass({
             return BarPlot.partitionFields(fields, experiments);
         },
 
-        partitionFields : function(fields, experiments, useOnlyPopulatedFields = false){
-            var topIndex, nextIndex;
-            if (!Array.isArray(fields) || fields.length < 2) throw new Error("Need at least 2 fields.");
-            if (useOnlyPopulatedFields){
-                // Find first & second fields which have more than 1 term and use those.
-                topIndex = BarPlot.firstPopulatedFieldIndex(fields);
-                if ((topIndex + 1) >= fields.length) return fields; // Cancel
-                
-                nextIndex = BarPlot.firstPopulatedFieldIndex(fields, topIndex + 1);
-            } else {
-                // Use fields[0] and fields[1].
-                topIndex = 0;
-                nextIndex = 1;
-            }
+        partitionFields : function(fields, experiments){
+            var topIndex = BarPlot.firstPopulatedFieldIndex(fields);
+            if ((topIndex + 1) >= fields.length) return fields; // Cancel
+            
+            var nextIndex = BarPlot.firstPopulatedFieldIndex(fields, topIndex + 1);
             fields[topIndex].childField = fields[nextIndex];
             return BarPlot.combinedFieldTermsForExperiments(fields, experiments);
         },
@@ -90,7 +81,7 @@ var BarPlot = React.createClass({
         combinedFieldTermsForExperiments : function(fields, experiments){
             var field;
             var fieldIndex;
-            if (Array.isArray(fields)){ // Fields can be array or single field object.
+            if (Array.isArray(fields)){ // Fields can be array or single field.
                 fieldIndex = _.findIndex(fields, function(f){ return typeof f.childField !== 'undefined'; });
                 field = fields[fieldIndex];
             } else {
