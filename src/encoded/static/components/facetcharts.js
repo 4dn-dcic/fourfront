@@ -168,7 +168,8 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 ()=>{
                     if (this.props.debug) console.log("Mounted FacetCharts after initializing ChartDataController:", ChartDataController.getState());
                     this.setState(newState);
-                }
+                },
+                60 * 1000 // 1min auto-refresh
             );
         } else {
             if (this.props.debug) console.log('Mounted FacetCharts');

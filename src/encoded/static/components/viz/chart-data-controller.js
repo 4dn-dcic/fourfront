@@ -143,6 +143,8 @@ function notifyLoadStartCallbacks(){ // Before load, call registered Load Start 
 
 var reduxSubscription = null;
 var isInitialized = false;
+var resyncInterval = null;
+var isWindowActive = true;
 
 var ChartDataController = module.exports = {
 
@@ -186,12 +188,14 @@ var ChartDataController = module.exports = {
      * @param {string} requestURLBase - Where to request 'all experiments' from.
      * @param {function} [updateStats] - Callback for updating QuickInfoBar, for example, with current experiments, experiment_sets, and files counts.
      * @param {function} [callback] - Optional callback for after initializing.
+     * @param {number|boolean} [resync=false] - How often to resync data, in ms, if window is active, for e.g. if submitters submitted new data while user is browsing.
      * @returns {undefined}
      */
     initialize : function(
         requestURLBase = null,
         updateStats = null,
-        callback = null
+        callback = null,
+        resync = false
     ){
         if (!refs.store) {
             refs.store = require('./../../store');
@@ -222,6 +226,26 @@ var ChartDataController = module.exports = {
             ChartDataController.updateStats();
             callback(state);
         });
+
+        if (typeof resync === 'number' && !isServerSide()){
+
+            resync = Math.max(resync, 20000); // 20sec minimum
+
+            window.addEventListener('focus', function(){
+                isWindowActive = true;
+            });
+            window.addEventListener('blur', function(){
+                isWindowActive = false;
+            });
+
+            resyncInterval = setInterval(function(){
+                if (!isWindowActive) return;
+                console.info('Resyncing experiments & filteredExperiments for ChartDataController.');
+                ChartDataController.sync();
+            }, resync);
+
+        }
+
         isInitialized = true;
     },
 
