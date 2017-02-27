@@ -43,6 +43,7 @@ var MosaicChart = React.createClass({
          * @param {Object} rootNode
          * @param {number} depth
          * @param {function} [filter] - Optional object whose keys/vals to filter resulting nodes by.
+         * @returns {Array} List of all (grand-)child nodes with matching depth and filter, if filter is set.
          */
         getAllNodesAtDepth : function(rootNode, depth = 1, filter = null){
             return _.reduce(rootNode.children, function(m, childNode){

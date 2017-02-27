@@ -198,7 +198,7 @@ var RotatedLabel = module.exports = React.createClass({
      * @see http://mathforum.org/sarah/hamilton/ham.1side.1angle.html
      * @param {number} labelHeight
      * @param {number} labelWidth
-     * @returns {ReactElement|null}
+     * @returns {ReactElement|null} The React element to append or null.
      */
     renderLabelAppend : function(labelHeight, labelWidth){
         if (!this.props.append) return null;
