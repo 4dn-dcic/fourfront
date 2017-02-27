@@ -16,6 +16,7 @@ var { Filters, ajax, JWT, console, isServerSide } = require('./util');
 var Alerts = require('./alerts');
 var jwt = require('jsonwebtoken');
 var { FacetCharts } = require('./facetcharts');
+var ChartDataController = require('./viz/chart-data-controller');
 var makeTitle = require('./item-pages/item').title;
 
 var dispatch_dict = {}; //used to store value for simultaneous dispatch
@@ -379,6 +380,9 @@ var App = React.createClass({
             }
         }
         if (this.state) {
+            if (prevState.session !== this.state.session && ChartDataController.isInitialized()){
+                ChartDataController.sync();
+            }
             for (key in this.state) {
                 if (this.state[key] !== prevState[key]) {
                     console.log('changed state: %s', key, this.state[key]);

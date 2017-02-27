@@ -5,9 +5,10 @@ var _ = require('underscore');
 var url = require('url');
 var d3 = require('d3');
 var vizUtil = require('./utilities');
-var { expFxn, Filters, console, object, isServerSide } = require('../util');
+var { expFxn, Filters, console, object, isServerSide, layout,  } = require('../util');
 var ActiveFiltersBar = require('./components/ActiveFiltersBar');
 var MosaicChart = require('./MosaicChart');
+var ChartDataController = require('./chart-data-controller');
 
 
 var QuickInfoBar = module.exports = React.createClass({
@@ -144,6 +145,7 @@ var QuickInfoBar = module.exports = React.createClass({
         var className = "inner container";
         if (this.state.show !== false) className += ' showing';
         if (this.state.show === 'activeFilters') className += ' showing-filters';
+        if (this.state.show === 'mosaicCharts') className += ' showing-charts';
         return (
             <div className={className} onMouseLeave={()=>{
                 this.setState({ show : false });
@@ -174,11 +176,11 @@ var QuickInfoBar = module.exports = React.createClass({
                         key={2}
                     />
                     <div
-                        className="any-filters-glance-label"
+                        className="any-filters glance-label"
                         title={areAnyFiltersSet ? "Filtered" : "No filters set"}
-                        onMouseEnter={()=>{
+                        onMouseEnter={_.debounce(()=>{
                             if (areAnyFiltersSet) this.setState({ show : 'activeFilters' });
-                        }}
+                        },100)}
                     >
                         <i className="icon icon-filter" style={{ opacity : areAnyFiltersSet ? 1 : 0.25 }} />
                     </div>
@@ -202,13 +204,32 @@ var QuickInfoBar = module.exports = React.createClass({
                         href={this.props.href}
                         showTitle={false}
                     />
+                    <div className="graph-icon" onMouseEnter={_.debounce(()=>{ this.setState({ show : 'mosaicCharts' }); },1000)}>
+                        <i className="icon icon-pie-chart" style={{ opacity : 0.05 }} />
+                    </div>
                 </div>
             );
         } else if (this.state.show === 'mosaicCharts') {
+            var chartDataState = ChartDataController.getState();
             return (
                 <div className="bottom-side">
                     <div className="row">
                         <div className="col-xs-12 col-sm-6">
+                            <ChartDataController.Provider id="mosaic1">
+                                    <MosaicChart
+                                        fields={chartDataState.chartFieldsHierarchyRight}
+                                        maxFieldDepthIndex={chartDataState.chartFieldsHierarchyRight.length - 1}
+
+                                        height={200}
+                                        width={ layout.gridContainerWidth() }
+
+
+                                        href={this.props.href}
+                                        key="sunburst"
+                                        schemas={this.props.schemas}
+                                        debug
+                                    />
+                                </ChartDataController.Provider>
                         </div>
                     </div>
                 </div>

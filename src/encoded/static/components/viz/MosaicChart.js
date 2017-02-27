@@ -388,7 +388,7 @@ var MosaicChart = React.createClass({
                 'maxLabelWidth' : null,
                 'labelWidth' : 200,
                 'offset' : {
-                    'top' : 18,
+                    'top' : 0,//18,
                     'bottom' : 50,
                     'left' : 0,
                     'right' : 0
@@ -452,15 +452,16 @@ var MosaicChart = React.createClass({
     /**
      * @param {Object} d - Node datum with depth, etc.
      */
-    mouseoverHandle : _.throttle(function(d){
-
+    mouseoverHandle : _.throttle(function(d, target=true){
+        if (!target) return false;
         var ancestorsArray = MosaicChart.getAncestors(d);
+        /*
         var siblingArray = MosaicChart.getAllNodesAtDepth(
             this.root,
             d.depth,
             function(n){ return n.data.term === d.data.term; }//.bind(this)
         );
-
+        */
         var currentNodeCounts = {
             experiments : d.data.active || d.data.experiments || 0,
             experiment_sets : d.data.experiment_sets || 0,
@@ -630,16 +631,14 @@ var MosaicChart = React.createClass({
     },
 
     chartLayersWidth : function(props = this.props){
-        var levelsCount = this.chartLevelsCount(props);
-        var availWidth = this.width(props.width);
-        var singleLevelWidth = this.singleChartLayerWidth();
         return (
             this.singleChartLayerWidth(props) * this.chartLevelsCount(props)
         );
     },
 
     singleChartLayerWidth : function(props = this.props){
-        return this.width(props.width) / (this.chartLevelsCount(props) - 1);
+        var dim = this.height(props.height); // Swap to height or width depending on if aligning vertically (= width) or horizontally (= height)
+        return dim / (this.chartLevelsCount(props) - 1);
     },
 
     visualizationSetup : function(){
@@ -650,7 +649,8 @@ var MosaicChart = React.createClass({
         // It creates all the points/sizes (x0, x1, y0, y1) needed for a partitioned layout.
         // Then these are used by 'arc' transform below to draw/put into the SVG.
         this.partition = d3.partition().size([
-            this.height(), // Use height for X coords & vice-versa -- and then flip back in this.generateRectPath.
+            //this.height(), // Use height for X coords & vice-versa -- and then flip back in this.generateRectPath.
+            this.width(),
             this.chartLayersWidth()
         ]);
         return;
@@ -680,11 +680,11 @@ var MosaicChart = React.createClass({
     generateRectPath : function(node){
         var path = d3.path();
 
-        var args = [            // ROTATE D3 PARTITION
-            node.y0,            // X
-            node.x0,            // Y
-            node.y1 - node.y0,  // Width
-            node.x1 - node.x0   // Height
+        var args = [            // // ROTATE D3 PARTITION
+            node.x0,            // X
+            node.y0,            // Y
+            node.x1 - node.x0,  // Width
+            node.y1 - node.y0   // Height
         ];
         if (node.data.field === 'accession'){
             //console.log(node.data.term, node.data.active, node.data.experiments, node.data.total_experiments, node.data.duplicates);
@@ -755,11 +755,11 @@ var MosaicChart = React.createClass({
         } else if (this.shouldPerformManualTransitions(nextProps, this.props)){
             return true;
         } else if (nextProps.height !== this.props.height) {
-            if (nextProps.height < this.props.height){
-                this.scaleChart(nextProps, this.props); // Defer update so we can scale chart down (visual effect)
-                return false;
-            }
-            return true;
+            //if (nextProps.height < this.props.height){
+            //    this.scaleChart(nextProps, this.props); // Defer update so we can scale chart down (visual effect)
+            //    return false;
+            //}
+            //return true;
         }
         // Default - don't update for most changes (performance, keep chart if new but outdated/invalid data, etc.)
         return true;
@@ -954,14 +954,16 @@ var MosaicChart = React.createClass({
                 _this.props.expSetFilters[node.data.field] instanceof Set &&
                 _this.props.expSetFilters[node.data.field].has(node.data.term)
             );
-            var className = (
-                (node.depth === 0) ? 'root-node' : ''
+            var className = "no-highlight" + (
+                (node.depth === 0) ? ' root-node' : ''
             ) + (
                 clickable ? " clickable" : " static"
             ) + (_this.root.data.active > 0 ?
                 (node.data.active === 0 ? ' filtered-out' : '') +
                 (isSetAsFilter ? ' term-is-set' : (hasTerm && applicableFields && applicableFields.length > 0 ? ' term-is-not-set' : ''))
                 : ' '
+            ) + (
+                removing ? ' removing' : (!existing ? ' adding' : '')
             );
             
             if (!removing && (_this.state.transitioning || _this.justMounted)) _this.existingNodes[node.data.id] = node;
@@ -1004,7 +1006,7 @@ var MosaicChart = React.createClass({
                     d={_this.generateRectPath(node)}
                     data-term={node.data.term}
                     fillRule="evenodd"
-                    className={className + (removing ? ' removing' : (!existing ? ' adding' : ''))}
+                    className={className}
                     onMouseOver={node.depth > 0 ? _this.onPathMouseOver : null }
                     onMouseEnter={ node.depth === 0 ? _this.mouseleave : null }
                     onMouseLeave={/*node.depth > 0 ? function(e){ unhighlightTerms(e.target.__data__.data.field); } :*/ null}
@@ -1033,7 +1035,7 @@ var MosaicChart = React.createClass({
 
         return _.values(_.groupBy(nodes, 'depth')).map(function(fieldNodes,i){
             return (
-                <g data-field={fieldNodes[0].data.field} className="field" key={fieldNodes[0].data.field || fieldNodes[0].depth || i}>
+                <g data-field={fieldNodes[0].data.field} className="field no-highlight" key={fieldNodes[0].data.field || fieldNodes[0].depth || i}>
                     { fieldNodes.map(genPath).sort(sortByID) }
                 </g>
             );
@@ -1064,7 +1066,7 @@ var MosaicChart = React.createClass({
 
         function renderSVG(){
             
-            var xOffset = (this.root && this.root.y1) || 0;
+            var yOffset = (this.root && this.root.y1) || 0;
             var svgWidth = this.width();
             var svgHeight = this.height();
 
@@ -1103,7 +1105,7 @@ var MosaicChart = React.createClass({
                         className="group-container"
                         ref={(r) => { this.vis = d3.select(r); }}
                         transform={
-                            "translate(" + (-xOffset) + ",0)"
+                            "translate(0," + (-yOffset) + ")"
                         }
                         onMouseLeave={null /*this.mouseleave*/}
                     >
@@ -1206,7 +1208,6 @@ var MosaicChart = React.createClass({
                     { styleOpts.offset.top >= 15 ? renderYAxisTop.call(this) : null }
                     { renderSVG.call(this) }
                     { styleOpts.offset.bottom >= 15 ? renderYAxisBottom.call(this) : null }
-                    { renderCursorComponent.call(this) }
                 </div>
             </div>
                 

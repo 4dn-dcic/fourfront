@@ -559,29 +559,31 @@
             }
         }
     }
-
+    /*
     svg g.group-container:hover path,
     svg g.group-container.hover path {
         transition: opacity 0.25s;
-        opacity: 0.125;
+        opacity: 0.33;
         cursor: crosshair;
         &:not(.filtered-out){
             //opacity : 0.66;
         }
-        &.highlight {
-            opacity: 0.5 !important;
-        }
+        //&.highlight {
+        //    opacity: 0.5;
+        //}
         &.hover {
-            opacity: 0.66 !important;
-            transition: opacity 0.5s .2s;
+            //opacity: 0.66;
+            opacity: 0.9;
+            transition: opacity 0.5s;
             &.term-is-set.filtered-out {
-                opacity : 0.5 !important;
+                //opacity : 0.5 !important;
             }
         }
-        &:hover, &:hover.term-is-set.filtered-out {
-            opacity: 1 !important;
+        &:hover, &:hover.term-is-set {
+            opacity: 1;
         }
     }
+    */
 
     .y-axis-top {
         position: relative;

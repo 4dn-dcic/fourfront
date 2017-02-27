@@ -233,9 +233,10 @@ var ChartDataController = module.exports = {
      * @param {string}   uniqueID - A unique identifier for the registered callback, to be used for removal.
      * @return {function}   A function which may be called to unregister the callback, in lieu of ChartDataController.unregisterUpdateCallback.
      */
-    registerUpdateCallback : function(callback, uniqueID = 'global'){
+    registerUpdateCallback : function(callback, uniqueID = 'global', overwrite=false){
         if (typeof callback !== 'function') throw Error("callback must be a function.");
         if (typeof uniqueID !== 'string') throw Error("uniqueID must be a string.");
+        if (!overwrite && typeof providerCallbacks[uniqueID] !== 'undefined') throw new Error(uniqueID + " already set.");
         providerCallbacks[uniqueID] = callback;
         return function(){
             return ChartDataController.unregisterUpdateCallback(uniqueID);

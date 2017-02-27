@@ -186,10 +186,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
     shouldComponentUpdate : function(nextProps, nextState){
         if (this.props.debug) console.log('FacetChart next props & state:', nextProps, nextState);
-        if ( nextState.mounted && this.state.session !== nextState.session ){
-            // Refetch on login/out. TODO: Bring this into ChartDataController or App.
-            ChartDataController.sync(()=>this.forceUpdate());
-        }
+
         if (
             this.props.schemas !== nextProps.schemas ||
             !_.isEqual(this.props.schemas, nextProps.schemas) ||
