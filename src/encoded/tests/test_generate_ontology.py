@@ -150,19 +150,6 @@ def slim_terms_by_ont(slim_term_list):
     ]
 
 
-def test_get_slim_terms(mocker, connection, slim_terms_by_ont):
-    present = ['developmental', 'assay']
-    absent = ['organ', 'system']
-    test_slim_terms = slim_terms_by_ont
-    with mocker.patch('encoded.commands.generate_ontology.get_FDN',
-                      side_effect=test_slim_terms):
-        terms = go.get_slim_terms(connection)
-        assert len(terms) == 3
-        for term in terms:
-            assert term['is_slim_for'] in present
-            assert term['is_slim_for'] not in absent
-
-
 @pytest.fixture
 def term_w_closure():
     return {'term_id': '1', 'uuid': 'uuid1',
@@ -204,50 +191,83 @@ def terms_w_closures(term_w_closure):
 
 
 @pytest.fixture
-def terms_w_rels():
+def terms():
     return {
         'a_term1': {
             'term_id': 'a_term1',
-            'term_name': 'name1'
+            'term_name': 'name1',
+            'all_parents': []
         },
         'id2': {
             'term_id': 'id2',
             'term_name': 'name2',
-            'parents': ['a_term1', 'ObsoleteClass']
+            'parents': ['a_term1', 'ObsoleteClass'],
+            'all_parents': ['a_term1']
         },
         'id3': {
             'term_id': 'id3',
             'term_name': 'obsolete name',
-            'relationships': ['id2']
+            'relationships': ['id2'],
+            'all_parents': ['id2']
         },
         'id4': {
             'term_id': 'id4',
             'term_name': 'Obsolete name',
-            'relationships': ['a_term1', 'id2']
+            'relationships': ['a_term1', 'id2'],
+            'all_parents': ['a_term11', 'id2']
         },
         'd_term1': {
             'term_id': 'd_term1',
-            'term_name': ''
+            'term_name': '',
+            'all_parents': ['id4']
         },
         'id6': {
             'term_id': 'id6',
             'develops_from': ['id7'],
-            'parents': ['id2']
+            'parents': ['id2'],
+            'all_parents': []
         },
         'id7': {
             'term_id': 'id7',
-            'parents': ['d_term1']
+            'parents': ['d_term1'],
+            'all_parents': ['id6']
         },
         'id8': {
             'term_id': 'id8',
-            'develops_from': ['id7', 'id3']
+            'develops_from': ['id7', 'id3'],
+            'all_parents': ['id7', 'id3']
         },
         'id9': {
             'term_id': 'id9',
             'has_part_inverse': ['id3'],
-            'develops_from': ['id3']
+            'develops_from': ['id3'],
+            'all_parents': ['id10']
         }
     }
+
+
+@pytest.fixture
+def syn_uris():
+    return ['http://www.ebi.ac.uk/efo/alternative_term',
+            'http://www.geneontology.org/formats/oboInOwl#hasExactSynonym']
+
+
+@pytest.fixture
+def syn_uris_as_URIRef(syn_uris):
+    return [go.convert2namespace(uri) for uri in syn_uris]
+
+
+def test_get_slim_terms(mocker, connection, slim_terms_by_ont):
+    present = ['developmental', 'assay']
+    absent = ['organ', 'system']
+    test_slim_terms = slim_terms_by_ont
+    with mocker.patch('encoded.commands.generate_ontology.get_FDN',
+                      side_effect=test_slim_terms):
+        terms = go.get_slim_terms(connection)
+        assert len(terms) == 3
+        for term in terms:
+            assert term['is_slim_for'] in present
+            assert term['is_slim_for'] not in absent
 
 
 def test_add_slim_to_term(terms_w_closures, slim_term_list):
@@ -266,8 +286,8 @@ def test_add_slim_to_term(terms_w_closures, slim_term_list):
             assert 'slim_terms' not in test_term
 
 
-def test_add_slim_terms(terms_w_rels, slim_term_list):
-    terms = go.add_slim_terms(terms_w_rels, slim_term_list)
+def test_add_slim_terms(terms, slim_term_list):
+    terms = go.add_slim_terms(terms, slim_term_list)
     print(terms)
     for tid, term in terms.items():
         if tid == 'id6':
@@ -284,11 +304,11 @@ def test_add_slim_terms(terms_w_rels, slim_term_list):
                 assert term['slim_terms'][0] == 'uuidd1'
 
 
-def test_remove_obsoletes_and_unnamed_obsoletes(terms_w_rels):
+def test_remove_obsoletes_and_unnamed_obsoletes(terms):
     ids = ['a_term1', 'id2', 'id3', 'id4', 'd_term1', 'id6', 'id7', 'id8', 'id9']
     for i in ids:
-        assert i in terms_w_rels
-    terms = go.remove_obsoletes_and_unnamed(terms_w_rels)
+        assert i in terms
+    terms = go.remove_obsoletes_and_unnamed(terms)
     remaining = ids.pop(0)
     assert remaining in terms
     for i in ids:
@@ -331,17 +351,6 @@ def test_get_syndef_terms_no_ontology(mocker, connection):
                       return_value=[]):
         synterms = go.get_syndef_terms(connection, 'ontologys/FAKE', 'synonym_terms')
         assert synterms is None
-
-
-@pytest.fixture
-def syn_uris():
-    return ['http://www.ebi.ac.uk/efo/alternative_term',
-            'http://www.geneontology.org/formats/oboInOwl#hasExactSynonym']
-
-
-@pytest.fixture
-def syn_uris_as_URIRef(syn_uris):
-    return [go.convert2namespace(uri) for uri in syn_uris]
 
 
 def check_if_URIRef(uri):
@@ -445,70 +454,28 @@ def test_get_synonyms_and_definitions(mocker, owler, returned_synonyms):
                     assert syn in checks
 
 
-@pytest.fixture
-def terms():
-    return {
-        'id1': {
-            'term_id': 'id1',
-            'all_parents': []
-        },
-        'id2': {
-            'term_id': 'id2',
-            'all_parents': ['id1']
-        },
-        'id3': {
-            'term_id': 'id3',
-            'all_parents': ['id2']
-        },
-        'id4': {
-            'term_id': 'id4',
-            'all_parents': ['id1', 'id2']
-        },
-        'id5': {
-            'term_id': 'id5',
-            'all_parents': ['id4']
-        },
-        'id6': {
-            'term_id': 'id6',
-            'all_parents': []
-        },
-        'id7': {
-            'term_id': 'id7',
-            'all_parents': ['id6']
-        },
-        'id8': {
-            'term_id': 'id8',
-            'all_parents': ['id7', 'id3']
-        },
-        'id9': {
-            'term_id': 'id9',
-            'all_parents': ['id10']
-        }
-    }
-
-
 def test_iterative_parents(terms):
     for tid, term in terms.items():
         parents = []
         oks = []
         if 'all_parents' in term:
             parents = go.iterative_parents(term['all_parents'], terms, 'all_parents')
-        if tid in ['id1', 'id6', 'id9']:
+        if tid in ['a_term1', 'id6', 'id9']:
             assert not parents
         if tid == 'id2':
-            oks = ['id1']
+            oks = ['a_term1']
             assert len(parents) == 1
         if tid in ['id3', 'id4']:
-            oks = ['id1', 'id2']
+            oks = ['a_term1', 'id2']
             assert len(parents) == 2
-        if tid == 'id5':
-            oks = ['id1', 'id2', 'id4']
+        if tid == 'd_term1':
+            oks = ['a_term1', 'id2', 'id4']
             assert len(parents) == 3
         if tid == 'id7':
             oks = ['id6']
             assert len(parents) == 1
         if tid == 'id8':
-            oks = ['id6', 'id7', 'id1', 'id2', 'id3']
+            oks = ['id6', 'id7', 'a_term1', 'id2', 'id3']
             assert len(parents) == 5
         if oks:
             assert [_id in oks for _id in parents]
@@ -525,23 +492,23 @@ def test_get_all_ancestors(terms):
         closure = term['closure']
         okids = []
         assert tid in closure  # checks that the term id is included
-        if tid in ['id1', 'id6', 'id9']:
+        if tid in ['a_term1', 'id6', 'id9']:
             assert len(closure) == 1
         if tid in ['id2', 'id7']:
             assert len(closure) == 2
             if tid == 'id2':
-                okids = ['id1']
+                okids = ['a_term1']
             else:
                 okids = ['id6']
         if tid in ['id3', 'id4']:
             assert len(closure) == 3
-            okids = ['id1', 'id2']
-        if tid == 'id5':
+            okids = ['a_term1', 'id2']
+        if tid == 'd_term1':
             assert len(closure) == 4
-            okids = ['id1', 'id2', 'id4']
+            okids = ['a_term1', 'id2', 'id4']
         if tid == 'id8':
             assert len(closure) == 6
-            okids = ['id6', 'id7', 'id1', 'id2', 'id3']
+            okids = ['id6', 'id7', 'a_term1', 'id2', 'id3']
         if okids:
             assert [_id in okids for _id in closure]
 
@@ -896,17 +863,26 @@ def mock_get_definitions(mocker):
     def_lists = [[], ['def1'], ['def1', 'def2']]
     return mocker.patch('encoded.commands.generate_ontology.get_synonyms', side_effect=def_lists)
 
-def test_add_additional_term_info(mocker):
-    syn_lists = [[], ['syn1'], ['syn1', 'syn2']]
-    def_lists = [[], ['def1'], ['def1', 'def2']]
+
+@pytest.fixture
+def simple_terms():
     terms = {'t1': {'term_id': 't1', 'term_url': 'term1'},
              't2': {'term_id': 't2', 'term_url': 'term2'},
              't3': {'term_id': 't3', 'term_url': 'term3'}}
-    terms = OrderedDict(sorted(terms.items(), key = lambda t: t[0]))
+    return OrderedDict(sorted(terms.items(), key=lambda t: t[0]))
+
+
+def test_add_additional_term_info(mocker, simple_terms):
+    syn_lists = [[], ['syn1'], ['syn1', 'syn2']]
+    def_lists = [[], ['def1'], ['def1', 'def2']]
+    # terms = {'t1': {'term_id': 't1', 'term_url': 'term1'},
+    #         't2': {'term_id': 't2', 'term_url': 'term2'},
+    #         't3': {'term_id': 't3', 'term_url': 'term3'}}
+    # terms = OrderedDict(sorted(terms.items(), key=lambda t: t[0]))
     with mocker.patch('encoded.commands.generate_ontology.convert2URIRef', return_value='blah'):
         with mocker.patch('encoded.commands.generate_ontology.get_synonyms', side_effect=syn_lists):
             with mocker.patch('encoded.commands.generate_ontology.get_definitions', side_effect=def_lists):
-                result = go.add_additional_term_info(terms, 'data', 'synterms', 'defterms')
+                result = go.add_additional_term_info(simple_terms, 'data', 'synterms', 'defterms')
                 for tid, term in result.items():
                     if tid == 't3':
                         assert term['definition'] == 'def1'
@@ -920,3 +896,15 @@ def test_add_additional_term_info(mocker):
                     else:
                         assert 'synonyms' not in term
                         assert 'definition' not in term
+
+
+def test_write_outfile(simple_terms):
+    import json
+    filename = 'tmp_test_file'
+    go.write_outfile(simple_terms, filename)
+    infile = open(filename, 'r')
+    result = json.load(infile)
+    print(result)
+    for r in result:
+        assert r in simple_terms.values()
+    os.remove(filename)

@@ -502,8 +502,10 @@ def download_and_process_owl(ontology, connection, terms):
 def write_outfile(terms, filename):
     with open(filename, 'w') as outfile:
         outfile.write('[\n')
-        for term in terms.values():
+        for i, term in enumerate(terms.values()):
             json.dump(term, outfile, indent=4)
+            if i != len(terms) - 1:
+                outfile.write(',')
             outfile.write('\n')
         outfile.write(']\n')
 
