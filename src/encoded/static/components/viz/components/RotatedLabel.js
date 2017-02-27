@@ -136,7 +136,7 @@ var RotatedLabel = module.exports = React.createClass({
         var state = null; // State is null unless text is too long and we need a 'show full label' state.
 
         if (this.props.label && this.props.isMounted){
-            var state = {
+            state = {
                 'textHeight' : layout.textHeight(
                     this.props.label,
                     this.labelWidth(),
@@ -206,9 +206,9 @@ var RotatedLabel = module.exports = React.createClass({
         var offTop = 0, offRight = 0;
         
         if (this.props.appendOffset > 0){
-                // Move appendor upwards by appendOffset, in context of angle/rotation.
-                offRight = this.props.appendOffset * Math.sin(this.props.angle/180 * Math.PI);
-                offTop = this.props.appendOffset * Math.cos(this.props.angle/180 * Math.PI);
+            // Move appendor upwards by appendOffset, in context of angle/rotation.
+            offRight = this.props.appendOffset * Math.sin(this.props.angle/180 * Math.PI);
+            offTop = this.props.appendOffset * Math.cos(this.props.angle/180 * Math.PI);
         }
         
         var dims = {

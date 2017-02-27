@@ -266,7 +266,7 @@ var ChartDataController = module.exports = {
         providerLoadStartCallbacks[uniqueID] = callback;
         return function(){
             return ChartDataController.unregisterUpdateCallback(uniqueID);
-        }
+        };
     },
 
     unregisterLoadStartCallback : function(uniqueID){
@@ -412,7 +412,7 @@ var ChartDataController = module.exports = {
             'GET',
             function(){
                 // Fallback (no results or lost connection)
-                ChartDataController.setState(extraState);
+                if (typeof callback === 'function') callback();
             }
         );
     },
