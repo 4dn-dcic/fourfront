@@ -2,7 +2,7 @@
 
 from snovault.attachment import ItemWithAttachment
 from snovault import (
-    calculated_property,
+    # calculated_property,
     collection,
     load_schema,
 )

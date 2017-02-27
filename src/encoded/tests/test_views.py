@@ -13,12 +13,22 @@ def _type_length():
         name: len(json.load(utf8(resource_stream('encoded', 'tests/data/inserts/%s.json' % name))))
         for name in ORDER
     }
-    # hot fix for Replicate exp set / exp set counts
-    try:
-        sum_exp_set = type_length_dict.get('experiment_set', 0) + type_length_dict.get('experiment_set_replicate', 0)
-        type_length_dict['experiment_set'] = sum_exp_set
-    except:
-        pass
+    # hot fix for Inherited Non-Abstract Collections
+    # list of parent object and children (nested list)
+    inherited_list = [
+     ["experiment_set", ["experiment_set_replicate"]],
+     ["workflow_run", ["workflow_run_sbg"]],
+    ]
+    for inh in inherited_list:
+        try:
+            # get the items in the inherited object first
+            sum_exp_set = type_length_dict.get(inh[0], 0)
+            # get the items in each inheriting object and sum
+            for sub_inh in inh[1]:
+                sum_exp_set += type_length_dict.get(sub_inh, 0)
+            type_length_dict[inh[0]] = sum_exp_set
+        except:
+            pass
     return type_length_dict
 
 
