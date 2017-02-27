@@ -157,6 +157,7 @@ var BarPlot = React.createClass({
          * @param {number} [availHeight=400] - Available width, in pixels, for chart.
          * @param {Object} [styleOpts=BarPlot.getDefaultStyleOpts()] - Style settings for chart which may contain chart offsets (for axes).
          * @param {boolean} [useOnlyPopulatedFields=false] - Determine which fields to show via checking for which fields have multiple terms present.
+         * @param {number} [maxValue] - Maximum y-axis value. Overrides height of bars.
          * 
          * @return {Object} Object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally.
          */
@@ -165,7 +166,8 @@ var BarPlot = React.createClass({
             availWidth = 400,
             availHeight = 400,
             styleOpts = BarPlot.getDefaultStyleOpts(),
-            useOnlyPopulatedFields = false
+            useOnlyPopulatedFields = false,
+            maxValue = null
         ){
 
             var topIndex = 0;
@@ -175,7 +177,7 @@ var BarPlot = React.createClass({
             }
             
             var numberOfTerms = _.keys(fields[topIndex].terms).length;
-            var largestExpCountForATerm = _.reduce(fields[topIndex].terms, function(m,t){
+            var largestExpCountForATerm = maxValue || _.reduce(fields[topIndex].terms, function(m,t){
                 return Math.max(m, typeof t === 'number' ? t : t.total);
             }, 0);
 
@@ -338,21 +340,24 @@ var BarPlot = React.createClass({
     },
 
     componentWillReceiveProps : function(nextProps){
+        /*
         if (this.shouldPerformManualTransitions(nextProps, this.props)){
             console.log('WILL DO SLOW TRANSITION');
             this.setState({ transitioning : true });
         }
+        */
     },
 
     componentDidUpdate : function(pastProps){
 
-
+        /*
         if (this.shouldPerformManualTransitions(this.props, pastProps)){
             // Cancel out of transitioning state after delay. Delay is to allow new/removing elements to adjust opacity.
             setTimeout(()=>{
                 this.setState({ transitioning : false });
             },750);
         }
+        */
 
         return;
 
@@ -749,15 +754,18 @@ var BarPlot = React.createClass({
             styleOpts
         );
 
-        return (
-            <div className="silhouette" style={{ 'width' : width, 'height' : height }}>
-                {
-                    allExperimentsBarData.bars
-                    .sort(function(a,b){ return a.term < b.term ? -1 : 1; })
-                    .map((d,i,a) => this.renderParts.bar.call(this, d, i, a, styleOpts, this.pastBars))
-                }
-            </div>
-        );
+        return {
+            'component' : (
+                <div className="silhouette" style={{ 'width' : width, 'height' : height }}>
+                    {
+                        allExperimentsBarData.bars
+                        .sort(function(a,b){ return a.term < b.term ? -1 : 1; })
+                        .map((d,i,a) => this.renderParts.bar.call(this, d, i, a, styleOpts, this.pastBars))
+                    }
+                </div>
+            ),
+            'data' : allExperimentsBarData
+        };
         
         
     },
@@ -772,7 +780,11 @@ var BarPlot = React.createClass({
         // Reset this.bars, cache past ones.
         this.pastBars = _.clone(this.bars); // Difference between current and pastBars used to determine which bars to do D3 transitions on (if any).
         this.bars = {}; // ref to 'g' element is stored here.
-        var allExpsBarData = null;
+        var allExpsBarDataContainer = null;
+
+        if (this.props.filteredExperiments){
+            allExpsBarDataContainer = this.renderAllExperimentsSilhouette(availWidth, availHeight, styleOpts);
+        }
 
         this.barData = BarPlot.genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
             BarPlot.genChartData( // Get counts by term per field.
@@ -783,14 +795,10 @@ var BarPlot = React.createClass({
             ),
             availWidth,
             availHeight,
-            styleOpts
+            styleOpts,
+            this.props.useOnlyPopulatedFields,
+            allExpsBarDataContainer && allExpsBarDataContainer.data && allExpsBarDataContainer.data.maxY
         );
-
-        if (this.props.filteredExperiments){
-
-            
-
-        }
 
         console.log('BARDATA', this.barData);
 
@@ -827,7 +835,7 @@ var BarPlot = React.createClass({
                 style={{ height : availHeight, width: availWidth }}
             >
                 { this.renderParts.leftAxis.call(this, availWidth, availHeight, this.barData, styleOpts) }
-                { this.renderAllExperimentsSilhouette(availWidth, availHeight) }
+                { allExpsBarDataContainer && allExpsBarDataContainer.component }
                 { barComponents }
                 { this.renderParts.bottomYAxis.call(this, availWidth, availHeight, allBars, styleOpts) }
             </div>

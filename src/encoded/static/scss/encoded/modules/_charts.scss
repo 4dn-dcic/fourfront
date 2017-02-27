@@ -485,6 +485,12 @@
 
     .silhouette {
         opacity : 0.25;
+        .chart-bar {
+            transition: none !important;
+            .bar-part {
+                transition: none !important;
+            }
+        }
     }
 
 }
