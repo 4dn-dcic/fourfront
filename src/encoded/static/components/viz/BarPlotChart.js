@@ -16,8 +16,12 @@ var BarPlot = React.createClass({
         genChartData : function(
             experiments = [],
             fields = [{ 'name' : 'Biosample' , field : 'experiments_in_set.biosample.biosource_summary' }],
-            experimentsOrSets='experiments',
+            experimentsOrSets = 'experiments',
+            useOnlyPopulatedFields = false
         ){
+
+            // Since we not looking for populated fields, only keep track of first two fields provided.
+            if (!useOnlyPopulatedFields) fields = fields.slice(0,2);
 
             // Add terms and total for each field.
             fields = fields.map(function(f){ 
@@ -32,7 +36,7 @@ var BarPlot = React.createClass({
             else expFxn.listAllExperimentsFromExperimentSets(experiments).forEach(BarPlot.countFieldsTermsForExperiment.bind(this, fields));
 
             //return fields;
-            return BarPlot.partitionFields(fields, experiments);
+            return BarPlot.partitionFields(fields, experiments, useOnlyPopulatedFields);
         },
 
         partitionFields : function(fields, experiments, useOnlyPopulatedFields = false){
@@ -301,6 +305,7 @@ var BarPlot = React.createClass({
         return {
             'experiments' : [],
             'fields' : [],
+            'useOnlyPopulatedFields' : false,
             'styleOptions' : null, // Can use to override default margins/style stuff.
         };
     },
@@ -728,6 +733,35 @@ var BarPlot = React.createClass({
 
     },
 
+    renderAllExperimentsSilhouette : function(width, height, styleOpts = null){
+        if (!this.props.filteredExperiments) return null;
+        if (!styleOpts) styleOpts = this.styleOptions();
+
+        var allExperimentsBarData = BarPlot.genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
+            BarPlot.genChartData( // Get counts by term per field.
+                this.props.experiments,
+                this.props.fields,
+                'experiments',
+                this.props.useOnlyPopulatedFields
+            ),
+            width,
+            height,
+            styleOpts
+        );
+
+        return (
+            <div className="silhouette" style={{ 'width' : width, 'height' : height }}>
+                {
+                    allExperimentsBarData.bars
+                    .sort(function(a,b){ return a.term < b.term ? -1 : 1; })
+                    .map((d,i,a) => this.renderParts.bar.call(this, d, i, a, styleOpts, this.pastBars))
+                }
+            </div>
+        );
+        
+        
+    },
+
     render : function(){
         if (this.state.mounted === false) return <div ref="container"></div>;
 
@@ -738,17 +772,25 @@ var BarPlot = React.createClass({
         // Reset this.bars, cache past ones.
         this.pastBars = _.clone(this.bars); // Difference between current and pastBars used to determine which bars to do D3 transitions on (if any).
         this.bars = {}; // ref to 'g' element is stored here.
+        var allExpsBarData = null;
 
         this.barData = BarPlot.genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
             BarPlot.genChartData( // Get counts by term per field.
                 this.props.filteredExperiments || this.props.experiments,
                 this.props.fields,
-                'experiments'
+                'experiments',
+                this.props.useOnlyPopulatedFields
             ),
             availWidth,
             availHeight,
-            this.styleOptions()
+            styleOpts
         );
+
+        if (this.props.filteredExperiments){
+
+            
+
+        }
 
         console.log('BARDATA', this.barData);
 
@@ -785,6 +827,7 @@ var BarPlot = React.createClass({
                 style={{ height : availHeight, width: availWidth }}
             >
                 { this.renderParts.leftAxis.call(this, availWidth, availHeight, this.barData, styleOpts) }
+                { this.renderAllExperimentsSilhouette(availWidth, availHeight) }
                 { barComponents }
                 { this.renderParts.bottomYAxis.call(this, availWidth, availHeight, allBars, styleOpts) }
             </div>
