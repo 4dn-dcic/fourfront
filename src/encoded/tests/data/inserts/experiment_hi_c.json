@@ -8,7 +8,7 @@
         "average_fragment_size": 100,
         "digestion_time": 30,
         "ligation_time": 30,
-        "digestion_enzyme": "DnaseI",
+        "digestion_enzyme": "DNaseI",
         "digestion_temperature": 37,
         "tagging_method": "Biotinylated ATP",
         "crosslinking_time": 30,
