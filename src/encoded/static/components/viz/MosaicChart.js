@@ -26,6 +26,7 @@ var MosaicChart = React.createClass({
          * nodes, highest first, but excluding the root.
          * 
          * @param {Node} node - Current node.
+         * @returns {Array} An array of parent & (grand-*)parent nodes, ordered.
          */
         getAncestors : function(node) {
             var path = [];
@@ -379,7 +380,11 @@ var MosaicChart = React.createClass({
                 });
         },
 
-        /** Get default style options for chart. Should suffice most of the time. */
+        /**
+         * Get default style options for chart. Should suffice most of the time.
+         * 
+         * @returns {Object} Object of style/dimension properties & values.
+         */
         getDefaultStyleOpts : function(){
             return {
                 'gap' : 5,
@@ -601,19 +606,33 @@ var MosaicChart = React.createClass({
         );
     },
 
-    /** @return {number} visible chart height, corrected for any offsets */
+    /**
+     * Get height of chart, accounting for style/dimension offsets from parent container.
+     * 
+     * @param {number} [baseHeight=props.height] - Original height, defaults to props.height. 
+     * @return {number} visible chart height, corrected for any offsets
+     */
     height : function(baseHeight = this.props.height){
         var styleOpts = this.styleOptions();
         return baseHeight - styleOpts.offset.bottom - styleOpts.offset.top;
     },
 
-    /** @return {number} visible chart width, corrected for any offsets */
+    /**
+     * Get width of chart, accounting for style/dimension offsets from parent container.
+     * 
+     * @param {number} [baseWidth=this.baseWidth()] - Original width, defaults to props.width or refs.container.offsetWidth.
+     * @return {number} visible chart width, corrected for any offsets.
+     */
     width : function(baseWidth = this.baseWidth()){
         var styleOpts = this.styleOptions();
         return baseWidth - styleOpts.offset.left - styleOpts.offset.right;
     },
 
-    /** @return {number} analogous to and fallback for props.width, if none set */
+    /**
+     * Provides fallback to props.width, using refs.container.offsetWidth if set.
+     * 
+     * @return {number} analogous to and fallback for props.width, if none set.
+     */
     baseWidth : function(){
         if (this.props.width) return this.props.width;
         return (this.refs && this.refs.container && this.refs.container.offsetWidth) || null;

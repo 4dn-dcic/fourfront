@@ -46,7 +46,7 @@ var Legend = module.exports = React.createClass({
             return fields.map(function(field){
                 return _.extend({} , field, {
                     'name' : Filters.Field.toName(field.field, schemas || null)
-                })
+                });
             });
         }
 

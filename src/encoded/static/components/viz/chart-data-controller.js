@@ -182,6 +182,11 @@ var ChartDataController = module.exports = {
 
     /** 
      * This function must be called before this component is used anywhere else.
+     * 
+     * @param {string} requestURLBase - Where to request 'all experiments' from.
+     * @param {function} [updateStats] - Callback for updating QuickInfoBar, for example, with current experiments, experiment_sets, and files counts.
+     * @param {function} [callback] - Optional callback for after initializing.
+     * @returns {undefined}
      */
     initialize : function(
         requestURLBase = null,
@@ -229,8 +234,8 @@ var ChartDataController = module.exports = {
      * For React components to register an "update me" function, i.e. forceUpdate,
      * to be called when new experiments/filteredExperiments has finished loading from back-end.
      * 
-     * @param {function} callback - The callback function to call.
-     * @param {string}   uniqueID - A unique identifier for the registered callback, to be used for removal.
+     * @param {function} callback - Function to be called upon loading 'experiments' or 'all experiments'. If registering from a React component, should include this.forceUpdate() or this.setState(..).
+     * @param {string}   uniqueID - A unique identifier for the registered callback, to be used for removal or overwrites.
      * @return {function}   A function which may be called to unregister the callback, in lieu of ChartDataController.unregisterUpdateCallback.
      */
     registerUpdateCallback : function(callback, uniqueID = 'global', overwrite=false){
@@ -240,7 +245,7 @@ var ChartDataController = module.exports = {
         providerCallbacks[uniqueID] = callback;
         return function(){
             return ChartDataController.unregisterUpdateCallback(uniqueID);
-        }
+        };
     },
 
     unregisterUpdateCallback : function(uniqueID){
@@ -248,7 +253,13 @@ var ChartDataController = module.exports = {
         delete providerCallbacks[uniqueID];
     },
 
-    /** Same as registerUpdateCallback but for when starting AJAX fetch of data. */
+    /**
+     * Same as registerUpdateCallback but for when starting AJAX fetch of data.
+     *
+     * @param {function} callback - Function to be called upon starting AJAX load.
+     * @param {string} uniqueID - @see ChartDataController.registerUpdateCallback().
+     * @returns {function} Function for unregistering callback which may be used in lieu of @see ChartDataController.unregisterUpdateCallback().
+     */
     registerLoadStartCallback : function(callback, uniqueID = 'global'){
         if (typeof callback !== 'function') throw Error("callback must be a function.");
         if (typeof uniqueID !== 'string') throw Error("uniqueID must be a string.");
@@ -270,7 +281,7 @@ var ChartDataController = module.exports = {
         var expsChanged = (
             updatedState.experiments !== state.experiments || updatedState.filteredExperiments !== state.filteredExperiments ||
             !_.isEqual(updatedState.experiments, state.experiments) || !_.isEqual(updatedState.filteredExperiments, state.filteredExperiments)
-        )
+        );
 
         _.extend(state, updatedState);
 
@@ -283,7 +294,12 @@ var ChartDataController = module.exports = {
         }
     },
 
-    /** Fetch new data from back-end regardless of expSetFilters state, e.g. for when session has changed. */
+    /**
+     * Fetch new data from back-end regardless of expSetFilters state, e.g. for when session has changed (@see App.prototype.componentDidUpdate()).
+     * 
+     * @param {function} [callback] - Function to be called after sync complete.
+     * @returns {undefined}
+     */
     sync : function(callback){
         if (!isInitialized) throw Error("Not initialized.");
         ChartDataController.fetchUnfilteredAndFilteredExperiments(null, callback);

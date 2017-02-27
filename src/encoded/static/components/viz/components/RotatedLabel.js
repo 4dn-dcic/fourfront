@@ -196,12 +196,14 @@ var RotatedLabel = module.exports = React.createClass({
      * Render the pointer or other appendage for label, positioned at label.x + props.placementWidth / 2.
      * 
      * @see http://mathforum.org/sarah/hamilton/ham.1side.1angle.html
+     * @param {number} labelHeight
+     * @param {number} labelWidth
+     * @returns {ReactElement|null}
      */
     renderLabelAppend : function(labelHeight, labelWidth){
         if (!this.props.append) return null;
-
-        var offTop = 0,
-            offRight = 0;
+        
+        var offTop = 0, offRight = 0;
         
         if (this.props.appendOffset > 0){
                 // Move appendor upwards by appendOffset, in context of angle/rotation.

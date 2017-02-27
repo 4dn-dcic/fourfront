@@ -162,7 +162,7 @@ var layout = module.exports = {
         var height;
         var contElem;
         if (containerElement && typeof containerElement.cloneNode === 'function'){
-            contElem = containerElement.cloneNode(false)
+            contElem = containerElement.cloneNode(false);
         } else {
             contElem = document.createElement('div');
         }

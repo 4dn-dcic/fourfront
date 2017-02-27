@@ -213,7 +213,7 @@ var expFilters = module.exports = {
                             'context' : originalReduxState.context,
                             //'expSetFilters' : originalReduxState.expSetFilters
                         } 
-                    })
+                    });
                     navigateFxn(originalReduxState.href, { skipRequest : true });
                 } else {
                     // Success. Remove any no result alerts.

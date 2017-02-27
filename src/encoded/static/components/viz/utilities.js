@@ -70,7 +70,7 @@ var vizUtil = module.exports = {
         vizUtil.colorCacheByField[field][term] = {
             'index' : index,
             'color' : color
-        }
+        };
         return color;
     },
 
