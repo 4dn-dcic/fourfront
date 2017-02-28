@@ -19,7 +19,6 @@ from .base import (
 )
 
 
-
 ONLY_ADMIN_VIEW = [
     (Allow, 'group.admin', ['view', 'edit']),
     (Allow, 'group.read-only-admin', ['view']),
@@ -27,6 +26,8 @@ ONLY_ADMIN_VIEW = [
     (Allow, 'remoteuser.EMBED', ['view']),
     (Deny, Everyone, ['view', 'edit'])
 ]
+
+SUBMITTER_CREATE = []
 
 ALLOW_EVERYONE_VIEW = [
     (Allow, Everyone, 'view'),

@@ -1,5 +1,5 @@
 import pytest
-# from encoded.types.experiment import Experiment, ExperimentHiC
+from encoded.types.experiment import Experiment, ExperimentHiC
 from encoded.types.experiment_set import is_newer_than
 # from snovault.storage import UUID
 pytestmark = pytest.mark.working
@@ -114,6 +114,23 @@ def test_experiment_set_replicate_update_adds_experiments_in_set(testapp, experi
             [{'replicate_exp': experiment['@id'], 'bio_rep_no': 1, 'tec_rep_no': 1}]},
         status=200)
     assert experiment['@id'] in res.json['@graph'][0]['experiments_in_set']
+
+
+def test_experiment_set_replicate_update_adds_experiments_in_set(registry, experiment):
+    import pdb; pdb.set_trace()
+    test_exp = ExperimentHiC.create(registry, None, experiment)
+    embedded = test_exp.embedded
+    experiment_set_emb = 'experiment_sets' in embedded
+    assert 'digestion_enzyme' in embedded
+    if 'references' not in embedded:
+        assert 'references.link_id' in embedded
+        assert 'references.display_title' in embedded
+    # trigger update
+    if not experiment_set_emb:
+        assert 'experiment_sets.link_id' in embedded
+        assert 'experiment_sets.display_title' in embedded
+    else:
+        assert 'experiment_sets' in embedded
 
 
 # tests for the experiment_sets calculated properties

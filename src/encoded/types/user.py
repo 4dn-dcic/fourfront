@@ -38,6 +38,8 @@ ONLY_ADMIN_VIEW_DETAILS = [
     (Deny, Everyone, ['view', 'view_details', 'edit']),
 ]
 
+SUBMITTER_CREATE = []
+
 ONLY_OWNER_EDIT = [
     (Allow, 'role.owner', 'view'),
     (Allow, 'role.owner', 'edit'),
@@ -75,6 +77,7 @@ class User(Item):
         'replaced': USER_DELETED,
         'revoked': ONLY_ADMIN_VIEW_DETAILS,
     }
+
 
     @calculated_property(schema={
         "title": "Title",

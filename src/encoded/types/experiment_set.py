@@ -99,12 +99,6 @@ class ExperimentSet(Item):
     embedded = add_default_embeds(embedded, schema)
 
     def _update(self, properties, sheets=None):
-        self.calc_props_schema = {}
-        if self.registry and self.registry['calculated_properties']:
-            for calc_props_key, calc_props_val in self.registry['calculated_properties'].props_for(self).items():
-                if calc_props_val.schema:
-                    self.calc_props_schema[calc_props_key] = calc_props_val.schema
-        self.embedded = add_default_embeds(self.embedded, self.calc_props_schema)
         super(ExperimentSet, self)._update(properties, sheets)
         if 'experiments_in_set' in properties:
             invalidate_linked_items(self, 'experiments_in_set')
@@ -179,12 +173,6 @@ class ExperimentSetReplicate(ExperimentSet):
     embedded = add_default_embeds(embedded, schema)
 
     def _update(self, properties, sheets=None):
-        self.calc_props_schema = {}
-        if self.registry and self.registry['calculated_properties']:
-            for calc_props_key, calc_props_val in self.registry['calculated_properties'].props_for(self).items():
-                if calc_props_val.schema:
-                    self.calc_props_schema[calc_props_key] = calc_props_val.schema
-        self.embedded = add_default_embeds(self.embedded, self.calc_props_schema)
         all_experiments = [exp['replicate_exp'] for exp in properties['replicate_exps']]
         properties['experiments_in_set'] = all_experiments
         super(ExperimentSetReplicate, self)._update(properties, sheets)

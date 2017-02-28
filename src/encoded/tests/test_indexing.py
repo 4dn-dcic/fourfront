@@ -5,6 +5,7 @@ elasticsearch running as subprocesses.
 """
 
 import pytest
+from encoded.types.experiment import ExperimentHiC
 pytestmark = [pytest.mark.working, pytest.mark.indexing]
 
 

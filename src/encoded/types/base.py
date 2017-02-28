@@ -36,17 +36,21 @@ ONLY_ADMIN_VIEW = [
     (Deny, Everyone, ['view', 'edit'])
 ]
 
+SUBMITTER_CREATE = [
+    (Allow, 'group.submitter', 'create'),
+]
+
 ALLOW_EVERYONE_VIEW = [
     (Allow, Everyone, 'view'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
 ALLOW_LAB_MEMBER_VIEW = [
     (Allow, 'role.lab_member', 'view'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
 ALLOW_VIEWING_GROUP_VIEW = [
     (Allow, 'role.viewing_group_member', 'view'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
 ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT = [
     (Allow, 'role.viewing_group_member', 'view'),
@@ -56,16 +60,16 @@ ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT = [
 ALLOW_LAB_SUBMITTER_EDIT = [
     (Allow, 'role.lab_member', 'view'),
     (Allow, 'role.lab_submitter', 'edit'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
 ALLOW_CURRENT_AND_SUBMITTER_EDIT = [
     (Allow, Everyone, 'view'),
     (Allow, 'role.lab_submitter', 'edit'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
 ALLOW_CURRENT = [
     (Allow, Everyone, 'view'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
 DELETED = [
     (Deny, Everyone, 'visible_for_edit')
@@ -75,7 +79,7 @@ DELETED = [
 
 ALLOW_SUBMITTER_ADD = [
     (Allow, 'group.submitter', ['add']),
-]
+] + SUBMITTER_CREATE
 
 
 def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), include=None):
@@ -287,14 +291,13 @@ class Item(snovault.Item):
             return path_str
 
     def _update(self, properties, sheets=None):
-        # update self first to ensure 'biosample_relation' are stored in self.properties
-        super(Item, self)._update(properties, sheets)
         self.calc_props_schema = {}
         if self.registry and self.registry['calculated_properties']:
             for calc_props_key, calc_props_val in self.registry['calculated_properties'].props_for(self).items():
                 if calc_props_val.schema:
                     self.calc_props_schema[calc_props_key] = calc_props_val.schema
         self.embedded = add_default_embeds(self.embedded, self.calc_props_schema)
+        super(Item, self)._update(properties, sheets)
 
 
 class SharedItem(Item):
@@ -337,8 +340,8 @@ def edit(context, request):
 
 @snovault.calculated_property(context=Item, category='action')
 def create(context, request):
-    """smth."""
-    if request.has_permission('edit'):
+    """If the user submits for any lab, allow them to create"""
+    if request.has_permission('create'):
         return {
             'name': 'create',
             'title': 'Create',
@@ -355,27 +358,22 @@ def add_default_embeds(embeds, schema={}):
     if 'properties' in schema:
         schema = schema['properties']
     processed_fields = embeds[:]
-    embedded_base_fields = []
     already_processed = []
     # find pre-existing fields
     for field in embeds:
         split_field = field.strip().split('.')
         if len(split_field) > 1:
             embed_path = '.'.join(split_field[:-1])
-            if embed_path not in embeds and embed_path not in already_processed:
+            if embed_path not in processed_fields and embed_path not in already_processed:
                 already_processed.append(embed_path)
                 if embed_path + '.link_id' not in processed_fields:
                     processed_fields.append(embed_path + '.link_id')
                 if embed_path + '.display_title' not in processed_fields:
                     processed_fields.append(embed_path + '.display_title')
-        elif len(split_field) == 1:
-            embedded_base_fields.append(split_field)
-    if('properties' not in schema.keys()):
-        return processed_fields + embeds
     # automatically embed top level linkTo's not already embedded
     for key, val in schema.items():
         check_linkTo = 'linkTo' in val or ('items' in val and 'linkTo' in val['items'])
-        if key not in embedded_base_fields and check_linkTo:
+        if key not in processed_fields and check_linkTo:
             if key + '.link_id' not in processed_fields:
                 processed_fields.append(key + '.link_id')
             if key + '.display_title' not in processed_fields:

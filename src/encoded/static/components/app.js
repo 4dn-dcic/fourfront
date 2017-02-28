@@ -901,6 +901,7 @@ var App = React.createClass({
             title = 'Error';
         }else if(actionList.length == 1){
             // check if the desired action is allowed per user (in the context)
+
             var contextActionNames = this.listActionsFor('context').map(function(act){
                 return act.name || '';
             });
