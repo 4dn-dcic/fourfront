@@ -484,7 +484,8 @@
     }
 
     .silhouette {
-        opacity : 0.25;
+        opacity : 0.33;
+        pointer-events: none;
         .chart-bar {
             transition: none !important;
             .bar-part {

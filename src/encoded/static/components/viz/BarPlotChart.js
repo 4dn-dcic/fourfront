@@ -557,7 +557,7 @@ var BarPlot = React.createClass({
 
         },
 
-        bar : function(d, index, all, styleOpts = null, existingBars = this.pastBars){
+        bar : function(d, index, all, styleOpts = null, existingBars = this.pastBars, isFilteredExperiments = false){
 
             var transitioning = this.state.transitioning; // Cache state.transitioning to avoid risk of race condition in ref function.
             if (!styleOpts) styleOpts = this.styleOptions();
@@ -616,9 +616,11 @@ var BarPlot = React.createClass({
                         }
                     }}
                 >
+                    { !isFilteredExperiments ?
                     <span className="bar-top-label" key="text-label">
                         { d.count }
                     </span>
+                    : null }
                     { barParts }
                 </div>
             );
@@ -822,9 +824,35 @@ var BarPlot = React.createClass({
 
         // The sort below only helps maintain order in which is processed thru renderParts.bar(), not order of bars shown.
         // This is to help React's keying algo adjust existing bars rather than un/remount them.
-        var barComponents = allBars
-            .sort(function(a,b){ return a.term < b.term ? -1 : 1; })
-            .map((d,i,a) => this.renderParts.bar.call(this, d, i, a, styleOpts, this.pastBars));
+        allBars = allBars.sort(function(a,b){ return a.term < b.term ? -1 : 1; });
+
+        function overWriteFilteredBarDimsWithAllExpsBarDims(barSet, allExpsBarSet){
+            barSet.forEach(function(b){
+                var allExpsBar = _.find(allExpsBarSet, { 'term' : b.term });
+                _.extend(
+                    b.attr,
+                    _.pick(
+                        allExpsBar.attr,
+                        'width', 'x'
+                    )
+                );
+                if (Array.isArray(b.bars)){
+                    overWriteFilteredBarDimsWithAllExpsBarDims(
+                        b.bars, allExpsBar.bars
+                    )
+                }
+            });
+        }
+
+        if (allExpsBarDataContainer){
+            overWriteFilteredBarDimsWithAllExpsBarDims(
+                allBars, allExpsBarDataContainer.data.bars
+            );
+        }
+
+        var barComponents = allBars.map((d,i,a) => 
+            this.renderParts.bar.call(this, d, i, a, styleOpts, this.pastBars, allExpsBarDataContainer)
+        );
 
         return (
             <div
