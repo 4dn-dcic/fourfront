@@ -289,13 +289,26 @@ def test_post_check_only(testapp, human_data, human):
     organism should validate fine but not post
     '''
     #if we post this data it will fail with uuid conflict, as calling the human fixture posts it
-    testapp.post_json('/organism/', human_data, status=409)
+    testapp.put_json('/organism/', human_data, status=409)
 
     # so this one won't post, but schema validation is ok,
     # note it doesn't detect primary key
     rest = testapp.post_json('/organism/?check_only=True', human_data).json
     assert rest['status'] == 'success'
 
+
+def test_put_check_only(testapp, human_data, human):
+    '''
+    organism should validate fine but not post
+    '''
+    #if we post this data it will fail with invalid status
+
+    testapp.post_json('/organism/', human_data, status=409)
+
+    # so this one won't post, but schema validation is ok,
+    # note it doesn't detect primary key
+    rest = testapp.post_json('/organism/?check_only=True', human_data).json
+    assert rest['status'] == 'success'
 
 def test_post_check_only_invalid_data(testapp, human_data):
     '''
