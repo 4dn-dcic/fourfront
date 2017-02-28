@@ -11,6 +11,8 @@ from .base import (
     add_default_embeds
 )
 
+from encoded.types.experiment_set import is_newer_than
+
 
 @abstract_collection(
     name='experiments',
@@ -133,13 +135,15 @@ class Experiment(Item):
     })
     def produced_in_pub(self, request):
         ppub = None
-        # print(self.properties)
-        if self.properties.get('experiment_sets', None) is not None:
-            esets = properties['experiment_sets']
-            for uuid in esets:
-                eset = self.collection.get(uuid)
-                if eset['produced_in_pub']:
-                    ppub = eset['produced_in_pub']
+        # this can I think be any collections - maybe change to something w/few items
+        exp_set_coll = self.registry['collections']['ExperimentSetReplicate']
+        esets = self.experiment_sets(request)
+        for link in esets:
+            if 'replicate' in link:
+                print(link)
+                itype, uuid = link.rsplit("/", 1)
+                eset = exp_set_coll.get(uuid)
+                ppub = eset.produced_in_pub(request)
         return ppub
 
     @calculated_property(schema={
@@ -153,13 +157,15 @@ class Experiment(Item):
         }
     })
     def publications_of_exp(self, request):
-        pubs = None
-        if self.properties.get('experiment_sets', None) is not None:
-            esets = properties['experiment_sets']
-            for uuid in esets:
-                eset = self.collection.get(uuid)
-                if eset['publications_of_set']:
-                    pubs = eset['publications_of_set']
+        pubs = []
+        exp_set_coll = self.registry['collections']['ExperimentSet']
+        esets = self.experiment_sets(request)
+        for link in esets:
+            itype, uuid = link.rsplit("/", 1)
+            eset = exp_set_coll.get(uuid)
+            pubs.extend(eset.publications_of_set(request))
+        if not pubs:
+            return None
         return pubs
 
 

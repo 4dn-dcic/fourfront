@@ -193,7 +193,15 @@ class Publication(Item):
         if date != "":
             properties['date_published'] = date
         super(Publication, self)._update(properties, sheets)
+        esets = []
         if 'exp_sets_prod_in_pub' in properties:
             invalidate_linked_items(self, 'exp_sets_prod_in_pub')
+            esets.extend(properties['exp_sets_prod_in_pub'])
         if 'exp_sets_used_in_pub' in properties:
             invalidate_linked_items(self, 'exp_sets_used_in_pub')
+            esets.extend(properties['exp_sets_used_in_pub'])
+        if esets:
+            for esid in esets:
+                eset = self.collection.get(esid)
+                if 'experiments_in_set' in eset.properties:
+                    invalidate_linked_items(eset, 'experiments_in_set')
