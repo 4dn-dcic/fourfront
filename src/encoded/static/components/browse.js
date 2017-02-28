@@ -332,7 +332,7 @@ var Term = browse.Term = React.createClass({
     },
 
     componentWillMount: function(){
-        var fullHref = generateTypeHref('?type=ExperimentSetReplicate&experimentset_type=replicate&', this.props.facet['field'], this.props.term['key']);
+        var fullHref = generateTypeHref('?type=ExperimentSetReplicate&', this.props.facet['field'], this.props.term['key']);
         if(this.props.typeTitle === this.props.term['key'] && fullHref !== this.props.searchBase){
             if(typeof document !== 'undefined'){
                 this.context.navigate(fullHref);
