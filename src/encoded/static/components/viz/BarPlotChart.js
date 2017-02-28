@@ -8,11 +8,144 @@ var { RotatedLabel } = require('./components');
 var { console, object, isServerSide, expFxn, Filters } = require('../util');
 var { highlightTerm, unhighlightTerms } = require('./../facetlist');
 
+var { ButtonToolbar, ButtonGroup, Button, DropdownButton, MenuItem } = require('react-bootstrap');
+
 
 var BarPlot = React.createClass({
 
     statics : {
 
+
+        /**
+         * Component which wraps the BarPlotChart and provides some UI buttons and stuff.
+         * Passes props to BarPlotChart.
+         * 
+         * 
+         */
+        UIControlsWrapper : React.createClass({
+
+            getDefaultProps : function(){
+                return {
+                    titleMap : {
+                        // Aggr type
+                        'experiment_sets' : "Experiment Sets",
+                        'experiments' : 'Experiments',
+                        'files' : "Files",
+                        // Show state
+                        'all' : 'All',
+                        'filtered' : 'Filtered',
+                        'both' : 'All & Filtered'
+                    }
+                };
+            },
+
+            titleMap : function(key = null, fromDropdown = false){
+                if (!key) return this.props.titleMap;
+                var title = this.props.titleMap[key];
+                if (fromDropdown && ['all','filtered'].indexOf(key) > -1){
+                    title += ' ' + this.titleMap(this.state.aggregateType);
+                } else if (fromDropdown && key == 'both'){
+                    return 'Both';
+                }
+                return title;
+            },
+
+            getInitialState : function(){
+                return {
+                    'fields' : [
+                        { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
+                        { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
+                        { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
+                        //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
+                    ],
+                    'aggregateType' : 'experiments',
+                    'showState' : 'both'
+                };
+            },
+
+            adjustedChildChart : function(){
+                // TODO: validate that props.children is a BarPlotChart
+
+                return React.cloneElement(
+                    this.props.children,
+                    _.extend(
+                        _.omit(this.props, 'titleMap'),
+                        {
+                            'fields' : this.state.fields,
+                            'showType' : this.state.showState
+                        }
+                    )
+                );
+            },
+
+            handleAggregateTypeSelect : _.throttle(function(eventKey, event){
+                this.setState({ aggregateType : eventKey });
+            }, 300),
+
+            handleExperimentsShowType : _.throttle(function(eventKey, event){
+                this.setState({ showState : eventKey });
+            }, 300),
+
+            renderDropDownMenuItems : function(keys){
+                return keys.map((key)=>
+                    <MenuItem key={key} eventKey={key}>{ this.titleMap(key, true) }</MenuItem>
+                );
+            },
+
+            render : function(){
+                return (
+                    <div className="bar-plot-chart-controls-wrapper">
+                        <div className="controls">
+                            <ButtonGroup>
+                                <DropdownButton
+                                    id="select-barplot-experiments-type"
+                                    onSelect={this.handleExperimentsShowType}
+                                    title={
+                                        <div className="dropdown-title-container">
+                                            <small>Show</small><br/>
+                                            <h5>{ this.titleMap(this.state.showState) }</h5>
+                                        </div>
+                                    }
+                                >
+                                    { this.renderDropDownMenuItems(['filtered','all','both']) }
+                                </DropdownButton>
+                                <DropdownButton
+                                    id="select-barplot-aggregate-type"
+                                    onSelect={this.handleAggregateTypeSelect}
+                                    title={
+                                        <div className="dropdown-title-container">
+                                            <small>Aggregation (Y Axis)</small><br/>
+                                            <h5>{ this.titleMap(this.state.aggregateType) }</h5>
+                                        </div>
+                                    }
+                                >
+                                    <MenuItem eventKey="experiment_sets">{ this.titleMap('experiment_sets') }</MenuItem>
+                                    <MenuItem eventKey="experiments">{ this.titleMap('experiments') }</MenuItem>
+                                    <MenuItem eventKey="files">{ this.titleMap('files') }</MenuItem>
+                                </DropdownButton>
+                            </ButtonGroup>
+                        </div>
+                        { this.adjustedChildChart() }
+                    </div>
+                );
+            }
+
+        }),
+
+        // *************************************
+        // **** AGGREGATION FUNCTIONS BELOW ****
+        // *************************************
+
+        /** 
+         * Entrypoint for aggregation. Counts up terms per field for field in array, then partitions one field as a child of another.
+         * 
+         * @param {Array} experiments - List of experiments which are to be aggregated or counted by their term(s).
+         * @param {Array} fields - List of fields containing at least 'field' property (as object-dot-notated string).
+         * @param {string} experimentsOrSets - Deprecated. Whether chart is fed experiments or experiment_sets.
+         * @param {boolean} useOnlyPopulatedFields - If true, will try to only select fields which have multiple terms to visualize.
+         * 
+         * @returns {Array} - Array of fields, now containing term counts per field. One field (either the first or first populated) will have a childField with partitioned terms.
+         */
         genChartData : function(
             experiments = [],
             fields = [{ 'name' : 'Biosample' , field : 'experiments_in_set.biosample.biosource_summary' }],
@@ -308,6 +441,7 @@ var BarPlot = React.createClass({
             'experiments' : [],
             'fields' : [],
             'useOnlyPopulatedFields' : false,
+            'showType' : 'both',
             'styleOptions' : null, // Can use to override default margins/style stuff.
         };
     },
@@ -784,13 +918,16 @@ var BarPlot = React.createClass({
         this.bars = {}; // ref to 'g' element is stored here.
         var allExpsBarDataContainer = null;
 
-        if (this.props.filteredExperiments){
+        if (
+            this.props.filteredExperiments && this.props.showType === 'both'
+        ){
             allExpsBarDataContainer = this.renderAllExperimentsSilhouette(availWidth, availHeight, styleOpts);
         }
 
         this.barData = BarPlot.genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
             BarPlot.genChartData( // Get counts by term per field.
-                this.props.filteredExperiments || this.props.experiments,
+                (   this.props.showType === 'all' ? this.props.experiments
+                    : this.props.filteredExperiments || this.props.experiments  ),
                 this.props.fields,
                 'experiments',
                 this.props.useOnlyPopulatedFields
@@ -802,7 +939,7 @@ var BarPlot = React.createClass({
             allExpsBarDataContainer && allExpsBarDataContainer.data && allExpsBarDataContainer.data.maxY
         );
 
-        console.log('BARDATA', this.barData);
+        console.log('BARDATA', this.props.showType, this.barData);
 
         // Bars from current dataset/filters only.
         var currentBars = this.barData.bars.map((d)=>{

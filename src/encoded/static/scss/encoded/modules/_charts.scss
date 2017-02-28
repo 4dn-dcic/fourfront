@@ -496,6 +496,35 @@
 
 }
 
+.bar-plot-chart-controls-wrapper {
+
+    .controls {
+
+        text-align: right;
+
+        .dropdown {
+            text-align: left;
+        }
+
+        .dropdown-title-container {
+            vertical-align: middle;
+            text-align: left;
+            display: inline-block;
+            padding-right: 5px;
+            min-width: 120px;
+            > small {
+                font-weight: 400;
+            }
+
+            h4, h5, h6 {
+                margin : 0;
+                font-weight: 600;
+            }
+        }
+
+    }
+}
+
 /** Sunburst Chart Style(s) **/
 
 .chart-container-sunburst {

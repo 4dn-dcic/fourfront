@@ -462,16 +462,16 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                     */}
                     <div className={genChartColClassName(1)} key="facet-chart-row-1-chart-1" style={{ height: height }}>
                         <ChartDataController.Provider id="barplot1">
-                            <BarPlotChart
-                                fields={chartDataState.chartFieldsBarPlot}
-                                width={this.width(1) - 20} height={height}
-                                schemas={this.props.schemas}
-                                updatePopover={this.updatePopover}
-                                ref="barplotChart"
-                                primaryField="experiments_in_set.biosample.biosource_summary"
-                                secondaryField={null}
-
-                            />
+                            <BarPlotChart.UIControlsWrapper>
+                                <BarPlotChart
+                                    fields={chartDataState.chartFieldsBarPlot}
+                                    width={this.width(1) - 20}
+                                    height={height}
+                                    schemas={this.props.schemas}
+                                    updatePopover={this.updatePopover}
+                                    ref="barplotChart"
+                                />
+                            </BarPlotChart.UIControlsWrapper>
                         </ChartDataController.Provider>
                         <FetchingView display={this.state.fetching} />
                     </div>

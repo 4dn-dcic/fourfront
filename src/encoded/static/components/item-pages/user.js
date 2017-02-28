@@ -436,7 +436,7 @@ var ProfileWorkFields = React.createClass({
      * @param {Object[]} labDetails - Array of lab objects with embedded award details.
      * @return {Object[]} List of all unique awards in labs.
      */
-    getAwardsList : function(labDetails, callback){
+    getAwardsList : function(labDetails){
         // Awards are embedded within labs, so we get full details.
         var awardsList = [];
 
@@ -470,9 +470,6 @@ var ProfileWorkFields = React.createClass({
             if (typeof awd.link_id === 'string') return awd.link_id.replace(/~/g, "/");
         });
         var newAwards = this.getAwardsList(labDetails);
-        this.getAwardsList(labDetails, function(newAwards){
-
-        });
         for (var i = 0; i < newAwards.length; i++){
             if (currentAwardsListIDs.indexOf(newAwards[i]['@id']) === -1){
                 currentAwardsList.push(newAwards[i]);
