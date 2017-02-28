@@ -289,7 +289,7 @@ def test_post_check_only(testapp, human_data, human):
     organism should validate fine but not post
     '''
     #if we post this data it will fail with uuid conflict, as calling the human fixture posts it
-    testapp.put_json('/organism/', human_data, status=409)
+    testapp.post_json('/organism/', human_data, status=409)
 
     # so this one won't post, but schema validation is ok,
     # note it doesn't detect primary key
@@ -317,3 +317,32 @@ def test_post_check_only_invalid_data(testapp, human_data):
     human_data['taxon_id'] = 24;
     testapp.post_json('/organism/?check_only=True', human_data, status=422)
 
+
+def test_put_check_only(testapp, human_data, human):
+    '''
+    organism should validate fine but not post
+    '''
+    # human_data has already been posted, now put with invalid status
+    human_data['status'] = 'no a valid status'
+    testapp.put_json('/organisms/human/?check_only=True', human_data, status=422)
+
+    # so this one won't post, but schema validation is ok,
+    # note it doesn't detect primary key
+    human_data['status'] = human['status']
+    rest = testapp.put_json('/organisms/human/?check_only=True', human_data).json
+    assert rest['status'] == 'success'
+
+
+def test_patch_check_only(testapp, human_data, human):
+    '''
+    organism should validate fine but not post
+    '''
+    # human_data has already been posted, now put with invalid status
+    human_data['status'] = 'no a valid status'
+    testapp.patch_json('/organisms/human/?check_only=True', human_data, status=422)
+
+    # so this one won't post, but schema validation is ok,
+    # note it doesn't detect primary key
+    human_data['status'] = human['status']
+    rest = testapp.patch_json('/organisms/human/?check_only=True', human_data).json
+    assert rest['status'] == 'success'
