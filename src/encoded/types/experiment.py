@@ -11,8 +11,6 @@ from .base import (
     add_default_embeds
 )
 
-from encoded.types.experiment_set import is_newer_than
-
 
 @abstract_collection(
     name='experiments',
@@ -141,7 +139,7 @@ class Experiment(Item):
         for link in esets:
             if 'replicate' in link:
                 print(link)
-                itype, uuid = link.rsplit("/", 1)
+                _, uuid = link.rsplit("/", 1)
                 eset = exp_set_coll.get(uuid)
                 ppub = eset.produced_in_pub(request)
         return ppub
@@ -161,7 +159,7 @@ class Experiment(Item):
         exp_set_coll = self.registry['collections']['ExperimentSet']
         esets = self.experiment_sets(request)
         for link in esets:
-            itype, uuid = link.rsplit("/", 1)
+            _, uuid = link.rsplit("/", 1)
             eset = exp_set_coll.get(uuid)
             pubs.extend(eset.publications_of_set(request))
         if not pubs:

@@ -281,7 +281,7 @@ def test_calculated_publications_in_rep_experiment_set_two_pubs_in_used(
     assert '/publication/' + pub2res.json['@graph'][0]['uuid'] in publications
 
 
-'''experiment pub calculated properties tests'''
+# experiment pub calculated properties tests
 
 
 @pytest.fixture
