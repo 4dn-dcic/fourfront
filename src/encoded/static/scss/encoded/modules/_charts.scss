@@ -484,7 +484,7 @@
     }
 
     .silhouette {
-        opacity : 0.33;
+        opacity : 0.75;
         pointer-events: none;
         .chart-bar {
             transition: none !important;
@@ -501,6 +501,10 @@
     .controls {
 
         text-align: right;
+
+        .btn-toolbar {
+            display: inline-block;
+        }
 
         .dropdown {
             text-align: left;

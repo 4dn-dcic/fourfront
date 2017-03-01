@@ -33,10 +33,44 @@ var BarPlot = React.createClass({
                         'files' : "Files",
                         // Show state
                         'all' : 'All',
-                        'filtered' : 'Filtered',
-                        'both' : 'All & Filtered'
-                    }
+                        'filtered' : 'Selected',
+                        'both' : 'All & Selected'
+                    },
+                    'availableFields1' : [
+                        { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
+                        { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" }
+                    ],
+                    'availableFields2' : [
+                        { title : "Experiment Type", field : 'experiments_in_set.experiment_type' }
+                    ],
                 };
+            },
+
+            getInitialState : function(){
+                return {
+                    'fields' : [
+                        { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
+                        { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
+                        { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
+                        //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
+                    ],
+                    'aggregateType' : 'experiment_sets',
+                    'showState' : 'both'
+                };
+            },
+
+            componentWillReceiveProps : function(nextProps){
+                if (this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters)){
+                    this.setState({ 'showState' : 'all' });
+                }
+            },
+
+            filterObjExistsAndNoFiltersSelected : function(expSetFilters = this.props.expSetFilters){
+                return (
+                    typeof expSetFilters === 'object'
+                    && expSetFilters !== null
+                    && _.keys(expSetFilters).length === 0
+                );
             },
 
             titleMap : function(key = null, fromDropdown = false){
@@ -50,26 +84,13 @@ var BarPlot = React.createClass({
                 return title;
             },
 
-            getInitialState : function(){
-                return {
-                    'fields' : [
-                        { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
-                        { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
-                        { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
-                        //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
-                    ],
-                    'aggregateType' : 'experiments',
-                    'showState' : 'both'
-                };
-            },
-
             adjustedChildChart : function(){
                 // TODO: validate that props.children is a BarPlotChart
 
                 return React.cloneElement(
                     this.props.children,
                     _.extend(
-                        _.omit(this.props, 'titleMap'),
+                        _.omit(this.props, 'titleMap', 'availableFields1', 'availableFields2'),
                         {
                             'fields' : this.state.fields,
                             'showType' : this.state.showState,
@@ -87,57 +108,127 @@ var BarPlot = React.createClass({
                 this.setState({ showState : eventKey });
             }, 300),
 
-            renderDropDownMenuItems : function(keys, active = null){
-                return keys.map((key)=>
-                    <MenuItem
+            handleFieldSelect : _.throttle(function(fieldIndex, eventKey, event){
+
+                //this.setState({ showState : eventKey });
+            }, 300),
+
+            getFieldAtIndex : function(fieldIndex){
+                if (!this.state.fields) return null;
+                if (!Array.isArray(this.state.fields)) return null;
+                if (this.state.fields.length < fieldIndex + 1) return null;
+                return this.state.fields[fieldIndex];
+            },
+
+            renderDropDownMenuItems : function(keys, active = null, noFiltersSet = true, disabledTitle = null){
+                return keys.map((key)=>{
+                    var subtitle = null;
+                    var title = null;
+                    if (Array.isArray(key)){
+                        // Assume we have [key, title, subtitle].
+                        title = key[1] || null;
+                        subtitle = key[2] || null;
+                        key = key[0];
+                    }
+                    var disabled = noFiltersSet && (key === 'filtered' || key === 'both');
+                    return <MenuItem
                         key={key}
                         eventKey={key}
                         active={key === active}
-                        children={this.titleMap(key, true)}
-                    />
-                );
+                        children={title || this.titleMap(key, true)}
+                        disabled={disabled}
+                        title={(disabled && disabledTitle) || subtitle || null}
+                    />;
+                });
             },
 
             render : function(){
                 
-                var filterObjExistsAndNoFiltersSelected = (
-                    typeof this.props.expSetFilters === 'object'
-                    && this.props.expSetFilters !== null
-                    && _.keys(this.props.expSetFilters).length === 0
-                );
+                var filterObjExistsAndNoFiltersSelected = this.filterObjExistsAndNoFiltersSelected();
 
-                console.log('INIT FILTERS', this.props.expSetFilters, filterObjExistsAndNoFiltersSelected);
                 return (
                     <div className="bar-plot-chart-controls-wrapper">
                         <div className="controls">
-                            <ButtonGroup>
-                                <DropdownButton
-                                    id="select-barplot-experiments-type"
-                                    onSelect={this.handleExperimentsShowType}
-                                    disabled={filterObjExistsAndNoFiltersSelected}
-                                    title={
-                                        <div className="dropdown-title-container">
-                                            <small>Show</small><br/>
-                                            <h5>{ this.titleMap(!filterObjExistsAndNoFiltersSelected ? this.state.showState : 'all') }</h5>
-                                        </div>
-                                    }
-                                    children={this.renderDropDownMenuItems(['filtered','all','both'], this.state.showState)}
-                                />
-                                <DropdownButton
-                                    id="select-barplot-aggregate-type"
-                                    onSelect={this.handleAggregateTypeSelect}
-                                    title={
-                                        <div className="dropdown-title-container">
-                                            <small>Aggregation (Y Axis)</small><br/>
-                                            <h5>{ this.titleMap(this.state.aggregateType) }</h5>
-                                        </div>
-                                    }
-                                >
-                                    <MenuItem eventKey="experiment_sets">{ this.titleMap('experiment_sets') }</MenuItem>
-                                    <MenuItem eventKey="experiments">{ this.titleMap('experiments') }</MenuItem>
-                                    <MenuItem eventKey="files">{ this.titleMap('files') }</MenuItem>
-                                </DropdownButton>
-                            </ButtonGroup>
+                            <ButtonToolbar>
+                                <ButtonGroup>
+                                    <DropdownButton
+                                        id="select-barplot-experiments-type"
+                                        onSelect={this.handleExperimentsShowType}
+                                        title={
+                                            <div className="dropdown-title-container">
+                                                <small>Show</small><br/>
+                                                <h5>{ this.titleMap(!filterObjExistsAndNoFiltersSelected ? this.state.showState : 'all') }</h5>
+                                            </div>
+                                        }
+                                        children={this.renderDropDownMenuItems(
+                                            ['filtered','all'],
+                                            this.state.showState,
+                                            filterObjExistsAndNoFiltersSelected,
+                                            "Please select some filters first."
+                                        )}
+                                    />
+                                    <DropdownButton
+                                        id="select-barplot-aggregate-type"
+                                        onSelect={this.handleAggregateTypeSelect}
+                                        title={
+                                            <div className="dropdown-title-container">
+                                                <small>Aggregation (Y-Axis)</small><br/>
+                                                <h5>{ this.titleMap(this.state.aggregateType) }</h5>
+                                            </div>
+                                        }
+                                        children={this.renderDropDownMenuItems(
+                                            ['experiment_sets','experiments','files'],
+                                            this.state.showState
+                                        )}
+                                    />
+                                </ButtonGroup>
+                                <ButtonGroup>
+                                    <DropdownButton
+                                        id="select-barplot-field-0"
+                                        onSelect={this.handleFieldSelect.bind(this, 0)}
+                                        title={
+                                            <div className="dropdown-title-container">
+                                                <small>Divided by (X-Axis)</small><br/>
+                                                <h5>{
+                                                    (()=>{
+                                                        var field = this.getFieldAtIndex(0);
+                                                        return field.title || Filters.Field.toName(field.field);
+                                                    })()
+                                                }</h5>
+                                            </div>
+                                        }
+                                        children={this.renderDropDownMenuItems(
+                                            this.props.availableFields1.map(function(field){
+                                                return [
+                                                    field.field,
+                                                    field.title || Filters.Field.toName(field.field),
+                                                    field.description || null
+                                                ]; // key, title, subtitle
+                                            }),
+                                            this.state.showState
+                                        )}
+                                    />
+                                    <DropdownButton
+                                        id="select-barplot-field-1"
+                                        onSelect={this.handleFieldSelect.bind(this, 1)}
+                                        title={
+                                            <div className="dropdown-title-container">
+                                                <small>Subdivided by</small><br/>
+                                                <h5>{
+                                                    (()=>{
+                                                        var field = this.getFieldAtIndex(1);
+                                                        return field.title || Filters.Field.toName(field.field);
+                                                    })()
+                                                }</h5>
+                                            </div>
+                                        }
+                                        children={this.renderDropDownMenuItems(
+                                            ['experiment_sets','experiments','files'],
+                                            this.state.showState
+                                        )}
+                                    />
+                                </ButtonGroup>
+                            </ButtonToolbar>
                         </div>
                         { this.adjustedChildChart() }
                     </div>
@@ -499,7 +590,7 @@ var BarPlot = React.createClass({
         /** Get default style options for chart. Should suffice most of the time. */
         getDefaultStyleOpts : function(){
             return {
-                'gap' : 5,
+                'gap' : 16,
                 'maxBarWidth' : 60,
                 'maxLabelWidth' : null,
                 'labelRotation' : 30,
@@ -826,8 +917,10 @@ var BarPlot = React.createClass({
                 return style;
             }
 
+            console.log('BARPARTS FOR ', d.term, d.bars);
+
             var barParts = Array.isArray(d.bars) ? 
-                d.bars.map(this.renderParts.barPart.bind(this))
+                _.sortBy(d.bars, 'term').map(this.renderParts.barPart.bind(this))
                 :
                 this.renderParts.barPart.call(this, d);
 
@@ -879,7 +972,7 @@ var BarPlot = React.createClass({
                     style={{
                         //top : rectY.call(this),
                         height : d.attr.height,
-                        width: d.attr.width,
+                        width: d.parent.attr.width,
                         backgroundColor : color
                     }}
                     data-color={color}
@@ -1004,6 +1097,11 @@ var BarPlot = React.createClass({
                 <div className="silhouette" style={{ 'width' : width, 'height' : height }}>
                     {
                         allExperimentsBarData.bars
+                        .map(function(b){
+                            b.attr.width = b.attr.width / 2 - 2;
+
+                            return b;
+                        })
                         .sort(function(a,b){ return a.term < b.term ? -1 : 1; })
                         .map((d,i,a) => this.renderParts.bar.call(this, d, i, a, styleOpts, this.pastBars))
                     }
@@ -1079,10 +1177,14 @@ var BarPlot = React.createClass({
                 var allExpsBar = _.find(allExpsBarSet, { 'term' : b.term });
                 _.extend(
                     b.attr,
-                    _.pick(
-                        allExpsBar.attr,
-                        'width', 'x'
-                    )
+                    {
+                        'width' : allExpsBar.attr.width,
+                        'x' : allExpsBar.attr.x + (allExpsBar.attr.width + 2)
+                    }
+                    //_.pick(
+                    //    allExpsBar.attr,
+                    //    'width', 'x'
+                    //)
                 );
                 if (Array.isArray(b.bars)){
                     overWriteFilteredBarDimsWithAllExpsBarDims(
