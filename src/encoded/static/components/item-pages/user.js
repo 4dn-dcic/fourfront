@@ -575,7 +575,7 @@ var ImpersonateUserForm = React.createClass({
     render: function() {
         var form = <BasicForm submitImpersonate={this.handleSubmit} />;
         return (
-            <div>
+            <div style={{marginTop : 30}}>
                 <h2>Impersonate User</h2>
                 {form}
             </div>
@@ -590,6 +590,7 @@ var ImpersonateUserForm = React.createClass({
             if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
                 localStorage.setItem("user_info", JSON.stringify(payload));
             }
+            JWT.saveUserInfo(JSON.stringify(payload), true);
             this.context.updateUserInfo();
             this.context.navigate('/');
         }.bind(this);
