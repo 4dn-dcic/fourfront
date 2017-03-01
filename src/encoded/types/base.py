@@ -168,6 +168,7 @@ class Item(snovault.Item):
     def __init__(self, registry, models):
         super().__init__(registry, models)
         self.STATUS_ACL = self.__class__.STATUS_ACL
+        self.update_embeds()
 
     @property
     def __name__(self):
@@ -290,14 +291,15 @@ class Item(snovault.Item):
                 path_str = '~'.join(path_split[:-1]) + '~'
             return path_str
 
-    def _update(self, properties, sheets=None):
+    def update_embeds(self):
+        total_schema = self.schema['properties'].copy() if self.schema else {}
         self.calc_props_schema = {}
         if self.registry and self.registry['calculated_properties']:
             for calc_props_key, calc_props_val in self.registry['calculated_properties'].props_for(self).items():
                 if calc_props_val.schema:
                     self.calc_props_schema[calc_props_key] = calc_props_val.schema
-        self.embedded = add_default_embeds(self.embedded, self.calc_props_schema)
-        super(Item, self)._update(properties, sheets)
+        total_schema.update(self.calc_props_schema)
+        self.embedded = add_default_embeds(self.embedded, total_schema)
 
 
 class SharedItem(Item):
@@ -357,7 +359,7 @@ def add_default_embeds(embeds, schema={}):
     """
     if 'properties' in schema:
         schema = schema['properties']
-    processed_fields = embeds[:]
+    processed_fields = embeds[:] if len(embeds) > 0 else []
     already_processed = []
     # find pre-existing fields
     for field in embeds:

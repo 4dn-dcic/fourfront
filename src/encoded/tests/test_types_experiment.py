@@ -144,7 +144,7 @@ def test_calculated_experiment_sets_for_custom_experiment_set(testapp, experimen
     assert len(experiment['experiment_sets']) == 0
     res = testapp.patch_json(custom_experiment_set['@id'], {'experiments_in_set': [experiment['@id']]}, status=200)
     expt_res = testapp.get(experiment['@id'])
-    assert custom_experiment_set['uuid'] in expt_res.json['experiment_sets'][0]
+    assert custom_experiment_set['uuid'] == expt_res.json['experiment_sets'][0]['uuid']
 
 
 def test_calculated_experiment_sets_for_replicate_experiment_set(testapp, experiment, replicate_experiment_set):
@@ -155,7 +155,7 @@ def test_calculated_experiment_sets_for_replicate_experiment_set(testapp, experi
             [{'replicate_exp': experiment['@id'], 'bio_rep_no': 1, 'tec_rep_no': 1}]},
         status=200)
     expt_res = testapp.get(experiment['@id'])
-    assert replicate_experiment_set['uuid'] in expt_res.json['experiment_sets'][0]
+    assert replicate_experiment_set['uuid'] == expt_res.json['experiment_sets'][0]['uuid']
 
 
 @pytest.fixture
@@ -189,7 +189,7 @@ def test_calculated_produced_in_pub_for_rep_experiment_set(testapp, replicate_ex
     pub1res = testapp.post_json('/publication', pub1_data, status=201)
     expsetres = testapp.get(replicate_experiment_set['@id'])
     assert 'produced_in_pub' in expsetres
-    assert '/publications/' + pub1res.json['@graph'][0]['uuid'] + '/' == expsetres.json['produced_in_pub']['@id']
+    assert '/publications/' + pub1res.json['@graph'][0]['uuid'] + '/' in expsetres.json['produced_in_pub'].values()
 
 
 def test_calculated_produced_in_pub_for_cust_experiment_set(testapp, custom_experiment_set, pub1_data):
@@ -198,7 +198,7 @@ def test_calculated_produced_in_pub_for_cust_experiment_set(testapp, custom_expe
     pub1res = testapp.post_json('/publication', pub1_data, status=201)
     expsetres = testapp.get(custom_experiment_set['@id'])
     assert 'produced_in_pub' in expsetres
-    assert '/publications/' + pub1res.json['@graph'][0]['uuid'] + '/' == expsetres.json['produced_in_pub']['@id']
+    assert '/publications/' + pub1res.json['@graph'][0]['uuid'] + '/' in expsetres.json['produced_in_pub'].values()
 
 
 def test_calculated_produced_in_pub_for_two_experiment_set_to_one_pub(
@@ -261,7 +261,7 @@ def test_calculated_publications_in_rep_experiment_set_2_fields(
     print('JSON:', response.json)
     assert 'publications_of_set' in response
     assert len(response.json['publications_of_set']) == 1
-    assert '/publication/' + pub1res.json['@graph'][0]['uuid'] in response.json['publications_of_set']
+    assert '/publications/' + pub1res.json['@graph'][0]['uuid'] +'/' in response.json['publications_of_set'][0].values()
 
 
 def test_calculated_publications_in_cust_experiment_set_used_in_field(
@@ -272,7 +272,7 @@ def test_calculated_publications_in_cust_experiment_set_used_in_field(
     response = testapp.get(custom_experiment_set['@id'])
     assert 'publications_of_set' in response
     assert len(response.json['publications_of_set']) == 1
-    assert '/publication/' + pub1res.json['@graph'][0]['uuid'] in response.json['publications_of_set']
+    assert '/publications/' + pub1res.json['@graph'][0]['uuid'] + '/' in response.json['publications_of_set'][0].values()
 
 
 def test_calculated_publications_in_rep_experiment_set_two_pubs_both_fields(
@@ -286,9 +286,9 @@ def test_calculated_publications_in_rep_experiment_set_two_pubs_both_fields(
     assert 'publications_of_set' in response
     assert len(response.json['publications_of_set']) == 2
     publications = response.json['publications_of_set']
-    publications = response.json['publications_of_set']
-    assert '/publication/' + pub1res.json['@graph'][0]['uuid'] in publications
-    assert '/publication/' + pub2res.json['@graph'][0]['uuid'] in publications
+    combined_pub_vals = list(publications[0].values()) + list(publications[1].values())
+    assert '/publications/' + pub1res.json['@graph'][0]['uuid'] + '/' in combined_pub_vals
+    assert '/publications/' + pub2res.json['@graph'][0]['uuid'] + '/' in combined_pub_vals
 
 
 def test_calculated_publications_in_rep_experiment_set_two_pubs_in_used(
@@ -302,8 +302,9 @@ def test_calculated_publications_in_rep_experiment_set_two_pubs_in_used(
     assert 'publications_of_set' in response
     assert len(response.json['publications_of_set']) == 2
     publications = response.json['publications_of_set']
-    assert '/publication/' + pub1res.json['@graph'][0]['uuid'] in publications
-    assert '/publication/' + pub2res.json['@graph'][0]['uuid'] in publications
+    combined_pub_vals = list(publications[0].values()) + list(publications[1].values())
+    assert '/publications/' + pub1res.json['@graph'][0]['uuid'] + '/' in combined_pub_vals
+    assert '/publications/' + pub2res.json['@graph'][0]['uuid'] + '/' in combined_pub_vals
 
 
 def test_is_newer_than():
