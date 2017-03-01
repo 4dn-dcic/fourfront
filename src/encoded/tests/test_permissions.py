@@ -637,14 +637,6 @@ def test_wrangler_can_edit_lab_name_or_title(lab, submitter_testapp, wrangler_te
 
 def test_ac_local_roles_for_lab(registry):
     from encoded.types.lab import Lab
-    from encoded.types import Award
-    award_data = {
-        'status': 'released',
-        'name': 'temp-award',
-        'description': 'Temporary award',
-        'viewing_group': '4DN',
-        'uuid': 'b0b9c607-bbbb-4f02-93f4-9895baa1334b'
-    }
     lab_data = {
         'status': 'in review by lab',
         'award': 'b0b9c607-bbbb-4f02-93f4-9895baa1334b',
