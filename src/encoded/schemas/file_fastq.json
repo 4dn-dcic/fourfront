@@ -33,6 +33,8 @@
             "title": "File Type",
             "description": "The type of file based on the information in the file.",
             "type": "string",
+            "default": "reads",
+            "exclude_from": "submit4dn",
             "enum": [
                 "reads"
             ]
@@ -41,11 +43,12 @@
             "title": "General Classification",
             "description": "General classification group for the File (raw, processed, ancillary (eg. index files))",
             "type": "string",
+            "default": "raw file",
+            "exclude_from": "submit4dn",
             "enum": [
                 "raw file"
               ]
         },
-
         "read_length": {
             "title": "Sequencing read length (bp)",
             "description": "Length of sequencing reads in base pairs for fastq files",
