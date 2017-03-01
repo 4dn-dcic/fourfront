@@ -1,5 +1,5 @@
 import pytest
-from encoded.types.experiment import Experiment, ExperimentHiC
+from encoded.types.experiment import ExperimentHiC
 from encoded.types.experiment_set import is_newer_than
 # from snovault.storage import UUID
 pytestmark = pytest.mark.working
@@ -118,7 +118,7 @@ def test_experiment_set_replicate_update_adds_experiments_in_set(testapp, experi
 
 # test for default_embedding practice with embedded list
 # this test should change should any of the reference embeds below be altered
-def test_experiment_set_replicate_update_adds_experiments_in_set(registry):
+def test_experiment_set_default_embedded_list(registry):
     exp_data = {
         'experiment_type': 'micro-C',
         'status': 'in review by lab'

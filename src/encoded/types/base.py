@@ -36,6 +36,8 @@ ONLY_ADMIN_VIEW = [
     (Deny, Everyone, ['view', 'edit'])
 ]
 
+# This acl allows item creation; it is easily overwritten in lab and user,
+# as these items should not be available for creation
 SUBMITTER_CREATE = [
     (Allow, 'group.submitter', 'create'),
 ]
@@ -168,6 +170,7 @@ class Item(snovault.Item):
     def __init__(self, registry, models):
         super().__init__(registry, models)
         self.STATUS_ACL = self.__class__.STATUS_ACL
+        # update self.embedded here
         self.update_embeds()
 
     @property
@@ -292,6 +295,11 @@ class Item(snovault.Item):
             return path_str
 
     def update_embeds(self):
+        """
+        extend self.embedded to have link_id and display_title for every linkTo
+        field in the properties schema and the schema of all calculated properties
+        (this is created here)
+        """
         total_schema = self.schema['properties'].copy() if self.schema else {}
         self.calc_props_schema = {}
         if self.registry and self.registry['calculated_properties']:

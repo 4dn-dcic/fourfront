@@ -650,8 +650,7 @@ def test_ac_local_roles_for_lab(registry):
         'award': 'b0b9c607-bbbb-4f02-93f4-9895baa1334b',
         'uuid': '828cd4fe-aaaa-4b36-a94a-d2e3a36aa989'
     }
-    test_award = Award.create(registry, None, award_data)
     test_lab = Lab.create(registry, None, lab_data)
     lab_ac_locals = test_lab.__ac_local_roles__()
-    assert 'role.lab_submitter' in lab_ac_locals.values()
-    assert 'role.lab_member' in lab_ac_locals.values()
+    assert('role.lab_submitter' in lab_ac_locals.values())
+    assert('role.lab_member' in lab_ac_locals.values())
