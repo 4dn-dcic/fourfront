@@ -103,6 +103,7 @@
               "title": "Cell line tier",
               "description": "DON'T SUBMIT - CALCULATED",
               "type": "string",
+              "default": "Unclassified",
               "permission": "import_items",
               "enum": [
                   "Tier 1",
