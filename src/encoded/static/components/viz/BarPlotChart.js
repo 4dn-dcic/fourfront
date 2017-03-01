@@ -72,7 +72,8 @@ var BarPlot = React.createClass({
                         _.omit(this.props, 'titleMap'),
                         {
                             'fields' : this.state.fields,
-                            'showType' : this.state.showState
+                            'showType' : this.state.showState,
+                            'aggregateType' : this.state.aggregateType
                         }
                     )
                 );
@@ -86,13 +87,26 @@ var BarPlot = React.createClass({
                 this.setState({ showState : eventKey });
             }, 300),
 
-            renderDropDownMenuItems : function(keys){
+            renderDropDownMenuItems : function(keys, active = null){
                 return keys.map((key)=>
-                    <MenuItem key={key} eventKey={key}>{ this.titleMap(key, true) }</MenuItem>
+                    <MenuItem
+                        key={key}
+                        eventKey={key}
+                        active={key === active}
+                        children={this.titleMap(key, true)}
+                    />
                 );
             },
 
             render : function(){
+                
+                var filterObjExistsAndNoFiltersSelected = (
+                    typeof this.props.expSetFilters === 'object'
+                    && this.props.expSetFilters !== null
+                    && _.keys(this.props.expSetFilters).length === 0
+                );
+
+                console.log('INIT FILTERS', this.props.expSetFilters, filterObjExistsAndNoFiltersSelected);
                 return (
                     <div className="bar-plot-chart-controls-wrapper">
                         <div className="controls">
@@ -100,15 +114,15 @@ var BarPlot = React.createClass({
                                 <DropdownButton
                                     id="select-barplot-experiments-type"
                                     onSelect={this.handleExperimentsShowType}
+                                    disabled={filterObjExistsAndNoFiltersSelected}
                                     title={
                                         <div className="dropdown-title-container">
                                             <small>Show</small><br/>
-                                            <h5>{ this.titleMap(this.state.showState) }</h5>
+                                            <h5>{ this.titleMap(!filterObjExistsAndNoFiltersSelected ? this.state.showState : 'all') }</h5>
                                         </div>
                                     }
-                                >
-                                    { this.renderDropDownMenuItems(['filtered','all','both']) }
-                                </DropdownButton>
+                                    children={this.renderDropDownMenuItems(['filtered','all','both'], this.state.showState)}
+                                />
                                 <DropdownButton
                                     id="select-barplot-aggregate-type"
                                     onSelect={this.handleAggregateTypeSelect}
@@ -132,6 +146,8 @@ var BarPlot = React.createClass({
 
         }),
 
+
+
         // *************************************
         // **** AGGREGATION FUNCTIONS BELOW ****
         // *************************************
@@ -149,10 +165,11 @@ var BarPlot = React.createClass({
         genChartData : function(
             experiments = [],
             fields = [{ 'name' : 'Biosample' , field : 'experiments_in_set.biosample.biosource_summary' }],
+            aggregate = 'experiments',
             experimentsOrSets = 'experiments',
             useOnlyPopulatedFields = false
         ){
-
+            //aggregate='experiments';
             // Since we not looking for populated fields, only keep track of first two fields provided.
             if (!useOnlyPopulatedFields) fields = fields.slice(0,2);
 
@@ -163,16 +180,68 @@ var BarPlot = React.createClass({
                     'total' : 0
                 });
             });
-        
-            // Handle experiment_sets as well, just in case.
-            if (experimentsOrSets === 'experiments') experiments.forEach(BarPlot.countFieldsTermsForExperiment.bind(this, fields));
-            else expFxn.listAllExperimentsFromExperimentSets(experiments).forEach(BarPlot.countFieldsTermsForExperiment.bind(this, fields));
 
-            //return fields;
-            return BarPlot.partitionFields(fields, experiments, useOnlyPopulatedFields);
+            BarPlot.aggregateByType(fields, experiments, aggregate);
+
+            return BarPlot.partitionFields(fields, experiments, aggregate, useOnlyPopulatedFields);
         },
 
-        partitionFields : function(fields, experiments, useOnlyPopulatedFields = false){
+        countTermForFieldFromExperimentByAggregateType : function(fieldObj, experiment, term, aggregate){
+            if (!aggregate || aggregate === 'experiments'){
+                BarPlot.countFieldTerm(fieldObj, term);
+                //experiments.forEach(BarPlot.countFieldsTermsForExperiment.bind(this, fields));
+            } else if ( aggregate === 'experiment_sets' ){
+                throw new Error("Not yet built.");
+
+            } else if ( aggregate === 'files' ){
+                BarPlot.countFieldTerm(fieldObj, term, true, expFxn.fileCount(experiment));
+            }
+        },
+
+        aggregateByType : function(fields, experiments, aggregate){
+            if (!aggregate || aggregate === 'experiments'){
+                experiments.forEach(function(exp){
+                    BarPlot.getTermsForFieldsFromExperiment(fields,exp).forEach(function(fieldTermPair, i){
+                        if (fields[i].field !== fieldTermPair[0]) throw new Error("This shouldn't happen");
+                        BarPlot.countFieldTerm(fields[i], fieldTermPair[1]);
+                    });
+                });
+                //experiments.forEach(BarPlot.countFieldsTermsForExperiment.bind(this, fields));
+            } else if ( aggregate === 'experiment_sets' ){
+                //throw new Error("Not yet built.");
+                var expSets = expFxn.groupExperimentsIntoExperimentSets(experiments);
+                console.log('EXPSETS', expSets);
+                _.forEach(expSets, function(expsInSet){
+                    var aggrValue = Math.round((1 / expsInSet.length) * 100) / 100;
+                    expsInSet.forEach(function(exp){
+                        var fieldTermPairs = BarPlot.getTermsForFieldsFromExperiment(fields,exp);
+                        fieldTermPairs.forEach(function(fieldTermPair, i){
+                            if (fields[i].field !== fieldTermPair[0]) throw new Error("This shouldn't happen");
+                            BarPlot.countFieldTerm(fields[i], fieldTermPair[1], true, aggrValue);
+                        });
+                    });
+                    // Finally, round resulting counts because JS might leave as 0.99999999999 instead of 1.
+                    fields.forEach(function(field){
+                        _.forEach(_.keys(field.terms), function(term){
+                            field.terms[term] = Math.round(field.terms[term] * 100) / 100;
+                        });
+                        console.log(field.field, field.terms);
+                    });
+                    
+                })
+            } else if ( aggregate === 'files' ){
+                console.log('aggregate ' + aggregate, experiments[0]);
+                experiments.forEach(function(exp){
+                    // [[field0Id, term], [field1Id, term], ...] . forEach( -->
+                    BarPlot.getTermsForFieldsFromExperiment(fields,exp).forEach(function(fieldTermPair, i){
+                        if (fields[i].field !== fieldTermPair[0]) throw new Error("This shouldn't happen");
+                        BarPlot.countFieldTerm(fields[i], fieldTermPair[1], true, expFxn.fileCount(exp));
+                    });
+                });
+            }
+        },
+
+        partitionFields : function(fields, experiments, aggregate, useOnlyPopulatedFields = false){
             var topIndex, nextIndex;
             if (!Array.isArray(fields) || fields.length < 2) throw new Error("Need at least 2 fields.");
             if (useOnlyPopulatedFields){
@@ -187,17 +256,19 @@ var BarPlot = React.createClass({
                 nextIndex = 1;
             }
             fields[topIndex].childField = fields[nextIndex];
-            return BarPlot.combinedFieldTermsForExperiments(fields, experiments);
+            return BarPlot.combinedFieldTermsForExperiments(fields, experiments, aggregate);
         },
+
 
         /**
          * @param {Object} fieldObj - A field object with present but incomplete 'terms' & 'total'.
          * @param {string|string[]} term - A string or array of strings denoting terms. If multiple terms are passed, then field must have fields as terms (with incomplete 'terms' & 'total') object.
          */
-        countFieldTermForExperiment : function(fieldObj, term, updateTotal = true){
+        countFieldTerm : function(fieldObj, term, updateTotal = true, countIncrease = 1){
             if (term === null) term = "None";
             var termsCont = fieldObj.terms;
             if (Array.isArray(term)){
+                console.log('ISNARRAY');
                 if (term.length === 1) term = term[0];
                 else {
                     var i = 0;
@@ -210,21 +281,29 @@ var BarPlot = React.createClass({
                 }
             }
             if (typeof termsCont[term] === 'number'){
-                termsCont[term]++;
+                termsCont[term] += countIncrease;
             } else {
-                termsCont[term] = 1;
+                termsCont[term] = countIncrease;
             }
-            if (updateTotal) fieldObj.total++;
+            if (updateTotal) fieldObj.total += countIncrease;
         },
 
+        /** @returns {Array} Array of pairs containing field key (index 0) and term (index 1) */
+        getTermsForFieldsFromExperiment : function(fields, exp){
+            return fields.map(function(f){
+                return [f.field, object.getNestedProperty(exp, f.field.replace('experiments_in_set.',''), true)];
+            });
+        },
+/*
         countFieldsTermsForExperiment : function(fields, exp){
             _.forEach(fields, function(f){ 
                 var term = object.getNestedProperty(exp, f.field.replace('experiments_in_set.',''), true);
-                BarPlot.countFieldTermForExperiment(f, term);
+                BarPlot.countFieldTerm(f, term);
             });
+            return fields;
         },
-
-        combinedFieldTermsForExperiments : function(fields, experiments){
+*/
+        combinedFieldTermsForExperiments : function(fields, experiments, aggregate){
             var field;
             var fieldIndex;
             if (Array.isArray(fields)){ // Fields can be array or single field object.
@@ -235,29 +314,59 @@ var BarPlot = React.createClass({
             }
 
             var fieldNames = _.pluck([field, field.childField], 'field');
+
             field.terms = _(field.terms).chain()
                 .clone()
                 .pairs()
                 .map(function(term){
-                    return [ 
+                    var termField = {
+                        'field' : field.childField.field, 
+                        'cachedTotal' : term[1],
+                        'total' : 0,
+                        'term' : term[0],
+                        'terms' : {} 
+                    };
+                    return [
                         term[0],
-                        { 
-                            'field' : field.childField.field, 
-                            'cachedTotal' : term[1],
-                            'total' : 0,
-                            'term' : term[0],
-                            'terms' : {} 
-                        }
+                        termField
                     ];
                 })
                 .object()
                 .value();
 
-            experiments.forEach(function(exp){
-                var topLevelFieldTerm = object.getNestedProperty(exp, field.field.replace('experiments_in_set.',''), true);
-                var nextLevelFieldTerm = object.getNestedProperty(exp, field.childField.field.replace('experiments_in_set.',''), true);
-                BarPlot.countFieldTermForExperiment(field.terms[topLevelFieldTerm], nextLevelFieldTerm);
-            });
+            //BarPlot.aggregateByType([field,field.childField], experiments, aggregate);
+            if (aggregate === 'files' || aggregate === 'experiments'){
+                experiments.forEach(function(exp){
+                    var topLevelFieldTerm = object.getNestedProperty(exp, field.field.replace('experiments_in_set.',''), true);
+                    var nextLevelFieldTerm = object.getNestedProperty(exp, field.childField.field.replace('experiments_in_set.',''), true);
+                    BarPlot.countTermForFieldFromExperimentByAggregateType(field.terms[topLevelFieldTerm], exp, nextLevelFieldTerm, aggregate);
+                });
+            } else if (aggregate === 'experiment_sets'){
+                var expSets = expFxn.groupExperimentsIntoExperimentSets(experiments);
+
+                _.forEach(expSets, function(expsInSet){
+                    // Round to hundredths because of JS floating point smidgerry. (e.g. 0.99999999999999 instead of 1)
+                    var aggrValue = 1 / expsInSet.length;
+
+                    expsInSet.forEach(function(exp){
+                        var topLevelFieldTerm = object.getNestedProperty(exp, field.field.replace('experiments_in_set.',''), true);
+                        var nextLevelFieldTerm = object.getNestedProperty(exp, field.childField.field.replace('experiments_in_set.',''), true);
+                    
+                        BarPlot.countFieldTerm(field.terms[topLevelFieldTerm], nextLevelFieldTerm, true, aggrValue);
+                    });
+                    
+                });
+
+                // Finally, round resulting counts because JS might leave as 0.99999999999 instead of 1.
+                _.forEach(_.keys(field.terms), function(topFieldTerm){
+                    _.forEach(_.keys(field.terms[topFieldTerm].terms), function(lowerFieldTerm){
+                        field.terms[topFieldTerm].terms[lowerFieldTerm] = Math.round(field.terms[topFieldTerm].terms[lowerFieldTerm] * 100) / 100;
+                    });
+                    field.terms[topFieldTerm].total = Math.round(field.terms[topFieldTerm].total * 100) / 100;
+                });
+
+            }
+            
 
             if (Array.isArray(fields)){
                 fields[fieldIndex] = field; // Probably not needed as field already simply references fields[fieldIndex];
@@ -310,9 +419,11 @@ var BarPlot = React.createClass({
             }
             
             var numberOfTerms = _.keys(fields[topIndex].terms).length;
-            var largestExpCountForATerm = maxValue || _.reduce(fields[topIndex].terms, function(m,t){
-                return Math.max(m, typeof t === 'number' ? t : t.total);
-            }, 0);
+            var largestExpCountForATerm = typeof maxValue === 'number' ?
+                maxValue
+                : _.reduce(fields[topIndex].terms, function(m,t){
+                    return Math.max(m, typeof t === 'number' ? t : t.total);
+                }, 0);
 
             var insetDims = {
                 width  : Math.max(availWidth  - styleOpts.offset.left   - styleOpts.offset.right, 0),
@@ -331,11 +442,8 @@ var BarPlot = React.createClass({
                         var termCount = term[1];
                         var childBars = null;
                         if (typeof term[1] === 'object') termCount = term[1].total;
-                        var barHeight = (
-                            termCount / (
-                                parent ? fieldObj.total : largestExpCountForATerm
-                            )
-                        ) * outerDims.height;
+                        var maxYForBar = parent ? fieldObj.total : largestExpCountForATerm;
+                        var barHeight = maxYForBar === 0 ? 0 : (termCount / maxYForBar) * outerDims.height;
                         var barNode = {
                             'name' : termKey,
                             'term' : termKey,
@@ -442,6 +550,7 @@ var BarPlot = React.createClass({
             'fields' : [],
             'useOnlyPopulatedFields' : false,
             'showType' : 'both',
+            'aggregateType' : 'experiments',
             'styleOptions' : null, // Can use to override default margins/style stuff.
         };
     },
@@ -833,11 +942,9 @@ var BarPlot = React.createClass({
         },
 
         leftAxis : function(availWidth, availHeight, barData, styleOpts){
-            //console.log(barData);
             var chartHeight = availHeight - styleOpts.offset.top - styleOpts.offset.bottom;
             var chartWidth = availWidth - styleOpts.offset.left - styleOpts.offset.right;
             var ticks = d3.ticks(0, barData.maxY * ((chartHeight - 10)/chartHeight), Math.min(8, barData.maxY)).concat([barData.maxY]);
-            //console.log(ticks);
             var steps = ticks.map(function(v,i){
                 var w = (
                     Math.min(
@@ -882,12 +989,14 @@ var BarPlot = React.createClass({
             BarPlot.genChartData( // Get counts by term per field.
                 this.props.experiments,
                 this.props.fields,
+                this.props.aggregateType,
                 'experiments',
                 this.props.useOnlyPopulatedFields
             ),
             width,
             height,
-            styleOpts
+            styleOpts,
+            this.props.useOnlyPopulatedFields
         );
 
         return {
@@ -929,6 +1038,7 @@ var BarPlot = React.createClass({
                 (   this.props.showType === 'all' ? this.props.experiments
                     : this.props.filteredExperiments || this.props.experiments  ),
                 this.props.fields,
+                this.props.aggregateType,
                 'experiments',
                 this.props.useOnlyPopulatedFields
             ),
@@ -964,6 +1074,7 @@ var BarPlot = React.createClass({
         allBars = allBars.sort(function(a,b){ return a.term < b.term ? -1 : 1; });
 
         function overWriteFilteredBarDimsWithAllExpsBarDims(barSet, allExpsBarSet){
+            //console.log('term', allExpsBarSet, barSet);
             barSet.forEach(function(b){
                 var allExpsBar = _.find(allExpsBarSet, { 'term' : b.term });
                 _.extend(

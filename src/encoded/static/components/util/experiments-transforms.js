@@ -104,6 +104,41 @@ var f = module.exports = {
         //return _.flatten(experiment_sets.map(function(set){ return set.experiments_in_set }), true);
     },
 
+    /**
+     * Groups experiments by experiment_set accession.
+     * Almost inverse of listAllExperimentsFromExperimentSets, though returns an object.
+     * 
+     * @param {Array} experiments - Array of experiment objects. Each must have property 'experiment_sets', containing array of experiment_set objects with at least accession.
+     * @returns {Object} Contains experiment_set accessions as keys and array of experiments in that set as value.
+     */
+    groupExperimentsIntoExperimentSets : function(experiments){
+        var expSets = {};
+        if (!Array.isArray(experiments)) throw new Error('param "experiments" must be an array');
+        if (experiments.length === 0) return expSets;
+        experiments.forEach(function(exp, i){
+            if (!Array.isArray(exp.experiment_sets) || exp.experiment_sets.length === 0){
+                // TODO : If no experiment sets, add to a 'None' set?
+                throw new Error('Experiment "' + exp.accession + '" (index '+ i +') has no experiment sets.');
+            }
+            exp.experiment_sets.forEach(function(expSet){
+                if (typeof expSet.accession !== 'string') throw new Error('experiment_set.accession must be a string, we have:', expSet.accession);
+                if (!(expSets[expSet.accession] instanceof Set)){
+                    expSets[expSet.accession] = new Set();
+                }
+                expSets[expSet.accession].add(exp);
+            });
+        });
+
+        var expSetAccessions = _.keys(expSets);
+        var currentAccession = null;
+        while (typeof expSetAccessions[0] !== 'undefined'){
+            // Convert Sets to Arrays
+            currentAccession = expSetAccessions.pop();
+            expSets[currentAccession] = [...expSets[currentAccession]];
+        }
+        return expSets;
+    },
+
     /** @return Object with experiment accessions as keys, from input array of experiments. */
     convertToObjectKeyedByAccession : function(experiments, keepExpObject = true){
         return _.object(

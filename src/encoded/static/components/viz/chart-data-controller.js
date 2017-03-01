@@ -140,10 +140,19 @@ function notifyLoadStartCallbacks(){ // Before load, call registered Load Start 
     });
 }
 
-
+/** @type {null|function} */
 var reduxSubscription = null;
+
+/** @type {boolean} */
 var isInitialized = false;
+
+/** @type {number} */
+var lastTimeSyncCalled = 0;
+
+/** @type {null|string} */
 var resyncInterval = null;
+
+/** @type {boolean} */
 var isWindowActive = true;
 
 var ChartDataController = module.exports = {
@@ -222,18 +231,27 @@ var ChartDataController = module.exports = {
             }
         });
 
-        ChartDataController.fetchUnfilteredAndFilteredExperiments(null, function(){
-            ChartDataController.updateStats();
+        isInitialized = true;
+
+        ChartDataController.sync(function(){
             callback(state);
         });
 
+        // Resync periodically if resync interval supplied.
         if (typeof resync === 'number' && !isServerSide()){
 
             resync = Math.max(resync, 20000); // 20sec minimum
 
             window.addEventListener('focus', function(){
-                isWindowActive = true;
+                if (lastTimeSyncCalled + resync < Date.now()){
+                    ChartDataController.sync(function(){
+                        isWindowActive = true;
+                    });
+                } else {
+                    isWindowActive = true;
+                }
             });
+
             window.addEventListener('blur', function(){
                 isWindowActive = false;
             });
@@ -246,7 +264,6 @@ var ChartDataController = module.exports = {
 
         }
 
-        isInitialized = true;
     },
 
     /**
@@ -329,6 +346,7 @@ var ChartDataController = module.exports = {
      */
     sync : function(callback){
         if (!isInitialized) throw Error("Not initialized.");
+        lastTimeSyncCalled = Date.now();
         ChartDataController.fetchUnfilteredAndFilteredExperiments(null, callback);
     },
 
@@ -380,6 +398,12 @@ var ChartDataController = module.exports = {
         if (!reduxStoreState || !reduxStoreState.expSetFilters || !reduxStoreState.href){
             reduxStoreState = refs.store.getState();
         }
+
+        // Set refs.expSetFilters if is null (e.g. if called from initialize() and not triggered Redux store filter change).
+        if (refs.expSetFilters === null){
+            refs.expSetFilters = reduxStoreState.expSetFilters;
+        }
+
         var filtersSet = _.keys(reduxStoreState.expSetFilters).length > 0;
         var experiments = null, filteredExperiments = null;
 
