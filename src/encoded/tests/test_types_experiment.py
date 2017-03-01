@@ -262,7 +262,6 @@ def test_calculated_publications_in_rep_experiment_set_two_pubs_both_fields(
     assert 'publications_of_set' in response
     assert len(response.json['publications_of_set']) == 2
     publications = response.json['publications_of_set']
-    publications = response.json['publications_of_set']
     assert '/publication/' + pub1res.json['@graph'][0]['uuid'] in publications
     assert '/publication/' + pub2res.json['@graph'][0]['uuid'] in publications
 
@@ -329,15 +328,15 @@ def test_calculated_expt_produced_in_pub_for_cust_experiment_set(
     pub1_data['exp_sets_prod_in_pub'] = [custset_w_exp1['@id']]
     pub1res = testapp.post_json('/publication', pub1_data, status=201)
     expres = testapp.get(custset_w_exp1['experiments_in_set'][0])
-    assert 'produced_in_pub' in expres
-    assert '/publications/' + pub1res.json['@graph'][0]['uuid'] + '/' == expres.json['produced_in_pub']['@id']
+    assert 'produced_in_pub' not in expres.json.keys()
 
 
-def test_calculated_expt_produced_in_pub_for_two_experiment_set_to_one_pub(
+def test_calculated_expt_produced_in_pub_for_one_expt_in_two_expset_one_pub(
         testapp, repset_w_exp1, custset_w_exp1, pub1_data):
-    # post two exp_set to single pub
+    # post two exp_set with same experiment (repset and custset) to single pub
     pub1_data['exp_sets_prod_in_pub'] = [repset_w_exp1['@id'], custset_w_exp1['@id']]
     pub1res = testapp.post_json('/publication', pub1_data, status=201)
+    # both responses will get the same experiment
     responses = [testapp.get(repset_w_exp1['replicate_exps'][0]['replicate_exp']),
                  testapp.get(custset_w_exp1['experiments_in_set'][0])]
     for response in responses:
@@ -345,9 +344,10 @@ def test_calculated_expt_produced_in_pub_for_two_experiment_set_to_one_pub(
         assert '/publications/' + pub1res.json['@graph'][0]['uuid'] + '/' == response.json['produced_in_pub']['@id']
 
 
-def test_calculated_expt_produced_in_pub_for_two_experiment_set_two_pubs(
+def test_calculated_expt_produced_in_pub_for_two_exp_two_expset_two_pubs(
         testapp, repset_w_exp1, custset_w_exp2, pub1_data, pub2_data):
-    # post different exp_set to each pub
+    # post 2 exp_set (one repset, one custom) each with diff expt to each pub
+    # only expt in repset should get the pub of repset
     pub1_data['exp_sets_prod_in_pub'] = [repset_w_exp1['@id']]
     pub2_data['exp_sets_prod_in_pub'] = [custset_w_exp2['@id']]
     pub1res = testapp.post_json('/publication', pub1_data, status=201)
@@ -358,83 +358,83 @@ def test_calculated_expt_produced_in_pub_for_two_experiment_set_two_pubs(
     assert 'produced_in_pub' not in responses[1].json
 
 
-# GOT TO HERE SO FAR
-def test_calculated_produced_in_pub_for_one_experiment_set_two_pubs(
-        testapp, replicate_experiment_set, pub1_data, pub2_data):
+def test_calculated_expt_produced_in_pub_for_one_expt_one_expset_two_pubs(
+        testapp, repset_w_exp1, pub1_data, pub2_data):
     # post one exp_set to two pubs - this one should pick up only the most recent pub
-    pub1_data['exp_sets_prod_in_pub'] = [replicate_experiment_set['@id']]
-    pub2_data['exp_sets_prod_in_pub'] = [replicate_experiment_set['@id']]
+    pub1_data['exp_sets_prod_in_pub'] = [repset_w_exp1['@id']]
+    pub2_data['exp_sets_prod_in_pub'] = [repset_w_exp1['@id']]
     pub1res = testapp.post_json('/publication', pub1_data, status=201)
     pub2res = testapp.post_json('/publication', pub2_data, status=201)
-    response = testapp.get(replicate_experiment_set['@id'])
+    response = testapp.get(repset_w_exp1['replicate_exps'][0]['replicate_exp'])
     assert 'produced_in_pub' in response
     assert not '/publications/' + pub1res.json['@graph'][0]['uuid'] + '/' == response.json['produced_in_pub']['@id']
     assert '/publications/' + pub2res.json['@graph'][0]['uuid'] + '/' == response.json['produced_in_pub']['@id']
 
 
-def test_calculated_publications_in_experiment_set_no_data(
-        testapp, replicate_experiment_set, custom_experiment_set, pub1_data):
+def test_calculated_publications_in_experiment_no_data(
+        testapp, repset_w_exp1, custset_w_exp2, pub1_data):
     pub1res = testapp.post_json('/publication', pub1_data, status=201)
-    print(replicate_experiment_set)
-    print(custom_experiment_set)
-    assert not replicate_experiment_set['publications_of_set']
-    assert not custom_experiment_set['publications_of_set']
+    responses = [testapp.get(repset_w_exp1['replicate_exps'][0]['replicate_exp']),
+                 testapp.get(custset_w_exp2['experiments_in_set'][0])]
+    for response in responses:
+        assert 'publications_of_exp' not in response
 
 
-def test_calculated_publications_in_rep_experiment_set_2_fields(
-        testapp, replicate_experiment_set, pub1_data):
+def test_calculated_publications_in_expt_w_repset_in_both_fields(
+        testapp, repset_w_exp1, pub1_data):
     # post single rep_exp_set to single pub both fields
-    pub1_data['exp_sets_prod_in_pub'] = [replicate_experiment_set['@id']]
-    pub1_data['exp_sets_used_in_pub'] = [replicate_experiment_set['@id']]
+    pub1_data['exp_sets_prod_in_pub'] = [repset_w_exp1['@id']]
+    pub1_data['exp_sets_used_in_pub'] = [repset_w_exp1['@id']]
     pub1res = testapp.post_json('/publication', pub1_data, status=201)
-    response = testapp.get(replicate_experiment_set['@id'])
-    print(response)
-    print('JSON:', response.json)
-    assert 'publications_of_set' in response
-    assert len(response.json['publications_of_set']) == 1
-    assert '/publication/' + pub1res.json['@graph'][0]['uuid'] in response.json['publications_of_set']
+    response = testapp.get(repset_w_exp1['replicate_exps'][0]['replicate_exp'])
+    assert 'publications_of_exp' in response
+    assert len(response.json['publications_of_exp']) == 1
+    assert pub1res.json['@graph'][0]['uuid'] == response.json['publications_of_exp'][0]['uuid']
 
 
-def test_calculated_publications_in_cust_experiment_set_used_in_field(
-        testapp, custom_experiment_set, pub1_data):
+def test_calculated_publications_in_expt_w_custset_used_in_field(
+        testapp, custset_w_exp2, pub1_data):
     # post only used in publication one pub one exp set
-    pub1_data['exp_sets_used_in_pub'] = [custom_experiment_set['@id']]
+    pub1_data['exp_sets_used_in_pub'] = [custset_w_exp2['@id']]
     pub1res = testapp.post_json('/publication', pub1_data, status=201)
-    response = testapp.get(custom_experiment_set['@id'])
-    assert 'publications_of_set' in response
-    assert len(response.json['publications_of_set']) == 1
-    assert '/publication/' + pub1res.json['@graph'][0]['uuid'] in response.json['publications_of_set']
+    response = testapp.get(custset_w_exp2['experiments_in_set'][0])
+    assert 'publications_of_exp' in response
+    assert len(response.json['publications_of_exp']) == 1
+    assert pub1res.json['@graph'][0]['uuid'] == response.json['publications_of_exp'][0]['uuid']
 
 
-def test_calculated_publications_in_rep_experiment_set_two_pubs_both_fields(
-        testapp, replicate_experiment_set, pub1_data, pub2_data):
+def test_calculated_publications_in_expt_w_repset_two_pubs_both_fields(
+        testapp, repset_w_exp1, pub1_data, pub2_data):
     # post same experiment set to two pubs in either field
-    pub1_data['exp_sets_prod_in_pub'] = [replicate_experiment_set['@id']]
-    pub2_data['exp_sets_used_in_pub'] = [replicate_experiment_set['@id']]
+    pub1_data['exp_sets_prod_in_pub'] = [repset_w_exp1['@id']]
+    pub2_data['exp_sets_used_in_pub'] = [repset_w_exp1['@id']]
     pub1res = testapp.post_json('/publication', pub1_data, status=201)
     pub2res = testapp.post_json('/publication', pub2_data, status=201)
-    response = testapp.get(replicate_experiment_set['@id'])
-    assert 'publications_of_set' in response
-    assert len(response.json['publications_of_set']) == 2
-    publications = response.json['publications_of_set']
-    publications = response.json['publications_of_set']
-    assert '/publication/' + pub1res.json['@graph'][0]['uuid'] in publications
-    assert '/publication/' + pub2res.json['@graph'][0]['uuid'] in publications
+    pubuuids = [pub1res.json['@graph'][0]['uuid']]
+    pubuuids.append(pub2res.json['@graph'][0]['uuid'])
+    response = testapp.get(repset_w_exp1['replicate_exps'][0]['replicate_exp'])
+    assert 'publications_of_exp' in response
+    assert len(response.json['publications_of_exp']) == 2
+    publications = response.json['publications_of_exp']
+    for pub in publications:
+        assert pub['uuid'] in pubuuids
 
 
-def test_calculated_publications_in_rep_experiment_set_two_pubs_in_used(
-        testapp, replicate_experiment_set, pub1_data, pub2_data):
+def test_calculated_publications_in_expt_w_repset_two_pubs_in_used(
+        testapp, repset_w_exp1, pub1_data, pub2_data):
     # post same experiment set to two pubs in used in pub field
-    pub1_data['exp_sets_used_in_pub'] = [replicate_experiment_set['@id']]
-    pub2_data['exp_sets_used_in_pub'] = [replicate_experiment_set['@id']]
+    pub1_data['exp_sets_used_in_pub'] = [repset_w_exp1['@id']]
+    pub2_data['exp_sets_used_in_pub'] = [repset_w_exp1['@id']]
     pub1res = testapp.post_json('/publication', pub1_data, status=201)
     pub2res = testapp.post_json('/publication', pub2_data, status=201)
-    response = testapp.get(replicate_experiment_set['@id'])
-    assert 'publications_of_set' in response
-    assert len(response.json['publications_of_set']) == 2
-    publications = response.json['publications_of_set']
-    assert '/publication/' + pub1res.json['@graph'][0]['uuid'] in publications
-    assert '/publication/' + pub2res.json['@graph'][0]['uuid'] in publications
+    pubuuids = [pub1res.json['@graph'][0]['uuid']]
+    pubuuids.append(pub2res.json['@graph'][0]['uuid'])
+    response = testapp.get(repset_w_exp1['replicate_exps'][0]['replicate_exp'])
+    assert 'publications_of_exp' in response
+    assert len(response.json['publications_of_exp']) == 2
+    publications = response.json['publications_of_exp']
+    for pub in publications:
+        assert pub['uuid'] in pubuuids
 
 
 def test_is_newer_than():
