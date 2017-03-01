@@ -153,16 +153,16 @@ var ExpTerm = React.createClass({
 
     handleClick: function(e) {
         e.preventDefault();
-        this.setState(
-            { filtering : true },
-            () => {
+        //this.setState(
+        //    { filtering : true },
+        //    () => {
                 this.props.handleChangeFilter(
                     this.props.facet.field,
                     this.props.term.key,
-                    () => this.setState({ filtering : false })
+                    //() => this.setState({ filtering : false })
                 );
-            }
-        );
+        //    }
+        //);
     },
 
     render: function () {
@@ -382,20 +382,28 @@ var FacetList = module.exports = React.createClass({
 
             function setHighlightClass(el, off = false){
                 var isSVG, className;
+                //if (el.nodeName.toLowerCase() === 'path') console.log(el);
                 if (el.className.baseVal) {
                     isSVG = true;
                     className = el.className.baseVal;
+                    //if (el.nodeName.toLowerCase() === 'path')console.log('isSVG', off);
                 } else {
                     isSVG = false;
                     className = el.className;
                 }
+                
+                if (el.classList && el.classList.add){
+                    if (!off) el.classList.add('highlight');
+                    else el.classList.remove('highlight');
+                    return isSVG;
+                }
 
                 if (!off){
-                    if (className.indexOf(' highlight') === -1) className += ' highlight';
+                    if (className.indexOf(' highlight') < 0) className = className + ' highlight';
                 } else {
                     if (className.indexOf(' highlight') > -1)   className = className.replace(' highlight', '');
                 }
-                
+
                 if (isSVG)  el.className.baseVal = className;
                 else        el.className = className;
                 return isSVG;
@@ -403,27 +411,32 @@ var FacetList = module.exports = React.createClass({
 
             vizUtil.requestAnimationFrame(function(){
 
-                _.each(document.querySelectorAll('[data-field]'), function(fieldContainerElement){
+                var colorIsSet =
+                    (color === null || color === false) ? false :
+                    (typeof color === 'string') ? color.length > 0 :
+                    (typeof color === 'object') ? true : false;
+
+                _.each(document.querySelectorAll('[data-field]:not(.no-highlight)'), function(fieldContainerElement){
                     setHighlightClass(fieldContainerElement, true);
                 });
 
-                if (color.length > 0){
-                    _.each(document.querySelectorAll('[data-field' + (field ? '="' + field + '"' : '') + ']'), function(fieldContainerElement){
-                        setHighlightClass(fieldContainerElement, color.length === 0);
+                if (colorIsSet){
+                    _.each(document.querySelectorAll('[data-field' + (field ? '="' + field + '"' : '') + ']:not(.no-highlight)'), function(fieldContainerElement){
+                        setHighlightClass(fieldContainerElement, false);
                     });
                 }
 
                 // unhighlight previously selected terms, if any.
-                _.each(document.querySelectorAll('[data-term]'), function(termElement){
+                _.each(document.querySelectorAll('[data-term]:not(.no-highlight)'), function(termElement){
                     var dataField = termElement.getAttribute('data-field');
                     if (field && dataField && dataField === field) return; // Skip, we need to leave as highlighted as also our field container.
                     var isSVG = setHighlightClass(termElement, true);
                     if (!isSVG && termElement.className.indexOf('no-highlight-color') === -1) termElement.style.backgroundColor = '';
                 });
 
-                if (color.length > 0){
-                    _.each(document.querySelectorAll('[data-term="' + term + '"]'), function(termElement){
-                        var isSVG = setHighlightClass(termElement, color.length === 0);
+                if (colorIsSet){
+                    _.each(document.querySelectorAll('[data-term="' + term + '"]:not(.no-highlight)'), function(termElement){
+                        var isSVG = setHighlightClass(termElement, false);
                         if (!isSVG && termElement.className.indexOf('no-highlight-color') === -1) termElement.style.backgroundColor = color;
                     });
                 }

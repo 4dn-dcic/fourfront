@@ -424,6 +424,8 @@ var ProfileWorkFields = React.createClass({
         }
     },
 
+    componentWillUnmount : function(){ delete this.isLabFetched; },
+
     /** 
      * Get list of all awards (unique) from list of labs.
      * ToDo : Migrate somewhere more static-cy.

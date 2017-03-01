@@ -79,7 +79,7 @@ var f = module.exports = {
     listAllExperimentsFromExperimentSets : function(experiment_sets){
         var uniqExpAccessions = {};
         return _(experiment_sets).chain()
-            .map(function(set){ 
+            .map(function(set){
                 return set.experiments_in_set.map(function(exp){
                     // Make sure we return new exp & set objects instead of mutating existing ones.
                     var cExp = _.clone(exp);
