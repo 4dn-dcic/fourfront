@@ -650,8 +650,6 @@ def test_ac_local_roles_for_lab(registry):
         'award': 'b0b9c607-bbbb-4f02-93f4-9895baa1334b',
         'uuid': '828cd4fe-aaaa-4b36-a94a-d2e3a36aa989'
     }
-    # create experimentHiC obj; _update (and by extension, add_default_embeds)
-    # are called automatically
     test_award = Award.create(registry, None, award_data)
     test_lab = Lab.create(registry, None, lab_data)
     lab_ac_locals = test_lab.__ac_local_roles__()
