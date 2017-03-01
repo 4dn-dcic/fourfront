@@ -309,7 +309,7 @@ def test_submitter_patch_submits_for_disallowed(submitter, other_lab, submitter_
 
 def test_wrangler_patch_submits_for_allowed(submitter, other_lab, wrangler_testapp):
     res = wrangler_testapp.get(submitter['@id'])
-    submits_for = {'submits_for': res.json['submits_for'] + [other_lab['@id']]}
+    submits_for = {'submits_for': [res.json['submits_for'][0]['@id']] + [other_lab['@id']]}
     wrangler_testapp.patch_json(res.json['@id'], submits_for, status=200)
 
 
