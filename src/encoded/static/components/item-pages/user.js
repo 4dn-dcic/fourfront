@@ -500,7 +500,7 @@ var ProfileWorkFields = React.createClass({
                 </div>
                 <div className="row field-entry submits_for">
                     <div className="col-sm-3 text-right text-left-xs">
-                        <label htmlFor="submits_for">Submit For</label>
+                        <label htmlFor="submits_for">Submits For</label>
                     </div>
                     <div className="col-sm-9 value">
                         <FormattedInfoBlock.List
