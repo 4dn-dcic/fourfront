@@ -5,11 +5,13 @@ var _ = require('underscore');
 var url = require('url');
 var d3 = require('d3');
 var vizUtil = require('./utilities');
-var { expFxn, Filters, console, object, isServerSide } = require('../util');
-var ChartBreadcrumbs = require('./components/ChartBreadcrumbs');
+var { expFxn, Filters, console, object, isServerSide, layout,  } = require('../util');
+var ActiveFiltersBar = require('./components/ActiveFiltersBar');
+var MosaicChart = require('./MosaicChart');
+var ChartDataController = require('./chart-data-controller');
 
 
-var HoverStatistics = module.exports = React.createClass({
+var QuickInfoBar = module.exports = React.createClass({
 
     getDefaultProps : function(){
         return {
@@ -22,14 +24,14 @@ var HoverStatistics = module.exports = React.createClass({
 
     getInitialState : function(){
         return {
-            'count_experiments'     : 0,
-            'count_experiment_sets' : 0,
-            'count_files'           : 0,
-            'count_experiments_total'     : 0,
-            'count_experiment_sets_total' : 0,
-            'count_files_total'           : 0,
-            'mounted' : false,
-            'showFilters' : false
+            'count_experiments'     : null,
+            'count_experiment_sets' : null,
+            'count_files'           : null,
+            'count_experiments_total'     : null,
+            'count_experiment_sets_total' : null,
+            'count_files_total'           : null,
+            'mounted'               : false,
+            'show'                  : false
         };
     },
 
@@ -47,12 +49,24 @@ var HoverStatistics = module.exports = React.createClass({
         if (!this.state.count_files_total           && this.state.count_files_total !== newState.count_files_total) return true;
 
         if (this.state.mounted !== newState.mounted) return true;
-        if (this.state.showFilters !== newState.showFilters) return true;
+        if (this.state.show !== newState.show) return true;
         if (this.props.showCurrent !== newProps.showCurrent) return true;
         if (this.props.expSetFilters !== newProps.expSetFilters) return true;
         if (this.isInvisible(this.props, this.state) != this.isInvisible(newProps, newState)) return true;
 
         return false;
+    },
+
+    updateCurrentAndTotalCounts : function(current, total, callback){
+        this.setState({
+            'count_experiments' : current.experiments,
+            'count_experiment_sets' : current.experiment_sets,
+            'count_files' : current.files,
+            'count_experiments_total' : total.experiments,
+            'count_experiment_sets_total' : total.experiment_sets,
+            'count_files_total' : total.files
+        }, typeof callback === 'function' ? callback() : null);
+        return true;
     },
 
     updateCurrentCounts : function(newCounts, callback){
@@ -78,9 +92,9 @@ var HoverStatistics = module.exports = React.createClass({
             !state.mounted ||
             props.invisible ||
             (
-                !(state.count_experiment_sets || state.count_experiment_sets_total) &&
-                !(state.count_experiments     || state.count_experiments_total) &&
-                !(state.count_files           || state.count_files_total)
+                (state.count_experiment_sets === null && state.count_experiment_sets_total === null) &&
+                (state.count_experiments === null     && state.count_experiments_total === null) &&
+                (state.count_files === null           && state.count_files_total === null)
             )
         ) return true;
 
@@ -99,8 +113,8 @@ var HoverStatistics = module.exports = React.createClass({
     },
 
     componentWillReceiveProps : function(nextProps){
-        if (!(nextProps.expSetFilters && _.keys(nextProps.expSetFilters).length > 0) && this.state.showFilters){
-            this.setState({ 'showFilters' : false });
+        if (!(nextProps.expSetFilters && _.keys(nextProps.expSetFilters).length > 0) && this.state.show){
+            this.setState({ 'show' : false });
         }
     },
 
@@ -114,7 +128,8 @@ var HoverStatistics = module.exports = React.createClass({
     renderStats : function(){
         var areAnyFiltersSet = (this.props.expSetFilters && _.keys(this.props.expSetFilters).length > 0);
         var stats;
-        if (this.props.showCurrent || this.state.showCurrent){
+        //if (this.props.showCurrent || this.state.showCurrent){
+        if (this.state.count_experiment_sets || this.state.count_experiments || this.state.count_files) {
             stats = {
                 'experiment_sets' : this.state.count_experiment_sets,
                 'experiments' : this.state.count_experiments,
@@ -122,35 +137,37 @@ var HoverStatistics = module.exports = React.createClass({
             };
         } else {
             stats = {
-                'experiment_sets' : this.state.count_experiment_sets_total,
-                'experiments' : this.state.count_experiments_total,
-                'files' : this.state.count_files_total
+                'experiment_sets' : this.state.count_experiment_sets_total || 0,
+                'experiments' : this.state.count_experiments_total || 0,
+                'files' : this.state.count_files_total || 0
             };
         }
+        var className = "inner container";
+        if (this.state.show !== false) className += ' showing';
+        if (this.state.show === 'activeFilters') className += ' showing-filters';
+        if (this.state.show === 'mosaicCharts') className += ' showing-charts';
         return (
-            <div className={"inner container" + (this.state.showFilters ? ' showing-filters' : '')} onMouseLeave={()=>{
-                this.setState({ showFilters : false });
+            <div className={className} onMouseLeave={()=>{
+                this.setState({ show : false });
             }}>
-                <div className="left-side clearfix" onMouseEnter={()=>{
-                    if (areAnyFiltersSet) this.setState({ showFilters : true });
-                }}>
-                    <HoverStatistics.Stat
-                        shortLabel="Exp. Sets"
+                <div className="left-side clearfix">
+                    <QuickInfoBar.Stat
+                        shortLabel="Experiment Sets"
                         longLabel="Experiment Sets"
                         id={this.props.id}
                         classNameID="expsets"
                         value={stats.experiment_sets}
                         key={0}
                     />
-                    <HoverStatistics.Stat
-                        shortLabel="Exps"
+                    <QuickInfoBar.Stat
+                        shortLabel="Experiments"
                         longLabel="Experiments"
                         id={this.props.id}
                         classNameID="experiments"
                         value={stats.experiments}
                         key={1}
                     />
-                    <HoverStatistics.Stat
+                    <QuickInfoBar.Stat
                         shortLabel="Files"
                         longLabel="Files in Experiments"
                         id={this.props.id}
@@ -158,25 +175,71 @@ var HoverStatistics = module.exports = React.createClass({
                         value={stats.files}
                         key={2}
                     />
-                    <div className="any-filters-glance-label" title={areAnyFiltersSet ? "Filtered" : "No filters set"}>
+                    <div
+                        className="any-filters glance-label"
+                        title={areAnyFiltersSet ? "Filtered" : "No filters set"}
+                        onMouseEnter={_.debounce(()=>{
+                            if (areAnyFiltersSet) this.setState({ show : 'activeFilters' });
+                        },100)}
+                    >
                         <i className="icon icon-filter" style={{ opacity : areAnyFiltersSet ? 1 : 0.25 }} />
                     </div>
                 </div>
-                <div className="bottom-side" style={{ opacity : this.state.showFilters ? 1 : 0 }}>
+                { this.renderHoverBar() }
+            </div>
+        );
+    },
+
+    renderHoverBar : function(){
+        if (this.state.show === 'activeFilters') {
+            return (
+                <div className="bottom-side">
                     <div className="crumbs-label">
                         Filtered by
                     </div>
-                    <ChartBreadcrumbs
-                        ref="breadcrumbs"
+                    <ActiveFiltersBar
                         expSetFilters={this.props.expSetFilters}
                         invisible={!this.state.mounted}
                         orderedFieldNames={null}
                         href={this.props.href}
                         showTitle={false}
                     />
+                    <div className="graph-icon" onMouseEnter={_.debounce(()=>{ this.setState({ show : 'mosaicCharts' }); },1000)}>
+                        <i className="icon icon-pie-chart" style={{ opacity : 0.05 }} />
+                    </div>
                 </div>
-            </div>
-        );
+            );
+        } else if (this.state.show === 'mosaicCharts') {
+            var chartDataState = ChartDataController.getState();
+            return (
+                <div className="bottom-side">
+                    <div className="row">
+                        <div className="col-xs-12 col-sm-6">
+                            <ChartDataController.Provider id="mosaic1">
+                                    <MosaicChart
+                                        fields={chartDataState.chartFieldsHierarchyRight}
+                                        maxFieldDepthIndex={chartDataState.chartFieldsHierarchyRight.length - 1}
+
+                                        height={200}
+                                        width={ layout.gridContainerWidth() }
+
+
+                                        href={this.props.href}
+                                        key="sunburst"
+                                        schemas={this.props.schemas}
+                                        debug
+                                    />
+                                </ChartDataController.Provider>
+                        </div>
+                    </div>
+                </div>
+            );
+        } else {
+            return (
+                <div className="bottom-side">
+                </div>
+            );
+        }
     },
 
     render : function(){
