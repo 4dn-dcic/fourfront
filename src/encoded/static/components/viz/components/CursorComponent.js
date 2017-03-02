@@ -6,22 +6,25 @@ var _ = require('underscore');
 var vizUtil = require('./../utilities');
 var { console, object, isServerSide, layout } = require('./../../util');
 
-/**
- * Currently Unused
- * ToDo: Refactor and make inherit from CursorComponent
- * 
- */
-
-/** Informed by https://github.com/CarMax/react-cursor-zoom/blob/master/src/cursor-zoom.jsx, for use on existing components (SVGs).  */
-var ZoomCursor = React.createClass({
+var CursorComponent = module.exports = React.createClass({
 
     getDefaultProps : function(){
         return {
-            'size' : 160,
-            'cursorOffset': { x: 0, y: 0 },
+            'cursorOffset': {
+                x: 0,
+                y: 0
+            },
             'scale' : 3,
             'visibilityMargin' : null,
-            'style' : null
+            'style' : null,
+            'width' : 300,
+            'height' : 100,
+            'containingElement' : null,
+            // In lieu of containingElement:
+            'containingWidth' : 200,
+            'containingHeight' : 200,
+            'offsetLeft' : 0,
+            'offsetTop' : 0
         };
     },
 
@@ -45,7 +48,7 @@ var ZoomCursor = React.createClass({
 
     /** @return {Offset} Offsets or margins from SVG for visibility. Defaults to 5 for top, right, bottom, & left unless set in props. */
     visibilityMargin : function(){
-        var def = { 'top' : 5, 'right' : 5, 'bottom' : 5, 'left' : 5 };
+        var def = { 'top' : 0, 'right' : 0, 'bottom' : 0, 'left' : 0 };
         if        (typeof this.props.visibilityMargin === 'number'){
             return _.extend(def, {
                 'left'   : this.props.visibilityMargin
@@ -58,6 +61,7 @@ var ZoomCursor = React.createClass({
 
     componentDidMount : function() {
         if (isServerSide()) return null;
+        console.log('Mounted CursorComponent');
         if (!this.portalElement) {
             this.portalElement = document.createElement('div');
             document.body.appendChild(this.portalElement);
@@ -67,81 +71,91 @@ var ZoomCursor = React.createClass({
     },
 
     componentWillUnmount : function() {
+        console.log('Will unmount CursorComponent');
         document.removeEventListener('mousemove', this._onMouseMove);
         document.body.removeChild(this.portalElement);
         this.portalElement = null;
+        this.setState({ 'mounted' : false });
     },
 
-    getBaseDimensions : function(){
+    getHoverComponentDimensions : function(){
         return {
             'width'  : ((this.props.style && this.props.style.width)  || this.props.width ) || (this.refs && this.refs.base && this.refs.base.clientWidth ),
             'height' : ((this.props.style && this.props.style.height) || this.props.height) || (this.refs && this.refs.base && this.refs.base.clientHeight)
         };
     },
 
-    scaleSVGChildrenComponent : function(svg, baseDimensions = null){
-        if (!baseDimensions) baseDimensions = this.getBaseDimensions();
-        return React.cloneElement(
-            svg,
-            {
-                'viewBox' : '0 0 ' + baseDimensions.width + ' ' + baseDimensions.height,
-                'style' : _.extend({}, svg.props.style, {
-                    'width'  : baseDimensions.width  * this.props.scale,
-                    'height' : baseDimensions.height * this.props.scale
-                })
-                
-            },
-            svg.props.children
-        );
+    getCursorContainmentDimensions : function(){
+        if (this.props.containingElement && typeof this.props.containingElement.clientHeight === 'number'){
+            return {
+                width : this.props.containingElement.clientWidth,
+                height : this.props.containingElement.clientHeight
+            };
+        }
+        return {
+            width : this.props.containingWidth,
+            height : this.props.containingHeight
+        };
     },
-    
-    isVisible : function(baseDimensions = null, visibilityMargin = null){
-        if (!baseDimensions) baseDimensions = this.getBaseDimensions();
+
+    isVisible : function(cursorContainmentDims = null, visibilityMargin = null){
+        if (typeof this.props.isVisible === 'boolean') return this.props.isVisible;
+        if (this.props.debugStyle) return true;
+        if (!cursorContainmentDims) cursorContainmentDims = this.getCursorContainmentDimensions();
         if (!visibilityMargin) visibilityMargin = this.visibilityMargin();
         return (
-            this.state.offsetY - visibilityMargin.bottom < baseDimensions.height &&
-            this.state.offsetX - visibilityMargin.right < baseDimensions.width &&
+            this.state.offsetY - visibilityMargin.bottom < cursorContainmentDims.height &&
+            this.state.offsetX - visibilityMargin.right < cursorContainmentDims.width &&
             this.state.offsetY + visibilityMargin.top > 0 &&
             this.state.offsetX + visibilityMargin.left > 0
         );
     },
 
     componentDidUpdate : function() {
-        
         if (!this.state.mounted) return;
-        var baseDimensions = this.getBaseDimensions();
-        var isVisible = this.isVisible();
+        vizUtil.requestAnimationFrame(()=>{
+            //console.log('Updated CursorComponent', this.state);
+            var hoverComponentDimensions = this.getHoverComponentDimensions();
+            var isVisible = this.isVisible();
 
-        ReactDOM.render(React.createElement(ZoomCursor.Magnifier, _.extend({
-            size: this.props.size,
-            scale : this.props.scale,
-            base : baseDimensions,
-            isVisible : isVisible,
-            childSVG : isVisible ? this.scaleSVGChildrenComponent(this.props.children, baseDimensions) : null,
-            cursorOffset: this.props.cursorOffset,
-            borderSize: this.props.borderSize,
-            borderColor: this.props.borderColor,
-            pointerStyle: this.props.pointerStyle,
-            onClick: this._handleClick,
-            className : this.props.zoomClassName,
-            onMouseLeave : this.props.onMouseLeave
-        }, this.state)), this.portalElement);
+            ReactDOM.render(React.createElement(CursorComponent.CursorContent, _.extend({
+                width: hoverComponentDimensions.width,
+                height : hoverComponentDimensions.height,
+                isVisible : isVisible,
+                cursorOffset: this.props.cursorOffset,
+                pointerStyle: this.props.pointerStyle,
+                onClick: this._handleClick,
+                className : this.props.className,
+                onMouseLeave : this.props.onMouseLeave,
+                style : this.props.style,
+                children : this.props.children
+            }, this.state)), this.portalElement);
+
+        });
     },
 
     _onMouseMove : _.throttle(function(e) {
-        var offset = layout.getElementOffset(this.refs.base);
-        //console.log('OFFSET', offset, layout.getElementOffset(this.refs.base))
+        var offset = layout.getElementOffset(this.props.containingElement || this.refs.base) || { left : this.props.offsetLeft || 0, top: this.props.offsetRight || 0 };
 
         var scrollX = (typeof window.pageXOffset !== 'undefined') ? window.pageXOffset : (document.documentElement || document.body.parentNode || document.body).scrollLeft;
         var scrollY = (typeof window.pageYOffset !== 'undefined') ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
 
-        this.setState({
-            x: e.clientX + scrollX, //(window.scrollX || window.pageXOffset),
-            y: e.clientY + scrollY, //(window.scrollY || window.pageYOffset),
-            offsetX: e.clientX - offset.left,
-            offsetY: e.clientY - offset.top
-        });
-    }, 100 /*, { trailing: false }*/ ),
+        if (this.props.debugStyle){
+            this.setState({
+                x : offset.left + 100,
+                y : offset.top + 100,
+                offsetX : 100,
+                offsetY : 100
+            });
+        } else {
+            this.setState({
+                x: e.clientX + scrollX, //(window.scrollX || window.pageXOffset),
+                y: e.clientY + scrollY, //(window.scrollY || window.pageYOffset),
+                offsetX: e.clientX + scrollX - offset.left,
+                offsetY: e.clientY + scrollY - offset.top
+            });
+        }
+    }, 100, { trailing: false }),
 
     _handleClick : function(e) {
         if (this.props.onClick) {
@@ -150,18 +164,13 @@ var ZoomCursor = React.createClass({
     },
 
     render : function(){
-        return (
-            <div
-                className={"zoom-cursor-wrapper" + (this.props.className ? ' ' + this.props.className : '')}
-                style={this.props.style}
-                ref="base"
-            >{ this.props.children }</div>
-        );
+        return null;
     },
 
     statics : {
-        Magnifier : React.createClass({
-            
+
+        CursorContent : React.createClass({
+
             getDefaultProps : function(){
                 return {
                     'scale'     : 2,
@@ -182,23 +191,18 @@ var ZoomCursor = React.createClass({
             },
 
             render : function(){
+                if (!this.props.isVisible || !this.props.children) return null;
 
-                if (!this.props.isVisible || !this.props.childSVG) return null;
-
-                var halfSizeY = this.props.size / 2;
-                var halfSizeX = this.props.size / 2;
-                var magX, magY;
-                magX = magY = this.props.scale;
-                var bgX = -(this.props.offsetX * magX - halfSizeX);
-                var bgY = -((this.props.offsetY + ((document && document.body && document.body.scrollTop) || 0)) * magY - halfSizeY);
+                var halfSizeY = this.props.height / 2;
+                var halfSizeX = this.props.width / 2;
 
                 return (
                     <div
-                        className={'cursor-zoom-magnifier-container'}
+                        className={'cursor-component-container ' + (this.props.className || '')}
                         style={{
                             display: this.props.isVisible ? 'block' : 'none',
-                            width: this.props.size,
-                            height: this.props.size,
+                            width: this.props.width,
+                            height: this.props.height,
                             transform : vizUtil.style.translate3d(this.props.x, this.props.y),
                             marginLeft: -halfSizeX + this.props.cursorOffset.x,
                             marginTop: -halfSizeY + this.props.cursorOffset.y,
@@ -218,32 +222,18 @@ var ZoomCursor = React.createClass({
                             />
                         }
 
-                            <div
-                                className={'cursor-zoom-magnifier' + (this.props.className ? ' ' + this.props.className : '')}
-                                style={{
-                                    width: this.props.size,
-                                    height: this.props.size,
-                                    border: this.props.borderSize + ' solid ' + this.props.borderColor
-                                }}
-                                onClick={this._handleClick}
-                            >
-                                <div className="inner" style={{
-                                    transform : vizUtil.style.translate3d(bgX, bgY),
-                                    width : (this.props.base.width * this.props.scale),
-                                    height : (this.props.base.height * this.props.scale)
-                                }}>
-                                    { this.props.childSVG }
-                                </div>
-                            </div>
+                        <div className={'inner' + (this.props.className ? ' ' + this.props.className : '')}>
+                            { this.props.children }
+                        </div>
 
                     </div>
-                );
 
+                );
             }
 
         })
+
     }
 
-});
 
-module.exports = ZoomCursor;
+});

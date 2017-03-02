@@ -853,12 +853,12 @@ var ResultTable = browse.ResultTable = React.createClass({
 
 
                 <div className="row above-chart-row">
-                    <div className="col-sm-6 col-xs-12">
+                    <div className="col-sm-5 col-xs-12">
                         <h5 className='browse-title'>
-                            Showing {formattedExperimentSetListings.length} of { this.props.context.total } experiment sets.
+                            {formattedExperimentSetListings.length} of { this.props.context.total } Experiment Sets
                         </h5>
                     </div>
-                    <div className="col-sm-6 col-xs-12">
+                    <div className="col-sm-7 col-xs-12">
                         
                         <ButtonToolbar className="pull-right">
                             
@@ -1149,7 +1149,7 @@ var Browse = browse.Browse = React.createClass({
             return(
                 <div className="error-page">
                     <h4>
-                        <a href='/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all'>
+                        <a href='/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=25&from=0'>
                             Only experiment sets may be browsed.
                         </a>
                     </h4>
