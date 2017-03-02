@@ -169,7 +169,7 @@ var Action = module.exports = React.createClass({
                     return;
                 }
                 // use first lab for now
-                var submits_for = data.submits_for[0]
+                var submits_for = data.submits_for[0];
                 lab = submits_for['@id'] ? submits_for['@id'] : submits_for.link_id.replace(/~/g, "/");
             }
             ajax.promise(lab).then(lab_data => {
