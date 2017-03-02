@@ -590,7 +590,7 @@ var ImpersonateUserForm = React.createClass({
             //if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
             //    localStorage.setItem("user_info", JSON.stringify(payload));
             //}
-            JWT.saveUserInfo(payload, true);
+            JWT.saveUserInfo(payload);
             this.context.updateUserInfo();
             this.context.navigate('/');
         }.bind(this);
@@ -598,13 +598,13 @@ var ImpersonateUserForm = React.createClass({
             alert('Impersonation unsuccessful.\nPlease check to make sure the provided email is correct.');
         };
 
-        var userInfo = localStorage.getItem('user_info') || null;
-        var idToken = userInfo ? JSON.parse(userInfo).id_token : null;
-        var reqHeaders = {'Accept': 'application/json'};
-        if(userInfo){
-            reqHeaders['Authorization'] = 'Bearer '+idToken;
-        }
-        ajax.load(url, callbackFxn, 'POST', fallbackFxn, jsonData, reqHeaders);
+        //var userInfo = localStorage.getItem('user_info') || null;
+        //var idToken = userInfo ? JSON.parse(userInfo).id_token : null;
+        //var reqHeaders = {'Accept': 'application/json'};
+        //if(userInfo){
+        //    reqHeaders['Authorization'] = 'Bearer '+idToken;
+        //}
+        ajax.load(url, callbackFxn, 'POST', fallbackFxn, jsonData);
     }
 });
 globals.content_views.register(ImpersonateUserForm, 'Portal', 'impersonate-user');
