@@ -68,7 +68,7 @@ class Lab(Item):
             self.STATUS_ACL = self.__class__.STATUS_ACL
 
     def __ac_local_roles__(self):
-        """this creates roles that the lab item needs so it can be edited & viewed"""
+        """This creates roles that the lab item needs so it can be edited & viewed"""
         roles = {}
         lab_submitters = 'submits_for.%s' % self.uuid
         roles[lab_submitters] = 'role.lab_submitter'

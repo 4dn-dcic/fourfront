@@ -17,8 +17,15 @@ from pyramid.traversal import (
 )
 import snovault
 # from ..schema_formats import is_accession
+# import snovalut default post / patch stuff so we can overwrite it in this file
 from snovault.crud_views import collection_add as sno_collection_add
-from snovault.validators import validate_item_content_post
+from snovault.crud_views import item_edit as sno_item_edit
+from snovault.validators import (
+    validate_item_content_post,
+    validate_item_content_put,
+    validate_item_content_patch
+)
+from snovault.etag import if_match_tid
 
 
 @lru_cache()
@@ -140,6 +147,21 @@ def collection_add(context, request, render=None):
                 }
 
     return sno_collection_add(context, request, render)
+
+
+
+@view_config(context=snovault.Item, permission='edit', request_method='PUT',
+             validators=[validate_item_content_put], decorator=if_match_tid)
+@view_config(context=snovault.Item, permission='edit', request_method='PATCH',
+             validators=[validate_item_content_patch], decorator=if_match_tid)
+def item_edit(context, request, render=None):
+    check_only = request.params.get('check_only', False)
+
+    if check_only:
+        return {'status': "success",
+                '@type': ['result'],
+                }
+    return sno_item_edit(context,request, render)
 
 
 class Item(snovault.Item):
