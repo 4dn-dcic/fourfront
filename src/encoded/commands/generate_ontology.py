@@ -8,6 +8,7 @@ from encoded.commands.owltools import (
     Owler,
     splitNameFromNamespace,
     convert2URIRef,
+    isURIRef,
     isBlankNode,
     getObjectLiteralsOfType,
     subClassOf,
@@ -54,6 +55,9 @@ def iterative_parents(nodes, terms, data):
 
 
 def get_all_ancestors(term, terms, field):
+    '''Adds a list of all the term's ancestors to a term up to the root
+        of the ontology and adds to closure fields - used in adding slims
+    '''
     closure = 'closure'
     if field == 'development':
         closure = 'closure_with_develops_from'
@@ -67,6 +71,13 @@ def get_all_ancestors(term, terms, field):
 
 
 def _combine_all_parents(term):
+    '''internal method to combine the directly related terms into 2 uniqued lists
+        of all_parents or development terms that will be used as starting terms
+        to generate closures of all ancestors
+
+        the development terms have those with has_part_inverse filtered out to
+        prevent over expansion of the ancestors to incorrect associations
+    '''
     parents = set()
     relations = set()
     develops = set()
@@ -85,9 +96,14 @@ def _combine_all_parents(term):
 
 
 def _has_human(cols):
+    '''True if human taxon is part of the collection'''
     ans = False
-    if cols and HUMAN_TAXON in cols:
-        ans = True
+    human = HUMAN_TAXON
+    if cols:
+        if isURIRef(cols[0]):
+            human = convert2URIRef(human)
+        if human in cols:
+            ans = True
     return ans
 
 
@@ -125,13 +141,16 @@ def create_term_dict(class_, termid, data, ontology_id=None):
     return term
 
 
-def add_term_and_info(class_, term, relationship, data, terms):
+def _add_term_and_info(class_, parent_uri, relationship, data, terms):
+    '''Internal function to add new terms that are part of an IntersectionOf
+        along with the appropriate relationships
+    '''
     if not terms:
         terms = {}
     for subclass in data.rdfGraph.objects(class_, subClassOf):
-        term_id = get_termid_from_uri(term)
+        term_id = get_termid_from_uri(parent_uri)
         if terms.get(term_id) is None:
-            terms[term_id] = create_term_dict(class_, term_id, data)
+            terms[term_id] = create_term_dict(parent_uri, term_id, data)
         if terms[term_id].get(relationship) is None:
             terms[term_id][relationship] = []
         terms[term_id][relationship].append(get_termid_from_uri(subclass))
@@ -154,9 +173,11 @@ def process_intersection_of(class_, intersection, data, terms):
         col_list.append(col.__str__())
     if _has_human(col_list):
         if PART_OF in col_list:
-            terms = add_term_and_info(class_, collection[0], 'part_of', data, terms)
+            # print('COL-0 = ', collection[0])
+            # print('CLASS = ', class_.__str__())
+            terms = _add_term_and_info(class_, collection[0], 'relationships', data, terms)
         elif DEVELOPS_FROM in col_list:
-            terms = add_term_and_info(class_, collection[0], 'develops_from', data, terms)
+            terms = _add_term_and_info(class_, collection[0], 'develops_from', data, terms)
     return terms
 
 
@@ -175,7 +196,7 @@ def process_blank_node(class_, data, terms):
     return terms
 
 
-def _find_and_add_parent_of(parent, child_id, data, terms, has_part=False, relation=None):
+def _find_and_add_parent_of(parent, child, data, terms, has_part=False, relation=None):
     '''Add parent terms with the provided relationship to the 'relationships'
         field of the term - treating has_part specially
 
@@ -183,6 +204,7 @@ def _find_and_add_parent_of(parent, child_id, data, terms, has_part=False, relat
         our default is a  'relationships' field - but can pass in a specific
         relation string eg. develops_from and that will get added as field
     '''
+    child_id = get_termid_from_uri(child)
     for obj in data.rdfGraph.objects(parent, SomeValuesFrom):
         if not isBlankNode(obj):
             objid = get_termid_from_uri(obj)
@@ -191,8 +213,9 @@ def _find_and_add_parent_of(parent, child_id, data, terms, has_part=False, relat
                 relation = 'has_part_inverse'
                 term2add = child_id
                 child_id = objid
+                child = obj
                 if child_id not in terms:
-                    terms[child_id] = create_term_dict(convert2URIRef(child_id), child_id, data)
+                    terms[child_id] = create_term_dict(child, child_id, data)
             if relation is None:
                 relation = 'relationships'
             if not terms[child_id].get(relation):
@@ -201,10 +224,11 @@ def _find_and_add_parent_of(parent, child_id, data, terms, has_part=False, relat
     return terms
 
 
-def process_parents(class_, termid, data, terms):
+def process_parents(class_, data, terms):
     '''Gets the parents of the class - direct and those linked via
         specified relationship types
     '''
+    termid = get_termid_from_uri(class_)
     for parent in data.get_classDirectSupers(class_, excludeBnodes=False):
         rtypes = {PART_OF: 'part_of',
                   DEVELOPS_FROM: 'develops_from',
@@ -220,7 +244,8 @@ def process_parents(class_, termid, data, terms):
                         has_part = True
                     if rtypes[rel] == 'develops_from':
                         relation = rtypes[rel]
-                    terms = _find_and_add_parent_of(parent, termid, data, terms, has_part, relation)
+                    # terms = _find_and_add_parent_of(parent, termid, data, terms, has_part, relation)
+                    terms = _find_and_add_parent_of(parent, class_, data, terms, has_part, relation)
         else:
             if not terms[termid].get('parents'):
                 terms[termid]['parents'] = []
@@ -241,13 +266,22 @@ def get_definitions(class_, data, definition_terms):
 
 
 def _cleanup_non_fields(terms):
+    '''Removes unwanted fields and empty terms from final json'''
     to_delete = ['relationships', 'all_parents', 'development',
-                 'has_part_inverse', 'develops_from', 'closure',
-                 'closure_with_develops_from']
+                 'has_part_inverse', 'develops_from',
+                 'closure', 'closure_with_develops_from',
+                 'achieves_planned_objective', 'part_of'  # these 2 should never be present
+                 ]
+    tids2delete = []
     for termid, term in terms.items():
-        for field in to_delete:
-            if field in term:
-                del term[field]
+        if not term:
+            tids2delete.append(termid)
+        else:
+            for field in to_delete:
+                if field in term:
+                    del term[field]
+    for tid in tids2delete:
+        del terms[tid]
     return terms
 
 
@@ -293,7 +327,7 @@ def convert2namespace(uri):
     return ns[name]
 
 
-def get_definition_terms(connection, ontology_id):
+def get_definition_terms1(connection, ontology_id):
     '''Checks an ontology item for ontology_terms that are used
         to designate synonyms in that ontology and returns a list
         of OntologyTerm dicts.
@@ -309,51 +343,35 @@ def get_definition_terms(connection, ontology_id):
     return synterms
 
 
-def get_syndef_terms(connection, ontology_id, termtype):
-    '''Checks an ontology item for ontology_terms that are used
-        to designate synonyms or definitions in that ontology and
-        returns a list of OntologyTerm dicts.
-    '''
-    sterms = None
-    ontologies = get_ontologies(connection, [ontology_id])
-    if ontologies:
-        ontology = ontologies[0]
-        term_ids = ontology.get(termtype)
-        if term_ids is not None:
-            sterms = [get_FDN(termid, connection) for termid in term_ids]
-
-    return sterms
-
-
-def get_syndef_terms_as_uri(connection, ontology_id, termtype, as_rdf=True):
+def get_syndef_terms_as_uri(connection, ontology, termtype, as_rdf=True):
     '''Checks an ontology item for ontology_terms that are used
         to designate synonyms or definitions in that ontology and returns a list
         of RDF Namespace:name pairs by default or simple URI strings
         if as_rdf=False.
     '''
-    sdterms = get_syndef_terms(connection, ontology_id, termtype)
+    sdterms = ontology.get(termtype)
     uris = [term['term_url'] for term in sdterms]
     if as_rdf:
         uris = [convert2namespace(uri) for uri in uris]
     return uris
 
 
-def get_synonym_term_uris(connection, ontology_id, as_rdf=True):
+def get_synonym_term_uris(connection, ontology, as_rdf=True):
     '''Checks an ontology item for ontology_terms that are used
         to designate synonyms in that ontology and returns a list
         of RDF Namespace:name pairs by default or simple URI strings
         if as_rdf=False.
     '''
-    return get_syndef_terms_as_uri(connection, ontology_id, 'synonym_terms', as_rdf)
+    return get_syndef_terms_as_uri(connection, ontology, 'synonym_terms', as_rdf)
 
 
-def get_definition_term_uris(connection, ontology_id, as_rdf=True):
+def get_definition_term_uris(connection, ontology, as_rdf=True):
     '''Checks an ontology item for ontology_terms that are used
         to designate definitions in that ontology and returns a list
         of RDF Namespace:name pairs by default or simple URI strings
         if as_rdf=False.
     '''
-    return get_syndef_terms_as_uri(connection, ontology_id, 'definition_terms', as_rdf)
+    return get_syndef_terms_as_uri(connection, ontology, 'definition_terms', as_rdf)
 
 
 def get_slim_terms(connection):
@@ -380,12 +398,11 @@ def get_slim_terms(connection):
 
 def get_ontologies(connection, ont_list):
     '''return list of ontology jsons retrieved from server
-        ontology jsons include linkTo items
+        ontology jsons are now fully embedded
     '''
     ontologies = []
     if ont_list == 'all':
         ontologies = get_FDN(None, connection, None, 'ontologys')
-        ontologies = [get_FDN(ontology['uuid'], connection) for ontology in ontologies]
     else:
         ontologies = [get_FDN('ontologys/' + ontology, connection) for ontology in ont_list]
 
@@ -415,15 +432,6 @@ def remove_obsoletes_and_unnamed(terms):
              if ('parents' not in term) or ('ObsoleteClass' not in term['parents'])}
     terms = {termid: term for termid, term in terms.items()
              if 'term_name' in term and (term['term_name'] and not term['term_name'].lower().startswith('obsolete'))}
-    # for termid, term in terms.items():
-    #     if 'parents' in term:
-    #         if 'ObsoleteClass' in term['parents']:
-    #             del terms[termid]
-    #     elif 'term_name' in term:
-    #         if not term['term_name']:
-    #             del terms[termid]
-    #         elif term['term_name'].lower().startswith('obsolete'):
-    #             del terms[termid]
     return terms
 
 
@@ -449,8 +457,8 @@ def add_additional_term_info(terms, data, synonym_terms, definition_terms):
 
 
 def download_and_process_owl(ontology, connection, terms):
-    synonym_terms = get_synonym_term_uris(connection, ontology['uuid'])
-    definition_terms = get_definition_term_uris(connection, ontology['uuid'])
+    synonym_terms = get_synonym_term_uris(connection, ontology)
+    definition_terms = get_definition_term_uris(connection, ontology)
     data = Owler(ontology['download_url'])
     for class_ in data.allclasses:
         if isBlankNode(class_):
@@ -467,7 +475,8 @@ def download_and_process_owl(ontology, connection, terms):
                 if 'source_ontology' not in terms[termid]:
                     terms[termid]['source_ontology'] = ontology['uuid']
             # deal with parents
-            terms = process_parents(class_, termid, data, terms)
+            # terms = process_parents(class_, termid, data, terms)
+            terms = process_parents(class_, data, terms)
     # add synonyms and definitions
     terms = add_additional_term_info(terms, data, synonym_terms, definition_terms)
     return terms
@@ -476,8 +485,10 @@ def download_and_process_owl(ontology, connection, terms):
 def write_outfile(terms, filename):
     with open(filename, 'w') as outfile:
         outfile.write('[\n')
-        for term in terms.values():
+        for i, term in enumerate(terms.values()):
             json.dump(term, outfile, indent=4)
+            if i != len(terms) - 1:
+                outfile.write(',')
             outfile.write('\n')
         outfile.write(']\n')
 
@@ -519,9 +530,6 @@ def main():
     ontologies = get_ontologies(connection, args.ontologies)
     slim_terms = get_slim_terms(connection)
 
-    # for testing with local copy of file pass in ontologies EFO
-    # ontologies[0]['download_url'] = '/Users/andrew/Documents/work/untracked_work_ff/test_families.owl'
-
     # start iteratively downloading and processing ontologies
     terms = {}
     for ontology in ontologies:
@@ -534,6 +542,9 @@ def main():
     if terms:
         terms = add_slim_terms(terms, slim_terms)
         terms = remove_obsoletes_and_unnamed(terms)
+        # at the moment we're writing json output but consider updating db directly
+        # including checks for removal of terms already in db from ontologies
+        # and audits for items linked to terms
         write_outfile(terms, args.outfile)
 
 

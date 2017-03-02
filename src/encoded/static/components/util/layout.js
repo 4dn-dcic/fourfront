@@ -1,5 +1,6 @@
 'use strict';
 
+var _ = require('underscore');
 var { isServerSide } = require('./misc');
 
 /** 
@@ -40,6 +41,33 @@ var layout = module.exports = {
         }
 
         return { left: x, top: y };
+    },
+
+    /** 
+     * Shorten a string to a maximum character length, splitting on word break (or other supplied character).
+     * Optionally append an ellipsis.
+     * 
+     * @param {string}  originalText
+     * @param {number}  maxChars
+     * @param {boolean} [addEllipsis=true]
+     * @param {string}  [splitOn=' ']
+     */
+    shortenString : function(originalText, maxChars = 28, addEllipsis = true, splitOn = ' '){
+        var textArr         = originalText.split(splitOn),
+            nextLength,
+            returnArr       = [],
+            returnStrLen    = 0;
+
+        while (typeof textArr[0] === 'string'){
+            nextLength = textArr[0].length + splitOn.length;
+            if (returnStrLen + nextLength <= maxChars){
+                returnArr.push(textArr.shift());
+                returnStrLen += nextLength;
+                
+            } else break;
+        }
+        if (textArr.length === 0) return originalText;
+        return returnArr.join(splitOn) + (addEllipsis ? '...' : '');
     },
 
     /**
@@ -83,6 +111,81 @@ var layout = module.exports = {
 
 
     /**
+     * Check width of text if it were to fit on one line.
+     * @param {string} textContent - Either text or text-like content, e.g. with span elements.
+     * @param {string} [font] - Font to use/measure. Include font-size. Defaults to "1rem 'Work Sans'".
+     * @param {boolean} [roundToPixel] - Whether to round result up.
+     * @return {integer} - Width of text if whitespace style set to nowrap, or object containing 'containerHeight' & 'textWidth' if widthForHeightCheck is set.
+     */
+    textWidth : function(
+        textContent,
+        font = "1rem 'Work Sans'",
+        roundToPixel = false
+    ){
+        if (isServerSide()) return null;
+        var canvas, context, width;
+
+        try {
+            // Attempt to use HTML5 canvas for sub-pixel accuracy, no DOM update, etc.
+            canvas = layout.textWidth.canvas || (layout.textWidth.canvas = document.createElement("canvas"));
+            context = canvas.getContext("2d");
+            context.font = font;
+            var metrics = context.measureText(textContent);
+            width = metrics.width;
+        } catch (e){
+            // Fallback to older DOM-based check.
+            console.warn("Failed to get text width with HTML5 canvas method, falling back to DOM method.");
+            width = layout.textContentWidth(
+                textContent,
+                'div',
+                null,
+                null,
+                { 'font' : font }
+            );
+        }
+        if (roundToPixel){
+            return Math.floor(width) + 1;
+        } else {
+            return width;
+        }
+    },
+
+    textHeight : function(
+        textContent = "Some String",
+        width = 200,
+        containerClassName = null,
+        style = null,
+        containerElement = null
+    ){
+        if (isServerSide()) return null;
+        
+        var height;
+        var contElem;
+        if (containerElement && typeof containerElement.cloneNode === 'function'){
+            contElem = containerElement.cloneNode(false);
+        } else {
+            contElem = document.createElement('div');
+        }
+        contElem.className = "off-screen " + (containerClassName || '');
+        contElem.innerHTML = textContent;
+        if (style){
+            _.extend(contElem.style, style);
+        }
+        contElem.style.display = "block";
+        contElem.style.width = width + "px";
+        if (containerElement && containerElement.parentElement){
+            containerElement.parentElement.appendChild(contElem);
+            height = contElem.clientHeight;
+            containerElement.parentElement.removeChild(contElem);    
+        } else {
+            document.body.appendChild(contElem);
+            height = contElem.clientHeight;
+            document.body.removeChild(contElem);
+        }
+        return height;
+    },
+
+    /**
      * Check width of text or text-like content if it were to fit on one line.
      * @param {string} textContent - Either text or text-like content, e.g. with span elements.
      * @param {string} [containerElementType] - Type of element to fit into, e.g. 'div' or 'p'.
@@ -120,7 +223,6 @@ var layout = module.exports = {
         }
         return textLineWidth;
     },
-
 
 
 

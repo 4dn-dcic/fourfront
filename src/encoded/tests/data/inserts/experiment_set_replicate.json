@@ -8,7 +8,7 @@
            {"replicate_exp": "4DNEX067APY1", "bio_rep_no": 1, "tec_rep_no":1},
            {"replicate_exp": "4DNEX067APT1", "bio_rep_no": 1, "tec_rep_no":2}
         ],
-        "lab": "4dn-dcic-lab",
+        "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
         "status":"released"
     },
@@ -21,7 +21,7 @@
            {"replicate_exp": "4DNEX067APV1", "bio_rep_no": 1, "tec_rep_no":1},
            {"replicate_exp": "4DNEX067APZ1", "bio_rep_no": 1, "tec_rep_no":2}
         ],
-        "lab": "4dn-dcic-lab",
+        "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
         "status":"released"
     },
@@ -35,7 +35,7 @@
            {"replicate_exp": "4DNEX34DAX2S", "bio_rep_no": 1, "tec_rep_no":2},
            {"replicate_exp": "4DNEX42CAX15", "bio_rep_no": 2, "tec_rep_no":1}
         ],
-        "lab": "4dn-dcic-lab",
+        "lab": "test-4dn-lab",
         "award": "1U01CA200059-01",
         "status":"released"
     }

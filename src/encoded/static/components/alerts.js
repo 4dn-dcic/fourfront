@@ -33,6 +33,11 @@ var Alerts = module.exports = React.createClass({
             'title'     : "No Results",
             'message'   : "Selecting this filter returned no results so it was deselected.",
             'style'     : "warning"
+        },
+        ConnectionError : {
+            "title" : "Connection Error",
+            "message" : "Check your internet connection",
+            "style" : "danger"
         }
     },
 

@@ -5,9 +5,10 @@
  */
 
 
-module.exports.ChartBreadcrumbs = require('./ChartBreadcrumbs');
+module.exports.ActiveFiltersBar = require('./ActiveFiltersBar');
 module.exports.SVGFilters = require('./SVGFilters');
 module.exports.FetchingView = require('./FetchingView');
-module.exports.ZoomCursor = require('./Legend');
+module.exports.Legend = require('./Legend');
 module.exports.ZoomCursor = require('./ZoomCursor');
-
+module.exports.RotatedLabel = require('./RotatedLabel');
+module.exports.CursorComponent = require('./CursorComponent');

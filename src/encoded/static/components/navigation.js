@@ -6,7 +6,7 @@ var { Navbars, Navbar, Nav, NavItem, NavDropdown, MenuItem } = require('react-bo
 var _ = require('underscore');
 var store = require('../store');
 var { JWT, console, layout, isServerSide } = require('./util');
-var HoverStatistics = require('./viz/hover-statistics');
+var QuickInfoBar = require('./viz/QuickInfoBar');
 var TestWarning = require('./testwarning');
 var productionHost = require('./globals').productionHost;
 
@@ -262,7 +262,7 @@ var Navigation = module.exports = React.createClass({
                             {/* REMOVE SEARCH FOR NOW: <Search href={this.props.href} /> */}
                         </Navbar.Collapse>
                     </Navbar>
-                    <HoverStatistics ref="stats" href={this.props.href} expSetFilters={this.props.expSetFilters} />
+                    <QuickInfoBar ref="stats" href={this.props.href} expSetFilters={this.props.expSetFilters} />
                 </div>
             </div>
         );
