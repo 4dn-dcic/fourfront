@@ -28,6 +28,10 @@ def convert2URIRef(astring):
     return astring
 
 
+def isURIRef(uri):
+    return isinstance(uri, URIRef)
+
+
 def inferNamespacePrefix(aUri):
     stringa = aUri.__str__()
     try:
