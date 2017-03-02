@@ -119,7 +119,9 @@ class FileSetCalibration(FileSet):
     item_type = 'file_set_calibration'
     schema = load_schema('encoded:schemas/file_set_calibration.json')
     name_key = 'accession'
-    embedded = ['files_in_set']
+    embedded = ['files_in_set',
+                'files_in_set.attachment',
+                ]
     embedded = add_default_embeds(embedded, schema)
 
 
