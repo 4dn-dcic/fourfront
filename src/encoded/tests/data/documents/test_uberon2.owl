@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+  <rdf:RDF xmlns="http://purl.obolibrary.org/obo/uberon/ext.owl#"
+       xml:base="http://purl.obolibrary.org/obo/uberon/ext.owl"
+       xmlns:owl="http://www.w3.org/2002/07/owl#"
+       xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+       xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+      <owl:Ontology rdf:about="http://purl.obolibrary.org/obo/uberon/ext.owl">
+      </owl:Ontology>
+  <owl:AnnotationProperty rdf:about="http://www.w3.org/2000/01/rdf-schema#label"/>
+<!-- http://purl.obolibrary.org/obo/UBERON_0001772 -->
+
+<owl:Class rdf:about="http://purl.obolibrary.org/obo/UBERON_0001772">
+    <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/UBERON_0010313"/>
+    <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/UBERON_0015808"/>
+    <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">corneal epithelium</rdfs:label>
+</owl:Class>
+
+<owl:Class>
+   <owl:intersectionOf rdf:parseType="Collection">
+       <rdf:Description rdf:about="http://purl.obolibrary.org/obo/UBERON_0001772"/>
+       <owl:Restriction>
+           <owl:onProperty rdf:resource="http://purl.obolibrary.org/obo/BFO_0000050"/>
+           <owl:someValuesFrom rdf:resource="http://purl.obolibrary.org/obo/NCBITaxon_9606"/>
+       </owl:Restriction>
+   </owl:intersectionOf>
+   <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/UBERON_0010304"/>
+</owl:Class>
+</rdf:RDF>

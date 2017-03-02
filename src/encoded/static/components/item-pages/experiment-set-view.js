@@ -205,6 +205,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                 <div className="row">
 
                     <div className="col-sm-5 col-md-4 col-lg-3">
+                        { this.props.context.experiments_in_set && this.props.context.experiments_in_set.length ?
                         <FacetList
                             urlPath={this.props.context['@id']}
                             experimentSetListJSON={this.props.context.experiments_in_set}
@@ -217,6 +218,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                             className="with-header-bg"
                             useAjax={false}
                         />
+                        : <div>&nbsp;</div> }
                     </div>
 
                     <div className="col-sm-7 col-md-8 col-lg-9">
@@ -228,14 +230,18 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                         />
 
                         <div className="exp-table-section">
+                            { this.props.context.experiments_in_set && this.props.context.experiments_in_set.length ? 
                             <h3>
                                 <span>Experiments</span>
+                                { Array.isArray(this.state.passExperiments) ? 
                                 <span className="exp-number small right">
                                     <span className="hidden-xs">Showing </span>
                                     { this.state.passExperiments.length } of { this.props.context.experiments_in_set.length }
                                     <span className="hidden-xs"> Experiments</span>
                                 </span>
+                                : null }
                             </h3>
+                            : null }
                             <div className="exp-table-container">
                                 <ExperimentsTable
                                     ref="experimentsTable"

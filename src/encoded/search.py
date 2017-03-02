@@ -69,7 +69,8 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
                                doc_types)
 
     # TODO: decide if the schemas are useful
-    schemas = [types[doc_type].schema for doc_type in doc_types]
+    # commented out as not returning them currently
+    # schemas = [types[doc_type].schema for doc_type in doc_types]
 
     ### Set sort order
     # has_sort = set_sort_order(request, search_term, types, doc_types, query, result)
@@ -85,7 +86,7 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
     ### Adding facets to the query
     query['aggs'] = set_facets(facets, used_filters, principals, doc_types)
 
-    # Execute the query
+    ### Execute the query
     if size == 'all':
         es_results = get_all_results(request, query)
     elif size:
@@ -94,18 +95,18 @@ def search(context, request, search_type=None, return_generator=False, forced_ty
         # fallback size for elasticsearch is 10
         es_results = es.search(body=query, index=es_index)
 
-    # record total number of hits
+    ### Record total number of hits
     result['total'] = total = es_results['hits']['total']
 
     schemas = (types[item_type].schema for item_type in doc_types)
-    result['facets'] = format_facets(
-        es_results, facets, used_filters, schemas, total)
+    result['facets'] = format_facets(es_results, facets, used_filters, schemas, total)
+
     # Add batch actions
     # TODO: figure out exactly what this does. Provide download URLs?
     # Implement later
     # result.update(search_result_actions(request, doc_types, es_results))
 
-    # Add all link for collections
+    ### Add all link for collections
     if size not in (None, 'all') and size < result['total']:
         params = [(k, v) for k, v in request.params.items() if k != 'limit']
         params.append(('limit', 'all'))
@@ -281,9 +282,9 @@ def prepare_search_term(request):
     prepared_vals = []
     for field, val in request.params.iteritems():
         if field not in ['type', 'frame', 'format', 'limit', 'sort', 'from', 'field']:
-            if 'embedded.*' + field not in prepared_terms.keys():
-                prepared_terms['embedded.*' + field] = []
-            prepared_terms['embedded.*' + field].append(val)
+            if 'embedded.' + field not in prepared_terms.keys():
+                prepared_terms['embedded.' + field] = []
+            prepared_terms['embedded.' + field].append(val)
     return prepared_terms
 
 
@@ -349,13 +350,15 @@ def list_result_fields(request, doc_types):
 # TODO: Make ES5 complaint query dsl ('query' should be ok, but not 'filter')
 def get_filtered_query(prepared_terms, result_fields, principals, doc_types):
     # prepare the query from prepared_terms
-    bool_query = {"must":[]}
-    for field in prepared_terms.keys():
-        this_query = {"query_string":{}}
+    bool_query = {"should":[]}
+    for field, terms in prepared_terms.items():
+        # Replaces query_search (text search?) w/ specific tests for field/term.
+        this_query = {"query_string":{ "default_operator" : "OR" }}
         this_query["query_string"]["fields"] = [field]
-        query_prep = ['\"{0}\"'.format(term) for term in prepared_terms[field]]
+
+        query_prep = ['\"{0}\"'.format(term) for term in terms]
         this_query["query_string"]["query"] = ' '.join(query_prep)
-        bool_query["must"].append(this_query)
+        bool_query["should"].append(this_query)
     ### FOR ES1
     return {
         "query": {
@@ -404,6 +407,7 @@ def set_filters(request, query, result):
         # default to searching type=Item rather than empty filter path
         if remove_path[-1] == '?':
             remove_path += 'type=Item'
+
         result['filters'].append({
             'field': field,
             'term': term,
@@ -413,9 +417,32 @@ def set_filters(request, query, result):
         if field == 'searchTerm':
             continue
 
+        # Add filter to query
+        if field.startswith('audit'):
+            query_field = field
+        elif field == 'type':
+            query_field = 'embedded.@type.raw'
+        else:
+            query_field = 'embedded.' + field + '.raw'
+
         if field not in used_filters.keys():
-            used_filters[field] = []
-        used_filters[field].append(term)
+            used_filters[field] = [term]
+            query_filters.append({
+                'terms' : { query_field : used_filters[field] }
+            })
+        else:
+            # Update query['filters']['and']['filters'][N] where N === { 'terms' : ... }
+            # with term.
+            query_filters.remove({
+                'terms' : { query_field : used_filters[field] }
+            })
+            used_filters[field].append(term)
+            query_filters.append({
+                'terms' : { query_field : used_filters[field] }
+            })
+
+        #used_filters[field].append(term)
+
     return used_filters
 
 
@@ -447,51 +474,65 @@ def initialize_facets(types, doc_types, search_audit, principals):
 def set_facets(facets, used_filters, principals, doc_types):
     """
     Sets facets in the query using filters
+
+    :param facets: A list of tuples containing (0) field in object dot notation,  and (1) a dict or OrderedDict with title property.
+    :param used_filters: Dict of filters which are set for the ES query. Key is field type, e.g. 'experiments_in_set.award.project', and value is list of terms (strings).
     """
+
     aggs = {}
-    facet_dict = dict(facets)
-    for field, _ in facets:
-        # This is a not facet field. Cannot ensure that embed path is correct
-        if field not in facet_dict.keys():
-            continue
+    facetFields = dict(facets).keys() # List of first entry of tuples in facets list.
+    # E.g. 'type','experimentset_type','experiments_in_set.award.project', ...
+
+    for field in facetFields:
         if field == 'type':
             query_field = 'embedded.@type.raw'
         elif field.startswith('audit'):
             query_field = field
         else:
             query_field = 'embedded.' + field + '.raw'
+
         agg_name = field.replace('.', '-')
 
-        terms = [
-            {'terms': {'principals_allowed.view': principals}},
-            {'terms': {'embedded.@type.raw': doc_types}},
-        ]
+        aggregation = {
+            'terms': {
+                'field': query_field,
+                'min_doc_count': 0,
+                'size': 100
+            }
+        }
+
+        termFilter = {
+            'bool': {
+                'must': [
+                    {'terms': {'principals_allowed.view': principals}},
+                    {'terms': {'embedded.@type.raw': doc_types}},
+                ],
+            },
+        }
+
         # Adding facets based on filters
         for q_field, q_terms in used_filters.items():
-            if q_field not in facet_dict.keys():
+            if q_field not in facetFields:
                 continue
-            if q_field != field and q_field.startswith('audit'):
-                terms.append({'terms': {q_field: q_terms}})
-            elif q_field != field and not q_field.endswith('!'):
-                terms.append({'terms': {'embedded.' + q_field + '.raw': q_terms}})
-            elif q_field != field and q_field.endswith('!'):
-                terms.append({'not': {'terms': {'embedded.' + q_field[:-1] + '.raw': q_terms}}})
+
+            if q_field == field:
+                continue
+
+            elif q_field != field: # Get reduced count aggregation for term in field not set in filters.
+                if q_field.startswith('audit'):
+                    termFilter['bool']['must'].append({'terms' : { q_field : q_terms }})
+                elif not q_field.endswith('!'):
+                    termFilter['bool']['must'].append({'terms' : { 'embedded.' + q_field + '.raw' : q_terms }})
+                elif q_field.endswith('!'):
+                    if termFilter['bool'].get('must_not') is None:
+                        termFilter['bool']['must_not'] = []
+                    termFilter['bool']['must_not'].append({'terms' : {'embedded.' + q_field[:-1] + '.raw': q_terms}})
 
         aggs[agg_name] = {
             'aggs': {
-                agg_name: {
-                    'terms': {
-                        'field': query_field,
-                        'min_doc_count': 0,
-                        'size': 100
-                    }
-                }
+                agg_name : aggregation
             },
-            'filter': {
-                'bool': {
-                    'must': terms,
-                },
-            },
+            'filter': termFilter,
         }
 
     return aggs
@@ -510,20 +551,24 @@ def format_facets(es_results, facets, used_filters, schemas, total):
     aggregations = es_results['aggregations']
     used_facets = set()
     for field, facet in facets:
+        resultFacet = {
+            'field' : field,
+            'title' : facet.get('title', field),
+            'total' : 0,
+            'terms' : None
+        }
         used_facets.add(field)
         agg_name = field.replace('.', '-')
-        if agg_name not in aggregations:
-            continue
-        terms = aggregations[agg_name][agg_name]['buckets']
+
+        if agg_name in aggregations:
+            resultFacet['total'] = aggregations[agg_name]['doc_count']
+            resultFacet['terms'] = aggregations[agg_name][agg_name]['buckets']
+
         # Choosing to show facets with one term for summary info on search it provides
-        if len(terms) < 1:
+        if len(resultFacet.get('terms', [])) < 1:
             continue
-        result.append({
-            'field': field,
-            'title': facet.get('title', field),
-            'terms': terms,
-            'total': aggregations[agg_name]['doc_count']
-        })
+
+        result.append(resultFacet)
 
     # Show any filters that aren't facets as a fake facet with one entry,
     # so that the filter can be viewed and removed

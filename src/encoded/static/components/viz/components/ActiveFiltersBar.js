@@ -5,7 +5,7 @@ var _ = require('underscore');
 var vizUtil = require('./../utilities');
 var { console, isServerSide, Filters } = require('./../../util');
 
-var ChartBreadcrumbs = module.exports = React.createClass({
+var ActiveFiltersBar = module.exports = React.createClass({
 
     statics : {
 
@@ -65,12 +65,6 @@ var ChartBreadcrumbs = module.exports = React.createClass({
         };
     },
 
-    getInitialState : function(){
-        return {
-            'highlighted' : []
-        };
-    },
-
     componentDidMount : function(){
         // Update color if mounting after serverside render w/ filters selected.
         if (this.props.expSetFilters && _.keys(this.props.expSetFilters).length > 0){
@@ -110,12 +104,12 @@ var ChartBreadcrumbs = module.exports = React.createClass({
                 return (
                     <div className="field-group" key={j} data-field={nodeSet[0].data.field}>
                         { nodeSet.map(function(node, i){
-                            return (<ChartBreadcrumbs.RegularCrumb
+                            return (<ActiveFiltersBar.RegularCrumb
                                 node={node}
                                 expSetFilters={_this.props.expSetFilters}
                                 href={_this.props.href}
                                 key={node.data.term}
-                                color={(node.color ? node.color : vizUtil.colorForNode(node, {}, true))}
+                                color={(node.color ? node.color : vizUtil.colorForNode(node))}
                             />);
                         }) }
                         <div className="field-label">{ Filters.Field.toName(nodeSet[0].data.field) || 'N/A' }</div>
@@ -131,11 +125,11 @@ var ChartBreadcrumbs = module.exports = React.createClass({
             return (<div className="chart-breadcrumbs" id={this.props.parentId + '-crumbs'}>{ this.renderCrumbs() }</div>);
         }
         return (
-            <ChartBreadcrumbs.Container>
+            <ActiveFiltersBar.Container>
                 <div className="chart-breadcrumbs" id={this.props.parentId + '-crumbs'}>
                     { this.renderCrumbs() }
                 </div>
-            </ChartBreadcrumbs.Container>
+            </ActiveFiltersBar.Container>
         );
     }
 });

@@ -10,8 +10,8 @@ jest.dontMock('react');
 jest.dontMock('underscore');
 
 
-describe('Testing viz/hover-statistics.js', function() {
-    var React, TestUtils, page, context, filters, _, Wrapper, HoverStatistics, href;
+describe('Testing viz/QuickInfoBar.js', function() {
+    var React, TestUtils, page, context, filters, _, Wrapper, QuickInfoBar, href;
 
     beforeEach(function() {
         React = require('react');
@@ -19,11 +19,11 @@ describe('Testing viz/hover-statistics.js', function() {
         TestUtils = require('react-dom/lib/ReactTestUtils');
         _ = require('underscore');
         context = require('../testdata/browse/context');
-        HoverStatistics = require('./../viz/hover-statistics');
+        QuickInfoBar = require('./../viz/QuickInfoBar');
         href = "http://localhost:8000/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=25&from=0";
 
         page = TestUtils.renderIntoDocument(
-            <HoverStatistics href={href} expSetFilters={{
+            <QuickInfoBar href={href} expSetFilters={{
                 "experiments_in_set.biosample.biosource.individual.organism.name" : new Set(["mouse"]),
                 "experiments_in_set.biosample.biosource.biosource_type" : new Set(["immortalized cell line"])
              }} />

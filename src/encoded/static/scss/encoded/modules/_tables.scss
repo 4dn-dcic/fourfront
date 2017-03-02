@@ -306,20 +306,6 @@ table.matrix {
 
 /** ExpSet Tables for Browse page **/
 
-.expset-table-container {
-
-	.expset-panel {
-		margin: 0px;
-		border: none;
-
-		> div > .panel-body{
-			padding: 0;
-			padding-left: 30px;
-		}
-	}
-
-}
-
 .expset-button{
 	padding: 0px !important;
 	text-align: center;
@@ -344,6 +330,18 @@ table.matrix {
 	overflow-x: auto;
 	position: relative;
 	margin-bottom: 80px;
+	padding-right: 0px;
+	border-right: 10px solid #fff;
+
+	.expset-panel {
+		margin: 0px;
+		border: none;
+
+		> div > .panel-body{
+			padding: 0;
+			padding-left: 30px;
+		}
+	}
 }
 
 .expset-table,

@@ -5,12 +5,15 @@ var _ = require('underscore');
 var url = require('url');
 var querystring = require('querystring');
 var d3 = require('d3');
-var SunBurstChart = require('./viz/sunburst');
-var BarPlotChart = require('./viz/barplot');
+var MosaicChart = require('./viz/MosaicChart');
+var BarPlotChart = require('./viz/BarPlotChart');
+var ChartDetailCursor = require('./viz/ChartDetailCursor');
 var { expFxn, Filters, ajax, console, layout, isServerSide } = require('./util');
 var FacetList = require('./facetlist');
 var vizUtil = require('./viz/utilities');
-var { ChartBreadcrumbs, SVGFilters, FetchingView } = require('./viz/components');
+var { SVGFilters, FetchingView, Legend } = require('./viz/components');
+var ChartDataController = require('./viz/chart-data-controller');
+
 
 /**
  * @callback showFunc
@@ -28,60 +31,6 @@ var { ChartBreadcrumbs, SVGFilters, FetchingView } = require('./viz/components')
  */
 
 var FacetCharts = module.exports.FacetCharts = React.createClass({
-
-    statics : {
-
-        /** Check if data is valid; must be array of experiment_sets w/ minimally-needed properties. */
-        isContextDataValid : function(context){
-            if (typeof context['@graph'] === 'undefined') return false;
-
-            var experiment_sets = context['@graph'];
-            if (!Array.isArray(experiment_sets)) return false;
-            if (experiment_sets.length === 0) return true; // Valid but no data.
-            
-            var expset = experiment_sets[0];
-            if (!Array.isArray(expset.experiments_in_set)) return false;
-            if (expset.experiments_in_set.length === 0) return true; // Valid but no data.
-            
-            var exp = expset.experiments_in_set[0];
-            if (typeof exp.accession === 'undefined') return false;
-            if (typeof exp.experiment_summary === 'undefined') return false;
-            if (typeof exp.biosample !== 'object') return false;
-            if (typeof exp.biosample.biosource_summary !== 'string') return false;
-            if (typeof exp.biosample.biosource === 'undefined') return false;
-
-            var biosource = Array.isArray(exp.biosample.biosource) ? 
-                (exp.biosample.biosource.length > 0 ? exp.biosample.biosource[0] : null) : exp.biosample.biosource;
-
-            if (biosource === null) return false;
-            if (typeof biosource.individual !== 'object' || !biosource.individual) return false;
-            if (typeof biosource.individual.organism !== 'object' || !biosource.individual.organism) return false;
-            if (typeof biosource.individual.organism.name !== 'string') return false;
-            if (typeof biosource.individual.organism.scientific_name !== 'string') return false;
-            return true;
-        },
-
-        getExperimentsFromContext : function(context){
-            if (!context) return null;
-            if (!FacetCharts.isContextDataValid(context)) return null;
-            return expFxn.listAllExperimentsFromExperimentSets(context['@graph']);
-        },
-
-        /** Not used/necessary, keeping for future if needed. */
-        isBrowserMSEdge : function(){
-            if (isServerSide()) return false;
-            if (document.documentElement.className.indexOf('no-uaEdge') > -1) return false;
-            if (document.documentElement.className.indexOf('uaEdge') > -1) return true;
-            return true;
-        },
-
-        getFieldsRequiredURLQueryPart : function(fields){
-            return fields.map(function(fieldToIncludeInResult){
-                return '&field=' + fieldToIncludeInResult;
-            }).join('');
-        },
-        
-    },
     
     getDefaultProps : function(){
         return {
@@ -91,38 +40,19 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 if (path.indexOf('/browse/') > -1) return true;
                 return false;
             },
-            'context' : null,
-            'ajax' : true,
             'views' : ['small', 'large'],
             'requestURLBase' : '/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&from=0',
-            'fieldsToFetch' : [ // What fields we need from /browse/... for this chart.
-                'accession',
-                'experiments_in_set.experiment_summary',
-                'experiments_in_set.experiment_type',
-                'experiments_in_set.accession',
-                //'experiments_in_set.status',
-                //'experiments_in_set.files.file_type',
-                'experiments_in_set.files.accession',
-                'experiments_in_set.filesets.files_in_set.accession',
-                //'experiments_in_set.biosample.description',
-                //'experiments_in_set.biosample.modifications_summary_short',
-                'experiments_in_set.biosample.biosource_summary',
-                //'experiments_in_set.biosample.accession',
-                //'experiments_in_set.biosample.biosource.description',
-                'experiments_in_set.biosample.biosource.biosource_name',
-                'experiments_in_set.biosample.biosource.biosource_type',
-                'experiments_in_set.biosample.biosource.individual.organism.name',
-                'experiments_in_set.biosample.biosource.individual.organism.scientific_name',
-                'experiments_in_set.digestion_enzyme.name'
-            ],
-            colWidthPerScreenSize : {
+            'colWidthPerScreenSize' : {
+                /* Previous, for mosaic: */
                 'small' : [
-                    {'xs' : 12, 'sm' : 6,  'md' : 4, 'lg' : 3},
-                    {'xs' : 12, 'sm' : 6,  'md' : 8, 'lg' : 9}
+                    //{'xs' : 12, 'sm' : 6,  'md' : 4, 'lg' : 3}, // For old mosaic
+                    {'xs' : 12, 'sm' : 9,  'md' : 9, 'lg' : 9},
+                    {'xs' : 12, 'sm' : 3, 'md' : 3, 'lg' : 3}
                 ],
                 'large' : [
-                    {'xs' : 12, 'sm' : 12, 'md' : 4, 'lg' : 3},
-                    {'xs' : 12, 'sm' : 12, 'md' : 8, 'lg' : 9}
+                    //{'xs' : 12, 'sm' : 12, 'md' : 4, 'lg' : 3}, // For old mosaic
+                    {'xs' : 12, 'sm' : 9, 'md' : 9, 'lg' : 9},
+                    {'xs' : 12, 'sm' : 3, 'md' : 3, 'lg' : 3}
                 ]
             }
         };
@@ -130,26 +60,27 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
     getInitialState : function(){
         return {
-            'experiments'           : null, //FacetCharts.getExperimentsFromContext(this.props.context),
-            'filteredExperiments'   : null,
             'mounted'               : false,
             'selectedNodes'         : [],   // expSetFilters, but with nodes (for colors, etc.) for breadcrumbs,
             'fetching'              : false,
+            /*
+            TODO: Might bring these back here.
             'chartFieldsBarPlot'    : [
                 { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
+                { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
                 { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
                 //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
             ],
             'chartFieldsHierarchy'  : [
-                { 
-                    field : 'experiments_in_set.biosample.biosource.individual.organism.name',
-                    title : "Primary Organism",
-                    name : function(val, id, exps, filteredExps){
-                        return Filters.Term.toName('experiments_in_set.biosample.biosource.individual.organism.name', val);
-                    }
-                },
-                { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
-                { title : "Biosample", field : 'experiments_in_set.biosample.biosource_summary' },
+                //{ 
+                //    field : 'experiments_in_set.biosample.biosource.individual.organism.name',
+                //    title : "Primary Organism",
+                //    name : function(val, id, exps, filteredExps){
+                //        return Filters.Term.toName('experiments_in_set.biosample.biosource.individual.organism.name', val);
+                //    }
+                //},
+                //{ title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
+                //{ title : "Biosample", field : 'experiments_in_set.biosample.biosource_summary' },
                 { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
                 {
                     title : "Digestion Enzyme",
@@ -175,12 +106,48 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 //    color : "#eee",
                 //    isFacet : false,
                 //}
+            ],
+            'chartFieldsHierarchyRight'  : [
+                { 
+                    field : 'experiments_in_set.biosample.biosource.individual.organism.name',
+                    title : "Primary Organism",
+                    name : function(val, id, exps, filteredExps){
+                        return Filters.Term.toName('experiments_in_set.biosample.biosource.individual.organism.name', val);
+                    }
+                },
+                { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' },
+                { title : "Biosample", field : 'experiments_in_set.biosample.biosource_summary' },
+                //{ title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
+                //{
+                //    title : "Digestion Enzyme",
+                //    field : 'experiments_in_set.digestion_enzyme.name',
+                //    description : function(val, id, exps, filteredExps, exp){
+                //        return 'Enzyme ' + val;
+                //    }
+                //},
+                {
+                    title : "Experiment Set",
+                    aggregatefield : "experiment_sets.accession",
+                    field : "accession",
+                    isFacet : false,
+                    size : 1
+                },
+                //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" },
+                //{
+                //    title: "Experiment Accession",
+                //    field : 'experiments_in_set.accession',
+                //    //size : function(val, id, exps, filteredExps, exp, parentNode){
+                //    //    return 1 / (_.findWhere(exp.experiment_sets, { 'accession' : parentNode.term }).experiments_in_set);
+                //    //},
+                //    color : "#eee",
+                //    isFacet : false,
+                //}
             ]
+            */
         };
     },
 
     componentDidMount : function(){
-        if (this.props.debug) console.log('Mounted FacetCharts');
 
         if (!isServerSide() && typeof window !== 'undefined'){
             var _this = this;
@@ -190,13 +157,22 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             window.addEventListener('resize', this.debouncedResizeHandler);
         }
 
-        if (this.props.ajax && this.state.experiments === null){
+        var newState = {
+            mounted : true
+        };
 
-            if (this.props.debug) console.log('FacetCharts - fetching all experiments from ' + this.props.requestURLBase);
-            this.fetchUnfilteredAndFilteredExperiments(this.props, { 'mounted' : true });
-
+        if (!ChartDataController.isInitialized()){
+            ChartDataController.initialize(
+                this.props.requestURLBase,
+                this.props.updateStats,
+                ()=>{
+                    if (this.props.debug) console.log("Mounted FacetCharts after initializing ChartDataController:", ChartDataController.getState());
+                    this.setState(newState);
+                }
+            );
         } else {
-            this.setState({ 'mounted' : true });
+            if (this.props.debug) console.log('Mounted FacetCharts');
+            this.setState(newState);
         }
 
     },
@@ -210,12 +186,10 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
     shouldComponentUpdate : function(nextProps, nextState){
         if (this.props.debug) console.log('FacetChart next props & state:', nextProps, nextState);
+
         if (
-            !_.isEqual(this.state, nextState) ||
-            !_.isEqual(this.state.experiments, nextState.experiments) ||
-            !_.isEqual(this.state.filteredExperiments, nextState.filteredExperiments) ||
             this.props.schemas !== nextProps.schemas ||
-            this.state.session !== nextState.session ||
+            !_.isEqual(this.props.schemas, nextProps.schemas) ||
             this.show(nextProps) !== this.show(this.props) ||
             (nextState.mounted !== this.state.mounted)
         ){
@@ -229,16 +203,16 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
     componentWillReceiveProps : function(nextProps){
 
         /** 
-         * Given list of fields from inner to outer circle of sunburst chart, 
+         * Given list of fields from inner to outer circle of MosaicChart, 
          * check if one is part of selected expSetFilters,
          * and if so, add to sequenceArray for ChartBreadcrumbs. 
          */
         /*
         function updatedBreadcrumbsSequence(){
             var sequence = [];
-            if (typeof this.refs.sunburstChart === 'undefined') return sequence;
+            if (typeof this.refs.mosaicChart === 'undefined') return sequence;
             
-            var chartFields = this.refs.sunburstChart.getRootNode().data.fields;
+            var chartFields = this.refs.mosaicChart.getRootNode().data.fields;
             var filters = nextProps.expSetFilters;
             var term, node;
 
@@ -247,7 +221,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                     if (filters[chartFields[i]].size === 1) {
                         // Grab first node (for colors, name, etc.) with matching term and append to sequence.
                         term = filters[chartFields[i]].values().next().value;
-                        node = SunBurstChart.findNode(this.refs.sunburstChart.getRootNode(), function(n){
+                        node = MosaicChart.findNode(this.refs.mosaicChart.getRootNode(), function(n){
                             return n.data.term && n.data.term === term;
                         });
                         if (typeof node !== 'undefined') {
@@ -264,96 +238,18 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         }
         */
 
-        var newState = {};
+        //var newState = {};
 
-        if (
-            nextProps.expSetFilters !== this.props.expSetFilters
-        ){
-            
-            // Update experiments
-            //if (FacetCharts.isContextDataValid(nextProps.context)){
-            //    newState.experiments = FacetCharts.getExperimentsFromContext(nextProps.context);
-            //}
-
-            // Update breadcrumbs
-            // newState.selectedNodes = updatedBreadcrumbsSequence.call(this);
-
-            // Unset filtered experiments if no filters.
-            if (_.keys(nextProps.expSetFilters).length === 0 && Array.isArray(this.state.experiments)){
-                newState.filteredExperiments = null;
-            } else {
-                newState.fetching = true;
-            }
-            
+        //if (Object.keys(newState).length > 0) this.setState(newState);
+        if (!this.show(this.props) && this.show(nextProps) && !isServerSide()) {
+            setTimeout(this.forceUpdate.bind(this), 50);
         }
-
-        if (Object.keys(newState).length > 0) this.setState(newState);
     },
 
     componentDidUpdate: function(pastProps, pastState){
-
-        if (pastProps.requestURLBase !== this.props.requestURLBase) {
-            this.fetchUnfilteredAndFilteredExperiments(this.props, { 'fetching' : false });
-        } else if (pastProps.expSetFilters !== this.props.expSetFilters || !_.isEqual(pastProps.expSetFilters, this.props.expSetFilters)){
-            if (_.keys(this.props.expSetFilters).length > 0){
-                this.fetchAndSetFilteredExperiments(this.props, { 'fetching' : false });
-            } else {
-                // @see componentWillReceiveProps (set state.filteredExperiments = null)
-            }
-        }
+        console.log('Updated FacetCharts', this.state);
     },
-
-    fetchUnfilteredAndFilteredExperiments : function(props, extraState = {}){
-        var filtersSet = _.keys(this.props.expSetFilters).length > 0;
-        var experiments, filteredExperiments = null;
-
-        var cb = _.after(filtersSet ? 2 : 1, function(){
-            this.setState(_.extend({ 
-                'experiments' : experiments,
-                'filteredExperiments' : filteredExperiments
-            }, extraState));
-        }.bind(this));
-
-        ajax.load(props.requestURLBase + this.getFieldsRequiredURLQueryPart(), (allExpsContext)=>{
-            experiments = expFxn.listAllExperimentsFromExperimentSets(allExpsContext['@graph']);
-            cb();
-        });
-
-        if (filtersSet){
-            ajax.load(this.getFilteredContextHref(props) + this.getFieldsRequiredURLQueryPart(), (filteredContext)=>{
-                filteredExperiments = expFxn.listAllExperimentsFromExperimentSets(filteredContext['@graph']);
-                cb();
-            });
-        }
-
-    },
-
-    fetchAndSetUnfilteredExperiments : function(props = this.props, extraState = {}){
-        ajax.load(props.requestURLBase + this.getFieldsRequiredURLQueryPart(), (allExpsContext)=>{
-            this.setState(
-                _.extend(extraState, {
-                    'experiments' : expFxn.listAllExperimentsFromExperimentSets(allExpsContext['@graph'])
-                })
-            );
-        });
-    },
-
-    fetchAndSetFilteredExperiments : function(props = this.props, extraState = {}){
-        ajax.load(this.getFilteredContextHref(props) + this.getFieldsRequiredURLQueryPart(), (filteredContext)=>{
-            this.setState(
-                _.extend(extraState, {
-                    'filteredExperiments' : expFxn.listAllExperimentsFromExperimentSets(filteredContext['@graph'])
-                })
-            );
-        });
-    },
-
-    getFilteredContextHref : function(props = this.props){ return Filters.filtersToHref(props.filters, props.href, 0, 'all', '/browse/'); },
-
-    getFieldsRequiredURLQueryPart : function(){ return FacetCharts.getFieldsRequiredURLQueryPart(this.props.fieldsToFetch); },
-
-    colorForNode : function(node){ return vizUtil.colorForNode(node, this.props.colors); },
-
+    
     handleVisualNodeClickToUpdateFilters : _.throttle(function(node){
 
         if (typeof node.target !== 'undefined' && typeof node.target.nodeName === 'string'){
@@ -384,7 +280,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
                 // If not selected, add any ancestor nodes' terms to filters as well.
                 if (typeof this.props.expSetFilters[node.data.field] === 'undefined' || !this.props.expSetFilters[node.data.field].has(node.data.term)){
-                    var sequenceArray = SunBurstChart.getAncestors(node);
+                    var sequenceArray = MosaicChart.getAncestors(node);
                     var i;
                     for (i = 0; i < sequenceArray.length; i++){
                         // Check if clicked on a term that's already set, then unset it to re-set it later down.
@@ -455,15 +351,24 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
     },
 
     /** We want a square for circular charts, so we determine WIDTH available for first chart (which is circular), and return that as height. */
-    width : function(chartIndex = 0, show = null){
+    width : function(chartNumber = 0, show = null){
         if (!show) show = this.show();
         if (!show) return null;
         if (!this.state.mounted || isServerSide()){
-            return 1160 * (this.props.colWidthPerScreenSize[show][chartIndex].lg / 12); // Full width container size (1160) 
+            return 1160 * (this.props.colWidthPerScreenSize[show][chartNumber - 1].lg / 12); // Full width container size (1160) 
         } else {
-            return (layout.gridContainerWidth() + 20) * (this.props.colWidthPerScreenSize[show][chartIndex][layout.responsiveGridState()] / 12);
+            return (layout.gridContainerWidth() + 20) * (this.props.colWidthPerScreenSize[show][chartNumber - 1][layout.responsiveGridState()] / 12);
         }
     },
+
+    updatePopover : _.debounce(function(d){
+        return (
+            this.refs &&
+            this.refs.detailCursor &&
+            this.refs.detailCursor.update &&
+            this.refs.detailCursor.update(d)
+        ) || null;
+    }, 200),
 
     render : function(){
 
@@ -492,43 +397,108 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             );
         }
 
+        console.log('SCHEMAS AT RENDER', this.props.schemas);
+
+        var chartDataState = ChartDataController.getState();
+        var legendFields = (this.refs && this.refs.barplotChart && this.refs.barplotChart.getLegendData()) || null;
+
         return (
             <div className={"facet-charts show-" + show} key="facet-charts">
                 
-                <div className="facet-charts-description description" ref="description" key="facet-chart-description"></div>
                 <div className="row facet-chart-row-1" key="facet-chart-row-1">
+                    {/*
+                    <div className={genChartColClassName(1)} key="facet-chart-row-1-chart-1" style={{ height: height }} ref="mosaicContainer">
+                        <div className="row">
+                            <div className="col-sm-6" style={{
+                                width : (chartDataState.chartFieldsHierarchy.length / (chartDataState.chartFieldsHierarchyRight.length + chartDataState.chartFieldsHierarchy.length)) * 100 + '%'
+                            }}>
+                                <ChartDataController.Provider id="mosaic1">
+                                    <MosaicChart
+                                        fields={chartDataState.chartFieldsHierarchy}
+                                        maxFieldDepthIndex={chartDataState.chartFieldsHierarchy.length - 1}
+
+                                        height={height}
+                                        width={(this.width(0)) * (chartDataState.chartFieldsHierarchy.length / (chartDataState.chartFieldsHierarchyRight.length + chartDataState.chartFieldsHierarchy.length)) - 20}
+                                        updateBreadcrumbsHoverNodes={(nodes) => this.refs && this.refs.breadcrumbs && this.refs.breadcrumbs.updateHoverNodes(nodes)}
+
+                                        handleClick={this.handleVisualNodeClickToUpdateFilters}
+                                        updateStats={this.props.updateStats}
+                                        updatePopover={this.updatePopover}
+
+                                        href={this.props.href}
+                                        key="sunburst"
+                                        schemas={this.props.schemas}
+                                        debug
+                                    />
+                                </ChartDataController.Provider>
+                            </div>
+                            <div className="col-sm-6" style={{
+                                width : (chartDataState.chartFieldsHierarchyRight.length / (chartDataState.chartFieldsHierarchyRight.length + chartDataState.chartFieldsHierarchy.length)) * 100 + '%'
+                            }}>
+                                <ChartDataController.Provider id="mosaic2">
+                                    <MosaicChart
+                                        fields={chartDataState.chartFieldsHierarchyRight}
+                                        maxFieldDepthIndex={chartDataState.chartFieldsHierarchyRight.length - 1}
+
+                                        height={height}
+                                        width={(this.width(0)) * (chartDataState.chartFieldsHierarchyRight.length / (chartDataState.chartFieldsHierarchyRight.length + chartDataState.chartFieldsHierarchy.length)) - 20 }
+                                        updateBreadcrumbsHoverNodes={(nodes) => this.refs && this.refs.breadcrumbs && this.refs.breadcrumbs.updateHoverNodes(nodes)}
+
+                                        handleClick={this.handleVisualNodeClickToUpdateFilters}
+                                        updateStats={this.props.updateStats}
+                                        updatePopover={this.updatePopover}
+
+                                        href={this.props.href}
+                                        key="sunburst"
+                                        schemas={this.props.schemas}
+                                        debug
+                                    />
+                                </ChartDataController.Provider>
+                            </div>
+                        </div>
+                        <FetchingView display={this.state.fetching} />
+                    </div>
+                    */}
                     <div className={genChartColClassName(1)} key="facet-chart-row-1-chart-1" style={{ height: height }}>
-                        <SunBurstChart
-                            experiments={this.state.experiments}
-                            filteredExperiments={this.state.filteredExperiments}
-                            fields={this.state.chartFieldsHierarchy}
-                            maxFieldDepthIndex={5}
+                        <ChartDataController.Provider id="barplot1">
+                            <BarPlotChart
+                                fields={chartDataState.chartFieldsBarPlot}
+                                width={this.width(1) - 20} height={height}
+                                schemas={this.props.schemas}
+                                updatePopover={this.updatePopover}
+                                ref="barplotChart"
+                                primaryField="experiments_in_set.biosample.biosource_summary"
+                                secondaryField={null}
 
-                            height={height} width={this.width(0) - 20}
-                            updateBreadcrumbsHoverNodes={(nodes) => this.refs && this.refs.breadcrumbs && this.refs.breadcrumbs.updateHoverNodes(nodes)}
-                            descriptionElement={() => this.refs.description}
-
-                            handleClick={this.handleVisualNodeClickToUpdateFilters}
-                            updateStats={this.props.updateStats}
-
-                            expSetFilters={this.props.expSetFilters}
-                            href={this.props.href}
-                            key="sunburst"
-                            ref="sunburstChart"
-                            debug
-                        />
+                            />
+                        </ChartDataController.Provider>
                         <FetchingView display={this.state.fetching} />
                     </div>
                     <div className={genChartColClassName(2)} key="facet-chart-row-1-chart-2" style={{ height: height }}>
-                        <BarPlotChart 
-                            experiments={this.state.filteredExperiments || this.state.experiments}
-                            fields={this.state.chartFieldsBarPlot}
-                            width={this.width(1) - 20} height={height}
+                        <Legend
+                            fields={legendFields}
                             schemas={this.props.schemas}
+                            width={this.width(2) - 20}
+                            title={
+                                <div>
+                                    <h6 className="text-400 legend-title">
+                                        { this.refs && this.refs.barplotChart && typeof this.refs.barplotChart.getTopLevelField === 'function' ?
+                                            Filters.Field.toName(this.refs.barplotChart.getTopLevelField(), this.props.schemas)
+                                        : null }
+                                        <br/><span className="text-300">divided into</span>
+                                    </h6>
+                                </div>
+                            }
                         />
-                        <FetchingView display={this.state.fetching} />
                     </div>
                 </div>
+                <ChartDetailCursor
+                    containingElement={(this.refs && this.refs.mosaicContainer) || null}
+                    verticalAlign="center" /* cursor position */
+                    visibilityMargin={{ left : -10, right : -10, bottom : -50, top: -18 }}
+                    //debugStyle /* -- keep this Component always visible so we can style it */
+                    ref="detailCursor"
+                />
             </div>
         );
     }

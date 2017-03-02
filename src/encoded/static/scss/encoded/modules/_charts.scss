@@ -53,9 +53,10 @@
     }
 
     div.y-axis-bottom {
-        border-top: 1px solid #aaa;
+        /* border-top: 1px solid #aaa; */
         position: absolute;
         bottom: 0;
+        transition: opacity .5s;
     }
 
 }
@@ -246,6 +247,94 @@
 
 }
 
+
+
+/*** Rotated Labels Axis ***/
+
+.rotated-labels-axis {
+    position: relative;
+    display: block;
+
+    .rotated-label {
+        opacity : 1;
+        transition: opacity .5s, transform .75s ease-out;
+        position: absolute;
+
+        > .label-text {
+            display: block;
+            transform-origin: 100% 0;
+            text-align: right;
+            position: relative;
+            font-size: 0.85rem;
+            line-height: 14px;
+            &.auto-rotation {
+                transition: transform 1s, left 1s;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .inner {
+                position: relative;
+                //vertical-align: sub;
+            }
+            .color-indicator {
+                font-size: 0.85rem;
+                position: absolute;
+                left: -14px;
+                display: block;
+                line-height: 14px;
+                width: 12px;
+                text-align: center;
+                transition: transform .5s;
+                transform: scale3d(0.5, 0.5, 0.5);
+            }
+            .append {
+                position: absolute;
+                right : -10px;
+                top: 50%;
+                margin-top: -7px;
+                opacity : 0.33;
+                transition: opacity 0.5s;
+                > i.icon {
+                    width : 20px;
+                }
+            }
+            &:before {
+            }
+            &.extra-long {
+                //overflow: hidden;
+                //height: 35px;
+                //&:after {
+                //    content : '...';
+                //    margin-left: 2px;
+                //}
+            }
+        }
+
+        &.expanded > .label-text {
+            &.extra-long {
+                background: '#fff';
+                &:after {
+                    content: none;
+                }
+            }
+        }
+
+        &:hover > .label-text,
+        &.highlight > .label-text {
+            .append {
+                opacity : 1;
+            }
+            .color-indicator {
+                font-size: 0.85rem;
+                transform : scale3d(1, 1, 1);
+            }
+        }
+
+    }
+}
+
+
 /** Bar Plot Chart Style(s) **/
 
 .bar-plot-chart { // SVG is top-level element rendered by component;
@@ -262,12 +351,6 @@
     line.y-axis-bottom {
         stroke : #aaa;
         stroke-width: 1px;
-    }
-
-    div.y-axis-bottom {
-        border-top: 1px solid #aaa;
-        position: absolute;
-        bottom: 0;
     }
 
     .bar-plot-left-axis {
@@ -361,27 +444,6 @@
 
     }
 
-    .y-axis-label {
-        opacity: 1;
-        transition: opacity .5s, transform .75s ease-out;
-        position: absolute;
-
-        > .label-text {
-            display: block;
-            transform-origin: 100% 0;
-            text-align: right;
-            position: relative;
-            font-size: 0.85rem;
-            line-height: 1.2rem;
-            &.auto-rotation {
-                transition: transform 1s, left 1s;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-        }
-    }
-
     &.highlight {
         .chart-bar > rect {
             fill-opacity: 0.4;
@@ -400,7 +462,7 @@
                 }
             }
         }
-        .y-axis-label {
+        .rotated-label {
             opacity : 0.4;
             &.highlight {
                 opacity : 1;
@@ -418,57 +480,6 @@
                     opacity : 1;
                 }
             }
-        }
-    }
-
-    .chart-color-legend {
-        position: absolute;
-        right: 20px;
-        top: 0;
-        padding: 14px 16px 14px;
-        background-color: #fff;
-        min-width: 200px;
-        //border: 1px solid #eee;
-        //border-radius: 1px;
-
-        .legend-title {
-            margin-bottom: 1px;
-            margin-top: 0px;
-        }
-
-        .color-patch {
-            display: inline-block;
-            height: 12px;
-            width: 12px;
-            margin-right: 6px;
-            position: relative;
-            top: 1px;
-            transition: opacity .25s;
-            //border: 1px solid #000;
-        }
-
-        .highlight .color-patch {
-            opacity : 0.125;
-            &.highlight {
-                opacity : 1;
-            }
-        }
-
-        .field {
-            .legend-field-title {
-                margin-top: 1px;
-            }
-            > .color-patch {
-                width: 10px;
-                height: 10px;
-                border-radius: 50%;
-            }
-
-            .term {
-                font-size: 0.85rem;
-                
-            }
-
         }
     }
 
@@ -540,23 +551,39 @@
         }
     }
 
+    g.field.highlight {
+        path {
+            opacity : 0.125;
+            &.highlight {
+                opacity: 1;
+            }
+        }
+    }
+    /*
     svg g.group-container:hover path,
     svg g.group-container.hover path {
         transition: opacity 0.25s;
-        opacity: 0.3;
+        opacity: 0.33;
+        cursor: crosshair;
         &:not(.filtered-out){
             //opacity : 0.66;
         }
-        &.hover, &.term-is-set {
-            opacity: 0.75;
-            &.filtered-out {
-                opacity : 0.75 !important;
+        //&.highlight {
+        //    opacity: 0.5;
+        //}
+        &.hover {
+            //opacity: 0.66;
+            opacity: 0.9;
+            transition: opacity 0.5s;
+            &.term-is-set.filtered-out {
+                //opacity : 0.5 !important;
             }
         }
-        &:hover {
+        &:hover, &:hover.term-is-set {
             opacity: 1;
         }
     }
+    */
 
     .y-axis-top {
         position: relative;
@@ -564,7 +591,7 @@
         left: 0;
         right: 0;
         height: 50px;
-        border-bottom: 1px solid #aaa;
+        //border-bottom: 1px solid #aaa;
         .top-label {
             position: absolute;
             height: inherit;
@@ -705,6 +732,186 @@
 
 .chart-container-sunburst:hover .chart .explanation .experiments-count-label {
     opacity : 1;
+}
+
+
+/**** Legend Style *****/
+
+.chart-color-legend {
+    /*
+    position: absolute;
+    right: 20px;
+    top: 0;
+    */
+    padding: 14px 16px 14px;
+    background-color: #fff;
+    min-width: 200px;
+    opacity : 1;
+    transition: opacity .75s;
+    //border: 1px solid #eee;
+    //border-radius: 1px;
+
+    .legend-title {
+        margin-bottom: 1px;
+        margin-top: 0px;
+    }
+
+    .color-patch {
+        display: inline-block;
+        height: 12px;
+        width: 12px;
+        margin-right: 6px;
+        position: relative;
+        top: 1px;
+        transition: opacity .25s;
+        //border: 1px solid #000;
+    }
+
+    .highlight .color-patch {
+        opacity : 0.125;
+        &.highlight {
+            opacity : 1;
+        }
+    }
+
+    .field {
+        .legend-field-title {
+            margin-top: 1px;
+        }
+        > .color-patch {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .term {
+            font-size: 0.85rem;
+            
+        }
+
+    }
+}
+
+
+/**** Cursor Component(s) ****/
+
+.cursor-component-container {
+    
+    z-index: 1000;
+    position: absolute;
+    top: 0;
+    left: 0;
+    //display: none !important;
+    opacity: 1;
+    transition: opacity .25s, transform .05s linear;
+    pointer-events: none;
+
+    .mosaic-cursor-body {
+        background-color: #fff;
+        box-shadow: 0px 1px 6px rgba(0,0,0,0.3);
+        border-radius: 5px;
+        overflow: hidden;
+
+        .detail-crumbs {
+            padding: 6px 10px 5px;
+            border-bottom: 1px dotted #ddd;
+
+            .crumb-header {
+                font-size: 0.825rem;
+                padding-bottom: 7px;
+                margin-bottom: 6px;
+                border-bottom: 1px dotted #ccc;
+            }
+
+            &.no-children {
+                padding-bottom: 0;
+                border-bottom: none;
+                .crumb-header {
+                    margin-bottom: 0;
+                }
+            }
+
+            .crumb {
+                position: relative;
+                font-size: 0.75rem;
+                padding-top: 1px;
+                > * {
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                    overflow: hidden;
+                }
+                .field {
+                    font-weight: 300;
+                    padding-right: 0;
+                    position: relative;
+                }
+                .field:after {
+                    content : ':';
+                }
+
+                &:not([data-depth="0"]) .field:before {
+                    content : '>';
+                    position: absolute;
+                    margin-left: -10px;
+                    font-weight: 200;
+                    color : #aaa;
+                }
+
+                .name {
+                    padding-left: 5px;
+                    padding-right: 0px;
+                }
+
+                .count {
+                    padding-left: 5px;
+                    overflow: visible;
+                }
+            }
+        }
+
+        > .field-title {
+            padding: 7px 10px 1px;
+            margin: 0;
+            font-weight: 300;
+            .descendent-prefix {
+                width: 10px;
+                float: left;
+                display: block;
+                margin-top: 2px;
+            }
+        }
+        > .details-title {
+            padding: 0 10px 7px;
+            border-bottom: 1px solid #ddd;
+            font-size: 1.2rem;
+            margin: 0;
+            font-weight: 300;
+            .term-color-indicator {
+                float: left;
+                position: relative;
+                font-size: 0.85rem;
+                top: 5px;
+                padding-right: 6px;
+                padding-left: 2px;
+                transition: color .5s;
+            }
+        }
+
+        .details.row {
+            font-size: 0.85rem;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            padding-left: 10px;
+            padding-right: 10px;
+
+            .count-val {
+                font-weight: 500;
+                text-align: right;
+            }
+
+        }
+    }
+
 }
 
 
