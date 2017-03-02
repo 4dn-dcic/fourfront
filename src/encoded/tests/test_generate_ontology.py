@@ -51,6 +51,7 @@ def test_connect2server(mocker):
 
 
 # see ontology schema for full schema
+# now synonym_terms and definition_terms are fully embedded
 all_ontology = [{'download_url': 'http://www.ebi.ac.uk/efo/efo_inferred.owl',
                  'synonym_terms': [
                      '/ontology-terms/111111bc-8535-4448-903e-854af460a233/',
@@ -65,20 +66,7 @@ all_ontology = [{'download_url': 'http://www.ebi.ac.uk/efo/efo_inferred.owl',
                  'uuid': '530006bc-8535-4448-903e-854af460b254',
                  'ontology_name': 'Experimental Factor Ontology'
                  },
-                {'ontology_name': 'Ontology for Biomedical Investigations',
-                 '@type': ['Ontology', 'Item'],
-                 'ontology_prefix': 'OBI',
-                 'namespace_url': 'http://purl.obolibrary.org/obo/',
-                 'download_url': 'http://purl.obolibrary.org/obo/obi.owl',
-                 '@id': '/ontologys/530026bc-8535-4448-903e-854af460b254/',
-                 'definition_terms': ['/ontology-terms/111116bc-8535-4448-903e-854af460a233/'],
-                 'uuid': '530026bc-8535-4448-903e-854af460b254',
-                 },
-                {'synonym_terms': [
-                    '/ontology-terms/111112bc-8535-4448-903e-854af460a233/',
-                    '/ontology-terms/111113bc-8535-4448-903e-854af460a233/',
-                    '/ontology-terms/111114bc-8535-4448-903e-854af460a233/'],
-                 'ontology_name': 'Uberon',
+                 {'ontology_name': 'Uberon',
                  '@type': ['Ontology', 'Item'],
                  'ontology_prefix': 'UBERON',
                  'namespace_url': 'http://purl.obolibrary.org/obo/',
@@ -86,7 +74,40 @@ all_ontology = [{'download_url': 'http://www.ebi.ac.uk/efo/efo_inferred.owl',
                  '@id': '/ontologys/530016bc-8535-4448-903e-854af460b254/',
                  'definition_terms': ['/ontology-terms/111116bc-8535-4448-903e-854af460a233/'],
                  'uuid': '530016bc-8535-4448-903e-854af460b254',
-                 }]
+                 },
+                 {'ontology_name': 'Ontology for Biomedical Investigations',
+                 '@type': ['Ontology', 'Item'],
+                 'ontology_prefix': 'OBI',
+                 'namespace_url': 'http://purl.obolibrary.org/obo/',
+                 'download_url': 'http://purl.obolibrary.org/obo/obi.owl',
+                 '@id': '/ontologys/530026bc-8535-4448-903e-854af460b254/',
+                 'definition_terms': [
+                     {'term_name': 'definition',
+                      '@type': ['OntologyTerm', 'Item'],
+                      'term_id': 'IAO:0000115',
+                      '@id': '/ontology-terms/111116bc-8535-4448-903e-854af460a233/',
+                      'uuid': '111116bc-8535-4448-903e-854af460a233',
+                      'term_url': 'http://purl.obolibrary.org/obo/IAO_0000115'
+                     }
+                  ],
+                 'uuid': '530026bc-8535-4448-903e-854af460b254',
+                 'synonym_terms': [
+                    {'term_name': 'alternative term',
+                     '@type': ['OntologyTerm', 'Item'],
+                     'term_id': 'IAO:0000118',
+                     '@id': '/ontology-terms/111117bc-8535-4448-903e-854af460a233/',
+                     'uuid': '111117bc-8535-4448-903e-854af460a233',
+                     'term_url': 'http://purl.obolibrary.org/obo/IAO_0000118'
+                    },
+                    {'term_name': 'alternative term',
+                     '@type': ['OntologyTerm', 'Item'],
+                     'term_id': 'IAO:0000118',
+                     '@id': '/ontology-terms/111117bc-8535-4448-903e-854af460a233/',
+                     'uuid': '111117bc-8535-4448-903e-854af460a233',
+                     'term_url': 'http://purl.obolibrary.org/obo/IAO_0000118'
+                    }
+                   ]
+                  }]
 
 
 def get_fdn_ontology_side_effect(*args):
@@ -249,7 +270,8 @@ def terms():
 @pytest.fixture
 def syn_uris():
     return ['http://www.ebi.ac.uk/efo/alternative_term',
-            'http://www.geneontology.org/formats/oboInOwl#hasExactSynonym']
+            'http://www.geneontology.org/formats/oboInOwl#hasExactSynonym',
+            'http://purl.obolibrary.org/obo/IAO_0000118']
 
 
 @pytest.fixture
@@ -315,44 +337,6 @@ def test_remove_obsoletes_and_unnamed_obsoletes(terms):
         assert i not in terms
 
 
-test_syn_terms = [
-    {
-        'uuid': '1',
-        'term_url': 'http://www.ebi.ac.uk/efo/alternative_term'
-    },
-    {
-        'uuid': '2',
-        'term_url': 'http://www.geneontology.org/formats/oboInOwl#hasExactSynonym'
-    },
-]
-
-
-def test_get_syndef_terms_has_terms(mocker, connection):
-    mocker.patch('encoded.commands.generate_ontology.get_ontologies',
-                 return_value=[all_ontology[0]])
-    with mocker.patch('encoded.commands.generate_ontology.get_FDN',
-                      side_effect=test_syn_terms):
-        synterms = go.get_syndef_terms(connection, 'ontologys/EFO', 'synonym_terms')
-        assert len(synterms) == 2
-        uuids = ['1', '2']
-        for syn in synterms:
-            assert syn['uuid'] in uuids
-
-
-def test_get_syndef_terms_no_terms(mocker, connection):
-    with mocker.patch('encoded.commands.generate_ontology.get_ontologies',
-                      return_value=[all_ontology[1]]):
-        synterms = go.get_syndef_terms(connection, 'ontologys/OBI', 'synonym_terms')
-        assert not synterms
-
-
-def test_get_syndef_terms_no_ontology(mocker, connection):
-    with mocker.patch('encoded.commands.generate_ontology.get_ontologies',
-                      return_value=[]):
-        synterms = go.get_syndef_terms(connection, 'ontologys/FAKE', 'synonym_terms')
-        assert synterms is None
-
-
 def check_if_URIRef(uri):
     from rdflib import URIRef
     return isinstance(uri, URIRef)
@@ -367,16 +351,14 @@ def test_convert2namespace(syn_uris):
 
 def test_get_syndef_terms_as_uri(mocker, connection, syn_uris):
     asrdf = [True, False]
-    with mocker.patch('encoded.commands.generate_ontology.get_syndef_terms',
-                      return_value=test_syn_terms):
-        for rdf in asrdf:
-            uris = go.get_syndef_terms_as_uri(connection, 'ontid', 'synonym_terms', rdf)
-            if rdf:
-                for uri in uris:
-                    assert check_if_URIRef(uri)
-                    assert str(uri) in syn_uris
-            else:
+    for rdf in asrdf:
+        uris = go.get_syndef_terms_as_uri(connection, all_ontology[2], 'synonym_terms', rdf)
+        if rdf:
+            for uri in uris:
+                assert check_if_URIRef(uri)
                 assert str(uri) in syn_uris
+        else:
+            assert str(uri) in syn_uris
 
 
 def test_get_synonym_term_uris_no_ontology(mocker, connection):
