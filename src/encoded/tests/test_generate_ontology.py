@@ -756,7 +756,7 @@ def test_find_and_add_parent_of(uberon_owler4):
     relation = None
     seen = False
     for c in uberon_owler4.allclasses:
-        for i, p in enumerate(uberon_owler4.get_classDirectSupers(c, excludeBnodes=False)):
+        for _, p in enumerate(uberon_owler4.get_classDirectSupers(c, excludeBnodes=False)):
             if go.isBlankNode(p):
                 has_part = False
                 if not seen:
