@@ -138,7 +138,6 @@ class Experiment(Item):
         esets = self.experiment_sets(request)
         for link in esets:
             if 'replicate' in link:
-                print(link)
                 _, uuid = link.rsplit("/", 1)
                 eset = exp_set_coll.get(uuid)
                 ppub = eset.produced_in_pub(request)
