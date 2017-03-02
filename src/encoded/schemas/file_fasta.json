@@ -42,10 +42,9 @@
         },
         "file_classification": {
             "title": "General Classification",
-            "description": "General classification group for the File (raw, processed, ancillary (eg. index files))",
-            "comment": "This will control how, when and where a file can be displayed - on pages (eg. ancillary files like index files will show up in workflow_run but not experiment)",
-            "internal_comment": "it is not clear how we make use of this fields",
             "type": "string",
+            "default": "ancillary file",
+            "exclude_from": "submit4dn",            
             "enum": [
                 "ancillary file"
               ]
