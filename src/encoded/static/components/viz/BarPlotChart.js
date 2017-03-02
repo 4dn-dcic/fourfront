@@ -4,8 +4,8 @@ var React = require('react');
 var _ = require('underscore');
 var d3 = require('d3');
 var vizUtil = require('./utilities');
-var { RotatedLabel } = require('./components');
-var { console, object, isServerSide, expFxn, Filters } = require('../util');
+var { RotatedLabel, Legend } = require('./components');
+var { console, object, isServerSide, expFxn, Filters, layout } = require('../util');
 var { highlightTerm, unhighlightTerms } = require('./../facetlist');
 
 var { ButtonToolbar, ButtonGroup, Button, DropdownButton, MenuItem } = require('react-bootstrap');
@@ -26,7 +26,7 @@ var BarPlot = React.createClass({
 
             getDefaultProps : function(){
                 return {
-                    titleMap : {
+                    'titleMap' : {
                         // Aggr type
                         'experiment_sets' : "Experiment Sets",
                         'experiments' : 'Experiments',
@@ -41,8 +41,10 @@ var BarPlot = React.createClass({
                         { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" }
                     ],
                     'availableFields2' : [
-                        { title : "Experiment Type", field : 'experiments_in_set.experiment_type' }
+                        { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
+                        { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" },
                     ],
+                    'legend' : false
                 };
             },
 
@@ -51,11 +53,10 @@ var BarPlot = React.createClass({
                     'fields' : [
                         { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
                         { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
-                        { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
                         //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
                     ],
                     'aggregateType' : 'experiment_sets',
-                    'showState' : 'both'
+                    'showState' : 'all'
                 };
             },
 
@@ -90,11 +91,14 @@ var BarPlot = React.createClass({
                 return React.cloneElement(
                     this.props.children,
                     _.extend(
-                        _.omit(this.props, 'titleMap', 'availableFields1', 'availableFields2'),
+                        _.omit( // Own props minus these.
+                            this.props,
+                            'titleMap', 'availableFields1', 'availableFields2', 'legend'
+                        ),
                         {
                             'fields' : this.state.fields,
                             'showType' : this.state.showState,
-                            'aggregateType' : this.state.aggregateType
+                            'aggregateType' : this.state.aggregateType,
                         }
                     )
                 );
@@ -108,8 +112,16 @@ var BarPlot = React.createClass({
                 this.setState({ showState : eventKey });
             }, 300),
 
-            handleFieldSelect : _.throttle(function(fieldIndex, eventKey, event){
-
+            handleFieldSelect : _.throttle(function(fieldIndex, newFieldKey, event){
+                var newField = _.find(
+                    this.props['availableFields' + (fieldIndex + 1)],
+                    { field : newFieldKey }
+                );
+                var otherFieldIndex = fieldIndex === 0 ? 1 : 0;
+                var newFields = [null,null];
+                newFields[fieldIndex] = newField;
+                newFields[otherFieldIndex] = this.state.fields[otherFieldIndex];
+                this.setState({ fields : newFields });
                 //this.setState({ showState : eventKey });
             }, 300),
 
@@ -146,9 +158,47 @@ var BarPlot = React.createClass({
                 
                 var filterObjExistsAndNoFiltersSelected = this.filterObjExistsAndNoFiltersSelected();
 
+                console.log('UIControlsWrapper', this.refs);
+
                 return (
                     <div className="bar-plot-chart-controls-wrapper">
+                        <div className="overlay">
+                            <div className="y-axis-top-label">
+                                <DropdownButton
+                                    id="select-barplot-aggregate-type"
+                                    onSelect={this.handleAggregateTypeSelect}
+                                    title={
+                                        <div className="dropdown-title-container">
+                                            <small>Aggregation (Y-Axis)</small><br/>
+                                            <h5>{ this.titleMap(this.state.aggregateType) }</h5>
+                                        </div>
+                                    }
+                                    children={this.renderDropDownMenuItems(
+                                        ['experiment_sets','experiments','files'],
+                                        this.state.showState
+                                    )}
+                                />
+                            </div>
+                        </div>
                         <div className="controls">
+                            <div className="overlay">
+                                <div className="y-axis-top-label">
+                                    <DropdownButton
+                                        id="select-barplot-aggregate-type"
+                                        onSelect={this.handleAggregateTypeSelect}
+                                        title={
+                                            <div className="dropdown-title-container">
+                                                <small>Aggregation (Y-Axis)</small><br/>
+                                                <h5>{ this.titleMap(this.state.aggregateType) }</h5>
+                                            </div>
+                                        }
+                                        children={this.renderDropDownMenuItems(
+                                            ['experiment_sets','experiments','files'],
+                                            this.state.showState
+                                        )}
+                                    />
+                                </div>
+                            </div>
                             <ButtonToolbar>
                                 <ButtonGroup>
                                     <DropdownButton
@@ -167,20 +217,7 @@ var BarPlot = React.createClass({
                                             "Please select some filters first."
                                         )}
                                     />
-                                    <DropdownButton
-                                        id="select-barplot-aggregate-type"
-                                        onSelect={this.handleAggregateTypeSelect}
-                                        title={
-                                            <div className="dropdown-title-container">
-                                                <small>Aggregation (Y-Axis)</small><br/>
-                                                <h5>{ this.titleMap(this.state.aggregateType) }</h5>
-                                            </div>
-                                        }
-                                        children={this.renderDropDownMenuItems(
-                                            ['experiment_sets','experiments','files'],
-                                            this.state.showState
-                                        )}
-                                    />
+                                    
                                 </ButtonGroup>
                                 <ButtonGroup>
                                     <DropdownButton
@@ -223,14 +260,50 @@ var BarPlot = React.createClass({
                                             </div>
                                         }
                                         children={this.renderDropDownMenuItems(
-                                            ['experiment_sets','experiments','files'],
+                                            this.props.availableFields2.map(function(field){
+                                                return [
+                                                    field.field,
+                                                    field.title || Filters.Field.toName(field.field),
+                                                    field.description || null
+                                                ]; // key, title, subtitle
+                                            }),
                                             this.state.showState
                                         )}
                                     />
                                 </ButtonGroup>
                             </ButtonToolbar>
                         </div>
-                        { this.adjustedChildChart() }
+                        <div className="row">
+                            <div className={"col-md-" + (this.props.legend ? 9 : 12)}>
+                                { this.adjustedChildChart() }
+                            </div>
+                            { this.props.legend ?
+                                <div className="col-md-3">
+                                    <Legend
+                                        fields={(
+                                            this.props.experiments ? (
+                                                Legend.experimentsAndFieldsToLegendData(
+                                                    this.state.showState === 'filtered' ? 
+                                                        (this.props.filteredExperiments || this.props.experiments)
+                                                        : this.props.experiments,
+                                                    [this.state.fields[1]],
+                                                    this.props.schemas
+                                                )
+                                            ) : null
+                                        )}
+                                        schemas={this.props.schemas}
+                                        width={layout.gridContainerWidth() * (3/12) - 20}
+                                        title={
+                                            <div>
+                                                <h5 className="text-400 legend-title">
+                                                    Legend
+                                                </h5>
+                                            </div>
+                                        }
+                                    />
+                                </div>
+                            : null }
+                        </div>
                     </div>
                 );
             }
@@ -301,7 +374,6 @@ var BarPlot = React.createClass({
             } else if ( aggregate === 'experiment_sets' ){
                 //throw new Error("Not yet built.");
                 var expSets = expFxn.groupExperimentsIntoExperimentSets(experiments);
-                console.log('EXPSETS', expSets);
                 _.forEach(expSets, function(expsInSet){
                     var aggrValue = Math.round((1 / expsInSet.length) * 100) / 100;
                     expsInSet.forEach(function(exp){
@@ -316,12 +388,10 @@ var BarPlot = React.createClass({
                         _.forEach(_.keys(field.terms), function(term){
                             field.terms[term] = Math.round(field.terms[term] * 100) / 100;
                         });
-                        console.log(field.field, field.terms);
                     });
                     
                 })
             } else if ( aggregate === 'files' ){
-                console.log('aggregate ' + aggregate, experiments[0]);
                 experiments.forEach(function(exp){
                     // [[field0Id, term], [field1Id, term], ...] . forEach( -->
                     BarPlot.getTermsForFieldsFromExperiment(fields,exp).forEach(function(fieldTermPair, i){
@@ -360,7 +430,13 @@ var BarPlot = React.createClass({
             var termsCont = fieldObj.terms;
             if (Array.isArray(term)){
                 console.log('ISNARRAY');
+                term = _.uniq(term);
                 if (term.length === 1) term = term[0];
+                else {
+                    console.warn('Multiple unique terms for field ' + field.field, terms);
+                    term = terms[0];
+                }
+                /*
                 else {
                     var i = 0;
                     while (i < term.length - 1){
@@ -370,6 +446,7 @@ var BarPlot = React.createClass({
                     }
                     term = term[i];
                 }
+                */
             }
             if (typeof termsCont[term] === 'number'){
                 termsCont[term] += countIncrease;
@@ -404,7 +481,15 @@ var BarPlot = React.createClass({
                 field = fields;
             }
 
-            var fieldNames = _.pluck([field, field.childField], 'field');
+            function createNoneChildField(){
+                field.terms["None"] = {
+                    'field' : field.childField.field, 
+                    'cachedTotal' : null,
+                    'total' : 0,
+                    'term' : "None",
+                    'terms' : {}
+                }
+            }
 
             field.terms = _(field.terms).chain()
                 .clone()
@@ -428,8 +513,15 @@ var BarPlot = React.createClass({
             //BarPlot.aggregateByType([field,field.childField], experiments, aggregate);
             if (aggregate === 'files' || aggregate === 'experiments'){
                 experiments.forEach(function(exp){
+                    
                     var topLevelFieldTerm = object.getNestedProperty(exp, field.field.replace('experiments_in_set.',''), true);
                     var nextLevelFieldTerm = object.getNestedProperty(exp, field.childField.field.replace('experiments_in_set.',''), true);
+                    
+                    if (!topLevelFieldTerm){
+                        topLevelFieldTerm = "None";
+                        if (typeof field.terms[topLevelFieldTerm] === 'undefined') createNoneChildField();
+                    }
+
                     BarPlot.countTermForFieldFromExperimentByAggregateType(field.terms[topLevelFieldTerm], exp, nextLevelFieldTerm, aggregate);
                 });
             } else if (aggregate === 'experiment_sets'){
@@ -442,7 +534,10 @@ var BarPlot = React.createClass({
                     expsInSet.forEach(function(exp){
                         var topLevelFieldTerm = object.getNestedProperty(exp, field.field.replace('experiments_in_set.',''), true);
                         var nextLevelFieldTerm = object.getNestedProperty(exp, field.childField.field.replace('experiments_in_set.',''), true);
-                    
+                        if (!topLevelFieldTerm){
+                            topLevelFieldTerm = "None";
+                            if (typeof field.terms[topLevelFieldTerm] === 'undefined') createNoneChildField();
+                        }
                         BarPlot.countFieldTerm(field.terms[topLevelFieldTerm], nextLevelFieldTerm, true, aggrValue);
                     });
                     
@@ -916,8 +1011,6 @@ var BarPlot = React.createClass({
                 style.width = d.attr.width;
                 return style;
             }
-
-            console.log('BARPARTS FOR ', d.term, d.bars);
 
             var barParts = Array.isArray(d.bars) ? 
                 _.sortBy(d.bars, 'term').map(this.renderParts.barPart.bind(this))

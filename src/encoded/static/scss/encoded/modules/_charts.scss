@@ -498,6 +498,36 @@
 
 .bar-plot-chart-controls-wrapper {
 
+    position: relative;
+
+    .overlay {
+        position: absolute;
+        .y-axis-top-label {
+            position: absolute;
+            left : 0px;
+        }
+    }
+
+    .dropdown {
+        text-align: left;
+    }
+
+    .dropdown-title-container {
+        vertical-align: middle;
+        text-align: left;
+        display: inline-block;
+        padding-right: 5px;
+        min-width: 120px;
+        > small {
+            font-weight: 400;
+        }
+
+        h4, h5, h6 {
+            margin : 0;
+            font-weight: 600;
+        }
+    }
+
     .controls {
 
         text-align: right;
@@ -506,25 +536,7 @@
             display: inline-block;
         }
 
-        .dropdown {
-            text-align: left;
-        }
-
-        .dropdown-title-container {
-            vertical-align: middle;
-            text-align: left;
-            display: inline-block;
-            padding-right: 5px;
-            min-width: 120px;
-            > small {
-                font-weight: 400;
-            }
-
-            h4, h5, h6 {
-                margin : 0;
-                font-weight: 600;
-            }
-        }
+        
 
     }
 }
