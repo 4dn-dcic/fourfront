@@ -68,7 +68,7 @@ var AccessKeyTable = React.createClass({
                 <tr key={key.access_key_id}>
                     <td className="access-key-id">{ key.access_key_id }</td>
                     <td>
-                        { key.date_created ? 
+                        { key.date_created ?
                             <DateUtility.LocalizedTime
                                 timestamp={key.date_created}
                                 formatType="date-time-md"
@@ -259,7 +259,7 @@ var User = module.exports.User = React.createClass({
     },
 
     mayEdit : function(){
-        return this.context.listActionsFor('context').filter(function(action){ 
+        return this.context.listActionsFor('context').filter(function(action){
             return action.name && action.name === 'edit';
         }).length > 0 ? true : false;
     },
@@ -334,7 +334,7 @@ var User = module.exports.User = React.createClass({
                         </div>
 
                     </div>
-                    
+
                     { typeof user.access_keys !== 'undefined' && typeof user.submits_for !== 'undefined' ?
                         <div className="access-keys-container">
                             <h3 className="text-300">Access Keys</h3>
@@ -363,7 +363,7 @@ var ProfileContactFields = React.createClass({
         var user = this.props.user;
 
         return (
-            <FieldSet 
+            <FieldSet
                 context={user}
                 parent={this.props.parent}
                 className="profile-contact-fields"
@@ -371,7 +371,7 @@ var ProfileContactFields = React.createClass({
                 objectType="User"
                 schemas={this.props.schemas}
             >
-                
+
                 <EditableField label="Email" labelID="email" placeholder="name@example.com" fallbackText="No email address" fieldType="email" disabled={true}>
                     { this.icon('envelope') }&nbsp; <a href={'mailto:' + user.email}>{ user.email }</a>
                 </EditableField>
@@ -379,15 +379,15 @@ var ProfileContactFields = React.createClass({
                 <EditableField label="Phone" labelID="phone1" placeholder="17775551234 x47" fallbackText="No phone number" fieldType="phone">
                     { this.icon('phone') }&nbsp; { user.phone1 }
                 </EditableField>
-                
+
                 <EditableField label="Fax" labelID="fax" placeholder="17775554321" fallbackText="No fax number" fieldType="phone">
                     { this.icon('fax') }&nbsp; { user.fax }
                 </EditableField>
-                
+
                 <EditableField label="Skype" labelID="skype" fallbackText="No skype ID" fieldType="username">
                     { this.icon('skype') }&nbsp; { user.skype }
                 </EditableField>
-                
+
             </FieldSet>
         );
     }
@@ -419,17 +419,17 @@ var ProfileWorkFields = React.createClass({
 
         if (typeof this.props.user.lab == 'string' && !this.state.details_lab){
             // Fetch lab info & update into User instance state via the -for mixin-like-usage ajaxPropertyDetails func.
-            
+
             //FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.user.lab, 'lab', (detail) => this.updateAwardsList([detail]) );
         }
     },
 
     componentWillUnmount : function(){ delete this.isLabFetched; },
 
-    /** 
+    /**
      * Get list of all awards (unique) from list of labs.
      * ToDo : Migrate somewhere more static-cy.
-     * 
+     *
      * @param {Object[]} labDetails - Array of lab objects with embedded award details.
      * @return {Object[]} List of all unique awards in labs.
      */
@@ -448,7 +448,7 @@ var ProfileWorkFields = React.createClass({
 
     /**
      * Update state.awards_list with award details from list of lab details.
-     * 
+     *
      * @param {Object[]} labDetails - Array of lab objects with embedded award details.
      */
     updateAwardsList : function(labDetails){
@@ -485,7 +485,7 @@ var ProfileWorkFields = React.createClass({
                     <div id="lab" className="col-sm-9 value">
                         { typeof user.lab !== 'undefined' ?
                             FormattedInfoBlock.Lab(this.isLabFetched ? this.state.details_lab : user.lab, false, false)
-                            : 
+                            :
                             <span className="not-set">No Labs</span>
                         }
                     </div>
@@ -575,7 +575,7 @@ var ImpersonateUserForm = React.createClass({
     render: function() {
         var form = <BasicForm submitImpersonate={this.handleSubmit} />;
         return (
-            <div>
+            <div style={{marginTop : 30}}>
                 <h2>Impersonate User</h2>
                 {form}
             </div>
@@ -587,9 +587,10 @@ var ImpersonateUserForm = React.createClass({
         var jsonData = JSON.stringify({'userid':data});
         var callbackFxn = function(payload) {
             alert('Success! ' + data + ' is being impersonated.');
-            if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
-                localStorage.setItem("user_info", JSON.stringify(payload));
-            }
+            //if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
+            //    localStorage.setItem("user_info", JSON.stringify(payload));
+            //}
+            JWT.saveUserInfo(payload, true);
             this.context.updateUserInfo();
             this.context.navigate('/');
         }.bind(this);

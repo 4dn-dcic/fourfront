@@ -35,7 +35,8 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
     getDefaultProps : function(){
         return {
             'href' : '/',
-            'show' : function(path){
+            'show' : function(path, search, hash){
+                if (typeof hash === 'string' && hash.indexOf('!impersonate-user') > -1) return false;
                 if (path === '/' || path === '/home') return 'large';
                 if (path.indexOf('/browse/') > -1) return true;
                 return false;
@@ -340,7 +341,8 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         if (typeof props.show === 'function') {
             var show;
             if (typeof props.href === 'string') {
-                show = props.show(url.parse(props.href).pathname);
+                var urlParts = url.parse(props.href);
+                show = props.show(urlParts.pathname, urlParts.search, urlParts.hash);
             } else {
                 show = props.show();
             }
