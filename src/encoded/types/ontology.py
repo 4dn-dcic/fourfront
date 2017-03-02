@@ -35,4 +35,7 @@ class Ontology(Item):
 
         item_type = 'ontology'
         schema = load_schema('encoded:schemas/ontology.json')
-        embedded = []
+        embedded = [
+           'synonym_terms',
+           'definition_terms',
+        ]
