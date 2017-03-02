@@ -110,7 +110,7 @@
         "submitted_by": "4dndcic@gmail.com",
         "award": "1U01CA200059-01",
         "file_format": "fastq",
-        "uuid": "0048955c-7cb6-4e56-a4d8-56fad52f688u",
+        "uuid": "0048955c-7cb6-4e56-a4d8-56fad52f688a",
         "status": "uploaded",
         "filename": "4DNFIN232JJ2.fastq.gz"
     },
@@ -121,7 +121,7 @@
         "submitted_by": "4dndcic@gmail.com",
         "award": "1U01CA200059-01",
         "file_format": "fastq",
-        "uuid": "0048955c-7cb6-4e56-a4d8-56fad52f688v",
+        "uuid": "0048955c-7cb6-4e56-a4d8-56fad52f688b",
         "status": "uploaded",
         "filename": "4DNFIN232JJ3.fastq.gz"
     },
@@ -132,7 +132,7 @@
         "submitted_by": "4dndcic@gmail.com",
         "award": "1U01CA200059-01",
         "file_format": "fastq",
-        "uuid": "0048955c-7cb6-4e56-a4d8-56fad52f688x",
+        "uuid": "0048955c-7cb6-4e56-a4d8-56fad52f688c",
         "status": "uploaded",
         "filename": "4DNFIN232JJ4.fastq.gz"
     },
@@ -143,7 +143,7 @@
         "submitted_by": "4dndcic@gmail.com",
         "award": "1U01CA200059-01",
         "file_format": "fastq",
-        "uuid": "0048955c-7cb6-4e56-a4d8-56fad52f688y",
+        "uuid": "0048955c-7cb6-4e56-a4d8-56fad52f688d",
         "status": "uploaded",
         "filename": "4DNFIN232JJ5.fastq.gz"
     }
