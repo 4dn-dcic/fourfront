@@ -183,7 +183,7 @@ var Action = module.exports = React.createClass({
                     award = lab_data.awards[0];
                 }
                 if(this.state.thisSchema.properties.award){
-                    finalizedContext.award = award['@id'] ? award['@id'] : award;
+                    finalizedContext.award = award['@id'] ? award['@id'] : award.link_id.replace(/~/g, "/");
                 }
                 if(this.state.thisSchema.properties.lab){
                     finalizedContext.lab = lab;

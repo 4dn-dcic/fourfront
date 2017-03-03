@@ -471,6 +471,9 @@ var ProfileWorkFields = React.createClass({
 
     render : function(){
         var user = this.props.user;
+        if (user.submits_for && user.submits_for.length > 0){
+            var submits_for = user.submits_for;
+        }
         // THESE FIELDS ARE NOT EDITABLE.
         // To be modified by admins, potentially w/ exception of 'Primary Lab' (e.g. select from submits_for list).
         return (
@@ -503,13 +506,32 @@ var ProfileWorkFields = React.createClass({
                         <label htmlFor="submits_for">Submits For</label>
                     </div>
                     <div className="col-sm-9 value">
-                        <FormattedInfoBlock.List
-                            renderItem={(detail) => FormattedInfoBlock.Lab(detail, false, false, false) }
-                            endpoints={user.submits_for}
-                            propertyName="submits_for"
-                            fallbackMsg="Not submitting for any organizations"
-                            ajaxCallback={this.updateAwardsList}
-                        />
+                        <ul className="formatted-info-panel-list loaded transitioned" id="submits_for">
+                            {submits_for ?
+                                submits_for.map(function(submit_val){
+                                    return (
+                                        <li className="submits_for-item" key={submit_val.link_id}>
+                                            <div className="formatted-info-panel no-icon no-label no-details loaded transitioned lab">
+                                                <div className="row loaded">
+                                                    <div className="details-col col-sm-12">
+                                                        <h5 class="block-title">
+                                                            <a href={submit_val.link_id.replace(/~/g, "/")}>
+                                                                {submit_val.display_title}
+                                                            </a>
+                                                        </h5>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    );
+                                })
+                                :
+                                <span className="not-set">
+                                    Not submitting for any organizations
+                                </span>
+                            }
+                        </ul>
+
                     </div>
                 </div>
                 <div className="row field-entry awards">
