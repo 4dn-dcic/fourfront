@@ -163,7 +163,7 @@ class Experiment(Item):
             pubs.extend(eset.publications_of_set(request))
         if not pubs:
             return None
-        return pubs
+        return list(set(pubs))
 
 
 @collection(
