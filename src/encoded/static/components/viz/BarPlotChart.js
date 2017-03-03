@@ -327,8 +327,9 @@ var BarPlot = React.createClass({
          * 
          * @param {Array} experiments - List of experiments which are to be aggregated or counted by their term(s).
          * @param {Array} fields - List of fields containing at least 'field' property (as object-dot-notated string).
-         * @param {string} experimentsOrSets - Deprecated. Whether chart is fed experiments or experiment_sets.
-         * @param {boolean} useOnlyPopulatedFields - If true, will try to only select fields which have multiple terms to visualize.
+         * @param {string} [aggregate="experiments"] - What to aggregate. Can be 'experiments', 'experiment_sets', or 'files'.
+         * @param {string} [experimentsOrSets="experiments"] - Deprecated. Whether chart is fed experiments or experiment_sets.
+         * @param {boolean} [useOnlyPopulatedFields=false] - If true, will try to only select fields which have multiple terms to visualize.
          * 
          * @returns {Array} - Array of fields, now containing term counts per field. One field (either the first or first populated) will have a childField with partitioned terms.
          */
@@ -464,7 +465,11 @@ var BarPlot = React.createClass({
             if (updateTotal) fieldObj.total += countIncrease;
         },
 
-        /** @returns {Array} Array of pairs containing field key (index 0) and term (index 1) */
+        /**
+         * @param {Array} fields - List of field objects.
+         * @param {Object} exp - Experiment to get terms (field values) from to pair with fields.
+         * @returns {Array} Array of pairs containing field key (index 0) and term (index 1) 
+         */
         getTermsForFieldsFromExperiment : function(fields, exp){
             return fields.map(function(f){
                 return [f.field, object.getNestedProperty(exp, f.field.replace('experiments_in_set.',''), true)];
@@ -694,7 +699,7 @@ var BarPlot = React.createClass({
             return fields;
         },
 
-        /** Get default style options for chart. Should suffice most of the time. */
+        /** @returns {Object} Default style options for chart. Should suffice most of the time. */
         getDefaultStyleOpts : function(){
             return {
                 'gap' : 16,
@@ -850,7 +855,11 @@ var BarPlot = React.createClass({
         */
     },
 
-    /** Call this function, e.g. through refs, to grab fields and terms for a/the Legend component. */
+    /**
+     * Call this function, e.g. through refs, to grab fields and terms for a/the Legend component.
+     * 
+     * @returns {Array} List of fields containing terms. For use by legend component.
+     */
     getLegendData : function(){
         if (!this.barData) return null;
         return BarPlot.barDataToLegendData(this.barData, this.props.schemas || null);
@@ -873,7 +882,6 @@ var BarPlot = React.createClass({
                 var prevBarData = null;
                 if (prevBarExists() && transitioning) prevBarData = existingBars[d.term].__data__;
 
-                /** Get transform (CSS style, or SVG attribute) for bar group. Positions bar's x coord via translate3d. */
                 function transformStyle(){
                     var xyCoords;
                     if ((d.removing || !prevBarExists()) && transitioning){
