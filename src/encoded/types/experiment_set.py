@@ -43,7 +43,11 @@ def invalidate_linked_items(item, field, updates=None):
     '''
     request = get_current_request()
     registry = item.registry
-    properties = item.properties
+    try:
+        properties = item.properties
+    except KeyError:
+        # if I try to invalidate an object that isn't yet fully stored, exit
+        return
     if field in properties:
         links = properties[field]
         if hasattr(links, 'lower'):
