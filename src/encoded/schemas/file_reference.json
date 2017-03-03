@@ -27,12 +27,14 @@
             "type": "string",
             "enum": [
                 "bwaIndex",
+                "chromsizes",
                 "other"
             ]
         }
     },
     "file_format_file_extension": {
         "bwaIndex": ".bwaIndex.tgz",
+        "chromsizes": ".chrom.sizes",
         "other": "no_file_extension"
     }
 }
