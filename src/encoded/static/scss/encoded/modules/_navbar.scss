@@ -275,6 +275,10 @@ $navbar-transition-length: .75s;
                     transition: color 0.3s;
                     display: inline-block;
                     min-width: 40px;
+                    small {
+                        opacity : 0.75;
+                        font-size: 72%;
+                    }
                 }
                 .stat-label {
                     line-height: 1rem;

@@ -38,13 +38,15 @@ var BarPlot = React.createClass({
                     },
                     'availableFields1' : [
                         { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
-                        { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" }
+                        { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
+                        { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' }
                     ],
                     'availableFields2' : [
                         { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
                         { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" },
                     ],
-                    'legend' : false
+                    'legend' : false,
+                    'chartHeight' : 300
                 };
             },
 
@@ -93,7 +95,7 @@ var BarPlot = React.createClass({
                     _.extend(
                         _.omit( // Own props minus these.
                             this.props,
-                            'titleMap', 'availableFields1', 'availableFields2', 'legend'
+                            'titleMap', 'availableFields1', 'availableFields2', 'legend', 'chartHeight'
                         ),
                         {
                             'fields' : this.state.fields,
@@ -157,108 +159,84 @@ var BarPlot = React.createClass({
             render : function(){
                 
                 var filterObjExistsAndNoFiltersSelected = this.filterObjExistsAndNoFiltersSelected();
+                var windowGridSize = layout.responsiveGridState();
 
                 console.log('UIControlsWrapper', this.refs);
 
                 return (
                     <div className="bar-plot-chart-controls-wrapper">
-                        <div className="overlay">
-                            <div className="y-axis-top-label">
+                        <div className="overlay" style={{
+                            height : this.props.chartHeight,
+                            width  : (windowGridSize !== 'xs' ? (layout.gridContainerWidth() * (9/12) - 15) : null)
+                        }}>
+
+                            <div className="y-axis-top-label" style={{
+                                width : this.props.chartHeight,
+                                top: this.props.chartHeight - 40
+                            }}>
                                 <DropdownButton
                                     id="select-barplot-aggregate-type"
+                                    bsSize="xsmall"
                                     onSelect={this.handleAggregateTypeSelect}
-                                    title={
-                                        <div className="dropdown-title-container">
-                                            <small>Aggregation (Y-Axis)</small><br/>
-                                            <h5>{ this.titleMap(this.state.aggregateType) }</h5>
-                                        </div>
-                                    }
+                                    title={this.titleMap(this.state.aggregateType)}
                                     children={this.renderDropDownMenuItems(
                                         ['experiment_sets','experiments','files'],
-                                        this.state.showState
+                                        this.state.aggregateType
                                     )}
                                 />
                             </div>
-                        </div>
-                        <div className="controls">
-                            <div className="overlay">
-                                <div className="y-axis-top-label">
-                                    <DropdownButton
-                                        id="select-barplot-aggregate-type"
-                                        onSelect={this.handleAggregateTypeSelect}
-                                        title={
-                                            <div className="dropdown-title-container">
-                                                <small>Aggregation (Y-Axis)</small><br/>
-                                                <h5>{ this.titleMap(this.state.aggregateType) }</h5>
-                                            </div>
-                                        }
-                                        children={this.renderDropDownMenuItems(
-                                            ['experiment_sets','experiments','files'],
-                                            this.state.showState
-                                        )}
-                                    />
+
+                            <div className="toggle-zoom" onClick={()=>
+                                this.handleExperimentsShowType(this.state.showState === 'all' ? 'filtered' : 'all')
+                            }>
+                                <div className="text">
+                                    <small>Viewing</small><br/>
+                                    {this.state.showState === 'all' ? 'All' : 'Selected'}
                                 </div>
+                                <i className={"icon icon-search-" + (this.state.showState === 'all' ? 'plus' : 'minus')}/>
                             </div>
-                            <ButtonToolbar>
-                                <ButtonGroup>
-                                    <DropdownButton
-                                        id="select-barplot-experiments-type"
-                                        onSelect={this.handleExperimentsShowType}
-                                        title={
-                                            <div className="dropdown-title-container">
-                                                <small>Show</small><br/>
-                                                <h5>{ this.titleMap(!filterObjExistsAndNoFiltersSelected ? this.state.showState : 'all') }</h5>
-                                            </div>
-                                        }
-                                        children={this.renderDropDownMenuItems(
-                                            ['filtered','all'],
-                                            this.state.showState,
-                                            filterObjExistsAndNoFiltersSelected,
-                                            "Please select some filters first."
-                                        )}
-                                    />
-                                    
-                                </ButtonGroup>
-                                <ButtonGroup>
-                                    <DropdownButton
-                                        id="select-barplot-field-0"
-                                        onSelect={this.handleFieldSelect.bind(this, 0)}
-                                        title={
-                                            <div className="dropdown-title-container">
-                                                <small>Divided by (X-Axis)</small><br/>
-                                                <h5>{
-                                                    (()=>{
-                                                        var field = this.getFieldAtIndex(0);
-                                                        return field.title || Filters.Field.toName(field.field);
-                                                    })()
-                                                }</h5>
-                                            </div>
-                                        }
-                                        children={this.renderDropDownMenuItems(
-                                            this.props.availableFields1.map(function(field){
-                                                return [
-                                                    field.field,
-                                                    field.title || Filters.Field.toName(field.field),
-                                                    field.description || null
-                                                ]; // key, title, subtitle
-                                            }),
-                                            this.state.showState
-                                        )}
-                                    />
+                            
+                            <div className="controls" style={{ display : 'none'}}>
+                                <ButtonToolbar>
+                                    <ButtonGroup>
+                                        <DropdownButton
+                                            id="select-barplot-experiments-type"
+                                            onSelect={this.handleExperimentsShowType}
+                                            title={
+                                                <div className="dropdown-title-container">
+                                                    <small>Show</small><br/>
+                                                    <h5>{ this.titleMap(!filterObjExistsAndNoFiltersSelected ? this.state.showState : 'all') }</h5>
+                                                </div>
+                                            }
+                                            children={this.renderDropDownMenuItems(
+                                                ['filtered','all'],
+                                                this.state.showState,
+                                                filterObjExistsAndNoFiltersSelected,
+                                                "Please select some filters first."
+                                            )}
+                                        />
+                                        
+                                    </ButtonGroup>
+                                </ButtonToolbar>
+                            </div>
+
+                        </div>
+
+                        <div className="row">
+                            <div className="col-md-9">
+                                { this.adjustedChildChart() }
+                            </div>
+                            <div className="col-md-3 chart-aside" style={{ height : this.props.chartHeight }}>
+                                <div className="legend-container" style={{ minHeight : windowGridSize !== 'xs' ? 
+                                    this.props.chartHeight - 49 : null
+                                }}>
                                     <DropdownButton
                                         id="select-barplot-field-1"
                                         onSelect={this.handleFieldSelect.bind(this, 1)}
-                                        title={
-                                            <div className="dropdown-title-container">
-                                                <small>Subdivided by</small><br/>
-                                                <h5>{
-                                                    (()=>{
-                                                        var field = this.getFieldAtIndex(1);
-                                                        return field.title || Filters.Field.toName(field.field);
-                                                    })()
-                                                }</h5>
-                                            </div>
-                                        }
+                                        title={(()=>{
+                                            var field = this.getFieldAtIndex(1);
+                                            return field.title || Filters.Field.toName(field.field);
+                                        })()}
                                         children={this.renderDropDownMenuItems(
                                             this.props.availableFields2.map(function(field){
                                                 return [
@@ -267,18 +245,9 @@ var BarPlot = React.createClass({
                                                     field.description || null
                                                 ]; // key, title, subtitle
                                             }),
-                                            this.state.showState
+                                            this.state.fields[1].field
                                         )}
                                     />
-                                </ButtonGroup>
-                            </ButtonToolbar>
-                        </div>
-                        <div className="row">
-                            <div className={"col-md-" + (this.props.legend ? 9 : 12)}>
-                                { this.adjustedChildChart() }
-                            </div>
-                            { this.props.legend ?
-                                <div className="col-md-3">
                                     <Legend
                                         fields={(
                                             this.props.experiments ? (
@@ -291,18 +260,42 @@ var BarPlot = React.createClass({
                                                 )
                                             ) : null
                                         )}
+                                        includeFieldTitles={false}
                                         schemas={this.props.schemas}
                                         width={layout.gridContainerWidth() * (3/12) - 20}
-                                        title={
+                                        title={null
+                                            /*
                                             <div>
                                                 <h5 className="text-400 legend-title">
                                                     Legend
                                                 </h5>
                                             </div>
+                                            */
                                         }
                                     />
                                 </div>
-                            : null }
+                                <div className="x-axis-right-label">
+                                    <DropdownButton
+                                        id="select-barplot-field-0"
+                                        onSelect={this.handleFieldSelect.bind(this, 0)}
+                                        title={(()=>{
+                                            var field = this.getFieldAtIndex(0);
+                                            return field.title || Filters.Field.toName(field.field);
+                                        })()}
+                                        children={this.renderDropDownMenuItems(
+                                            this.props.availableFields1.map(function(field){
+                                                return [
+                                                    field.field,
+                                                    field.title || Filters.Field.toName(field.field),
+                                                    field.description || null
+                                                ]; // key, title, subtitle
+                                            }),
+                                            this.state.fields[0].field
+                                        )}
+                                    />
+                                </div>
+
+                            </div>
                         </div>
                     </div>
                 );
@@ -429,12 +422,11 @@ var BarPlot = React.createClass({
             if (term === null) term = "None";
             var termsCont = fieldObj.terms;
             if (Array.isArray(term)){
-                console.log('ISNARRAY');
                 term = _.uniq(term);
                 if (term.length === 1) term = term[0];
                 else {
-                    console.warn('Multiple unique terms for field ' + field.field, terms);
-                    term = terms[0];
+                    console.warn('Multiple unique terms for field ' + fieldObj.field, term);
+                    term = term[0];
                 }
                 /*
                 else {
@@ -510,20 +502,30 @@ var BarPlot = React.createClass({
                 .object()
                 .value();
 
+            function aggregateExp(exp, aggrValue = null){
+                if (typeof aggrValue !== 'number') aggrValue = null;
+                var topLevelFieldTerm = object.getNestedProperty(exp, field.field.replace('experiments_in_set.',''), true);
+                var nextLevelFieldTerm = object.getNestedProperty(exp, field.childField.field.replace('experiments_in_set.',''), true);
+
+                // For now, just use first term if evaluates to list.
+                if (Array.isArray(topLevelFieldTerm)) topLevelFieldTerm = topLevelFieldTerm[0];
+                if (Array.isArray(nextLevelFieldTerm)) nextLevelFieldTerm = nextLevelFieldTerm[0];
+
+                if (!topLevelFieldTerm){
+                    topLevelFieldTerm = "None";
+                    if (typeof field.terms[topLevelFieldTerm] === 'undefined') createNoneChildField();
+                }
+
+                if (aggregate === 'files' || aggregate === 'experiments'){
+                    BarPlot.countTermForFieldFromExperimentByAggregateType(field.terms[topLevelFieldTerm], exp, nextLevelFieldTerm, aggregate);
+                } else if (aggregate === 'experiment_sets'){
+                    BarPlot.countFieldTerm(field.terms[topLevelFieldTerm], nextLevelFieldTerm, true, aggrValue);
+                }
+            }
+
             //BarPlot.aggregateByType([field,field.childField], experiments, aggregate);
             if (aggregate === 'files' || aggregate === 'experiments'){
-                experiments.forEach(function(exp){
-                    
-                    var topLevelFieldTerm = object.getNestedProperty(exp, field.field.replace('experiments_in_set.',''), true);
-                    var nextLevelFieldTerm = object.getNestedProperty(exp, field.childField.field.replace('experiments_in_set.',''), true);
-                    
-                    if (!topLevelFieldTerm){
-                        topLevelFieldTerm = "None";
-                        if (typeof field.terms[topLevelFieldTerm] === 'undefined') createNoneChildField();
-                    }
-
-                    BarPlot.countTermForFieldFromExperimentByAggregateType(field.terms[topLevelFieldTerm], exp, nextLevelFieldTerm, aggregate);
-                });
+                experiments.forEach(aggregateExp);
             } else if (aggregate === 'experiment_sets'){
                 var expSets = expFxn.groupExperimentsIntoExperimentSets(experiments);
 
@@ -532,13 +534,7 @@ var BarPlot = React.createClass({
                     var aggrValue = 1 / expsInSet.length;
 
                     expsInSet.forEach(function(exp){
-                        var topLevelFieldTerm = object.getNestedProperty(exp, field.field.replace('experiments_in_set.',''), true);
-                        var nextLevelFieldTerm = object.getNestedProperty(exp, field.childField.field.replace('experiments_in_set.',''), true);
-                        if (!topLevelFieldTerm){
-                            topLevelFieldTerm = "None";
-                            if (typeof field.terms[topLevelFieldTerm] === 'undefined') createNoneChildField();
-                        }
-                        BarPlot.countFieldTerm(field.terms[topLevelFieldTerm], nextLevelFieldTerm, true, aggrValue);
+                        aggregateExp(exp, aggrValue);
                     });
                     
                 });
@@ -957,7 +953,7 @@ var BarPlot = React.createClass({
                 );
             },
 
-            bottomYAxis : function(availWidth, availHeight, currentBars, styleOpts){
+            bottomXAxis : function(availWidth, availHeight, currentBars, styleOpts){
                 var lineYCoord = availHeight - (styleOpts.offset.bottom * 0.75);
                 return (
                     <g key="y-axis-bottom">
@@ -1079,7 +1075,7 @@ var BarPlot = React.createClass({
             );
         },
 
-        bottomYAxis : function(availWidth, availHeight, currentBars, styleOpts){
+        bottomXAxis : function(availWidth, availHeight, currentBars, styleOpts){
             var _this = this;
 
             var labelWidth = styleOpts.labelWidth;
@@ -1132,7 +1128,7 @@ var BarPlot = React.createClass({
             var chartWidth = availWidth - styleOpts.offset.left - styleOpts.offset.right;
             var ticks = d3.ticks(0, barData.maxY * ((chartHeight - 10)/chartHeight), Math.min(8, barData.maxY)).concat([barData.maxY]);
             var steps = ticks.map(function(v,i){
-                var w = (
+                var w = i === 0 ? chartWidth : (
                     Math.min(
                         (barData.bars.filter(function(b){
                             return b.count >= v - ((ticks[1] - ticks[0]) * 2);
@@ -1141,7 +1137,7 @@ var BarPlot = React.createClass({
                     )
                 );
                 return (
-                    <div className={"axis-step" + (i >= ticks.length - 1 ? ' last' : '')} style={{
+                    <div className={"axis-step" + (i >= ticks.length - 1 ? ' last' : '')} data-tick-index={i} style={{
                         position : 'absolute',
                         left: 0,
                         right: 0,
@@ -1265,7 +1261,6 @@ var BarPlot = React.createClass({
         allBars = allBars.sort(function(a,b){ return a.term < b.term ? -1 : 1; });
 
         function overWriteFilteredBarDimsWithAllExpsBarDims(barSet, allExpsBarSet){
-            //console.log('term', allExpsBarSet, barSet);
             barSet.forEach(function(b){
                 var allExpsBar = _.find(allExpsBarSet, { 'term' : b.term });
                 _.extend(
@@ -1274,10 +1269,6 @@ var BarPlot = React.createClass({
                         'width' : allExpsBar.attr.width,
                         'x' : allExpsBar.attr.x + (allExpsBar.attr.width + 2)
                     }
-                    //_.pick(
-                    //    allExpsBar.attr,
-                    //    'width', 'x'
-                    //)
                 );
                 if (Array.isArray(b.bars)){
                     overWriteFilteredBarDimsWithAllExpsBarDims(
@@ -1308,7 +1299,7 @@ var BarPlot = React.createClass({
                 { this.renderParts.leftAxis.call(this, availWidth, availHeight, this.barData, styleOpts) }
                 { allExpsBarDataContainer && allExpsBarDataContainer.component }
                 { barComponents }
-                { this.renderParts.bottomYAxis.call(this, availWidth, availHeight, allBars, styleOpts) }
+                { this.renderParts.bottomXAxis.call(this, availWidth, availHeight, allBars, styleOpts) }
             </div>
         );
         /*
@@ -1322,7 +1313,7 @@ var BarPlot = React.createClass({
             }}>
                 { this.renderParts.svg.topYAxis.call(this, availWidth, styleOpts) }
                 { barComponents }
-                { this.renderParts.svg.bottomYAxis.call(this, availWidth, availHeight, currentBars, styleOpts) }
+                { this.renderParts.svg.bottomXAxis.call(this, availWidth, availHeight, currentBars, styleOpts) }
             </svg>
         );
         */

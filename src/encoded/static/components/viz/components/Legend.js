@@ -11,10 +11,16 @@ var Legend = module.exports = React.createClass({
     statics : {
         Field : React.createClass({
 
+            getDefaultProps : function(){
+                return { 'includeFieldTitle' : true };
+            },
+
             render : function(){
                 return (
                     <div className="field" data-field={this.props.field} onMouseLeave={unhighlightTerms.bind(this, this.props.field)}>
-                        <h5 className="text-500 legend-field-title">{ this.props.title || this.props.name || this.props.field }</h5>
+                        { this.props.includeFieldTitle ? 
+                            <h5 className="text-500 legend-field-title">{ this.props.title || this.props.name || this.props.field }</h5>
+                        : null }
                         { this.props.terms.map((term) =>
                             <Legend.Term {...term} field={this.props.field} key={term.term} />
                         )}
@@ -56,11 +62,8 @@ var Legend = module.exports = React.createClass({
                 'terms' : {}
             };
 
-            console.log('LEGENDNAME', legendFieldItem.name);
-
             experiments.forEach(function(exp){
                 var term = object.getNestedProperty(exp, field.field.replace('experiments_in_set.',''), true);
-                console.log('LEGENDNAME', term, legendFieldItem.name);
                 if (!term) term = "None";
                 if (Array.isArray(term)){
                     term = _.uniq(term);
@@ -111,7 +114,6 @@ var Legend = module.exports = React.createClass({
     },
 
     render : function(){
-        console.log('FIELDS', this.props.fields);
         return (
             <div className={"legend " + this.props.className} id={this.props.id} style={{
                 opacity : !Array.isArray(this.props.fields) ? 0 : 1,
@@ -120,9 +122,9 @@ var Legend = module.exports = React.createClass({
                 { this.props.title }
                 { Array.isArray(this.props.fields) ?
                     Legend.parseFieldNames(this.props.fields, this.props.schemas || null)
-                    .map(function(field){
-                        return <Legend.Field {...field} key={field.field} />;
-                    }) 
+                    .map((field)=>
+                        <Legend.Field includeFieldTitle={this.props.includeFieldTitles} {...field} key={field.field} />
+                    ) 
                 : null }
             </div>
         );

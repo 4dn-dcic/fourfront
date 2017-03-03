@@ -44,7 +44,7 @@ var state = {
     chartFieldsBarPlot  : [
         { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
         { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
-        { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
+        { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" }
         //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
     ],
     chartFieldsHierarchy: [
@@ -153,7 +153,7 @@ var lastTimeSyncCalled = 0;
 var resyncInterval = null;
 
 /** @type {boolean} */
-var isWindowActive = true;
+var isWindowActive = false;
 
 var ChartDataController = module.exports = {
 
@@ -262,6 +262,8 @@ var ChartDataController = module.exports = {
                 ChartDataController.sync();
             }, resync);
 
+            isWindowActive = true;
+
         }
 
     },
@@ -365,15 +367,15 @@ var ChartDataController = module.exports = {
 
         var current, total;
 
-        function getCounts(){
-            var expSets = _.reduce(state.filteredExperiments || state.experiments, function(m,exp){
+        function getCounts(exps){
+            var expSets = _.reduce(exps, function(m,exp){
                 if (exp.experiment_sets) return new Set([...m, ..._.pluck(exp.experiment_sets, 'accession')]);
                 return m;
             }, new Set());
             return {
                 'experiment_sets' : expSets.size,
-                'experiments' : (state.filteredExperiments || state.experiments).length,
-                'files' : expFxn.fileCountFromExperiments(state.filteredExperiments || state.experiments)
+                'experiments' : exps.length,
+                'files' : expFxn.fileCountFromExperiments(exps)
             };
         }
 
