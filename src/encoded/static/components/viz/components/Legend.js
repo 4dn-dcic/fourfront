@@ -114,6 +114,7 @@ var Legend = module.exports = React.createClass({
     },
 
     render : function(){
+        if (!this.props.fields) return null;
         return (
             <div className={"legend " + this.props.className} id={this.props.id} style={{
                 opacity : !Array.isArray(this.props.fields) ? 0 : 1,

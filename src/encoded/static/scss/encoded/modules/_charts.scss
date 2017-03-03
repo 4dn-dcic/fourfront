@@ -33,6 +33,13 @@
 
 }
 
+@media screen and (max-width : $screen-xs-max){
+    .facet-charts {
+        height : auto !important;
+        margin-top: 20px;
+    }
+}
+
 /** Individual and standalone chart styles **/
 
 .chart-container {
@@ -503,6 +510,12 @@
 
 }
 
+@media screen and (max-width : $screen-xs-max){
+    .bar-plot-chart {
+        position: relative;
+    }
+}
+
 .bar-plot-chart-controls-wrapper {
 
     position: relative;
@@ -540,6 +553,8 @@
             top : 3px;
             right: 0px;
             font-size: 1.35rem;
+            cursor: pointer;
+            user-select: none;
             .text {
                 font-size: 0.85rem;
                 line-height: 0.9rem;
@@ -548,6 +563,17 @@
                 margin-top: -5px;
                 vertical-align: middle;
                 text-align: right;
+            }
+            i.icon {
+                transition : transform .75s ease-out, opacity .75s ease-out;
+            }
+            &.no-click {
+                cursor: default;
+                pointer-events: none;
+                i.icon {
+                    opacity: 0.25;
+                    transform: scale3d(0.8,0.8,0.8);
+                }
             }
         }
     }
@@ -610,6 +636,27 @@
 
         
 
+    }
+}
+
+@media screen and (max-width : $screen-xs-max){
+    .bar-plot-chart-controls-wrapper {
+        position: relative;
+
+        .overlay {
+            .y-axis-top-label {
+                left: 10px;
+            }
+        }
+
+        .chart-aside {
+            height : auto !important;
+            margin-top: 30px;
+            .legend-container {
+                height : auto !important;
+                overflow: visible !important;
+            }
+        }
     }
 }
 

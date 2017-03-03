@@ -386,6 +386,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         }
 
         var height = show === 'small' ? 300 : 450;
+        if (this.state.mounted && layout.responsiveGridState() === 'xs') height = Math.min(height, 240);
 
         FacetList.unhighlightTerms();
 

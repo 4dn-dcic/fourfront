@@ -115,14 +115,26 @@ var BarPlot = React.createClass({
             }, 300),
 
             handleFieldSelect : _.throttle(function(fieldIndex, newFieldKey, event){
+
+                if (newFieldKey === "none"){ // Only applies to subdivision (fieldIndex 1)
+                    var newFields = this.state.fields.slice(0,1);
+                    this.setState({ fields : newFields });
+                    return;
+                }
+
                 var newField = _.find(
                     this.props['availableFields' + (fieldIndex + 1)],
                     { field : newFieldKey }
                 );
                 var otherFieldIndex = fieldIndex === 0 ? 1 : 0;
-                var newFields = [null,null];
+                var newFields;
+                if (fieldIndex === 0 && this.state.fields.length === 1){
+                    newFields = [null];
+                } else {
+                    newFields = [null, null];
+                }
                 newFields[fieldIndex] = newField;
-                newFields[otherFieldIndex] = this.state.fields[otherFieldIndex];
+                if (newFields.length > 1) newFields[otherFieldIndex] = this.state.fields[otherFieldIndex];
                 this.setState({ fields : newFields });
                 //this.setState({ showState : eventKey });
             }, 300),
@@ -161,8 +173,6 @@ var BarPlot = React.createClass({
                 var filterObjExistsAndNoFiltersSelected = this.filterObjExistsAndNoFiltersSelected();
                 var windowGridSize = layout.responsiveGridState();
 
-                console.log('UIControlsWrapper', this.refs);
-
                 return (
                     <div className="bar-plot-chart-controls-wrapper">
                         <div className="overlay" style={{
@@ -186,7 +196,7 @@ var BarPlot = React.createClass({
                                 />
                             </div>
 
-                            <div className="toggle-zoom" onClick={()=>
+                            <div className={"toggle-zoom" + (filterObjExistsAndNoFiltersSelected ? ' no-click' : '')} onClick={()=>
                                 this.handleExperimentsShowType(this.state.showState === 'all' ? 'filtered' : 'all')
                             }>
                                 <div className="text">
@@ -235,22 +245,26 @@ var BarPlot = React.createClass({
                                         onSelect={this.handleFieldSelect.bind(this, 1)}
                                         title={(()=>{
                                             var field = this.getFieldAtIndex(1);
+                                            if (!field) return "None";
                                             return field.title || Filters.Field.toName(field.field);
                                         })()}
                                         children={this.renderDropDownMenuItems(
-                                            this.props.availableFields2.map(function(field){
+                                            this.props.availableFields2.concat([{
+                                                title : <em>None</em>,
+                                                field : "none"
+                                            }]).map(function(field){
                                                 return [
                                                     field.field,
                                                     field.title || Filters.Field.toName(field.field),
                                                     field.description || null
                                                 ]; // key, title, subtitle
                                             }),
-                                            this.state.fields[1].field
+                                            (this.state.fields[1] && this.state.fields[1].field) || "none"
                                         )}
                                     />
                                     <Legend
                                         fields={(
-                                            this.props.experiments ? (
+                                            this.props.experiments && this.state.fields[1] ? (
                                                 Legend.experimentsAndFieldsToLegendData(
                                                     this.state.showState === 'filtered' ? 
                                                         (this.props.filteredExperiments || this.props.experiments)
@@ -328,10 +342,12 @@ var BarPlot = React.createClass({
         ){
             //aggregate='experiments';
             // Since we not looking for populated fields, only keep track of first two fields provided.
-            if (!useOnlyPopulatedFields) fields = fields.slice(0,2);
+            fields = !useOnlyPopulatedFields ? fields.slice(0,2) : fields.slice(0);
 
-            // Add terms and total for each field.
-            fields = fields.map(function(f){ 
+            // Add terms and total for each field which isn't null or undefined.
+            fields = _.filter(fields, function(f){
+                return f;
+            }).map(function(f){
                 return _.extend({}, f, {
                     'terms' : {},
                     'total' : 0
@@ -340,6 +356,7 @@ var BarPlot = React.createClass({
 
             BarPlot.aggregateByType(fields, experiments, aggregate);
 
+            if (fields.length === 1) return fields;
             return BarPlot.partitionFields(fields, experiments, aggregate, useOnlyPopulatedFields);
         },
 
@@ -368,7 +385,7 @@ var BarPlot = React.createClass({
                 //throw new Error("Not yet built.");
                 var expSets = expFxn.groupExperimentsIntoExperimentSets(experiments);
                 _.forEach(expSets, function(expsInSet){
-                    var aggrValue = Math.round((1 / expsInSet.length) * 100) / 100;
+                    var aggrValue = (1 / expsInSet.length);
                     expsInSet.forEach(function(exp){
                         var fieldTermPairs = BarPlot.getTermsForFieldsFromExperiment(fields,exp);
                         fieldTermPairs.forEach(function(fieldTermPair, i){
@@ -1011,7 +1028,7 @@ var BarPlot = React.createClass({
             var barParts = Array.isArray(d.bars) ? 
                 _.sortBy(d.bars, 'term').map(this.renderParts.barPart.bind(this))
                 :
-                this.renderParts.barPart.call(this, d);
+                this.renderParts.barPart.call(this, _.extend({}, d, { color : 'rgb(139, 114, 142)' }));
 
             return (
                 <div
@@ -1061,7 +1078,7 @@ var BarPlot = React.createClass({
                     style={{
                         //top : rectY.call(this),
                         height : d.attr.height,
-                        width: d.parent.attr.width,
+                        width: (d.parent || d).attr.width,
                         backgroundColor : color
                     }}
                     data-color={color}
