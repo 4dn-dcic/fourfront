@@ -107,7 +107,7 @@ class FileSet(Item):
 
 
 @collection(
-    name='file-sets-calibration',
+    name='file-set-calibrations',
     unique_key='accession',
     properties={
         'title': 'Calibration File Sets',
