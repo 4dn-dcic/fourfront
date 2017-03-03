@@ -16,4 +16,4 @@ def test_user_with_submitter(testapp, submitter):
         award = lab_res.json['awards'][0]['@id']
     else:
         award = lab_res.json['awards'][0]['linked_id'].replace('~','/')
-    award_res = testapp.get(award, status=200)
+    testapp.get(award, status=200)
