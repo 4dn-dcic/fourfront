@@ -192,7 +192,6 @@ class Publication(Item):
             properties['url'] = url
         if date != "":
             properties['date_published'] = date
-        super(Publication, self)._update(properties, sheets)
         esets = []
         if 'exp_sets_prod_in_pub' in properties:
             invalidate_linked_items(self, 'exp_sets_prod_in_pub')
@@ -203,5 +202,7 @@ class Publication(Item):
         if esets:
             for esid in esets:
                 eset = self.collection.get(esid)
-                if 'experiments_in_set' in eset.properties:
-                    invalidate_linked_items(eset, 'experiments_in_set')
+                if eset is not None:
+                    if 'experiments_in_set' in eset.properties:
+                        invalidate_linked_items(eset, 'experiments_in_set')
+        super(Publication, self)._update(properties, sheets)
