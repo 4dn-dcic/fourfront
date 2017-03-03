@@ -5,7 +5,8 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    add_default_embeds
 )
 from snovault.attachment import ItemWithAttachment
 
@@ -28,6 +29,7 @@ class Image(ItemWithAttachment, Item):
         'image/gif',
     ]
     embedded = ['submitted_by']
+    embedded = add_default_embeds(embedded, schema)
 
     def unique_keys(self, properties):
         """smth."""

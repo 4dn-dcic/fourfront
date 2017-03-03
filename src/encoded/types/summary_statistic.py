@@ -6,7 +6,8 @@ from snovault import (
 )
 # from pyramid.security import Authenticated
 from .base import (
-    Item
+    Item,
+    add_default_embeds
     # paths_filtered_by_status,
 )
 
@@ -23,6 +24,7 @@ class SummaryStatistic(Item):
     item_type = 'summary_statistic'
     schema = load_schema('encoded:schemas/summary_statistic.json')
     embedded = []
+    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -37,3 +39,4 @@ class SummaryStatisticHiC(SummaryStatistic):
     item_type = 'summary_statistic_hi_c'
     schema = load_schema('encoded:schemas/summary_statistic_hi_c.json')
     embedded = SummaryStatistic.embedded
+    embedded = add_default_embeds(embedded, schema)

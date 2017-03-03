@@ -7,7 +7,8 @@ from snovault import (
 )
 # from pyramid.security import Authenticated
 from .base import (
-    Item
+    Item,
+    add_default_embeds
     # paths_filtered_by_status,
 )
 
@@ -23,6 +24,7 @@ class QualityMetricFlag(Item):
     item_type = 'quality_metric_flag'
     schema = load_schema('encoded:schemas/quality_metric_flag.json')
     embedded = ['quality_metrics']
+    embedded = add_default_embeds(embedded, schema)
 
 
 @abstract_collection(
@@ -38,6 +40,7 @@ class QualityMetric(Item):
     item_type = 'quality_metric'
     schema = load_schema('encoded:schemas/quality_metric.json')
     embedded = []
+    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -52,6 +55,7 @@ class QualityMetricFastqc(QualityMetric):
     item_type = 'quality_metric_fastqc'
     schema = load_schema('encoded:schemas/quality_metric_fastqc.json')
     embedded = QualityMetric.embedded
+    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -66,6 +70,7 @@ class QualityMetricBamqc(QualityMetric):
     item_type = 'quality_metric_bamqc'
     schema = load_schema('encoded:schemas/quality_metric_bamqc.json')
     embedded = QualityMetric.embedded
+    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -80,3 +85,4 @@ class QualityMetricPairsqc(QualityMetric):
     item_type = 'quality_metric_pairsqc'
     schema = load_schema('encoded:schemas/quality_metric_pairsqc.json')
     embedded = QualityMetric.embedded
+    embedded = add_default_embeds(embedded, schema)

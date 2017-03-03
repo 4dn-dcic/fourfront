@@ -14,8 +14,10 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item
+    Item,
+    add_default_embeds
 )
+
 
 
 ONLY_ADMIN_VIEW = [
@@ -25,8 +27,6 @@ ONLY_ADMIN_VIEW = [
     (Allow, 'remoteuser.EMBED', ['view']),
     (Deny, Everyone, ['view', 'edit'])
 ]
-
-SUBMITTER_CREATE = []
 
 ALLOW_EVERYONE_VIEW = [
     (Allow, Everyone, 'view'),
@@ -52,6 +52,7 @@ class Lab(Item):
     schema = load_schema('encoded:schemas/lab.json')
     name_key = 'name'
     embedded = ['awards']
+    embedded = add_default_embeds(embedded, schema)
 
     STATUS_ACL = {
         'current': ALLOW_EVERYONE_VIEW_AND_SUBMITTER_EDIT,

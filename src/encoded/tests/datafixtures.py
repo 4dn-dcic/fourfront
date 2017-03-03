@@ -2,14 +2,14 @@ import pytest
 
 
 @pytest.fixture
-def lab(testapp, award):
+def lab(testapp):
     item = {
         'name': 'encode-lab',
         'title': 'ENCODE lab',
-        'status': 'current',
-        'awards':[award['@id']]
+        'status': 'current'
     }
     return testapp.post_json('/lab', item).json['@graph'][0]
+
 
 @pytest.fixture
 def admin(testapp):

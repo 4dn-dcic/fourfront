@@ -100,10 +100,8 @@ var QuickInfoBar = module.exports = React.createClass({
 
         // If have href, only show for /browse/, /search/, and / & /home
         if (typeof props.href === 'string'){
-            var urlParts = url.parse(props.href);
-            if (urlParts.hash && urlParts.hash.indexOf('!impersonate-user') > -1) return true;
             // Doing replace twice should be faster than one time with /g regex flag (3 steps each or 15 steps combined w/ '/g')
-            var pathParts = urlParts.pathname.replace(/^\//, "").replace(/\/$/, "").split('/');
+            var pathParts = url.parse(props.href).pathname.replace(/^\//, "").replace(/\/$/, "").split('/');
             if (pathParts[0] === 'browse') return false;
             if (pathParts[0] === 'search') return false;
             if (pathParts[0] === 'home') return false;

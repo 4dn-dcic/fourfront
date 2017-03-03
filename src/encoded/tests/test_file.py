@@ -133,7 +133,8 @@ def test_file_post_fastq_related(testapp, fastq_json, fastq_related_file):
     # when updating the last one we should have updated this one too
     fastq_res = testapp.get('/md5:{md5sum}'.format(**fastq_json)).follow(status=200)
     fastq_related_files = fastq_res.json['related_files']
-    assert fastq_related_files[0]['file']['@id'] == fastq_related_res.json['@graph'][0]['@id']
+    assert fastq_related_files == [{'file': fastq_related_res.json['@graph'][0]['@id'],
+                                   'relationship_type': 'parent of'}]
 
 
 def test_external_creds(mocker):

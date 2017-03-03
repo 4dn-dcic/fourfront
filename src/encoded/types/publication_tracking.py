@@ -6,7 +6,8 @@ from snovault import (
 )
 # from pyramid.traversal import find_root
 from .base import (
-    Item
+    Item,
+    add_default_embeds
     # paths_filtered_by_status,
 )
 
@@ -24,3 +25,4 @@ class PublicationTracking(Item):
     item_type = 'publication_tracking'
     schema = load_schema('encoded:schemas/publication_tracking.json')
     embedded = []
+    embedded = add_default_embeds(embedded, schema)

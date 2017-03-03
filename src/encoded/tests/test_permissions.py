@@ -309,7 +309,7 @@ def test_submitter_patch_submits_for_disallowed(submitter, other_lab, submitter_
 
 def test_wrangler_patch_submits_for_allowed(submitter, other_lab, wrangler_testapp):
     res = wrangler_testapp.get(submitter['@id'])
-    submits_for = {'submits_for': [res.json['submits_for'][0]['@id']] + [other_lab['@id']]}
+    submits_for = {'submits_for': res.json['submits_for'] + [other_lab['@id']]}
     wrangler_testapp.patch_json(res.json['@id'], submits_for, status=200)
 
 
@@ -634,15 +634,3 @@ def test_wrangler_can_edit_lab_name_or_title(lab, submitter_testapp, wrangler_te
         wrangler_testapp.patch_json(original_id, {'title': 'Test Lab, HMS'}, status=200)
         wrangler_testapp.patch_json(original_id, {'name': new_name}, status=200)
         wrangler_testapp.patch_json(new_id, {'name': original_name}, status=200)
-
-def test_ac_local_roles_for_lab(registry):
-    from encoded.types.lab import Lab
-    lab_data = {
-        'status': 'in review by lab',
-        'award': 'b0b9c607-bbbb-4f02-93f4-9895baa1334b',
-        'uuid': '828cd4fe-aaaa-4b36-a94a-d2e3a36aa989'
-    }
-    test_lab = Lab.create(registry, None, lab_data)
-    lab_ac_locals = test_lab.__ac_local_roles__()
-    assert('role.lab_submitter' in lab_ac_locals.values())
-    assert('role.lab_member' in lab_ac_locals.values())
