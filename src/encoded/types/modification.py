@@ -5,8 +5,7 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item,
-    add_default_embeds
+    Item
 )
 
 
@@ -22,7 +21,6 @@ class Modification(Item):
     item_type = 'modification'
     schema = load_schema('encoded:schemas/modification.json')
     embedded = ['constructs', 'modified_regions', 'created_by', 'target_of_mod']
-    embedded = add_default_embeds(embedded, schema)
 
     @calculated_property(schema={
         "title": "Modification name",
