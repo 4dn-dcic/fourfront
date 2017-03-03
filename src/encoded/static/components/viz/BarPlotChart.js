@@ -115,9 +115,9 @@ var BarPlot = React.createClass({
             }, 300),
 
             handleFieldSelect : _.throttle(function(fieldIndex, newFieldKey, event){
-
+                var newFields;
                 if (newFieldKey === "none"){ // Only applies to subdivision (fieldIndex 1)
-                    var newFields = this.state.fields.slice(0,1);
+                    newFields = this.state.fields.slice(0,1);
                     this.setState({ fields : newFields });
                     return;
                 }
@@ -127,7 +127,6 @@ var BarPlot = React.createClass({
                     { field : newFieldKey }
                 );
                 var otherFieldIndex = fieldIndex === 0 ? 1 : 0;
-                var newFields;
                 if (fieldIndex === 0 && this.state.fields.length === 1){
                     newFields = [null];
                 } else {
@@ -400,7 +399,7 @@ var BarPlot = React.createClass({
                         });
                     });
                     
-                })
+                });
             } else if ( aggregate === 'files' ){
                 experiments.forEach(function(exp){
                     // [[field0Id, term], [field1Id, term], ...] . forEach( -->
@@ -497,7 +496,7 @@ var BarPlot = React.createClass({
                     'total' : 0,
                     'term' : "None",
                     'terms' : {}
-                }
+                };
             }
 
             field.terms = _(field.terms).chain()
@@ -1290,7 +1289,7 @@ var BarPlot = React.createClass({
                 if (Array.isArray(b.bars)){
                     overWriteFilteredBarDimsWithAllExpsBarDims(
                         b.bars, allExpsBar.bars
-                    )
+                    );
                 }
             });
         }
