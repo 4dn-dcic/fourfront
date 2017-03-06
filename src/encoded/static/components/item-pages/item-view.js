@@ -4,11 +4,10 @@ var React = require('react');
 var globals = require('./../globals');
 var Collapse = require('react-bootstrap').Collapse;
 var _ = require('underscore');
-var { ItemHeader, PartialList, ExternalReferenceLink } = require('./components');
+var { ItemHeader, PartialList, ExternalReferenceLink, FormattedInfoBlock, FilesInSetTable } = require('./components');
 var { AuditIndicators, AuditDetail, AuditMixin } = require('./../audit');
 var { console, object, DateUtility, Filters } = require('./../util');
 var itemTitle = require('./item').title;
-var FormattedInfoBlock = require('./components/FormattedInfoBlock');
 
 
 var Detail = React.createClass({
@@ -42,6 +41,13 @@ var Detail = React.createClass({
          */
         formValue : function (schemas, item, keyPrefix = '', atType = 'ExperimentSet', depth = 0) {
             if(Array.isArray(item)) {
+
+                if (keyPrefix === 'files_in_set'){
+                    return (
+                        <FilesInSetTable files={item}/>
+                    );
+                }
+
                 return (
                     <ul>
                         {   item.length === 0 ? <li><em>None</em></li>
@@ -56,6 +62,7 @@ var Detail = React.createClass({
 
                 // if the following is true, we have an embedded object
                 if (item.display_title && item.link_id){
+
                     var format_id = item.link_id.replace(/~/g, "/")
                     return (
                         <a href={format_id}>
