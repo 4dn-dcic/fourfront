@@ -96,9 +96,10 @@ var Detail = React.createClass({
                 } else if(item.slice(0,10) === '@@download'){
                     // this is a download link. Format appropriately
                     var split_item = item.split('/');
+                    var attach_title = decodeURIComponent(split_item[split_item.length-1]);
                     return (
                         <a key={item} href={item} target="_blank" download>
-                            {split_item[split_item.length-1]}
+                            {attach_title}
                         </a>
                     );
                 }
