@@ -123,7 +123,6 @@ class FileSetCalibration(FileSet):
                 'files_in_set.attachment.download',
                 'files_in_set.attachment.href',
                 ]
-    embedded = add_default_embeds(embedded, schema)
 
 
 @abstract_collection(
@@ -337,7 +336,6 @@ class FileCalibration(File):
     item_type = 'file_calibration'
     schema = load_schema('encoded:schemas/file_calibration.json')
     embedded = File.embedded
-    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
 

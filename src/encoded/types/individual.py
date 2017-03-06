@@ -11,6 +11,7 @@ from .base import (
     # paths_filtered_by_status,
 )
 
+
 @abstract_collection(
     name='individuals',
     unique_key='accession',
