@@ -97,11 +97,32 @@ def property_closure(request, propname, root_uuid):
     })
 class FileSet(Item):
     """Collection of files stored under fileset."""
-
     item_type = 'file_set'
+    base_types = ['FileSet'] + Item.base_types
     schema = load_schema('encoded:schemas/file_set.json')
     name_key = 'accession'
     embedded = []
+
+
+@collection(
+    name='file-set-calibrations',
+    unique_key='accession',
+    properties={
+        'title': 'Calibration File Sets',
+        'description': 'Listing of File Sets',
+    })
+class FileSetCalibration(FileSet):
+    """Collection of files stored under fileset."""
+
+    item_type = 'file_set_calibration'
+    schema = load_schema('encoded:schemas/file_set_calibration.json')
+    name_key = 'accession'
+    embedded = ['files_in_set.submitted_by',
+                'files_in_set.accession',
+                'files_in_set.description',
+                'files_in_set.attachment.download',
+                'files_in_set.attachment.href',
+                ]
 
 
 @abstract_collection(
@@ -217,7 +238,6 @@ class File(Item):
         else:
             return file_format + ' ' + file_format_type
 
-
     @classmethod
     def build_external_creds(cls, registry, uuid, properties):
         bucket = registry.settings['file_upload_bucket']
@@ -235,7 +255,6 @@ class File(Item):
 
         profile_name = registry.settings.get('file_upload_profile_name')
         return external_creds(bucket, key, name, profile_name)
-
 
     @classmethod
     def create(cls, registry, uuid, properties, sheets=None):
@@ -301,6 +320,21 @@ class FileReference(File):
     """Collection for individual reference files."""
     item_type = 'file_reference'
     schema = load_schema('encoded:schemas/file_reference.json')
+    embedded = File.embedded
+    name_key = 'accession'
+
+
+@collection(
+    name='files-calibration',
+    unique_key='accession',
+    properties={
+        'title': 'Calibration Files',
+        'description': 'Listing of Calibration Files',
+    })
+class FileCalibration(File):
+    """Collection for individual calibration files."""
+    item_type = 'file_calibration'
+    schema = load_schema('encoded:schemas/file_calibration.json')
     embedded = File.embedded
     name_key = 'accession'
 
