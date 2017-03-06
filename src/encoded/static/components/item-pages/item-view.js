@@ -38,7 +38,7 @@ var Detail = React.createClass({
          * Wraps URLs/paths in link elements. Sub-panels for objects.
          *
          * @param {Object} schemas - Object containing schemas for server's JSONized object output.
-         * @param {*|*[]} item - Item(s) to render recursively.
+         * @param {*} item - Item(s) to render recursively.
          */
         formValue : function (schemas, item, keyPrefix = '', atType = 'ExperimentSet', depth = 0) {
             if(Array.isArray(item)) {

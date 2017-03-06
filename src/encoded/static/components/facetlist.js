@@ -10,6 +10,8 @@ var vizUtil = require('./viz/utilities');
 /**
  * Used to render individual terms in FacetList.
  * Available through FacetList.Facet.ExpTerm
+ * 
+ * @memberof FacetList
  */
 var ExpTerm = React.createClass({
 
@@ -90,7 +92,7 @@ var ExpTerm = React.createClass({
              * props.expSetFilters uses standardized fieldKeys/props.facet.field while
              * experiment tables & facets do not. Props provided through props.facet 
              * are un-standardized, so run them through standardizeFieldKey() before
-             * checking if in expSetFilters (e.g. as in ExpTerm.isSelected() ).
+             * checking if in expSetFilters (e.g. as in ExpTerm.isSelected()).
              */
             var termMatchExps = Filters.siftExperimentsClientSide(
                 this.props.experimentSetListJSON,
@@ -357,6 +359,9 @@ var Facet = React.createClass({
 
 /**
  * FacetList - Exported
+ *
+ * @memberof components
+ * @namespace FacetList
  */
 
 var FacetList = module.exports = React.createClass({
@@ -453,6 +458,7 @@ var FacetList = module.exports = React.createClass({
         /**
          * Adds a restrictions property to each facet from restrictions object and uses it to filter terms.
          * 
+         * @memberof components.FacetList
          * @param {Object[]} origFacets - Array of initial facets; should have terms already.
          * @param {Object} [restrictions] - Object containing restricted facet fields as property names and arrays of term keys as values.
          * @return {Object[]} Facets which have filtered terms and a restrictions property, if there is a restriction for it in restrictions object.

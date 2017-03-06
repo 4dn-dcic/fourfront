@@ -26,4 +26,5 @@ require('./experiments-table');
 require('./browse');
 require('./testwarning');
 
+/** @namespace components */
 module.exports = require('./app');

@@ -82,6 +82,9 @@ class Timeout {
 /**
  * App is the root component, mounted on document.body.
  * It lives for the entire duration the page is loaded.
+ * 
+ * @memberof components
+ * @namespace App
  */
 var App = React.createClass({
     SLOW_REQUEST_TIME: 750,
@@ -102,6 +105,7 @@ var App = React.createClass({
         }
     },
 
+    /** @memberof components.App */
     getInitialState: function() {
         console.log('APP FILTERS', Filters.hrefToFilters(this.props.href));
         // Todo: Migrate session & user_actions to redux store?
@@ -220,6 +224,9 @@ var App = React.createClass({
         return name;
     },
 
+    /**
+     * @memberof components.App
+     */
     loadSchemas : function(callback, forceFetch = false){
         if (this.state.schemas !== null && !forceFetch){
             // We've already loaded these successfully (hopefully)
@@ -239,6 +246,10 @@ var App = React.createClass({
         });
     },
 
+    /**
+     * @memberof components.App
+     * @returns {Object} Stats React component.
+     */
     getStatsComponent : function(){
         if (!this.refs || !this.refs.navigation) return null;
         if (!this.refs.navigation.refs) return null;
@@ -246,6 +257,9 @@ var App = React.createClass({
         return this.refs.navigation.refs.stats;
     },
 
+    /**
+     * @memberof components.App
+     */
     updateStats : function(currentCounts, totalCounts = null, callback = null){
         var statsComponent = this.getStatsComponent();
         if (statsComponent){

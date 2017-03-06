@@ -142,7 +142,7 @@ var BarPlot = React.createClass({
          * @param {number} fields.total - Count of total experiments for which this field is applicable.
          * @param {number} [availWidth=400] - Available width, in pixels, for chart.
          * @param {number} [availHeight=400] - Available width, in pixels, for chart.
-         * @param {Object} [styleOpts=BarPlot.getDefaultStyleOpts()] - Style settings for chart which may contain chart offsets (for axes).
+         * @param {Object} [styleOpts] - Style settings for chart which may contain chart offsets (for axes).
          * @return {Object} Object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally.
          */
         genChartBarDims : function(

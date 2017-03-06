@@ -24,6 +24,7 @@ var ChartDataController = require('./viz/chart-data-controller');
 /**
  * Area for displaying Charts rel to browsing.
  * 
+ * @memberof components
  * Props:
  * 
  * @param {(boolean|string|showFunc)} [show] - Type of view to show or whether to display or not; if function supplied, as well as props.href, path is passed as argument. 

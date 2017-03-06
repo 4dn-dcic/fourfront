@@ -2,6 +2,8 @@
 
 /**
  * A directory of methods and maybe a mini-component or two for common use.
+ * 
+ * @module util
  */
 
 /** Transforms, manipulations, parsers, etc. re: objects. **/

@@ -2,6 +2,12 @@
 
 var _ = require('underscore');
 
+/**
+ * A module containing various manipulations for experiments and experiment_sets collections.
+ * 
+ * @module util/experiments-transforms
+ */
+
 var f = module.exports = {
 
     /** 
