@@ -121,6 +121,7 @@ class FileSetCalibration(FileSet):
                 'files_in_set.accession',
                 'files_in_set.description',
                 'files_in_set.attachment.download',
+                'files_in_set.attachment.href',
                 ]
     embedded = add_default_embeds(embedded, schema)
 
