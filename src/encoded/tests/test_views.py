@@ -18,6 +18,7 @@ def _type_length():
     inherited_list = [
      ["experiment_set", ["experiment_set_replicate"]],
      ["workflow_run", ["workflow_run_sbg"]],
+     ["file_set", ["file_set_calibration"]],
     ]
     for inh in inherited_list:
         try:
