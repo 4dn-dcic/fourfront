@@ -8,8 +8,7 @@ from snovault import (
 )
 # from pyramid.traversal import find_root
 from .base import (
-    Item,
-    add_default_embeds
+    Item
     # paths_filtered_by_status,
 )
 
@@ -33,7 +32,6 @@ class AnalysisStep(Item):
     name_key = 'name'
     schema = load_schema('encoded:schemas/analysis_step.json')
     embedded = ['software_used', 'qa_stats_generated']
-    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -50,7 +48,6 @@ class Award(Item):
     schema = load_schema('encoded:schemas/award.json')
     name_key = 'name'
     embedded = ['pi']
-    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -78,7 +75,6 @@ class Construct(Item):
     item_type = 'construct'
     schema = load_schema('encoded:schemas/construct.json')
     embedded = []
-    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -93,7 +89,6 @@ class Document(ItemWithAttachment, Item):
     item_type = 'document'
     schema = load_schema('encoded:schemas/document.json')
     embedded = ['lab', 'award', 'submitted_by']
-    embedded = add_default_embeds(embedded, schema)
 
     def display_title(self):
         if self.properties.get('attachment'):
@@ -116,7 +111,6 @@ class Enzyme(Item):
     schema = load_schema('encoded:schemas/enzyme.json')
     name_key = 'name'
     embedded = ['enzyme_source']
-    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -131,7 +125,6 @@ class GenomicRegion(Item):
     item_type = 'genomic_region'
     schema = load_schema('encoded:schemas/genomic_region.json')
     embedded = []
-    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -148,7 +141,6 @@ class Organism(Item):
     schema = load_schema('encoded:schemas/organism.json')
     name_key = 'name'
     embedded = []
-    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -163,4 +155,3 @@ class Protocol(Item):
     item_type = 'protocol'
     schema = load_schema('encoded:schemas/protocol.json')
     embedded = []
-    embedded = add_default_embeds(embedded, schema)

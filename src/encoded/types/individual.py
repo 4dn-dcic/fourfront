@@ -7,8 +7,7 @@ from snovault import (
 )
 # from pyramid.security import Authenticated
 from .base import (
-    Item,
-    add_default_embeds
+    Item
     # paths_filtered_by_status,
 )
 
@@ -25,7 +24,6 @@ class Individual(Item):
     base_types = ['Individual'] + Item.base_types
     schema = load_schema('encoded:schemas/individual.json')
     embedded = ['organism']
-    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
 
@@ -42,7 +40,6 @@ class IndividualHuman(Individual):
     item_type = 'individual_human'
     schema = load_schema('encoded:schemas/individual_human.json')
     embedded = Individual.embedded
-    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -58,4 +55,3 @@ class IndividualMouse(Individual):
     item_type = 'individual_mouse'
     schema = load_schema('encoded:schemas/individual_mouse.json')
     embedded = Individual.embedded + ['mouse_vendor']
-    embedded = add_default_embeds(embedded, schema)

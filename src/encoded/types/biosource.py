@@ -5,8 +5,7 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item,
-    add_default_embeds
+    Item
     # paths_filtered_by_status,
 )
 
@@ -25,7 +24,6 @@ class Biosource(Item):
     name_key = 'accession'
     schema = load_schema('encoded:schemas/biosource.json')
     embedded = ["individual", "individual.organism"]
-    embedded = add_default_embeds(embedded, schema)
 
     def _update(self, properties, sheets=None):
         name2info = {
