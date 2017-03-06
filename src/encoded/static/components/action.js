@@ -854,6 +854,7 @@ var FileInput = React.createClass({
     handleChange: function(e){
         var acceptedTypes = [
             "application/pdf",
+            "application/zip",
             "text/plain",
             "text/tab-separated-values",
             "image/jpeg",
@@ -868,7 +869,7 @@ var FileInput = React.createClass({
         var file = e.target.files[0];
         if ((!file.type || !_.contains(acceptedTypes, file.type))){
             this.refs.fileInput.value = '';
-            alert('File upload failed! File must of one of the following types: application/pdf, text/plain, text/tab-separated-values, image/jpeg, image/tiff, image/gif, text/html, image/png, image/svs, text/autosql.');
+            alert('File upload failed! File must of one of the following types: ' + acceptedTypes.toString());
             return;
         }else{
             attachment_props.type = file.type;
