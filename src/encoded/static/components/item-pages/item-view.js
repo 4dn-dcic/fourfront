@@ -93,6 +93,14 @@ var Detail = React.createClass({
                             </a>
                         );
                     }
+                } else if(item.slice(0,10) === '@@download'){
+                    // this is a download link. Format appropriately
+                    var split_item = item.split('/');
+                    return (
+                        <a key={item} href={item} target="_blank" download>
+                            {split_item[split_item.length-1]}
+                        </a>
+                    );
                 }
             }
             return(<span>{ item }</span>); // Fallback
