@@ -856,6 +856,8 @@ var FileInput = React.createClass({
     handleChange: function(e){
         var acceptedTypes = [
             "application/pdf",
+            "application/zip",
+            "application/x-rar-compressed",
             "text/plain",
             "text/tab-separated-values",
             "image/jpeg",
