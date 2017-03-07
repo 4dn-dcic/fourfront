@@ -339,7 +339,54 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		
 }
 
+/*** Files In Set Table ***/
 
+.files-in-set-table {
+	.row {
+		padding-top: 5px;
+		padding-bottom: 5px;
+
+		> .title {
+			border-bottom: 1px solid #eee;
+		}
+
+		h6 {
+			margin: 0;
+		}
+
+		
+
+	}
+}
+
+@media screen and (min-width : $screen-xs-min){
+	.files-in-set-table {
+		.row {
+
+			> .description {
+				min-height: 30px;
+				padding-top: 6px;
+			}
+
+			> .title {
+				line-height: 30px;
+				height: 30px;
+				vertical-align: middle;
+				border-bottom: none;
+				text-align: left;
+			}
+
+			> .download-button {
+				height: 30px;
+			}
+
+			h6 {
+				line-height: 30px;
+				height: 30px;
+			}
+		}
+	}
+}
 
 
 
