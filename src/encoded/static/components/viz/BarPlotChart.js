@@ -1,5 +1,6 @@
 'use strict';
 
+/** @ignore */
 var React = require('react');
 var _ = require('underscore');
 var d3 = require('d3');
@@ -16,8 +17,15 @@ var { ButtonToolbar, ButtonGroup, Button, DropdownButton, MenuItem } = require('
  * @module {React.Component} viz/BarPlotChart
  */
 
+/**
+ * @alias module:viz/BarPlotChart
+ */
 var BarPlot = React.createClass({
 
+    /**
+     * @namespace
+     * @memberof module:viz/BarPlotChart
+     */
     statics : {
 
 
@@ -25,10 +33,15 @@ var BarPlot = React.createClass({
          * Component which wraps the BarPlotChart and provides some UI buttons and stuff.
          * Passes props to BarPlotChart.
          * 
-         * 
+         * @namespace
+         * @memberof module:viz/BarPlotChart
          */
         UIControlsWrapper : React.createClass({
 
+            /**
+             * Default props for the UIControlsWrapper.
+             * @memberof module:viz/BarPlotChart.UIControlsWrapper
+             */
             getDefaultProps : function(){
                 return {
                     'titleMap' : {
@@ -55,6 +68,10 @@ var BarPlot = React.createClass({
                 };
             },
 
+            /**
+             * @ignore
+             * @memberof module:viz/BarPlotChart.UIControlsWrapper
+             */
             getInitialState : function(){
                 return {
                     'fields' : [
@@ -67,12 +84,20 @@ var BarPlot = React.createClass({
                 };
             },
 
+            /**
+             * @ignore
+             * @memberof module:viz/BarPlotChart.UIControlsWrapper
+             */
             componentWillReceiveProps : function(nextProps){
                 if (this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters)){
                     this.setState({ 'showState' : 'all' });
                 }
             },
 
+            /**
+             * @ignore
+             * @memberof module:viz/BarPlotChart.UIControlsWrapper
+             */
             filterObjExistsAndNoFiltersSelected : function(expSetFilters = this.props.expSetFilters){
                 return (
                     typeof expSetFilters === 'object'
@@ -81,6 +106,10 @@ var BarPlot = React.createClass({
                 );
             },
 
+            /**
+             * @ignore
+             * @memberof module:viz/BarPlotChart.UIControlsWrapper
+             */
             titleMap : function(key = null, fromDropdown = false){
                 if (!key) return this.props.titleMap;
                 var title = this.props.titleMap[key];
@@ -92,6 +121,11 @@ var BarPlot = React.createClass({
                 return title;
             },
 
+            /**
+             * Clones props.children, expecting a Chart React Component as the sole child, and extends Chart props with 'fields', 'showType', and 'aggregateType'.
+             * @returns {React.Component} Cloned & extended props.children.
+             * @memberof module:viz/BarPlotChart.UIControlsWrapper
+             */
             adjustedChildChart : function(){
                 // TODO: validate that props.children is a BarPlotChart
 
@@ -111,14 +145,26 @@ var BarPlot = React.createClass({
                 );
             },
 
+            /**
+             * @ignore
+             * @memberof module:viz/BarPlotChart.UIControlsWrapper
+             */
             handleAggregateTypeSelect : _.throttle(function(eventKey, event){
                 this.setState({ aggregateType : eventKey });
             }, 300),
 
+            /**
+             * @ignore
+             * @memberof module:viz/BarPlotChart.UIControlsWrapper
+             */
             handleExperimentsShowType : _.throttle(function(eventKey, event){
                 this.setState({ showState : eventKey });
             }, 300),
 
+            /**
+             * @ignore
+             * @memberof module:viz/BarPlotChart.UIControlsWrapper
+             */
             handleFieldSelect : _.throttle(function(fieldIndex, newFieldKey, event){
                 var newFields;
                 if (newFieldKey === "none"){ // Only applies to subdivision (fieldIndex 1)
@@ -143,6 +189,10 @@ var BarPlot = React.createClass({
                 //this.setState({ showState : eventKey });
             }, 300),
 
+            /**
+             * @ignore
+             * @memberof module:viz/BarPlotChart.UIControlsWrapper
+             */
             getFieldAtIndex : function(fieldIndex){
                 if (!this.state.fields) return null;
                 if (!Array.isArray(this.state.fields)) return null;
@@ -150,6 +200,10 @@ var BarPlot = React.createClass({
                 return this.state.fields[fieldIndex];
             },
 
+            /**
+             * @ignore
+             * @memberof module:viz/BarPlotChart.UIControlsWrapper
+             */
             renderDropDownMenuItems : function(keys, active = null, noFiltersSet = true, disabledTitle = null){
                 return keys.map((key)=>{
                     var subtitle = null;
@@ -172,6 +226,10 @@ var BarPlot = React.createClass({
                 });
             },
 
+            /**
+             * @ignore
+             * @memberof module:viz/BarPlotChart.UIControlsWrapper
+             */
             render : function(){
                 
                 var filterObjExistsAndNoFiltersSelected = this.filterObjExistsAndNoFiltersSelected();
