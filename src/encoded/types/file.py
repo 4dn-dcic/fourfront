@@ -8,9 +8,9 @@ from snovault import (
     abstract_collection,
 )
 from snovault.schema_utils import schema_validator
+from snovault.attachment import ItemWithAttachment
 from .base import (
-    Item,
-    add_default_embeds
+    Item
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -98,12 +98,31 @@ def property_closure(request, propname, root_uuid):
     })
 class FileSet(Item):
     """Collection of files stored under fileset."""
-
     item_type = 'file_set'
+    base_types = ['FileSet'] + Item.base_types
     schema = load_schema('encoded:schemas/file_set.json')
     name_key = 'accession'
     embedded = []
-    embedded = add_default_embeds(embedded, schema)
+
+
+@collection(
+    name='file-set-calibrations',
+    unique_key='accession',
+    properties={
+        'title': 'Calibration File Sets',
+        'description': 'Listing of File Sets',
+    })
+class FileSetCalibration(FileSet):
+    """Collection of files stored under fileset."""
+
+    item_type = 'file_set_calibration'
+    schema = load_schema('encoded:schemas/file_set_calibration.json')
+    name_key = 'accession'
+    embedded = ['files_in_set.submitted_by',
+                'files_in_set.accession',
+                'files_in_set.description',
+                'files_in_set.attachment'
+                ]
 
 
 @abstract_collection(
@@ -118,8 +137,7 @@ class File(Item):
     item_type = 'file'
     base_types = ['File'] + Item.base_types
     schema = load_schema('encoded:schemas/file.json')
-    embedded = ['lab', 'file_format']
-    embedded = add_default_embeds(embedded, schema)
+    embedded = ['lab', 'file_format', 'related_files.file']
     name_key = 'accession'
 
     def _update(self, properties, sheets=None):
@@ -220,7 +238,6 @@ class File(Item):
         else:
             return file_format + ' ' + file_format_type
 
-
     @classmethod
     def build_external_creds(cls, registry, uuid, properties):
         bucket = registry.settings['file_upload_bucket']
@@ -238,7 +255,6 @@ class File(Item):
 
         profile_name = registry.settings.get('file_upload_profile_name')
         return external_creds(bucket, key, name, profile_name)
-
 
     @classmethod
     def create(cls, registry, uuid, properties, sheets=None):
@@ -260,7 +276,6 @@ class FileFastq(File):
     item_type = 'file_fastq'
     schema = load_schema('encoded:schemas/file_fastq.json')
     embedded = File.embedded
-    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
 
@@ -276,7 +291,6 @@ class FileFasta(File):
     item_type = 'file_fasta'
     schema = load_schema('encoded:schemas/file_fasta.json')
     embedded = File.embedded
-    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
 
@@ -292,7 +306,6 @@ class FileProcessed(File):
     item_type = 'file_processed'
     schema = load_schema('encoded:schemas/file_processed.json')
     embedded = File.embedded
-    embedded = add_default_embeds(embedded, schema)
     name_key = 'accession'
 
 
@@ -308,7 +321,21 @@ class FileReference(File):
     item_type = 'file_reference'
     schema = load_schema('encoded:schemas/file_reference.json')
     embedded = File.embedded
-    embedded = add_default_embeds(embedded, schema)
+    name_key = 'accession'
+
+
+@collection(
+    name='files-calibration',
+    unique_key='accession',
+    properties={
+        'title': 'Calibration Files',
+        'description': 'Listing of Calibration Files',
+    })
+class FileCalibration(ItemWithAttachment, File):
+    """Collection for individual calibration files."""
+    item_type = 'file_calibration'
+    schema = load_schema('encoded:schemas/file_calibration.json')
+    embedded = File.embedded
     name_key = 'accession'
 
 

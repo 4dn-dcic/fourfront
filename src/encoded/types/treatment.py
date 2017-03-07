@@ -7,8 +7,7 @@ from snovault import (
 )
 # from pyramid.security import Authenticated
 from .base import (
-    Item,
-    add_default_embeds
+    Item
     # paths_filtered_by_status,
 )
 
@@ -25,7 +24,6 @@ class Treatment(Item):
     base_types = ['Treatment'] + Item.base_types
     schema = load_schema('encoded:schemas/treatment.json')
     embedded = []
-    embedded = add_default_embeds(embedded, schema)
 
     @calculated_property(schema={
         "title": "Treatment_type",
@@ -52,7 +50,6 @@ class TreatmentChemical(Treatment):
     item_type = 'treatment_chemical'
     schema = load_schema('encoded:schemas/treatment_chemical.json')
     embedded = Treatment.embedded
-    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -67,4 +64,3 @@ class TreatmentRnai(Treatment):
     item_type = 'treatment_rnai'
     schema = load_schema('encoded:schemas/treatment_rnai.json')
     embedded = ['rnai_vendor', 'rnai_constructs', 'target']
-    embedded = add_default_embeds(embedded, schema)

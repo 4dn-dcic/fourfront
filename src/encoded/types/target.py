@@ -5,8 +5,7 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item,
-    add_default_embeds
+    Item
 )
 
 
@@ -22,7 +21,6 @@ class Target(Item):
     item_type = 'target'
     schema = load_schema('encoded:schemas/target.json')
     embedded = ['targeted_region']
-    embedded = add_default_embeds(embedded, schema)
 
     @calculated_property(schema={
         "title": "Target summary",
