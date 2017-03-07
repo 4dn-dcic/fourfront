@@ -42,7 +42,7 @@ var BarPlot = React.createClass({
 
         /**
          * @param {Object} fieldObj - A field object with present but incomplete 'terms' & 'total'.
-         * @param {string|string[]} term - A string or array of strings denoting terms. If multiple terms are passed, then field must have fields as terms (with incomplete 'terms' & 'total') object.
+         * @param {string|string[]} term - A string or array of strings denoting terms.
          */
         countFieldTermForExperiment : function(fieldObj, term, updateTotal = true){
             if (term === null) term = "None";
