@@ -19,8 +19,24 @@ var { FacetCharts } = require('./facetcharts');
 var ChartDataController = require('./viz/chart-data-controller');
 var makeTitle = require('./item-pages/item').title;
 
-var dispatch_dict = {}; //used to store value for simultaneous dispatch
+/**
+ * The top-level component for this application.
+ * 
+ * @module {React.Component} app
+ */
 
+/** 
+ * Used to temporarily store Redux store values for simultaneous dispatch.
+ * 
+ * @memberof app
+ */
+var dispatch_dict = {};
+
+/**
+ * Top bar navigation & link schema definition.
+ * 
+ * @memberof app
+ */
 var portal = {
     portal_title: '4DN Data Portal',
     global_sections: [
@@ -79,10 +95,6 @@ class Timeout {
 }
 
 
-/**
- * App is the root component, mounted on document.body.
- * It lives for the entire duration the page is loaded.
- */
 var App = React.createClass({
     SLOW_REQUEST_TIME: 750,
     historyEnabled: !!(typeof window != 'undefined' && window.history && window.history.pushState),

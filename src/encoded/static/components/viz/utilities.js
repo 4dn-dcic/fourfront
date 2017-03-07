@@ -5,6 +5,12 @@ var _ = require('underscore');
 var d3 = require('d3');
 var { console, isServerSide } = require('./../util');
 
+/**
+ * Utility functions for aiding with visualizations.
+ * 
+ * @module {Object} viz/utilities
+ */
+
 var vizUtil = module.exports = {
 
     // Taken from http://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript
@@ -21,7 +27,12 @@ var vizUtil = module.exports = {
         }
         return colour;
     },
-
+    /** 
+     * Helper function for window.requestAnimationFrame.
+     * 
+     * @param {function} cb - Callback method.
+     * @returns {undefined|string} Undefined or timeout ID if falling back to setTimeout.
+     */
     requestAnimationFrame : function(cb){
         if (!isServerSide() && typeof window !== 'undefined'){
             if (typeof window.requestAnimationFrame !== 'undefined') return window.requestAnimationFrame(cb);
@@ -30,10 +41,12 @@ var vizUtil = module.exports = {
         }
         return setTimeout(cb, 0);
     },
-
+    /** @ignore */
     colorCache : {},        // We cache generated colors into here to re-use and speed up.
+    /** @ignore */
     colorCacheByField : {},
 
+    /** Mapping of colors to particular terms. */
     predefinedColors : {    // Keys should be all lowercase
         "human (homo sapiens)"  : "rgb(218, 112, 6)",
         "human"                 : "rgb(218, 112, 6)",
@@ -57,7 +70,13 @@ var vizUtil = module.exports = {
             '#4d4d4d'   // gray
         ]
     },
-
+    /** 
+     * @param   {string} field
+     * @param   {string} term
+     * @param   {string|Object} [color]
+     * @param   {string} [palette="muted"]
+     * @returns {string|Object}
+     */
     addToColorCacheByField : function(field, term, color = null, palette = 'muted'){
         if (typeof vizUtil.colorCacheByField[field] === 'undefined'){
             vizUtil.colorCacheByField[field] = {};

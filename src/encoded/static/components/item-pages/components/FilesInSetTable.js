@@ -23,7 +23,7 @@ var FilesInSetTable = module.exports = React.createClass({
                     this.props.files.map(function(file, i){
                         var atId = (file && file.link_id && file.link_id.replace(/~/g, "/")) || null;
                         var title = file.display_title || file.accession;
-                        var downloadHref = (file && file.attachment && file.attachment.download) || null; // IDK correct download url.
+                        var downloadHref = (file && file.attachment && file.attachment.href) || null; // IDK correct download url.
                         return (
                             <div className="row" key={atId || title || i}>
                                 <div className="col-xs-12 col-md-4 title">
@@ -35,7 +35,7 @@ var FilesInSetTable = module.exports = React.createClass({
                                     { file.description }
                                 </div>
                                 <div className="col-xs-12 col-md-2 text-right download-button">
-                                    <Button bsSize="small" href={ downloadHref } download disabled>
+                                    <Button bsSize="small" href={ downloadHref } download>
                                         <i className="icon icon-download"/>
                                     </Button>
                                 </div>
