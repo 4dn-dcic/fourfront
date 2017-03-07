@@ -33,6 +33,13 @@
 
 }
 
+@media screen and (max-width : $screen-xs-max){
+    .facet-charts {
+        height : auto !important;
+        margin-top: 20px;
+    }
+}
+
 /** Individual and standalone chart styles **/
 
 .chart-container {
@@ -267,6 +274,7 @@
             position: relative;
             font-size: 0.85rem;
             line-height: 14px;
+            transition: width .75s ease-out, left .75s ease-out;
             &.auto-rotation {
                 transition: transform 1s, left 1s;
                 white-space: nowrap;
@@ -365,7 +373,7 @@
             left: 0;
             right: 0;
             text-align: right;
-            transition: bottom .75s ease-out;
+            //transition: bottom .75s ease-out;
             z-index: 0;
             &:before {
                 content : '';
@@ -383,6 +391,12 @@
                 display: block;
                 top: -1px;
                 transition: width .75s;
+                
+            }
+            &[data-tick-index="0"]{
+                .axis-bg-line {
+                    border-color: #eee;
+                }
             }
             &.last {
                 .axis-label {
@@ -404,7 +418,7 @@
     }
 
     .chart-bar {
-        transition: transform .75s ease-out, opacity .5s;
+        transition: transform .75s ease-out, opacity .5s, width .75s ease-out;
         position: absolute;
 
         .bar-top-label {
@@ -483,6 +497,167 @@
         }
     }
 
+    .silhouette {
+        opacity : 0.75;
+        pointer-events: none;
+        .chart-bar {
+            transition: none !important;
+            .bar-part {
+                transition: none !important;
+            }
+        }
+    }
+
+}
+
+@media screen and (max-width : $screen-xs-max){
+    .bar-plot-chart {
+        position: relative;
+    }
+}
+
+.bar-plot-chart-controls-wrapper {
+
+    position: relative;
+
+    .overlay {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        z-index: 10;
+        .y-axis-top-label {
+            position: absolute;
+            transform: rotate3d(0,0,1,-90deg);
+            text-align: center;
+            transform-origin: 0 100%;
+            z-index: 100;
+            @media screen and (min-width: 1250px){
+                left: -10px;
+            }
+
+            .dropdown-toggle.btn.btn-xs {
+                padding-left: 8px;
+                padding-right: 8px;
+            }
+
+            .dropdown-menu {
+                transform: rotate3d(0,0,1,90deg);
+                top: 54px;
+                z-index: 100;
+            }
+        }
+
+        .toggle-zoom {
+            position: absolute;
+            top : 3px;
+            right: 0px;
+            font-size: 1.35rem;
+            cursor: pointer;
+            user-select: none;
+            .text {
+                font-size: 0.85rem;
+                line-height: 0.9rem;
+                margin-right: 10px;
+                display: inline-block;
+                margin-top: -5px;
+                vertical-align: middle;
+                text-align: right;
+            }
+            i.icon {
+                transition : transform .75s ease-out, opacity .75s ease-out;
+            }
+            &.no-click {
+                cursor: default;
+                pointer-events: none;
+                i.icon {
+                    opacity: 0.25;
+                    transform: scale3d(0.8,0.8,0.8);
+                }
+            }
+        }
+    }
+
+    .x-axis-right-label {
+        position: relative;
+        h6, h5, h4 {
+            font-weight: 500;
+            margin-bottom: 3px;
+        }
+    }
+
+    .dropdown {
+        text-align: left;
+    }
+
+    .chart-aside{
+        .dropdown {
+            width : 100%;
+            > button {
+                width: 100%;
+                text-align: left;
+                span.caret {
+                    position: absolute;
+                    right: 12px;
+                    top: 14px;
+                }
+            }
+        }
+        .legend-container {
+            margin-bottom: 8px;
+            border-bottom: 1px dotted #eee;
+            overflow-y: auto;
+        }
+    }
+
+    .dropdown-title-container {
+        vertical-align: middle;
+        text-align: left;
+        display: inline-block;
+        padding-right: 5px;
+        min-width: 120px;
+        > small {
+            font-weight: 400;
+        }
+
+        h4, h5, h6 {
+            margin : 0;
+            font-weight: 600;
+        }
+    }
+
+    .controls {
+
+        text-align: right;
+
+        .btn-toolbar {
+            display: inline-block;
+        }
+
+        
+
+    }
+}
+
+@media screen and (max-width : $screen-xs-max){
+    .bar-plot-chart-controls-wrapper {
+        position: relative;
+
+        .overlay {
+            .y-axis-top-label {
+                left: 10px;
+            }
+        }
+
+        .chart-aside {
+            height : auto !important;
+            margin-top: 30px;
+            .legend-container {
+                height : auto !important;
+                overflow: visible !important;
+            }
+        }
+    }
 }
 
 /** Sunburst Chart Style(s) **/

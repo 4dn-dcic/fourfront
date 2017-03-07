@@ -415,6 +415,9 @@ var ProfileWorkFields = React.createClass({
 
         if (!this.state.details_lab){
             this.isLabFetched = FormattedInfoBlock.onMountMaybeFetch.call(this, 'lab', this.props.user.lab, (detail) => this.updateAwardsList([detail]) );
+            if (!this.isLabFetched){
+                this.updateAwardsList([this.props.user.lab]);
+            }
         }
 
         if (typeof this.props.user.lab == 'string' && !this.state.details_lab){
@@ -436,13 +439,21 @@ var ProfileWorkFields = React.createClass({
     getAwardsList : function(labDetails){
         // Awards are embedded within labs, so we get full details.
         var awardsList = [];
+
+        function addAwardToList(award){
+            if (awardsList.indexOf(labDetails[i].awards[j]) === -1){
+                awardsList.push(labDetails[i].awards[j]);
+            }
+        }
+
         for (var i = 0; i < labDetails.length; i++){
             if (typeof labDetails[i].awards !== 'undefined' && Array.isArray(labDetails[i].awards)){
                 for (var j = 0; j < labDetails[i].awards.length; j++){
-                    if (awardsList.indexOf(labDetails[i].awards[j]) === -1) awardsList.push(labDetails[i].awards[j]);
+                    addAwardToList(labDetails[i].awards[j]);
                 }
             }
         }
+        
         return awardsList;
     },
 
