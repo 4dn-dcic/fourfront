@@ -11,8 +11,7 @@ from pyramid.security import (
     Everyone,
 )
 from .base import (
-    Item,
-    add_default_embeds
+    Item
     # paths_filtered_by_status,
 )
 from snovault import (
@@ -26,8 +25,7 @@ from snovault.storage import User as AuthUser
 from snovault.schema_utils import validate_request
 from snovault.crud_views import collection_add
 from snovault.calculated import calculate_properties
-from snovault.resource_views import item_view_object
-from snovault.util import expand_path
+from snovault.resource_views import item_view_page
 
 
 ONLY_ADMIN_VIEW_DETAILS = [
@@ -37,6 +35,8 @@ ONLY_ADMIN_VIEW_DETAILS = [
     (Allow, 'remoteuser.EMBED', ['view']),
     (Deny, Everyone, ['view', 'view_details', 'edit']),
 ]
+
+SUBMITTER_CREATE = []
 
 ONLY_OWNER_EDIT = [
     (Allow, 'role.owner', 'view'),
@@ -68,13 +68,14 @@ class User(Item):
     schema = load_schema('encoded:schemas/user.json')
     # Avoid access_keys reverse link so editing access keys does not reindex content.
     embedded = ['lab.awards']
-    embedded = add_default_embeds(embedded, schema)
+
     STATUS_ACL = {
         'current': ONLY_OWNER_EDIT,
         'deleted': USER_DELETED,
         'replaced': USER_DELETED,
         'revoked': ONLY_ADMIN_VIEW_DETAILS,
     }
+
 
     @calculated_property(schema={
         "title": "Title",
@@ -83,7 +84,6 @@ class User(Item):
     def title(self, first_name, last_name):
         """return first and last name."""
         title = u'{} {}'.format(first_name, last_name)
-        # import pdb; pdb.set_trace()
         return title
 
     def display_title(self):
@@ -114,30 +114,16 @@ class User(Item):
 @view_config(context=User, permission='view', request_method='GET', name='page')
 def user_page_view(context, request):
     """smth."""
-    if request.has_permission('view_details'):
-        properties = item_view_object(context, request)
-    else:
-        item_path = request.resource_path(context)
-        properties = request.embed(item_path, '@@object')
-    for path in context.embedded:
-        expand_path(request, properties, path)
-    calculated = calculate_properties(context, request, properties, category='page')
-    properties.update(calculated)
+    properties = item_view_page(context, request)
+    if not request.has_permission('view_details'):
+        filtered = {}
+        for key in ['@id', '@type', 'uuid', 'lab', 'title', 'link_id', 'display_title']:
+            try:
+                filtered[key] = properties[key]
+            except KeyError:
+                pass
+        return filtered
     return properties
-
-
-@view_config(context=User, permission='view', request_method='GET',
-             name='object')
-def user_basic_view(context, request):
-    """smth."""
-    properties = item_view_object(context, request)
-    filtered = {}
-    for key in ['@id', '@type', 'uuid', 'lab', 'title', 'link_id', 'display_title']:
-        try:
-            filtered[key] = properties[key]
-        except KeyError:
-            pass
-    return filtered
 
 
 @view_config(context=User.Collection, permission='add', request_method='POST',

@@ -7,9 +7,13 @@ var vizUtil = require('./utilities');
 var { RotatedLabel, Legend } = require('./components');
 var { console, object, isServerSide, expFxn, Filters, layout } = require('../util');
 var { highlightTerm, unhighlightTerms } = require('./../facetlist');
-
 var { ButtonToolbar, ButtonGroup, Button, DropdownButton, MenuItem } = require('react-bootstrap');
 
+/**
+ * Component for BarPlotChart.
+ * 
+ * @module {React.Component} viz/BarPlotChart
+ */
 
 var BarPlot = React.createClass({
 

@@ -68,7 +68,7 @@ var AccessKeyTable = React.createClass({
                 <tr key={key.access_key_id}>
                     <td className="access-key-id">{ key.access_key_id }</td>
                     <td>
-                        { key.date_created ? 
+                        { key.date_created ?
                             <DateUtility.LocalizedTime
                                 timestamp={key.date_created}
                                 formatType="date-time-md"
@@ -259,7 +259,7 @@ var User = module.exports.User = React.createClass({
     },
 
     mayEdit : function(){
-        return this.context.listActionsFor('context').filter(function(action){ 
+        return this.context.listActionsFor('context').filter(function(action){
             return action.name && action.name === 'edit';
         }).length > 0 ? true : false;
     },
@@ -334,7 +334,7 @@ var User = module.exports.User = React.createClass({
                         </div>
 
                     </div>
-                    
+
                     { typeof user.access_keys !== 'undefined' && typeof user.submits_for !== 'undefined' ?
                         <div className="access-keys-container">
                             <h3 className="text-300">Access Keys</h3>
@@ -363,7 +363,7 @@ var ProfileContactFields = React.createClass({
         var user = this.props.user;
 
         return (
-            <FieldSet 
+            <FieldSet
                 context={user}
                 parent={this.props.parent}
                 className="profile-contact-fields"
@@ -371,7 +371,7 @@ var ProfileContactFields = React.createClass({
                 objectType="User"
                 schemas={this.props.schemas}
             >
-                
+
                 <EditableField label="Email" labelID="email" placeholder="name@example.com" fallbackText="No email address" fieldType="email" disabled={true}>
                     { this.icon('envelope') }&nbsp; <a href={'mailto:' + user.email}>{ user.email }</a>
                 </EditableField>
@@ -379,15 +379,15 @@ var ProfileContactFields = React.createClass({
                 <EditableField label="Phone" labelID="phone1" placeholder="17775551234 x47" fallbackText="No phone number" fieldType="phone">
                     { this.icon('phone') }&nbsp; { user.phone1 }
                 </EditableField>
-                
+
                 <EditableField label="Fax" labelID="fax" placeholder="17775554321" fallbackText="No fax number" fieldType="phone">
                     { this.icon('fax') }&nbsp; { user.fax }
                 </EditableField>
-                
+
                 <EditableField label="Skype" labelID="skype" fallbackText="No skype ID" fieldType="username">
                     { this.icon('skype') }&nbsp; { user.skype }
                 </EditableField>
-                
+
             </FieldSet>
         );
     }
@@ -422,17 +422,17 @@ var ProfileWorkFields = React.createClass({
 
         if (typeof this.props.user.lab == 'string' && !this.state.details_lab){
             // Fetch lab info & update into User instance state via the -for mixin-like-usage ajaxPropertyDetails func.
-            
+
             //FormattedInfoBlock.ajaxPropertyDetails.call(this, this.props.user.lab, 'lab', (detail) => this.updateAwardsList([detail]) );
         }
     },
 
     componentWillUnmount : function(){ delete this.isLabFetched; },
 
-    /** 
+    /**
      * Get list of all awards (unique) from list of labs.
      * ToDo : Migrate somewhere more static-cy.
-     * 
+     *
      * @param {Object[]} labDetails - Array of lab objects with embedded award details.
      * @return {Object[]} List of all unique awards in labs.
      */
@@ -459,7 +459,7 @@ var ProfileWorkFields = React.createClass({
 
     /**
      * Update state.awards_list with award details from list of lab details.
-     * 
+     *
      * @param {Object[]} labDetails - Array of lab objects with embedded award details.
      */
     updateAwardsList : function(labDetails){
@@ -482,6 +482,9 @@ var ProfileWorkFields = React.createClass({
 
     render : function(){
         var user = this.props.user;
+        if (user.submits_for && user.submits_for.length > 0){
+            var submits_for = user.submits_for;
+        }
         // THESE FIELDS ARE NOT EDITABLE.
         // To be modified by admins, potentially w/ exception of 'Primary Lab' (e.g. select from submits_for list).
         return (
@@ -496,7 +499,7 @@ var ProfileWorkFields = React.createClass({
                     <div id="lab" className="col-sm-9 value">
                         { typeof user.lab !== 'undefined' ?
                             FormattedInfoBlock.Lab(this.isLabFetched ? this.state.details_lab : user.lab, false, false)
-                            : 
+                            :
                             <span className="not-set">No Labs</span>
                         }
                     </div>
@@ -511,16 +514,35 @@ var ProfileWorkFields = React.createClass({
                 </div>
                 <div className="row field-entry submits_for">
                     <div className="col-sm-3 text-right text-left-xs">
-                        <label htmlFor="submits_for">Submit For</label>
+                        <label htmlFor="submits_for">Submits For</label>
                     </div>
                     <div className="col-sm-9 value">
-                        <FormattedInfoBlock.List
-                            renderItem={(detail) => FormattedInfoBlock.Lab(detail, false, false, false) }
-                            endpoints={user.submits_for}
-                            propertyName="submits_for"
-                            fallbackMsg="Not submitting for any organizations"
-                            ajaxCallback={this.updateAwardsList}
-                        />
+                        <ul className="formatted-info-panel-list loaded transitioned" id="submits_for">
+                            {submits_for ?
+                                submits_for.map(function(submit_val){
+                                    return (
+                                        <li className="submits_for-item" key={submit_val.link_id}>
+                                            <div className="formatted-info-panel no-icon no-label no-details loaded transitioned lab">
+                                                <div className="row loaded">
+                                                    <div className="details-col col-sm-12">
+                                                        <h5 class="block-title">
+                                                            <a href={submit_val.link_id.replace(/~/g, "/")}>
+                                                                {submit_val.display_title}
+                                                            </a>
+                                                        </h5>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    );
+                                })
+                                :
+                                <span className="not-set">
+                                    Not submitting for any organizations
+                                </span>
+                            }
+                        </ul>
+
                     </div>
                 </div>
                 <div className="row field-entry awards">
@@ -586,7 +608,7 @@ var ImpersonateUserForm = React.createClass({
     render: function() {
         var form = <BasicForm submitImpersonate={this.handleSubmit} />;
         return (
-            <div>
+            <div style={{marginTop : 30}}>
                 <h2>Impersonate User</h2>
                 {form}
             </div>
@@ -598,9 +620,10 @@ var ImpersonateUserForm = React.createClass({
         var jsonData = JSON.stringify({'userid':data});
         var callbackFxn = function(payload) {
             alert('Success! ' + data + ' is being impersonated.');
-            if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
-                localStorage.setItem("user_info", JSON.stringify(payload));
-            }
+            //if(typeof(Storage) !== 'undefined'){ // check if localStorage supported
+            //    localStorage.setItem("user_info", JSON.stringify(payload));
+            //}
+            JWT.saveUserInfo(payload);
             this.context.updateUserInfo();
             this.context.navigate('/');
         }.bind(this);
@@ -608,13 +631,13 @@ var ImpersonateUserForm = React.createClass({
             alert('Impersonation unsuccessful.\nPlease check to make sure the provided email is correct.');
         };
 
-        var userInfo = localStorage.getItem('user_info') || null;
-        var idToken = userInfo ? JSON.parse(userInfo).id_token : null;
-        var reqHeaders = {'Accept': 'application/json'};
-        if(userInfo){
-            reqHeaders['Authorization'] = 'Bearer '+idToken;
-        }
-        ajax.load(url, callbackFxn, 'POST', fallbackFxn, jsonData, reqHeaders);
+        //var userInfo = localStorage.getItem('user_info') || null;
+        //var idToken = userInfo ? JSON.parse(userInfo).id_token : null;
+        //var reqHeaders = {'Accept': 'application/json'};
+        //if(userInfo){
+        //    reqHeaders['Authorization'] = 'Bearer '+idToken;
+        //}
+        ajax.load(url, callbackFxn, 'POST', fallbackFxn, jsonData);
     }
 });
 globals.content_views.register(ImpersonateUserForm, 'Portal', 'impersonate-user');

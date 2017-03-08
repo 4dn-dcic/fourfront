@@ -5,6 +5,10 @@ var { Alert, Fade } = require('react-bootstrap');
 var _ = require('underscore');
 var store = require('../store');
 
+/**
+ * @module {React.Component} alerts
+ */
+
 var Alerts = module.exports = React.createClass({
 
     statics : {

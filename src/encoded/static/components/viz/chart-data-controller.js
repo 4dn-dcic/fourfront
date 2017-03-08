@@ -4,10 +4,8 @@ var React = require('react');
 var _ = require('underscore');
 var { expFxn, Filters, ajax, console, layout, isServerSide } = require('./../util');
 
-/** 
- * This is a utility to manage charts' experiment data in one global place and distribute to charts throughout UI.
- */
 
+/** @private; @ignore */
 var refs = {
     store       : null,
     requestURLBase : null,//'/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&from=0',
@@ -35,6 +33,7 @@ var refs = {
     expSetFilters : null,
 };
 
+/** @private; @ignore */
 var state = {
     experiments         : null,
     filteredExperiments : null,
@@ -123,61 +122,109 @@ var state = {
 
 /** Private state & functions **/
 
+/** @private; @ignore */
 var providerCallbacks = {};
+/** @private; @ignore */
 var providerLoadStartCallbacks = {};
 
-function notifyUpdateCallbacks(){ // After load & update, call registered Update callbacks.
+/**
+ * After load & update, call registered Update callbacks.
+ * @private 
+ */
+function notifyUpdateCallbacks(){
     console.log('Notifying update callbacks',_.keys(providerCallbacks));
     _.forEach(providerCallbacks, function(pcb){
         pcb(state);
     });
 }
 
-function notifyLoadStartCallbacks(){ // Before load, call registered Load Start callbacks.
+/**
+ * Before load, call registered Load Start callbacks.
+ * @private 
+ */
+function notifyLoadStartCallbacks(){
     console.log('Notifying load start callbacks', _.keys(providerLoadStartCallbacks));
     _.forEach(providerLoadStartCallbacks, function(plscb){
         plscb(state);
     });
 }
 
-/** @type {null|function} */
+/** 
+ * @private
+ * @ignore
+ * @type {null|function}
+ */
 var reduxSubscription = null;
 
-/** @type {boolean} */
+/**
+ * @private
+ * @ignore
+ * @type {boolean}
+ */
 var isInitialized = false;
 
-/** @type {number} */
+/**
+ * @private
+ * @ignore
+ * @type {number}
+ */
 var lastTimeSyncCalled = 0;
 
-/** @type {null|string} */
+/**
+ * @private
+ * @ignore
+ * @type {null|string}
+ */
 var resyncInterval = null;
 
-/** @type {boolean} */
+/**
+ * @private
+ * @ignore
+ * @type {boolean}
+ */
 var isWindowActive = false;
+
+
+/** 
+ * This is a utility to manage charts' experiment data in one global place and distribute to charts throughout UI.
+ * 
+ * @module {Object} viz/chart-data-controller
+ */
 
 var ChartDataController = module.exports = {
 
     /**
      * Use this component to wrap individual charts and provide them with source of experiments data via
      * props.experiments and props.filteredExperiments. Also provides expSetFilters from redux store.
+     * 
+     * @namespace Provider
+     * @memberof viz/chart-data-controller
      */
     Provider : React.createClass({
 
+        /**
+         * @memberof viz/chart-data-controller.Provider
+         * @prop {string} id - Unique ID.
+         * @prop {Object} children - Must be a Chart or Chart controller component.
+         */
         propTypes : {
             'id' : React.PropTypes.string.isRequired,
             'children' : React.PropTypes.object.isRequired
         },
 
+        /** @memberof viz/chart-data-controller.Provider */
         componentWillMount : function(){
             ChartDataController.registerUpdateCallback(()=>{
                 this.forceUpdate();
             }, this.props.id);
         },
 
+        /** @memberof viz/chart-data-controller.Provider */
         componentWillUnmount : function(){
             ChartDataController.unregisterUpdateCallback(this.props.id);
         },
 
+        /** @memberof viz/chart-data-controller.Provider */
         render : function(){
             // Set 'experiments' and 'filteredExperiments' props on props.children.
             var childChartProps = _.extend({}, this.props.children.props);
@@ -294,6 +341,11 @@ var ChartDataController = module.exports = {
         };
     },
 
+    /**
+     * The opposite of registerUpdateCallback.
+     * @param {string} uniqueID - ID given alongside initially-registered callback.
+     * @returns {undefined}
+     */
     unregisterUpdateCallback : function(uniqueID){
         if (typeof uniqueID !== 'string') throw Error("uniqueID must be a string.");
         delete providerCallbacks[uniqueID];
@@ -315,13 +367,23 @@ var ChartDataController = module.exports = {
         };
     },
 
+    /**
+     * The opposite of registerLoadStartCallback.
+     * @param {string} uniqueID - ID given alongside initially-registered callback.
+     * @returns {undefined}
+     */
     unregisterLoadStartCallback : function(uniqueID){
         if (typeof uniqueID !== 'string') throw Error("uniqueID must be a string.");
         delete providerLoadStartCallbacks[uniqueID];
     },
 
+    /** 
+     * Get current state. Similar to Redux's store.getState().
+     * @returns {Object}
+     */
     getState : function(){ return state; },
 
+    /** @private */
     setState : function(updatedState = {}, callback = null){
         
         var expsChanged = (
@@ -352,6 +414,7 @@ var ChartDataController = module.exports = {
         ChartDataController.fetchUnfilteredAndFilteredExperiments(null, callback);
     },
 
+    /** @ignore */
     handleUpdatedFilters : function(expSetFilters, callback){
         if (_.keys(expSetFilters).length === 0 && Array.isArray(state.experiments)){
             ChartDataController.setState({ filteredExperiments : null }, callback);
@@ -360,6 +423,10 @@ var ChartDataController = module.exports = {
         }
     },
 
+    /**
+     * Update stats in top left corner of page, if updateState param was passed in during initialization.
+     * @returns {undefined}
+     */
     updateStats : function(){
         if (typeof refs.updateStats !== 'function'){
             throw Error("Not initialized with updateStats callback.");
@@ -395,7 +462,7 @@ var ChartDataController = module.exports = {
     },
 
 
-
+    /** @ignore */
     fetchUnfilteredAndFilteredExperiments : function(reduxStoreState = null, callback = null){
         if (!reduxStoreState || !reduxStoreState.expSetFilters || !reduxStoreState.href){
             reduxStoreState = refs.store.getState();
@@ -441,6 +508,7 @@ var ChartDataController = module.exports = {
 
     },
 
+    /** @ignore */
     fetchAndSetUnfilteredExperiments : function(callback = null){
         notifyLoadStartCallbacks();
         ajax.load(
@@ -453,6 +521,7 @@ var ChartDataController = module.exports = {
         );
     },
 
+    /** @ignore */
     fetchAndSetFilteredExperiments : function(callback = null){
         notifyLoadStartCallbacks();
         ajax.load(
@@ -470,12 +539,18 @@ var ChartDataController = module.exports = {
         );
     },
 
+    /**
+     * @ignore
+     */
     getFieldsRequiredURLQueryPart : function(fields = refs.fieldsToFetch){
         return fields.map(function(fieldToIncludeInResult){
             return '&field=' + fieldToIncludeInResult;
         }).join('');
     },
 
+    /**
+     * @ignore
+     */
     getFilteredContextHref : function(expSetFilters, href){
         if (!expSetFilters || !href){
             var storeState = refs.store.getState();

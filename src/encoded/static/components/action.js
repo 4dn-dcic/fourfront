@@ -168,12 +168,14 @@ var Action = module.exports = React.createClass({
                     this.setState({'validated': 2});
                     return;
                 }
-                lab = data.submits_for[0];
+                // use first lab for now
+                var submits_for = data.submits_for[0];
+                lab = submits_for['@id'] ? submits_for['@id'] : submits_for.link_id.replace(/~/g, "/");
             }
             ajax.promise(lab).then(lab_data => {
                 if (this.context.contentTypeIsJSON(lab_data)){
                     if(!lab_data.awards || lab_data.awards.length == 0){
-                        console.log('THIS LAB FOR ACCOUNT LACKS AN AWARD');
+                        console.log('THE LAB FOR THIS ACCOUNT LACKS AN AWARD');
                         this.setState({'validated': 2});
                         return;
                     }
@@ -181,7 +183,7 @@ var Action = module.exports = React.createClass({
                     award = lab_data.awards[0];
                 }
                 if(this.state.thisSchema.properties.award){
-                    finalizedContext.award = award['@id'] ? award['@id'] : award;
+                    finalizedContext.award = award['@id'] ? award['@id'] : award.link_id.replace(/~/g, "/");
                 }
                 if(this.state.thisSchema.properties.lab){
                     finalizedContext.lab = lab;
@@ -854,6 +856,7 @@ var FileInput = React.createClass({
     handleChange: function(e){
         var acceptedTypes = [
             "application/pdf",
+            "application/zip",
             "text/plain",
             "text/tab-separated-values",
             "image/jpeg",
@@ -868,7 +871,7 @@ var FileInput = React.createClass({
         var file = e.target.files[0];
         if ((!file.type || !_.contains(acceptedTypes, file.type))){
             this.refs.fileInput.value = '';
-            alert('File upload failed! File must of one of the following types: application/pdf, text/plain, text/tab-separated-values, image/jpeg, image/tiff, image/gif, text/html, image/png, image/svs, text/autosql.');
+            alert('File upload failed! File must of one of the following types: ' + acceptedTypes.toString());
             return;
         }else{
             attachment_props.type = file.type;

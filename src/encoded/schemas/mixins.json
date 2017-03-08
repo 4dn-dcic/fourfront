@@ -229,6 +229,7 @@
                     "type": "string",
                     "enum": [
                         "application/pdf",
+                        "application/zip",
                         "text/plain",
                         "text/tab-separated-values",
                         "image/jpeg",
