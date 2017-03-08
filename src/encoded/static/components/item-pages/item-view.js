@@ -428,21 +428,29 @@ var ItemView = module.exports = React.createClass({
                             />
                         </div>
 
+                        <h5 className="item-page-detail-toggle-button btn btn-info btn-block" onClick={()=>{
+                            this.setState({ collapsed : !this.state.collapsed });
+                        }}>{ this.state.collapsed ? "See more information" : "Hide" }</h5>
+
                     </div>
 
 
                     <div className="col-xs-12 col-md-4 item-info-area section">
 
-                        <hr/>
-
-                        <h5 className="item-page-detail-toggle-button btn btn-default btn-block" onClick={()=>{
-                            this.setState({ collapsed : !this.state.collapsed });
-                        }}>{ this.state.collapsed ? "See more information" : "Hide" }</h5>
-
                         { typeof context.lab !== 'undefined' || typeof context.award !== 'undefined' ?
                         <hr/>
                         : null }
 
+                        { typeof context.submitted_by !== 'undefined' ?
+                        <div className>
+                            { FormattedInfoBlock.User(
+                                this.state && typeof this.state.details_submitted_by !== 'undefined' ?
+                                this.state.details_submitted_by : context.submitted_by
+                            ) }
+                        </div>
+                        : null }
+
+                        { typeof context.lab !== 'undefined' ? <hr/> : null }
                         { typeof context.lab !== 'undefined' ?
                         <div className>
                             { FormattedInfoBlock.Lab(
@@ -452,6 +460,7 @@ var ItemView = module.exports = React.createClass({
                         </div>
                         : null }
 
+                        { typeof context.award !== 'undefined' ? <hr/> : null }
                         { typeof context.award !== 'undefined' ?
                         <div className>
                             { FormattedInfoBlock.Award(

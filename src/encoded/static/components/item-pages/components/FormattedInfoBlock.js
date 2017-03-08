@@ -288,6 +288,25 @@ var FormattedInfoBlock = module.exports = React.createClass({
             );
         },
 
+        /**
+         * Preset generator for User detail block.
+         * @see FormattedInfoBlock.Lab
+         */
+        User : function(details_user, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
+            if (details_user && typeof details_user.error !== 'undefined' && details_user.error) {
+                return FormattedInfoBlock.Error.apply(this, arguments);
+            }
+            return FormattedInfoBlock.generate(
+                details_user,
+                typeof includeIcon == 'string' ? includeIcon : (includeIcon == true ? "icon-user" : null),
+                includeLabel ? (typeof includeLabel === 'string' ? includeLabel : "Submitted By") : null,
+                details_user && includeDetail ? details_user.lab : null,
+                'award',
+                'project',
+                key
+            );
+        },
+
         Error : function(details_error, includeIcon = true, includeLabel = true, includeDetail = true, key = null){
             return FormattedInfoBlock.generate(
                 details_error.body,
@@ -306,8 +325,13 @@ var FormattedInfoBlock = module.exports = React.createClass({
                     key={key}
                     label={label}
                     iconClass={iconClass}
-                    title={(detail && detail.title) || null }
-                    titleHref={detail && detail['@id'] ? detail['@id'] : null }
+                    title={(detail && (detail.display_title || detail.title)) || null }
+                    titleHref={
+                        (detail && 
+                            (detail['@id'] || 
+                                (detail.link_id && detail.link_id.replace(/~/g, "/"))
+                        )) || null
+                    }
                     extraContainerClassName={extraContainerClassName}
                     extraDetailClassName={extraDetailClassName}
                     loading={!detail}
