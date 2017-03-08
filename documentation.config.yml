@@ -19,7 +19,12 @@ sections : [
     {
         "title" : "Getting Started",
         "path" : "./README.rst",
-        "saveAs" : "getting-started.rst"
+        "saveAs" : "README.rst"
+    },
+    {
+        "title" : "Overview",
+        "path" : "./docs/overview.rst",
+        "saveAs" : "overview.rst"
     },
     {
         "title" : "ElasticBeanstalk Deployment",
@@ -30,6 +35,16 @@ sections : [
         "title" : "Database Overview",
         "path" : "./docs/database.rst",
         "saveAs" : "database.rst"
+    },
+    {
+        "title" : "Object Lifecycle",
+        "path" : "./docs/object-lifecycle.rst",
+        "saveAs" : "object-lifecycle.rst"
+    },
+    {
+        "title" : "Authentication",
+        "path" : "./docs/auth.rst",
+        "saveAs" : "authentication.rst"
     },
     {
         "title" : "Document Invalidation",
