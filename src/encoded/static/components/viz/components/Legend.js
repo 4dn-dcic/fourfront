@@ -69,8 +69,8 @@ var Legend = module.exports = React.createClass({
                     term = _.uniq(term);
                     if (term.length === 1) term = term[0];
                     else {
-                        console.warn('Multiple unique terms for field ' + field.field, terms);
-                        term = terms[0];
+                        console.warn('Multiple unique terms for field ' + field.field, term);
+                        term = term[0];
                     }
                 }
                 if (typeof legendFieldItem.terms[term] === 'object') return; // aka continue.
