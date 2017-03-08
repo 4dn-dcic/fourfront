@@ -8,6 +8,7 @@ from snovault import (
     abstract_collection,
 )
 from snovault.schema_utils import schema_validator
+from snovault.attachment import ItemWithAttachment
 from .base import (
     Item
 )
@@ -120,8 +121,7 @@ class FileSetCalibration(FileSet):
     embedded = ['files_in_set.submitted_by',
                 'files_in_set.accession',
                 'files_in_set.description',
-                'files_in_set.attachment.download',
-                'files_in_set.attachment.href',
+                'files_in_set.attachment'
                 ]
 
 
@@ -331,7 +331,7 @@ class FileReference(File):
         'title': 'Calibration Files',
         'description': 'Listing of Calibration Files',
     })
-class FileCalibration(File):
+class FileCalibration(ItemWithAttachment, File):
     """Collection for individual calibration files."""
     item_type = 'file_calibration'
     schema = load_schema('encoded:schemas/file_calibration.json')
