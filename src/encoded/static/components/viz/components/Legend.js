@@ -6,15 +6,27 @@ var vizUtil = require('./../utilities');
 var { highlightTerm, unhighlightTerms } = require('./../../facetlist');
 var { console, isServerSide, Filters, object } = require('./../../util');
 
+
 var Legend = module.exports = React.createClass({
 
     statics : {
+
+        /**
+         * React component which represents a "Field", which might have multiple terms.
+         * 
+         * @memberof module:viz/components.Legend
+         * @prop {string} field - Field name, in object-dot-notation.
+         * @prop {boolean} includeFieldTitle - Whether field title should be included at the top of list of terms.
+         * @prop {Object[]} terms - Terms which belong to this field, in the form of objects. 
+         * @type React.Component
+         */
         Field : React.createClass({
 
             getDefaultProps : function(){
                 return { 'includeFieldTitle' : true };
             },
 
+            /** @ignore */
             render : function(){
                 return (
                     <div className="field" data-field={this.props.field} onMouseLeave={unhighlightTerms.bind(this, this.props.field)}>
@@ -29,6 +41,15 @@ var Legend = module.exports = React.createClass({
             }
         }),
 
+        /**
+         * React component which represents a Term item.
+         * 
+         * @memberof module:viz/components.Legend
+         * @prop {string} field - Name of field to which this term belongs, in object-dot-notation.
+         * @prop {string} term - Name of term.
+         * @prop {string|Object} color - Color to show next to term, should be string or RGBColor object.
+         * @type React.Component
+         */
         Term : React.createClass({
 
             render : function(){
@@ -69,8 +90,8 @@ var Legend = module.exports = React.createClass({
                     term = _.uniq(term);
                     if (term.length === 1) term = term[0];
                     else {
-                        console.warn('Multiple unique terms for field ' + field.field, terms);
-                        term = terms[0];
+                        console.warn('Multiple unique terms for field ' + field.field, term);
+                        term = term[0];
                     }
                 }
                 if (typeof legendFieldItem.terms[term] === 'object') return; // aka continue.

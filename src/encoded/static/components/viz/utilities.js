@@ -1,5 +1,6 @@
 'use strict';
 
+/** @ignore */
 var React = require('react');
 var _ = require('underscore');
 var d3 = require('d3');
@@ -11,9 +12,15 @@ var { console, isServerSide } = require('./../util');
  * @module {Object} viz/utilities
  */
 
+/** @alias module:viz/utilities */
 var vizUtil = module.exports = {
 
-    // Taken from http://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript
+    /** 
+     * Taken from http://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript
+     * 
+     * @param {string} str - String to generate a color form.
+     * @returns {string} A CSS color.
+     */
     stringToColor : function(str) {
         var hash = 0;
         var i;
@@ -28,7 +35,7 @@ var vizUtil = module.exports = {
         return colour;
     },
     /** 
-     * Helper function for window.requestAnimationFrame.
+     * Helper function for window.requestAnimationFrame. Falls back to browser-prefixed versions if default not available, or falls back to setTimeout with 0ms delay if no requestAnimationFrame available at all.
      * 
      * @param {function} cb - Callback method.
      * @returns {undefined|string} Undefined or timeout ID if falling back to setTimeout.
@@ -46,7 +53,10 @@ var vizUtil = module.exports = {
     /** @ignore */
     colorCacheByField : {},
 
-    /** Mapping of colors to particular terms. */
+    /**
+     * Mapping of colors to particular terms.
+     * @type {Object.<string>}
+     */
     predefinedColors : {    // Keys should be all lowercase
         "human (homo sapiens)"  : "rgb(218, 112, 6)",
         "human"                 : "rgb(218, 112, 6)",
@@ -223,8 +233,9 @@ var vizUtil = module.exports = {
         // TODO
     },
 
+    /** @namespace */
     style : {
-
+        
         translate3d : function(x=0, y=0, z=0, append = 'px'){
             if (!append) append = '';
             return 'translate3d(' + x + append + ',' + y + append + ',' + z + append + ')';
