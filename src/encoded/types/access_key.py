@@ -11,7 +11,6 @@ from pyramid.security import (
 from pyramid.settings import asbool
 from .base import (
     Item,
-    add_default_embeds,
     DELETED,
     ONLY_ADMIN_VIEW,
 )
@@ -55,7 +54,6 @@ class AccessKey(Item):
     schema = load_schema('encoded:schemas/access_key.json')
     name_key = 'access_key_id'
     embedded = []
-    embedded = add_default_embeds(embedded, schema)
 
     STATUS_ACL = {
         'current': [(Allow, 'role.owner', ['view', 'edit'])] + ONLY_ADMIN_VIEW,

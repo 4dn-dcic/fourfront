@@ -4,8 +4,7 @@ from snovault import (
     load_schema,
 )
 from .base import (
-    Item,
-    add_default_embeds
+    Item
 )
 
 
@@ -22,7 +21,6 @@ class OntologyTerm(Item):
     item_type = 'ontology_term'
     schema = load_schema('encoded:schemas/ontology_term.json')
     embedded = []
-    embedded = add_default_embeds(embedded, schema)
 
 
 @collection(
@@ -41,4 +39,3 @@ class Ontology(Item):
            'synonym_terms',
            'definition_terms',
         ]
-        embedded = add_default_embeds(embedded, schema)

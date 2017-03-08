@@ -8,6 +8,11 @@ var { RotatedLabel } = require('./components');
 var { console, object, isServerSide, expFxn, Filters } = require('../util');
 var { highlightTerm, unhighlightTerms } = require('./../facetlist');
 
+/**
+ * Component for BarPlotChart.
+ * 
+ * @module {React.Component} viz/BarPlotChart
+ */
 
 var BarPlot = React.createClass({
 

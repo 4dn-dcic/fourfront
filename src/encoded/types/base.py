@@ -43,17 +43,23 @@ ONLY_ADMIN_VIEW = [
     (Deny, Everyone, ['view', 'edit'])
 ]
 
+# This acl allows item creation; it is easily overwritten in lab and user,
+# as these items should not be available for creation
+SUBMITTER_CREATE = [
+    (Allow, 'group.submitter', 'create'),
+]
+
 ALLOW_EVERYONE_VIEW = [
     (Allow, Everyone, 'view'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
 ALLOW_LAB_MEMBER_VIEW = [
     (Allow, 'role.lab_member', 'view'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
 ALLOW_VIEWING_GROUP_VIEW = [
     (Allow, 'role.viewing_group_member', 'view'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
 ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT = [
     (Allow, 'role.viewing_group_member', 'view'),
@@ -63,16 +69,16 @@ ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT = [
 ALLOW_LAB_SUBMITTER_EDIT = [
     (Allow, 'role.lab_member', 'view'),
     (Allow, 'role.lab_submitter', 'edit'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
 ALLOW_CURRENT_AND_SUBMITTER_EDIT = [
     (Allow, Everyone, 'view'),
     (Allow, 'role.lab_submitter', 'edit'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
 ALLOW_CURRENT = [
     (Allow, Everyone, 'view'),
-] + ONLY_ADMIN_VIEW
+] + ONLY_ADMIN_VIEW + SUBMITTER_CREATE
 
 DELETED = [
     (Deny, Everyone, 'visible_for_edit')
@@ -82,7 +88,7 @@ DELETED = [
 
 ALLOW_SUBMITTER_ADD = [
     (Allow, 'group.submitter', ['add']),
-]
+] + SUBMITTER_CREATE
 
 
 def paths_filtered_by_status(request, paths, exclude=('deleted', 'replaced'), include=None):
@@ -186,6 +192,8 @@ class Item(snovault.Item):
     def __init__(self, registry, models):
         super().__init__(registry, models)
         self.STATUS_ACL = self.__class__.STATUS_ACL
+        # update self.embedded here
+        self.update_embeds()
 
     @property
     def __name__(self):
@@ -308,6 +316,21 @@ class Item(snovault.Item):
                 path_str = '~'.join(path_split[:-1]) + '~'
             return path_str
 
+    def update_embeds(self):
+        """
+        extend self.embedded to have link_id and display_title for every linkTo
+        field in the properties schema and the schema of all calculated properties
+        (this is created here)
+        """
+        total_schema = self.schema['properties'].copy() if self.schema else {}
+        self.calc_props_schema = {}
+        if self.registry and self.registry['calculated_properties']:
+            for calc_props_key, calc_props_val in self.registry['calculated_properties'].props_for(self).items():
+                if calc_props_val.schema:
+                    self.calc_props_schema[calc_props_key] = calc_props_val.schema
+        total_schema.update(self.calc_props_schema)
+        self.embedded = add_default_embeds(self.embedded, total_schema)
+
 
 class SharedItem(Item):
     """An Item visible to all authenticated users while "proposed" or "in progress"."""
@@ -349,8 +372,8 @@ def edit(context, request):
 
 @snovault.calculated_property(context=Item, category='action')
 def create(context, request):
-    """smth."""
-    if request.has_permission('edit'):
+    """If the user submits for any lab, allow them to create"""
+    if request.has_permission('create'):
         return {
             'name': 'create',
             'title': 'Create',
@@ -364,27 +387,27 @@ def add_default_embeds(embeds, schema={}):
     This adds display_title to any non-fully embedded linkTo field and defaults
     to using the @id and display_title of non-embedded linkTo's
     """
-
-    embedded_base_fields = []
-    fields_to_process = []
+    if 'properties' in schema:
+        schema = schema['properties']
+    processed_fields = embeds[:] if len(embeds) > 0 else []
+    already_processed = []
     # find pre-existing fields
     for field in embeds:
         split_field = field.strip().split('.')
         if len(split_field) > 1:
             embed_path = '.'.join(split_field[:-1])
-            if embed_path not in embeds and embed_path not in fields_to_process:
-                fields_to_process.append(embed_path)
-        elif len(split_field) == 1:
-            embedded_base_fields.append(split_field)
-    processed_fields = [field + '.display_title' for field in fields_to_process]
-    processed_fields += [field + '.link_id' for field in fields_to_process]
-    if('properties' not in schema.keys()):
-        return processed_fields + embeds
+            if embed_path not in processed_fields and embed_path not in already_processed:
+                already_processed.append(embed_path)
+                if embed_path + '.link_id' not in processed_fields:
+                    processed_fields.append(embed_path + '.link_id')
+                if embed_path + '.display_title' not in processed_fields:
+                    processed_fields.append(embed_path + '.display_title')
     # automatically embed top level linkTo's not already embedded
-    for key, val in schema['properties'].items():
-        if key not in embedded_base_fields and 'linkTo' in val:
+    for key, val in schema.items():
+        check_linkTo = 'linkTo' in val or ('items' in val and 'linkTo' in val['items'])
+        if key not in processed_fields and check_linkTo:
             if key + '.link_id' not in processed_fields:
                 processed_fields.append(key + '.link_id')
             if key + '.display_title' not in processed_fields:
                 processed_fields.append(key + '.display_title')
-    return processed_fields + embeds
+    return processed_fields
