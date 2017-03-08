@@ -261,7 +261,7 @@ var App = React.createClass({
     updateStats : function(currentCounts, totalCounts = null, callback = null){
         var statsComponent = this.getStatsComponent();
         if (statsComponent){
-            if (!totalCounts){
+            if (totalCounts === null){
                 return statsComponent.updateCurrentCounts(currentCounts, callback);
             } else {
                 return statsComponent.updateCurrentAndTotalCounts(currentCounts, totalCounts, callback);
