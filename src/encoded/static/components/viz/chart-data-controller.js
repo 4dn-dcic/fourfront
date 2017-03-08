@@ -184,26 +184,38 @@ function notifyLoadStartCallbacks(){
 
 /**
  * Holds unsubcribe callback to Redux store subscription.
- * @member
  * @private
  * @ignore
+ * @type null|function
  */
 var reduxSubscription = null;
 
 /**
- * @member
  * @private
  * @ignore
+ * @type boolean
  */
 var isInitialized = false;
 
-/** @type {number} */
+/**
+ * @private
+ * @ignore
+ * @type number
+ */
 var lastTimeSyncCalled = 0;
 
-/** @type {null|string} */
+/**
+ * @private
+ * @ignore
+ * @type null|string
+ */
 var resyncInterval = null;
 
-/** @type {boolean} */
+/**
+ * @private
+ * @ignore
+ * @type boolean
+ */
 var isWindowActive = false;
 
 
