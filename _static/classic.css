@@ -23,7 +23,7 @@ body {
 }
 
 div.document {
-    background-color: #8c1829;
+    background-color: #711422;
 }
 
 div.documentwrapper {
@@ -55,7 +55,7 @@ div.footer a {
 }
 
 div.related {
-    background-color: #671421;
+    background-color: rgb(130, 29, 45);
     line-height: 30px;
     color: #ffffff;
 }
@@ -116,7 +116,7 @@ div.sphinxsidebar input {
 
 /* for collapsible sidebar */
 div#sidebarbutton {
-    background-color: rgb(130, 29, 45);
+    background-color: #711422;
 }
 
 
