@@ -10,3 +10,4 @@ module.exports.ItemHeader = require('./ItemHeader');
 module.exports.PartialList = require('./PartialList');
 module.exports.ExternalReferenceLink = require('./ExternalReferenceLink');
 module.exports.FilesInSetTable = require('./FilesInSetTable');
+module.exports.ItemFooterRow = require('./ItemFooterRow');

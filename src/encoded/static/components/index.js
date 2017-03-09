@@ -15,6 +15,7 @@ require('./static-pages/about');
 require('./facetlist');
 require('./item-pages/item-view');
 require('./item-pages/experiment-set-view');
+require('./item-pages/file-set-calibration-view');
 require('./item-pages/item');
 require('./item-pages/user');
 require('./statuslabel');
