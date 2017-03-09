@@ -34,7 +34,8 @@ var Action = module.exports = React.createClass({
             'validated': 0, // 0 = not validated, 1 = validated, 2 = error
             'thisType': contType[0],
             'thisSchema': thisSchema,
-            'errorCount': 0
+            'errorCount': 0,
+            'file': null
         };
     },
 
@@ -115,6 +116,12 @@ var Action = module.exports = React.createClass({
             contextCopy[splitField[splitField.length-1]] = value;
         }
         this.setState({'newContext': contextCopy, 'validated': 0});
+    },
+
+    modifyFile: function(file){
+        // function that updates state to contain a file upload
+        // not used for all object types
+        this.setState({'file':file});
     },
 
     generatePostButton: function(){
@@ -226,24 +233,41 @@ var Action = module.exports = React.createClass({
                         // handle file upload if this is a file
                         if(_.contains(response['@graph'][0]['@type'],'File')){
                             // FF-617. What should the body be?
-                            this.context.fetch(newID + '/upload', {
+                            this.context.fetch(newID + 'upload', {
                                 method: 'POST',
                                 headers: {
                                     'Accept': 'application/json',
                                     'Content-Type': 'application/json'
                                 },
-                                body: JSON.stringify({})
+                                body: JSON.stringify(response['@graph'][0])
                             })
                             .then(response => {
                                 console.log(response);
-                                if (!response['@graph'] || !this.context.contentTypeIsJSON(response)) throw response;
+                                if (!this.context.contentTypeIsJSON(response) || !response['@graph'] || !response['@graph'][0]['upload_credentials']['upload_url'] || !this.state.file) throw response;
                                 return response;
                             })
                             .then(response => {
-                                console.log('==>', response);
+                                console.log(this.state.file);
+                                // var upload_creds = response['@graph'][0]['upload_credentials'];
+                                // var signed_url = getS3UploadUrl(this.state.file, upload_creds);
+                                // console.log(signed_url);
+                                // this.context.fetch(signed_url, {
+                                //     method: 'PUT',
+                                //     data: this.state.file
+                                // });
+                                // .addEventListener('progress', function(e){
+                                //     if (firstProgressEvent) {
+                                // 		_this.total += e.total;
+                                // 	}
+                                // 	firstProgressEvent = false;
+                                // 	_this.loaded += (e.loaded - lastBytesLoaded);
+                                // 	_this.onProgress(_this.loaded / _this.total);
+                                //     console.log(_this.total);
+                                //     console.log(_this.loaded);
+                                // }, false);
                             }, error => {
-                                // something went wrong with fetch context. Just use an empty object
-                                console.log('thing2');
+                                // FF-617. Handle error
+                                console.log('file upload error');
                             });
                         }
                         if(typeof newID !== 'string'){
@@ -299,7 +323,7 @@ var Action = module.exports = React.createClass({
             <div className={itemClass}>
                 <h2>{this.props.edit ? editTitle : createTitle}</h2>
                 <h4 style={{'color':'#808080', 'paddingBottom': '10px'}}>Add, edit, and remove field values. Submit at the bottom of the form.</h4>
-                <FieldPanel thisType={thisType} context={context} baseContext={baseContext} schema={schema} modifyNewContext={this.modifyNewContext} reqFields={reqFields}/>
+                <FieldPanel thisType={thisType} context={context} baseContext={baseContext} schema={schema} modifyNewContext={this.modifyNewContext} modifyFile={this.modifyFile} reqFields={reqFields}/>
                 <div>{this.generatePostButton()}</div>
             </div>
         );
@@ -354,7 +378,7 @@ var FieldPanel = React.createClass({
         // @id of the whole object, may be useful down the line
         var masterID = this.props.baseContext['@id'] || this.props.baseContext.link_id.replace(/~/g, "/");
         return(
-            <BuildField value={fieldValue} key={field} schema={fieldSchema} label={field} fieldType={fieldType} fieldTip={fieldTip} enumValues={enumValues} disabled={false} modifyNewContext={this.props.modifyNewContext} required={required} masterID={masterID}/>
+            <BuildField value={fieldValue} key={field} schema={fieldSchema} label={field} fieldType={fieldType} fieldTip={fieldTip} enumValues={enumValues} disabled={false} modifyNewContext={this.props.modifyNewContext} modifyFile={this.props.modifyFile} required={required} masterID={masterID}/>
         );
     },
 
@@ -449,7 +473,7 @@ var BuildField = React.createClass({
                 <AttachmentInput {...inputProps} field={this.props.label} modifyNewContext={this.props.modifyNewContext}/>
             );
             case 's3_file_upload' : return (
-                <TestUploader {...inputProps} masterID={this.props.masterID} field={this.props.label} modifyNewContext={this.props.modifyNewContext}/>
+                <TestUploader {...inputProps} masterID={this.props.masterID} field={this.props.label} modifyNewContext={this.props.modifyNewContext} modifyFile={this.props.modifyFile}/>
             );
         }
         // Fallback
@@ -959,8 +983,7 @@ var TestUploader = React.createClass({
         var file = e.target.files[0];
         var filename = file.name ? file.name : "unknown";
         this.props.modifyNewContext(this.props.field, filename);
-        //FF-617 how should I change status? Doesn't seem like something that should be set by user
-        this.props.modifyNewContext('status', 'uploading');
+        this.props.modifyFile(file);
     },
 
     render: function(){

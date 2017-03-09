@@ -1,18 +1,18 @@
 var aws = require('aws-sdk');
 
-var getS3UploadUrl = module.exports = function (filename, filetype) {
+var getS3UploadUrl = module.exports = function (file, creds) {
     aws.config.update({
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+        accessKeyId: creds.access_key,
+        secretAccessKey: creds.secret_key
     });
 
     var s3 = new aws.S3();
 
     var params = {
-        Bucket: 'carlv',
-        Key: filename,
+        Bucket: 'encoded-4dn-files',
+        Key: file.name,
         Expires: 60,
-        ContentType: filetype
+        ContentType: file.type
     };
 
     s3.getSignedUrl('putObject', params, function(err, data) {
@@ -20,7 +20,7 @@ var getS3UploadUrl = module.exports = function (filename, filetype) {
             console.log(err);
             return null;
         } else {
-            console.log(data);
+            console.log('?? ', data);
             return data;
         }
     });
