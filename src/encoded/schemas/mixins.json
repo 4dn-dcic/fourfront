@@ -5,7 +5,7 @@
             "title": "Schema Version",
             "internal_comment":  "Do not submit, value is assigned by the server. The version of the JSON schema that the server uses to validate the object. Schema version indicates generation of schema used to save version to to enable upgrade steps to work. Individual schemas should set the default.",
             "type": "string",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "pattern": "^\\d+(\\.\\d+)*$",
             "requestMethod": []
         }
@@ -15,7 +15,7 @@
             "title": "UUID",
             "type": "string",
             "format": "uuid",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "serverDefault": "uuid4",
             "permission": "import_items",
             "requestMethod": "POST"
@@ -26,7 +26,7 @@
             "title": "Accession",
             "description": "A unique identifier to be used to reference the object.",
             "internal_comment": "Only admins are allowed to set or update this value.",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "type": "string",
             "format": "accession",
             "permission": "import_items",
@@ -37,7 +37,7 @@
             "description": "Accessions previously assigned to objects that have been merged with this object.",
             "type": "array",
             "internal_comment":"Only admins are allowed to set or update this value.",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "default": [],
             "items": {
                 "title": "Alternate Accession",
@@ -68,7 +68,7 @@
     "status": {
         "status": {
             "title": "Status",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "type": "string",
             "default": "in review by lab",
             "permission": "import_items",
@@ -88,7 +88,7 @@
         "date_created": {
             "rdfs:subPropertyOf": "dc:created",
             "title": "Date created",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "type": "string",
             "anyOf": [
                 {"format": "date-time"},
@@ -101,7 +101,7 @@
         "submitted_by": {
             "rdfs:subPropertyOf": "dc:creator",
             "title": "Submitted by",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "type": "string",
             "linkTo": "User",
             "serverDefault": "userid",
@@ -158,7 +158,7 @@
         "lab": {
             "title": "Lab",
              "description": "Lab associated with the submission.",
-             "exclude_from": "submit4dn",
+             "exclude_from": ["submit4dn", "FFedit-create"],
              "type": "string",
              "linkTo": "Lab",
              "linkSubmitsFor": true,
@@ -167,7 +167,7 @@
         "award": {
             "title": "Grant",
             "description": "Grant associated with the submission.",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "default": "",
             "type": "string",
             "linkTo": "Award"
@@ -178,7 +178,7 @@
             "title": "Notes",
             "description": "DCIC internal notes.",
             "type": "string",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "elasticsearch_mapping_index_type": {
                 "title": "Field mapping index type",
                 "description": "Defines one of three types of indexing available",

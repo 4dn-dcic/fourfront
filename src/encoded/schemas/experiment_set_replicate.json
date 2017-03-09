@@ -34,7 +34,7 @@
             "description": "Replicate experiments with biological and technical replication numbers.",
             "type": "array",
             "default": [],
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "uniqueItems": true,
             "items": {
                 "title": "Replicate experiment",

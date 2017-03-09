@@ -28,7 +28,7 @@
             "type": "string",
             "format": "uri",
             "permission": "import-items",
-            "exclude_from": "submit4dn"
+            "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "term_id": {
           "title": "Term ID",
@@ -49,7 +49,7 @@
             "description": "The definition for the ontology term.",
             "type": "string",
             "permission": "import-items",
-            "exclude_from": "submit4dn"
+            "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "preferred_name": {
           "title": "Display name",
@@ -63,7 +63,7 @@
             "title": "Synonyms",
             "description": "Synonyms for the ontology term.",
             "permission": "import-items",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "internal_comment": "Calculated from term info - cannot be used as ID",
             "type": "array",
             "items" : {
