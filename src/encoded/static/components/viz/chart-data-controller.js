@@ -43,7 +43,7 @@ var state = {
     chartFieldsBarPlot  : [
         { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
         { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
-        { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
+        { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" }
         //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
     ],
     chartFieldsHierarchy: [
@@ -149,16 +149,48 @@ function notifyLoadStartCallbacks(){
     });
 }
 
-/** @private; @ignore */
+/** 
+ * @private
+ * @ignore
+ * @type {null|function}
+ */
 var reduxSubscription = null;
-/** @private; @ignore */
+
+/**
+ * @private
+ * @ignore
+ * @type {boolean}
+ */
 var isInitialized = false;
+
+/**
+ * @private
+ * @ignore
+ * @type {number}
+ */
+var lastTimeSyncCalled = 0;
+
+/**
+ * @private
+ * @ignore
+ * @type {null|string}
+ */
+var resyncInterval = null;
+
+/**
+ * @private
+ * @ignore
+ * @type {boolean}
+ */
+var isWindowActive = false;
+
 
 /** 
  * This is a utility to manage charts' experiment data in one global place and distribute to charts throughout UI.
  * 
  * @module {Object} viz/chart-data-controller
  */
+
 var ChartDataController = module.exports = {
 
     /**
@@ -212,12 +244,14 @@ var ChartDataController = module.exports = {
      * @param {string} requestURLBase - Where to request 'all experiments' from.
      * @param {function} [updateStats] - Callback for updating QuickInfoBar, for example, with current experiments, experiment_sets, and files counts.
      * @param {function} [callback] - Optional callback for after initializing.
+     * @param {number|boolean} [resync=false] - How often to resync data, in ms, if window is active, for e.g. if submitters submitted new data while user is browsing.
      * @returns {undefined}
      */
     initialize : function(
         requestURLBase = null,
         updateStats = null,
-        callback = null
+        callback = null,
+        resync = false
     ){
         if (!refs.store) {
             refs.store = require('./../../store');
@@ -244,11 +278,41 @@ var ChartDataController = module.exports = {
             }
         });
 
-        ChartDataController.fetchUnfilteredAndFilteredExperiments(null, function(){
-            ChartDataController.updateStats();
+        isInitialized = true;
+
+        ChartDataController.sync(function(){
             callback(state);
         });
-        isInitialized = true;
+
+        // Resync periodically if resync interval supplied.
+        if (typeof resync === 'number' && !isServerSide()){
+
+            resync = Math.max(resync, 20000); // 20sec minimum
+
+            window.addEventListener('focus', function(){
+                if (lastTimeSyncCalled + resync < Date.now()){
+                    ChartDataController.sync(function(){
+                        isWindowActive = true;
+                    });
+                } else {
+                    isWindowActive = true;
+                }
+            });
+
+            window.addEventListener('blur', function(){
+                isWindowActive = false;
+            });
+
+            resyncInterval = setInterval(function(){
+                if (!isWindowActive) return;
+                console.info('Resyncing experiments & filteredExperiments for ChartDataController.');
+                ChartDataController.sync();
+            }, resync);
+
+            isWindowActive = true;
+
+        }
+
     },
 
     /**
@@ -346,6 +410,7 @@ var ChartDataController = module.exports = {
      */
     sync : function(callback){
         if (!isInitialized) throw Error("Not initialized.");
+        lastTimeSyncCalled = Date.now();
         ChartDataController.fetchUnfilteredAndFilteredExperiments(null, callback);
     },
 
@@ -369,15 +434,15 @@ var ChartDataController = module.exports = {
 
         var current, total;
 
-        function getCounts(){
-            var expSets = _.reduce(state.filteredExperiments || state.experiments, function(m,exp){
+        function getCounts(exps){
+            var expSets = _.reduce(exps, function(m,exp){
                 if (exp.experiment_sets) return new Set([...m, ..._.pluck(exp.experiment_sets, 'accession')]);
                 return m;
             }, new Set());
             return {
                 'experiment_sets' : expSets.size,
-                'experiments' : (state.filteredExperiments || state.experiments).length,
-                'files' : expFxn.fileCountFromExperiments(state.filteredExperiments || state.experiments)
+                'experiments' : exps.length,
+                'files' : expFxn.fileCountFromExperiments(exps)
             };
         }
 
@@ -402,6 +467,12 @@ var ChartDataController = module.exports = {
         if (!reduxStoreState || !reduxStoreState.expSetFilters || !reduxStoreState.href){
             reduxStoreState = refs.store.getState();
         }
+
+        // Set refs.expSetFilters if is null (e.g. if called from initialize() and not triggered Redux store filter change).
+        if (refs.expSetFilters === null){
+            refs.expSetFilters = reduxStoreState.expSetFilters;
+        }
+
         var filtersSet = _.keys(reduxStoreState.expSetFilters).length > 0;
         var experiments = null, filteredExperiments = null;
 

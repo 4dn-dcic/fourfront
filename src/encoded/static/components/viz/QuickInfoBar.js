@@ -133,9 +133,21 @@ var QuickInfoBar = module.exports = React.createClass({
         //if (this.props.showCurrent || this.state.showCurrent){
         if (this.state.count_experiment_sets || this.state.count_experiments || this.state.count_files) {
             stats = {
-                'experiment_sets' : this.state.count_experiment_sets,
-                'experiments' : this.state.count_experiments,
-                'files' : this.state.count_files
+                'experiment_sets' : (
+                    <span>
+                        { this.state.count_experiment_sets }<small> / { (this.state.count_experiment_sets_total || 0) }</small>
+                    </span>
+                ),
+                'experiments' : (
+                    <span>
+                        { this.state.count_experiments }<small> / {this.state.count_experiments_total || 0}</small>
+                    </span>
+                ),
+                'files' : (
+                    <span>
+                        { this.state.count_files }<small> / {this.state.count_files_total || 0}</small>
+                    </span>
+                ),
             };
         } else {
             stats = {
