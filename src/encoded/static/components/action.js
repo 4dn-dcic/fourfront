@@ -3,10 +3,12 @@ var React = require('react');
 var globals = require('./globals');
 var _ = require('underscore');
 var { ajax, console, object, isServerSide } = require('./util');
+var getS3UploadUrl = require('./util/aws');
 var { DropdownButton, Button, MenuItem, Panel, Table} = require('react-bootstrap');
 var makeTitle = require('./item-pages/item').title;
 var Alerts = require('./alerts');
 var d3 = require('d3');
+var ReactS3Uploader = require('react-s3-uploader');
 
 // Master component used for user actions: create and edit
 // create is considered default mode, but by simply switching the behavior
@@ -160,6 +162,7 @@ var Action = module.exports = React.createClass({
         var lab;
         var award;
         var finalizedContext = this.contextSift(this.state.newContext, this.state.thisSchema);
+        console.log('contextToPOST:', finalizedContext);
         // get award and lab info from the /me endpoint
         ajax.promise('/me?frame=embedded').then(data => {
             if (this.context.contentTypeIsJSON(data)){
@@ -220,6 +223,29 @@ var Action = module.exports = React.createClass({
                     }else{
                         console.log('OBJECT SUCCESSFULLY POSTED!');
                         var newID = response['@graph'][0]['@id'];
+                        // handle file upload if this is a file
+                        if(_.contains(response['@graph'][0]['@type'],'File')){
+                            // FF-617. What should the body be?
+                            this.context.fetch(newID + '/upload', {
+                                method: 'POST',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({})
+                            })
+                            .then(response => {
+                                console.log(response);
+                                if (!response['@graph'] || !this.context.contentTypeIsJSON(response)) throw response;
+                                return response;
+                            })
+                            .then(response => {
+                                console.log('==>', response);
+                            }, error => {
+                                // something went wrong with fetch context. Just use an empty object
+                                console.log('thing2');
+                            });
+                        }
                         if(typeof newID !== 'string'){
                             newID = '/';
                         }
@@ -262,6 +288,7 @@ var Action = module.exports = React.createClass({
     render: function() {
         var title = makeTitle({'context': this.props.context});
         var context = this.state.newContext;
+        var baseContext = this.props.context; // includes calc props and the like
         var thisType = this.state.thisType;
         var itemClass = globals.itemClass(context, 'view-item');
         var schema = this.state.thisSchema;
@@ -272,7 +299,7 @@ var Action = module.exports = React.createClass({
             <div className={itemClass}>
                 <h2>{this.props.edit ? editTitle : createTitle}</h2>
                 <h4 style={{'color':'#808080', 'paddingBottom': '10px'}}>Add, edit, and remove field values. Submit at the bottom of the form.</h4>
-                <FieldPanel thisType={thisType} context={context} schema={schema} modifyNewContext={this.modifyNewContext} reqFields={reqFields}/>
+                <FieldPanel thisType={thisType} context={context} baseContext={baseContext} schema={schema} modifyNewContext={this.modifyNewContext} reqFields={reqFields}/>
                 <div>{this.generatePostButton()}</div>
             </div>
         );
@@ -324,8 +351,10 @@ var FieldPanel = React.createClass({
         if(fieldSchema.linkTo){
             fieldType = 'linked object';
         }
+        // @id of the whole object, may be useful down the line
+        var masterID = this.props.baseContext['@id'] || this.props.baseContext.link_id.replace(/~/g, "/");
         return(
-            <BuildField value={fieldValue} key={field} schema={fieldSchema} label={field} fieldType={fieldType} fieldTip={fieldTip} enumValues={enumValues} disabled={false} modifyNewContext={this.props.modifyNewContext} required={required}/>
+            <BuildField value={fieldValue} key={field} schema={fieldSchema} label={field} fieldType={fieldType} fieldTip={fieldTip} enumValues={enumValues} disabled={false} modifyNewContext={this.props.modifyNewContext} required={required} masterID={masterID}/>
         );
     },
 
@@ -417,7 +446,10 @@ var BuildField = React.createClass({
                 <ObjectField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext}/>
             );
             case 'attachment' : return (
-                <FileInput {...inputProps} field={this.props.label} modifyNewContext={this.props.modifyNewContext}/>
+                <AttachmentInput {...inputProps} field={this.props.label} modifyNewContext={this.props.modifyNewContext}/>
+            );
+            case 's3_file_upload' : return (
+                <TestUploader {...inputProps} masterID={this.props.masterID} field={this.props.label} modifyNewContext={this.props.modifyNewContext}/>
             );
         }
         // Fallback
@@ -465,6 +497,8 @@ var BuildField = React.createClass({
         var field_case = this.props.fieldType;
         if (this.props.schema.attachment && this.props.schema.attachment === true){
             field_case = 'attachment';
+        } else if (this.props.schema.s3Upload && this.props.schema.s3Upload === true){
+            field_case = 's3_file_upload';
         }
         var isArray = this.props.isArray || false;
         // array entries don't need dt/dd rows
@@ -852,9 +886,10 @@ var ObjectField = React.createClass({
 /* For version 1. A simple local file upload that gets the name, type,
 size, and b64 encoded stream in the form of a data url. Upon successful
 upload, adds this information to NewContext*/
-var FileInput = React.createClass({
-    handleChange: function(e){
-        var acceptedTypes = [
+var AttachmentInput = React.createClass({
+
+    acceptedTypes: function(){
+        var types = [
             "application/pdf",
             "application/zip",
             "text/plain",
@@ -867,15 +902,13 @@ var FileInput = React.createClass({
             "image/svs",
             "text/autosql"
         ];
+        return(types.toString());
+    },
+
+    handleChange: function(e){
         var attachment_props = {};
         var file = e.target.files[0];
-        if ((!file.type || !_.contains(acceptedTypes, file.type))){
-            this.refs.fileInput.value = '';
-            alert('File upload failed! File must of one of the following types: ' + acceptedTypes.toString());
-            return;
-        }else{
-            attachment_props.type = file.type;
-        }
+        attachment_props.type = file.type;
         if(file.size) {attachment_props.size = file.size;}
         if(file.name) {attachment_props.download = file.name;}
         var fileReader = new window.FileReader();
@@ -894,7 +927,87 @@ var FileInput = React.createClass({
 
     render: function(){
         return(
-            <input id={this.props.field} type='file' onChange={this.handleChange} ref="fileInput"/>
+            <input id={this.props.field} type='file' onChange={this.handleChange} ref="fileInput" accept={this.acceptedTypes()}/>
         );
     }
 });
+
+var TestUploader = React.createClass({
+    contextTypes: {
+        contentTypeIsJSON: React.PropTypes.func,
+        fetch: React.PropTypes.func
+    },
+
+    acceptedTypes: function(){
+        var types = [
+            "application/pdf",
+            "application/zip",
+            "text/plain",
+            "text/tab-separated-values",
+            "image/jpeg",
+            "image/tiff",
+            "image/gif",
+            "text/html",
+            "image/png",
+            "image/svs",
+            "text/autosql"
+        ];
+        return(types.toString());
+    },
+
+    handleChange: function(e){
+        var file = e.target.files[0];
+        var filename = file.name ? file.name : "unknown";
+        this.props.modifyNewContext(this.props.field, filename);
+        //FF-617 how should I change status? Doesn't seem like something that should be set by user
+        this.props.modifyNewContext('status', 'uploading');
+    },
+
+    render: function(){
+        return(
+            <input id={this.props.field} type='file' onChange={this.handleChange} ref="fileInput" accept={this.acceptedTypes()}/>
+        );
+    }
+});
+
+// var TestUploader = React.createClass({
+//     getSignedUrl: function(file, callback){
+//         var fileName = file.name || null;
+//         var fileType =  file.type || null;
+//         if(fileName && fileType){
+//             var signedUrl = getS3UploadUrl(fileName, fileType);
+//             if (signedUrl){
+//                 var data = {'signedUrl':signedUrl};
+//                 callback(data);
+//             }else{
+//                 return;
+//             }
+//         }else{
+//             console.log('File name and type not available!');
+//             return;
+//         }
+//
+//     },
+//
+//     onError: function(){
+//         console.log('S3 upload errored!');
+//     },
+//
+//     onFinish: function(){
+//         console.log('S3 upload complete!');
+//     },
+//
+//     render: function(){
+//         return (
+//             <ReactS3Uploader
+//                 className="s3Uploader"
+//                 getSignedUrl={this.getSignedUrl}
+//                 accept="image/*"
+//                 uploadRequestHeaders={{
+//                     'x-amz-acl': 'public-read'
+//                 }}
+//                 contentDisposition="auto"
+//                 />
+//         );
+//     }
+// });

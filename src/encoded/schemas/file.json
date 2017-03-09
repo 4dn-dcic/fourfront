@@ -14,8 +14,8 @@
         "filename": {
             "title": "File Name",
             "description": "The local file name used at time of submission.",
+            "s3Upload": true,
             "type": "string",
-            "exclude_from": "submit4dn",
             "comment": "ultimately uploaded filename will be uuid/accession, but filename with no directory will be store in metadata as passed in"
         },
         "file_format": {
