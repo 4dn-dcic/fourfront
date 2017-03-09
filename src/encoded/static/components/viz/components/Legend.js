@@ -7,6 +7,12 @@ var { highlightTerm, unhighlightTerms } = require('./../../facetlist');
 var { console, isServerSide, Filters, object } = require('./../../util');
 
 
+/**
+ * @prop {Object[]} fields - List of objects containing at least 'field', in object dot notation. Ideally should also have 'name'.
+ * @prop {boolean} includeFieldTitle - Whether to show field title at top of terms.
+ * @prop {string} className - Optional className to add to Legend's outermost div container.
+ * @prop {string|Element|Component} title - Optional title to display at top of fields.
+ */
 var Legend = module.exports = React.createClass({
 
     statics : {
@@ -14,11 +20,12 @@ var Legend = module.exports = React.createClass({
         /**
          * React component which represents a "Field", which might have multiple terms.
          * 
+         * @namespace
          * @memberof module:viz/components.Legend
          * @prop {string} field - Field name, in object-dot-notation.
-         * @prop {boolean} includeFieldTitle - Whether field title should be included at the top of list of terms.
+         * @prop {boolean} includeFieldTitles - Whether field title should be included at the top of list of terms.
          * @prop {Object[]} terms - Terms which belong to this field, in the form of objects. 
-         * @type React.Component
+         * @type {Component}
          */
         Field : React.createClass({
 
@@ -44,11 +51,12 @@ var Legend = module.exports = React.createClass({
         /**
          * React component which represents a Term item.
          * 
+         * @namespace
          * @memberof module:viz/components.Legend
          * @prop {string} field - Name of field to which this term belongs, in object-dot-notation.
          * @prop {string} term - Name of term.
          * @prop {string|Object} color - Color to show next to term, should be string or RGBColor object.
-         * @type React.Component
+         * @type Component
          */
         Term : React.createClass({
 

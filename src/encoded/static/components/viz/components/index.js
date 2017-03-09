@@ -17,9 +17,8 @@ module.exports.FetchingView = require('./FetchingView');
 /**
  * Legend components to use alongside Charts. Best to include within a UIControlsWrapper, and place next to chart, utilizing the same data.
  * 
- * @member
  * @namespace
- * @type {React.Component}
+ * @type {Component}
  */
 module.exports.Legend = require('./Legend');
 
@@ -28,7 +27,19 @@ module.exports.Legend = require('./Legend');
  * 
  * @member
  * @namespace
+ * @type {Component}
  */
 module.exports.ZoomCursor = require('./ZoomCursor');
+
+/**
+ * A label meant to be place along an X-axis. Given an angle, label text, placementHeight, and other properties, calculates 
+ * visible portion of label and rotates it. Handles showing full label onHover.
+ * Optionally adds a directional pointer icon to tail of label.
+ * 
+ * @member
+ * @namespace
+ * @type {Component}
+ */
 module.exports.RotatedLabel = require('./RotatedLabel');
+
 module.exports.CursorComponent = require('./CursorComponent');
