@@ -1,0 +1,7 @@
+encoded.tests.features.browsersteps module
+==========================================
+
+.. automodule:: encoded.tests.features.browsersteps
+    :members:
+    :undoc-members:
+    :show-inheritance:

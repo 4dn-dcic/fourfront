@@ -1,0 +1,32 @@
+.. _undefined.viz/components/Legend:
+
+====================================
+Namespace: ``viz/components/Legend``
+====================================
+
+
+.. contents:: Local Navigation
+   :local:
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 1
+   
+   
+Description
+===========
+
+
+
+Functions
+=========
+
+
+Members
+=======
+
+
+
+

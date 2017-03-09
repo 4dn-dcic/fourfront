@@ -1,0 +1,7 @@
+encoded.commands.add_date_created module
+========================================
+
+.. automodule:: encoded.commands.add_date_created
+    :members:
+    :undoc-members:
+    :show-inheritance:

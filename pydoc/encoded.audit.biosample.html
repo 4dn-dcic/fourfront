@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.audit.biosample module &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="encoded.audit.conditions module" href="encoded.audit.conditions.html" />
+    <link rel="prev" title="encoded.audit package" href="encoded.audit.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.audit.conditions.html" title="encoded.audit.conditions module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="encoded.audit.html" title="encoded.audit package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.audit.html" accesskey="U">encoded.audit package</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-encoded.audit.biosample">
+<span id="encoded-audit-biosample-module"></span><h1>encoded.audit.biosample module<a class="headerlink" href="#module-encoded.audit.biosample" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="encoded.audit.biosample.audit_biosample_culture_date">
+<code class="descclassname">encoded.audit.biosample.</code><code class="descname">audit_biosample_culture_date</code><span class="sig-paren">(</span><em>value</em>, <em>system</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/audit/biosample.html#audit_biosample_culture_date"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.audit.biosample.audit_biosample_culture_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>A culture_harvest_date should not precede
+a culture_start_date.
+This should move to the schema.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.audit.biosample.audit_biosample_depleted_term_match">
+<code class="descclassname">encoded.audit.biosample.</code><code class="descname">audit_biosample_depleted_term_match</code><span class="sig-paren">(</span><em>value</em>, <em>system</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/audit/biosample.html#audit_biosample_depleted_term_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.audit.biosample.audit_biosample_depleted_term_match" title="Permalink to this definition">¶</a></dt>
+<dd><p>The depleted_in_term_name and depleted_in_term_name
+should be concordant. This should be a calcualted field.
+If one exists, the other should.  This should be handled in the schema.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.audit.biosample.audit_biosample_donor">
+<code class="descclassname">encoded.audit.biosample.</code><code class="descname">audit_biosample_donor</code><span class="sig-paren">(</span><em>value</em>, <em>system</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/audit/biosample.html#audit_biosample_donor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.audit.biosample.audit_biosample_donor" title="Permalink to this definition">¶</a></dt>
+<dd><p>A biosample should have a donor.
+The organism of donor and biosample should match.
+Pooled_from biosamples do not need donors??</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.audit.biosample.audit_biosample_gtex_children">
+<code class="descclassname">encoded.audit.biosample.</code><code class="descname">audit_biosample_gtex_children</code><span class="sig-paren">(</span><em>value</em>, <em>system</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/audit/biosample.html#audit_biosample_gtex_children"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.audit.biosample.audit_biosample_gtex_children" title="Permalink to this definition">¶</a></dt>
+<dd><p>GTEX children biosamples have to be properly registered.
+- aliases (column A from plate-maps)
+- part_of pointing to the parent biosample
+- source Kristin Ardlie</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.audit.biosample.audit_biosample_human_no_model_organism_properties">
+<code class="descclassname">encoded.audit.biosample.</code><code class="descname">audit_biosample_human_no_model_organism_properties</code><span class="sig-paren">(</span><em>value</em>, <em>system</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/audit/biosample.html#audit_biosample_human_no_model_organism_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.audit.biosample.audit_biosample_human_no_model_organism_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>human bioamples shouldn&#8217;t have model organism properties initiated</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.audit.biosample.audit_biosample_part_of_consistency">
+<code class="descclassname">encoded.audit.biosample.</code><code class="descname">audit_biosample_part_of_consistency</code><span class="sig-paren">(</span><em>value</em>, <em>system</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/audit/biosample.html#audit_biosample_part_of_consistency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.audit.biosample.audit_biosample_part_of_consistency" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.audit.biosample.audit_biosample_subcellular_term_match">
+<code class="descclassname">encoded.audit.biosample.</code><code class="descname">audit_biosample_subcellular_term_match</code><span class="sig-paren">(</span><em>value</em>, <em>system</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/audit/biosample.html#audit_biosample_subcellular_term_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.audit.biosample.audit_biosample_subcellular_term_match" title="Permalink to this definition">¶</a></dt>
+<dd><p>The subcellular_fraction_term_name and subcellular_fraction_term_id
+should be concordant. This should be a calculated field
+If one exists the other should. This should be handled in the schema.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.audit.biosample.audit_biosample_term">
+<code class="descclassname">encoded.audit.biosample.</code><code class="descname">audit_biosample_term</code><span class="sig-paren">(</span><em>value</em>, <em>system</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/audit/biosample.html#audit_biosample_term"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.audit.biosample.audit_biosample_term" title="Permalink to this definition">¶</a></dt>
+<dd><p>Biosample_term_id and biosample_term_name
+and biosample_type should all be present.
+This should be handled by schemas.
+Biosample_term_id should be in the ontology.
+Biosample_term_name should match biosample_term_id.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.audit.biosample.audit_biosample_tier1_cell_lines_have_required_cell_culture_properties">
+<code class="descclassname">encoded.audit.biosample.</code><code class="descname">audit_biosample_tier1_cell_lines_have_required_cell_culture_properties</code><span class="sig-paren">(</span><em>value</em>, <em>system</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/audit/biosample.html#audit_biosample_tier1_cell_lines_have_required_cell_culture_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.audit.biosample.audit_biosample_tier1_cell_lines_have_required_cell_culture_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>tier1 cell lines have required fields from biosample_cell_culture
+that must be present and that depend on the cell_line</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.audit.biosample.audit_biosample_transfection_type">
+<code class="descclassname">encoded.audit.biosample.</code><code class="descname">audit_biosample_transfection_type</code><span class="sig-paren">(</span><em>value</em>, <em>system</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/audit/biosample.html#audit_biosample_transfection_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.audit.biosample.audit_biosample_transfection_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>A biosample with constructs or rnais should have a
+transfection_type</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.audit.biosample.is_part_of">
+<code class="descclassname">encoded.audit.biosample.</code><code class="descname">is_part_of</code><span class="sig-paren">(</span><em>term_id</em>, <em>part_of_term_id</em>, <em>ontology</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/audit/biosample.html#is_part_of"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.audit.biosample.is_part_of" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="encoded.audit.html"
+                        title="previous chapter">encoded.audit package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="encoded.audit.conditions.html"
+                        title="next chapter">encoded.audit.conditions module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pydoc/encoded.audit.biosample.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.audit.conditions.html" title="encoded.audit.conditions module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="encoded.audit.html" title="encoded.audit package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.audit.html" >encoded.audit package</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

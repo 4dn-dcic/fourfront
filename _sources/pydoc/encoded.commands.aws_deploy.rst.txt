@@ -1,0 +1,7 @@
+encoded.commands.aws_deploy module
+==================================
+
+.. automodule:: encoded.commands.aws_deploy
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,7 @@
+encoded.workflow_examples.get_cwl_from_SBG module
+=================================================
+
+.. automodule:: encoded.workflow_examples.get_cwl_from_SBG
+    :members:
+    :undoc-members:
+    :show-inheritance:

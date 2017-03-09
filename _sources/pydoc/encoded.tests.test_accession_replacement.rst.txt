@@ -1,0 +1,7 @@
+encoded.tests.test_accession_replacement module
+===============================================
+
+.. automodule:: encoded.tests.test_accession_replacement
+    :members:
+    :undoc-members:
+    :show-inheritance:

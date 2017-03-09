@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.types.modification module &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="encoded.types.ontology module" href="encoded.types.ontology.html" />
+    <link rel="prev" title="encoded.types.lab module" href="encoded.types.lab.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.ontology.html" title="encoded.types.ontology module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.lab.html" title="encoded.types.lab module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.types.html" accesskey="U">encoded.types package</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-encoded.types.modification">
+<span id="encoded-types-modification-module"></span><h1>encoded.types.modification module<a class="headerlink" href="#module-encoded.types.modification" title="Permalink to this headline">¶</a></h1>
+<p>Modifications types file.</p>
+<dl class="class">
+<dt id="encoded.types.modification.Modification">
+<em class="property">class </em><code class="descclassname">encoded.types.modification.</code><code class="descname">Modification</code><span class="sig-paren">(</span><em>registry</em>, <em>models</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/modification.html#Modification"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.modification.Modification" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="encoded.types.base.html#encoded.types.base.Item" title="encoded.types.base.Item"><code class="xref py py-class docutils literal"><span class="pre">encoded.types.base.Item</span></code></a></p>
+<p>Modification class.</p>
+<dl class="method">
+<dt id="encoded.types.modification.Modification.display_title">
+<code class="descname">display_title</code><span class="sig-paren">(</span><em>request</em>, <em>modification_type=None</em>, <em>target_of_mod=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/modification.html#Modification.display_title"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.modification.Modification.display_title" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.modification.Modification.embedded">
+<code class="descname">embedded</code><em class="property"> = ['constructs', 'modified_regions', 'created_by', 'target_of_mod']</em><a class="headerlink" href="#encoded.types.modification.Modification.embedded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.modification.Modification.item_type">
+<code class="descname">item_type</code><em class="property"> = 'modification'</em><a class="headerlink" href="#encoded.types.modification.Modification.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="encoded.types.modification.Modification.modification_name">
+<code class="descname">modification_name</code><span class="sig-paren">(</span><em>request</em>, <em>modification_type=None</em>, <em>target_of_mod=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/modification.html#Modification.modification_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.modification.Modification.modification_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="encoded.types.modification.Modification.modification_name_short">
+<code class="descname">modification_name_short</code><span class="sig-paren">(</span><em>request</em>, <em>modification_type=None</em>, <em>target_of_mod=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/modification.html#Modification.modification_name_short"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.modification.Modification.modification_name_short" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.modification.Modification.schema">
+<code class="descname">schema</code><em class="property"> = OrderedDict([('title', 'Modification'), ('description', 'Schema for submitting a stable genomic modification.'), ('id', '/profiles/modification.json'), ('$schema', 'http://json-schema.org/draft-04/schema#'), ('type', 'object'), ('required', ['description', 'modification_type', 'lab', 'award']), ('identifyingProperties', ['uuid', 'aliases']), ('additionalProperties', False), ('mixinProperties', [OrderedDict([('$ref', 'mixins.json#/schema_version')]), OrderedDict([('$ref', 'mixins.json#/uuid')]), OrderedDict([('$ref', 'mixins.json#/aliases')]), OrderedDict([('$ref', 'mixins.json#/status')]), OrderedDict([('$ref', 'mixins.json#/attribution')]), OrderedDict([('$ref', 'mixins.json#/references')]), OrderedDict([('$ref', 'mixins.json#/submitted')]), OrderedDict([('$ref', 'mixins.json#/notes')])]), ('properties', OrderedDict([('notes', {'title': 'Notes', 'description': 'DCIC internal notes.', 'type': 'string', 'exclude_from': 'submit4dn', 'elasticsearch_mapping_index_type': {'title': 'Field mapping index type', 'description': 'Defines one of three types of indexing available', 'type': 'string', 'default': 'analyzed', 'enum': ['analyzed', 'not_analyzed', 'no']}}), ('date_created', {'rdfs:subPropertyOf': 'dc:created', 'title': 'Date created', 'exclude_from': 'submit4dn', 'type': 'string', 'anyOf': [{'format': 'date-time'}, {'format': 'date'}], 'serverDefault': 'now', 'permission': 'import_items'}), ('submitted_by', {'rdfs:subPropertyOf': 'dc:creator', 'title': 'Submitted by', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'User', 'serverDefault': 'userid', 'permission': 'import_items'}), ('references', {'title': 'References', 'description': 'The publications that provide more information about the object.', 'type': 'array', 'default': [], 'uniqueItems': True, 'items': {'title': 'Reference', 'description': 'A publication that provide smore information about the object.', 'type': 'string', 'linkTo': 'Publication'}}), ('lab', {'title': 'Lab', 'description': 'Lab associated with the submission.', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'Lab', 'linkSubmitsFor': True, 'default': ''}), ('award', {'title': 'Grant', 'description': 'Grant associated with the submission.', 'exclude_from': 'submit4dn', 'default': '', 'type': 'string', 'linkTo': 'Award'}), ('status', {'title': 'Status', 'exclude_from': 'submit4dn', 'type': 'string', 'default': 'in review by lab', 'permission': 'import_items', 'enum': ['released', 'current', 'revoked', 'deleted', 'replaced', 'in review by lab', 'in review by project', 'released to project']}), ('aliases', {'title': 'Lab aliases', 'description': 'Lab specific identifiers to reference an object.', 'type': 'array', 'comment': 'Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).', 'default': [], 'uniqueItems': True, 'items': {'uniqueKey': 'alias', 'title': 'Lab alias', 'description': 'A lab specific identifier to reference an object.', 'type': 'string', 'pattern': '^\\S+:\\S+'}}), ('uuid', {'title': 'UUID', 'type': 'string', 'format': 'uuid', 'exclude_from': 'submit4dn', 'serverDefault': 'uuid4', 'permission': 'import_items', 'requestMethod': 'POST'}), ('schema_version', {'title': 'Schema Version', 'internal_comment': 'Do not submit, value is assigned by the server. The version of the JSON schema that the server uses to validate the object. Schema version indicates generation of schema used to save version to to enable upgrade steps to work. Individual schemas should set the default.', 'type': 'string', 'exclude_from': 'submit4dn', 'pattern': '^\\d+(\\.\\d+)*$', 'requestMethod': [], 'default': '1'}), ('description', {'title': 'Description', 'description': 'A brief plain text description of the modification.', 'type': 'string'}), ('modification_type', {'title': 'Genomic modification type', 'description': 'The type of genomic modification.', 'type': 'string', 'enum': ['Crispr', 'Stable Transfection', 'Other']}), ('constructs', {'title': 'Constructs', 'description': 'Recombinant constructs used to make modification.', 'type': 'array', 'items': OrderedDict([('title', 'Constructs'), ('description', 'A recombinant construct.'), ('type', 'string'), ('linkTo', 'Construct')])}), ('guide_rnas', {'title': 'Guide RNAs', 'description': 'The guide RNA sequences used in Crispr targetting.', 'type': 'array', 'items': OrderedDict([('title', 'Guide RNA'), ('description', 'Sequence of the guide RNA - submit as DNA (i.e. T not U) can include the PAM motif that is not actually part of the transcribed target and should not include the tracrRNA so that the sequence submitted reflects the genomic sequence'), ('type', 'string'), ('pattern', '^[ATGCN]+$')])}), ('modified_regions', {'title': 'Modified Regions', 'description': 'The genomic regions being modified.', 'type': 'array', 'items': OrderedDict([('title', 'Genomic region'), ('description', 'region being modfied'), ('type', 'string'), ('linkTo', 'GenomicRegion')])}), ('target_of_mod', {'title': 'Target of Modification', 'description': 'The targeted gene or genomic region that is targeted by the modification.', 'type': 'string', 'linkTo': 'Target'}), ('url', {'title': 'URL', 'description': 'An external resource with additional information about the construct.', 'type': 'string', 'format': 'uri'}), ('created_by', {'title': 'Created By', 'description': 'Lab or Company that produced the modfication', 'type': 'string', 'linkTo': 'Vendor'})]))])</em><a class="headerlink" href="#encoded.types.modification.Modification.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="encoded.types.lab.html"
+                        title="previous chapter">encoded.types.lab module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="encoded.types.ontology.html"
+                        title="next chapter">encoded.types.ontology module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pydoc/encoded.types.modification.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.ontology.html" title="encoded.types.ontology module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.lab.html" title="encoded.types.lab module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.types.html" >encoded.types package</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

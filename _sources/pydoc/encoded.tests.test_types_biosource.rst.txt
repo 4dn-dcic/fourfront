@@ -1,0 +1,7 @@
+encoded.tests.test_types_biosource module
+=========================================
+
+.. automodule:: encoded.tests.test_types_biosource
+    :members:
+    :undoc-members:
+    :show-inheritance:

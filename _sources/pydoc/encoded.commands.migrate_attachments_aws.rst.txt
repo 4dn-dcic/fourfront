@@ -1,0 +1,7 @@
+encoded.commands.migrate_attachments_aws module
+===============================================
+
+.. automodule:: encoded.commands.migrate_attachments_aws
+    :members:
+    :undoc-members:
+    :show-inheritance:

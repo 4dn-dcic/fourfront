@@ -1,0 +1,7 @@
+encoded.tests.features.conftest module
+======================================
+
+.. automodule:: encoded.tests.features.conftest
+    :members:
+    :undoc-members:
+    :show-inheritance:

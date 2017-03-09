@@ -1,0 +1,7 @@
+encoded.loadxl module
+=====================
+
+.. automodule:: encoded.loadxl
+    :members:
+    :undoc-members:
+    :show-inheritance:

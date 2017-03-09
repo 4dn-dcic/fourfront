@@ -1,0 +1,7 @@
+encoded.tests.test_audit_replicate module
+=========================================
+
+.. automodule:: encoded.tests.test_audit_replicate
+    :members:
+    :undoc-members:
+    :show-inheritance:

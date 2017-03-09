@@ -1,0 +1,7 @@
+encoded.commands.generate_annotations module
+============================================
+
+.. automodule:: encoded.commands.generate_annotations
+    :members:
+    :undoc-members:
+    :show-inheritance:

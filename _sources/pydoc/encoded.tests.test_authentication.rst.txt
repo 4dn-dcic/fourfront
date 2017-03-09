@@ -1,0 +1,7 @@
+encoded.tests.test_authentication module
+========================================
+
+.. automodule:: encoded.tests.test_authentication
+    :members:
+    :undoc-members:
+    :show-inheritance:

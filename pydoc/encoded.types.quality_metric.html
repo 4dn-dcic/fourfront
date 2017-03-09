@@ -1,0 +1,241 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.types.quality_metric module &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="encoded.types.software module" href="encoded.types.software.html" />
+    <link rel="prev" title="encoded.types.publication_tracking module" href="encoded.types.publication_tracking.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.software.html" title="encoded.types.software module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.publication_tracking.html" title="encoded.types.publication_tracking module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.types.html" accesskey="U">encoded.types package</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-encoded.types.quality_metric">
+<span id="encoded-types-quality-metric-module"></span><h1>encoded.types.quality_metric module<a class="headerlink" href="#module-encoded.types.quality_metric" title="Permalink to this headline">¶</a></h1>
+<p>The type file for the collection Quality Metric.</p>
+<dl class="class">
+<dt id="encoded.types.quality_metric.QualityMetric">
+<em class="property">class </em><code class="descclassname">encoded.types.quality_metric.</code><code class="descname">QualityMetric</code><span class="sig-paren">(</span><em>registry</em>, <em>models</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/quality_metric.html#QualityMetric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.quality_metric.QualityMetric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="encoded.types.base.html#encoded.types.base.Item" title="encoded.types.base.Item"><code class="xref py py-class docutils literal"><span class="pre">encoded.types.base.Item</span></code></a></p>
+<p>Quality metrics class.</p>
+<dl class="attribute">
+<dt id="encoded.types.quality_metric.QualityMetric.base_types">
+<code class="descname">base_types</code><em class="property"> = ['QualityMetric', 'Item']</em><a class="headerlink" href="#encoded.types.quality_metric.QualityMetric.base_types" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.quality_metric.QualityMetric.embedded">
+<code class="descname">embedded</code><em class="property"> = []</em><a class="headerlink" href="#encoded.types.quality_metric.QualityMetric.embedded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.quality_metric.QualityMetric.item_type">
+<code class="descname">item_type</code><em class="property"> = 'quality_metric'</em><a class="headerlink" href="#encoded.types.quality_metric.QualityMetric.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.quality_metric.QualityMetric.schema">
+<code class="descname">schema</code><em class="property"> = OrderedDict([('description', 'Schema for reporting the specific calculation of an quality metrics'), ('id', '/profiles/quality_metric.json'), ('$schema', 'http://json-schema.org/draft-04/schema#'), ('type', 'object'), ('required', ['award', 'lab']), ('additionalProperties', False), ('identifyingProperties', ['uuid', 'aliases']), ('properties', OrderedDict([('overall_quality_status', OrderedDict([('description', 'Overall QC decision'), ('type', 'string'), ('enum', ['PASS', 'FAIL', 'WARN'])])), ('url', OrderedDict([('type', 'string'), ('description', 'Location of the main html file'), ('format', 'uri')]))]))])</em><a class="headerlink" href="#encoded.types.quality_metric.QualityMetric.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="encoded.types.quality_metric.QualityMetricBamqc">
+<em class="property">class </em><code class="descclassname">encoded.types.quality_metric.</code><code class="descname">QualityMetricBamqc</code><span class="sig-paren">(</span><em>registry</em>, <em>models</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/quality_metric.html#QualityMetricBamqc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.quality_metric.QualityMetricBamqc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#encoded.types.quality_metric.QualityMetric" title="encoded.types.quality_metric.QualityMetric"><code class="xref py py-class docutils literal"><span class="pre">encoded.types.quality_metric.QualityMetric</span></code></a></p>
+<p>Subclass of quality matrics for bam files.</p>
+<dl class="attribute">
+<dt id="encoded.types.quality_metric.QualityMetricBamqc.embedded">
+<code class="descname">embedded</code><em class="property"> = []</em><a class="headerlink" href="#encoded.types.quality_metric.QualityMetricBamqc.embedded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.quality_metric.QualityMetricBamqc.item_type">
+<code class="descname">item_type</code><em class="property"> = 'quality_metric_bamqc'</em><a class="headerlink" href="#encoded.types.quality_metric.QualityMetricBamqc.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.quality_metric.QualityMetricBamqc.schema">
+<code class="descname">schema</code><em class="property"> = OrderedDict([('description', 'Schema for reporting the specific calculation of an quality metrics'), ('id', '/profiles/quality_metric_bamqc.json'), ('$schema', 'http://json-schema.org/draft-04/schema#'), ('type', 'object'), ('required', ['award', 'lab']), ('additionalProperties', False), ('identifyingProperties', ['uuid', 'aliases']), ('mixinProperties', [OrderedDict([('$ref', 'mixins.json#/schema_version')]), OrderedDict([('$ref', 'quality_metric.json#/properties')]), OrderedDict([('$ref', 'mixins.json#/uuid')]), OrderedDict([('$ref', 'mixins.json#/aliases')]), OrderedDict([('$ref', 'mixins.json#/attribution')]), OrderedDict([('$ref', 'mixins.json#/submitted')]), OrderedDict([('$ref', 'mixins.json#/status')]), OrderedDict([('$ref', 'quality_metric.json#/properties')])]), ('properties', OrderedDict([('overall_quality_status', {'description': 'Overall QC decision', 'type': 'string', 'enum': ['PASS', 'FAIL', 'WARN']}), ('url', {'type': 'string', 'description': 'Location of the main html file', 'format': 'uri'}), ('status', {'title': 'Status', 'exclude_from': 'submit4dn', 'type': 'string', 'default': 'in review by lab', 'permission': 'import_items', 'enum': ['released', 'current', 'revoked', 'deleted', 'replaced', 'in review by lab', 'in review by project', 'released to project']}), ('date_created', {'rdfs:subPropertyOf': 'dc:created', 'title': 'Date created', 'exclude_from': 'submit4dn', 'type': 'string', 'anyOf': [{'format': 'date-time'}, {'format': 'date'}], 'serverDefault': 'now', 'permission': 'import_items'}), ('submitted_by', {'rdfs:subPropertyOf': 'dc:creator', 'title': 'Submitted by', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'User', 'serverDefault': 'userid', 'permission': 'import_items'}), ('lab', {'title': 'Lab', 'description': 'Lab associated with the submission.', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'Lab', 'linkSubmitsFor': True, 'default': ''}), ('award', {'title': 'Grant', 'description': 'Grant associated with the submission.', 'exclude_from': 'submit4dn', 'default': '', 'type': 'string', 'linkTo': 'Award'}), ('aliases', {'title': 'Lab aliases', 'description': 'Lab specific identifiers to reference an object.', 'type': 'array', 'comment': 'Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).', 'default': [], 'uniqueItems': True, 'items': {'uniqueKey': 'alias', 'title': 'Lab alias', 'description': 'A lab specific identifier to reference an object.', 'type': 'string', 'pattern': '^\\S+:\\S+'}}), ('uuid', {'title': 'UUID', 'type': 'string', 'format': 'uuid', 'exclude_from': 'submit4dn', 'serverDefault': 'uuid4', 'permission': 'import_items', 'requestMethod': 'POST'}), ('schema_version', {'title': 'Schema Version', 'internal_comment': 'Do not submit, value is assigned by the server. The version of the JSON schema that the server uses to validate the object. Schema version indicates generation of schema used to save version to to enable upgrade steps to work. Individual schemas should set the default.', 'type': 'string', 'exclude_from': 'submit4dn', 'pattern': '^\\d+(\\.\\d+)*$', 'requestMethod': [], 'default': '1'}), ('Total Sequences', {'type': 'number', 'description': 'BamQC Summary metric'}), ('Total Mapped sequences', {'type': 'number', 'description': 'BamQC Summary metric'}), ('Total Uniquely Mapped Sequences', {'type': 'number', 'description': 'BamQC Summary metric'}), ('%Mapped', {'type': 'number', 'description': 'BamQC Summary metric'}), ('%Uniquely Mapped', {'type': 'number', 'description': 'BamQC Summary metric'})]))])</em><a class="headerlink" href="#encoded.types.quality_metric.QualityMetricBamqc.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="encoded.types.quality_metric.QualityMetricFastqc">
+<em class="property">class </em><code class="descclassname">encoded.types.quality_metric.</code><code class="descname">QualityMetricFastqc</code><span class="sig-paren">(</span><em>registry</em>, <em>models</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/quality_metric.html#QualityMetricFastqc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.quality_metric.QualityMetricFastqc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#encoded.types.quality_metric.QualityMetric" title="encoded.types.quality_metric.QualityMetric"><code class="xref py py-class docutils literal"><span class="pre">encoded.types.quality_metric.QualityMetric</span></code></a></p>
+<p>Subclass of quality matrics for fastq files.</p>
+<dl class="attribute">
+<dt id="encoded.types.quality_metric.QualityMetricFastqc.embedded">
+<code class="descname">embedded</code><em class="property"> = []</em><a class="headerlink" href="#encoded.types.quality_metric.QualityMetricFastqc.embedded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.quality_metric.QualityMetricFastqc.item_type">
+<code class="descname">item_type</code><em class="property"> = 'quality_metric_fastqc'</em><a class="headerlink" href="#encoded.types.quality_metric.QualityMetricFastqc.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.quality_metric.QualityMetricFastqc.schema">
+<code class="descname">schema</code><em class="property"> = OrderedDict([('description', 'Schema for reporting the specific calculation of an quality metrics'), ('id', '/profiles/quality_metric_fastqc.json'), ('$schema', 'http://json-schema.org/draft-04/schema#'), ('type', 'object'), ('required', ['award', 'lab']), ('additionalProperties', False), ('identifyingProperties', ['uuid', 'aliases']), ('mixinProperties', [OrderedDict([('$ref', 'mixins.json#/schema_version')]), OrderedDict([('$ref', 'quality_metric.json#/properties')]), OrderedDict([('$ref', 'mixins.json#/uuid')]), OrderedDict([('$ref', 'mixins.json#/aliases')]), OrderedDict([('$ref', 'mixins.json#/attribution')]), OrderedDict([('$ref', 'mixins.json#/submitted')]), OrderedDict([('$ref', 'mixins.json#/status')]), OrderedDict([('$ref', 'quality_metric.json#/properties')])]), ('properties', OrderedDict([('overall_quality_status', {'description': 'Overall QC decision', 'type': 'string', 'enum': ['PASS', 'FAIL', 'WARN']}), ('url', {'type': 'string', 'description': 'Location of the main html file', 'format': 'uri'}), ('status', {'title': 'Status', 'exclude_from': 'submit4dn', 'type': 'string', 'default': 'in review by lab', 'permission': 'import_items', 'enum': ['released', 'current', 'revoked', 'deleted', 'replaced', 'in review by lab', 'in review by project', 'released to project']}), ('date_created', {'rdfs:subPropertyOf': 'dc:created', 'title': 'Date created', 'exclude_from': 'submit4dn', 'type': 'string', 'anyOf': [{'format': 'date-time'}, {'format': 'date'}], 'serverDefault': 'now', 'permission': 'import_items'}), ('submitted_by', {'rdfs:subPropertyOf': 'dc:creator', 'title': 'Submitted by', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'User', 'serverDefault': 'userid', 'permission': 'import_items'}), ('lab', {'title': 'Lab', 'description': 'Lab associated with the submission.', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'Lab', 'linkSubmitsFor': True, 'default': ''}), ('award', {'title': 'Grant', 'description': 'Grant associated with the submission.', 'exclude_from': 'submit4dn', 'default': '', 'type': 'string', 'linkTo': 'Award'}), ('aliases', {'title': 'Lab aliases', 'description': 'Lab specific identifiers to reference an object.', 'type': 'array', 'comment': 'Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).', 'default': [], 'uniqueItems': True, 'items': {'uniqueKey': 'alias', 'title': 'Lab alias', 'description': 'A lab specific identifier to reference an object.', 'type': 'string', 'pattern': '^\\S+:\\S+'}}), ('uuid', {'title': 'UUID', 'type': 'string', 'format': 'uuid', 'exclude_from': 'submit4dn', 'serverDefault': 'uuid4', 'permission': 'import_items', 'requestMethod': 'POST'}), ('schema_version', {'title': 'Schema Version', 'internal_comment': 'Do not submit, value is assigned by the server. The version of the JSON schema that the server uses to validate the object. Schema version indicates generation of schema used to save version to to enable upgrade steps to work. Individual schemas should set the default.', 'type': 'string', 'exclude_from': 'submit4dn', 'pattern': '^\\d+(\\.\\d+)*$', 'requestMethod': [], 'default': '1'}), ('Total Sequences', {'type': 'number', 'description': 'FastQC Summary metric'}), ('Sequences flagged as poor quality', {'type': 'number', 'description': 'FastQC Summary metric'}), ('Sequence length', {'type': 'number', 'description': 'FastQC Summary metric'}), ('%GC', {'type': 'number', 'description': 'FastQC Summary metric'}), ('Per base sequence quality', {'type': 'string', 'enum': ['PASS', 'FAIL', 'WARN'], 'description': 'FastQC metric'}), ('Per base sequence content', {'type': 'string', 'enum': ['PASS', 'FAIL', 'WARN'], 'description': 'FastQC metric'}), ('Basic Statistics', {'type': 'string', 'enum': ['PASS', 'FAIL', 'WARN'], 'description': 'FastQC metric'}), ('Kmer Content', {'type': 'string', 'enum': ['PASS', 'FAIL', 'WARN'], 'description': 'FastQC metric'}), ('Sequence Duplication Levels', {'type': 'string', 'enum': ['PASS', 'FAIL', 'WARN'], 'description': 'FastQC metric'}), ('Sequence Length Distribution', {'type': 'string', 'enum': ['PASS', 'FAIL', 'WARN'], 'description': 'FastQC metric'}), ('Overrepresented sequences', {'type': 'string', 'enum': ['PASS', 'FAIL', 'WARN'], 'description': 'FastQC metric'}), ('Per sequence GC content', {'type': 'string', 'enum': ['PASS', 'FAIL', 'WARN'], 'description': 'FastQC metric'}), ('Adapter Content', {'type': 'string', 'enum': ['PASS', 'FAIL', 'WARN'], 'description': 'FastQC metric'}), ('Per tile sequence quality', {'type': 'string', 'enum': ['PASS', 'FAIL', 'WARN'], 'description': 'FastQC metric'}), ('Per base N content', {'type': 'string', 'enum': ['PASS', 'FAIL', 'WARN'], 'description': 'FastQC metric'}), ('Per sequence quality scores', {'type': 'string', 'enum': ['PASS', 'FAIL', 'WARN'], 'description': 'FastQC metric'})]))])</em><a class="headerlink" href="#encoded.types.quality_metric.QualityMetricFastqc.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="encoded.types.quality_metric.QualityMetricFlag">
+<em class="property">class </em><code class="descclassname">encoded.types.quality_metric.</code><code class="descname">QualityMetricFlag</code><span class="sig-paren">(</span><em>registry</em>, <em>models</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/quality_metric.html#QualityMetricFlag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.quality_metric.QualityMetricFlag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="encoded.types.base.html#encoded.types.base.Item" title="encoded.types.base.Item"><code class="xref py py-class docutils literal"><span class="pre">encoded.types.base.Item</span></code></a></p>
+<p>Quality Metrics Flag class.</p>
+<dl class="attribute">
+<dt id="encoded.types.quality_metric.QualityMetricFlag.embedded">
+<code class="descname">embedded</code><em class="property"> = ['quality_metrics']</em><a class="headerlink" href="#encoded.types.quality_metric.QualityMetricFlag.embedded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.quality_metric.QualityMetricFlag.item_type">
+<code class="descname">item_type</code><em class="property"> = 'quality_metric_flag'</em><a class="headerlink" href="#encoded.types.quality_metric.QualityMetricFlag.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.quality_metric.QualityMetricFlag.schema">
+<code class="descname">schema</code><em class="property"> = OrderedDict([('description', 'Schema for reporting a flag that indicates something about an associated quality metric'), ('id', '/profiles/quality_metric_flag.json'), ('$schema', 'http://json-schema.org/draft-04/schema#'), ('type', 'object'), ('required', ['flag', 'award', 'lab']), ('additionalProperties', False), ('identifyingProperties', ['uuid']), ('mixinProperties', [OrderedDict([('$ref', 'mixins.json#/schema_version')]), OrderedDict([('$ref', 'mixins.json#/uuid')]), OrderedDict([('$ref', 'mixins.json#/status')]), OrderedDict([('$ref', 'mixins.json#/aliases')]), OrderedDict([('$ref', 'mixins.json#/submitted')]), OrderedDict([('$ref', 'mixins.json#/attribution')]), OrderedDict([('$ref', 'mixins.json#/attachment')])]), ('properties', OrderedDict([('attachment', {'title': 'Attached Document', 'type': 'object', 'additionalProperties': False, 'formInput': 'file', 'attachment': True, 'properties': {'download': {'title': 'File Name', 'type': 'string'}, 'href': {'internal_comment': 'Internal webapp URL for document file', 'type': 'string'}, 'type': {'title': 'MIME type', 'type': 'string', 'enum': ['application/pdf', 'application/zip', 'text/plain', 'text/tab-separated-values', 'image/jpeg', 'image/tiff', 'image/gif', 'text/html', 'image/png', 'image/svs', 'text/autosql']}, 'md5sum': {'title': 'MD5sum', 'type': 'string', 'format': 'md5sum'}, 'size': {'title': 'File size', 'type': 'integer'}, 'width': {'title': 'Image width', 'type': 'integer'}, 'height': {'title': 'Image height', 'type': 'integer'}}}), ('lab', {'title': 'Lab', 'description': 'Lab associated with the submission.', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'Lab', 'linkSubmitsFor': True, 'default': ''}), ('award', {'title': 'Grant', 'description': 'Grant associated with the submission.', 'exclude_from': 'submit4dn', 'default': '', 'type': 'string', 'linkTo': 'Award'}), ('date_created', {'rdfs:subPropertyOf': 'dc:created', 'title': 'Date created', 'exclude_from': 'submit4dn', 'type': 'string', 'anyOf': [{'format': 'date-time'}, {'format': 'date'}], 'serverDefault': 'now', 'permission': 'import_items'}), ('submitted_by', {'rdfs:subPropertyOf': 'dc:creator', 'title': 'Submitted by', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'User', 'serverDefault': 'userid', 'permission': 'import_items'}), ('aliases', {'title': 'Lab aliases', 'description': 'Lab specific identifiers to reference an object.', 'type': 'array', 'comment': 'Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).', 'default': [], 'uniqueItems': True, 'items': {'uniqueKey': 'alias', 'title': 'Lab alias', 'description': 'A lab specific identifier to reference an object.', 'type': 'string', 'pattern': '^\\S+:\\S+'}}), ('status', {'title': 'Status', 'exclude_from': 'submit4dn', 'type': 'string', 'default': 'in review by lab', 'permission': 'import_items', 'enum': ['released', 'current', 'revoked', 'deleted', 'replaced', 'in review by lab', 'in review by project', 'released to project']}), ('uuid', {'title': 'UUID', 'type': 'string', 'format': 'uuid', 'exclude_from': 'submit4dn', 'serverDefault': 'uuid4', 'permission': 'import_items', 'requestMethod': 'POST'}), ('schema_version', {'title': 'Schema Version', 'internal_comment': 'Do not submit, value is assigned by the server. The version of the JSON schema that the server uses to validate the object. Schema version indicates generation of schema used to save version to to enable upgrade steps to work. Individual schemas should set the default.', 'type': 'string', 'exclude_from': 'submit4dn', 'pattern': '^\\d+(\\.\\d+)*$', 'requestMethod': [], 'default': '1'}), ('flag', {'title': 'Flag', 'description': 'A flag that may indicate an issue with an experiment', 'type': 'string', 'internal_comment': 'Can be associated with a specific quality metric that generates the flag', 'enum': ['FASTQC WARNING', 'ALIGNMENT WARNING', 'OTHER RELEVANT FLAGS']}), ('quality_metrics', {'title': 'Quality Metrics', 'description': 'One or more specific quality metrics that this flag applies to.', 'type': 'array', 'items': OrderedDict([('title', 'QC Metric'), ('description', 'A particular QC metric associated with this flag.'), ('type', 'string'), ('linkTo', 'QualityMetric')])})]))])</em><a class="headerlink" href="#encoded.types.quality_metric.QualityMetricFlag.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="encoded.types.quality_metric.QualityMetricPairsqc">
+<em class="property">class </em><code class="descclassname">encoded.types.quality_metric.</code><code class="descname">QualityMetricPairsqc</code><span class="sig-paren">(</span><em>registry</em>, <em>models</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/quality_metric.html#QualityMetricPairsqc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.quality_metric.QualityMetricPairsqc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#encoded.types.quality_metric.QualityMetric" title="encoded.types.quality_metric.QualityMetric"><code class="xref py py-class docutils literal"><span class="pre">encoded.types.quality_metric.QualityMetric</span></code></a></p>
+<p>Subclass of quality matrics for pairs files.</p>
+<dl class="attribute">
+<dt id="encoded.types.quality_metric.QualityMetricPairsqc.embedded">
+<code class="descname">embedded</code><em class="property"> = []</em><a class="headerlink" href="#encoded.types.quality_metric.QualityMetricPairsqc.embedded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.quality_metric.QualityMetricPairsqc.item_type">
+<code class="descname">item_type</code><em class="property"> = 'quality_metric_pairsqc'</em><a class="headerlink" href="#encoded.types.quality_metric.QualityMetricPairsqc.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.quality_metric.QualityMetricPairsqc.schema">
+<code class="descname">schema</code><em class="property"> = OrderedDict([('description', 'Schema for reporting the specific calculation of an quality metrics'), ('id', '/profiles/quality_metric_pairsqc.json'), ('$schema', 'http://json-schema.org/draft-04/schema#'), ('type', 'object'), ('required', ['award', 'lab']), ('additionalProperties', False), ('identifyingProperties', ['uuid', 'aliases']), ('mixinProperties', [OrderedDict([('$ref', 'mixins.json#/schema_version')]), OrderedDict([('$ref', 'quality_metric.json#/properties')]), OrderedDict([('$ref', 'mixins.json#/uuid')]), OrderedDict([('$ref', 'mixins.json#/aliases')]), OrderedDict([('$ref', 'mixins.json#/attribution')]), OrderedDict([('$ref', 'mixins.json#/submitted')]), OrderedDict([('$ref', 'mixins.json#/status')]), OrderedDict([('$ref', 'quality_metric.json#/properties')])]), ('properties', OrderedDict([('overall_quality_status', {'description': 'Overall QC decision', 'type': 'string', 'enum': ['PASS', 'FAIL', 'WARN']}), ('url', {'type': 'string', 'description': 'Location of the main html file', 'format': 'uri'}), ('status', {'title': 'Status', 'exclude_from': 'submit4dn', 'type': 'string', 'default': 'in review by lab', 'permission': 'import_items', 'enum': ['released', 'current', 'revoked', 'deleted', 'replaced', 'in review by lab', 'in review by project', 'released to project']}), ('date_created', {'rdfs:subPropertyOf': 'dc:created', 'title': 'Date created', 'exclude_from': 'submit4dn', 'type': 'string', 'anyOf': [{'format': 'date-time'}, {'format': 'date'}], 'serverDefault': 'now', 'permission': 'import_items'}), ('submitted_by', {'rdfs:subPropertyOf': 'dc:creator', 'title': 'Submitted by', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'User', 'serverDefault': 'userid', 'permission': 'import_items'}), ('lab', {'title': 'Lab', 'description': 'Lab associated with the submission.', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'Lab', 'linkSubmitsFor': True, 'default': ''}), ('award', {'title': 'Grant', 'description': 'Grant associated with the submission.', 'exclude_from': 'submit4dn', 'default': '', 'type': 'string', 'linkTo': 'Award'}), ('aliases', {'title': 'Lab aliases', 'description': 'Lab specific identifiers to reference an object.', 'type': 'array', 'comment': 'Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).', 'default': [], 'uniqueItems': True, 'items': {'uniqueKey': 'alias', 'title': 'Lab alias', 'description': 'A lab specific identifier to reference an object.', 'type': 'string', 'pattern': '^\\S+:\\S+'}}), ('uuid', {'title': 'UUID', 'type': 'string', 'format': 'uuid', 'exclude_from': 'submit4dn', 'serverDefault': 'uuid4', 'permission': 'import_items', 'requestMethod': 'POST'}), ('schema_version', {'title': 'Schema Version', 'internal_comment': 'Do not submit, value is assigned by the server. The version of the JSON schema that the server uses to validate the object. Schema version indicates generation of schema used to save version to to enable upgrade steps to work. Individual schemas should set the default.', 'type': 'string', 'exclude_from': 'submit4dn', 'pattern': '^\\d+(\\.\\d+)*$', 'requestMethod': [], 'default': '1'}), ('Cis-to-trans Ratio', {'type': 'number', 'description': 'PairsQC Summary metric'})]))])</em><a class="headerlink" href="#encoded.types.quality_metric.QualityMetricPairsqc.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="encoded.types.publication_tracking.html"
+                        title="previous chapter">encoded.types.publication_tracking module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="encoded.types.software.html"
+                        title="next chapter">encoded.types.software module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pydoc/encoded.types.quality_metric.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.software.html" title="encoded.types.software module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.publication_tracking.html" title="encoded.types.publication_tracking module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.types.html" >encoded.types package</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

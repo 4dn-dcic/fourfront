@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.types.sop_map module &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="encoded.types.summary_statistic module" href="encoded.types.summary_statistic.html" />
+    <link rel="prev" title="encoded.types.software module" href="encoded.types.software.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.summary_statistic.html" title="encoded.types.summary_statistic module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.software.html" title="encoded.types.software module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.types.html" accesskey="U">encoded.types package</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-encoded.types.sop_map">
+<span id="encoded-types-sop-map-module"></span><h1>encoded.types.sop_map module<a class="headerlink" href="#module-encoded.types.sop_map" title="Permalink to this headline">¶</a></h1>
+<p>Collection for the SopMap object.</p>
+<dl class="class">
+<dt id="encoded.types.sop_map.SopMap">
+<em class="property">class </em><code class="descclassname">encoded.types.sop_map.</code><code class="descname">SopMap</code><span class="sig-paren">(</span><em>registry</em>, <em>models</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/sop_map.html#SopMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.sop_map.SopMap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="encoded.types.base.html#encoded.types.base.Item" title="encoded.types.base.Item"><code class="xref py py-class docutils literal"><span class="pre">encoded.types.base.Item</span></code></a></p>
+<p>The SopFields class that lists the default values of fields if the SOP is followed.</p>
+<dl class="attribute">
+<dt id="encoded.types.sop_map.SopMap.embedded">
+<code class="descname">embedded</code><em class="property"> = []</em><a class="headerlink" href="#encoded.types.sop_map.SopMap.embedded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.sop_map.SopMap.item_type">
+<code class="descname">item_type</code><em class="property"> = 'sop_map'</em><a class="headerlink" href="#encoded.types.sop_map.SopMap.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.sop_map.SopMap.name_key">
+<code class="descname">name_key</code><em class="property"> = 'mapid'</em><a class="headerlink" href="#encoded.types.sop_map.SopMap.name_key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.sop_map.SopMap.schema">
+<code class="descname">schema</code><em class="property"> = OrderedDict([('title', 'SOPs with fields'), ('description', 'For items with SOPs stores a mapping of the fields and the default values for that SOP.'), ('id', '/profiles/sop_map.json'), ('$schema', 'http://json-schema.org/draft-04/schema#'), ('type', 'object'), ('required', ['associated_item_type', 'award', 'lab']), ('additionalProperties', False), ('identifyingProperties', ['uuid', 'aliases', 'mapid']), ('mixinProperties', [OrderedDict([('$ref', 'mixins.json#/schema_version')]), OrderedDict([('$ref', 'mixins.json#/aliases')]), OrderedDict([('$ref', 'mixins.json#/uuid')]), OrderedDict([('$ref', 'mixins.json#/submitted')]), OrderedDict([('$ref', 'mixins.json#/documents')]), OrderedDict([('$ref', 'mixins.json#/attribution')]), OrderedDict([('$ref', 'mixins.json#/notes')]), OrderedDict([('$ref', 'mixins.json#/status')])]), ('properties', OrderedDict([('status', {'title': 'Status', 'exclude_from': 'submit4dn', 'type': 'string', 'default': 'in review by lab', 'permission': 'import_items', 'enum': ['released', 'current', 'revoked', 'deleted', 'replaced', 'in review by lab', 'in review by project', 'released to project']}), ('notes', {'title': 'Notes', 'description': 'DCIC internal notes.', 'type': 'string', 'exclude_from': 'submit4dn', 'elasticsearch_mapping_index_type': {'title': 'Field mapping index type', 'description': 'Defines one of three types of indexing available', 'type': 'string', 'default': 'analyzed', 'enum': ['analyzed', 'not_analyzed', 'no']}}), ('lab', {'title': 'Lab', 'description': 'Lab associated with the submission.', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'Lab', 'linkSubmitsFor': True, 'default': ''}), ('award', {'title': 'Grant', 'description': 'Grant associated with the submission.', 'exclude_from': 'submit4dn', 'default': '', 'type': 'string', 'linkTo': 'Award'}), ('documents', {'title': 'Documents', 'description': 'Documents that provide additional information (not data file).', 'comment': 'See Documents sheet or collection for existing items.', 'type': 'array', 'default': [], 'uniqueItems': True, 'items': {'title': 'Document', 'description': 'A document that provides additional information (not data file).', 'type': 'string', 'linkTo': 'Document'}}), ('date_created', {'rdfs:subPropertyOf': 'dc:created', 'title': 'Date created', 'exclude_from': 'submit4dn', 'type': 'string', 'anyOf': [{'format': 'date-time'}, {'format': 'date'}], 'serverDefault': 'now', 'permission': 'import_items'}), ('submitted_by', {'rdfs:subPropertyOf': 'dc:creator', 'title': 'Submitted by', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'User', 'serverDefault': 'userid', 'permission': 'import_items'}), ('uuid', {'title': 'UUID', 'type': 'string', 'format': 'uuid', 'exclude_from': 'submit4dn', 'serverDefault': 'uuid4', 'permission': 'import_items', 'requestMethod': 'POST'}), ('aliases', {'title': 'Lab aliases', 'description': 'Lab specific identifiers to reference an object.', 'type': 'array', 'comment': 'Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).', 'default': [], 'uniqueItems': True, 'items': {'uniqueKey': 'alias', 'title': 'Lab alias', 'description': 'A lab specific identifier to reference an object.', 'type': 'string', 'pattern': '^\\S+:\\S+'}}), ('schema_version', {'title': 'Schema Version', 'internal_comment': 'Do not submit, value is assigned by the server. The version of the JSON schema that the server uses to validate the object. Schema version indicates generation of schema used to save version to to enable upgrade steps to work. Individual schemas should set the default.', 'type': 'string', 'exclude_from': 'submit4dn', 'pattern': '^\\d+(\\.\\d+)*$', 'requestMethod': [], 'default': '1'}), ('sop_name', {'title': 'SOP', 'description': 'Name of the SOP.', 'type': 'string'}), ('sop_version', {'title': 'Version', 'description': 'Version of the SOP', 'type': 'number', 'default': 1}), ('associated_item_type', {'title': 'Item type', 'description': 'The type of the item to which the SOP map can be linked', 'type': 'string'}), ('id_values', {'title': 'ID values', 'description': 'Values of fields from item that can be used specify the map to use', 'type': 'array', 'items': OrderedDict([('title', 'Field Value'), ('description', 'Identifying field value'), ('type', 'string')])}), ('mapid', {'&#64;type': '&#64;id', 'title': 'Map ID', 'description': 'An autogenerated unique ID to allow mapping of Items to an SOP map', 'type': 'string', 'uniqueKey': 'sop_map:mapid'}), ('description', {'title': 'Description', 'description': &quot;A short description of the SOP and what it's used for.&quot;, 'type': 'string'}), ('sop_protocol', {'title': 'SOP Protocol', 'description': 'The Protocol item that describes the SOP', 'type': 'string', 'linkTo': 'Protocol'}), ('necessary_fields', {'title': 'Non-empty SOP fields', 'description': 'The data fields that need a value but do not have default values', 'type': 'array', 'items': OrderedDict([('title', 'Field name'), ('description', 'Name of the field that must have any value'), ('type', 'string')])}), ('fields_with_default', {'title': 'SOP fields with defaults', 'description': 'The data fields that have SOP defaults', 'type': 'array', 'items': OrderedDict([('title', 'Field Info'), ('type', 'object'), ('additionalProperties', False), ('properties', OrderedDict([('field_name', OrderedDict([('title', 'Field name'), ('description', 'the name of the field'), ('type', 'string')])), ('field_value', OrderedDict([('title', 'Value'), ('description', 'a specified value for the specified parameter'), ('type', 'string')]))]))])}), ('fields_with_options', {'title': 'SOP fields that can have more than one possible value', 'description': 'The data fields that have more than one possible acceptable value in SOP', 'internal_comment': 'example - for in situ Hi-C can use either MboI or DpnII for digestion', 'type': 'array', 'items': OrderedDict([('title', 'Field Info'), ('type', 'object'), ('additionalProperties', False), ('properties', OrderedDict([('field_name', OrderedDict([('title', 'Field name'), ('description', 'the name of the field'), ('type', 'string')])), ('field_options', OrderedDict([('title', 'List of options'), ('description', 'All acceptable values for the specified parameter'), ('type', 'array'), ('items', OrderedDict([('title', 'Value'), ('description', 'An acceptable value for a field with options'), ('type', 'string')]))]))]))])}), ('range_fields', {'title': 'Range fields', 'description': 'The data fields that specify an acceptable range of values', 'type': 'array', 'items': OrderedDict([('title', 'Field Info'), ('type', 'object'), ('additionalProperties', False), ('properties', OrderedDict([('field_name', OrderedDict([('title', 'Field name'), ('description', 'the name of the field'), ('type', 'string')])), ('minimum_value', OrderedDict([('title', 'Minimum Value'), ('description', 'The specified minimum value for the given range field'), ('type', 'number')])), ('maximum_value', OrderedDict([('title', 'Maximum Value'), ('description', 'The specified maximum value for the given range field'), ('type', 'number')]))]))])})]))])</em><a class="headerlink" href="#encoded.types.sop_map.SopMap.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="encoded.types.software.html"
+                        title="previous chapter">encoded.types.software module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="encoded.types.summary_statistic.html"
+                        title="next chapter">encoded.types.summary_statistic module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pydoc/encoded.types.sop_map.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.summary_statistic.html" title="encoded.types.summary_statistic module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.software.html" title="encoded.types.software module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.types.html" >encoded.types package</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

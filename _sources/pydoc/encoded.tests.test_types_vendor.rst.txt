@@ -1,0 +1,7 @@
+encoded.tests.test_types_vendor module
+======================================
+
+.. automodule:: encoded.tests.test_types_vendor
+    :members:
+    :undoc-members:
+    :show-inheritance:

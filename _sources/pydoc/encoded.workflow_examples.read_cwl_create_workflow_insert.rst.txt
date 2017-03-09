@@ -1,0 +1,7 @@
+encoded.workflow_examples.read_cwl_create_workflow_insert module
+================================================================
+
+.. automodule:: encoded.workflow_examples.read_cwl_create_workflow_insert
+    :members:
+    :undoc-members:
+    :show-inheritance:

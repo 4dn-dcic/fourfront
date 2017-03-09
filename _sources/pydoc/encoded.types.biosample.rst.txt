@@ -1,0 +1,7 @@
+encoded.types.biosample module
+==============================
+
+.. automodule:: encoded.types.biosample
+    :members:
+    :undoc-members:
+    :show-inheritance:

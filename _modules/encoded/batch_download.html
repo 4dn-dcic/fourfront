@@ -1,0 +1,434 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.batch_download &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../encoded.html" accesskey="U">encoded</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.batch_download</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">pyramid.compat</span> <span class="k">import</span> <span class="n">bytes_</span>
+<span class="kn">from</span> <span class="nn">pyramid.httpexceptions</span> <span class="k">import</span> <span class="n">HTTPBadRequest</span>
+<span class="kn">from</span> <span class="nn">pyramid.view</span> <span class="k">import</span> <span class="n">view_config</span>
+<span class="kn">from</span> <span class="nn">pyramid.response</span> <span class="k">import</span> <span class="n">Response</span>
+<span class="kn">from</span> <span class="nn">snovault</span> <span class="k">import</span> <span class="n">TYPES</span>
+<span class="kn">from</span> <span class="nn">snovault.util</span> <span class="k">import</span> <span class="n">simple_path_ids</span>
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">parse_qs</span><span class="p">,</span>
+    <span class="n">urlencode</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.search</span> <span class="k">import</span> <span class="n">iter_search_results</span>
+<span class="kn">from</span> <span class="nn">.search</span> <span class="k">import</span> <span class="n">list_visible_columns_for_schemas</span>
+
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="includeme"><a class="viewcode-back" href="../../pydoc/encoded.batch_download.html#encoded.batch_download.includeme">[docs]</a><span class="k">def</span> <span class="nf">includeme</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_route</span><span class="p">(</span><span class="s1">&#39;batch_download&#39;</span><span class="p">,</span> <span class="s1">&#39;/batch_download/</span><span class="si">{search_params}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_route</span><span class="p">(</span><span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="s1">&#39;/metadata/</span><span class="si">{search_params}</span><span class="s1">/</span><span class="si">{tsv}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_route</span><span class="p">(</span><span class="s1">&#39;peak_metadata&#39;</span><span class="p">,</span> <span class="s1">&#39;/peak_metadata/</span><span class="si">{search_params}</span><span class="s1">/</span><span class="si">{tsv}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_route</span><span class="p">(</span><span class="s1">&#39;report_download&#39;</span><span class="p">,</span> <span class="s1">&#39;/report.tsv&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+
+<span class="c1"># includes concatenated properties</span>
+<span class="n">_tsv_mapping</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">&#39;File accession&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;files.title&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;File format&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;files.file_type&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Output type&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;files.output_type&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Experiment accession&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;accession&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Assay&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;assay_term_name&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Biosample term id&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;biosample_term_id&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Biosample term name&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;biosample_term_name&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Biosample type&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;biosample_type&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Biosample life stage&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;replicates.library.biosample.life_stage&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Biosample sex&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;replicates.library.biosample.sex&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Biosample organism&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;replicates.library.biosample.organism.scientific_name&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Biosample treatments&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;replicates.library.biosample.treatments.treatment_term_name&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Biosample subcellular fraction term name&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;replicates.library.biosample.subcellular_fraction_term_name&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Biosample phase&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;replicates.library.biosample.phase&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Biosample synchronization stage&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;replicates.library.biosample.fly_synchronization_stage&#39;</span><span class="p">,</span>
+                                         <span class="s1">&#39;replicates.library.biosample.worm_synchronization_stage&#39;</span><span class="p">,</span>
+                                         <span class="s1">&#39;replicates.library.biosample.post_synchronization_time&#39;</span><span class="p">,</span>
+                                         <span class="s1">&#39;replicates.library.biosample.post_synchronization_time_units&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Experiment target&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;target.name&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Antibody accession&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;replicates.antibody.accession&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Library made from&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;replicates.library.nucleic_acid_term_name&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Library depleted in&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;replicates.library.depleted_in_term_name&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Library extraction method&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;replicates.library.extraction_method&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Library lysis method&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;replicates.library.lysis_method&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Library crosslinking method&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;replicates.library.crosslinking_method&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Experiment date released&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;date_released&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Project&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;award.project&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;RBNS protein concentration&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;files.replicate.rbns_protein_concentration&#39;</span><span class="p">,</span> <span class="s1">&#39;files.replicate.rbns_protein_concentration_units&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Library fragmentation method&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;files.replicate.library.fragmentation_method&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Library size range&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;files.replicate.library.size_range&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Biosample Age&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;files.replicate.library.biosample.age_display&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Biological replicate(s)&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;files.biological_replicates&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Technical replicate&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;files.replicate.technical_replicate_number&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Read length&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;files.read_length&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Run type&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;files.run_type&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Paired end&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;files.paired_end&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Paired with&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;files.paired_with&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Derived from&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;files.derived_from.accession&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Size&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;files.file_size&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Lab&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;files.lab.title&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;md5sum&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;files.md5sum&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;File download URL&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;files.href&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Assembly&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;files.assembly&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="s1">&#39;Platform&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;files.platform.title&#39;</span><span class="p">])</span>
+<span class="p">])</span>
+
+
+<div class="viewcode-block" id="get_file_uuids"><a class="viewcode-back" href="../../pydoc/encoded.batch_download.html#encoded.batch_download.get_file_uuids">[docs]</a><span class="k">def</span> <span class="nf">get_file_uuids</span><span class="p">(</span><span class="n">result_dict</span><span class="p">):</span>
+    <span class="n">file_uuids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">result_dict</span><span class="p">[</span><span class="s1">&#39;@graph&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">]:</span>
+            <span class="n">file_uuids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file</span><span class="p">[</span><span class="s1">&#39;uuid&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">file_uuids</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="get_biosample_accessions"><a class="viewcode-back" href="../../pydoc/encoded.batch_download.html#encoded.batch_download.get_biosample_accessions">[docs]</a><span class="k">def</span> <span class="nf">get_biosample_accessions</span><span class="p">(</span><span class="n">file_json</span><span class="p">,</span> <span class="n">experiment_json</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">experiment_json</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">file_json</span><span class="p">[</span><span class="s1">&#39;uuid&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;uuid&#39;</span><span class="p">]:</span>
+            <span class="n">accession</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;replicate&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;library&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;biosample&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;accession&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">accession</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">accession</span>
+    <span class="n">accessions</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">replicate</span> <span class="ow">in</span> <span class="n">experiment_json</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;replicates&#39;</span><span class="p">,</span> <span class="p">[]):</span>
+        <span class="n">accession</span> <span class="o">=</span> <span class="n">replicate</span><span class="p">[</span><span class="s1">&#39;library&#39;</span><span class="p">][</span><span class="s1">&#39;biosample&#39;</span><span class="p">][</span><span class="s1">&#39;accession&#39;</span><span class="p">]</span>
+        <span class="n">accessions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">accession</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">accessions</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="get_peak_metadata_links"><a class="viewcode-back" href="../../pydoc/encoded.batch_download.html#encoded.batch_download.get_peak_metadata_links">[docs]</a><span class="k">def</span> <span class="nf">get_peak_metadata_links</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">matchdict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;search_params&#39;</span><span class="p">):</span>
+        <span class="n">search_params</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">matchdict</span><span class="p">[</span><span class="s1">&#39;search_params&#39;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">search_params</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">query_string</span>
+
+    <span class="n">peak_metadata_tsv_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{host_url}</span><span class="s1">/peak_metadata/</span><span class="si">{search_params}</span><span class="s1">/peak_metadata.tsv&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">host_url</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">host_url</span><span class="p">,</span>
+        <span class="n">search_params</span><span class="o">=</span><span class="n">search_params</span>
+    <span class="p">)</span>
+    <span class="n">peak_metadata_json_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{host_url}</span><span class="s1">/peak_metadata/</span><span class="si">{search_params}</span><span class="s1">/peak_metadata.json&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">host_url</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">host_url</span><span class="p">,</span>
+        <span class="n">search_params</span><span class="o">=</span><span class="n">search_params</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">peak_metadata_tsv_link</span><span class="p">,</span> <span class="n">peak_metadata_json_link</span><span class="p">]</span></div>
+
+
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">route_name</span><span class="o">=</span><span class="s1">&#39;peak_metadata&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="peak_metadata"><a class="viewcode-back" href="../../pydoc/encoded.batch_download.html#encoded.batch_download.peak_metadata">[docs]</a><span class="k">def</span> <span class="nf">peak_metadata</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="n">param_list</span> <span class="o">=</span> <span class="n">parse_qs</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">matchdict</span><span class="p">[</span><span class="s1">&#39;search_params&#39;</span><span class="p">])</span>
+    <span class="n">param_list</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;assay_term_name&#39;</span><span class="p">,</span> <span class="s1">&#39;coordinates&#39;</span><span class="p">,</span> <span class="s1">&#39;target.label&#39;</span><span class="p">,</span> <span class="s1">&#39;biosample.accession&#39;</span><span class="p">,</span> <span class="s1">&#39;file.accession&#39;</span><span class="p">,</span> <span class="s1">&#39;experiment.accession&#39;</span><span class="p">]</span>
+    <span class="n">param_list</span><span class="p">[</span><span class="s1">&#39;limit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">]</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/region-search/?</span><span class="si">{}</span><span class="s1">&amp;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">urlencode</span><span class="p">(</span><span class="n">param_list</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span><span class="s1">&#39;referrer=peak_metadata&#39;</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">as_user</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">uuids_in_results</span> <span class="o">=</span> <span class="n">get_file_uuids</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">json_doc</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;peaks&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;_id&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">uuids_in_results</span><span class="p">:</span>
+            <span class="n">file_json</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;_id&#39;</span><span class="p">])</span>
+            <span class="n">experiment_json</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">file_json</span><span class="p">[</span><span class="s1">&#39;dataset&#39;</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;inner_hits&#39;</span><span class="p">][</span><span class="s1">&#39;positions&#39;</span><span class="p">][</span><span class="s1">&#39;hits&#39;</span><span class="p">][</span><span class="s1">&#39;hits&#39;</span><span class="p">]:</span>
+                <span class="n">data_row</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">coordinates</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">:</span><span class="si">{}</span><span class="s1">-</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">hit</span><span class="p">[</span><span class="s1">&#39;_index&#39;</span><span class="p">],</span> <span class="n">hit</span><span class="p">[</span><span class="s1">&#39;_source&#39;</span><span class="p">][</span><span class="s1">&#39;start&#39;</span><span class="p">],</span> <span class="n">hit</span><span class="p">[</span><span class="s1">&#39;_source&#39;</span><span class="p">][</span><span class="s1">&#39;end&#39;</span><span class="p">])</span>
+                <span class="n">file_accession</span> <span class="o">=</span> <span class="n">file_json</span><span class="p">[</span><span class="s1">&#39;accession&#39;</span><span class="p">]</span>
+                <span class="n">experiment_accession</span> <span class="o">=</span> <span class="n">experiment_json</span><span class="p">[</span><span class="s1">&#39;accession&#39;</span><span class="p">]</span>
+                <span class="n">assay_name</span> <span class="o">=</span> <span class="n">experiment_json</span><span class="p">[</span><span class="s1">&#39;assay_term_name&#39;</span><span class="p">]</span>
+                <span class="n">target_name</span> <span class="o">=</span> <span class="n">experiment_json</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">)</span> <span class="c1"># not all experiments have targets</span>
+                <span class="n">biosample_accession</span> <span class="o">=</span> <span class="n">get_biosample_accessions</span><span class="p">(</span><span class="n">file_json</span><span class="p">,</span> <span class="n">experiment_json</span><span class="p">)</span>
+                <span class="n">data_row</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">assay_name</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">target_name</span><span class="p">,</span> <span class="n">biosample_accession</span><span class="p">,</span> <span class="n">file_accession</span><span class="p">,</span> <span class="n">experiment_accession</span><span class="p">])</span>
+                <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_row</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">assay_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">json_doc</span><span class="p">:</span>
+                    <span class="n">json_doc</span><span class="p">[</span><span class="n">assay_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">json_doc</span><span class="p">[</span><span class="n">assay_name</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                        <span class="s1">&#39;coordinates&#39;</span><span class="p">:</span> <span class="n">coordinates</span><span class="p">,</span>
+                        <span class="s1">&#39;target.name&#39;</span><span class="p">:</span> <span class="n">target_name</span><span class="p">,</span>
+                        <span class="s1">&#39;biosample.accession&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">biosample_accession</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="p">)),</span>
+                        <span class="s1">&#39;file.accession&#39;</span><span class="p">:</span> <span class="n">file_accession</span><span class="p">,</span>
+                        <span class="s1">&#39;experiment.accession&#39;</span><span class="p">:</span> <span class="n">experiment_accession</span>
+                    <span class="p">})</span>
+    <span class="k">if</span> <span class="s1">&#39;peak_metadata.json&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">url</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+            <span class="n">content_type</span><span class="o">=</span><span class="s1">&#39;text/plain&#39;</span><span class="p">,</span>
+            <span class="n">body</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">json_doc</span><span class="p">),</span>
+            <span class="n">content_disposition</span><span class="o">=</span><span class="s1">&#39;attachment;filename=&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="s1">&#39;peak_metadata.json&#39;</span>
+        <span class="p">)</span>
+    <span class="n">fout</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+    <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">fout</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">writerows</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+        <span class="n">content_type</span><span class="o">=</span><span class="s1">&#39;text/tsv&#39;</span><span class="p">,</span>
+        <span class="n">body</span><span class="o">=</span><span class="n">fout</span><span class="o">.</span><span class="n">getvalue</span><span class="p">(),</span>
+        <span class="n">content_disposition</span><span class="o">=</span><span class="s1">&#39;attachment;filename=&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="s1">&#39;peak_metadata.tsv&#39;</span>
+    <span class="p">)</span></div>
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">route_name</span><span class="o">=</span><span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="metadata_tsv"><a class="viewcode-back" href="../../pydoc/encoded.batch_download.html#encoded.batch_download.metadata_tsv">[docs]</a><span class="k">def</span> <span class="nf">metadata_tsv</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="n">param_list</span> <span class="o">=</span> <span class="n">parse_qs</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">matchdict</span><span class="p">[</span><span class="s1">&#39;search_params&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="s1">&#39;referrer&#39;</span> <span class="ow">in</span> <span class="n">param_list</span><span class="p">:</span>
+        <span class="n">search_path</span> <span class="o">=</span> <span class="s1">&#39;/</span><span class="si">{}</span><span class="s1">/&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">param_list</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;referrer&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">search_path</span> <span class="o">=</span> <span class="s1">&#39;/search/&#39;</span>
+    <span class="n">param_list</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">file_attributes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">_tsv_mapping</span><span class="p">:</span>
+        <span class="n">header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prop</span><span class="p">)</span>
+        <span class="n">param_list</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">param_list</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">_tsv_mapping</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">_tsv_mapping</span><span class="p">[</span><span class="n">prop</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;files&#39;</span><span class="p">):</span>
+            <span class="n">file_attributes</span> <span class="o">=</span> <span class="n">file_attributes</span> <span class="o">+</span> <span class="p">[</span><span class="n">_tsv_mapping</span><span class="p">[</span><span class="n">prop</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="n">param_list</span><span class="p">[</span><span class="s1">&#39;limit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">]</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">?</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">search_path</span><span class="p">,</span> <span class="n">urlencode</span><span class="p">(</span><span class="n">param_list</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">as_user</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;@graph&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">]:</span>
+            <span class="n">exp_data_row</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">header</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">_tsv_mapping</span><span class="p">[</span><span class="n">column</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;files&#39;</span><span class="p">):</span>
+                    <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">_tsv_mapping</span><span class="p">[</span><span class="n">column</span><span class="p">]:</span>
+                        <span class="n">c_value</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">simple_path_ids</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">c_value</span><span class="p">:</span>
+                                <span class="n">c_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="s1">&#39;replicates.library.biosample.post_synchronization_time&#39;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">c_value</span><span class="p">):</span>
+                                <span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; + &#39;</span> <span class="o">+</span> <span class="n">c_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">c_value</span><span class="p">):</span>
+                                <span class="n">temp</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">c_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">temp</span><span class="p">]</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">temp</span> <span class="o">=</span> <span class="n">c_value</span>
+                    <span class="n">exp_data_row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">temp</span><span class="p">))))</span>
+            <span class="n">f_attributes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;files.title&#39;</span><span class="p">,</span> <span class="s1">&#39;files.file_type&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;files.output_type&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="s1">&#39;files.file_type&#39;</span> <span class="ow">in</span> <span class="n">param_list</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;file_type&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">param_list</span><span class="p">[</span><span class="s1">&#39;files.file_type&#39;</span><span class="p">]:</span>
+                        <span class="k">continue</span>
+                <span class="n">f</span><span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">host_url</span> <span class="o">+</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">]</span>
+                <span class="n">f_row</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">f_attributes</span><span class="p">:</span>
+                    <span class="n">f_row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="n">attr</span><span class="p">[</span><span class="mi">6</span><span class="p">:]])</span>
+                <span class="n">data_row</span> <span class="o">=</span> <span class="n">f_row</span> <span class="o">+</span> <span class="n">exp_data_row</span>
+                <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">file_attributes</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">f_attributes</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="n">path</span> <span class="o">=</span> <span class="n">prop</span><span class="p">[</span><span class="mi">6</span><span class="p">:]</span>
+                    <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">simple_path_ids</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+                        <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">prop</span> <span class="o">==</span> <span class="s1">&#39;files.replicate.rbns_protein_concentration&#39;</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="s1">&#39;replicate&#39;</span> <span class="ow">in</span> <span class="n">f</span> <span class="ow">and</span> <span class="s1">&#39;rbns_protein_concentration_units&#39;</span> <span class="ow">in</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;replicate&#39;</span><span class="p">]:</span>
+                            <span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;replicate&#39;</span><span class="p">][</span><span class="s1">&#39;rbns_protein_concentration_units&#39;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">prop</span> <span class="o">==</span> <span class="s1">&#39;files.paired_with&#39;</span><span class="p">:</span>
+                        <span class="c1"># chopping of path to just accession</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">temp</span><span class="p">):</span>
+                            <span class="n">new_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">temp</span><span class="p">]</span>
+                            <span class="n">temp</span> <span class="o">=</span> <span class="n">new_values</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">temp</span><span class="p">))</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+                    <span class="n">data_row</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+                <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_row</span><span class="p">)</span>
+    <span class="n">fout</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+    <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">fout</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+    <span class="n">writer</span><span class="o">.</span><span class="n">writerows</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+        <span class="n">content_type</span><span class="o">=</span><span class="s1">&#39;text/tsv&#39;</span><span class="p">,</span>
+        <span class="n">body</span><span class="o">=</span><span class="n">fout</span><span class="o">.</span><span class="n">getvalue</span><span class="p">(),</span>
+        <span class="n">content_disposition</span><span class="o">=</span><span class="s1">&#39;attachment;filename=&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="s1">&#39;metadata.tsv&#39;</span>
+    <span class="p">)</span></div>
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">route_name</span><span class="o">=</span><span class="s1">&#39;batch_download&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="batch_download"><a class="viewcode-back" href="../../pydoc/encoded.batch_download.html#encoded.batch_download.batch_download">[docs]</a><span class="k">def</span> <span class="nf">batch_download</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="c1"># adding extra params to get required columns</span>
+    <span class="n">param_list</span> <span class="o">=</span> <span class="n">parse_qs</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">matchdict</span><span class="p">[</span><span class="s1">&#39;search_params&#39;</span><span class="p">])</span>
+    <span class="n">param_list</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;files.href&#39;</span><span class="p">,</span> <span class="s1">&#39;files.file_type&#39;</span><span class="p">]</span>
+    <span class="n">param_list</span><span class="p">[</span><span class="s1">&#39;limit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">]</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;/search/?</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">urlencode</span><span class="p">(</span><span class="n">param_list</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">as_user</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">metadata_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{host_url}</span><span class="s1">/metadata/</span><span class="si">{search_params}</span><span class="s1">/metadata.tsv&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">host_url</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">host_url</span><span class="p">,</span>
+        <span class="n">search_params</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">matchdict</span><span class="p">[</span><span class="s1">&#39;search_params&#39;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">metadata_link</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s1">&#39;files.file_type&#39;</span> <span class="ow">in</span> <span class="n">param_list</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;@graph&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">exp</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;file_type&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">param_list</span><span class="p">[</span><span class="s1">&#39;files.file_type&#39;</span><span class="p">]:</span>
+                    <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{host_url}{href}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">host_url</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">host_url</span><span class="p">,</span>
+                        <span class="n">href</span><span class="o">=</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">]</span>
+                    <span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;@graph&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">exp</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">]:</span>
+                <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{host_url}{href}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">host_url</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">host_url</span><span class="p">,</span>
+                    <span class="n">href</span><span class="o">=</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">]</span>
+                <span class="p">))</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+        <span class="n">content_type</span><span class="o">=</span><span class="s1">&#39;text/plain&#39;</span><span class="p">,</span>
+        <span class="n">body</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">files</span><span class="p">),</span>
+        <span class="n">content_disposition</span><span class="o">=</span><span class="s1">&#39;attachment; filename=&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="s1">&#39;files.txt&#39;</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="lookup_column_value"><a class="viewcode-back" href="../../pydoc/encoded.batch_download.html#encoded.batch_download.lookup_column_value">[docs]</a><span class="k">def</span> <span class="nf">lookup_column_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+        <span class="n">nextnodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">node</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">node</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">nextnodes</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">nextnodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="n">nextnodes</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+    <span class="c1"># if we ended with an embedded object, show the @id</span>
+    <span class="k">if</span> <span class="n">nodes</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;__contains__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;@id&#39;</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">]</span>
+    <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">deduped_nodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nodes</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">n</span> <span class="ow">in</span> <span class="n">seen</span> <span class="ow">or</span> <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">n</span><span class="p">))]</span>
+    <span class="k">return</span> <span class="sa">u</span><span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">deduped_nodes</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="format_row"><a class="viewcode-back" href="../../pydoc/encoded.batch_download.html#encoded.batch_download.format_row">[docs]</a><span class="k">def</span> <span class="nf">format_row</span><span class="p">(</span><span class="n">columns</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Format a list of text columns as a tab-separated byte string.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">bytes_</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">])</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\r\n</span><span class="s1">&#39;</span></div>
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">route_name</span><span class="o">=</span><span class="s1">&#39;report_download&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="report_download"><a class="viewcode-back" href="../../pydoc/encoded.batch_download.html#encoded.batch_download.report_download">[docs]</a><span class="k">def</span> <span class="nf">report_download</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="n">types</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">getall</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">types</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Report view requires specifying a single type.&#39;</span>
+        <span class="k">raise</span> <span class="n">HTTPBadRequest</span><span class="p">(</span><span class="n">explanation</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="c1"># Make sure we get all results</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">GET</span><span class="p">[</span><span class="s1">&#39;limit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span>
+
+    <span class="n">schemas</span> <span class="o">=</span> <span class="p">[</span><span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">TYPES</span><span class="p">][</span><span class="n">types</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">schema</span><span class="p">]</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="n">list_visible_columns_for_schemas</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">schemas</span><span class="p">)</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="n">column</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">field</span> <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">columns</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+
+    <span class="k">def</span> <span class="nf">generate_rows</span><span class="p">():</span>
+        <span class="k">yield</span> <span class="n">format_row</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">iter_search_results</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">lookup_column_value</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">]</span>
+            <span class="k">yield</span> <span class="n">format_row</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+    <span class="c1"># Stream response using chunked encoding.</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">content_type</span> <span class="o">=</span> <span class="s1">&#39;text/tsv&#39;</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">content_disposition</span> <span class="o">=</span> <span class="s1">&#39;attachment;filename=&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="s1">&#39;report.tsv&#39;</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">app_iter</span> <span class="o">=</span> <span class="n">generate_rows</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">response</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../encoded.html" >encoded</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,646 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.commands.generate_ontology &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" accesskey="U">encoded</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.commands.generate_ontology</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">rdflib.collection</span> <span class="k">import</span> <span class="n">Collection</span>
+<span class="kn">from</span> <span class="nn">encoded.commands.owltools</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">Namespace</span><span class="p">,</span>
+    <span class="n">Owler</span><span class="p">,</span>
+    <span class="n">splitNameFromNamespace</span><span class="p">,</span>
+    <span class="n">convert2URIRef</span><span class="p">,</span>
+    <span class="n">isURIRef</span><span class="p">,</span>
+    <span class="n">isBlankNode</span><span class="p">,</span>
+    <span class="n">getObjectLiteralsOfType</span><span class="p">,</span>
+    <span class="n">subClassOf</span><span class="p">,</span>
+    <span class="n">SomeValuesFrom</span><span class="p">,</span>
+    <span class="n">IntersectionOf</span><span class="p">,</span>
+    <span class="n">OnProperty</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">wranglertools.fdnDCIC</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">FDN_Key</span><span class="p">,</span>
+    <span class="n">FDN_Connection</span><span class="p">,</span>
+    <span class="n">get_FDN</span>
+<span class="p">)</span>
+
+
+<span class="n">EPILOG</span> <span class="o">=</span> <span class="vm">__doc__</span>
+
+<span class="n">PART_OF</span> <span class="o">=</span> <span class="s2">&quot;http://purl.obolibrary.org/obo/BFO_0000050&quot;</span>
+<span class="n">DEVELOPS_FROM</span> <span class="o">=</span> <span class="s2">&quot;http://purl.obolibrary.org/obo/RO_0002202&quot;</span>
+<span class="n">HUMAN_TAXON</span> <span class="o">=</span> <span class="s2">&quot;http://purl.obolibrary.org/obo/NCBITaxon_9606&quot;</span>
+<span class="n">HAS_PART</span> <span class="o">=</span> <span class="s2">&quot;http://purl.obolibrary.org/obo/BFO_0000051&quot;</span>
+<span class="n">ACHIEVES_PLANNED_OBJECTIVE</span> <span class="o">=</span> <span class="s2">&quot;http://purl.obolibrary.org/obo/OBI_0000417&quot;</span>
+
+
+<div class="viewcode-block" id="iterative_parents"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.iterative_parents">[docs]</a><span class="k">def</span> <span class="nf">iterative_parents</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="n">terms</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;returns all the parents traversing the term graph structure</span>
+<span class="sd">        - (not the direct RDF graph) by iteratively following parents</span>
+<span class="sd">        until there are no more parents</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">newNodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">terms</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+                <span class="k">continue</span>  <span class="c1"># deal with a parent not being in the term dict</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">terms</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">[</span><span class="n">node</span><span class="p">][</span><span class="n">data</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">parent</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+                        <span class="n">newNodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">newNodes</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">results</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="get_all_ancestors"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.get_all_ancestors">[docs]</a><span class="k">def</span> <span class="nf">get_all_ancestors</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">terms</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Adds a list of all the term&#39;s ancestors to a term up to the root</span>
+<span class="sd">        of the ontology and adds to closure fields - used in adding slims</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">closure</span> <span class="o">=</span> <span class="s1">&#39;closure&#39;</span>
+    <span class="k">if</span> <span class="n">field</span> <span class="o">==</span> <span class="s1">&#39;development&#39;</span><span class="p">:</span>
+        <span class="n">closure</span> <span class="o">=</span> <span class="s1">&#39;closure_with_develops_from&#39;</span>
+    <span class="k">if</span> <span class="n">closure</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">term</span><span class="p">:</span>
+        <span class="n">term</span><span class="p">[</span><span class="n">closure</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">term</span><span class="p">:</span>
+        <span class="n">words</span> <span class="o">=</span> <span class="n">iterative_parents</span><span class="p">(</span><span class="n">term</span><span class="p">[</span><span class="n">field</span><span class="p">],</span> <span class="n">terms</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+        <span class="n">term</span><span class="p">[</span><span class="n">closure</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">words</span><span class="p">)</span>
+    <span class="n">term</span><span class="p">[</span><span class="n">closure</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">term</span><span class="p">[</span><span class="s1">&#39;term_id&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">term</span>  <span class="c1"># is this necessary</span></div>
+
+
+<span class="k">def</span> <span class="nf">_combine_all_parents</span><span class="p">(</span><span class="n">term</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;internal method to combine the directly related terms into 2 uniqued lists</span>
+<span class="sd">        of all_parents or development terms that will be used as starting terms</span>
+<span class="sd">        to generate closures of all ancestors</span>
+
+<span class="sd">        the development terms have those with has_part_inverse filtered out to</span>
+<span class="sd">        prevent over expansion of the ancestors to incorrect associations</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">parents</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">relations</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">develops</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">if</span> <span class="s1">&#39;parents&#39;</span> <span class="ow">in</span> <span class="n">term</span><span class="p">:</span>
+        <span class="n">parents</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">term</span><span class="p">[</span><span class="s1">&#39;parents&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="s1">&#39;relationships&#39;</span> <span class="ow">in</span> <span class="n">term</span><span class="p">:</span>
+        <span class="n">relations</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">term</span><span class="p">[</span><span class="s1">&#39;relationships&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="s1">&#39;develops_from&#39;</span> <span class="ow">in</span> <span class="n">term</span><span class="p">:</span>
+        <span class="n">develops</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">term</span><span class="p">[</span><span class="s1">&#39;develops_from&#39;</span><span class="p">])</span>
+    <span class="n">term</span><span class="p">[</span><span class="s1">&#39;all_parents&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">parents</span> <span class="o">|</span> <span class="n">relations</span><span class="p">)</span>
+    <span class="n">development</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">parents</span> <span class="o">|</span> <span class="n">relations</span> <span class="o">|</span> <span class="n">develops</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;has_part_inverse&#39;</span> <span class="ow">in</span> <span class="n">term</span><span class="p">:</span>
+        <span class="n">development</span> <span class="o">=</span> <span class="p">[</span><span class="n">dev</span> <span class="k">for</span> <span class="n">dev</span> <span class="ow">in</span> <span class="n">development</span> <span class="k">if</span> <span class="n">dev</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">term</span><span class="p">[</span><span class="s1">&#39;has_part_inverse&#39;</span><span class="p">]]</span>
+    <span class="n">term</span><span class="p">[</span><span class="s1">&#39;development&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">development</span>
+    <span class="k">return</span> <span class="n">term</span>
+
+
+<span class="k">def</span> <span class="nf">_has_human</span><span class="p">(</span><span class="n">cols</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;True if human taxon is part of the collection&#39;&#39;&#39;</span>
+    <span class="n">ans</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">human</span> <span class="o">=</span> <span class="n">HUMAN_TAXON</span>
+    <span class="k">if</span> <span class="n">cols</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">isURIRef</span><span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">human</span> <span class="o">=</span> <span class="n">convert2URIRef</span><span class="p">(</span><span class="n">human</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">human</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">:</span>
+            <span class="n">ans</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">ans</span>
+
+
+<div class="viewcode-block" id="get_termid_from_uri"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.get_termid_from_uri">[docs]</a><span class="k">def</span> <span class="nf">get_termid_from_uri</span><span class="p">(</span><span class="n">uri</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Given a uri - takes the last part (name) and converts _ to :</span>
+<span class="sd">        eg. http://www.ebi.ac.uk/efo/EFO_0002784 =&gt; EFO:0002784</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">splitNameFromNamespace</span><span class="p">(</span><span class="n">uri</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;:&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_term_name_from_rdf"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.get_term_name_from_rdf">[docs]</a><span class="k">def</span> <span class="nf">get_term_name_from_rdf</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Looks for label for class in the rdf graph&#39;&#39;&#39;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rdfGraph</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">class_</span><span class="p">)</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">name</span></div>
+
+
+<div class="viewcode-block" id="create_term_dict"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.create_term_dict">[docs]</a><span class="k">def</span> <span class="nf">create_term_dict</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="n">termid</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ontology_id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Adds basic term info to the dictionary of all terms</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">term</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;term_id&#39;</span><span class="p">:</span> <span class="n">termid</span><span class="p">,</span>
+        <span class="s1">&#39;term_url&#39;</span><span class="p">:</span> <span class="n">class_</span><span class="o">.</span><span class="fm">__str__</span><span class="p">(),</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">ontology_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">term</span><span class="p">[</span><span class="s1">&#39;source_ontology&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ontology_id</span>
+    <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ns</span><span class="p">)</span> <span class="o">=</span> <span class="n">splitNameFromNamespace</span><span class="p">(</span><span class="n">term</span><span class="p">[</span><span class="s1">&#39;term_url&#39;</span><span class="p">])</span>
+    <span class="n">term</span><span class="p">[</span><span class="s1">&#39;namespace&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ns</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">get_term_name_from_rdf</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">term</span><span class="p">[</span><span class="s1">&#39;term_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+    <span class="k">return</span> <span class="n">term</span></div>
+
+
+<span class="k">def</span> <span class="nf">_add_term_and_info</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="n">parent_uri</span><span class="p">,</span> <span class="n">relationship</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">terms</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Internal function to add new terms that are part of an IntersectionOf</span>
+<span class="sd">        along with the appropriate relationships</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">terms</span><span class="p">:</span>
+        <span class="n">terms</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">subclass</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">rdfGraph</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="n">subClassOf</span><span class="p">):</span>
+        <span class="n">term_id</span> <span class="o">=</span> <span class="n">get_termid_from_uri</span><span class="p">(</span><span class="n">parent_uri</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">terms</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">term_id</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">terms</span><span class="p">[</span><span class="n">term_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_term_dict</span><span class="p">(</span><span class="n">parent_uri</span><span class="p">,</span> <span class="n">term_id</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">terms</span><span class="p">[</span><span class="n">term_id</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">relationship</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">terms</span><span class="p">[</span><span class="n">term_id</span><span class="p">][</span><span class="n">relationship</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">terms</span><span class="p">[</span><span class="n">term_id</span><span class="p">][</span><span class="n">relationship</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">get_termid_from_uri</span><span class="p">(</span><span class="n">subclass</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">terms</span>
+
+
+<div class="viewcode-block" id="process_intersection_of"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.process_intersection_of">[docs]</a><span class="k">def</span> <span class="nf">process_intersection_of</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="n">intersection</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">terms</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Given a class with IntersectionOf predicate determine if the</span>
+<span class="sd">        intersected class is part of human or if our term develops_from</span>
+<span class="sd">        the class and if so make ontology_term json for it if it doesn&#39;t</span>
+<span class="sd">        already exist</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># the intersectionOf rdf consists of a collection of 2 members</span>
+    <span class="c1"># the first (collection[0]) is the resource uri (term)</span>
+    <span class="c1"># the second (collection[1]) is a restriction</span>
+    <span class="n">collection</span> <span class="o">=</span> <span class="n">Collection</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">rdfGraph</span><span class="p">,</span> <span class="n">intersection</span><span class="p">)</span>
+    <span class="n">col_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">rdfGraph</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">collection</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="c1"># get restriction terms and add to col_list as string</span>
+        <span class="n">col_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="fm">__str__</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">_has_human</span><span class="p">(</span><span class="n">col_list</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">PART_OF</span> <span class="ow">in</span> <span class="n">col_list</span><span class="p">:</span>
+            <span class="c1"># print(&#39;COL-0 = &#39;, collection[0])</span>
+            <span class="c1"># print(&#39;CLASS = &#39;, class_.__str__())</span>
+            <span class="n">terms</span> <span class="o">=</span> <span class="n">_add_term_and_info</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="n">collection</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;relationships&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">terms</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">DEVELOPS_FROM</span> <span class="ow">in</span> <span class="n">col_list</span><span class="p">:</span>
+            <span class="n">terms</span> <span class="o">=</span> <span class="n">_add_term_and_info</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="n">collection</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;develops_from&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">terms</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">terms</span></div>
+
+
+<div class="viewcode-block" id="process_blank_node"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.process_blank_node">[docs]</a><span class="k">def</span> <span class="nf">process_blank_node</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">terms</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Given a blank node determine if there are any parent resources</span>
+<span class="sd">        of relevant types and if so process them appropriately</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">object_</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">rdfGraph</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="n">subClassOf</span><span class="p">):</span>
+        <span class="c1"># direct parents of blank nodes</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">isBlankNode</span><span class="p">(</span><span class="n">object_</span><span class="p">):</span>
+            <span class="c1"># we have a resource</span>
+            <span class="k">for</span> <span class="n">intersection</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">rdfGraph</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="n">IntersectionOf</span><span class="p">):</span>
+                <span class="c1"># intersectionOf triples are checked for human part_of</span>
+                <span class="c1"># or develops_from</span>
+                <span class="n">terms</span> <span class="o">=</span> <span class="n">process_intersection_of</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="n">intersection</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">terms</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">terms</span></div>
+
+
+<span class="k">def</span> <span class="nf">_find_and_add_parent_of</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">terms</span><span class="p">,</span> <span class="n">has_part</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">relation</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Add parent terms with the provided relationship to the &#39;relationships&#39;</span>
+<span class="sd">        field of the term - treating has_part specially</span>
+
+<span class="sd">        NOTE: encode had added fields for each relationship type to the dict</span>
+<span class="sd">        our default is a  &#39;relationships&#39; field - but can pass in a specific</span>
+<span class="sd">        relation string eg. develops_from and that will get added as field</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">child_id</span> <span class="o">=</span> <span class="n">get_termid_from_uri</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">rdfGraph</span><span class="o">.</span><span class="n">objects</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">SomeValuesFrom</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">isBlankNode</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+            <span class="n">objid</span> <span class="o">=</span> <span class="n">get_termid_from_uri</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+            <span class="n">term2add</span> <span class="o">=</span> <span class="n">objid</span>
+            <span class="k">if</span> <span class="n">has_part</span><span class="p">:</span>
+                <span class="n">relation</span> <span class="o">=</span> <span class="s1">&#39;has_part_inverse&#39;</span>
+                <span class="n">term2add</span> <span class="o">=</span> <span class="n">child_id</span>
+                <span class="n">child_id</span> <span class="o">=</span> <span class="n">objid</span>
+                <span class="n">child</span> <span class="o">=</span> <span class="n">obj</span>
+                <span class="k">if</span> <span class="n">child_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">:</span>
+                    <span class="n">terms</span><span class="p">[</span><span class="n">child_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_term_dict</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">child_id</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">relation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">relation</span> <span class="o">=</span> <span class="s1">&#39;relationships&#39;</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">terms</span><span class="p">[</span><span class="n">child_id</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">relation</span><span class="p">):</span>
+                <span class="n">terms</span><span class="p">[</span><span class="n">child_id</span><span class="p">][</span><span class="n">relation</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">terms</span><span class="p">[</span><span class="n">child_id</span><span class="p">][</span><span class="n">relation</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">term2add</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">terms</span>
+
+
+<div class="viewcode-block" id="process_parents"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.process_parents">[docs]</a><span class="k">def</span> <span class="nf">process_parents</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">terms</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Gets the parents of the class - direct and those linked via</span>
+<span class="sd">        specified relationship types</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">termid</span> <span class="o">=</span> <span class="n">get_termid_from_uri</span><span class="p">(</span><span class="n">class_</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">get_classDirectSupers</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="n">excludeBnodes</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">rtypes</span> <span class="o">=</span> <span class="p">{</span><span class="n">PART_OF</span><span class="p">:</span> <span class="s1">&#39;part_of&#39;</span><span class="p">,</span>
+                  <span class="n">DEVELOPS_FROM</span><span class="p">:</span> <span class="s1">&#39;develops_from&#39;</span><span class="p">,</span>
+                  <span class="n">HAS_PART</span><span class="p">:</span> <span class="s1">&#39;has_part&#39;</span><span class="p">,</span>
+                  <span class="n">ACHIEVES_PLANNED_OBJECTIVE</span><span class="p">:</span> <span class="s1">&#39;achieves_planned_objective&#39;</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">isBlankNode</span><span class="p">(</span><span class="n">parent</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">rdfGraph</span><span class="o">.</span><span class="n">triples</span><span class="p">((</span><span class="n">parent</span><span class="p">,</span> <span class="n">OnProperty</span><span class="p">,</span> <span class="kc">None</span><span class="p">)):</span>
+                <span class="n">rel</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">rel</span> <span class="ow">in</span> <span class="n">rtypes</span><span class="p">:</span>
+                    <span class="n">relation</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">has_part</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">if</span> <span class="n">rtypes</span><span class="p">[</span><span class="n">rel</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;has_part&#39;</span><span class="p">:</span>
+                        <span class="n">has_part</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="n">rtypes</span><span class="p">[</span><span class="n">rel</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;develops_from&#39;</span><span class="p">:</span>
+                        <span class="n">relation</span> <span class="o">=</span> <span class="n">rtypes</span><span class="p">[</span><span class="n">rel</span><span class="p">]</span>
+                    <span class="c1"># terms = _find_and_add_parent_of(parent, termid, data, terms, has_part, relation)</span>
+                    <span class="n">terms</span> <span class="o">=</span> <span class="n">_find_and_add_parent_of</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">class_</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">terms</span><span class="p">,</span> <span class="n">has_part</span><span class="p">,</span> <span class="n">relation</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">terms</span><span class="p">[</span><span class="n">termid</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;parents&#39;</span><span class="p">):</span>
+                <span class="n">terms</span><span class="p">[</span><span class="n">termid</span><span class="p">][</span><span class="s1">&#39;parents&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">terms</span><span class="p">[</span><span class="n">termid</span><span class="p">][</span><span class="s1">&#39;parents&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">get_termid_from_uri</span><span class="p">(</span><span class="n">parent</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">terms</span></div>
+
+
+<div class="viewcode-block" id="get_synonyms"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.get_synonyms">[docs]</a><span class="k">def</span> <span class="nf">get_synonyms</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">synonym_terms</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Gets synonyms for the class as strings</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">getObjectLiteralsOfType</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">synonym_terms</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_definitions"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.get_definitions">[docs]</a><span class="k">def</span> <span class="nf">get_definitions</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">definition_terms</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Gets definitions for the class as strings</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">getObjectLiteralsOfType</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">definition_terms</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_cleanup_non_fields</span><span class="p">(</span><span class="n">terms</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Removes unwanted fields and empty terms from final json&#39;&#39;&#39;</span>
+    <span class="n">to_delete</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;relationships&#39;</span><span class="p">,</span> <span class="s1">&#39;all_parents&#39;</span><span class="p">,</span> <span class="s1">&#39;development&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;has_part_inverse&#39;</span><span class="p">,</span> <span class="s1">&#39;develops_from&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;closure&#39;</span><span class="p">,</span> <span class="s1">&#39;closure_with_develops_from&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;achieves_planned_objective&#39;</span><span class="p">,</span> <span class="s1">&#39;part_of&#39;</span>  <span class="c1"># these 2 should never be present</span>
+                 <span class="p">]</span>
+    <span class="n">tids2delete</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">termid</span><span class="p">,</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">term</span><span class="p">:</span>
+            <span class="n">tids2delete</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">termid</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">to_delete</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">term</span><span class="p">:</span>
+                    <span class="k">del</span> <span class="n">term</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">tid</span> <span class="ow">in</span> <span class="n">tids2delete</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">terms</span><span class="p">[</span><span class="n">tid</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">terms</span>
+
+
+<div class="viewcode-block" id="add_slim_to_term"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.add_slim_to_term">[docs]</a><span class="k">def</span> <span class="nf">add_slim_to_term</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">slim_terms</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Checks the list of ancestor terms to see if any are slim_terms</span>
+<span class="sd">        and if so adds the slim_term to the term in slim_term slot</span>
+
+<span class="sd">        for now checking both closure and closure_with_develops_from</span>
+<span class="sd">        but consider having only single &#39;ancestor&#39; list</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">slimterms2add</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">slimterm</span> <span class="ow">in</span> <span class="n">slim_terms</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;closure&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">slimterm</span><span class="p">[</span><span class="s1">&#39;term_id&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">term</span><span class="p">[</span><span class="s1">&#39;closure&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">slimterm</span><span class="p">[</span><span class="s1">&#39;is_slim_for&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;developmental&#39;</span><span class="p">:</span>
+                <span class="n">slimterms2add</span><span class="p">[</span><span class="n">slimterm</span><span class="p">[</span><span class="s1">&#39;term_id&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">slimterm</span><span class="p">[</span><span class="s1">&#39;uuid&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;closure_with_develops_from&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">slimterm</span><span class="p">[</span><span class="s1">&#39;term_id&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">term</span><span class="p">[</span><span class="s1">&#39;closure_with_develops_from&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">slimterm</span><span class="p">[</span><span class="s1">&#39;is_slim_for&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;developmental&#39;</span><span class="p">:</span>
+                <span class="n">slimterms2add</span><span class="p">[</span><span class="n">slimterm</span><span class="p">[</span><span class="s1">&#39;term_id&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">slimterm</span><span class="p">[</span><span class="s1">&#39;uuid&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">slimterms2add</span><span class="p">:</span>
+        <span class="n">term</span><span class="p">[</span><span class="s1">&#39;slim_terms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">slimterms2add</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">term</span></div>
+
+
+<div class="viewcode-block" id="add_slim_terms"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.add_slim_terms">[docs]</a><span class="k">def</span> <span class="nf">add_slim_terms</span><span class="p">(</span><span class="n">terms</span><span class="p">,</span> <span class="n">slim_terms</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">termid</span><span class="p">,</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">term</span> <span class="o">=</span> <span class="n">_combine_all_parents</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">termid</span><span class="p">,</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">term</span> <span class="o">=</span> <span class="n">get_all_ancestors</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">terms</span><span class="p">,</span> <span class="s1">&#39;all_parents&#39;</span><span class="p">)</span>
+        <span class="n">term</span> <span class="o">=</span> <span class="n">get_all_ancestors</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">terms</span><span class="p">,</span> <span class="s1">&#39;development&#39;</span><span class="p">)</span>
+        <span class="n">term</span> <span class="o">=</span> <span class="n">add_slim_to_term</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">slim_terms</span><span class="p">)</span>
+    <span class="n">terms</span> <span class="o">=</span> <span class="n">_cleanup_non_fields</span><span class="p">(</span><span class="n">terms</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">terms</span></div>
+
+
+<div class="viewcode-block" id="convert2namespace"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.convert2namespace">[docs]</a><span class="k">def</span> <span class="nf">convert2namespace</span><span class="p">(</span><span class="n">uri</span><span class="p">):</span>
+    <span class="n">name</span><span class="p">,</span> <span class="n">ns</span> <span class="o">=</span> <span class="n">splitNameFromNamespace</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;#&#39;</span> <span class="ow">in</span> <span class="n">uri</span><span class="p">:</span>
+        <span class="n">ns</span> <span class="o">=</span> <span class="n">ns</span> <span class="o">+</span> <span class="s1">&#39;#&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ns</span> <span class="o">=</span> <span class="n">ns</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span>
+    <span class="n">ns</span> <span class="o">=</span> <span class="n">Namespace</span><span class="p">(</span><span class="n">ns</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ns</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="get_definition_terms1"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.get_definition_terms1">[docs]</a><span class="k">def</span> <span class="nf">get_definition_terms1</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">ontology_id</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Checks an ontology item for ontology_terms that are used</span>
+<span class="sd">        to designate synonyms in that ontology and returns a list</span>
+<span class="sd">        of OntologyTerm dicts.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">synterms</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">ontologies</span> <span class="o">=</span> <span class="n">get_ontologies</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="p">[</span><span class="n">ontology_id</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">ontologies</span><span class="p">:</span>
+        <span class="n">ontology</span> <span class="o">=</span> <span class="n">ontologies</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">synonym_ids</span> <span class="o">=</span> <span class="n">ontology</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;synonym_terms&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">synonym_ids</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">synterms</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_FDN</span><span class="p">(</span><span class="n">termid</span><span class="p">,</span> <span class="n">connection</span><span class="p">)</span> <span class="k">for</span> <span class="n">termid</span> <span class="ow">in</span> <span class="n">synonym_ids</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">synterms</span></div>
+
+
+<div class="viewcode-block" id="get_syndef_terms_as_uri"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.get_syndef_terms_as_uri">[docs]</a><span class="k">def</span> <span class="nf">get_syndef_terms_as_uri</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">ontology</span><span class="p">,</span> <span class="n">termtype</span><span class="p">,</span> <span class="n">as_rdf</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Checks an ontology item for ontology_terms that are used</span>
+<span class="sd">        to designate synonyms or definitions in that ontology and returns a list</span>
+<span class="sd">        of RDF Namespace:name pairs by default or simple URI strings</span>
+<span class="sd">        if as_rdf=False.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">sdterms</span> <span class="o">=</span> <span class="n">ontology</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">termtype</span><span class="p">)</span>
+    <span class="n">uris</span> <span class="o">=</span> <span class="p">[</span><span class="n">term</span><span class="p">[</span><span class="s1">&#39;term_url&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">sdterms</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">as_rdf</span><span class="p">:</span>
+        <span class="n">uris</span> <span class="o">=</span> <span class="p">[</span><span class="n">convert2namespace</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span> <span class="k">for</span> <span class="n">uri</span> <span class="ow">in</span> <span class="n">uris</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">uris</span></div>
+
+
+<div class="viewcode-block" id="get_synonym_term_uris"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.get_synonym_term_uris">[docs]</a><span class="k">def</span> <span class="nf">get_synonym_term_uris</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">ontology</span><span class="p">,</span> <span class="n">as_rdf</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Checks an ontology item for ontology_terms that are used</span>
+<span class="sd">        to designate synonyms in that ontology and returns a list</span>
+<span class="sd">        of RDF Namespace:name pairs by default or simple URI strings</span>
+<span class="sd">        if as_rdf=False.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">get_syndef_terms_as_uri</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">ontology</span><span class="p">,</span> <span class="s1">&#39;synonym_terms&#39;</span><span class="p">,</span> <span class="n">as_rdf</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_definition_term_uris"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.get_definition_term_uris">[docs]</a><span class="k">def</span> <span class="nf">get_definition_term_uris</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">ontology</span><span class="p">,</span> <span class="n">as_rdf</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Checks an ontology item for ontology_terms that are used</span>
+<span class="sd">        to designate definitions in that ontology and returns a list</span>
+<span class="sd">        of RDF Namespace:name pairs by default or simple URI strings</span>
+<span class="sd">        if as_rdf=False.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">get_syndef_terms_as_uri</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">ontology</span><span class="p">,</span> <span class="s1">&#39;definition_terms&#39;</span><span class="p">,</span> <span class="n">as_rdf</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_slim_terms"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.get_slim_terms">[docs]</a><span class="k">def</span> <span class="nf">get_slim_terms</span><span class="p">(</span><span class="n">connection</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Retrieves ontology_term jsons for those terms that have &#39;is_slim_for&#39;</span>
+<span class="sd">        field populated</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># currently need to hard code the categories of slims but once the ability</span>
+    <span class="c1"># to search all can add parameters to retrieve all or just the terms in the</span>
+    <span class="c1"># categories passed as a list</span>
+    <span class="n">slim_categories</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;developmental&#39;</span><span class="p">,</span> <span class="s1">&#39;assay&#39;</span><span class="p">,</span> <span class="s1">&#39;organ&#39;</span><span class="p">,</span> <span class="s1">&#39;system&#39;</span><span class="p">]</span>
+    <span class="n">search_suffix</span> <span class="o">=</span> <span class="s1">&#39;search/?type=OntologyTerm&amp;is_slim_for=&#39;</span>
+    <span class="n">slim_terms</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">cat</span> <span class="ow">in</span> <span class="n">slim_categories</span><span class="p">:</span>
+        <span class="n">terms</span> <span class="o">=</span> <span class="n">get_FDN</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">connection</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">search_suffix</span> <span class="o">+</span> <span class="n">cat</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># a notification indicates an issue eg. No results found</span>
+            <span class="c1"># so ignore</span>
+            <span class="n">terms</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;notification&#39;</span><span class="p">)</span>
+            <span class="k">pass</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">slim_terms</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">terms</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">slim_terms</span></div>
+
+
+<div class="viewcode-block" id="get_ontologies"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.get_ontologies">[docs]</a><span class="k">def</span> <span class="nf">get_ontologies</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">ont_list</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;return list of ontology jsons retrieved from server</span>
+<span class="sd">        ontology jsons are now fully embedded</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">ontologies</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">ont_list</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+        <span class="n">ontologies</span> <span class="o">=</span> <span class="n">get_FDN</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">connection</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;ontologys&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ontologies</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_FDN</span><span class="p">(</span><span class="s1">&#39;ontologys/&#39;</span> <span class="o">+</span> <span class="n">ontology</span><span class="p">,</span> <span class="n">connection</span><span class="p">)</span> <span class="k">for</span> <span class="n">ontology</span> <span class="ow">in</span> <span class="n">ont_list</span><span class="p">]</span>
+
+    <span class="c1"># removing item not found cases with reporting</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ontology</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ontologies</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;Ontology&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ontology</span><span class="p">[</span><span class="s1">&#39;@type&#39;</span><span class="p">]:</span>
+            <span class="n">ontologies</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ontologies</span></div>
+
+
+<div class="viewcode-block" id="connect2server"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.connect2server">[docs]</a><span class="k">def</span> <span class="nf">connect2server</span><span class="p">(</span><span class="n">keyfile</span><span class="p">,</span> <span class="n">keyname</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Sets up credentials for accessing the server.  Generates a key using info</span>
+<span class="sd">       from the named keyname in the keyfile and checks that the server can be</span>
+<span class="sd">       reached with that key&#39;&#39;&#39;</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="n">FDN_Key</span><span class="p">(</span><span class="n">keyfile</span><span class="p">,</span> <span class="n">keyname</span><span class="p">)</span>
+    <span class="n">connection</span> <span class="o">=</span> <span class="n">FDN_Connection</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Running on:       </span><span class="si">{server}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">server</span><span class="o">=</span><span class="n">connection</span><span class="o">.</span><span class="n">server</span><span class="p">))</span>
+    <span class="c1"># test connection</span>
+    <span class="k">if</span> <span class="n">connection</span><span class="o">.</span><span class="n">check</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">connection</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;CONNECTION ERROR: Please check your keys.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="remove_obsoletes_and_unnamed"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.remove_obsoletes_and_unnamed">[docs]</a><span class="k">def</span> <span class="nf">remove_obsoletes_and_unnamed</span><span class="p">(</span><span class="n">terms</span><span class="p">):</span>
+    <span class="n">terms</span> <span class="o">=</span> <span class="p">{</span><span class="n">termid</span><span class="p">:</span> <span class="n">term</span> <span class="k">for</span> <span class="n">termid</span><span class="p">,</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+             <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;parents&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">term</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;ObsoleteClass&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">term</span><span class="p">[</span><span class="s1">&#39;parents&#39;</span><span class="p">])}</span>
+    <span class="n">terms</span> <span class="o">=</span> <span class="p">{</span><span class="n">termid</span><span class="p">:</span> <span class="n">term</span> <span class="k">for</span> <span class="n">termid</span><span class="p">,</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+             <span class="k">if</span> <span class="s1">&#39;term_name&#39;</span> <span class="ow">in</span> <span class="n">term</span> <span class="ow">and</span> <span class="p">(</span><span class="n">term</span><span class="p">[</span><span class="s1">&#39;term_name&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">term</span><span class="p">[</span><span class="s1">&#39;term_name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;obsolete&#39;</span><span class="p">))}</span>
+    <span class="k">return</span> <span class="n">terms</span></div>
+
+
+<div class="viewcode-block" id="add_additional_term_info"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.add_additional_term_info">[docs]</a><span class="k">def</span> <span class="nf">add_additional_term_info</span><span class="p">(</span><span class="n">terms</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">synonym_terms</span><span class="p">,</span> <span class="n">definition_terms</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">termid</span><span class="p">,</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">termuri</span> <span class="o">=</span> <span class="n">convert2URIRef</span><span class="p">(</span><span class="n">term</span><span class="p">[</span><span class="s1">&#39;term_url&#39;</span><span class="p">])</span>
+
+        <span class="c1"># add any missing synonyms</span>
+        <span class="n">synonyms</span> <span class="o">=</span> <span class="n">get_synonyms</span><span class="p">(</span><span class="n">termuri</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">synonym_terms</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">synonyms</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;synonyms&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">term</span><span class="p">:</span>
+                <span class="n">term</span><span class="p">[</span><span class="s1">&#39;synonyms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">syn</span> <span class="ow">in</span> <span class="n">synonyms</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">syn</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">term</span><span class="p">[</span><span class="s1">&#39;synonyms&#39;</span><span class="p">]:</span>
+                    <span class="n">term</span><span class="p">[</span><span class="s1">&#39;synonyms&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">syn</span><span class="p">)</span>
+
+        <span class="c1"># we only want one definition - may want to add some checking if multiple</span>
+        <span class="k">if</span> <span class="n">term</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;definition&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">definitions</span> <span class="o">=</span> <span class="n">get_definitions</span><span class="p">(</span><span class="n">termuri</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">definition_terms</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">definitions</span><span class="p">:</span>
+                <span class="n">term</span><span class="p">[</span><span class="s1">&#39;definition&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">definitions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">terms</span></div>
+
+
+<div class="viewcode-block" id="download_and_process_owl"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.download_and_process_owl">[docs]</a><span class="k">def</span> <span class="nf">download_and_process_owl</span><span class="p">(</span><span class="n">ontology</span><span class="p">,</span> <span class="n">connection</span><span class="p">,</span> <span class="n">terms</span><span class="p">):</span>
+    <span class="n">synonym_terms</span> <span class="o">=</span> <span class="n">get_synonym_term_uris</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">ontology</span><span class="p">)</span>
+    <span class="n">definition_terms</span> <span class="o">=</span> <span class="n">get_definition_term_uris</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">ontology</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">Owler</span><span class="p">(</span><span class="n">ontology</span><span class="p">[</span><span class="s1">&#39;download_url&#39;</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">class_</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">allclasses</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">isBlankNode</span><span class="p">(</span><span class="n">class_</span><span class="p">):</span>
+            <span class="n">terms</span> <span class="o">=</span> <span class="n">process_blank_node</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">terms</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">terms</span><span class="p">:</span>
+                <span class="n">terms</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">termid</span> <span class="o">=</span> <span class="n">get_termid_from_uri</span><span class="p">(</span><span class="n">class_</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">terms</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">termid</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">terms</span><span class="p">[</span><span class="n">termid</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_term_dict</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="n">termid</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">ontology</span><span class="p">[</span><span class="s1">&#39;uuid&#39;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39;term_name&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">[</span><span class="n">termid</span><span class="p">]:</span>
+                    <span class="n">terms</span><span class="p">[</span><span class="n">termid</span><span class="p">][</span><span class="s1">&#39;term_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_term_name_from_rdf</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s1">&#39;source_ontology&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">[</span><span class="n">termid</span><span class="p">]:</span>
+                    <span class="n">terms</span><span class="p">[</span><span class="n">termid</span><span class="p">][</span><span class="s1">&#39;source_ontology&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ontology</span><span class="p">[</span><span class="s1">&#39;uuid&#39;</span><span class="p">]</span>
+            <span class="c1"># deal with parents</span>
+            <span class="c1"># terms = process_parents(class_, termid, data, terms)</span>
+            <span class="n">terms</span> <span class="o">=</span> <span class="n">process_parents</span><span class="p">(</span><span class="n">class_</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">terms</span><span class="p">)</span>
+    <span class="c1"># add synonyms and definitions</span>
+    <span class="n">terms</span> <span class="o">=</span> <span class="n">add_additional_term_info</span><span class="p">(</span><span class="n">terms</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">synonym_terms</span><span class="p">,</span> <span class="n">definition_terms</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">terms</span></div>
+
+
+<div class="viewcode-block" id="write_outfile"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.write_outfile">[docs]</a><span class="k">def</span> <span class="nf">write_outfile</span><span class="p">(</span><span class="n">terms</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;[</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">term</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">terms</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">term</span><span class="p">,</span> <span class="n">outfile</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">terms</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+            <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;]</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="parse_args"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.parse_args">[docs]</a><span class="k">def</span> <span class="nf">parse_args</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Process specified Ontologies and create OntologyTerm inserts for updates&quot;</span><span class="p">,</span>
+        <span class="n">epilog</span><span class="o">=</span><span class="n">EPILOG</span><span class="p">,</span>
+        <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--ontologies&#39;</span><span class="p">,</span>
+                        <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Names of ontologies to process - eg. UBERON, OBI, EFO; </span><span class="se">\</span>
+<span class="s2">                        all retrieves all ontologies that exist in db&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--outfile&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;ontology.json&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;The name of the output file.  </span><span class="se">\</span>
+<span class="s2">                        Default is --outfile=ontology.json&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--key&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;The keypair identifier from the keyfile.  </span><span class="se">\</span>
+<span class="s2">                        Default is --key=default&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--keyfile&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~/keypairs.json&quot;</span><span class="p">),</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;The keypair file.  Default is --keyfile=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+                             <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~/keypairs.json&quot;</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../pydoc/encoded.commands.generate_ontology.html#encoded.commands.generate_ontology.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39; Downloads latest Ontology OWL files for Ontologies in the database</span>
+<span class="sd">        and Updates Terms by generating json inserts</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># setup</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>  <span class="c1"># to facilitate testing</span>
+    <span class="n">connection</span> <span class="o">=</span> <span class="n">connect2server</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">keyfile</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="n">ontologies</span> <span class="o">=</span> <span class="n">get_ontologies</span><span class="p">(</span><span class="n">connection</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">ontologies</span><span class="p">)</span>
+    <span class="n">slim_terms</span> <span class="o">=</span> <span class="n">get_slim_terms</span><span class="p">(</span><span class="n">connection</span><span class="p">)</span>
+
+    <span class="c1"># start iteratively downloading and processing ontologies</span>
+    <span class="n">terms</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">ontology</span> <span class="ow">in</span> <span class="n">ontologies</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Processing: &#39;</span><span class="p">,</span> <span class="n">ontology</span><span class="p">[</span><span class="s1">&#39;ontology_name&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">ontology</span><span class="p">[</span><span class="s1">&#39;download_url&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># get all the terms for an ontology</span>
+            <span class="n">terms</span> <span class="o">=</span> <span class="n">download_and_process_owl</span><span class="p">(</span><span class="n">ontology</span><span class="p">,</span> <span class="n">connection</span><span class="p">,</span> <span class="n">terms</span><span class="p">)</span>
+
+    <span class="c1"># at this point we&#39;ve processed the rdf of all the ontologies</span>
+    <span class="k">if</span> <span class="n">terms</span><span class="p">:</span>
+        <span class="n">terms</span> <span class="o">=</span> <span class="n">add_slim_terms</span><span class="p">(</span><span class="n">terms</span><span class="p">,</span> <span class="n">slim_terms</span><span class="p">)</span>
+        <span class="n">terms</span> <span class="o">=</span> <span class="n">remove_obsoletes_and_unnamed</span><span class="p">(</span><span class="n">terms</span><span class="p">)</span>
+        <span class="c1"># at the moment we&#39;re writing json output but consider updating db directly</span>
+        <span class="c1"># including checks for removal of terms already in db from ontologies</span>
+        <span class="c1"># and audits for items linked to terms</span>
+        <span class="n">write_outfile</span><span class="p">(</span><span class="n">terms</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">outfile</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

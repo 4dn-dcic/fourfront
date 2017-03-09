@@ -1,0 +1,223 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.commands.import_data &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" accesskey="U">encoded</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.commands.import_data</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;\</span>
+<span class="sd">The inpath is the path to either:</span>
+
+<span class="sd">  - a zip file or directory containing single sheet xlsx/tsv/csv files named</span>
+<span class="sd">    after the object type, e.g. experiment.xlsx, antibody_lot.tsv</span>
+
+<span class="sd">  - a single Excel workbook with worksheets named after the object types.</span>
+
+<span class="sd">Examples.</span>
+
+<span class="sd">To load the initial data:</span>
+
+<span class="sd">    %(prog)s --attach ../dccMetadataImport/data/documents/ \\</span>
+<span class="sd">        --attach ../dccMetadataImport/data/ENCODE3docs/ \\</span>
+<span class="sd">        ../documents-export.zip dev-masterdata.ini</span>
+
+<span class="sd">To make updates from a single tsv file</span>
+
+<span class="sd">    %(prog)s --username ACCESS_KEY_ID --password SECRET_ACCESS_KEY \\</span>
+<span class="sd">        --patch ../updates/ http://localhost:6543</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">webtest</span> <span class="k">import</span> <span class="n">TestApp</span>
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="k">import</span> <span class="n">urlparse</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">loadxl</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+
+<span class="n">EPILOG</span> <span class="o">=</span> <span class="vm">__doc__</span>
+
+
+<div class="viewcode-block" id="basic_auth"><a class="viewcode-back" href="../../../pydoc/encoded.commands.import_data.html#encoded.commands.import_data.basic_auth">[docs]</a><span class="k">def</span> <span class="nf">basic_auth</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">base64</span> <span class="k">import</span> <span class="n">b64encode</span>
+    <span class="kn">from</span> <span class="nn">pyramid.compat</span> <span class="k">import</span> <span class="n">ascii_native_</span>
+    <span class="k">return</span> <span class="s1">&#39;Basic &#39;</span> <span class="o">+</span> <span class="n">ascii_native_</span><span class="p">(</span><span class="n">b64encode</span><span class="p">((</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">))</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="remote_app"><a class="viewcode-back" href="../../../pydoc/encoded.commands.import_data.html#encoded.commands.import_data.remote_app">[docs]</a><span class="k">def</span> <span class="nf">remote_app</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    <span class="n">environ</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;HTTP_ACCEPT&#39;</span><span class="p">:</span> <span class="s1">&#39;application/json&#39;</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">username</span><span class="p">:</span>
+        <span class="n">environ</span><span class="p">[</span><span class="s1">&#39;HTTP_AUTHORIZATION&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">basic_auth</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">TestApp</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">environ</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="internal_app"><a class="viewcode-back" href="../../../pydoc/encoded.commands.import_data.html#encoded.commands.import_data.internal_app">[docs]</a><span class="k">def</span> <span class="nf">internal_app</span><span class="p">(</span><span class="n">configfile</span><span class="p">,</span> <span class="n">app_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">pyramid</span> <span class="k">import</span> <span class="n">paster</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">paster</span><span class="o">.</span><span class="n">get_app</span><span class="p">(</span><span class="n">configfile</span><span class="p">,</span> <span class="n">app_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">username</span><span class="p">:</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="s1">&#39;IMPORT&#39;</span>
+    <span class="n">environ</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;HTTP_ACCEPT&#39;</span><span class="p">:</span> <span class="s1">&#39;application/json&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;REMOTE_USER&#39;</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">TestApp</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">environ</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="run"><a class="viewcode-back" href="../../../pydoc/encoded.commands.import_data.html#encoded.commands.import_data.run">[docs]</a><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="n">testapp</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">docsdir</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">item_type</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">name</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ext</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;.xlsx&#39;</span><span class="p">]:</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">loadxl</span><span class="o">.</span><span class="n">read_single_sheet</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">item_type</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">loadxl</span><span class="o">.</span><span class="n">read_single_sheet</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">loadxl</span><span class="o">.</span><span class="n">get_pipeline</span><span class="p">(</span><span class="n">testapp</span><span class="p">,</span> <span class="n">docsdir</span><span class="p">,</span> <span class="n">test</span><span class="p">,</span> <span class="n">item_type</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+    <span class="n">loadxl</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">loadxl</span><span class="o">.</span><span class="n">combine</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../pydoc/encoded.commands.import_data.html#encoded.commands.import_data.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># https://github.com/gawel/WSGIProxy2/pull/3 (and change to WebTest)</span>
+    <span class="kn">from</span> <span class="nn">wsgiproxy.proxies</span> <span class="k">import</span> <span class="n">ALLOWED_METHODS</span>
+    <span class="k">if</span> <span class="s1">&#39;PATCH&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALLOWED_METHODS</span><span class="p">:</span>
+        <span class="n">ALLOWED_METHODS</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;PATCH&#39;</span><span class="p">)</span>
+
+    <span class="kn">import</span> <span class="nn">argparse</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Import data&quot;</span><span class="p">,</span> <span class="n">epilog</span><span class="o">=</span><span class="n">EPILOG</span><span class="p">,</span>
+        <span class="n">formatter_class</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--test-only&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--item-type&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Item type&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--post&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;method&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_const&#39;</span><span class="p">,</span>
+        <span class="n">const</span><span class="o">=</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Create new data&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--put&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;method&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_const&#39;</span><span class="p">,</span>
+        <span class="n">const</span><span class="o">=</span><span class="s2">&quot;PUT&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Replace existing data&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--patch&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;method&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_const&#39;</span><span class="p">,</span>
+        <span class="n">const</span><span class="o">=</span><span class="s2">&quot;PATCH&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Patch existing data&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--username&#39;</span><span class="p">,</span> <span class="s1">&#39;-u&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;HTTP username (access_key_id) or import user uuid/email&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--password&#39;</span><span class="p">,</span> <span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;HTTP password (secret_access_key)&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--attach&#39;</span><span class="p">,</span> <span class="s1">&#39;-a&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;append&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="p">[],</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Directory to search for attachments&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--app-name&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Pyramid app name in configfile&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;inpath&#39;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;input zip file/directory of excel/csv/tsv sheets.&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;url&#39;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;either the url to the application or path to configfile&quot;</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">()</span>
+
+    <span class="n">url</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">scheme</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">,</span> <span class="s1">&#39;https&#39;</span><span class="p">):</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">scheme</span> <span class="o">+</span> <span class="s1">&#39;://&#39;</span> <span class="o">+</span> <span class="n">url</span><span class="o">.</span><span class="n">netloc</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">username</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">password</span>
+        <span class="k">if</span> <span class="n">url</span><span class="o">.</span><span class="n">username</span><span class="p">:</span>
+            <span class="n">base</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">scheme</span> <span class="o">+</span> <span class="s1">&#39;://&#39;</span> <span class="o">+</span> <span class="n">url</span><span class="o">.</span><span class="n">netloc</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">username</span>
+            <span class="n">username</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">username</span>
+            <span class="k">if</span> <span class="n">url</span><span class="o">.</span><span class="n">password</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">password</span>
+                <span class="n">password</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">password</span>
+        <span class="n">testapp</span> <span class="o">=</span> <span class="n">remote_app</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">testapp</span> <span class="o">=</span> <span class="n">internal_app</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">app_name</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
+
+    <span class="c1"># Loading app will have configured from config file. Reconfigure here:</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;encoded&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;wsgi&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">method</span><span class="p">:</span>
+        <span class="n">run</span><span class="p">(</span><span class="n">testapp</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">inpath</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">attach</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">item_type</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">test_only</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">loadxl</span><span class="o">.</span><span class="n">load_all</span><span class="p">(</span><span class="n">testapp</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">inpath</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">attach</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">test_only</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,380 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.tests.testing_views &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../tests.html" accesskey="U">encoded.tests</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.tests.testing_views</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pyramid.security</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">Allow</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyramid.view</span> <span class="k">import</span> <span class="n">view_config</span>
+<span class="kn">from</span> <span class="nn">snovault</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">Item</span><span class="p">,</span>
+    <span class="n">calculated_property</span><span class="p">,</span>
+    <span class="n">collection</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">..types.base</span> <span class="k">import</span> <span class="n">paths_filtered_by_status</span>
+<span class="kn">from</span> <span class="nn">snovault.attachment</span> <span class="k">import</span> <span class="n">ItemWithAttachment</span>
+
+
+<div class="viewcode-block" id="includeme"><a class="viewcode-back" href="../../../pydoc/encoded.tests.testing_views.html#encoded.tests.testing_views.includeme">[docs]</a><span class="k">def</span> <span class="nf">includeme</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="s1">&#39;.testing_auditor&#39;</span><span class="p">)</span></div>
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;testing-user&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="user"><a class="viewcode-back" href="../../../pydoc/encoded.tests.testing_views.html#encoded.tests.testing_views.user">[docs]</a><span class="k">def</span> <span class="nf">user</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;authenticated_userid&#39;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">authenticated_userid</span><span class="p">,</span>
+        <span class="s1">&#39;effective_principals&#39;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">effective_principals</span><span class="p">,</span>
+    <span class="p">}</span></div>
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;testing-allowed&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="allowed"><a class="viewcode-back" href="../../../pydoc/encoded.tests.testing_views.html#encoded.tests.testing_views.allowed">[docs]</a><span class="k">def</span> <span class="nf">allowed</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">pyramid.security</span> <span class="k">import</span> <span class="p">(</span>
+        <span class="n">has_permission</span><span class="p">,</span>
+        <span class="n">principals_allowed_by_permission</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">permission</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;permission&#39;</span><span class="p">,</span> <span class="s1">&#39;view&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;has_permission&#39;</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">has_permission</span><span class="p">(</span><span class="n">permission</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">)),</span>
+        <span class="s1">&#39;principals_allowed_by_permission&#39;</span><span class="p">:</span> <span class="n">principals_allowed_by_permission</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">permission</span><span class="p">),</span>
+    <span class="p">}</span></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="s1">&#39;testing-downloads&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Test download collection&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Testing. Testing. 1, 2, 3.&#39;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+<div class="viewcode-block" id="TestingDownload"><a class="viewcode-back" href="../../../pydoc/encoded.tests.testing_views.html#encoded.tests.testing_views.TestingDownload">[docs]</a><span class="k">class</span> <span class="nc">TestingDownload</span><span class="p">(</span><span class="n">ItemWithAttachment</span><span class="p">):</span>
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;testing_download&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;object&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;properties&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;attachment&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;object&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;attachment&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s1">&#39;properties&#39;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;enum&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;image/png&#39;</span><span class="p">],</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;attachment2&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;object&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;attachment&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                <span class="s1">&#39;properties&#39;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;enum&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;image/png&#39;</span><span class="p">],</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="s1">&#39;testing-keys&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Test keys&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Testing. Testing. 1, 2, 3.&#39;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">unique_key</span><span class="o">=</span><span class="s1">&#39;testing_accession&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+<div class="viewcode-block" id="TestingKey"><a class="viewcode-back" href="../../../pydoc/encoded.tests.testing_views.html#encoded.tests.testing_views.TestingKey">[docs]</a><span class="k">class</span> <span class="nc">TestingKey</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;testing_key&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;object&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;properties&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;uniqueKey&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;accession&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;uniqueKey&#39;</span><span class="p">:</span> <span class="s1">&#39;testing_accession&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+    <span class="p">}</span></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span><span class="s1">&#39;testing-link-sources&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="TestingLinkSource"><a class="viewcode-back" href="../../../pydoc/encoded.tests.testing_views.html#encoded.tests.testing_views.TestingLinkSource">[docs]</a><span class="k">class</span> <span class="nc">TestingLinkSource</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;testing_link_source&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;object&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;properties&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;uuid&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;target&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;linkTo&#39;</span><span class="p">:</span> <span class="s1">&#39;TestingLinkTarget&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;additionalProperties&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">}</span></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span><span class="s1">&#39;testing-link-targets&#39;</span><span class="p">,</span> <span class="n">unique_key</span><span class="o">=</span><span class="s1">&#39;testing_link_target:name&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="TestingLinkTarget"><a class="viewcode-back" href="../../../pydoc/encoded.tests.testing_views.html#encoded.tests.testing_views.TestingLinkTarget">[docs]</a><span class="k">class</span> <span class="nc">TestingLinkTarget</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;testing_link_target&#39;</span>
+    <span class="n">name_key</span> <span class="o">=</span> <span class="s1">&#39;name&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;object&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;properties&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;uniqueKey&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;uuid&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;additionalProperties&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">rev</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;reverse&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;TestingLinkSource&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;reverse&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="nd">@calculated_property</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Sources&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;array&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;items&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;string&#39;</span><span class="p">,</span> <span class="s1">&#39;object&#39;</span><span class="p">],</span>
+            <span class="s2">&quot;linkFrom&quot;</span><span class="p">:</span> <span class="s2">&quot;TestingLinkSource.target&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="TestingLinkTarget.reverse"><a class="viewcode-back" href="../../../pydoc/encoded.tests.testing_views.html#encoded.tests.testing_views.TestingLinkTarget.reverse">[docs]</a>    <span class="k">def</span> <span class="nf">reverse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">reverse</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">paths_filtered_by_status</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">reverse</span><span class="p">)</span></div></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="s1">&#39;testing-post-put-patch&#39;</span><span class="p">,</span>
+    <span class="n">acl</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="s1">&#39;group.submitter&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="s1">&#39;edit&#39;</span><span class="p">,</span> <span class="s1">&#39;view&#39;</span><span class="p">]),</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+<div class="viewcode-block" id="TestingPostPutPatch"><a class="viewcode-back" href="../../../pydoc/encoded.tests.testing_views.html#encoded.tests.testing_views.TestingPostPutPatch">[docs]</a><span class="k">class</span> <span class="nc">TestingPostPutPatch</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;testing_post_put_patch&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;required&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;object&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;properties&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;schema_version&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;pattern&quot;</span><span class="p">:</span> <span class="s2">&quot;^</span><span class="se">\\</span><span class="s2">d+(</span><span class="se">\\</span><span class="s2">.</span><span class="se">\\</span><span class="s2">d+)*$&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;requestMethod&quot;</span><span class="p">:</span> <span class="p">[],</span>
+                <span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;UUID&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="s2">&quot;uuid&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;permission&quot;</span><span class="p">:</span> <span class="s2">&quot;import_items&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;requestMethod&quot;</span><span class="p">:</span> <span class="s2">&quot;POST&quot;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;simple1&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="s1">&#39;simple1 default&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;simple2&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="s1">&#39;simple2 default&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;protected&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="c1"># This should be allowed on PUT so long as value is the same</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="s1">&#39;protected default&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;permission&#39;</span><span class="p">:</span> <span class="s1">&#39;import_items&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;protected_link&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="c1"># This should be allowed on PUT so long as the linked uuid is</span>
+                <span class="c1"># the same</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;linkTo&#39;</span><span class="p">:</span> <span class="s1">&#39;TestingLinkTarget&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;permission&#39;</span><span class="p">:</span> <span class="s1">&#39;import_items&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+    <span class="p">}</span></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span><span class="s1">&#39;testing-server-defaults&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="TestingServerDefault"><a class="viewcode-back" href="../../../pydoc/encoded.tests.testing_views.html#encoded.tests.testing_views.TestingServerDefault">[docs]</a><span class="k">class</span> <span class="nc">TestingServerDefault</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;testing_server_default&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;object&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;properties&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;uuid&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;serverDefault&#39;</span><span class="p">:</span> <span class="s1">&#39;uuid4&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;serverDefault&#39;</span><span class="p">:</span> <span class="s1">&#39;userid&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;linkTo&#39;</span><span class="p">:</span> <span class="s1">&#39;User&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;now&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;serverDefault&#39;</span><span class="p">:</span> <span class="s1">&#39;now&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;format&#39;</span><span class="p">:</span> <span class="s1">&#39;date-time&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;accession&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;serverDefault&#39;</span><span class="p">:</span> <span class="s1">&#39;accession&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;accessionType&#39;</span><span class="p">:</span> <span class="s1">&#39;AB&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;format&#39;</span><span class="p">:</span> <span class="s1">&#39;accession&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+    <span class="p">}</span></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span><span class="s1">&#39;testing-dependencies&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="TestingDependencies"><a class="viewcode-back" href="../../../pydoc/encoded.tests.testing_views.html#encoded.tests.testing_views.TestingDependencies">[docs]</a><span class="k">class</span> <span class="nc">TestingDependencies</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;testing_dependencies&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;object&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;dependencies&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;dep1&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;dep2&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;dep2&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;dep1&#39;</span><span class="p">],</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;properties&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;dep1&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;dep2&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;enum&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;dep2&#39;</span><span class="p">],</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+    <span class="p">}</span></div>
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">TestingPostPutPatch</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;testing-retry&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="testing_retry"><a class="viewcode-back" href="../../../pydoc/encoded.tests.testing_views.html#encoded.tests.testing_views.testing_retry">[docs]</a><span class="k">def</span> <span class="nf">testing_retry</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="k">import</span> <span class="n">inspect</span>
+    <span class="kn">from</span> <span class="nn">transaction.interfaces</span> <span class="k">import</span> <span class="n">TransientError</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">model</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">_attempt</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;_attempt&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">_attempt</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">TransientError</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;attempt&#39;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">_attempt</span><span class="p">,</span>
+        <span class="s1">&#39;detached&#39;</span><span class="p">:</span> <span class="n">inspect</span><span class="p">(</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">detached</span><span class="p">,</span>
+    <span class="p">}</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../tests.html" >encoded.tests</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

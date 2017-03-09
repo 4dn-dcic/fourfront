@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.commands.aws_deploy module &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="encoded.commands.check_rendering module" href="encoded.commands.check_rendering.html" />
+    <link rel="prev" title="encoded.commands.add_date_created module" href="encoded.commands.add_date_created.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.commands.check_rendering.html" title="encoded.commands.check_rendering module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="encoded.commands.add_date_created.html" title="encoded.commands.add_date_created module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.commands.html" accesskey="U">encoded.commands package</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-encoded.commands.aws_deploy">
+<span id="encoded-commands-aws-deploy-module"></span><h1>encoded.commands.aws_deploy module<a class="headerlink" href="#module-encoded.commands.aws_deploy" title="Permalink to this headline">¶</a></h1>
+<p>This script will be used to manage the aws install.  We currently have two AWS environments
+* 4dn-web-dev - daily builds go here, actually more of a testing environment</p>
+<blockquote>
+<div><ul class="simple">
+<li>tied to master branch in git</li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>4dn-prod    - produciton releases are deployed here</dt>
+<dd><ul class="first last">
+<li>tied to the production branch in git</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>This script will look for the following env variables:
+ENV_NAME == &#8216;PROD&#8217; for production tasks
+ENCODED_VERSION - sets the version of encode, for bug reporting purposes
+ADMIN_SECRET - use for production deployment first time to set password for admin
+# TODO: change below to use <cite>ENV_NAME</cite>
+NODE_ENV == &#8216;production&#8217; set by gulpfile.js to tell webpack to packages js propertly</p>
+<p>Basically we are going to do the following steps.</p>
+<ol class="arabic simple">
+<li>Install Nodejs</li>
+<li>Setup apache</li>
+<li>Bootstrap</li>
+<li>Buildout</li>
+<li>Secret key for sesisons</li>
+<li>update pyramid config file, to have appropriate settings for aws</li>
+<li>setup elastic search mapping (or re-initialize)</li>
+<li>Create / Update elastic search indexes</li>
+<li>Load data (dummy data for test, just admin for production)</li>
+<li>Setup WSGI</li>
+</ol>
+<p>The &#8220;normal&#8221; non environment sensitive .ebextension file looks like this:</p>
+<dl class="docutils">
+<dt>container_commands:</dt>
+<dd><dl class="first last docutils">
+<dt>01_nodejs_install:</dt>
+<dd><dl class="first last docutils">
+<dt>command: curl &#8211;silent &#8211;location <a class="reference external" href="https://rpm.nodesource.com/setup_4.x">https://rpm.nodesource.com/setup_4.x</a> |</dt>
+<dd>sudo bash - &amp;&amp; yum install nodejs -y</dd>
+</dl>
+</dd>
+<dt>02_setup_apache:</dt>
+<dd>command: cp .ebextensions/encoded-apache.conf /etc/httpd/conf.d/encoded-apache.conf</dd>
+<dt>03_bootstrap:</dt>
+<dd><dl class="first last docutils">
+<dt>command: &#8220;source /opt/python/run/venv/bin/activate &amp;&amp; python bootstrap.py</dt>
+<dd>&#8211;buildout-version 2.4.1 &#8211;setuptools-version 18.1 &gt; /var/log/deploy.log&#8221;</dd>
+</dl>
+</dd>
+<dt>04_buildout:</dt>
+<dd>command: &#8220;source /opt/python/run/venv/bin/activate &amp;&amp; bin/buildout  &gt;&gt; /var/log/deploy.log&#8221;</dd>
+<dt>05_secret_key:</dt>
+<dd>command: cat /dev/urandom | head -c 256 | base64 &gt; session-secret.b64</dd>
+<dt>06_jerry_rig_pyramid_config:</dt>
+<dd><dl class="first last docutils">
+<dt>command: &#8220;source /opt/python/run/venv/bin/activate &amp;&amp; python deploy/set_beanstalk_config.py</dt>
+<dd>&gt;&gt; /var/log/deploy.log&#8221;</dd>
+</dl>
+</dd>
+<dt>07_elastic_search_mapping:</dt>
+<dd>command: &#8220;bin/create-mapping production.ini &#8211;app-name app  &gt;&gt; /var/log/deploy.log&#8221;
+leader_only: true</dd>
+<dt>08_elastic_search_index:</dt>
+<dd><dl class="first docutils">
+<dt>command: &#8220;bin/index-annotations production.ini &#8211;check-first &#8211;app-name app</dt>
+<dd>&gt;&gt; /var/log/deploy.log&#8221;</dd>
+</dl>
+<p class="last">leader_only: true</p>
+</dd>
+<dt>09_load_dummy_data:</dt>
+<dd>command: &#8220;bin/load-data production.ini &#8211;app-name app  &gt;&gt; /var/log/deploy.log&#8221;
+leader_only: true</dd>
+<dt>10_setup_wsgi_home:</dt>
+<dd>command: &#8220;mkdir -p /home/wsgi &amp;&amp; chown wsgi:wsgi /home/wsgi&#8221;</dd>
+</dl>
+</dd>
+</dl>
+<dl class="function">
+<dt id="encoded.commands.aws_deploy.get_buildout_cmd">
+<code class="descclassname">encoded.commands.aws_deploy.</code><code class="descname">get_buildout_cmd</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/aws_deploy.html#get_buildout_cmd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.aws_deploy.get_buildout_cmd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.aws_deploy.is_prod">
+<code class="descclassname">encoded.commands.aws_deploy.</code><code class="descname">is_prod</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/aws_deploy.html#is_prod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.aws_deploy.is_prod" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.aws_deploy.main">
+<code class="descclassname">encoded.commands.aws_deploy.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/aws_deploy.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.aws_deploy.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.aws_deploy.run_w_venv">
+<code class="descclassname">encoded.commands.aws_deploy.</code><code class="descname">run_w_venv</code><span class="sig-paren">(</span><em>cmd</em>, <em>log_file='/var/log/deploy.log'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/aws_deploy.html#run_w_venv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.aws_deploy.run_w_venv" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="encoded.commands.add_date_created.html"
+                        title="previous chapter">encoded.commands.add_date_created module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="encoded.commands.check_rendering.html"
+                        title="next chapter">encoded.commands.check_rendering module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pydoc/encoded.commands.aws_deploy.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.commands.check_rendering.html" title="encoded.commands.check_rendering module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="encoded.commands.add_date_created.html" title="encoded.commands.add_date_created module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.commands.html" >encoded.commands package</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

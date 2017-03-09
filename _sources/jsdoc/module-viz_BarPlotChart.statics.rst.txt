@@ -1,0 +1,149 @@
+.. _module-viz_BarPlotChart.statics:
+
+===================
+Object: ``statics``
+===================
+
+
+Member Of :doc:`module-viz_BarPlotChart`
+
+
+.. toctree::
+   :maxdepth: 3
+   
+   
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+Functions
+=========
+
+
+
+.. _module-viz_BarPlotChart.statics.genChartData:
+
+
+``genChartData``
+----------------
+
+Entrypoint for aggregation. 
+First, counts up terms per field from experiments for field in supplied 'fields' param array. Count is adjusted depending on if aggregating experiments, experiment_sets, or files.
+Secondly, partitions one field as a child of another. If param 'useOnlyPopulatedFields' is false (default), then will use
+first field in param 'fields' array as primary field, or X-axis, and second field as secondary field, or bar subdivision.
+If 'useOnlyPopulatedFields' is set to true, will find the first field which has multiple terms (== multiple bars) to use as the primary field, and find
+second field with multiple terms to use as the secondary field.
+
+.. js:function:: genChartData(experiments, fields[, aggregate][, experimentsOrSets][, useOnlyPopulatedFields])
+
+    
+    :param Array experiments: List of experiments which are to be aggregated or counted by their term(s).
+    :param Array fields: List of fields containing at least 'field' property (as object-dot-notated string).
+    :param string aggregate: What to aggregate. Can be 'experiments', 'experiment_sets', or 'files'.
+    :param string experimentsOrSets: Deprecated. Whether chart is fed experiments or experiment_sets.
+    :param boolean useOnlyPopulatedFields: If true, will try to only select fields which have multiple terms to visualize.
+    :return Array: - Array of fields, now containing term counts per field. One field (either the first or first populated) will have a childField with partitioned terms.
+    
+
+
+
+
+
+.. _module-viz_BarPlotChart.statics.countFieldTerm:
+
+
+``countFieldTerm``
+------------------
+
+
+
+.. js:function:: countFieldTerm(fieldObj, term[, updateTotal][, countIncrease])
+
+    
+    :param Object fieldObj: A field object with present but incomplete 'terms' & 'total'.
+    :param string|Array.<string> term: A string or array of strings denoting terms.
+    :param boolean updateTotal: Whether to update fieldObj.total property as well.
+    :param number countIncrease: Amount to increase count for term by.
+    :return undefined: 
+    
+
+
+.. _module-viz_BarPlotChart.statics.getTermsForFieldsFromExperiment:
+
+
+``getTermsForFieldsFromExperiment``
+-----------------------------------
+
+
+
+.. js:function:: getTermsForFieldsFromExperiment(fields, exp)
+
+    
+    :param Array fields: List of field objects.
+    :param Object exp: Experiment to get terms (field values) from to pair with fields.
+    :return Array: Array of pairs containing field key (index 0) and term (index 1)
+    
+
+
+
+
+.. _module-viz_BarPlotChart.statics.genChartBarDims:
+
+
+``genChartBarDims``
+-------------------
+
+Return an object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally.
+
+.. js:function:: genChartBarDims(fields, fields.terms, fields.total[, availWidth][, availHeight][, styleOpts][, useOnlyPopulatedFields][, maxValue])
+
+    
+    :param Array.<Object> fields: Array of fields (i.e. from props.fields) which contain counts by term and total added through @see BarPlot.genChartData().
+    :param Object fields.terms: Object keyed by possible term for field, with value being count of term occurences in [props.]experiments passed to genChartData.
+    :param number fields.total: Count of total experiments for which this field is applicable.
+    :param number availWidth: Available width, in pixels, for chart.
+    :param number availHeight: Available width, in pixels, for chart.
+    :param Object styleOpts: Style settings for chart which may contain chart offsets (for axes).
+    :param boolean useOnlyPopulatedFields: Determine which fields to show via checking for which fields have multiple terms present.
+    :param number maxValue: Maximum y-axis value. Overrides height of bars.
+    :return Object: Object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally.
+    
+
+
+.. _module-viz_BarPlotChart.statics.barDataToLegendData:
+
+
+``barDataToLegendData``
+-----------------------
+
+Deprecated. Convert barData to array of field objects to be consumed by Legend React component.
+
+.. js:function:: barDataToLegendData(barData[, schemas])
+
+    
+    :param Object barData: Data representing bars and their subdivisions.
+    :param Object schemas: Schemas to get field names from.
+    :return Array: - Fields with terms and colors for those terms.
+    
+
+
+.. _module-viz_BarPlotChart.statics.getDefaultStyleOpts:
+
+
+``getDefaultStyleOpts``
+-----------------------
+
+
+
+.. js:function:: getDefaultStyleOpts()
+
+    
+    :return Object: Default style options for chart. Should suffice most of the time.
+    
+
+
+
+
+

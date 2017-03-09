@@ -1,0 +1,7 @@
+encoded.tests.features.test_admin_user module
+=============================================
+
+.. automodule:: encoded.tests.features.test_admin_user
+    :members:
+    :undoc-members:
+    :show-inheritance:

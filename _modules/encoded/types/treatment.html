@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.types.treatment &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../types.html" accesskey="U">encoded.types</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.types.treatment</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;The type file for the collection Treatment.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">snovault</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">abstract_collection</span><span class="p">,</span>
+    <span class="n">calculated_property</span><span class="p">,</span>
+    <span class="n">collection</span><span class="p">,</span>
+    <span class="n">load_schema</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># from pyramid.security import Authenticated</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">Item</span>
+    <span class="c1"># paths_filtered_by_status,</span>
+<span class="p">)</span>
+
+
+<span class="nd">@abstract_collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;treatments&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s2">&quot;Treatments&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing of all types of treatments.&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="Treatment"><a class="viewcode-back" href="../../../pydoc/encoded.types.treatment.html#encoded.types.treatment.Treatment">[docs]</a><span class="k">class</span> <span class="nc">Treatment</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Treatment class.&quot;&quot;&quot;</span>
+
+    <span class="n">base_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Treatment&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Item</span><span class="o">.</span><span class="n">base_types</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/treatment.json&#39;</span><span class="p">)</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="nd">@calculated_property</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Treatment_type&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="Treatment.treatment_type"><a class="viewcode-back" href="../../../pydoc/encoded.types.treatment.html#encoded.types.treatment.Treatment.treatment_type">[docs]</a>    <span class="k">def</span> <span class="nf">treatment_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">rnai_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chemical</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">rnai_type</span> <span class="ow">and</span> <span class="n">target</span><span class="p">:</span>
+            <span class="n">targetObj</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="s1">&#39;@@object&#39;</span><span class="p">)</span>
+            <span class="n">rnai_value</span> <span class="o">=</span> <span class="n">rnai_type</span> <span class="o">+</span> <span class="s2">&quot; for &quot;</span> <span class="o">+</span> <span class="n">targetObj</span><span class="p">[</span><span class="s1">&#39;target_summary&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rnai_value</span> <span class="o">=</span> <span class="n">rnai_type</span>
+        <span class="k">return</span> <span class="n">rnai_value</span> <span class="ow">or</span> <span class="n">chemical</span> <span class="ow">or</span> <span class="s2">&quot;None&quot;</span></div></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;treatments-chemical&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Treatments-Chemicals&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing Chemical or Drug Treatments&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="TreatmentChemical"><a class="viewcode-back" href="../../../pydoc/encoded.types.treatment.html#encoded.types.treatment.TreatmentChemical">[docs]</a><span class="k">class</span> <span class="nc">TreatmentChemical</span><span class="p">(</span><span class="n">Treatment</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Subclass of treatment for chemical treatments.&quot;&quot;&quot;</span>
+
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;treatment_chemical&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/treatment_chemical.json&#39;</span><span class="p">)</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="n">Treatment</span><span class="o">.</span><span class="n">embedded</span></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;treatments-rnai&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Treatments-RNAi&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing RNAi Treatments&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="TreatmentRnai"><a class="viewcode-back" href="../../../pydoc/encoded.types.treatment.html#encoded.types.treatment.TreatmentRnai">[docs]</a><span class="k">class</span> <span class="nc">TreatmentRnai</span><span class="p">(</span><span class="n">Treatment</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Subclass of treatment for RNAi treatments.&quot;&quot;&quot;</span>
+
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;treatment_rnai&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/treatment_rnai.json&#39;</span><span class="p">)</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;rnai_vendor&#39;</span><span class="p">,</span> <span class="s1">&#39;rnai_constructs&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">]</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../types.html" >encoded.types</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

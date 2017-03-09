@@ -1,0 +1,122 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.tests.testing_auditor &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../tests.html" accesskey="U">encoded.tests</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.tests.testing_auditor</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">snovault.auditor</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">audit_checker</span><span class="p">,</span>
+    <span class="n">AuditFailure</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="includeme"><a class="viewcode-back" href="../../../pydoc/encoded.tests.testing_auditor.html#encoded.tests.testing_auditor.includeme">[docs]</a><span class="k">def</span> <span class="nf">includeme</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="s1">&#39;.testing_views&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="has_condition1"><a class="viewcode-back" href="../../../pydoc/encoded.tests.testing_auditor.html#encoded.tests.testing_auditor.has_condition1">[docs]</a><span class="k">def</span> <span class="nf">has_condition1</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">system</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;condition1&#39;</span><span class="p">)</span></div>
+
+
+<span class="nd">@audit_checker</span><span class="p">(</span><span class="s1">&#39;testing_link_source&#39;</span><span class="p">,</span> <span class="n">condition</span><span class="o">=</span><span class="n">has_condition1</span><span class="p">)</span>
+<div class="viewcode-block" id="checker1"><a class="viewcode-back" href="../../../pydoc/encoded.tests.testing_auditor.html#encoded.tests.testing_auditor.checker1">[docs]</a><span class="k">def</span> <span class="nf">checker1</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">system</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;checker1&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;testchecker&#39;</span><span class="p">,</span> <span class="s1">&#39;Missing checker1&#39;</span><span class="p">)</span></div>
+
+
+<span class="nd">@audit_checker</span><span class="p">(</span><span class="s1">&#39;testing_link_target&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="testing_link_target_status"><a class="viewcode-back" href="../../../pydoc/encoded.tests.testing_auditor.html#encoded.tests.testing_auditor.testing_link_target_status">[docs]</a><span class="k">def</span> <span class="nf">testing_link_target_status</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">system</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;CHECK&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;reverse&#39;</span><span class="p">]):</span>
+            <span class="k">return</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">,</span> <span class="s1">&#39;Missing reverse items&#39;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../tests.html" >encoded.tests</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

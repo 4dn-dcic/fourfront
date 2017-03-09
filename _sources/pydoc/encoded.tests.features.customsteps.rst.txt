@@ -1,0 +1,7 @@
+encoded.tests.features.customsteps module
+=========================================
+
+.. automodule:: encoded.tests.features.customsteps
+    :members:
+    :undoc-members:
+    :show-inheritance:

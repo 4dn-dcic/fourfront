@@ -1,0 +1,310 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.workflow_examples.read_cwl_create_workflow_insert &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" accesskey="U">encoded</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.workflow_examples.read_cwl_create_workflow_insert</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/python</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+
+<div class="viewcode-block" id="generate_uuid"><a class="viewcode-back" href="../../../pydoc/encoded.workflow_examples.read_cwl_create_workflow_insert.html#encoded.workflow_examples.read_cwl_create_workflow_insert.generate_uuid">[docs]</a><span class="k">def</span> <span class="nf">generate_uuid</span> <span class="p">():</span>
+  <span class="n">rand_uuid_start</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>
+    <span class="n">r</span><span class="o">=</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="s1">&#39;abcdef1234567890&#39;</span><span class="p">)</span>
+    <span class="n">rand_uuid_start</span> <span class="o">+=</span> <span class="n">r</span>
+    <span class="n">uuid</span><span class="o">=</span><span class="n">rand_uuid_start</span> <span class="o">+</span> <span class="s2">&quot;-49e5-4c33-afab-9ec90d65faf3&quot;</span>
+  <span class="k">return</span> <span class="n">uuid</span></div>
+
+
+<span class="c1"># function that parses &#39;source&#39; field of CWL, which contain information of step and argument names.</span>
+<span class="c1"># it returns a dictionary with &#39;step&#39; and &#39;arg&#39; as key.</span>
+<span class="c1"># if the source is global, &#39;step&#39; will be &#39;&#39;.</span>
+<div class="viewcode-block" id="parse_source"><a class="viewcode-back" href="../../../pydoc/encoded.workflow_examples.read_cwl_create_workflow_insert.html#encoded.workflow_examples.read_cwl_create_workflow_insert.parse_source">[docs]</a><span class="k">def</span> <span class="nf">parse_source</span><span class="p">(</span><span class="n">source_str</span><span class="p">):</span> 
+  <span class="n">source</span><span class="o">=</span><span class="p">{}</span>
+  <span class="n">source_str</span> <span class="o">=</span> <span class="n">source_str</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">source_str</span><span class="p">:</span>  <span class="c1">## the format is  #step.ID, so if &#39;.&#39; doesn&#39;t exist, that implies this is a global argument.</span>
+    <span class="c1">## step argument ##</span>
+    <span class="n">source_arr</span> <span class="o">=</span> <span class="n">source_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+    <span class="n">source</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">source_arr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">source</span><span class="p">[</span><span class="s1">&#39;arg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">source_arr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="c1">## global argument ##</span>
+    <span class="n">source</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">source</span><span class="p">[</span><span class="s1">&#39;arg&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">source_str</span>
+  <span class="k">return</span><span class="p">(</span><span class="n">source</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># given the type field of an element of cwl_dict[&#39;inputs&#39;] (e.g. cwl_dict[&#39;inputs&#39;][1][&#39;type&#39;], return either &#39;Input file&#39; or &#39;parameter&#39;. </span>
+<div class="viewcode-block" id="Is_Input_file_or_parameter"><a class="viewcode-back" href="../../../pydoc/encoded.workflow_examples.read_cwl_create_workflow_insert.html#encoded.workflow_examples.read_cwl_create_workflow_insert.Is_Input_file_or_parameter">[docs]</a><span class="k">def</span> <span class="nf">Is_Input_file_or_parameter</span> <span class="p">(</span> <span class="n">cwl_param_type</span> <span class="p">):</span>
+
+  <span class="n">argument_type</span><span class="o">=</span><span class="s1">&#39;parameter&#39;</span>  <span class="c1">## default is parameter unless the following conditions meet</span>
+
+  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cwl_param_type</span><span class="p">,</span><span class="nb">list</span><span class="p">):</span>
+    <span class="k">if</span> <span class="s1">&#39;File&#39;</span> <span class="ow">in</span> <span class="n">cwl_param_type</span><span class="p">:</span>  <span class="c1">#  e.g. type=[ &#39;File&#39;,&#39;null&#39; ]  (SBG)</span>
+      <span class="n">argument_type</span><span class="o">=</span><span class="s1">&#39;Input file&#39;</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cwl_param_type</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="n">cwl_param_type</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;array&#39;</span> <span class="ow">and</span> <span class="n">cwl_param_type</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;items&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;File&#39;</span><span class="p">:</span>  <span class="c1"># e.g. type=[{&#39;type&#39;:&#39;array&#39;,&#39;items&#39;:&#39;File&#39;}] (SBG)</span>
+      <span class="n">argument_type</span><span class="o">=</span><span class="s1">&#39;Input file&#39;</span>
+  <span class="k">elif</span> <span class="n">cwl_param_type</span><span class="o">==</span><span class="s1">&#39;File&#39;</span><span class="p">:</span>     <span class="c1"># e.g. type=&#39;File&#39;</span>
+    <span class="n">argument_type</span><span class="o">=</span><span class="s1">&#39;Input file&#39;</span>
+  <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cwl_param_type</span><span class="p">,</span><span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="n">cwl_param_type</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;array&#39;</span> <span class="ow">and</span> <span class="n">cwl_param_type</span><span class="p">[</span><span class="s1">&#39;items&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;File&#39;</span><span class="p">:</span>  <span class="c1"># e.g. type={&#39;type&#39;:&#39;array&#39;,&#39;items&#39;:&#39;File&#39;}</span>
+    <span class="n">argument_type</span><span class="o">=</span><span class="s1">&#39;Input file&#39;</span>
+
+  <span class="k">return</span> <span class="n">argument_type</span></div>
+
+
+
+<span class="c1"># Add a workflow output argument and map to the step output argument.</span>
+<span class="c1"># for now we assume that 1. a global output argument has a single source and 2. that it is an output of some step. (I think this is a reasonable assumption)</span>
+<div class="viewcode-block" id="map_workflow_output_argument_to_step_argument"><a class="viewcode-back" href="../../../pydoc/encoded.workflow_examples.read_cwl_create_workflow_insert.html#encoded.workflow_examples.read_cwl_create_workflow_insert.map_workflow_output_argument_to_step_argument">[docs]</a><span class="k">def</span> <span class="nf">map_workflow_output_argument_to_step_argument</span> <span class="p">(</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">workflow_argument</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">step_argument</span> <span class="p">):</span>
+  <span class="n">workflow</span><span class="p">[</span><span class="s1">&#39;arguments&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> 
+    <span class="p">{</span><span class="s1">&#39;workflow_argument_name&#39;</span><span class="p">:</span> <span class="n">workflow_argument</span><span class="p">,</span> 
+     <span class="s1">&#39;argument_type&#39;</span><span class="p">:</span><span class="s1">&#39;Output file&#39;</span><span class="p">,</span> 
+     <span class="s1">&#39;argument_mapping&#39;</span><span class="p">:[{</span> <span class="s1">&#39;workflow_step&#39;</span><span class="p">:</span> <span class="n">step</span><span class="p">,</span>
+                           <span class="s1">&#39;step_argument_name&#39;</span><span class="p">:</span> <span class="n">step_argument</span><span class="p">,</span>
+                           <span class="s1">&#39;step_argument_type&#39;</span><span class="p">:</span><span class="s1">&#39;Output file&#39;</span> 
+                        <span class="p">}]</span>
+    <span class="p">})</span>  </div>
+
+
+
+<span class="c1"># Add a step argument and map to the global input source.</span>
+<span class="c1"># Assumes the global source exists in workflow[&#39;arguments&#39;]</span>
+<div class="viewcode-block" id="map_step_argument_to_workflow_input_argument"><a class="viewcode-back" href="../../../pydoc/encoded.workflow_examples.read_cwl_create_workflow_insert.html#encoded.workflow_examples.read_cwl_create_workflow_insert.map_step_argument_to_workflow_input_argument">[docs]</a><span class="k">def</span> <span class="nf">map_step_argument_to_workflow_input_argument</span> <span class="p">(</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">step_id</span><span class="p">,</span> <span class="n">step_argument</span> <span class="p">):</span>
+
+  <span class="k">if</span> <span class="n">workflow</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s1">&#39;arguments&#39;</span><span class="p">):</span>
+    <span class="n">argument_index</span><span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">workflow</span><span class="p">[</span><span class="s1">&#39;arguments&#39;</span><span class="p">])):</span>
+      <span class="n">e</span> <span class="o">=</span> <span class="n">workflow</span><span class="p">[</span><span class="s1">&#39;arguments&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+      <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="s1">&#39;workflow_argument_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">source</span><span class="p">[</span><span class="s1">&#39;arg&#39;</span><span class="p">]:</span>
+        <span class="n">argument_index</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="n">global_argument_type</span> <span class="o">=</span> <span class="n">e</span><span class="p">[</span><span class="s1">&#39;argument_type&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">argument_index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+      <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Error: corresponding workflow argument doesn&#39;t exist: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source</span><span class="p">[</span><span class="s1">&#39;arg&#39;</span><span class="p">]))</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Error: workflow argument doesn&#39;t exist.&quot;</span><span class="p">)</span>
+  
+  <span class="c1"># fill in the workflow dictionary. The step argument type is assumed to be the same as global argument type (in this case global argument type exists and since it is the source, it is either Input file or parameter.)</span>
+  <span class="n">workflow</span><span class="p">[</span><span class="s1">&#39;arguments&#39;</span><span class="p">][</span><span class="n">argument_index</span><span class="p">][</span><span class="s1">&#39;argument_mapping&#39;</span><span class="p">]</span><span class="o">=</span> \
+    <span class="p">[{</span> <span class="s1">&#39;workflow_step&#39;</span><span class="p">:</span> <span class="n">step_id</span><span class="p">,</span> <span class="c1"># id of the step.</span>
+       <span class="s1">&#39;step_argument_name&#39;</span><span class="p">:</span> <span class="n">step_argument</span><span class="p">,</span> <span class="c1"># id of an input entry of the step, remove &#39;#step&#39; from #step.ID</span>
+       <span class="s1">&#39;step_argument_type&#39;</span><span class="p">:</span> <span class="n">global_argument_type</span>
+    <span class="p">}]</span></div>
+
+
+
+<span class="c1"># add a step argument and map it to another step argument</span>
+<span class="c1"># if source step argument doesn&#39;t exist in the workflow dictionary yet, create a new entry.</span>
+<span class="c1"># the function assumes that the source is not a global argument.</span>
+<div class="viewcode-block" id="map_step_argument_to_another_step_argument"><a class="viewcode-back" href="../../../pydoc/encoded.workflow_examples.read_cwl_create_workflow_insert.html#encoded.workflow_examples.read_cwl_create_workflow_insert.map_step_argument_to_another_step_argument">[docs]</a><span class="k">def</span> <span class="nf">map_step_argument_to_another_step_argument</span> <span class="p">(</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">step_id</span><span class="p">,</span> <span class="n">step_argument</span> <span class="p">):</span>
+
+  <span class="k">if</span> <span class="n">workflow</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s1">&#39;arguments&#39;</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">workflow</span><span class="p">[</span><span class="s1">&#39;arguments&#39;</span><span class="p">])):</span>
+      <span class="n">e</span><span class="o">=</span> <span class="n">workflow</span><span class="p">[</span><span class="s1">&#39;arguments&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+      <span class="n">argument_index</span><span class="o">=-</span><span class="mi">1</span>
+      <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s1">&#39;workflow_argument_mapping&#39;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">e2</span> <span class="ow">in</span> <span class="n">e</span><span class="p">[</span><span class="s1">&#39;workflow_argument_mapping&#39;</span><span class="p">]:</span>
+          <span class="k">if</span> <span class="n">e</span><span class="p">[</span><span class="s1">&#39;workflow_step&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">source</span><span class="o">.</span><span class="n">step</span> <span class="ow">and</span> <span class="n">e</span><span class="p">[</span><span class="s1">&#39;step_argument_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">source</span><span class="o">.</span><span class="n">arg</span><span class="p">:</span> <span class="c1"># sourced from a previously entered entry.</span>
+            <span class="n">argument_index</span><span class="o">=</span><span class="n">i</span>
+            <span class="n">workflow</span><span class="p">[</span><span class="s1">&#39;arguments&#39;</span><span class="p">][</span><span class="n">argument_index</span><span class="p">][</span><span class="s1">&#39;argument_mapping&#39;</span><span class="p">]</span><span class="o">=</span> \
+              <span class="p">[{</span> <span class="s1">&#39;workflow_step&#39;</span><span class="p">:</span> <span class="n">step_id</span><span class="p">,</span> <span class="c1"># id of the step.</span>
+                 <span class="s1">&#39;step_argument_name&#39;</span><span class="p">:</span> <span class="n">step_argument</span><span class="p">,</span> <span class="c1"># id of an input entry of the step, remove &#39;#step&#39; from #step.ID</span>
+                 <span class="s1">&#39;step_argument_type&#39;</span><span class="p">:</span> <span class="s1">&#39;Input file or parameter&#39;</span>
+              <span class="p">},</span>
+              <span class="p">{</span> <span class="s1">&#39;workflow_step&#39;</span><span class="p">:</span> <span class="n">source</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">],</span> <span class="c1"># id of the source step.</span>
+                 <span class="s1">&#39;step_argument_name&#39;</span><span class="p">:</span> <span class="n">source</span><span class="p">[</span><span class="s1">&#39;arg&#39;</span><span class="p">],</span>
+                 <span class="s1">&#39;step_argument_type&#39;</span><span class="p">:</span> <span class="s1">&#39;Output file or parameter&#39;</span> <span class="c1"># do we pass parameters between steps as well?</span>
+              <span class="p">}]</span>
+            <span class="k">break</span> <span class="c1"># in theory there should be only a single match, so break shoudn&#39;t be necessary except for saving time.</span>
+      <span class="k">if</span> <span class="n">argument_index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="c1">## corresponding source step argument doesn&#39;t exist. It may appear later in cwl.</span>
+        <span class="c1"># sys.exit(&quot;Error: corresponding source step argument doesn&#39;t exist.&quot;) # don&#39;t produce error message. create a new entry.</span>
+        <span class="n">workflow</span><span class="p">[</span><span class="s1">&#39;arguments&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> 
+          <span class="p">{</span><span class="s1">&#39;workflow_argument_name&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;argument_type&#39;</span><span class="p">:</span><span class="s1">&#39;&#39;</span><span class="p">,</span> 
+           <span class="s1">&#39;argument_mapping&#39;</span><span class="p">:[{</span> <span class="s1">&#39;workflow_step&#39;</span><span class="p">:</span> <span class="n">step_id</span><span class="p">,</span>
+                                 <span class="s1">&#39;step_argument_name&#39;</span><span class="p">:</span> <span class="n">step_argument</span><span class="p">,</span>
+                                 <span class="s1">&#39;step_argument_type&#39;</span><span class="p">:</span><span class="s1">&#39;Input file or parameter&#39;</span>  <span class="c1"># either Input file or parameter. # Is there a way to know this from workflow cwl? I will not decide it for now : any argument that is not globally associated doesn&#39;t matter too much in terms of schema.</span>
+                              <span class="p">},</span>
+                              <span class="p">{</span> <span class="s1">&#39;workflow_step&#39;</span><span class="p">:</span> <span class="n">source</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">],</span>
+                                <span class="s1">&#39;step_argument_name&#39;</span><span class="p">:</span> <span class="n">source</span><span class="p">[</span><span class="s1">&#39;arg&#39;</span><span class="p">],</span>
+                                <span class="s1">&#39;step_argument_type&#39;</span><span class="p">:</span><span class="s1">&#39;Output file or parameter&#39;</span> <span class="c1"># do we pass parameters between steps as well?</span>
+                              <span class="p">}]</span>
+          <span class="p">})</span>  
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s2">&quot;Error: workflow argument doesn&#39;t exist.&quot;</span><span class="p">)</span></div>
+
+
+
+
+<span class="c1"># function that takes a cwl file and write a workflow insert json file</span>
+<div class="viewcode-block" id="parse_cwl"><a class="viewcode-back" href="../../../pydoc/encoded.workflow_examples.read_cwl_create_workflow_insert.html#encoded.workflow_examples.read_cwl_create_workflow_insert.parse_cwl">[docs]</a><span class="k">def</span> <span class="nf">parse_cwl</span><span class="p">(</span><span class="n">cwlfile</span><span class="p">,</span> <span class="n">workflow_metadata_json</span><span class="p">,</span> <span class="n">workflow_name</span><span class="p">,</span> <span class="n">workflow_description</span><span class="p">,</span> <span class="n">workflow_type</span><span class="p">,</span> <span class="n">cwl_url</span><span class="p">,</span> <span class="n">uuid</span><span class="p">):</span>
+
+  <span class="c1"># get cwl as a dict</span>
+  <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cwlfile</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">cwl_dict</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+  <span class="c1"># handle SBG cwl.</span>
+  <span class="k">if</span> <span class="n">cwl_dict</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s1">&#39;raw&#39;</span><span class="p">):</span>
+    <span class="n">cwl_dict</span><span class="o">=</span><span class="n">cwl_dict</span><span class="p">[</span><span class="s1">&#39;raw&#39;</span><span class="p">]</span>  <span class="c1"># &#39;some&#39; SBG&#39;s cwl is one level down under the &#39;raw&#39; field.</span>
+  
+  <span class="c1"># initialize dictionary to write to output json file</span>
+  <span class="n">workflow</span><span class="o">=</span><span class="p">{</span> <span class="s1">&#39;arguments&#39;</span><span class="p">:[],</span>  <span class="c1"># this is what we will create.</span>
+             <span class="s2">&quot;workflow_steps&quot;</span><span class="p">:</span> <span class="p">[],</span> <span class="c1"># this, too.</span>
+             <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="n">workflow_name</span><span class="p">,</span>
+             <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">workflow_description</span><span class="p">,</span>
+             <span class="s2">&quot;workflow_type&quot;</span><span class="p">:</span> <span class="n">workflow_type</span><span class="p">,</span>
+             <span class="s2">&quot;cwl_pointer&quot;</span><span class="p">:</span> <span class="n">cwl_url</span><span class="p">,</span>
+             <span class="s2">&quot;workflow_diagram&quot;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+             <span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="n">uuid</span> <span class="p">}</span>
+
+
+  <span class="c1"># parsing global input files and parameters and storing to the workflow dictionary (can&#39;t map to step arguments yet)</span>
+  <span class="c1"># argument type is either &#39;Input file&#39; or &#39;parameter&#39;.</span>
+  <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cwl_dict</span><span class="p">[</span><span class="s1">&#39;inputs&#39;</span><span class="p">]:</span>
+    <span class="n">argument_type</span> <span class="o">=</span> <span class="n">Is_Input_file_or_parameter</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">])</span>
+    <span class="n">workflow</span><span class="p">[</span><span class="s1">&#39;arguments&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;workflow_argument_name&#39;</span><span class="p">:</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">),</span> <span class="s1">&#39;argument_type&#39;</span><span class="p">:</span><span class="n">argument_type</span><span class="p">})</span>
+
+  <span class="c1">## parsing global output files and storing to the workflow dictionary and mapping to step arguments </span>
+  <span class="c1">## (the mapping (source) information is in the same field in cwl since the global output is usually sourced from a step output )</span>
+  <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cwl_dict</span><span class="p">[</span><span class="s1">&#39;outputs&#39;</span><span class="p">]:</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="n">parse_source</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">map_workflow_output_argument_to_step_argument</span> <span class="p">(</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">),</span> <span class="n">source</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">],</span> <span class="n">source</span><span class="p">[</span><span class="s1">&#39;arg&#39;</span><span class="p">]</span> <span class="p">)</span>
+
+  <span class="c1">## parsing steps (map 1. global output files to step arguments and 2. between arguments between steps that are not globally defined)</span>
+  <span class="c1">## fill in &#39;arguments&#39;</span>
+  <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cwl_dict</span><span class="p">[</span><span class="s1">&#39;steps&#39;</span><span class="p">]:</span>
+    <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;inputs&#39;</span><span class="p">]:</span>
+      <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="s1">&#39;source&#39;</span><span class="p">):</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">parse_source</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+  
+        <span class="c1">## case 1: global argument is the source</span>
+        <span class="k">if</span> <span class="n">source</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;&#39;</span><span class="p">:</span> 
+          <span class="n">map_step_argument_to_workflow_input_argument</span><span class="p">(</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">),</span> <span class="n">parse_source</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])[</span><span class="s1">&#39;arg&#39;</span><span class="p">]</span> <span class="p">)</span>
+   
+        <span class="c1">## case 2: no global argument (just passing between steps)</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">map_step_argument_to_another_step_argument</span><span class="p">(</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">),</span> <span class="n">parse_source</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])[</span><span class="s1">&#39;arg&#39;</span><span class="p">]</span> <span class="p">)</span>
+       
+        <span class="c1">## case 3 (no global argument, no passing between steps) - we assume this doesn&#39;t exist.</span>
+
+  <span class="c1">## parsing steps again</span>
+  <span class="c1">## fill in workflow_steps.</span>
+  <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cwl_dict</span><span class="p">[</span><span class="s1">&#39;steps&#39;</span><span class="p">]:</span>
+    <span class="n">workflow</span><span class="p">[</span><span class="s1">&#39;workflow_steps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">{</span> <span class="s1">&#39;step_name&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">),</span> <span class="s1">&#39;step&#39;</span><span class="p">:</span> <span class="n">generate_uuid</span><span class="p">()</span> <span class="p">}</span> <span class="p">)</span>   <span class="c1">## assuming that uuid for step is generated at this point? Or should we retrieve a corresponding step that already exists?</span>
+
+
+  <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">workflow_metadata_json</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fo</span><span class="p">:</span>
+    <span class="n">fo</span><span class="o">.</span><span class="n">write</span> <span class="p">(</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span><span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+    <span class="c1">#fo.write ( cwl_dict.keys() + &quot;\n&quot;)</span>
+    <span class="c1">#fo.write ( json.dumps(cwl_dict[&#39;outputs&#39;],indent=4) + &quot;\n&quot;)</span>
+  
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">argparse</span>
+
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;temporary cwl parser that creates a workflow insert&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-c&#39;</span><span class="p">,</span><span class="s1">&#39;--cwlfile&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;input cwlfile&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-w&#39;</span><span class="p">,</span><span class="s1">&#39;--workflow_metadata_json&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;output workflow metadata json file&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-n&#39;</span><span class="p">,</span><span class="s1">&#39;--workflow_name&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;output workflow metadata json file&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-d&#39;</span><span class="p">,</span><span class="s1">&#39;--workflow_description&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;output workflow metadata json file&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-t&#39;</span><span class="p">,</span><span class="s1">&#39;--workflow_type&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;output workflow metadata json file&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-u&#39;</span><span class="p">,</span><span class="s1">&#39;--cwl_url&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;output workflow metadata json file&#39;</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">uuid</span><span class="o">=</span> <span class="n">generate_uuid</span><span class="p">()</span>
+    <span class="n">parse_cwl</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">cwlfile</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">workflow_metadata_json</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">workflow_name</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">workflow_description</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">workflow_type</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">cwl_url</span><span class="p">,</span> <span class="n">uuid</span> <span class="p">)</span>
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

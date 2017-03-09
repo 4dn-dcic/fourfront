@@ -1,0 +1,331 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Overview of encoded Application &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Beanstalk Deployment" href="beanstalk-deployment.html" />
+    <link rel="prev" title="Tutorials and Other Documents" href="static_documentation_contents.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="beanstalk-deployment.html" title="Beanstalk Deployment"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="static_documentation_contents.html" title="Tutorials and Other Documents"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="static_documentation_contents.html" accesskey="U">Tutorials and Other Documents</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="overview-of-encoded-application">
+<h1>Overview of encoded Application<a class="headerlink" href="#overview-of-encoded-application" title="Permalink to this headline">¶</a></h1>
+<p>This document does not contain installation or operating instructures.  See README.rst for that.</p>
+<p>Encoded is a python/javascript application for storing, modifying, retrieving and displaying the metadata (as JSON objects) for the <a class="reference external" href="http://www.encodeproject.org/">ENCODE</a> project.
+The application was designed specifically to store metadata for high-throughput genomics experiments, but the overall architecture is suitable for any set of highly linked objects.</p>
+<p>The &#8220;deep&#8221; backend is a simple Postgres object database.  The relational database does not store any specific information about the objects but simply tracks transactions and keys.   CRUD (Create/Read/Update/Delete) in this database is governed by a python <a class="reference external" href="http://www.pylonsproject.org/">Pyramid</a> app.   This python app can stand alone and provide JSON objects via GET directly from the database.</p>
+<p><a class="reference external" href="http://www.elasticsearch.org/">Elasticsearch</a> is used to deeply and robustly index the entire object store and provide extremely fast read access and powerful search capability.</p>
+<p>The Browser accessible frontend is written in <a class="reference external" href="http://facebook.github.io/react/">ReactJS</a> and uses the same <a class="reference external" href="http://www.pylonsproject.org/">Pyramid</a> URL dispatch as the backend, but converts the GET request JSON into XHTML for viewing in a Web Browser.</p>
+<div class="section" id="source-code-organization">
+<h2>SOURCE CODE ORGANIZATION<a class="headerlink" href="#source-code-organization" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p><strong>* WARNING THIS IS OUT OF DATE SINCE snovault SPLIT OFF &#8211; REWRITE WHEN IT&#8217;S TOTALLY DIVORCED *</strong></p>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>Root - the root directory contains configuration files and install scripts along with other accessory directories</dt>
+<dd><ul class="first last">
+<li><em>bin</em> - command line excutables (see src/commmands) from buildout (see <a class="reference external" href="http://docs.pylonsproject.org/en/latest/">PyramidDocs</a>)</li>
+<li><em>develop</em> &amp; <em>develop-eggs</em> - source and python eggs (created by buildout)</li>
+<li><em>docs</em> - documentation (including this file)</li>
+<li><em>eggs</em> - Python dependencies from PyPi (created by buildout)</li>
+<li><em>etc</em> - apache config and other admin files</li>
+<li><em>node_modules</em> - JS (Node) dependencies from npm (created by buildout)</li>
+<li><em>parts</em> - wsgi interfaces and ruby dependencies (gems) (created by buildout)</li>
+<li><em>scripts</em> - cron jobs</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>src directory - contains all the python and javascript code for front and backends</dt>
+<dd><ul class="first last">
+<li><em>commands</em> - the python source for command line scripts used for synching, indexing and other utilities independent of the main Pyramid application</li>
+<li><em>schemas</em> - JSON schemas (<a class="reference external" href="http://json-schema.org/">JSONSchema</a>, <a class="reference external" href="http://json-ld.org/">JSON-LD</a>) describing allowed types and values for all metadata objects</li>
+<li><em>static</em> - Frontend JS (components), SCSS/CSS (HTML styling), images, fonts and frontend JS libraries</li>
+<li><em>tests</em> - Unit and integration tests</li>
+<li><em>upgrade</em> - python instructions for upgrading old objects stored to the latest schema</li>
+<li><em>views</em> - business logic for dispatching URLs and producing the correct JSON</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="backend">
+<h2><strong>BACKEND</strong><a class="headerlink" href="#backend" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li>Application (responds to web requests) - the main config files are <a href="#id1"><span class="problematic" id="id2">*</span></a>.ini in the root encoded directory.</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="guts">
+<h2>Guts<a class="headerlink" href="#guts" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="views">
+<h2>views<a class="headerlink" href="#views" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>The guts of the web application are in the views package.  Views.views defines the Item and Collection classes that the web app will respond to via URLs like /{things}/ (returns a Collection of Things) and /{things}/{id} (retuns a Thing).</p>
+<dl class="docutils">
+<dt>Other modules in the views package correspond to non-core views that the app will respond to.</dt>
+<dd>user.py - special user objects are special
+access_key.py - generation/modification of access keys for programatic access
+search.py - constructs ES query and passes though to :9200</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="snovault-py">
+<h2>snovault.py<a class="headerlink" href="#snovault-py" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>snovault.py defines the core Collection and Item classes which are the python representation of linked JSON objects and groups (collections) of linked JSON objects.   It contains the business logic for updating JSON objects via PATCH and the recursive GETs necessary for embedded objects.</div></blockquote>
+</div>
+<div class="section" id="authz">
+<h2>AuthZ<a class="headerlink" href="#authz" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><em>authentication.py</em></li>
+<li><em>authorization.py</em></li>
+<li><em>persona.py</em></li>
+</ul>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>JSON data schema</dt>
+<dd><dl class="first last docutils">
+<dt>definition</dt>
+<dd>Each object type has a .json schema file in /schemas.  The objects are linked and embedded within each other by reference, forming a graph structure.   &#8220;Mixins&#8221; are sub-schemas included in more than one object type definition.  Each schema file is <em>versioned</em> and mapping an object from an older schema to a new one is called <em>upgrading</em></dd>
+<dt>validation</dt>
+<dd>Objects are validated as they are POSTed or PATCHed to the application (via HTTP).  Not sure when/how the validation is hooked in</dd>
+<dt>upgrading</dt>
+<dd>No idea</dd>
+<dt>linked and embedded objects</dt>
+<dd>Sorcery</dd>
+</dl>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Postgres Storage</dt>
+<dd><ul class="first last">
+<li>Loading</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li>Elasticsearch &amp; Indexing</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="frontend">
+<h2><strong>FRONTEND</strong><a class="headerlink" href="#frontend" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>The pyramid app handles all URL dispatch and fetches JSON objects from Elasticsearch (or optionally, the database directly).  These can be either individual objects or Collections (arrays) of objects.  The objects can either be &#8220;flat&#8221; with no linked objects embedded, or with some or all linked objects embedded in the response.</p>
+<p>The scope of embedding is decided on an object-by-object bases, listed in the /src/encoded/types directory. Each object has an &#8216;embedded&#8217; list defined, which dictates what objects will be embedded in the elasticsearch indexing process. Whole objects can be embedded or specific fields of objects. For objects (with linkTo&#8217;s in the schema) are not explicitly added to the &#8216;embedded&#8217; list, two fields will automatically included, regardless of whether or not these are calculated properties. These are link_id and display_title.</p>
+<ul class="simple">
+<li>renderers.py - code that determines whether to return HTML or JSON based on request, as well as code for starting the node subprocess renderer.js which converts the ReactJS pages into XHTML.</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="use-of-nodejs">
+<h2>Use of NodeJS<a class="headerlink" href="#use-of-nodejs" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="about-reactjs">
+<h2>About ReactJS<a class="headerlink" href="#about-reactjs" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="component-pages">
+<h2>Component Pages<a class="headerlink" href="#component-pages" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>HTML pages are written in Javascript using <a class="reference external" href="http://jsx.github.io">JSX</a> and <a class="reference external" href="http://facebook.github.io/react/">ReactJS</a>.  These files are in src/static/components.
+Each object type has a component which describes how both the individual item and the collection pages are rendered.  Other pages include home and search.  <a class="reference external" href="http://jsx.github.io">JSX</a> allows the JS file itself to serve like an HTML template, similar to other web frameworks.</div></blockquote>
+</div>
+<div class="section" id="boilerplate-and-parent-classes">
+<h2>Boilerplate and Parent Classes<a class="headerlink" href="#boilerplate-and-parent-classes" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li>app.js</li>
+<li>globals.js</li>
+<li>mixins.js</li>
+<li>errors.js</li>
+<li>home.js</li>
+<li>item.js</li>
+<li>collection.js</li>
+<li>fetched.js</li>
+<li>edit.js</li>
+<li>testing.js</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="user-pages-templates">
+<h2>User Pages (Templates)<a class="headerlink" href="#user-pages-templates" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li>index.js</li>
+<li>antibody.js</li>
+<li>biosample.js</li>
+<li>dataset.js</li>
+<li>experiment.js</li>
+<li>platform.js</li>
+<li>search.js</li>
+<li>target.js</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="views-and-sections-templates">
+<h2>Views and Sections (Templates)<a class="headerlink" href="#views-and-sections-templates" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li>dbxref.js</li>
+<li>navbar.js</li>
+<li>footer.js</li>
+</ul>
+</div></blockquote>
+<p><strong>API</strong></p>
+</div>
+<div class="section" id="parameters-to-be-supplied-in-post-object-or-via-get-url-parameters">
+<h2>Parameters (to be supplied in POST object or via GET url parameters):<a class="headerlink" href="#parameters-to-be-supplied-in-post-object-or-via-get-url-parameters" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li>datastore=(database|elasticsearch) default: elasticsearch</li>
+<li>format=json  Return JSON objects instead of XHTML from browser.</li>
+<li>limit=((int)|all) return only some or all objects in a collection</li>
+<li><dl class="first docutils">
+<dt>Searching</dt>
+<dd><ul class="first last">
+<li></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Overview of encoded Application</a><ul>
+<li><a class="reference internal" href="#source-code-organization">SOURCE CODE ORGANIZATION</a></li>
+<li><a class="reference internal" href="#backend"><strong>BACKEND</strong></a></li>
+<li><a class="reference internal" href="#guts">Guts</a></li>
+<li><a class="reference internal" href="#views">views</a></li>
+<li><a class="reference internal" href="#snovault-py">snovault.py</a></li>
+<li><a class="reference internal" href="#authz">AuthZ</a></li>
+<li><a class="reference internal" href="#frontend"><strong>FRONTEND</strong></a></li>
+<li><a class="reference internal" href="#use-of-nodejs">Use of NodeJS</a></li>
+<li><a class="reference internal" href="#about-reactjs">About ReactJS</a></li>
+<li><a class="reference internal" href="#component-pages">Component Pages</a></li>
+<li><a class="reference internal" href="#boilerplate-and-parent-classes">Boilerplate and Parent Classes</a></li>
+<li><a class="reference internal" href="#user-pages-templates">User Pages (Templates)</a></li>
+<li><a class="reference internal" href="#views-and-sections-templates">Views and Sections (Templates)</a></li>
+<li><a class="reference internal" href="#parameters-to-be-supplied-in-post-object-or-via-get-url-parameters">Parameters (to be supplied in POST object or via GET url parameters):</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="static_documentation_contents.html"
+                        title="previous chapter">Tutorials and Other Documents</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="beanstalk-deployment.html"
+                        title="next chapter">Beanstalk Deployment</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/overview.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="beanstalk-deployment.html" title="Beanstalk Deployment"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="static_documentation_contents.html" title="Tutorials and Other Documents"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="static_documentation_contents.html" >Tutorials and Other Documents</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

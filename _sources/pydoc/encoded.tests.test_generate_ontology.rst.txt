@@ -1,0 +1,7 @@
+encoded.tests.test_generate_ontology module
+===========================================
+
+.. automodule:: encoded.tests.test_generate_ontology
+    :members:
+    :undoc-members:
+    :show-inheritance:

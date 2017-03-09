@@ -1,0 +1,265 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Fourfront Metadata Database &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="fourfront-metadata-database">
+<h1>Fourfront Metadata Database<a class="headerlink" href="#fourfront-metadata-database" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="https://travis-ci.org/4dn-dcic/fourfront"><img alt="Build status" src="https://travis-ci.org/4dn-dcic/fourfront.png?branch=master" /></a></p>
+<p><a class="reference external" href="https://coveralls.io/github/4dn-dcic/fourfront?branch=master"><img alt="Coverage" src="https://coveralls.io/repos/github/4dn-dcic/fourfront/badge.svg?branch=master" /></a></p>
+<p><a class="reference external" href="https://www.codacy.com/app/4dn/fourfront?utm_source=github.com&amp;amp;utm_medium=referral&amp;amp;utm_content=4dn-dcic/fourfront&amp;amp;utm_campaign=Badge_Grade"><img alt="Quality" src="https://api.codacy.com/project/badge/Grade/f5fc54006b4740b5800e83eb2aeeeb43" /></a></p>
+<p>This is a fork from <a class="reference external" href="https://github.com/ENCODE-DCC/encoded">ENCODE-DCC/encoded</a> .  We are working to modularize the project and adapted to our needs for the 4D Nucleome project.</p>
+<p>Step 1: Verify that homebrew is working properly:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ sudo brew doctor
+</pre></div>
+</div>
+<p>Step 2: Install or update dependencies:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ brew install libevent libmagic libxml2 libxslt openssl postgresql graphviz nginx python3
+$ brew install freetype libjpeg libtiff littlecms webp  # Required by Pillow
+$ brew tap homebrew/versions
+$ brew install elasticsearch17 node4-lts
+</pre></div>
+</div>
+<p>If you need to update dependencies:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ brew update
+$ brew upgrade
+$ rm -rf encoded/eggs
+</pre></div>
+</div>
+<p>Step 3: Run buildout:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ python3 bootstrap.py --buildout-version 2.4.1 --setuptools-version 18.1
+$ bin/buildout
+
+NOTE:
+If you have issues with postgres or the python interface to it (psycogpg2) you probably need to install postgresql
+via homebrew (as above)
+If you have issues with Pillow you may need to install new xcode command line tools:
+- First update Xcode from AppStore (reboot)
+$ xcode-select install
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>If you wish to completely rebuild the application, or have updated dependencies:</dt>
+<dd><p class="first">$ make clean</p>
+<p class="last">Then goto Step 3.</p>
+</dd>
+</dl>
+<p>Step 4: Start the application locally</p>
+<p>In one terminal startup the database servers and nginx proxy with:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ bin/dev-servers development.ini --app-name app --clear --init --load
+</pre></div>
+</div>
+<p>This will first clear any existing data in /tmp/encoded.
+Then postgres and elasticsearch servers will be initiated within /tmp/encoded.
+An nginx proxy running on port 8000 will be started.
+The servers are started, and finally the test set will be loaded.</p>
+<p>In a second terminal, run the app with:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ bin/pserve development.ini
+</pre></div>
+</div>
+<p>Indexing will then proceed in a background thread similar to the production setup.</p>
+<p>Browse to the interface at <a class="reference external" href="http://localhost:8000/">http://localhost:8000/</a>.</p>
+<div class="section" id="running-tests">
+<h2>Running tests<a class="headerlink" href="#running-tests" title="Permalink to this headline">¶</a></h2>
+<p>To run specific tests locally:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ bin/test -k test_name
+</pre></div>
+</div>
+<p>To run with a debugger:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ bin/test --pdb
+</pre></div>
+</div>
+<p>Specific tests to run locally for schema changes:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ bin/test -k test_load_workbook
+$ bin/test -k test_edw_sync
+</pre></div>
+</div>
+<p>Run the Pyramid tests with:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ bin/test -m &quot;not bdd&quot;
+</pre></div>
+</div>
+<p>Run the Browser tests with:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ bin/test -m bdd -v --splinter-webdriver chrome
+</pre></div>
+</div>
+<p>Note: to run against chrome you should first:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ brew install chromedriver
+</pre></div>
+</div>
+<p>Run the Javascript tests with:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ npm test
+</pre></div>
+</div>
+<p>Or if you need to supply command line arguments:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ ./node_modules/.bin/jest
+</pre></div>
+</div>
+</div>
+<div class="section" id="building-javascript">
+<h2>Building Javascript<a class="headerlink" href="#building-javascript" title="Permalink to this headline">¶</a></h2>
+<p>Our Javascript is written using ES6 and JSX, so needs to be compiled
+using babel and webpack.</p>
+<p>To build production-ready bundles, do:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ npm run build
+</pre></div>
+</div>
+<p>(This is also done as part of running buildout.)</p>
+<p>To build development bundles and continue updating them as you edit source files, run:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ npm run dev
+</pre></div>
+</div>
+<p>The development bundles are not minified, to speed up building.</p>
+</div>
+<div class="section" id="notes-on-sass-compass">
+<h2>Notes on SASS/Compass<a class="headerlink" href="#notes-on-sass-compass" title="Permalink to this headline">¶</a></h2>
+<p>We use the <a class="reference external" href="http://sass-lang.com/">SASS</a> and <a class="reference external" href="http://compass-style.org/">Compass</a> CSS preprocessors.
+The buildout installs the SASS and Compass utilities and compiles the CSS.
+When changing the SCSS source files you must recompile the CSS using one of the following methods:</p>
+<div class="section" id="compiling-on-the-fly">
+<h3>Compiling &#8220;on the fly&#8221;<a class="headerlink" href="#compiling-on-the-fly" title="Permalink to this headline">¶</a></h3>
+<p>Compass can watch for any changes made to .scss files and instantly compile them to .css.
+To start this, from the root of the project (where config.rb is) do:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ bin/compass watch
+</pre></div>
+</div>
+<p>You can specify whether the compiled CSS is minified or not in config.rb. (Currently, it is set to minify.)</p>
+</div>
+<div class="section" id="force-compiling">
+<h3>Force compiling<a class="headerlink" href="#force-compiling" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ bin/compass compile
+</pre></div>
+</div>
+<p>Again, you can specify whether the compiled CSS is minified or not in config.rb.</p>
+<p>Also see the <a class="reference external" href="http://compass-style.org/help/tutorials/command-line/">Compass Command Line Documentation</a> and the <a class="reference external" href="http://compass-style.org/help/tutorials/configuration-reference/">Configuration Reference</a>.</p>
+<p>And of course:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ bin/compass help
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="sublimelinter">
+<h2>SublimeLinter<a class="headerlink" href="#sublimelinter" title="Permalink to this headline">¶</a></h2>
+<p>To setup SublimeLinter with Sublime Text 3, first install the linters:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ easy_install-2.7 flake8
+$ npm install -g jshint
+$ npm install -g jsxhint
+</pre></div>
+</div>
+<p>After first setting up <a class="reference external" href="https://sublime.wbond.net/">Package Control</a> (follow install and usage instructions on site), use it to install the following packages in Sublime Text 3:</p>
+<blockquote>
+<div><ul class="simple">
+<li>sublimelinter</li>
+<li>sublimelinter-flake8</li>
+<li>sublimelinter-jsxhint</li>
+<li>jsx</li>
+<li>sublimelinter-jshint</li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Fourfront Metadata Database</a><ul>
+<li><a class="reference internal" href="#running-tests">Running tests</a></li>
+<li><a class="reference internal" href="#building-javascript">Building Javascript</a></li>
+<li><a class="reference internal" href="#notes-on-sass-compass">Notes on SASS/Compass</a><ul>
+<li><a class="reference internal" href="#compiling-on-the-fly">Compiling &#8220;on the fly&#8221;</a></li>
+<li><a class="reference internal" href="#force-compiling">Force compiling</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#sublimelinter">SublimeLinter</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/README.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

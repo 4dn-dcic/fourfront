@@ -1,0 +1,7 @@
+encoded.types.target module
+===========================
+
+.. automodule:: encoded.types.target
+    :members:
+    :undoc-members:
+    :show-inheritance:

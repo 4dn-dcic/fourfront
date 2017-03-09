@@ -1,0 +1,7 @@
+encoded.tests.test_create_mapping module
+========================================
+
+.. automodule:: encoded.tests.test_create_mapping
+    :members:
+    :undoc-members:
+    :show-inheritance:

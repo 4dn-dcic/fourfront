@@ -1,0 +1,509 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.types.base &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../types.html" accesskey="U">encoded.types</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.types.base</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;base class creation for all the schemas that exist.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">lru_cache</span>
+<span class="kn">from</span> <span class="nn">pyramid.view</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">view_config</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyramid.security</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="c1"># ALL_PERMISSIONS,</span>
+    <span class="n">Allow</span><span class="p">,</span>
+    <span class="n">Authenticated</span><span class="p">,</span>
+    <span class="n">Deny</span><span class="p">,</span>
+    <span class="c1"># DENY_ALL,</span>
+    <span class="n">Everyone</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyramid.traversal</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">find_root</span><span class="p">,</span>
+    <span class="n">traverse</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">import</span> <span class="nn">snovault</span>
+<span class="c1"># from ..schema_formats import is_accession</span>
+<span class="c1"># import snovalut default post / patch stuff so we can overwrite it in this file</span>
+<span class="kn">from</span> <span class="nn">snovault.crud_views</span> <span class="k">import</span> <span class="n">collection_add</span> <span class="k">as</span> <span class="n">sno_collection_add</span>
+<span class="kn">from</span> <span class="nn">snovault.crud_views</span> <span class="k">import</span> <span class="n">item_edit</span> <span class="k">as</span> <span class="n">sno_item_edit</span>
+<span class="kn">from</span> <span class="nn">snovault.validators</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">validate_item_content_post</span><span class="p">,</span>
+    <span class="n">validate_item_content_put</span><span class="p">,</span>
+    <span class="n">validate_item_content_patch</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">snovault.etag</span> <span class="k">import</span> <span class="n">if_match_tid</span>
+
+
+<span class="nd">@lru_cache</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">_award_viewing_group</span><span class="p">(</span><span class="n">award_uuid</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
+    <span class="n">award</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">get_by_uuid</span><span class="p">(</span><span class="n">award_uuid</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">award</span><span class="o">.</span><span class="n">upgrade_properties</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;viewing_group&#39;</span><span class="p">)</span>
+
+<span class="c1"># Item acls</span>
+
+<span class="n">ONLY_ADMIN_VIEW</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="s1">&#39;group.admin&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;view&#39;</span><span class="p">,</span> <span class="s1">&#39;edit&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="s1">&#39;group.read-only-admin&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;view&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="s1">&#39;remoteuser.INDEXER&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;view&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="s1">&#39;remoteuser.EMBED&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;view&#39;</span><span class="p">]),</span>
+    <span class="p">(</span><span class="n">Deny</span><span class="p">,</span> <span class="n">Everyone</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;view&#39;</span><span class="p">,</span> <span class="s1">&#39;edit&#39;</span><span class="p">])</span>
+<span class="p">]</span>
+
+<span class="c1"># This acl allows item creation; it is easily overwritten in lab and user,</span>
+<span class="c1"># as these items should not be available for creation</span>
+<span class="n">SUBMITTER_CREATE</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="s1">&#39;group.submitter&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">),</span>
+<span class="p">]</span>
+
+<span class="n">ALLOW_EVERYONE_VIEW</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="n">Everyone</span><span class="p">,</span> <span class="s1">&#39;view&#39;</span><span class="p">),</span>
+<span class="p">]</span> <span class="o">+</span> <span class="n">ONLY_ADMIN_VIEW</span> <span class="o">+</span> <span class="n">SUBMITTER_CREATE</span>
+
+<span class="n">ALLOW_LAB_MEMBER_VIEW</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="s1">&#39;role.lab_member&#39;</span><span class="p">,</span> <span class="s1">&#39;view&#39;</span><span class="p">),</span>
+<span class="p">]</span> <span class="o">+</span> <span class="n">ONLY_ADMIN_VIEW</span> <span class="o">+</span> <span class="n">SUBMITTER_CREATE</span>
+
+<span class="n">ALLOW_VIEWING_GROUP_VIEW</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="s1">&#39;role.viewing_group_member&#39;</span><span class="p">,</span> <span class="s1">&#39;view&#39;</span><span class="p">),</span>
+<span class="p">]</span> <span class="o">+</span> <span class="n">ONLY_ADMIN_VIEW</span> <span class="o">+</span> <span class="n">SUBMITTER_CREATE</span>
+
+<span class="n">ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="s1">&#39;role.viewing_group_member&#39;</span><span class="p">,</span> <span class="s1">&#39;view&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="s1">&#39;role.lab_submitter&#39;</span><span class="p">,</span> <span class="s1">&#39;edit&#39;</span><span class="p">),</span>
+<span class="p">]</span> <span class="o">+</span> <span class="n">ALLOW_LAB_MEMBER_VIEW</span>
+
+<span class="n">ALLOW_LAB_SUBMITTER_EDIT</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="s1">&#39;role.lab_member&#39;</span><span class="p">,</span> <span class="s1">&#39;view&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="s1">&#39;role.lab_submitter&#39;</span><span class="p">,</span> <span class="s1">&#39;edit&#39;</span><span class="p">),</span>
+<span class="p">]</span> <span class="o">+</span> <span class="n">ONLY_ADMIN_VIEW</span> <span class="o">+</span> <span class="n">SUBMITTER_CREATE</span>
+
+<span class="n">ALLOW_CURRENT_AND_SUBMITTER_EDIT</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="n">Everyone</span><span class="p">,</span> <span class="s1">&#39;view&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="s1">&#39;role.lab_submitter&#39;</span><span class="p">,</span> <span class="s1">&#39;edit&#39;</span><span class="p">),</span>
+<span class="p">]</span> <span class="o">+</span> <span class="n">ONLY_ADMIN_VIEW</span> <span class="o">+</span> <span class="n">SUBMITTER_CREATE</span>
+
+<span class="n">ALLOW_CURRENT</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="n">Everyone</span><span class="p">,</span> <span class="s1">&#39;view&#39;</span><span class="p">),</span>
+<span class="p">]</span> <span class="o">+</span> <span class="n">ONLY_ADMIN_VIEW</span> <span class="o">+</span> <span class="n">SUBMITTER_CREATE</span>
+
+<span class="n">DELETED</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="n">Deny</span><span class="p">,</span> <span class="n">Everyone</span><span class="p">,</span> <span class="s1">&#39;visible_for_edit&#39;</span><span class="p">)</span>
+<span class="p">]</span> <span class="o">+</span> <span class="n">ONLY_ADMIN_VIEW</span>
+
+<span class="c1"># Collection acls</span>
+
+<span class="n">ALLOW_SUBMITTER_ADD</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="s1">&#39;group.submitter&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;add&#39;</span><span class="p">]),</span>
+<span class="p">]</span> <span class="o">+</span> <span class="n">SUBMITTER_CREATE</span>
+
+
+<div class="viewcode-block" id="paths_filtered_by_status"><a class="viewcode-back" href="../../../pydoc/encoded.types.base.html#encoded.types.base.paths_filtered_by_status">[docs]</a><span class="k">def</span> <span class="nf">paths_filtered_by_status</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">paths</span><span class="p">,</span> <span class="n">exclude</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;deleted&#39;</span><span class="p">,</span> <span class="s1">&#39;replaced&#39;</span><span class="p">),</span> <span class="n">include</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;smth.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">include</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">path</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span>
+            <span class="k">if</span> <span class="n">traverse</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">path</span><span class="p">)[</span><span class="s1">&#39;context&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">__json__</span><span class="p">(</span><span class="n">request</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">include</span>
+        <span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">path</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span>
+            <span class="k">if</span> <span class="n">traverse</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">path</span><span class="p">)[</span><span class="s1">&#39;context&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">__json__</span><span class="p">(</span><span class="n">request</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exclude</span>
+        <span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="AbstractCollection"><a class="viewcode-back" href="../../../pydoc/encoded.types.base.html#encoded.types.base.AbstractCollection">[docs]</a><span class="k">class</span> <span class="nc">AbstractCollection</span><span class="p">(</span><span class="n">snovault</span><span class="o">.</span><span class="n">AbstractCollection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;smth.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="AbstractCollection.get"><a class="viewcode-back" href="../../../pydoc/encoded.types.base.html#encoded.types.base.AbstractCollection.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;smth.&quot;&quot;&quot;</span>
+        <span class="n">resource</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">AbstractCollection</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">resource</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">resource</span>
+        <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">resource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">get_by_unique_key</span><span class="p">(</span><span class="s1">&#39;alias&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">resource</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_allow_contained</span><span class="p">(</span><span class="n">resource</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">default</span>
+                <span class="k">return</span> <span class="n">resource</span>
+        <span class="k">return</span> <span class="n">default</span></div></div>
+
+
+<div class="viewcode-block" id="Collection"><a class="viewcode-back" href="../../../pydoc/encoded.types.base.html#encoded.types.base.Collection">[docs]</a><span class="k">class</span> <span class="nc">Collection</span><span class="p">(</span><span class="n">snovault</span><span class="o">.</span><span class="n">Collection</span><span class="p">,</span> <span class="n">AbstractCollection</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;smth.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;smth.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Collection</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;__acl__&#39;</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="c1"># XXX collections should be setup after all types are registered.</span>
+        <span class="c1"># Don&#39;t access type_info.schema here as that precaches calculated schema too early.</span>
+        <span class="k">if</span> <span class="s1">&#39;lab&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_info</span><span class="o">.</span><span class="n">factory</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;properties&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__acl__</span> <span class="o">=</span> <span class="n">ALLOW_SUBMITTER_ADD</span></div>
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">Collection</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span>
+             <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">validate_item_content_post</span><span class="p">])</span>
+<div class="viewcode-block" id="collection_add"><a class="viewcode-back" href="../../../pydoc/encoded.types.base.html#encoded.types.base.collection_add">[docs]</a><span class="k">def</span> <span class="nf">collection_add</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">render</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">check_only</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;check_only&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">check_only</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+                <span class="s1">&#39;@type&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">],</span>
+                <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">sno_collection_add</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">render</span><span class="p">)</span></div>
+
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">snovault</span><span class="o">.</span><span class="n">Item</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="s1">&#39;edit&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;PUT&#39;</span><span class="p">,</span>
+             <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">validate_item_content_put</span><span class="p">],</span> <span class="n">decorator</span><span class="o">=</span><span class="n">if_match_tid</span><span class="p">)</span>
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">snovault</span><span class="o">.</span><span class="n">Item</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="s1">&#39;edit&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;PATCH&#39;</span><span class="p">,</span>
+             <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">validate_item_content_patch</span><span class="p">],</span> <span class="n">decorator</span><span class="o">=</span><span class="n">if_match_tid</span><span class="p">)</span>
+<div class="viewcode-block" id="item_edit"><a class="viewcode-back" href="../../../pydoc/encoded.types.base.html#encoded.types.base.item_edit">[docs]</a><span class="k">def</span> <span class="nf">item_edit</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">render</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">check_only</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;check_only&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">check_only</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+                <span class="s1">&#39;@type&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">],</span>
+                <span class="p">}</span>
+    <span class="k">return</span> <span class="n">sno_item_edit</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="n">request</span><span class="p">,</span> <span class="n">render</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Item"><a class="viewcode-back" href="../../../pydoc/encoded.types.base.html#encoded.types.base.Item">[docs]</a><span class="k">class</span> <span class="nc">Item</span><span class="p">(</span><span class="n">snovault</span><span class="o">.</span><span class="n">Item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;smth.&quot;&quot;&quot;</span>
+
+    <span class="n">AbstractCollection</span> <span class="o">=</span> <span class="n">AbstractCollection</span>
+    <span class="n">Collection</span> <span class="o">=</span> <span class="n">Collection</span>
+    <span class="n">STATUS_ACL</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="c1"># standard_status</span>
+        <span class="s1">&#39;released&#39;</span><span class="p">:</span> <span class="n">ALLOW_CURRENT</span><span class="p">,</span>
+        <span class="s1">&#39;current&#39;</span><span class="p">:</span> <span class="n">ALLOW_CURRENT</span><span class="p">,</span>
+        <span class="s1">&#39;revoked&#39;</span><span class="p">:</span> <span class="n">ALLOW_CURRENT</span><span class="p">,</span>
+        <span class="s1">&#39;deleted&#39;</span><span class="p">:</span> <span class="n">DELETED</span><span class="p">,</span>
+        <span class="s1">&#39;replaced&#39;</span><span class="p">:</span> <span class="n">DELETED</span><span class="p">,</span>
+        <span class="s1">&#39;in review by lab&#39;</span><span class="p">:</span> <span class="n">ALLOW_LAB_SUBMITTER_EDIT</span><span class="p">,</span>
+        <span class="s1">&#39;in review by project&#39;</span><span class="p">:</span> <span class="n">ALLOW_VIEWING_GROUP_LAB_SUBMITTER_EDIT</span><span class="p">,</span>
+        <span class="s1">&#39;released to project&#39;</span><span class="p">:</span> <span class="n">ALLOW_VIEWING_GROUP_VIEW</span><span class="p">,</span>
+        <span class="c1"># for file</span>
+        <span class="s1">&#39;obsolete&#39;</span><span class="p">:</span> <span class="n">ONLY_ADMIN_VIEW</span><span class="p">,</span>
+        <span class="s1">&#39;uploading&#39;</span><span class="p">:</span> <span class="n">ALLOW_LAB_SUBMITTER_EDIT</span><span class="p">,</span>
+        <span class="s1">&#39;uploaded&#39;</span><span class="p">:</span> <span class="n">ALLOW_LAB_SUBMITTER_EDIT</span><span class="p">,</span>
+        <span class="s1">&#39;upload failed&#39;</span><span class="p">:</span> <span class="n">ALLOW_LAB_SUBMITTER_EDIT</span><span class="p">,</span>
+
+        <span class="c1"># publication</span>
+        <span class="s1">&#39;published&#39;</span><span class="p">:</span> <span class="n">ALLOW_CURRENT</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">registry</span><span class="p">,</span> <span class="n">models</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">registry</span><span class="p">,</span> <span class="n">models</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">STATUS_ACL</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">STATUS_ACL</span>
+        <span class="c1"># update self.embedded here</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_embeds</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">__name__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;smth.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name_key</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uuid</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upgrade_properties</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;replaced&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uuid</span>
+        <span class="k">return</span> <span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">uuid</span>
+
+    <span class="k">def</span> <span class="nf">__acl__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;smth.&quot;&quot;&quot;</span>
+        <span class="c1"># Don&#39;t finalize to avoid validation here.</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upgrade_properties</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">STATUS_ACL</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">ALLOW_LAB_SUBMITTER_EDIT</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__ac_local_roles__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;this creates roles based on properties of the object being acccessed&quot;&quot;&quot;</span>
+        <span class="n">roles</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upgrade_properties</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s1">&#39;lab&#39;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+            <span class="n">lab_submitters</span> <span class="o">=</span> <span class="s1">&#39;submits_for.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;lab&#39;</span><span class="p">]</span>
+            <span class="n">roles</span><span class="p">[</span><span class="n">lab_submitters</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;role.lab_submitter&#39;</span>
+            <span class="c1"># add lab_member as well</span>
+            <span class="n">lab_member</span> <span class="o">=</span> <span class="s1">&#39;lab.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;lab&#39;</span><span class="p">]</span>
+            <span class="n">roles</span><span class="p">[</span><span class="n">lab_member</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;role.lab_member&#39;</span>
+        <span class="k">if</span> <span class="s1">&#39;award&#39;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+            <span class="n">viewing_group</span> <span class="o">=</span> <span class="n">_award_viewing_group</span><span class="p">(</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;award&#39;</span><span class="p">],</span> <span class="n">find_root</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">viewing_group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">viewing_group_members</span> <span class="o">=</span> <span class="s1">&#39;viewing_group.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">viewing_group</span>
+                <span class="n">roles</span><span class="p">[</span><span class="n">viewing_group_members</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;role.viewing_group_member&#39;</span>
+        <span class="k">return</span> <span class="n">roles</span>
+
+<div class="viewcode-block" id="Item.unique_keys"><a class="viewcode-back" href="../../../pydoc/encoded.types.base.html#encoded.types.base.Item.unique_keys">[docs]</a>    <span class="k">def</span> <span class="nf">unique_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;smth.&quot;&quot;&quot;</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Item</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">unique_keys</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;accession&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;properties&#39;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">keys</span>
+        <span class="n">keys</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;accession&#39;</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;alternate_accessions&#39;</span><span class="p">,</span> <span class="p">[]))</span>
+        <span class="k">if</span> <span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="s1">&#39;replaced&#39;</span> <span class="ow">and</span> <span class="s1">&#39;accession&#39;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+            <span class="n">keys</span><span class="p">[</span><span class="s1">&#39;accession&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;accession&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">keys</span></div>
+
+    <span class="nd">@snovault</span><span class="o">.</span><span class="n">calculated_property</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;External Reference URIs&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;External references to this item.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;array&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;items&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;External Reference&quot;</span><span class="p">,</span> <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">},</span>
+                <span class="s2">&quot;ref&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="Item.external_references"><a class="viewcode-back" href="../../../pydoc/encoded.types.base.html#encoded.types.base.Item.external_references">[docs]</a>    <span class="k">def</span> <span class="nf">external_references</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">dbxrefs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">namespaces</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;snovault.jsonld.namespaces&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dbxrefs</span> <span class="ow">and</span> <span class="n">namespaces</span><span class="p">:</span>
+            <span class="n">refs</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">dbxrefs</span><span class="p">:</span>
+                <span class="n">refObject</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;ref&quot;</span><span class="p">:</span> <span class="n">r</span><span class="p">,</span> <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">}</span>
+                <span class="n">refParts</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">refParts</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">refObject</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="n">refPrefix</span> <span class="o">=</span> <span class="n">refParts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">refID</span> <span class="o">=</span> <span class="n">refParts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">baseUri</span> <span class="o">=</span> <span class="n">namespaces</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">refPrefix</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">baseUri</span><span class="p">:</span>
+                    <span class="n">refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">refObject</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+                <span class="k">if</span> <span class="s1">&#39;</span><span class="si">{reference_id}</span><span class="s1">&#39;</span> <span class="ow">in</span> <span class="n">baseUri</span><span class="p">:</span>
+                    <span class="n">refObject</span><span class="p">[</span><span class="s1">&#39;uri&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">baseUri</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{reference_id}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">refID</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">refObject</span><span class="p">[</span><span class="s1">&#39;uri&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">baseUri</span> <span class="o">+</span> <span class="n">refID</span>
+                <span class="n">refs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">refObject</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">refs</span>
+        <span class="k">return</span> <span class="p">[]</span></div>
+
+    <span class="nd">@snovault</span><span class="o">.</span><span class="n">calculated_property</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Display Title&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;A calculated title for every object in 4DN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span>
+    <span class="p">},)</span>
+<div class="viewcode-block" id="Item.display_title"><a class="viewcode-back" href="../../../pydoc/encoded.types.base.html#encoded.types.base.Item.display_title">[docs]</a>    <span class="k">def</span> <span class="nf">display_title</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;create a display_title field.&quot;&quot;&quot;</span>
+        <span class="n">display_title</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">look_for</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="s2">&quot;title&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;location_description&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;accession&quot;</span><span class="p">,</span>
+                    <span class="p">]</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">look_for</span><span class="p">:</span>
+            <span class="c1"># special case for user: concatenate first and last names</span>
+            <span class="n">display_title</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">display_title</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">display_title</span>
+        <span class="c1"># if none of the existing terms are available, use @type + date_created</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">type_date</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">&quot; from &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;date_created&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)[:</span><span class="mi">10</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">type_date</span>
+        <span class="c1"># last resort, use uuid</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;uuid&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+
+    <span class="nd">@snovault</span><span class="o">.</span><span class="n">calculated_property</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;link_id&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;A copy of @id that can be embedded. Uses ~ instead of /&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span>
+    <span class="p">},)</span>
+<div class="viewcode-block" id="Item.link_id"><a class="viewcode-back" href="../../../pydoc/encoded.types.base.html#encoded.types.base.Item.link_id">[docs]</a>    <span class="k">def</span> <span class="nf">link_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;create the link_id field, which is a copy of @id using ~ instead of /&quot;&quot;&quot;</span>
+        <span class="n">path_str</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;accession&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">path_str</span><span class="p">:</span>
+            <span class="n">path_split</span> <span class="o">=</span> <span class="n">path_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">path_split</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="s1">&#39;@@&#39;</span> <span class="ow">in</span> <span class="n">path_split</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">path_str</span> <span class="o">=</span> <span class="s1">&#39;~&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path_split</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;~&#39;</span>
+            <span class="k">return</span> <span class="n">path_str</span></div>
+
+<div class="viewcode-block" id="Item.update_embeds"><a class="viewcode-back" href="../../../pydoc/encoded.types.base.html#encoded.types.base.Item.update_embeds">[docs]</a>    <span class="k">def</span> <span class="nf">update_embeds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        extend self.embedded to have link_id and display_title for every linkTo</span>
+<span class="sd">        field in the properties schema and the schema of all calculated properties</span>
+<span class="sd">        (this is created here)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">total_schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;properties&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calc_props_schema</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">registry</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">&#39;calculated_properties&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">calc_props_key</span><span class="p">,</span> <span class="n">calc_props_val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">&#39;calculated_properties&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">props_for</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">calc_props_val</span><span class="o">.</span><span class="n">schema</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">calc_props_schema</span><span class="p">[</span><span class="n">calc_props_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">calc_props_val</span><span class="o">.</span><span class="n">schema</span>
+        <span class="n">total_schema</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calc_props_schema</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">embedded</span> <span class="o">=</span> <span class="n">add_default_embeds</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">embedded</span><span class="p">,</span> <span class="n">total_schema</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="SharedItem"><a class="viewcode-back" href="../../../pydoc/encoded.types.base.html#encoded.types.base.SharedItem">[docs]</a><span class="k">class</span> <span class="nc">SharedItem</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An Item visible to all authenticated users while &quot;proposed&quot; or &quot;in progress&quot;.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__ac_local_roles__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;smth.&quot;&quot;&quot;</span>
+        <span class="n">roles</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upgrade_properties</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s1">&#39;lab&#39;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+            <span class="n">lab_submitters</span> <span class="o">=</span> <span class="s1">&#39;submits_for.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;lab&#39;</span><span class="p">]</span>
+            <span class="n">roles</span><span class="p">[</span><span class="n">lab_submitters</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;role.lab_submitter&#39;</span>
+        <span class="n">roles</span><span class="p">[</span><span class="n">Authenticated</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;role.viewing_group_member&#39;</span>
+        <span class="k">return</span> <span class="n">roles</span></div>
+
+
+<span class="nd">@snovault</span><span class="o">.</span><span class="n">calculated_property</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">Item</span><span class="o">.</span><span class="n">Collection</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="s1">&#39;action&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="add"><a class="viewcode-back" href="../../../pydoc/encoded.types.base.html#encoded.types.base.add">[docs]</a><span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;smth.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">has_permission</span><span class="p">(</span><span class="s1">&#39;add&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;add&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Add&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;profile&#39;</span><span class="p">:</span> <span class="s1">&#39;/profiles/</span><span class="si">{ti.name}</span><span class="s1">.json&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ti</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">type_info</span><span class="p">),</span>
+            <span class="s1">&#39;href&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">{item_uri}</span><span class="s1">#!add&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item_uri</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">resource_path</span><span class="p">(</span><span class="n">context</span><span class="p">)),</span>
+        <span class="p">}</span></div>
+
+
+<span class="nd">@snovault</span><span class="o">.</span><span class="n">calculated_property</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">Item</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="s1">&#39;action&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="edit"><a class="viewcode-back" href="../../../pydoc/encoded.types.base.html#encoded.types.base.edit">[docs]</a><span class="k">def</span> <span class="nf">edit</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;smth.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">has_permission</span><span class="p">(</span><span class="s1">&#39;edit&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;edit&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Edit&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;profile&#39;</span><span class="p">:</span> <span class="s1">&#39;/profiles/</span><span class="si">{ti.name}</span><span class="s1">.json&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ti</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">type_info</span><span class="p">),</span>
+            <span class="s1">&#39;href&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">{item_uri}</span><span class="s1">#!edit&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item_uri</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">resource_path</span><span class="p">(</span><span class="n">context</span><span class="p">)),</span>
+        <span class="p">}</span></div>
+
+
+<span class="nd">@snovault</span><span class="o">.</span><span class="n">calculated_property</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">Item</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="s1">&#39;action&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="create"><a class="viewcode-back" href="../../../pydoc/encoded.types.base.html#encoded.types.base.create">[docs]</a><span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;If the user submits for any lab, allow them to create&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">has_permission</span><span class="p">(</span><span class="s1">&#39;create&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Create&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;profile&#39;</span><span class="p">:</span> <span class="s1">&#39;/profiles/</span><span class="si">{ti.name}</span><span class="s1">.json&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ti</span><span class="o">=</span><span class="n">context</span><span class="o">.</span><span class="n">type_info</span><span class="p">),</span>
+            <span class="s1">&#39;href&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">{item_uri}</span><span class="s1">#!create&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item_uri</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">resource_path</span><span class="p">(</span><span class="n">context</span><span class="p">)),</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="add_default_embeds"><a class="viewcode-back" href="../../../pydoc/encoded.types.base.html#encoded.types.base.add_default_embeds">[docs]</a><span class="k">def</span> <span class="nf">add_default_embeds</span><span class="p">(</span><span class="n">embeds</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="sd">&quot;&quot;&quot;Perform default processing on the embeds list.</span>
+<span class="sd">    This adds display_title to any non-fully embedded linkTo field and defaults</span>
+<span class="sd">    to using the @id and display_title of non-embedded linkTo&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;properties&#39;</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">:</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;properties&#39;</span><span class="p">]</span>
+    <span class="n">processed_fields</span> <span class="o">=</span> <span class="n">embeds</span><span class="p">[:]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">embeds</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">[]</span>
+    <span class="n">already_processed</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># find pre-existing fields</span>
+    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">embeds</span><span class="p">:</span>
+        <span class="n">split_field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">split_field</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">embed_path</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">split_field</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">embed_path</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">processed_fields</span> <span class="ow">and</span> <span class="n">embed_path</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">already_processed</span><span class="p">:</span>
+                <span class="n">already_processed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">embed_path</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">embed_path</span> <span class="o">+</span> <span class="s1">&#39;.link_id&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">processed_fields</span><span class="p">:</span>
+                    <span class="n">processed_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">embed_path</span> <span class="o">+</span> <span class="s1">&#39;.link_id&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">embed_path</span> <span class="o">+</span> <span class="s1">&#39;.display_title&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">processed_fields</span><span class="p">:</span>
+                    <span class="n">processed_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">embed_path</span> <span class="o">+</span> <span class="s1">&#39;.display_title&#39;</span><span class="p">)</span>
+    <span class="c1"># automatically embed top level linkTo&#39;s not already embedded</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">check_linkTo</span> <span class="o">=</span> <span class="s1">&#39;linkTo&#39;</span> <span class="ow">in</span> <span class="n">val</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;items&#39;</span> <span class="ow">in</span> <span class="n">val</span> <span class="ow">and</span> <span class="s1">&#39;linkTo&#39;</span> <span class="ow">in</span> <span class="n">val</span><span class="p">[</span><span class="s1">&#39;items&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">processed_fields</span> <span class="ow">and</span> <span class="n">check_linkTo</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">+</span> <span class="s1">&#39;.link_id&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">processed_fields</span><span class="p">:</span>
+                <span class="n">processed_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span> <span class="o">+</span> <span class="s1">&#39;.link_id&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">+</span> <span class="s1">&#39;.display_title&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">processed_fields</span><span class="p">:</span>
+                <span class="n">processed_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span> <span class="o">+</span> <span class="s1">&#39;.display_title&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">processed_fields</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../types.html" >encoded.types</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+encoded.types.base module
+=========================
+
+.. automodule:: encoded.types.base
+    :members:
+    :undoc-members:
+    :show-inheritance:

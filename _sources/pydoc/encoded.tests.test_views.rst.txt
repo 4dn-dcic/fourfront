@@ -1,0 +1,7 @@
+encoded.tests.test_views module
+===============================
+
+.. automodule:: encoded.tests.test_views
+    :members:
+    :undoc-members:
+    :show-inheritance:

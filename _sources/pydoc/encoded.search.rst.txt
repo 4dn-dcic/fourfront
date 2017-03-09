@@ -1,0 +1,7 @@
+encoded.search module
+=====================
+
+.. automodule:: encoded.search
+    :members:
+    :undoc-members:
+    :show-inheritance:

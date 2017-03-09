@@ -1,0 +1,7 @@
+encoded.types.individual module
+===============================
+
+.. automodule:: encoded.types.individual
+    :members:
+    :undoc-members:
+    :show-inheritance:

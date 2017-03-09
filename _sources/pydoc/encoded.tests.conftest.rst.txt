@@ -1,0 +1,7 @@
+encoded.tests.conftest module
+=============================
+
+.. automodule:: encoded.tests.conftest
+    :members:
+    :undoc-members:
+    :show-inheritance:

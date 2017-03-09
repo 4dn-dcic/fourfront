@@ -1,0 +1,7 @@
+encoded.renderers module
+========================
+
+.. automodule:: encoded.renderers
+    :members:
+    :undoc-members:
+    :show-inheritance:

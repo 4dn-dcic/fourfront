@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.types.ontology module &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="encoded.types.publication module" href="encoded.types.publication.html" />
+    <link rel="prev" title="encoded.types.modification module" href="encoded.types.modification.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.publication.html" title="encoded.types.publication module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.modification.html" title="encoded.types.modification module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.types.html" accesskey="U">encoded.types package</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-encoded.types.ontology">
+<span id="encoded-types-ontology-module"></span><h1>encoded.types.ontology module<a class="headerlink" href="#module-encoded.types.ontology" title="Permalink to this headline">¶</a></h1>
+<p>Collection for the Ontology and OntologyTerms objects.</p>
+<dl class="class">
+<dt id="encoded.types.ontology.Ontology">
+<em class="property">class </em><code class="descclassname">encoded.types.ontology.</code><code class="descname">Ontology</code><span class="sig-paren">(</span><em>registry</em>, <em>models</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/ontology.html#Ontology"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.ontology.Ontology" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="encoded.types.base.html#encoded.types.base.Item" title="encoded.types.base.Item"><code class="xref py py-class docutils literal"><span class="pre">encoded.types.base.Item</span></code></a></p>
+<p>The Ontology class that holds info on an ontology.</p>
+<dl class="attribute">
+<dt id="encoded.types.ontology.Ontology.embedded">
+<code class="descname">embedded</code><em class="property"> = ['synonym_terms', 'definition_terms']</em><a class="headerlink" href="#encoded.types.ontology.Ontology.embedded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.ontology.Ontology.item_type">
+<code class="descname">item_type</code><em class="property"> = 'ontology'</em><a class="headerlink" href="#encoded.types.ontology.Ontology.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.ontology.Ontology.schema">
+<code class="descname">schema</code><em class="property"> = OrderedDict([('title', 'Ontology'), ('description', 'Schema for submitting information about ontology.'), ('id', '/profiles/ontology.json'), ('$schema', 'http://json-schema.org/draft-04/schema#'), ('type', 'object'), ('required', ['ontology_name']), ('identifyingProperties', ['uuid', 'ontology_name', 'ontology_url', 'ontology_prefix']), ('additionalProperties', False), ('mixinProperties', [OrderedDict([('$ref', 'mixins.json#/schema_version')]), OrderedDict([('$ref', 'mixins.json#/uuid')]), OrderedDict([('$ref', 'mixins.json#/references')]), OrderedDict([('$ref', 'mixins.json#/submitted')]), OrderedDict([('$ref', 'mixins.json#/status')]), OrderedDict([('$ref', 'mixins.json#/notes')])]), ('properties', OrderedDict([('notes', {'title': 'Notes', 'description': 'DCIC internal notes.', 'type': 'string', 'exclude_from': 'submit4dn', 'elasticsearch_mapping_index_type': {'title': 'Field mapping index type', 'description': 'Defines one of three types of indexing available', 'type': 'string', 'default': 'analyzed', 'enum': ['analyzed', 'not_analyzed', 'no']}}), ('status', {'title': 'Status', 'exclude_from': 'submit4dn', 'type': 'string', 'default': 'released', 'permission': 'import_items', 'enum': ['released', 'current', 'revoked', 'deleted', 'replaced', 'in review by lab', 'in review by project', 'released to project']}), ('date_created', {'rdfs:subPropertyOf': 'dc:created', 'title': 'Date created', 'exclude_from': 'submit4dn', 'type': 'string', 'anyOf': [{'format': 'date-time'}, {'format': 'date'}], 'serverDefault': 'now', 'permission': 'import_items'}), ('submitted_by', {'rdfs:subPropertyOf': 'dc:creator', 'title': 'Submitted by', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'User', 'serverDefault': 'userid', 'permission': 'import_items'}), ('references', {'title': 'References', 'description': 'The publications that provide more information about the object.', 'type': 'array', 'default': [], 'uniqueItems': True, 'items': {'title': 'Reference', 'description': 'A publication that provide smore information about the object.', 'type': 'string', 'linkTo': 'Publication'}}), ('uuid', {'title': 'UUID', 'type': 'string', 'format': 'uuid', 'exclude_from': 'submit4dn', 'serverDefault': 'uuid4', 'permission': 'import_items', 'requestMethod': 'POST'}), ('schema_version', {'title': 'Schema Version', 'internal_comment': 'Do not submit, value is assigned by the server. The version of the JSON schema that the server uses to validate the object. Schema version indicates generation of schema used to save version to to enable upgrade steps to work. Individual schemas should set the default.', 'type': 'string', 'exclude_from': 'submit4dn', 'pattern': '^\\d+(\\.\\d+)*$', 'requestMethod': [], 'default': '1'}), ('ontology_name', {'title': 'Name', 'description': 'The name of the ontology.', 'type': 'string'}), ('ontology_url', {'title': 'Ontology URL', 'description': 'An external link to information about the ontology.', 'type': 'string', 'format': 'uri', 'internal_comment': 'may not be the same url used to generate term specific url - see base_url'}), ('download_url', {'title': 'Download URL', 'description': 'URL to download the full ontology.', 'type': 'string', 'format': 'uri'}), ('namespace_url', {'title': 'Namespace URL', 'description': 'The base URL to which a term identifier can be added to construct a url to a term.', 'type': 'string', 'format': 'uri', 'internal_comment': 'may not be the same as home url - this to get specific terms or to use as namespace when parsing rdf'}), ('ontology_prefix', {'title': 'Ontology Prefix', 'descripton': 'Abbreviation for the ontology - should correspond to the valid prefix for the ontology eg. EFO, OBI, UBERON and be unique', 'comment': 'An identifying property that can be used for retrieval', 'type': 'string', 'uniqueKey': True}), ('description', {'title': 'Description', 'description': 'A short description of the ontology.', 'type': 'string'}), ('synonym_terms', {'title': 'Synonym Terms', 'decription': &quot;Terms that are used to denote synonyms - eg. 'exact synonym', 'alternative term' ...&quot;, 'type': 'array', 'items': OrderedDict([('title', 'Synonym'), ('type', 'string'), ('linkTo', 'OntologyTerm')])}), ('definition_terms', {'title': 'Definition Terms', 'decription': &quot;Terms that are used to denote definitions - eg. 'definition', 'IAO:00000115' ...&quot;, 'type': 'array', 'items': OrderedDict([('title', 'Definition'), ('type', 'string'), ('linkTo', 'OntologyTerm')])}), ('relation_terms', {'title': 'Relationship Terms', 'decription': &quot;Terms that are used to denote relationships often found in onProperty triple - eg. 'part of', 'develops from' ...&quot;, 'internal_comment': 'Will only store a subset of relationships - those of interest when parsing ontologies', 'type': 'array', 'items': OrderedDict([('title', 'Relationship'), ('type', 'string'), ('linkTo', 'OntologyTerm')])})]))])</em><a class="headerlink" href="#encoded.types.ontology.Ontology.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="encoded.types.ontology.OntologyTerm">
+<em class="property">class </em><code class="descclassname">encoded.types.ontology.</code><code class="descname">OntologyTerm</code><span class="sig-paren">(</span><em>registry</em>, <em>models</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/ontology.html#OntologyTerm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.ontology.OntologyTerm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="encoded.types.base.html#encoded.types.base.Item" title="encoded.types.base.Item"><code class="xref py py-class docutils literal"><span class="pre">encoded.types.base.Item</span></code></a></p>
+<p>The OntologyTerm class that holds info on a term from an ontology.</p>
+<dl class="attribute">
+<dt id="encoded.types.ontology.OntologyTerm.embedded">
+<code class="descname">embedded</code><em class="property"> = []</em><a class="headerlink" href="#encoded.types.ontology.OntologyTerm.embedded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.ontology.OntologyTerm.item_type">
+<code class="descname">item_type</code><em class="property"> = 'ontology_term'</em><a class="headerlink" href="#encoded.types.ontology.OntologyTerm.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.ontology.OntologyTerm.schema">
+<code class="descname">schema</code><em class="property"> = OrderedDict([('title', 'Ontology Term'), ('description', 'Schema for submitting an ontology term.'), ('id', '/profiles/ontology_term.json'), ('$schema', 'http://json-schema.org/draft-04/schema#'), ('type', 'object'), ('required', ['term_id']), ('identifyingProperties', ['uuid', 'term_id', 'preferred_name']), ('additionalProperties', False), ('mixinProperties', [OrderedDict([('$ref', 'mixins.json#/schema_version')]), OrderedDict([('$ref', 'mixins.json#/uuid')]), OrderedDict([('$ref', 'mixins.json#/references')]), OrderedDict([('$ref', 'mixins.json#/submitted')]), OrderedDict([('$ref', 'mixins.json#/status')]), OrderedDict([('$ref', 'mixins.json#/notes')])]), ('properties', OrderedDict([('notes', {'title': 'Notes', 'description': 'DCIC internal notes.', 'type': 'string', 'exclude_from': 'submit4dn', 'elasticsearch_mapping_index_type': {'title': 'Field mapping index type', 'description': 'Defines one of three types of indexing available', 'type': 'string', 'default': 'analyzed', 'enum': ['analyzed', 'not_analyzed', 'no']}}), ('status', {'title': 'Status', 'exclude_from': 'submit4dn', 'type': 'string', 'default': 'released', 'permission': 'import_items', 'enum': ['released', 'current', 'revoked', 'deleted', 'replaced', 'in review by lab', 'in review by project', 'released to project']}), ('date_created', {'rdfs:subPropertyOf': 'dc:created', 'title': 'Date created', 'exclude_from': 'submit4dn', 'type': 'string', 'anyOf': [{'format': 'date-time'}, {'format': 'date'}], 'serverDefault': 'now', 'permission': 'import_items'}), ('submitted_by', {'rdfs:subPropertyOf': 'dc:creator', 'title': 'Submitted by', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'User', 'serverDefault': 'userid', 'permission': 'import_items'}), ('references', {'title': 'References', 'description': 'The publications that provide more information about the object.', 'type': 'array', 'default': [], 'uniqueItems': True, 'items': {'title': 'Reference', 'description': 'A publication that provide smore information about the object.', 'type': 'string', 'linkTo': 'Publication'}}), ('uuid', {'title': 'UUID', 'type': 'string', 'format': 'uuid', 'exclude_from': 'submit4dn', 'serverDefault': 'uuid4', 'permission': 'import_items', 'requestMethod': 'POST'}), ('schema_version', {'title': 'Schema Version', 'internal_comment': 'Do not submit, value is assigned by the server. The version of the JSON schema that the server uses to validate the object. Schema version indicates generation of schema used to save version to to enable upgrade steps to work. Individual schemas should set the default.', 'type': 'string', 'exclude_from': 'submit4dn', 'pattern': '^\\d+(\\.\\d+)*$', 'requestMethod': [], 'default': '1'}), ('term_url', {'title': 'URL', 'description': 'The url that uniquely identifies term - often purl.', 'type': 'string', 'format': 'uri', 'permission': 'import-items', 'exclude_from': 'submit4dn'}), ('term_id', {'title': 'Term ID', 'description': 'The ID for the ontology term including the prefix.', 'type': 'string', 'comment': 'Must be unique in our system', 'uniqueKey': True, 'permission': 'import-items'}), ('term_name', {'title': 'Term name', 'description': 'The current valid name for the ontology term.', 'type': 'string', 'permission': 'import-items'}), ('definition', {'title': 'Definition', 'description': 'The definition for the ontology term.', 'type': 'string', 'permission': 'import-items', 'exclude_from': 'submit4dn'}), ('preferred_name', {'title': 'Display name', 'description': 'A preferred name (possibly shortened or simpler version) for the ontology term - can be used for submission or retrieval.', 'type': 'string', 'comment': 'Must be unique in our system', 'uniqueKey': True, 'permission': 'import-items'}), ('synonyms', {'title': 'Synonyms', 'description': 'Synonyms for the ontology term.', 'permission': 'import-items', 'exclude_from': 'submit4dn', 'internal_comment': 'Calculated from term info - cannot be used as ID', 'type': 'array', 'items': OrderedDict([('title', 'Synonym'), ('description', 'An ontology term synonym.'), ('type', 'string'), ('permission', 'import-items')])}), ('source_ontology', {'title': 'Ontology that this term is part of', 'descripton': 'The ontology from whence this term EFO, OBI, UBERON', 'permission': 'import-items', 'type': 'string', 'linkTo': 'Ontology'}), ('namespace', {'title': 'Term namespace', 'description': 'The namespace to which the term belongs - relevant for imported ontologies', 'type': 'string', 'permission': 'import-items'}), ('parents', {'title': 'Parent terms', 'description': 'Ontology terms that are direct parents of this term via subClassOf', 'permission': 'import-items', 'type': 'array', 'items': OrderedDict([('title', 'Parent'), ('description', 'The parent ontology term'), ('type', 'string'), ('linkTo', 'OntologyTerm')])}), ('slim_terms', {'title': 'Slim terms', 'description': 'Ontology terms that are slimmed - less specific that are used in search', 'permission': 'import-items', 'type': 'array', 'items': OrderedDict([('title', 'Slim Term'), ('type', 'string'), ('linkTo', 'OntologyTerm')])}), ('is_slim_for', {'title': 'Slim Branch', 'description': 'If the term is a slim term the value is the slot that the slim is for', 'type': 'string', 'enum': ['developmental', 'organ', 'system', 'assay']})]))])</em><a class="headerlink" href="#encoded.types.ontology.OntologyTerm.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="encoded.types.modification.html"
+                        title="previous chapter">encoded.types.modification module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="encoded.types.publication.html"
+                        title="next chapter">encoded.types.publication module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pydoc/encoded.types.ontology.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.publication.html" title="encoded.types.publication module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.modification.html" title="encoded.types.modification module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.types.html" >encoded.types package</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

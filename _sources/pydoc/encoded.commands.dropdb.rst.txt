@@ -1,0 +1,7 @@
+encoded.commands.dropdb module
+==============================
+
+.. automodule:: encoded.commands.dropdb
+    :members:
+    :undoc-members:
+    :show-inheritance:

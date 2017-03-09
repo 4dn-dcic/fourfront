@@ -1,0 +1,7 @@
+encoded.types.publication module
+================================
+
+.. automodule:: encoded.types.publication
+    :members:
+    :undoc-members:
+    :show-inheritance:

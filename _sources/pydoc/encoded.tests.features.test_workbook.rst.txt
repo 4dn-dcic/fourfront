@@ -1,0 +1,7 @@
+encoded.tests.features.test_workbook module
+===========================================
+
+.. automodule:: encoded.tests.features.test_workbook
+    :members:
+    :undoc-members:
+    :show-inheritance:

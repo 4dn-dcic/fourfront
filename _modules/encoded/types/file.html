@@ -1,0 +1,563 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.types.file &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../types.html" accesskey="U">encoded.types</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.types.file</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">snovault</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">AfterModified</span><span class="p">,</span>
+    <span class="n">BeforeModified</span><span class="p">,</span>
+    <span class="n">CONNECTION</span><span class="p">,</span>
+    <span class="n">calculated_property</span><span class="p">,</span>
+    <span class="n">collection</span><span class="p">,</span>
+    <span class="n">load_schema</span><span class="p">,</span>
+    <span class="n">abstract_collection</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">snovault.schema_utils</span> <span class="k">import</span> <span class="n">schema_validator</span>
+<span class="kn">from</span> <span class="nn">snovault.attachment</span> <span class="k">import</span> <span class="n">ItemWithAttachment</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">Item</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyramid.httpexceptions</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">HTTPForbidden</span><span class="p">,</span>
+    <span class="n">HTTPTemporaryRedirect</span><span class="p">,</span>
+    <span class="n">HTTPNotFound</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyramid.response</span> <span class="k">import</span> <span class="n">Response</span>
+<span class="kn">from</span> <span class="nn">pyramid.settings</span> <span class="k">import</span> <span class="n">asbool</span>
+<span class="kn">from</span> <span class="nn">pyramid.view</span> <span class="k">import</span> <span class="n">view_config</span>
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">parse_qs</span><span class="p">,</span>
+    <span class="n">urlparse</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">import</span> <span class="nn">boto</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">pytz</span>
+<span class="kn">from</span> <span class="nn">netaddr.core</span> <span class="k">import</span> <span class="n">AddrFormatError</span>
+
+
+<div class="viewcode-block" id="show_upload_credentials"><a class="viewcode-back" href="../../../pydoc/encoded.types.file.html#encoded.types.file.show_upload_credentials">[docs]</a><span class="k">def</span> <span class="nf">show_upload_credentials</span><span class="p">(</span><span class="n">request</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">request</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">status</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;uploading&#39;</span><span class="p">,</span> <span class="s1">&#39;upload failed&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">has_permission</span><span class="p">(</span><span class="s1">&#39;edit&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="external_creds"><a class="viewcode-back" href="../../../pydoc/encoded.types.file.html#encoded.types.file.external_creds">[docs]</a><span class="k">def</span> <span class="nf">external_creds</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">profile_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    if name is None, we want the link to s3 but no need to generate</span>
+<span class="sd">    an access token.  This is useful for linking metadata to files that</span>
+<span class="sd">    already exist on s3.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">credentials</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">policy</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;Version&#39;</span><span class="p">:</span> <span class="s1">&#39;2012-10-17&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;Statement&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s1">&#39;Effect&#39;</span><span class="p">:</span> <span class="s1">&#39;Allow&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Action&#39;</span><span class="p">:</span> <span class="s1">&#39;s3:PutObject&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;Resource&#39;</span><span class="p">:</span> <span class="s1">&#39;arn:aws:s3:::</span><span class="si">{bucket}</span><span class="s1">/</span><span class="si">{key}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">),</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+        <span class="n">boto</span><span class="o">.</span><span class="n">set_stream_logger</span><span class="p">(</span><span class="s1">&#39;boto&#39;</span><span class="p">)</span>
+        <span class="n">conn</span> <span class="o">=</span> <span class="n">boto</span><span class="o">.</span><span class="n">connect_sts</span><span class="p">(</span><span class="n">profile_name</span><span class="o">=</span><span class="n">profile_name</span><span class="p">)</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">get_federation_token</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">policy</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">policy</span><span class="p">))</span>
+        <span class="c1"># &#39;access_key&#39; &#39;secret_key&#39; &#39;expiration&#39; &#39;session_token&#39;</span>
+        <span class="n">credentials</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">credentials</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="n">credentials</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="s1">&#39;upload_url&#39;</span><span class="p">:</span> <span class="s1">&#39;s3://</span><span class="si">{bucket}</span><span class="s1">/</span><span class="si">{key}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bucket</span><span class="o">=</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">),</span>
+            <span class="s1">&#39;federated_user_arn&#39;</span><span class="p">:</span> <span class="n">token</span><span class="o">.</span><span class="n">federated_user_arn</span><span class="p">,</span>
+            <span class="s1">&#39;federated_user_id&#39;</span><span class="p">:</span> <span class="n">token</span><span class="o">.</span><span class="n">federated_user_id</span><span class="p">,</span>
+            <span class="s1">&#39;request_id&#39;</span><span class="p">:</span> <span class="n">token</span><span class="o">.</span><span class="n">request_id</span><span class="p">,</span>
+        <span class="p">})</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;service&#39;</span><span class="p">:</span> <span class="s1">&#39;s3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;bucket&#39;</span><span class="p">:</span> <span class="n">bucket</span><span class="p">,</span>
+        <span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="n">key</span><span class="p">,</span>
+        <span class="s1">&#39;upload_credentials&#39;</span><span class="p">:</span> <span class="n">credentials</span><span class="p">,</span>
+    <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="property_closure"><a class="viewcode-back" href="../../../pydoc/encoded.types.file.html#encoded.types.file.property_closure">[docs]</a><span class="k">def</span> <span class="nf">property_closure</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">propname</span><span class="p">,</span> <span class="n">root_uuid</span><span class="p">):</span>
+    <span class="c1"># Must avoid cycles</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">CONNECTION</span><span class="p">]</span>
+    <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">remaining</span> <span class="o">=</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">root_uuid</span><span class="p">)}</span>
+    <span class="k">while</span> <span class="n">remaining</span><span class="p">:</span>
+        <span class="n">seen</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">remaining</span><span class="p">)</span>
+        <span class="n">next_remaining</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">uuid</span> <span class="ow">in</span> <span class="n">remaining</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">get_by_uuid</span><span class="p">(</span><span class="n">uuid</span><span class="p">)</span>
+            <span class="n">next_remaining</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">__json__</span><span class="p">(</span><span class="n">request</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">propname</span><span class="p">,</span> <span class="p">()))</span>
+        <span class="n">remaining</span> <span class="o">=</span> <span class="n">next_remaining</span> <span class="o">-</span> <span class="n">seen</span>
+    <span class="k">return</span> <span class="n">seen</span></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;file-sets&#39;</span><span class="p">,</span>
+    <span class="n">unique_key</span><span class="o">=</span><span class="s1">&#39;accession&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;File Sets&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing of File Sets&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="FileSet"><a class="viewcode-back" href="../../../pydoc/encoded.types.file.html#encoded.types.file.FileSet">[docs]</a><span class="k">class</span> <span class="nc">FileSet</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Collection of files stored under fileset.&quot;&quot;&quot;</span>
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;file_set&#39;</span>
+    <span class="n">base_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;FileSet&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Item</span><span class="o">.</span><span class="n">base_types</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/file_set.json&#39;</span><span class="p">)</span>
+    <span class="n">name_key</span> <span class="o">=</span> <span class="s1">&#39;accession&#39;</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;file-set-calibrations&#39;</span><span class="p">,</span>
+    <span class="n">unique_key</span><span class="o">=</span><span class="s1">&#39;accession&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Calibration File Sets&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing of File Sets&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="FileSetCalibration"><a class="viewcode-back" href="../../../pydoc/encoded.types.file.html#encoded.types.file.FileSetCalibration">[docs]</a><span class="k">class</span> <span class="nc">FileSetCalibration</span><span class="p">(</span><span class="n">FileSet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Collection of files stored under fileset.&quot;&quot;&quot;</span>
+
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;file_set_calibration&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/file_set_calibration.json&#39;</span><span class="p">)</span>
+    <span class="n">name_key</span> <span class="o">=</span> <span class="s1">&#39;accession&#39;</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;files_in_set.submitted_by&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;files_in_set.accession&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;files_in_set.description&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;files_in_set.attachment&#39;</span>
+                <span class="p">]</span></div>
+
+
+<span class="nd">@abstract_collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;files&#39;</span><span class="p">,</span>
+    <span class="n">unique_key</span><span class="o">=</span><span class="s1">&#39;accession&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Files&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing of Files&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="File"><a class="viewcode-back" href="../../../pydoc/encoded.types.file.html#encoded.types.file.File">[docs]</a><span class="k">class</span> <span class="nc">File</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Collection for individual files.&quot;&quot;&quot;</span>
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;file&#39;</span>
+    <span class="n">base_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;File&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Item</span><span class="o">.</span><span class="n">base_types</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/file.json&#39;</span><span class="p">)</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;lab&#39;</span><span class="p">,</span> <span class="s1">&#39;file_format&#39;</span><span class="p">,</span> <span class="s1">&#39;related_files.file&#39;</span><span class="p">]</span>
+    <span class="n">name_key</span> <span class="o">=</span> <span class="s1">&#39;accession&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">sheets</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">properties</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># ensure we always have s3 links setup</span>
+        <span class="n">sheets</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">sheets</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">sheets</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">uuid</span> <span class="o">=</span> <span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;uuid&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sheets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;external&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="n">uuid</span><span class="p">:</span>
+            <span class="n">sheets</span><span class="p">[</span><span class="s1">&#39;external&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_external_creds</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">registry</span><span class="p">,</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">properties</span><span class="p">)</span>
+
+        <span class="c1"># update self first to ensure &#39;related_files&#39; are stored in self.properties</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">File</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_update</span><span class="p">(</span><span class="n">properties</span><span class="p">,</span> <span class="n">sheets</span><span class="p">)</span>
+        <span class="n">DicRefRelation</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;derived from&quot;</span><span class="p">:</span> <span class="s2">&quot;parent of&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;parent of&quot;</span><span class="p">:</span> <span class="s2">&quot;derived from&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;supercedes&quot;</span><span class="p">:</span> <span class="s2">&quot;is superceded by&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;is superceded by&quot;</span><span class="p">:</span> <span class="s2">&quot;supercedes&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;paired with&quot;</span><span class="p">:</span> <span class="s2">&quot;paired with&quot;</span>
+        <span class="p">}</span>
+        <span class="n">acc</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uuid</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;related_files&#39;</span> <span class="ow">in</span> <span class="n">properties</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">relation</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;related_files&quot;</span><span class="p">]:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">switch</span> <span class="o">=</span> <span class="n">relation</span><span class="p">[</span><span class="s2">&quot;relationship_type&quot;</span><span class="p">]</span>
+                    <span class="n">rev_switch</span> <span class="o">=</span> <span class="n">DicRefRelation</span><span class="p">[</span><span class="n">switch</span><span class="p">]</span>
+                    <span class="n">related_fl</span> <span class="o">=</span> <span class="n">relation</span><span class="p">[</span><span class="s2">&quot;file&quot;</span><span class="p">]</span>
+                    <span class="n">relationship_entry</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;relationship_type&quot;</span><span class="p">:</span> <span class="n">rev_switch</span><span class="p">,</span> <span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">acc</span><span class="p">}</span>
+                    <span class="n">rel_dic</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;related_files&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">relationship_entry</span><span class="p">,</span> <span class="p">]}</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;invalid data, can&#39;t update correctly&quot;</span><span class="p">)</span>
+                    <span class="k">return</span>
+
+                <span class="n">target_fl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">collection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">related_fl</span><span class="p">)</span>
+                <span class="c1"># case one we don&#39;t have relations</span>
+                <span class="k">if</span> <span class="s1">&#39;related_files&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">target_fl</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">target_fl</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">rel_dic</span><span class="p">)</span>
+                    <span class="n">target_fl</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">target_fl</span><span class="o">.</span><span class="n">properties</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># case two we have relations but not the one we need</span>
+                    <span class="k">for</span> <span class="n">target_relation</span> <span class="ow">in</span> <span class="n">target_fl</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;related_files&#39;</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">target_relation</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;file&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="n">acc</span><span class="p">:</span>
+                            <span class="k">break</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># make data for new related_files</span>
+                        <span class="n">target_fl</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;related_files&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">relationship_entry</span><span class="p">)</span>
+                        <span class="n">target_fl</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">target_fl</span><span class="o">.</span><span class="n">properties</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">__name__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upgrade_properties</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;replaced&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">uuid</span>
+        <span class="k">return</span> <span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">uuid</span>
+
+<div class="viewcode-block" id="File.unique_keys"><a class="viewcode-back" href="../../../pydoc/encoded.types.file.html#encoded.types.file.File.unique_keys">[docs]</a>    <span class="k">def</span> <span class="nf">unique_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">File</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">unique_keys</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="s1">&#39;replaced&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;md5sum&#39;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;md5:</span><span class="si">{md5sum}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">properties</span><span class="p">)</span>
+                <span class="n">keys</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;alias&#39;</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">keys</span></div>
+
+    <span class="nd">@calculated_property</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Title&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="File.title"><a class="viewcode-back" href="../../../pydoc/encoded.types.file.html#encoded.types.file.File.title">[docs]</a>    <span class="k">def</span> <span class="nf">title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">accession</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">external_accession</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">accession</span> <span class="ow">or</span> <span class="n">external_accession</span></div>
+
+    <span class="nd">@calculated_property</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Download URL&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="File.href"><a class="viewcode-back" href="../../../pydoc/encoded.types.file.html#encoded.types.file.File.href">[docs]</a>    <span class="k">def</span> <span class="nf">href</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">file_format</span><span class="p">,</span> <span class="n">accession</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">external_accession</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">accession</span> <span class="o">=</span> <span class="n">accession</span> <span class="ow">or</span> <span class="n">external_accession</span>
+        <span class="n">file_extension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;file_format_file_extension&#39;</span><span class="p">][</span><span class="n">file_format</span><span class="p">]</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">accession</span><span class="p">,</span> <span class="n">file_extension</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">resource_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;@@download&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></div>
+
+    <span class="nd">@calculated_property</span><span class="p">(</span><span class="n">condition</span><span class="o">=</span><span class="n">show_upload_credentials</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="File.upload_credentials"><a class="viewcode-back" href="../../../pydoc/encoded.types.file.html#encoded.types.file.File.upload_credentials">[docs]</a>    <span class="k">def</span> <span class="nf">upload_credentials</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">external</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">propsheets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;external&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">external</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">external</span><span class="p">[</span><span class="s1">&#39;upload_credentials&#39;</span><span class="p">]</span></div>
+
+    <span class="nd">@calculated_property</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;File type&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="File.file_type"><a class="viewcode-back" href="../../../pydoc/encoded.types.file.html#encoded.types.file.File.file_type">[docs]</a>    <span class="k">def</span> <span class="nf">file_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_format</span><span class="p">,</span> <span class="n">file_format_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">file_format_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">file_format</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">file_format</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">file_format_type</span></div>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="File.build_external_creds"><a class="viewcode-back" href="../../../pydoc/encoded.types.file.html#encoded.types.file.File.build_external_creds">[docs]</a>    <span class="k">def</span> <span class="nf">build_external_creds</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">registry</span><span class="p">,</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">properties</span><span class="p">):</span>
+        <span class="n">bucket</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;file_upload_bucket&#39;</span><span class="p">]</span>
+        <span class="n">mapping</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;file_format_file_extension&#39;</span><span class="p">]</span>
+        <span class="n">file_extension</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">[</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]]</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{uuid}</span><span class="s1">/</span><span class="si">{accession}{file_extension}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">file_extension</span><span class="o">=</span><span class="n">file_extension</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span>
+            <span class="n">accession</span><span class="o">=</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;accession&#39;</span><span class="p">))</span>
+
+        <span class="c1"># remove the path from the file name and only take first 32 chars</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">fname</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">fname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="mi">32</span><span class="p">]</span>
+
+        <span class="n">profile_name</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;file_upload_profile_name&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">external_creds</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">profile_name</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="File.create"><a class="viewcode-back" href="../../../pydoc/encoded.types.file.html#encoded.types.file.File.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">registry</span><span class="p">,</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">sheets</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;uploading&#39;</span><span class="p">:</span>
+            <span class="n">sheets</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">sheets</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">sheets</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">sheets</span><span class="p">[</span><span class="s1">&#39;external&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">build_external_creds</span><span class="p">(</span><span class="n">registry</span><span class="p">,</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">properties</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">File</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">registry</span><span class="p">,</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">sheets</span><span class="p">)</span></div></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;files-fastq&#39;</span><span class="p">,</span>
+    <span class="n">unique_key</span><span class="o">=</span><span class="s1">&#39;accession&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;FASTQ Files&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing of FASTQ Files&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="FileFastq"><a class="viewcode-back" href="../../../pydoc/encoded.types.file.html#encoded.types.file.FileFastq">[docs]</a><span class="k">class</span> <span class="nc">FileFastq</span><span class="p">(</span><span class="n">File</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Collection for individual fastq files.&quot;&quot;&quot;</span>
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;file_fastq&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/file_fastq.json&#39;</span><span class="p">)</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="n">File</span><span class="o">.</span><span class="n">embedded</span>
+    <span class="n">name_key</span> <span class="o">=</span> <span class="s1">&#39;accession&#39;</span></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;files-fasta&#39;</span><span class="p">,</span>
+    <span class="n">unique_key</span><span class="o">=</span><span class="s1">&#39;accession&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;FASTA Files&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing of FASTA Files&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="FileFasta"><a class="viewcode-back" href="../../../pydoc/encoded.types.file.html#encoded.types.file.FileFasta">[docs]</a><span class="k">class</span> <span class="nc">FileFasta</span><span class="p">(</span><span class="n">File</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Collection for individual fasta files.&quot;&quot;&quot;</span>
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;file_fasta&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/file_fasta.json&#39;</span><span class="p">)</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="n">File</span><span class="o">.</span><span class="n">embedded</span>
+    <span class="n">name_key</span> <span class="o">=</span> <span class="s1">&#39;accession&#39;</span></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;files-processed&#39;</span><span class="p">,</span>
+    <span class="n">unique_key</span><span class="o">=</span><span class="s1">&#39;accession&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Processed Files&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing of Processed Files&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="FileProcessed"><a class="viewcode-back" href="../../../pydoc/encoded.types.file.html#encoded.types.file.FileProcessed">[docs]</a><span class="k">class</span> <span class="nc">FileProcessed</span><span class="p">(</span><span class="n">File</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Collection for individual processed files.&quot;&quot;&quot;</span>
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;file_processed&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/file_processed.json&#39;</span><span class="p">)</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="n">File</span><span class="o">.</span><span class="n">embedded</span>
+    <span class="n">name_key</span> <span class="o">=</span> <span class="s1">&#39;accession&#39;</span></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;files-reference&#39;</span><span class="p">,</span>
+    <span class="n">unique_key</span><span class="o">=</span><span class="s1">&#39;accession&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Refenrence Files&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing of Reference Files&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="FileReference"><a class="viewcode-back" href="../../../pydoc/encoded.types.file.html#encoded.types.file.FileReference">[docs]</a><span class="k">class</span> <span class="nc">FileReference</span><span class="p">(</span><span class="n">File</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Collection for individual reference files.&quot;&quot;&quot;</span>
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;file_reference&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/file_reference.json&#39;</span><span class="p">)</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="n">File</span><span class="o">.</span><span class="n">embedded</span>
+    <span class="n">name_key</span> <span class="o">=</span> <span class="s1">&#39;accession&#39;</span></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;files-calibration&#39;</span><span class="p">,</span>
+    <span class="n">unique_key</span><span class="o">=</span><span class="s1">&#39;accession&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Calibration Files&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing of Calibration Files&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="FileCalibration"><a class="viewcode-back" href="../../../pydoc/encoded.types.file.html#encoded.types.file.FileCalibration">[docs]</a><span class="k">class</span> <span class="nc">FileCalibration</span><span class="p">(</span><span class="n">ItemWithAttachment</span><span class="p">,</span> <span class="n">File</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Collection for individual calibration files.&quot;&quot;&quot;</span>
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;file_calibration&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/file_calibration.json&#39;</span><span class="p">)</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="n">File</span><span class="o">.</span><span class="n">embedded</span>
+    <span class="n">name_key</span> <span class="o">=</span> <span class="s1">&#39;accession&#39;</span></div>
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;upload&#39;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">File</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span>
+             <span class="n">permission</span><span class="o">=</span><span class="s1">&#39;edit&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="get_upload"><a class="viewcode-back" href="../../../pydoc/encoded.types.file.html#encoded.types.file.get_upload">[docs]</a><span class="k">def</span> <span class="nf">get_upload</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="n">external</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">propsheets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;external&#39;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="n">upload_credentials</span> <span class="o">=</span> <span class="n">external</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;upload_credentials&#39;</span><span class="p">)</span>
+    <span class="c1"># Show s3 location info for files originally submitted to EDW.</span>
+    <span class="k">if</span> <span class="n">upload_credentials</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">external</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;service&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;s3&#39;</span><span class="p">:</span>
+        <span class="n">upload_credentials</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;upload_url&#39;</span><span class="p">:</span> <span class="s1">&#39;s3://</span><span class="si">{bucket}</span><span class="s1">/</span><span class="si">{key}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">external</span><span class="p">),</span>
+        <span class="p">}</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;@graph&#39;</span><span class="p">:</span> <span class="p">[{</span>
+            <span class="s1">&#39;@id&#39;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">resource_path</span><span class="p">(</span><span class="n">context</span><span class="p">),</span>
+            <span class="s1">&#39;upload_credentials&#39;</span><span class="p">:</span> <span class="n">upload_credentials</span><span class="p">,</span>
+        <span class="p">}],</span>
+    <span class="p">}</span></div>
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;upload&#39;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">File</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span>
+             <span class="n">permission</span><span class="o">=</span><span class="s1">&#39;edit&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">schema_validator</span><span class="p">({</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">})])</span>
+<div class="viewcode-block" id="post_upload"><a class="viewcode-back" href="../../../pydoc/encoded.types.file.html#encoded.types.file.post_upload">[docs]</a><span class="k">def</span> <span class="nf">post_upload</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+
+    <span class="n">properties</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">upgrade_properties</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;uploading&#39;</span><span class="p">,</span> <span class="s1">&#39;upload failed&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">HTTPForbidden</span><span class="p">(</span><span class="s1">&#39;status must be &quot;uploading&quot; to issue new credentials&#39;</span><span class="p">)</span>
+
+    <span class="n">accession_or_external</span> <span class="o">=</span> <span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;accession&#39;</span><span class="p">)</span>
+    <span class="n">external</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">propsheets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;external&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">external</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Handle objects initially posted as another state.</span>
+        <span class="n">bucket</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;file_upload_bucket&#39;</span><span class="p">]</span>
+        <span class="c1"># maybe this should be properties.uuid</span>
+        <span class="n">uuid</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">uuid</span>
+        <span class="n">mapping</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;file_format_file_extension&#39;</span><span class="p">]</span>
+        <span class="n">file_extension</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">[</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]]</span>
+
+        <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{uuid}</span><span class="s1">/</span><span class="si">{accession}{file_extension}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">file_extension</span><span class="o">=</span><span class="n">file_extension</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="o">**</span><span class="n">properties</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">external</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;service&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;s3&#39;</span><span class="p">:</span>
+        <span class="n">bucket</span> <span class="o">=</span> <span class="n">external</span><span class="p">[</span><span class="s1">&#39;bucket&#39;</span><span class="p">]</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">external</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">external</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;service&#39;</span><span class="p">))</span>
+
+    <span class="c1"># remove the path from the file name and only take first 32 chars</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="mi">32</span><span class="p">]</span>
+    <span class="n">profile_name</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;file_upload_profile_name&#39;</span><span class="p">)</span>
+    <span class="n">creds</span> <span class="o">=</span> <span class="n">external_creds</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">profile_name</span><span class="p">)</span>
+    <span class="c1"># in case we haven&#39;t uploaded a file before</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">propsheets</span><span class="p">[</span><span class="s1">&#39;external&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">creds</span>
+
+    <span class="n">new_properties</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;upload failed&#39;</span><span class="p">:</span>
+        <span class="n">new_properties</span> <span class="o">=</span> <span class="n">properties</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">new_properties</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;uploading&#39;</span>
+
+    <span class="n">registry</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span>
+    <span class="n">registry</span><span class="o">.</span><span class="n">notify</span><span class="p">(</span><span class="n">BeforeModified</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">))</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">new_properties</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;external&#39;</span><span class="p">:</span> <span class="n">creds</span><span class="p">})</span>
+    <span class="n">registry</span><span class="o">.</span><span class="n">notify</span><span class="p">(</span><span class="n">AfterModified</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">))</span>
+
+    <span class="n">rendered</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="s1">&#39;/</span><span class="si">%s</span><span class="s1">/@@object&#39;</span> <span class="o">%</span> <span class="n">context</span><span class="o">.</span><span class="n">uuid</span><span class="p">,</span> <span class="n">as_user</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;status&#39;</span><span class="p">:</span> <span class="s1">&#39;success&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;@type&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;@graph&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">rendered</span><span class="p">],</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;download&#39;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">File</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span>
+             <span class="n">permission</span><span class="o">=</span><span class="s1">&#39;view&#39;</span><span class="p">,</span> <span class="n">subpath_segments</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<div class="viewcode-block" id="download"><a class="viewcode-back" href="../../../pydoc/encoded.types.file.html#encoded.types.file.download">[docs]</a><span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="n">properties</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">upgrade_properties</span><span class="p">()</span>
+    <span class="n">mapping</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;file_format_file_extension&#39;</span><span class="p">]</span>
+    <span class="n">file_extension</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">[</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]]</span>
+    <span class="n">accession_or_external</span> <span class="o">=</span> <span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;accession&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;external_accession&#39;</span><span class="p">]</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">accession_or_external</span> <span class="o">+</span> <span class="n">file_extension</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">subpath</span><span class="p">:</span>
+        <span class="n">_filename</span><span class="p">,</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">subpath</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="o">!=</span> <span class="n">_filename</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HTTPNotFound</span><span class="p">(</span><span class="n">_filename</span><span class="p">)</span>
+
+    <span class="n">proxy</span> <span class="o">=</span> <span class="n">asbool</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;proxy&#39;</span><span class="p">))</span> <span class="ow">or</span> <span class="s1">&#39;Origin&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">use_download_proxy</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">client_addr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">&#39;aws_ipset&#39;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="c1"># this fails in testing due to testapp not having ip</span>
+        <span class="n">use_download_proxy</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">external</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">propsheets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;external&#39;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">external</span><span class="p">:</span>
+        <span class="n">profile_name</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;file_upload_profile_name&#39;</span><span class="p">)</span>
+        <span class="n">sheets</span><span class="p">[</span><span class="s1">&#39;external&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">external_creds</span><span class="p">(</span><span class="n">bucket</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">profile_name</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">external</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;service&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;s3&#39;</span><span class="p">:</span>
+        <span class="n">conn</span> <span class="o">=</span> <span class="n">boto</span><span class="o">.</span><span class="n">connect_s3</span><span class="p">()</span>
+        <span class="n">location</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">generate_url</span><span class="p">(</span>
+            <span class="mi">36</span><span class="o">*</span><span class="mi">60</span><span class="o">*</span><span class="mi">60</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span><span class="p">,</span> <span class="n">external</span><span class="p">[</span><span class="s1">&#39;bucket&#39;</span><span class="p">],</span> <span class="n">external</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">],</span>
+            <span class="n">force_http</span><span class="o">=</span><span class="n">proxy</span> <span class="ow">or</span> <span class="n">use_download_proxy</span><span class="p">,</span> <span class="n">response_headers</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">&#39;response-content-disposition&#39;</span><span class="p">:</span> <span class="s2">&quot;attachment; filename=&quot;</span> <span class="o">+</span> <span class="n">filename</span><span class="p">,</span>
+            <span class="p">})</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">external</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;service&#39;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">asbool</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;soft&#39;</span><span class="p">)):</span>
+        <span class="n">expires</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">parse_qs</span><span class="p">(</span><span class="n">urlparse</span><span class="p">(</span><span class="n">location</span><span class="p">)</span><span class="o">.</span><span class="n">query</span><span class="p">)[</span><span class="s1">&#39;Expires&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;@type&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;SoftRedirect&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;location&#39;</span><span class="p">:</span> <span class="n">location</span><span class="p">,</span>
+            <span class="s1">&#39;expires&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">expires</span><span class="p">,</span> <span class="n">pytz</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+        <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">proxy</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;X-Accel-Redirect&#39;</span><span class="p">:</span> <span class="s1">&#39;/_proxy/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">location</span><span class="p">)})</span>
+
+    <span class="c1"># We don&#39;t use X-Accel-Redirect here so that client behaviour is similar for</span>
+    <span class="c1"># both aws and non-aws users.</span>
+    <span class="k">if</span> <span class="n">use_download_proxy</span><span class="p">:</span>
+        <span class="n">location</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;download_proxy&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">location</span><span class="p">)</span>
+
+    <span class="c1"># 307 redirect specifies to keep original method</span>
+    <span class="k">raise</span> <span class="n">HTTPTemporaryRedirect</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="n">location</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../types.html" >encoded.types</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

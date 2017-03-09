@@ -1,0 +1,7 @@
+encoded.tests.test_types_init_collections module
+================================================
+
+.. automodule:: encoded.tests.test_types_init_collections
+    :members:
+    :undoc-members:
+    :show-inheritance:

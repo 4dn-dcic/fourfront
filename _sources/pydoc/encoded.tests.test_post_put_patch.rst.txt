@@ -1,0 +1,7 @@
+encoded.tests.test_post_put_patch module
+========================================
+
+.. automodule:: encoded.tests.test_post_put_patch
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,7 @@
+encoded.tests.test_indexing module
+==================================
+
+.. automodule:: encoded.tests.test_indexing
+    :members:
+    :undoc-members:
+    :show-inheritance:

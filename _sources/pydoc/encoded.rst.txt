@@ -1,0 +1,43 @@
+encoded package
+===============
+
+Subpackages
+-----------
+
+.. toctree::
+
+    encoded.audit
+    encoded.commands
+    encoded.tests
+    encoded.types
+    encoded.upgrade
+
+Submodules
+----------
+
+.. toctree::
+
+   encoded.authentication
+   encoded.authorization
+   encoded.batch_download
+   encoded.edw_hash
+   encoded.loadxl
+   encoded.memlimit
+   encoded.peak_indexer
+   encoded.region_search
+   encoded.renderers
+   encoded.root
+   encoded.schema_formats
+   encoded.search
+   encoded.server_defaults
+   encoded.typedsheets
+   encoded.visualization
+   encoded.xlreader
+
+Module contents
+---------------
+
+.. automodule:: encoded
+    :members:
+    :undoc-members:
+    :show-inheritance:

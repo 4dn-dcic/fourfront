@@ -1,0 +1,7 @@
+encoded.types.workflow module
+=============================
+
+.. automodule:: encoded.types.workflow
+    :members:
+    :undoc-members:
+    :show-inheritance:

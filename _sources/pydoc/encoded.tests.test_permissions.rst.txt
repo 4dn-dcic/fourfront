@@ -1,0 +1,7 @@
+encoded.tests.test_permissions module
+=====================================
+
+.. automodule:: encoded.tests.test_permissions
+    :members:
+    :undoc-members:
+    :show-inheritance:

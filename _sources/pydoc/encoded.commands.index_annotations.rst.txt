@@ -1,0 +1,7 @@
+encoded.commands.index_annotations module
+=========================================
+
+.. automodule:: encoded.commands.index_annotations
+    :members:
+    :undoc-members:
+    :show-inheritance:

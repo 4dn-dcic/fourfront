@@ -1,0 +1,7 @@
+encoded.commands.import_data module
+===================================
+
+.. automodule:: encoded.commands.import_data
+    :members:
+    :undoc-members:
+    :show-inheritance:

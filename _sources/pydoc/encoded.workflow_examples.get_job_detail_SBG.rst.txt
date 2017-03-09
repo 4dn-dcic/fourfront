@@ -1,0 +1,7 @@
+encoded.workflow_examples.get_job_detail_SBG module
+===================================================
+
+.. automodule:: encoded.workflow_examples.get_job_detail_SBG
+    :members:
+    :undoc-members:
+    :show-inheritance:

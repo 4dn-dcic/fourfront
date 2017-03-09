@@ -1,0 +1,7 @@
+encoded.tests.test_schemas module
+=================================
+
+.. automodule:: encoded.tests.test_schemas
+    :members:
+    :undoc-members:
+    :show-inheritance:

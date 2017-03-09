@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.types.software module &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="encoded.types.sop_map module" href="encoded.types.sop_map.html" />
+    <link rel="prev" title="encoded.types.quality_metric module" href="encoded.types.quality_metric.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.sop_map.html" title="encoded.types.sop_map module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.quality_metric.html" title="encoded.types.quality_metric module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.types.html" accesskey="U">encoded.types package</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-encoded.types.software">
+<span id="encoded-types-software-module"></span><h1>encoded.types.software module<a class="headerlink" href="#module-encoded.types.software" title="Permalink to this headline">¶</a></h1>
+<p>The type file for the collection Software.</p>
+<p>moving this out of __init.py__ and into it&#8217;s own file as
+add logic for autopopulating &#8216;name&#8217; upon update or create</p>
+<dl class="class">
+<dt id="encoded.types.software.Software">
+<em class="property">class </em><code class="descclassname">encoded.types.software.</code><code class="descname">Software</code><span class="sig-paren">(</span><em>registry</em>, <em>models</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/software.html#Software"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.software.Software" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="encoded.types.base.html#encoded.types.base.Item" title="encoded.types.base.Item"><code class="xref py py-class docutils literal"><span class="pre">encoded.types.base.Item</span></code></a></p>
+<p>The Software class that contains the software... used.</p>
+<dl class="attribute">
+<dt id="encoded.types.software.Software.embedded">
+<code class="descname">embedded</code><em class="property"> = []</em><a class="headerlink" href="#encoded.types.software.Software.embedded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.software.Software.item_type">
+<code class="descname">item_type</code><em class="property"> = 'software'</em><a class="headerlink" href="#encoded.types.software.Software.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.software.Software.schema">
+<code class="descname">schema</code><em class="property"> = OrderedDict([('title', 'Software'), ('description', 'Schema for submitting analysis software.'), ('id', '/profiles/software.json'), ('$schema', 'http://json-schema.org/draft-04/schema#'), ('type', 'object'), ('required', ['name', 'version', 'software_type', 'award', 'lab']), ('additionalProperties', False), ('identifyingProperties', ['uuid', 'alias', 'title']), ('mixinProperties', [OrderedDict([('$ref', 'mixins.json#/schema_version')]), OrderedDict([('$ref', 'mixins.json#/uuid')]), OrderedDict([('$ref', 'mixins.json#/aliases')]), OrderedDict([('$ref', 'mixins.json#/notes')]), OrderedDict([('$ref', 'mixins.json#/references')]), OrderedDict([('$ref', 'mixins.json#/status')]), OrderedDict([('$ref', 'mixins.json#/submitted')]), OrderedDict([('$ref', 'mixins.json#/attribution')])]), ('properties', OrderedDict([('lab', {'title': 'Lab', 'description': 'Lab associated with the submission.', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'Lab', 'linkSubmitsFor': True, 'default': ''}), ('award', {'title': 'Grant', 'description': 'Grant associated with the submission.', 'exclude_from': 'submit4dn', 'default': '', 'type': 'string', 'linkTo': 'Award'}), ('date_created', {'rdfs:subPropertyOf': 'dc:created', 'title': 'Date created', 'exclude_from': 'submit4dn', 'type': 'string', 'anyOf': [{'format': 'date-time'}, {'format': 'date'}], 'serverDefault': 'now', 'permission': 'import_items'}), ('submitted_by', {'rdfs:subPropertyOf': 'dc:creator', 'title': 'Submitted by', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'User', 'serverDefault': 'userid', 'permission': 'import_items'}), ('status', {'title': 'Status', 'exclude_from': 'submit4dn', 'type': 'string', 'default': 'in review by lab', 'permission': 'import_items', 'enum': ['released', 'current', 'revoked', 'deleted', 'replaced', 'in review by lab', 'in review by project', 'released to project']}), ('references', {'title': 'References', 'description': 'The publications that provide more information about the object.', 'type': 'array', 'default': [], 'uniqueItems': True, 'items': {'title': 'Reference', 'description': 'A publication that provide smore information about the object.', 'type': 'string', 'linkTo': 'Publication'}}), ('notes', {'title': 'Notes', 'description': 'DCIC internal notes.', 'type': 'string', 'exclude_from': 'submit4dn', 'elasticsearch_mapping_index_type': {'title': 'Field mapping index type', 'description': 'Defines one of three types of indexing available', 'type': 'string', 'default': 'analyzed', 'enum': ['analyzed', 'not_analyzed', 'no']}}), ('aliases', {'title': 'Lab aliases', 'description': 'Lab specific identifiers to reference an object.', 'type': 'array', 'comment': 'Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).', 'default': [], 'uniqueItems': True, 'items': {'uniqueKey': 'alias', 'title': 'Lab alias', 'description': 'A lab specific identifier to reference an object.', 'type': 'string', 'pattern': '^\\S+:\\S+'}}), ('uuid', {'title': 'UUID', 'type': 'string', 'format': 'uuid', 'exclude_from': 'submit4dn', 'serverDefault': 'uuid4', 'permission': 'import_items', 'requestMethod': 'POST'}), ('schema_version', {'title': 'Schema Version', 'internal_comment': 'Do not submit, value is assigned by the server. The version of the JSON schema that the server uses to validate the object. Schema version indicates generation of schema used to save version to to enable upgrade steps to work. Individual schemas should set the default.', 'type': 'string', 'exclude_from': 'submit4dn', 'pattern': '^\\d+(\\.\\d+)*$', 'requestMethod': [], 'default': '1'}), ('name', {'title': 'Name', 'description': 'The name of the software.', 'type': 'string'}), ('version', {'title': 'Version', 'description': 'The software version number.', 'type': 'string'}), ('title', {'title': 'Name_Version', 'description': 'Do Not Submit - unique name version combination that is automatically generated', 'type': 'string'}), ('software_type', {'title': 'Types', 'description': 'The classification of the software', 'type': 'array', 'uniqueItems': True, 'items': OrderedDict([('title', 'Type'), ('type', 'string'), ('enum', ['docker container', 'aligner', 'aggregator', 'normalizer', 'indexer', 'quality metric generator', 'peak caller', 'filter', 'file format convertor', 'matrix generator', 'database', 'variant annotator', 'genome segmentator', 'qualification', 'assembler', 'other'])])}), ('description', {'title': 'Description', 'description': 'A plain text description of the software.', 'type': 'string'}), ('docker_info', {'title': 'Docker Container Information', 'description': 'A short description of the docker container', 'type': 'object', 'properties': OrderedDict([('docker_registry_url', OrderedDict([('title', 'Docker Registry URL'), ('description', 'Docker Hub or 7 bridges registry URL.'), ('type', 'string'), ('format', 'uri')])), ('docker_image_name', OrderedDict([('title', 'Image Name'), ('description', 'The name of the image that is downloaded'), ('type', 'string')])), ('docker_image_version', OrderedDict([('title', 'Image Version'), ('description', 'The version of the image that is downloaded'), ('type', 'string')]))])}), ('source_url', {'title': 'Source URL', 'description': 'An external resource to the code base.', 'type': 'string', 'format': 'uri'}), ('binary_url', {'title': 'Binary URL', 'description': 'An external resource to a compiled download of the software.', 'type': 'string', 'format': 'uri'}), ('documentation_url', {'title': 'About URL', 'description': 'An external resource to addiitonal information about the software.', 'internal_comment': 'Use of this is discouraged as documentation should be included in github repo (source_url) or binary_url', 'type': 'string', 'format': 'uri'}), ('purpose', {'title': 'Purpose in project', 'description': 'The purpose that the software was used for in the project.', 'type': 'array', 'uniqueItems': True, 'items': OrderedDict([('title', 'Purpose'), ('type', 'string'), ('enum', ['Hi-C', 'Imaging', 'Data QC', 'Visualization', 'Community Resource'])])}), ('software_relation', {'title': 'Related Softwares', 'description': 'All related software', 'type': 'array', 'items': OrderedDict([('title', 'Related Software'), ('type', 'object'), ('additionalProperties', False), ('properties', OrderedDict([('relationship_type', OrderedDict([('type', 'string'), ('description', &quot;A controlled term specifying the type of relationship between the 'parent' software and the one listed here.&quot;), ('title', 'Relationship Type'), ('enum', ['parent of', 'derived from', 'container for', 'contained in'])])), ('software', OrderedDict([('type', 'string'), ('description', 'The related software'), ('linkTo', 'Software')]))]))])})]))])</em><a class="headerlink" href="#encoded.types.software.Software.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="encoded.types.quality_metric.html"
+                        title="previous chapter">encoded.types.quality_metric module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="encoded.types.sop_map.html"
+                        title="next chapter">encoded.types.sop_map module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pydoc/encoded.types.software.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.sop_map.html" title="encoded.types.sop_map module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.quality_metric.html" title="encoded.types.quality_metric module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.types.html" >encoded.types package</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

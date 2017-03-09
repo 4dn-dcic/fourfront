@@ -1,0 +1,183 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.types.publication module &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="encoded.types.publication_tracking module" href="encoded.types.publication_tracking.html" />
+    <link rel="prev" title="encoded.types.ontology module" href="encoded.types.ontology.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.publication_tracking.html" title="encoded.types.publication_tracking module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.ontology.html" title="encoded.types.ontology module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.types.html" accesskey="U">encoded.types package</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-encoded.types.publication">
+<span id="encoded-types-publication-module"></span><h1>encoded.types.publication module<a class="headerlink" href="#module-encoded.types.publication" title="Permalink to this headline">¶</a></h1>
+<p>Create publication class and contain methods for data fetching.</p>
+<dl class="class">
+<dt id="encoded.types.publication.BioRxivExtractor">
+<em class="property">class </em><code class="descclassname">encoded.types.publication.</code><code class="descname">BioRxivExtractor</code><a class="reference internal" href="../_modules/encoded/types/publication.html#BioRxivExtractor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.publication.BioRxivExtractor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">html.parser.HTMLParser</span></code></p>
+<dl class="method">
+<dt id="encoded.types.publication.BioRxivExtractor.handle_starttag">
+<code class="descname">handle_starttag</code><span class="sig-paren">(</span><em>tag</em>, <em>attrs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/publication.html#BioRxivExtractor.handle_starttag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.publication.BioRxivExtractor.handle_starttag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="encoded.types.publication.Publication">
+<em class="property">class </em><code class="descclassname">encoded.types.publication.</code><code class="descname">Publication</code><span class="sig-paren">(</span><em>registry</em>, <em>models</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/publication.html#Publication"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.publication.Publication" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="encoded.types.base.html#encoded.types.base.Item" title="encoded.types.base.Item"><code class="xref py py-class docutils literal"><span class="pre">encoded.types.base.Item</span></code></a></p>
+<p>Publication class.</p>
+<dl class="attribute">
+<dt id="encoded.types.publication.Publication.embedded">
+<code class="descname">embedded</code><em class="property"> = ['exp_sets_prod_in_pub', 'exp_sets_used_in_pub']</em><a class="headerlink" href="#encoded.types.publication.Publication.embedded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.publication.Publication.item_type">
+<code class="descname">item_type</code><em class="property"> = 'publication'</em><a class="headerlink" href="#encoded.types.publication.Publication.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.publication.Publication.schema">
+<code class="descname">schema</code><em class="property"> = OrderedDict([('title', 'Publication'), ('description', 'Schema for a publication page.'), ('id', '/profiles/publication.json'), ('$schema', 'http://json-schema.org/draft-04/schema#'), ('type', 'object'), ('required', ['ID']), ('identifyingProperties', ['uuid', 'ID']), ('additionalProperties', False), ('mixinProperties', [OrderedDict([('$ref', 'mixins.json#/schema_version')]), OrderedDict([('$ref', 'mixins.json#/uuid')]), OrderedDict([('$ref', 'mixins.json#/aliases')]), OrderedDict([('$ref', 'mixins.json#/submitted')]), OrderedDict([('$ref', 'mixins.json#/attachment')]), OrderedDict([('$ref', 'mixins.json#/aliases')]), OrderedDict([('$ref', 'mixins.json#/attribution')])]), ('properties', OrderedDict([('lab', {'title': 'Lab', 'description': 'Lab associated with the submission.', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'Lab', 'linkSubmitsFor': True, 'default': ''}), ('award', {'title': 'Grant', 'description': 'Grant associated with the submission.', 'exclude_from': 'submit4dn', 'default': '', 'type': 'string', 'linkTo': 'Award'}), ('aliases', {'title': 'Lab aliases', 'description': 'Lab specific identifiers to reference an object.', 'type': 'array', 'comment': 'Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).', 'default': [], 'uniqueItems': True, 'items': {'uniqueKey': 'alias', 'title': 'Lab alias', 'description': 'A lab specific identifier to reference an object.', 'type': 'string', 'pattern': '^\\S+:\\S+'}}), ('attachment', {'title': 'Attached Document', 'type': 'object', 'additionalProperties': False, 'formInput': 'file', 'attachment': True, 'properties': {'download': {'title': 'File Name', 'type': 'string'}, 'href': {'internal_comment': 'Internal webapp URL for document file', 'type': 'string'}, 'type': {'title': 'MIME type', 'type': 'string', 'enum': ['application/pdf', 'application/zip', 'text/plain', 'text/tab-separated-values', 'image/jpeg', 'image/tiff', 'image/gif', 'text/html', 'image/png', 'image/svs', 'text/autosql']}, 'md5sum': {'title': 'MD5sum', 'type': 'string', 'format': 'md5sum'}, 'size': {'title': 'File size', 'type': 'integer'}, 'width': {'title': 'Image width', 'type': 'integer'}, 'height': {'title': 'Image height', 'type': 'integer'}}}), ('date_created', {'rdfs:subPropertyOf': 'dc:created', 'title': 'Date created', 'exclude_from': 'submit4dn', 'type': 'string', 'anyOf': [{'format': 'date-time'}, {'format': 'date'}], 'serverDefault': 'now', 'permission': 'import_items'}), ('submitted_by', {'rdfs:subPropertyOf': 'dc:creator', 'title': 'Submitted by', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'User', 'serverDefault': 'userid', 'permission': 'import_items'}), ('uuid', {'title': 'UUID', 'type': 'string', 'format': 'uuid', 'exclude_from': 'submit4dn', 'serverDefault': 'uuid4', 'permission': 'import_items', 'requestMethod': 'POST'}), ('schema_version', {'title': 'Schema Version', 'internal_comment': 'Do not submit, value is assigned by the server. The version of the JSON schema that the server uses to validate the object. Schema version indicates generation of schema used to save version to to enable upgrade steps to work. Individual schemas should set the default.', 'type': 'string', 'exclude_from': 'submit4dn', 'pattern': '^\\d+(\\.\\d+)*$', 'requestMethod': [], 'default': '1'}), ('ID', {'title': 'Publication Identifier', 'description': 'PMID or doi for the publication.', 'type': 'string', 'uniqueKey': 'publication:ID', 'pattern': '^PMID:[0-9]+$|^doi:10\\.[0-9]{4}[\\d\\S\\:\\.]+$', 'comment': 'Please provide either in the form of PMID:12345678 or doi:10.1234/abc123'}), ('status', {'title': 'Status', 'type': 'string', 'default': 'current', 'permission': 'import_items', 'enum': ['current', 'revoked', 'deleted', 'replaced', 'in review by lab', 'in review by project', 'released to project']}), ('published_by', {'title': 'Published by', 'type': 'string', 'enum': ['4DN', 'External']}), ('categories', {'title': 'Categories', 'type': 'array', 'uniqueItems': True, 'items': OrderedDict([('title', 'Category'), ('type', 'string'), ('enum', ['human disease', 'basic biology', 'software tool', 'database', 'integrative analysis', 'technology development', 'data standard', 'key publication', 'pilot phase publication', 'model organism biology', 'tutorial', 'genomic annotations', 'production'])])}), ('exp_sets_prod_in_pub', {'title': 'Experiment sets produced by this publication', 'description': 'List of experiment sets that are produced by this publication.', 'type': 'array', 'comment': 'use accessions for identifiers.', 'uniqueItems': True, 'items': OrderedDict([('title', 'Experiment Set'), ('type', 'string'), ('linkTo', 'ExperimentSet')])}), ('exp_sets_used_in_pub', {'title': 'Experiment sets used by this publication (not produced)', 'description': 'List of experiment sets that are used (not produced) by this publication.', 'type': 'array', 'comment': 'use accessions for identifiers.', 'uniqueItems': True, 'items': OrderedDict([('title', 'Experiment Set'), ('type', 'string'), ('linkTo', 'ExperimentSet')])}), ('title', {'title': 'Title', 'description': &quot;DON'T SUBMIT, auto-generated.&quot;, 'uniqueKey': True, 'type': 'string', 'exclude_from': 'edit'}), ('abstract', {'title': 'Abstract', 'description': 'Abstract of the publication or communication.', 'type': 'string', 'exclude_from': 'submit4dn'}), ('authors', {'title': 'Authors', 'description': 'All authors, with format Bernstein BE, Birney E, Dunham I,...', 'type': 'string', 'exclude_from': 'submit4dn'}), ('date_published', {'title': 'Publication date', 'description': 'Publication date.', 'type': 'string', 'exclude_from': 'submit4dn'}), ('url', {'title': 'URL', 'description': 'An external resource with additional information about the source.', 'type': 'string', 'format': 'uri', 'exclude_from': 'submit4dn'})]))])</em><a class="headerlink" href="#encoded.types.publication.Publication.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.types.publication.fetch_biorxiv">
+<code class="descclassname">encoded.types.publication.</code><code class="descname">fetch_biorxiv</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/publication.html#fetch_biorxiv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.publication.fetch_biorxiv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes Url, uses the BioRxivExtractor class and returns title abstract authors url</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.types.publication.fetch_pubmed">
+<code class="descclassname">encoded.types.publication.</code><code class="descname">fetch_pubmed</code><span class="sig-paren">(</span><em>PMID</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/publication.html#fetch_pubmed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.publication.fetch_pubmed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes the number part of PMID and returns title, abstract and authors</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.types.publication.map_doi_biox">
+<code class="descclassname">encoded.types.publication.</code><code class="descname">map_doi_biox</code><span class="sig-paren">(</span><em>doi</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/publication.html#map_doi_biox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.publication.map_doi_biox" title="Permalink to this definition">¶</a></dt>
+<dd><p>If a doi is not mapped to pubmed, check where it goes</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.types.publication.map_doi_pmid">
+<code class="descclassname">encoded.types.publication.</code><code class="descname">map_doi_pmid</code><span class="sig-paren">(</span><em>doi</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/publication.html#map_doi_pmid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.publication.map_doi_pmid" title="Permalink to this definition">¶</a></dt>
+<dd><p>If a doi is given, checks if it maps to pmid</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="encoded.types.ontology.html"
+                        title="previous chapter">encoded.types.ontology module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="encoded.types.publication_tracking.html"
+                        title="next chapter">encoded.types.publication_tracking module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pydoc/encoded.types.publication.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.publication_tracking.html" title="encoded.types.publication_tracking module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.ontology.html" title="encoded.types.ontology module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.types.html" >encoded.types package</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

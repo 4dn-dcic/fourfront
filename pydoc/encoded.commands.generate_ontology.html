@@ -1,0 +1,302 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.commands.generate_ontology module &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="encoded.commands.import_data module" href="encoded.commands.import_data.html" />
+    <link rel="prev" title="encoded.commands.generate_annotations module" href="encoded.commands.generate_annotations.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.commands.import_data.html" title="encoded.commands.import_data module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="encoded.commands.generate_annotations.html" title="encoded.commands.generate_annotations module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.commands.html" accesskey="U">encoded.commands package</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-encoded.commands.generate_ontology">
+<span id="encoded-commands-generate-ontology-module"></span><h1>encoded.commands.generate_ontology module<a class="headerlink" href="#module-encoded.commands.generate_ontology" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.add_additional_term_info">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">add_additional_term_info</code><span class="sig-paren">(</span><em>terms</em>, <em>data</em>, <em>synonym_terms</em>, <em>definition_terms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#add_additional_term_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.add_additional_term_info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.add_slim_terms">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">add_slim_terms</code><span class="sig-paren">(</span><em>terms</em>, <em>slim_terms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#add_slim_terms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.add_slim_terms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.add_slim_to_term">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">add_slim_to_term</code><span class="sig-paren">(</span><em>term</em>, <em>slim_terms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#add_slim_to_term"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.add_slim_to_term" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks the list of ancestor terms to see if any are slim_terms
+and if so adds the slim_term to the term in slim_term slot</p>
+<p>for now checking both closure and closure_with_develops_from
+but consider having only single &#8216;ancestor&#8217; list</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.connect2server">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">connect2server</code><span class="sig-paren">(</span><em>keyfile</em>, <em>keyname</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#connect2server"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.connect2server" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets up credentials for accessing the server.  Generates a key using info
+from the named keyname in the keyfile and checks that the server can be
+reached with that key</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.convert2namespace">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">convert2namespace</code><span class="sig-paren">(</span><em>uri</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#convert2namespace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.convert2namespace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.create_term_dict">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">create_term_dict</code><span class="sig-paren">(</span><em>class_</em>, <em>termid</em>, <em>data</em>, <em>ontology_id=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#create_term_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.create_term_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds basic term info to the dictionary of all terms</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.download_and_process_owl">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">download_and_process_owl</code><span class="sig-paren">(</span><em>ontology</em>, <em>connection</em>, <em>terms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#download_and_process_owl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.download_and_process_owl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.get_all_ancestors">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">get_all_ancestors</code><span class="sig-paren">(</span><em>term</em>, <em>terms</em>, <em>field</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#get_all_ancestors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.get_all_ancestors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a list of all the term&#8217;s ancestors to a term up to the root
+of the ontology and adds to closure fields - used in adding slims</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.get_definition_term_uris">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">get_definition_term_uris</code><span class="sig-paren">(</span><em>connection</em>, <em>ontology</em>, <em>as_rdf=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#get_definition_term_uris"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.get_definition_term_uris" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks an ontology item for ontology_terms that are used
+to designate definitions in that ontology and returns a list
+of RDF Namespace:name pairs by default or simple URI strings
+if as_rdf=False.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.get_definition_terms1">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">get_definition_terms1</code><span class="sig-paren">(</span><em>connection</em>, <em>ontology_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#get_definition_terms1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.get_definition_terms1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks an ontology item for ontology_terms that are used
+to designate synonyms in that ontology and returns a list
+of OntologyTerm dicts.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.get_definitions">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">get_definitions</code><span class="sig-paren">(</span><em>class_</em>, <em>data</em>, <em>definition_terms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#get_definitions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.get_definitions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets definitions for the class as strings</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.get_ontologies">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">get_ontologies</code><span class="sig-paren">(</span><em>connection</em>, <em>ont_list</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#get_ontologies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.get_ontologies" title="Permalink to this definition">¶</a></dt>
+<dd><p>return list of ontology jsons retrieved from server
+ontology jsons are now fully embedded</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.get_slim_terms">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">get_slim_terms</code><span class="sig-paren">(</span><em>connection</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#get_slim_terms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.get_slim_terms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves ontology_term jsons for those terms that have &#8216;is_slim_for&#8217;
+field populated</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.get_syndef_terms_as_uri">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">get_syndef_terms_as_uri</code><span class="sig-paren">(</span><em>connection</em>, <em>ontology</em>, <em>termtype</em>, <em>as_rdf=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#get_syndef_terms_as_uri"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.get_syndef_terms_as_uri" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks an ontology item for ontology_terms that are used
+to designate synonyms or definitions in that ontology and returns a list
+of RDF Namespace:name pairs by default or simple URI strings
+if as_rdf=False.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.get_synonym_term_uris">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">get_synonym_term_uris</code><span class="sig-paren">(</span><em>connection</em>, <em>ontology</em>, <em>as_rdf=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#get_synonym_term_uris"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.get_synonym_term_uris" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks an ontology item for ontology_terms that are used
+to designate synonyms in that ontology and returns a list
+of RDF Namespace:name pairs by default or simple URI strings
+if as_rdf=False.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.get_synonyms">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">get_synonyms</code><span class="sig-paren">(</span><em>class_</em>, <em>data</em>, <em>synonym_terms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#get_synonyms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.get_synonyms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets synonyms for the class as strings</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.get_term_name_from_rdf">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">get_term_name_from_rdf</code><span class="sig-paren">(</span><em>class_</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#get_term_name_from_rdf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.get_term_name_from_rdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Looks for label for class in the rdf graph</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.get_termid_from_uri">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">get_termid_from_uri</code><span class="sig-paren">(</span><em>uri</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#get_termid_from_uri"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.get_termid_from_uri" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a uri - takes the last part (name) and converts _ to :
+eg. <a class="reference external" href="http://www.ebi.ac.uk/efo/EFO_0002784">http://www.ebi.ac.uk/efo/EFO_0002784</a> =&gt; EFO:0002784</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.iterative_parents">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">iterative_parents</code><span class="sig-paren">(</span><em>nodes</em>, <em>terms</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#iterative_parents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.iterative_parents" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns all the parents traversing the term graph structure
+- (not the direct RDF graph) by iteratively following parents
+until there are no more parents</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.main">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Downloads latest Ontology OWL files for Ontologies in the database
+and Updates Terms by generating json inserts</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.parse_args">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">parse_args</code><span class="sig-paren">(</span><em>args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#parse_args"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.parse_args" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.process_blank_node">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">process_blank_node</code><span class="sig-paren">(</span><em>class_</em>, <em>data</em>, <em>terms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#process_blank_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.process_blank_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a blank node determine if there are any parent resources
+of relevant types and if so process them appropriately</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.process_intersection_of">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">process_intersection_of</code><span class="sig-paren">(</span><em>class_</em>, <em>intersection</em>, <em>data</em>, <em>terms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#process_intersection_of"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.process_intersection_of" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a class with IntersectionOf predicate determine if the
+intersected class is part of human or if our term develops_from
+the class and if so make ontology_term json for it if it doesn&#8217;t
+already exist</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.process_parents">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">process_parents</code><span class="sig-paren">(</span><em>class_</em>, <em>data</em>, <em>terms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#process_parents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.process_parents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the parents of the class - direct and those linked via
+specified relationship types</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.remove_obsoletes_and_unnamed">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">remove_obsoletes_and_unnamed</code><span class="sig-paren">(</span><em>terms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#remove_obsoletes_and_unnamed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.remove_obsoletes_and_unnamed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.commands.generate_ontology.write_outfile">
+<code class="descclassname">encoded.commands.generate_ontology.</code><code class="descname">write_outfile</code><span class="sig-paren">(</span><em>terms</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/commands/generate_ontology.html#write_outfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.commands.generate_ontology.write_outfile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="encoded.commands.generate_annotations.html"
+                        title="previous chapter">encoded.commands.generate_annotations module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="encoded.commands.import_data.html"
+                        title="next chapter">encoded.commands.import_data module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pydoc/encoded.commands.generate_ontology.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.commands.import_data.html" title="encoded.commands.import_data module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="encoded.commands.generate_annotations.html" title="encoded.commands.generate_annotations module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.commands.html" >encoded.commands package</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

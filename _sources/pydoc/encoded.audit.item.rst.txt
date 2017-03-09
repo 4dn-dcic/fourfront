@@ -1,0 +1,7 @@
+encoded.audit.item module
+=========================
+
+.. automodule:: encoded.audit.item
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,237 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Component: viz/QuickInfoBar &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Object: viz/chart-data-controller" href="module-viz_chart-data-controller.html" />
+    <link rel="prev" title="Component: UIControlsWrapper" href="module-viz_BarPlotChart.UIControlsWrapper.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="module-viz_chart-data-controller.html" title="Object: viz/chart-data-controller"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="module-viz_BarPlotChart.UIControlsWrapper.html" title="Component: UIControlsWrapper"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">JavaScript API Reference</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="component-viz-quickinfobar">
+<h1>Component: <code class="docutils literal"><span class="pre">viz/QuickInfoBar</span></code><a class="headerlink" href="#component-viz-quickinfobar" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<div class="contents local topic" id="local-navigation">
+<p class="topic-title first">Local Navigation</p>
+<ul class="simple">
+<li><a class="reference internal" href="#description" id="id1">Description</a></li>
+<li><a class="reference internal" href="#functions" id="id2">Functions</a><ul>
+<li><a class="reference internal" href="#getinitialstate" id="id3"><code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
+<li><a class="reference internal" href="#updatecurrentandtotalcounts" id="id4"><code class="docutils literal"><span class="pre">updateCurrentAndTotalCounts</span></code></a></li>
+<li><a class="reference internal" href="#updatecurrentcounts" id="id5"><code class="docutils literal"><span class="pre">updateCurrentCounts</span></code></a></li>
+<li><a class="reference internal" href="#updatetotalcounts" id="id6"><code class="docutils literal"><span class="pre">updateTotalCounts</span></code></a></li>
+<li><a class="reference internal" href="#isinvisible" id="id7"><code class="docutils literal"><span class="pre">isInvisible</span></code></a></li>
+<li><a class="reference internal" href="#componentwillreceiveprops" id="id8"><code class="docutils literal"><span class="pre">componentWillReceiveProps</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="description">
+<h2><a class="toc-backref" href="#id1">Description</a><a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>Bar shown below header on home and browse pages.
+Shows counts of selected experiment_sets, experiments, and files against those properties&#8217; total counts.</p>
+</div>
+<div class="section" id="functions">
+<h2><a class="toc-backref" href="#id2">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="getinitialstate">
+<span id="module-viz-quickinfobar-getinitialstate"></span><h3><a class="toc-backref" href="#id3"><code class="docutils literal"><span class="pre">getInitialState</span></code></a><a class="headerlink" href="#getinitialstate" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="getInitialState">
+<code class="descname">getInitialState</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getInitialState" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Return Object.&lt;number, boolean, string&gt;:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">Initial State</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="updatecurrentandtotalcounts">
+<span id="module-viz-quickinfobar-updatecurrentandtotalcounts"></span><h3><a class="toc-backref" href="#id4"><code class="docutils literal"><span class="pre">updateCurrentAndTotalCounts</span></code></a><a class="headerlink" href="#updatecurrentandtotalcounts" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="updateCurrentAndTotalCounts">
+<code class="descname">updateCurrentAndTotalCounts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#updateCurrentAndTotalCounts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="updatecurrentcounts">
+<span id="module-viz-quickinfobar-updatecurrentcounts"></span><h3><a class="toc-backref" href="#id5"><code class="docutils literal"><span class="pre">updateCurrentCounts</span></code></a><a class="headerlink" href="#updatecurrentcounts" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="updateCurrentCounts">
+<code class="descname">updateCurrentCounts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#updateCurrentCounts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="updatetotalcounts">
+<span id="module-viz-quickinfobar-updatetotalcounts"></span><h3><a class="toc-backref" href="#id6"><code class="docutils literal"><span class="pre">updateTotalCounts</span></code></a><a class="headerlink" href="#updatetotalcounts" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="updateTotalCounts">
+<code class="descname">updateTotalCounts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#updateTotalCounts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="isinvisible">
+<span id="module-viz-quickinfobar-isinvisible"></span><h3><a class="toc-backref" href="#id7"><code class="docutils literal"><span class="pre">isInvisible</span></code></a><a class="headerlink" href="#isinvisible" title="Permalink to this headline">¶</a></h3>
+<p>Check if component is visible or not.</p>
+<dl class="function">
+<dt id="isInvisible">
+<code class="descname">isInvisible</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isInvisible" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="componentwillreceiveprops">
+<span id="module-viz-quickinfobar-componentwillreceiveprops"></span><h3><a class="toc-backref" href="#id8"><code class="docutils literal"><span class="pre">componentWillReceiveProps</span></code></a><a class="headerlink" href="#componentwillreceiveprops" title="Permalink to this headline">¶</a></h3>
+<p>Updates state.show if no filters are selected.</p>
+<dl class="function">
+<dt id="componentWillReceiveProps">
+<code class="descname">componentWillReceiveProps</code><span class="sig-paren">(</span><em>nextProps</em><span class="sig-paren">)</span><a class="headerlink" href="#componentWillReceiveProps" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>nextProps</strong> (<em>Object</em>) &#8211; Next props.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return undefined:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">Updates state.show if no filters are selected.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Component: <code class="docutils literal"><span class="pre">viz/QuickInfoBar</span></code></a><ul>
+<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#getinitialstate"><code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
+<li><a class="reference internal" href="#updatecurrentandtotalcounts"><code class="docutils literal"><span class="pre">updateCurrentAndTotalCounts</span></code></a></li>
+<li><a class="reference internal" href="#updatecurrentcounts"><code class="docutils literal"><span class="pre">updateCurrentCounts</span></code></a></li>
+<li><a class="reference internal" href="#updatetotalcounts"><code class="docutils literal"><span class="pre">updateTotalCounts</span></code></a></li>
+<li><a class="reference internal" href="#isinvisible"><code class="docutils literal"><span class="pre">isInvisible</span></code></a></li>
+<li><a class="reference internal" href="#componentwillreceiveprops"><code class="docutils literal"><span class="pre">componentWillReceiveProps</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="module-viz_BarPlotChart.UIControlsWrapper.html"
+                        title="previous chapter">Component: <code class="docutils literal"><span class="pre">UIControlsWrapper</span></code></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="module-viz_chart-data-controller.html"
+                        title="next chapter">Object: <code class="docutils literal"><span class="pre">viz/chart-data-controller</span></code></a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/jsdoc/module-viz_QuickInfoBar.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="module-viz_chart-data-controller.html" title="Object: viz/chart-data-controller"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="module-viz_BarPlotChart.UIControlsWrapper.html" title="Component: UIControlsWrapper"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+encoded.commands.migrate_files_aws module
+=========================================
+
+.. automodule:: encoded.commands.migrate_files_aws
+    :members:
+    :undoc-members:
+    :show-inheritance:

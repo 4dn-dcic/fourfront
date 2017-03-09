@@ -1,0 +1,446 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.region_search &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../encoded.html" accesskey="U">encoded</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.region_search</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pyramid.view</span> <span class="k">import</span> <span class="n">view_config</span>
+<span class="kn">from</span> <span class="nn">snovault</span> <span class="k">import</span> <span class="n">TYPES</span>
+<span class="kn">from</span> <span class="nn">snovault.elasticsearch.interfaces</span> <span class="k">import</span> <span class="n">ELASTIC_SEARCH</span>
+<span class="kn">from</span> <span class="nn">pyramid.security</span> <span class="k">import</span> <span class="n">effective_principals</span>
+<span class="kn">from</span> <span class="nn">.search</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">format_results</span><span class="p">,</span>
+    <span class="n">set_filters</span><span class="p">,</span>
+    <span class="n">set_facets</span><span class="p">,</span>
+    <span class="n">get_filtered_query</span><span class="p">,</span>
+    <span class="n">format_facets</span><span class="p">,</span>
+    <span class="n">hgConnect</span><span class="p">,</span>
+    <span class="n">search_result_actions</span><span class="p">,</span>
+    <span class="n">_ASSEMBLY_MAPPER</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.batch_download</span> <span class="k">import</span> <span class="n">get_peak_metadata_links</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="k">import</span> <span class="n">urlencode</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="n">_ENSEMBL_URL</span> <span class="o">=</span> <span class="s1">&#39;http://rest.ensembl.org/&#39;</span>
+
+<span class="n">_REGION_FIELDS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;embedded.files.uuid&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;embedded.files.accession&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;embedded.files.href&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;embedded.files.file_format&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;embedded.files.assembly&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;embedded.files.output_type&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;embedded.files.derived_from&#39;</span>
+<span class="p">]</span>
+
+<span class="n">_FACETS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s1">&#39;assay_term_name&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Assay&#39;</span><span class="p">}),</span>
+    <span class="p">(</span><span class="s1">&#39;biosample_term_name&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Biosample term&#39;</span><span class="p">}),</span>
+    <span class="p">(</span><span class="s1">&#39;target.label&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Target&#39;</span><span class="p">}),</span>
+    <span class="p">(</span><span class="s1">&#39;replicates.library.biosample.donor.organism.scientific_name&#39;</span><span class="p">,</span> <span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Organism&#39;</span>
+    <span class="p">}),</span>
+    <span class="p">(</span><span class="s1">&#39;organ_slims&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Organ&#39;</span><span class="p">}),</span>
+    <span class="p">(</span><span class="s1">&#39;assembly&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Genome assembly&#39;</span><span class="p">}),</span>
+    <span class="p">(</span><span class="s1">&#39;files.file_type&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Available data&#39;</span><span class="p">})</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="includeme"><a class="viewcode-back" href="../../pydoc/encoded.region_search.html#encoded.region_search.includeme">[docs]</a><span class="k">def</span> <span class="nf">includeme</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_route</span><span class="p">(</span><span class="s1">&#39;region-search&#39;</span><span class="p">,</span> <span class="s1">&#39;/region-search{slash:/?}&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_route</span><span class="p">(</span><span class="s1">&#39;suggest&#39;</span><span class="p">,</span> <span class="s1">&#39;/suggest{slash:/?}&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_peak_query"><a class="viewcode-back" href="../../pydoc/encoded.region_search.html#encoded.region_search.get_peak_query">[docs]</a><span class="k">def</span> <span class="nf">get_peak_query</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">with_inner_hits</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    return peak query</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;query&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;filtered&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;filter&#39;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s1">&#39;nested&#39;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="s1">&#39;positions&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;filter&#39;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s1">&#39;bool&#39;</span><span class="p">:</span> <span class="p">{</span>
+                                <span class="s1">&#39;must&#39;</span><span class="p">:</span> <span class="p">[</span>
+                                    <span class="p">{</span>
+                                        <span class="s1">&#39;range&#39;</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="s1">&#39;positions.start&#39;</span><span class="p">:</span> <span class="p">{</span>
+                                                <span class="s1">&#39;lte&#39;</span><span class="p">:</span> <span class="n">end</span><span class="p">,</span>
+                                            <span class="p">}</span>
+                                        <span class="p">}</span>
+                                    <span class="p">},</span>
+                                    <span class="p">{</span>
+                                        <span class="s1">&#39;range&#39;</span><span class="p">:</span> <span class="p">{</span>
+                                            <span class="s1">&#39;positions.end&#39;</span><span class="p">:</span> <span class="p">{</span>
+                                                <span class="s1">&#39;gte&#39;</span><span class="p">:</span> <span class="n">start</span><span class="p">,</span>
+                                            <span class="p">}</span>
+                                        <span class="p">}</span>
+                                    <span class="p">}</span>
+                                <span class="p">]</span>
+                            <span class="p">}</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="s1">&#39;_cache&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;_source&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">with_inner_hits</span><span class="p">:</span>
+        <span class="n">query</span><span class="p">[</span><span class="s1">&#39;query&#39;</span><span class="p">][</span><span class="s1">&#39;filtered&#39;</span><span class="p">][</span><span class="s1">&#39;filter&#39;</span><span class="p">][</span><span class="s1">&#39;nested&#39;</span><span class="p">][</span><span class="s1">&#39;inner_hits&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">99999</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">query</span></div>
+
+
+<div class="viewcode-block" id="sanitize_coordinates"><a class="viewcode-back" href="../../pydoc/encoded.region_search.html#encoded.region_search.sanitize_coordinates">[docs]</a><span class="k">def</span> <span class="nf">sanitize_coordinates</span><span class="p">(</span><span class="n">term</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Sanitize the input string and return coordinates &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">term</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">term</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">terms</span> <span class="o">=</span> <span class="n">term</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+    <span class="n">chromosome</span> <span class="o">=</span> <span class="n">terms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">terms</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">end</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">start</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">and</span> <span class="n">end</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">chromosome</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_annotation_coordinates"><a class="viewcode-back" href="../../pydoc/encoded.region_search.html#encoded.region_search.get_annotation_coordinates">[docs]</a><span class="k">def</span> <span class="nf">get_annotation_coordinates</span><span class="p">(</span><span class="n">es</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">assembly</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Gets annotation coordinates from annotation index in ES &#39;&#39;&#39;</span>
+
+    <span class="n">chromosome</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">es_results</span> <span class="o">=</span> <span class="n">es</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;annotations&#39;</span><span class="p">,</span> <span class="n">doc_type</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">chromosome</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">annotations</span> <span class="o">=</span> <span class="n">es_results</span><span class="p">[</span><span class="s1">&#39;_source&#39;</span><span class="p">][</span><span class="s1">&#39;annotations&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">annotation</span> <span class="ow">in</span> <span class="n">annotations</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">annotation</span><span class="p">[</span><span class="s1">&#39;assembly_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">assembly</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;chr&#39;</span> <span class="o">+</span> <span class="n">annotation</span><span class="p">[</span><span class="s1">&#39;chromosome&#39;</span><span class="p">],</span>
+                        <span class="n">annotation</span><span class="p">[</span><span class="s1">&#39;start&#39;</span><span class="p">],</span>
+                        <span class="n">annotation</span><span class="p">[</span><span class="s1">&#39;end&#39;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">location</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{chr}</span><span class="s1">:</span><span class="si">{start}</span><span class="s1">-</span><span class="si">{end}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">chr</span><span class="o">=</span><span class="n">annotation</span><span class="p">[</span><span class="s1">&#39;chromosome&#39;</span><span class="p">],</span>
+                    <span class="n">start</span><span class="o">=</span><span class="n">annotation</span><span class="p">[</span><span class="s1">&#39;start&#39;</span><span class="p">],</span>
+                    <span class="n">end</span><span class="o">=</span><span class="n">annotation</span><span class="p">[</span><span class="s1">&#39;end&#39;</span><span class="p">]</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">assembly_mapper</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="s1">&#39;human&#39;</span><span class="p">,</span>
+                               <span class="n">annotations</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;assembly_name&#39;</span><span class="p">],</span> <span class="n">assembly</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="assembly_mapper"><a class="viewcode-back" href="../../pydoc/encoded.region_search.html#encoded.region_search.assembly_mapper">[docs]</a><span class="k">def</span> <span class="nf">assembly_mapper</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">species</span><span class="p">,</span> <span class="n">input_assembly</span><span class="p">,</span> <span class="n">output_assembly</span><span class="p">):</span>
+    <span class="c1"># All others</span>
+    <span class="n">new_url</span> <span class="o">=</span> <span class="n">_ENSEMBL_URL</span> <span class="o">+</span> <span class="s1">&#39;map/&#39;</span> <span class="o">+</span> <span class="n">species</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> \
+        <span class="o">+</span> <span class="n">input_assembly</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">location</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">output_assembly</span> \
+        <span class="o">+</span> <span class="s1">&#39;/?content-type=application/json&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">new_response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">new_url</span><span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_response</span><span class="p">[</span><span class="s1">&#39;mappings&#39;</span><span class="p">]):</span>
+            <span class="k">return</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">new_response</span><span class="p">[</span><span class="s1">&#39;mappings&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;mapped&#39;</span><span class="p">]</span>
+        <span class="n">chromosome</span> <span class="o">=</span> <span class="s1">&#39;chr&#39;</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;seq_region_name&#39;</span><span class="p">]</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;start&#39;</span><span class="p">]</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;end&#39;</span><span class="p">]</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">chromosome</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_rsid_coordinates"><a class="viewcode-back" href="../../pydoc/encoded.region_search.html#encoded.region_search.get_rsid_coordinates">[docs]</a><span class="k">def</span> <span class="nf">get_rsid_coordinates</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{ensembl}</span><span class="s1">variation/human/</span><span class="si">{id}</span><span class="s1">?content-type=application/json&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">ensembl</span><span class="o">=</span><span class="n">_ENSEMBL_URL</span><span class="p">,</span>
+        <span class="nb">id</span><span class="o">=</span><span class="nb">id</span>
+    <span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;mappings&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">response</span><span class="p">:</span>
+            <span class="k">return</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">mapping</span> <span class="ow">in</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;mappings&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">mapping</span><span class="p">[</span><span class="s1">&#39;assembly_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;GRCh38&#39;</span><span class="p">:</span>
+                <span class="n">location</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">[</span><span class="s1">&#39;location&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">assembly_mapper</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="s1">&#39;human&#39;</span><span class="p">,</span> <span class="s1">&#39;GRCh38&#39;</span><span class="p">,</span> <span class="s1">&#39;GRCh37&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_ensemblid_coordinates"><a class="viewcode-back" href="../../pydoc/encoded.region_search.html#encoded.region_search.get_ensemblid_coordinates">[docs]</a><span class="k">def</span> <span class="nf">get_ensemblid_coordinates</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{ensembl}</span><span class="s1">lookup/id/</span><span class="si">{id}</span><span class="s1">?content-type=application/json&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">ensembl</span><span class="o">=</span><span class="n">_ENSEMBL_URL</span><span class="p">,</span>
+        <span class="nb">id</span><span class="o">=</span><span class="nb">id</span>
+    <span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;assembly_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;GRCh38&#39;</span><span class="p">:</span>
+            <span class="n">location</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{chr}</span><span class="s1">:</span><span class="si">{start}</span><span class="s1">-</span><span class="si">{end}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="nb">chr</span><span class="o">=</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;seq_region_name&#39;</span><span class="p">],</span>
+                <span class="n">start</span><span class="o">=</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;start&#39;</span><span class="p">],</span>
+                <span class="n">end</span><span class="o">=</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;end&#39;</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">assembly_mapper</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="s1">&#39;human&#39;</span><span class="p">,</span> <span class="s1">&#39;GRCh38&#39;</span><span class="p">,</span> <span class="s1">&#39;GRCh37&#39;</span><span class="p">)</span></div>
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">route_name</span><span class="o">=</span><span class="s1">&#39;region-search&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="s1">&#39;search&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="region_search"><a class="viewcode-back" href="../../pydoc/encoded.region_search.html#encoded.region_search.region_search">[docs]</a><span class="k">def</span> <span class="nf">region_search</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Search files by region.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">types</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">TYPES</span><span class="p">]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;@id&#39;</span><span class="p">:</span> <span class="s1">&#39;/region-search/&#39;</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;?&#39;</span> <span class="o">+</span> <span class="n">request</span><span class="o">.</span><span class="n">query_string</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;&amp;referrer&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">query_string</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+        <span class="s1">&#39;@type&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;region-search&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Search by region&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;facets&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;@graph&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;columns&#39;</span><span class="p">:</span> <span class="n">OrderedDict</span><span class="p">(),</span>
+        <span class="s1">&#39;notification&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;filters&#39;</span><span class="p">:</span> <span class="p">[]</span>
+    <span class="p">}</span>
+    <span class="n">principals</span> <span class="o">=</span> <span class="n">effective_principals</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="n">es</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">ELASTIC_SEARCH</span><span class="p">]</span>
+    <span class="n">snp_es</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">&#39;snp_search&#39;</span><span class="p">]</span>
+    <span class="n">region</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;region&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">)</span>
+    
+
+    <span class="c1"># handling limit</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;limit&#39;</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">size</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="mi">99999</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="mi">25</span>
+    <span class="k">if</span> <span class="n">region</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">region</span> <span class="o">=</span> <span class="s1">&#39;*&#39;</span>
+
+    <span class="n">assembly</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;genome&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">)</span>
+    <span class="n">reference</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">regular_name</span><span class="p">,</span> <span class="n">ucsc_name</span> <span class="ow">in</span> <span class="n">_ASSEMBLY_MAPPER</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">ucsc_name</span> <span class="o">==</span> <span class="n">assembly</span><span class="p">:</span>
+            <span class="n">reference</span> <span class="o">=</span> <span class="n">regular_name</span>
+    <span class="n">annotation</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;annotation&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">annotation</span> <span class="o">!=</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>
+        <span class="n">chromosome</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">get_annotation_coordinates</span><span class="p">(</span><span class="n">es</span><span class="p">,</span> <span class="n">annotation</span><span class="p">,</span> <span class="n">reference</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">region</span> <span class="o">!=</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>
+        <span class="n">region</span> <span class="o">=</span> <span class="n">region</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">region</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;rs&#39;</span><span class="p">):</span>
+            <span class="n">chromosome</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">get_rsid_coordinates</span><span class="p">(</span><span class="n">region</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">region</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;ens&#39;</span><span class="p">):</span>
+            <span class="n">chromosome</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">get_ensemblid_coordinates</span><span class="p">(</span><span class="n">region</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">region</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;chr&#39;</span><span class="p">):</span>
+            <span class="n">chromosome</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">sanitize_coordinates</span><span class="p">(</span><span class="n">region</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="s1">&#39;notification&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Please select valid annotation or enter coordinates&#39;</span>
+            <span class="k">return</span> <span class="n">result</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;notification&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Please enter valid coordinates&#39;</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="c1"># Check if there are valid coordinates</span>
+    <span class="k">if</span> <span class="n">chromosome</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="ow">or</span> <span class="n">start</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="ow">or</span> <span class="n">end</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;notification&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;No annotations found&#39;</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;coordinates&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{chr}</span><span class="s1">:</span><span class="si">{start}</span><span class="s1">-</span><span class="si">{end}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="nb">chr</span><span class="o">=</span><span class="n">chromosome</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="n">end</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Search for peaks for the coordinates we got</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># including inner hits is very slow</span>
+        <span class="c1"># figure out how to distinguish browser requests from .embed method requests</span>
+        <span class="k">if</span> <span class="s1">&#39;peak_metadata&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">query_string</span><span class="p">:</span>
+            <span class="n">peak_query</span> <span class="o">=</span> <span class="n">get_peak_query</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">with_inner_hits</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">peak_query</span> <span class="o">=</span> <span class="n">get_peak_query</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+
+        <span class="n">peak_results</span> <span class="o">=</span> <span class="n">snp_es</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">peak_query</span><span class="p">,</span>
+                                     <span class="n">index</span><span class="o">=</span><span class="n">chromosome</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+                                     <span class="n">doc_type</span><span class="o">=</span><span class="n">assembly</span><span class="p">,</span>
+                                     <span class="n">size</span><span class="o">=</span><span class="mi">99999</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;notification&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Please enter valid coordinates&#39;</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="n">file_uuids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">peak_results</span><span class="p">[</span><span class="s1">&#39;hits&#39;</span><span class="p">][</span><span class="s1">&#39;hits&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">hit</span><span class="p">[</span><span class="s1">&#39;_id&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">file_uuids</span><span class="p">:</span>
+            <span class="n">file_uuids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">hit</span><span class="p">[</span><span class="s1">&#39;_id&#39;</span><span class="p">])</span>
+    <span class="n">file_uuids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">file_uuids</span><span class="p">))</span>
+    <span class="n">result</span><span class="p">[</span><span class="s1">&#39;notification&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;No results found&#39;</span>
+
+
+    <span class="c1"># if more than one peak found return the experiments with those peak files</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">file_uuids</span><span class="p">):</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">get_filtered_query</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="p">[],</span> <span class="nb">set</span><span class="p">(),</span> <span class="n">principals</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;Experiment&#39;</span><span class="p">])</span>
+        <span class="k">del</span> <span class="n">query</span><span class="p">[</span><span class="s1">&#39;query&#39;</span><span class="p">]</span>
+        <span class="n">query</span><span class="p">[</span><span class="s1">&#39;filter&#39;</span><span class="p">][</span><span class="s1">&#39;and&#39;</span><span class="p">][</span><span class="s1">&#39;filters&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s1">&#39;terms&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;embedded.files.uuid&#39;</span><span class="p">:</span> <span class="n">file_uuids</span>
+            <span class="p">}</span>
+        <span class="p">})</span>
+        <span class="n">used_filters</span> <span class="o">=</span> <span class="n">set_filters</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+        <span class="n">used_filters</span><span class="p">[</span><span class="s1">&#39;files.uuid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">file_uuids</span>
+        <span class="n">query</span><span class="p">[</span><span class="s1">&#39;aggs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">set_facets</span><span class="p">(</span><span class="n">_FACETS</span><span class="p">,</span> <span class="n">used_filters</span><span class="p">,</span> <span class="n">principals</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;Experiment&#39;</span><span class="p">])</span>
+        <span class="n">schemas</span> <span class="o">=</span> <span class="p">(</span><span class="n">types</span><span class="p">[</span><span class="n">item_type</span><span class="p">]</span><span class="o">.</span><span class="n">schema</span> <span class="k">for</span> <span class="n">item_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Experiment&#39;</span><span class="p">])</span>
+        <span class="n">es_results</span> <span class="o">=</span> <span class="n">es</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
+            <span class="n">body</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="s1">&#39;encoded&#39;</span><span class="p">,</span> <span class="n">doc_type</span><span class="o">=</span><span class="s1">&#39;experiment&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span>
+        <span class="p">)</span>
+
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;@graph&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">format_results</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">es_results</span><span class="p">[</span><span class="s1">&#39;hits&#39;</span><span class="p">][</span><span class="s1">&#39;hits&#39;</span><span class="p">]))</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">total</span> <span class="o">=</span> <span class="n">es_results</span><span class="p">[</span><span class="s1">&#39;hits&#39;</span><span class="p">][</span><span class="s1">&#39;total&#39;</span><span class="p">]</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;facets&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_facets</span><span class="p">(</span><span class="n">es_results</span><span class="p">,</span> <span class="n">_FACETS</span><span class="p">,</span> <span class="n">used_filters</span><span class="p">,</span> <span class="n">schemas</span><span class="p">,</span> <span class="n">total</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;peaks&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">peak_results</span><span class="p">[</span><span class="s1">&#39;hits&#39;</span><span class="p">][</span><span class="s1">&#39;hits&#39;</span><span class="p">])</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;download_elements&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_peak_metadata_links</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="s1">&#39;notification&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Success&#39;</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">search_result_actions</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;Experiment&#39;</span><span class="p">],</span> <span class="n">es_results</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;coordinates&#39;</span><span class="p">]))</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">route_name</span><span class="o">=</span><span class="s1">&#39;suggest&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="s1">&#39;search&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="suggest"><a class="viewcode-back" href="../../pydoc/encoded.region_search.html#encoded.region_search.suggest">[docs]</a><span class="k">def</span> <span class="nf">suggest</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;@id&#39;</span><span class="p">:</span> <span class="s1">&#39;/suggest/?&#39;</span> <span class="o">+</span> <span class="n">urlencode</span><span class="p">({</span><span class="s1">&#39;q&#39;</span><span class="p">:</span> <span class="n">text</span><span class="p">}),</span>
+        <span class="s1">&#39;@type&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;suggest&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Suggest&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;@graph&#39;</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="s1">&#39;q&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;q&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="n">es</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">ELASTIC_SEARCH</span><span class="p">]</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;suggester&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">text</span><span class="p">,</span>
+            <span class="s2">&quot;completion&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="s2">&quot;name_suggest&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="mi">10</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">es</span><span class="o">.</span><span class="n">suggest</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;annotations&#39;</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">query</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;/suggest/?&#39;</span> <span class="o">+</span> <span class="n">urlencode</span><span class="p">({</span><span class="s1">&#39;q&#39;</span><span class="p">:</span> <span class="n">text</span><span class="p">})</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;@graph&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;suggester&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;options&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span> <span class="ow">in</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;(C. elegans)&#39;</span><span class="p">,</span><span class="s1">&#39;(mus musculus)&#39;</span><span class="p">,</span><span class="s1">&#39;(D. melanogaster)&#39;</span><span class="p">]):</span>
+                <span class="n">result</span><span class="p">[</span><span class="s1">&#39;@graph&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../encoded.html" >encoded</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

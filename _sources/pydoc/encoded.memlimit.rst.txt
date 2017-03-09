@@ -1,0 +1,7 @@
+encoded.memlimit module
+=======================
+
+.. automodule:: encoded.memlimit
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,7 @@
+encoded.tests.features.test_generics module
+===========================================
+
+.. automodule:: encoded.tests.features.test_generics
+    :members:
+    :undoc-members:
+    :show-inheritance:

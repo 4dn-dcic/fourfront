@@ -1,0 +1,7 @@
+encoded.audit.dataset module
+============================
+
+.. automodule:: encoded.audit.dataset
+    :members:
+    :undoc-members:
+    :show-inheritance:

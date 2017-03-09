@@ -1,0 +1,63 @@
+encoded.tests package
+=====================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    encoded.tests.features
+
+Submodules
+----------
+
+.. toctree::
+
+   encoded.tests.conftest
+   encoded.tests.datafixtures
+   encoded.tests.test_access_key
+   encoded.tests.test_accession_replacement
+   encoded.tests.test_audit_biosample
+   encoded.tests.test_audit_item
+   encoded.tests.test_audit_replicate
+   encoded.tests.test_auditor
+   encoded.tests.test_auth0
+   encoded.tests.test_authentication
+   encoded.tests.test_aws_deploy
+   encoded.tests.test_batch_download
+   encoded.tests.test_create_mapping
+   encoded.tests.test_download
+   encoded.tests.test_edw_hash
+   encoded.tests.test_embedding
+   encoded.tests.test_file
+   encoded.tests.test_fixtures
+   encoded.tests.test_fourfront_submission
+   encoded.tests.test_generate_ontology
+   encoded.tests.test_graph
+   encoded.tests.test_indexing
+   encoded.tests.test_key
+   encoded.tests.test_link
+   encoded.tests.test_ontology_slims
+   encoded.tests.test_owltools
+   encoded.tests.test_permissions
+   encoded.tests.test_post_put_patch
+   encoded.tests.test_schemas
+   encoded.tests.test_search
+   encoded.tests.test_server_defaults
+   encoded.tests.test_types_biosample
+   encoded.tests.test_types_biosource
+   encoded.tests.test_types_experiment
+   encoded.tests.test_types_init_collections
+   encoded.tests.test_types_publication
+   encoded.tests.test_types_vendor
+   encoded.tests.test_views
+   encoded.tests.testing_auditor
+   encoded.tests.testing_views
+
+Module contents
+---------------
+
+.. automodule:: encoded.tests
+    :members:
+    :undoc-members:
+    :show-inheritance:

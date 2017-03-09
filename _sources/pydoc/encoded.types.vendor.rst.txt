@@ -1,0 +1,7 @@
+encoded.types.vendor module
+===========================
+
+.. automodule:: encoded.types.vendor
+    :members:
+    :undoc-members:
+    :show-inheritance:

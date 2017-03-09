@@ -1,0 +1,343 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.types.experiment &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../types.html" accesskey="U">encoded.types</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.types.experiment</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Abstract collection for experiment and integration of all experiment types.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">snovault</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">abstract_collection</span><span class="p">,</span>
+    <span class="n">calculated_property</span><span class="p">,</span>
+    <span class="n">collection</span><span class="p">,</span>
+    <span class="n">load_schema</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">Item</span>
+<span class="p">)</span>
+
+
+<span class="nd">@abstract_collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;experiments&#39;</span><span class="p">,</span>
+    <span class="n">unique_key</span><span class="o">=</span><span class="s1">&#39;accession&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s2">&quot;Experiments&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing of all types of experiments.&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="Experiment"><a class="viewcode-back" href="../../../pydoc/encoded.types.experiment.html#encoded.types.experiment.Experiment">[docs]</a><span class="k">class</span> <span class="nc">Experiment</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The main experiment class.&quot;&quot;&quot;</span>
+
+    <span class="n">base_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Experiment&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Item</span><span class="o">.</span><span class="n">base_types</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/experiment.json&#39;</span><span class="p">)</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;protocol&quot;</span><span class="p">,</span> <span class="s2">&quot;protocol_variation&quot;</span><span class="p">,</span> <span class="s2">&quot;lab&quot;</span><span class="p">,</span> <span class="s2">&quot;award&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;biosample&quot;</span><span class="p">,</span> <span class="s2">&quot;biosample.biosource&quot;</span><span class="p">,</span> <span class="s2">&quot;biosample.modifications&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;biosample.treatments&quot;</span><span class="p">,</span> <span class="s2">&quot;biosample.biosource.individual.organism&quot;</span><span class="p">]</span>
+    <span class="n">name_key</span> <span class="o">=</span> <span class="s1">&#39;accession&#39;</span>
+
+<div class="viewcode-block" id="Experiment.generate_mapid"><a class="viewcode-back" href="../../../pydoc/encoded.types.experiment.html#encoded.types.experiment.Experiment.generate_mapid">[docs]</a>    <span class="k">def</span> <span class="nf">generate_mapid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">experiment_type</span><span class="p">,</span> <span class="n">num</span><span class="p">):</span>
+        <span class="n">delim</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span>
+        <span class="n">mapid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="n">mapid</span> <span class="o">=</span> <span class="n">mapid</span> <span class="o">+</span> <span class="n">delim</span> <span class="o">+</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">experiment_type</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">mapid</span> <span class="o">+</span> <span class="n">delim</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">num</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Experiment.find_current_sop_map"><a class="viewcode-back" href="../../../pydoc/encoded.types.experiment.html#encoded.types.experiment.Experiment.find_current_sop_map">[docs]</a>    <span class="k">def</span> <span class="nf">find_current_sop_map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">experiment_type</span><span class="p">):</span>
+        <span class="n">maps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">suffnum</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">mapid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_mapid</span><span class="p">(</span><span class="n">experiment_type</span><span class="p">,</span> <span class="n">suffnum</span><span class="p">)</span>
+        <span class="n">sop_coll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">&#39;collections&#39;</span><span class="p">][</span><span class="s1">&#39;SopMap&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">sop_coll</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">while</span><span class="p">(</span><span class="kc">True</span><span class="p">):</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="n">sop_coll</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">mapid</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">m</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="n">maps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+                <span class="n">suffnum</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">mapid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_mapid</span><span class="p">(</span><span class="n">experiment_type</span><span class="p">,</span> <span class="n">suffnum</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">maps</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">maps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+    <span class="k">def</span> <span class="nf">_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">sheets</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># if the sop_mapping field is not present see if it should be</span>
+        <span class="k">if</span> <span class="s1">&#39;sop_mapping&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">properties</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">sopmap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_current_sop_map</span><span class="p">(</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;experiment_type&#39;</span><span class="p">])</span>
+            <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;sop_mapping&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">sopmap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">sop_mapping</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sopmap</span><span class="o">.</span><span class="n">uuid</span><span class="p">)</span>
+                <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;sop_mapping&#39;</span><span class="p">][</span><span class="s1">&#39;sop_map&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sop_mapping</span>
+                <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;sop_mapping&#39;</span><span class="p">][</span><span class="s1">&#39;has_sop&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Yes&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;sop_mapping&#39;</span><span class="p">][</span><span class="s1">&#39;has_sop&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;No&quot;</span>
+        <span class="c1"># update self first to ensure &#39;experiment_relation&#39; are stored in self.properties</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Experiment</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_update</span><span class="p">(</span><span class="n">properties</span><span class="p">,</span> <span class="n">sheets</span><span class="p">)</span>
+
+        <span class="n">DicRefRelation</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;controlled by&quot;</span><span class="p">:</span> <span class="s2">&quot;control for&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;derived from&quot;</span><span class="p">:</span> <span class="s2">&quot;source for&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;control for&quot;</span><span class="p">:</span> <span class="s2">&quot;controlled by&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source for&quot;</span><span class="p">:</span> <span class="s2">&quot;derived from&quot;</span>
+        <span class="p">}</span>
+        <span class="n">acc</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uuid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;experiment_relation&#39;</span> <span class="ow">in</span> <span class="n">properties</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">relation</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">[</span><span class="s2">&quot;experiment_relation&quot;</span><span class="p">]:</span>
+                <span class="n">switch</span> <span class="o">=</span> <span class="n">relation</span><span class="p">[</span><span class="s2">&quot;relationship_type&quot;</span><span class="p">]</span>
+                <span class="n">rev_switch</span> <span class="o">=</span> <span class="n">DicRefRelation</span><span class="p">[</span><span class="n">switch</span><span class="p">]</span>
+                <span class="n">related_exp</span> <span class="o">=</span> <span class="n">relation</span><span class="p">[</span><span class="s2">&quot;experiment&quot;</span><span class="p">]</span>
+                <span class="n">relationship_entry</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;relationship_type&quot;</span><span class="p">:</span> <span class="n">rev_switch</span><span class="p">,</span> <span class="s2">&quot;experiment&quot;</span><span class="p">:</span> <span class="n">acc</span><span class="p">}</span>
+                <span class="n">rel_dic</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;experiment_relation&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">relationship_entry</span><span class="p">,</span> <span class="p">]}</span>
+
+                <span class="n">target_exp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">collection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">related_exp</span><span class="p">)</span>
+                <span class="c1"># case one we don&#39;t have relations</span>
+                <span class="k">if</span> <span class="s1">&#39;experiment_relation&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">target_exp</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">target_exp</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">rel_dic</span><span class="p">)</span>
+                    <span class="n">target_exp</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">target_exp</span><span class="o">.</span><span class="n">properties</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># case two we have relations but not the one we need</span>
+                    <span class="k">for</span> <span class="n">target_relation</span> <span class="ow">in</span> <span class="n">target_exp</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;experiment_relation&#39;</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">target_relation</span><span class="p">[</span><span class="s1">&#39;experiment&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">acc</span><span class="p">:</span>
+                            <span class="k">break</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># make data for new experiemnt_relation</span>
+                        <span class="n">target_exp</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;experiment_relation&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">relationship_entry</span><span class="p">)</span>
+                        <span class="n">target_exp</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">target_exp</span><span class="o">.</span><span class="n">properties</span><span class="p">)</span>
+
+    <span class="nd">@calculated_property</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Experiment Sets&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Experiment Sets to which this experiment belongs.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;array&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;items&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Experiment Set&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;linkTo&quot;</span><span class="p">:</span> <span class="s2">&quot;ExperimentSet&quot;</span>
+        <span class="p">}</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="Experiment.experiment_sets"><a class="viewcode-back" href="../../../pydoc/encoded.types.experiment.html#encoded.types.experiment.Experiment.experiment_sets">[docs]</a>    <span class="k">def</span> <span class="nf">experiment_sets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="n">exp_set_coll</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">&#39;collections&#39;</span><span class="p">][</span><span class="s1">&#39;ExperimentSet&#39;</span><span class="p">])</span>
+        <span class="n">exp_set_coll</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">&#39;collections&#39;</span><span class="p">][</span><span class="s1">&#39;ExperimentSetReplicate&#39;</span><span class="p">]))</span>
+        <span class="n">sets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">uuid</span> <span class="ow">in</span> <span class="n">exp_set_coll</span><span class="p">:</span>
+            <span class="n">eset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">collection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">uuid</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">eset</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;experiments_in_set&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uuid</span><span class="p">):</span>
+                    <span class="n">ty</span> <span class="o">=</span> <span class="n">eset</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;experimentset_type&#39;</span><span class="p">]</span>
+                    <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;/experiment_set/&#39;</span>
+                    <span class="k">if</span> <span class="n">ty</span> <span class="o">==</span> <span class="s1">&#39;replicate&#39;</span><span class="p">:</span>
+                        <span class="n">prefix</span> <span class="o">=</span> <span class="s1">&#39;/experiment_set_replicate/&#39;</span>
+                    <span class="n">s</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="p">)</span>
+                    <span class="n">sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">sets</span><span class="p">))</span></div></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;experiments-hi-c&#39;</span><span class="p">,</span>
+    <span class="n">unique_key</span><span class="o">=</span><span class="s1">&#39;accession&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Experiments Hi-C&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing Hi-C Experiments&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="ExperimentHiC"><a class="viewcode-back" href="../../../pydoc/encoded.types.experiment.html#encoded.types.experiment.ExperimentHiC">[docs]</a><span class="k">class</span> <span class="nc">ExperimentHiC</span><span class="p">(</span><span class="n">Experiment</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The experiment class for Hi-C experiments.&quot;&quot;&quot;</span>
+
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;experiment_hi_c&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/experiment_hi_c.json&#39;</span><span class="p">)</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="n">Experiment</span><span class="o">.</span><span class="n">embedded</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;digestion_enzyme&quot;</span><span class="p">,</span> <span class="s2">&quot;submitted_by&quot;</span><span class="p">]</span>
+    <span class="n">name_key</span> <span class="o">=</span> <span class="s1">&#39;accession&#39;</span>
+
+    <span class="nd">@calculated_property</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Experiment summary&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Summary of the experiment, including type, enzyme and biosource.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="ExperimentHiC.experiment_summary"><a class="viewcode-back" href="../../../pydoc/encoded.types.experiment.html#encoded.types.experiment.ExperimentHiC.experiment_summary">[docs]</a>    <span class="k">def</span> <span class="nf">experiment_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">experiment_type</span><span class="o">=</span><span class="s1">&#39;Undefined&#39;</span><span class="p">,</span> <span class="n">digestion_enzyme</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">biosample</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">sum_str</span> <span class="o">=</span> <span class="n">experiment_type</span>
+        <span class="k">if</span> <span class="n">biosample</span><span class="p">:</span>
+            <span class="n">biosamp_props</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">biosample</span><span class="p">,</span> <span class="s1">&#39;@@object&#39;</span><span class="p">)</span>
+            <span class="n">biosource</span> <span class="o">=</span> <span class="n">biosamp_props</span><span class="p">[</span><span class="s1">&#39;biosource_summary&#39;</span><span class="p">]</span>
+            <span class="n">sum_str</span> <span class="o">+=</span> <span class="p">(</span><span class="s1">&#39; on &#39;</span> <span class="o">+</span> <span class="n">biosource</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">digestion_enzyme</span><span class="p">:</span>
+            <span class="n">de_props</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">digestion_enzyme</span><span class="p">,</span> <span class="s1">&#39;@@object&#39;</span><span class="p">)</span>
+            <span class="n">de_name</span> <span class="o">=</span> <span class="n">de_props</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+            <span class="n">sum_str</span> <span class="o">+=</span> <span class="p">(</span><span class="s1">&#39; with &#39;</span> <span class="o">+</span> <span class="n">de_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sum_str</span></div>
+
+    <span class="nd">@calculated_property</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Display Title&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;A calculated title for every object in 4DN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="ExperimentHiC.display_title"><a class="viewcode-back" href="../../../pydoc/encoded.types.experiment.html#encoded.types.experiment.ExperimentHiC.display_title">[docs]</a>    <span class="k">def</span> <span class="nf">display_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">experiment_type</span><span class="o">=</span><span class="s1">&#39;Undefined&#39;</span><span class="p">,</span> <span class="n">digestion_enzyme</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">biosample</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_summary</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">experiment_type</span><span class="p">,</span> <span class="n">digestion_enzyme</span><span class="p">,</span> <span class="n">biosample</span><span class="p">)</span></div></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;experiments-capture-c&#39;</span><span class="p">,</span>
+    <span class="n">unique_key</span><span class="o">=</span><span class="s1">&#39;accession&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Experiments Capture Hi-C&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing Capture Hi-C Experiments&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="ExperimentCaptureC"><a class="viewcode-back" href="../../../pydoc/encoded.types.experiment.html#encoded.types.experiment.ExperimentCaptureC">[docs]</a><span class="k">class</span> <span class="nc">ExperimentCaptureC</span><span class="p">(</span><span class="n">Experiment</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The experiment class for Capture Hi-C experiments.&quot;&quot;&quot;</span>
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;experiment_capture_c&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/experiment_capture_c.json&#39;</span><span class="p">)</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="n">Experiment</span><span class="o">.</span><span class="n">embedded</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;digestion_enzyme&quot;</span><span class="p">,</span>
+                                      <span class="s2">&quot;submitted_by&quot;</span><span class="p">,</span>
+                                      <span class="s2">&quot;targeted_regions&quot;</span><span class="p">,</span>
+                                      <span class="s2">&quot;targeted_regions.target&quot;</span><span class="p">,</span>
+                                      <span class="s2">&quot;targeted_regions.oligo_file&quot;</span><span class="p">]</span>
+    <span class="n">name_key</span> <span class="o">=</span> <span class="s1">&#39;accession&#39;</span>
+
+    <span class="nd">@calculated_property</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Experiment summary&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Summary of the experiment, including type, enzyme and biosource.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="ExperimentCaptureC.experiment_summary"><a class="viewcode-back" href="../../../pydoc/encoded.types.experiment.html#encoded.types.experiment.ExperimentCaptureC.experiment_summary">[docs]</a>    <span class="k">def</span> <span class="nf">experiment_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">experiment_type</span><span class="o">=</span><span class="s1">&#39;Undefined&#39;</span><span class="p">,</span> <span class="n">digestion_enzyme</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">biosample</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">sum_str</span> <span class="o">=</span> <span class="n">experiment_type</span>
+        <span class="k">if</span> <span class="n">biosample</span><span class="p">:</span>
+            <span class="n">biosamp_props</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">biosample</span><span class="p">,</span> <span class="s1">&#39;@@object&#39;</span><span class="p">)</span>
+            <span class="n">biosource</span> <span class="o">=</span> <span class="n">biosamp_props</span><span class="p">[</span><span class="s1">&#39;biosource_summary&#39;</span><span class="p">]</span>
+
+            <span class="n">sum_str</span> <span class="o">+=</span> <span class="p">(</span><span class="s1">&#39; on &#39;</span> <span class="o">+</span> <span class="n">biosource</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">digestion_enzyme</span><span class="p">:</span>
+            <span class="n">de_props</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">digestion_enzyme</span><span class="p">,</span> <span class="s1">&#39;@@object&#39;</span><span class="p">)</span>
+            <span class="n">de_name</span> <span class="o">=</span> <span class="n">de_props</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+            <span class="n">sum_str</span> <span class="o">+=</span> <span class="p">(</span><span class="s1">&#39; with &#39;</span> <span class="o">+</span> <span class="n">de_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sum_str</span></div>
+
+    <span class="nd">@calculated_property</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Display Title&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;A calculated title for every object in 4DN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="ExperimentCaptureC.display_title"><a class="viewcode-back" href="../../../pydoc/encoded.types.experiment.html#encoded.types.experiment.ExperimentCaptureC.display_title">[docs]</a>    <span class="k">def</span> <span class="nf">display_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">experiment_type</span><span class="o">=</span><span class="s1">&#39;Undefined&#39;</span><span class="p">,</span> <span class="n">digestion_enzyme</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">biosample</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_summary</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">experiment_type</span><span class="p">,</span> <span class="n">digestion_enzyme</span><span class="p">,</span> <span class="n">biosample</span><span class="p">)</span></div></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;experiments-repliseq&#39;</span><span class="p">,</span>
+    <span class="n">unique_key</span><span class="o">=</span><span class="s1">&#39;accession&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Experiments Repliseq&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing of Repliseq Experiments&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="ExperimentRepliseq"><a class="viewcode-back" href="../../../pydoc/encoded.types.experiment.html#encoded.types.experiment.ExperimentRepliseq">[docs]</a><span class="k">class</span> <span class="nc">ExperimentRepliseq</span><span class="p">(</span><span class="n">Experiment</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The experiment class for Repliseq experiments.&quot;&quot;&quot;</span>
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;experiment_repliseq&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/experiment_repliseq.json&#39;</span><span class="p">)</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="n">Experiment</span><span class="o">.</span><span class="n">embedded</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;submitted_by&quot;</span><span class="p">]</span>
+    <span class="n">name_key</span> <span class="o">=</span> <span class="s1">&#39;accession&#39;</span>
+
+    <span class="nd">@calculated_property</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Experiment summary&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Summary of the experiment, including type, enzyme and biosource.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="ExperimentRepliseq.experiment_summary"><a class="viewcode-back" href="../../../pydoc/encoded.types.experiment.html#encoded.types.experiment.ExperimentRepliseq.experiment_summary">[docs]</a>    <span class="k">def</span> <span class="nf">experiment_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">experiment_type</span><span class="o">=</span><span class="s1">&#39;Undefined&#39;</span><span class="p">,</span> <span class="n">cell_cycle_stage</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">biosample</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">sum_str</span> <span class="o">=</span> <span class="n">experiment_type</span>
+        <span class="k">if</span> <span class="n">biosample</span><span class="p">:</span>
+            <span class="n">biosamp_props</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">biosample</span><span class="p">,</span> <span class="s1">&#39;@@object&#39;</span><span class="p">)</span>
+            <span class="n">biosource</span> <span class="o">=</span> <span class="n">biosamp_props</span><span class="p">[</span><span class="s1">&#39;biosource_summary&#39;</span><span class="p">]</span>
+            <span class="n">sum_str</span> <span class="o">+=</span> <span class="p">(</span><span class="s1">&#39; on &#39;</span> <span class="o">+</span> <span class="n">biosource</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cell_cycle_stage</span><span class="p">:</span>
+            <span class="n">sum_str</span> <span class="o">+=</span> <span class="p">(</span><span class="s1">&#39; at &#39;</span> <span class="o">+</span> <span class="n">cell_cycle_stage</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sum_str</span></div>
+
+    <span class="nd">@calculated_property</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Display Title&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;A calculated title for every object in 4DN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="ExperimentRepliseq.display_title"><a class="viewcode-back" href="../../../pydoc/encoded.types.experiment.html#encoded.types.experiment.ExperimentRepliseq.display_title">[docs]</a>    <span class="k">def</span> <span class="nf">display_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">experiment_type</span><span class="o">=</span><span class="s1">&#39;Undefined&#39;</span><span class="p">,</span> <span class="n">cell_cycle_stage</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">biosample</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_summary</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">experiment_type</span><span class="p">,</span> <span class="n">cell_cycle_stage</span><span class="p">,</span> <span class="n">biosample</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../types.html" >encoded.types</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

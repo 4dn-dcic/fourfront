@@ -1,0 +1,220 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Beanstalk Deployment &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Database Documentation" href="database.html" />
+    <link rel="prev" title="Overview of encoded Application" href="overview.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="database.html" title="Database Documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="overview.html" title="Overview of encoded Application"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="static_documentation_contents.html" accesskey="U">Tutorials and Other Documents</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="beanstalk-deployment">
+<span id="beanstalk-deployment"></span><h1>Beanstalk Deployment<a class="headerlink" href="#beanstalk-deployment" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="beanstalk-deployment-through-travis">
+<span id="beanstalk-deployment-through-travis"></span><h2>Beanstalk deployment through travis<a class="headerlink" href="#beanstalk-deployment-through-travis" title="Permalink to this headline">¶</a></h2>
+<p>Currently Travis is set to deploy to beansalk on succesful build.</p>
+<ul class="simple">
+<li>Branch &#8216;master&#8217; will deploy to the 4dn-web-dev environment (if all test pass)</li>
+<li>Branch &#8216;prodution&#8217; will deploy to the 4dn-prod environment (if all tests pass)</li>
+</ul>
+<p>So to push something to production it should go through the following steps.</p>
+<ol class="simple">
+<li>Pull request is created for feature branch.</li>
+<li>Pull request accepted and merged to master.</li>
+<li>Travis will pick this up run tests and deploy to 4dn-web-dev</li>
+<li>If that is all succcesful to deploy to production do.</li>
+<li>git checkout production</li>
+<li>git merge master</li>
+<li>edit deploy_beanstalk.py and change version number on line 10 to be next version.</li>
+<li>Check in your changes.</li>
+<li>git push origin production</li>
+<li>Travis will then run tests and if pass will deploy to production</li>
+</ol>
+</div>
+<div class="section" id="dropping-database">
+<span id="dropping-database"></span><h2>Dropping database<a class="headerlink" href="#dropping-database" title="Permalink to this headline">¶</a></h2>
+<p>For test environment the database is not dropped for each deploy.  This means that new upserts,
+which change existing data will in most cases not execute succesfully on the test environment (Unit upgrades are put back in place).</p>
+<p>When that happens we need to drop the database and recreate it, so the inserts can be run.</p>
+<div class="section" id="the-old-hard-way-to-do-it-boooo">
+<span id="the-old-hard-way-to-do-it-boooo"></span><h3>The Old hard way to do it.. boooo :(<a class="headerlink" href="#the-old-hard-way-to-do-it-boooo" title="Permalink to this headline">¶</a></h3>
+<p>Easiest way to do that is to ssh into the beanstalk instance and do the follow:</p>
+<p>** Note ** to ssh in first <code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">awsebcli</span></code> then follow the setup instructions.  With that installed you can simply type eb ssh (ensuring that the master branch is checked out). (If this doesn&#8217;t work, try <code class="docutils literal"><span class="pre">eb</span> <span class="pre">init</span></code> before <code class="docutils literal"><span class="pre">eb</span> <span class="pre">ssh</span></code>)</p>
+<p>Once conneted do the following:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">source</span> /opt/python/current/env
+sudo service httpd stop
+<span class="nb">echo</span> <span class="nv">$RDS_PASSWORD</span>
+
+dropdb -p <span class="nv">$RDS_PORT</span> -h <span class="nv">$RDS_HOSTNAME</span> -U <span class="nv">$RDS_USERNAME</span> -e <span class="nv">$RDS_DB_NAME</span>
+
+createdb -p <span class="nv">$RDS_PORT</span> -h <span class="nv">$RDS_HOSTNAME</span> -U <span class="nv">$RDS_USERNAME</span> -e <span class="nv">$RDS_DB_NAME</span>
+
+
+<span class="c1"># drop indexes in elastic search</span>
+curl -XDELETE <span class="s1">&#39;http://172.31.49.128:9872/annotations&#39;</span>
+
+<span class="c1"># for 4dn-web-dev (Development Environment)</span>
+curl -XDELETE <span class="s1">&#39;http://172.31.49.128:9872/snovault&#39;</span>
+
+<span class="c1"># for production (PLEASE DONT SCREW THIS UP :) )</span>
+curl -XDELETE <span class="s1">&#39;http://172.31.49.128:9872/ffprod&#39;</span>
+
+sudo shutdown -r now
+
+<span class="c1"># this will drop you back to your local machine, if you want to trigger latest build from master (and you know it&#39;s a clean build)</span>
+
+git checkout master
+eb deploy
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-new-awesome-way-to-do-it">
+<span id="the-new-awesome-way-to-do-it"></span><h3>The New awesome way to do it:<a class="headerlink" href="#the-new-awesome-way-to-do-it" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="o">/</span><span class="n">opt</span><span class="o">/</span><span class="n">python</span><span class="o">/</span><span class="n">current</span><span class="o">/</span><span class="n">app</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">dropdb</span>
+
+<span class="c1"># to bring things up again from back home</span>
+<span class="n">git</span> <span class="n">checkout</span> <span class="n">production</span> 
+<span class="n">eb</span> <span class="n">deploy</span>
+</pre></div>
+</div>
+<p>Bye bye data. Use at your own risk, all warranties void.
+<img alt="genghi" src="https://67.media.tumblr.com/6d863550ff51d672f8c3125344119f20/tumblr_oc5gn5Jvtt1qkjik5o1_540.gif" /></p>
+<p>** Note ** this will temporarily bring the site down, for a couple of minutes</p>
+</div>
+</div>
+<div class="section" id="database-backup-restore">
+<span id="database-backup-restore"></span><h2>Database backup / restore<a class="headerlink" href="#database-backup-restore" title="Permalink to this headline">¶</a></h2>
+<p>Database snapshots are automatically taken every day.  To restore a backup on production (4dnweb-prod)</p>
+<ol class="simple">
+<li>Go to the RDS tab and then look at the snapshots page.</li>
+<li>Select the backup you want to restore.</li>
+<li>Click Restore Snapshot</li>
+<li>You will be prompted for a DB Instance Name, name it what you like.</li>
+<li>Go to 4dnweb-prod environment and select configuration -&gt; software configuration</li>
+<li>Change the enviornment variable bnSTaLk_HOSTNAME to the name you just used for the new database.</li>
+<li>Redeploy the applicaition production.</li>
+</ol>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Beanstalk Deployment</a><ul>
+<li><a class="reference internal" href="#beanstalk-deployment-through-travis">Beanstalk deployment through travis</a></li>
+<li><a class="reference internal" href="#dropping-database">Dropping database</a><ul>
+<li><a class="reference internal" href="#the-old-hard-way-to-do-it-boooo">The Old hard way to do it.. boooo :(</a></li>
+<li><a class="reference internal" href="#the-new-awesome-way-to-do-it">The New awesome way to do it:</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#database-backup-restore">Database backup / restore</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="overview.html"
+                        title="previous chapter">Overview of encoded Application</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="database.html"
+                        title="next chapter">Database Documentation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/beanstalk-deployment.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="database.html" title="Database Documentation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="overview.html" title="Overview of encoded Application"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="static_documentation_contents.html" >Tutorials and Other Documents</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

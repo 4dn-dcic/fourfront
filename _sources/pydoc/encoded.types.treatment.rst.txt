@@ -1,0 +1,7 @@
+encoded.types.treatment module
+==============================
+
+.. automodule:: encoded.types.treatment
+    :members:
+    :undoc-members:
+    :show-inheritance:

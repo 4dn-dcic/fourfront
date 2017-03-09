@@ -1,0 +1,86 @@
+.. _module-viz_utilities.style:
+
+====================
+Namespace: ``style``
+====================
+
+
+Member Of :doc:`module-viz_utilities`
+
+
+.. toctree::
+   :maxdepth: 3
+   
+   
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+Functions
+=========
+
+
+
+.. _module-viz_utilities.style.translate3d:
+
+
+``translate3d``
+---------------
+
+
+
+.. js:function:: translate3d()
+
+    
+    
+
+
+.. _module-viz_utilities.style.translate:
+
+
+``translate``
+-------------
+
+
+
+.. js:function:: translate()
+
+    
+    
+
+
+.. _module-viz_utilities.style.rotate3d:
+
+
+``rotate3d``
+------------
+
+
+
+.. js:function:: rotate3d(rotation[, axes])
+
+    
+    :param number rotation: How much to rotate, in degrees.
+    :param string|Array.<string>|Object axes: Axes around which to rotate.
+    
+
+
+.. _module-viz_utilities.style.scale3d:
+
+
+``scale3d``
+-----------
+
+
+
+.. js:function:: scale3d()
+
+    
+    
+
+
+
+
+

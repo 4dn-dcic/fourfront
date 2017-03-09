@@ -1,0 +1,7 @@
+encoded.visualization module
+============================
+
+.. automodule:: encoded.visualization
+    :members:
+    :undoc-members:
+    :show-inheritance:

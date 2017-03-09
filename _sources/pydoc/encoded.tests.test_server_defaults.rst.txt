@@ -1,0 +1,7 @@
+encoded.tests.test_server_defaults module
+=========================================
+
+.. automodule:: encoded.tests.test_server_defaults
+    :members:
+    :undoc-members:
+    :show-inheritance:

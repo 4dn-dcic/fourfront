@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.types.treatment module &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="encoded.types.user module" href="encoded.types.user.html" />
+    <link rel="prev" title="encoded.types.target module" href="encoded.types.target.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.user.html" title="encoded.types.user module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.target.html" title="encoded.types.target module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.types.html" accesskey="U">encoded.types package</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-encoded.types.treatment">
+<span id="encoded-types-treatment-module"></span><h1>encoded.types.treatment module<a class="headerlink" href="#module-encoded.types.treatment" title="Permalink to this headline">¶</a></h1>
+<p>The type file for the collection Treatment.</p>
+<dl class="class">
+<dt id="encoded.types.treatment.Treatment">
+<em class="property">class </em><code class="descclassname">encoded.types.treatment.</code><code class="descname">Treatment</code><span class="sig-paren">(</span><em>registry</em>, <em>models</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/treatment.html#Treatment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.treatment.Treatment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="encoded.types.base.html#encoded.types.base.Item" title="encoded.types.base.Item"><code class="xref py py-class docutils literal"><span class="pre">encoded.types.base.Item</span></code></a></p>
+<p>Treatment class.</p>
+<dl class="attribute">
+<dt id="encoded.types.treatment.Treatment.base_types">
+<code class="descname">base_types</code><em class="property"> = ['Treatment', 'Item']</em><a class="headerlink" href="#encoded.types.treatment.Treatment.base_types" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.treatment.Treatment.embedded">
+<code class="descname">embedded</code><em class="property"> = []</em><a class="headerlink" href="#encoded.types.treatment.Treatment.embedded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.treatment.Treatment.schema">
+<code class="descname">schema</code><em class="property"> = OrderedDict([('title', 'Treatment'), ('description', 'Abstract Schema for submitting a specific type of treatment.'), ('id', '/profiles/treatment.json'), ('$schema', 'http://json-schema.org/draft-04/schema#'), ('type', 'object'), ('required', ['description', 'lab', 'award']), ('identifyingProperties', ['uuid', 'aliases']), ('additionalProperties', False), ('properties', OrderedDict([('description', OrderedDict([('title', 'Description'), ('description', 'A brief plain text description of the treatment.'), ('type', 'string')]))]))])</em><a class="headerlink" href="#encoded.types.treatment.Treatment.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="encoded.types.treatment.Treatment.treatment_type">
+<code class="descname">treatment_type</code><span class="sig-paren">(</span><em>request</em>, <em>rnai_type=None</em>, <em>target=None</em>, <em>chemical=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/treatment.html#Treatment.treatment_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.treatment.Treatment.treatment_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="encoded.types.treatment.TreatmentChemical">
+<em class="property">class </em><code class="descclassname">encoded.types.treatment.</code><code class="descname">TreatmentChemical</code><span class="sig-paren">(</span><em>registry</em>, <em>models</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/treatment.html#TreatmentChemical"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.treatment.TreatmentChemical" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#encoded.types.treatment.Treatment" title="encoded.types.treatment.Treatment"><code class="xref py py-class docutils literal"><span class="pre">encoded.types.treatment.Treatment</span></code></a></p>
+<p>Subclass of treatment for chemical treatments.</p>
+<dl class="attribute">
+<dt id="encoded.types.treatment.TreatmentChemical.embedded">
+<code class="descname">embedded</code><em class="property"> = []</em><a class="headerlink" href="#encoded.types.treatment.TreatmentChemical.embedded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.treatment.TreatmentChemical.item_type">
+<code class="descname">item_type</code><em class="property"> = 'treatment_chemical'</em><a class="headerlink" href="#encoded.types.treatment.TreatmentChemical.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.treatment.TreatmentChemical.schema">
+<code class="descname">schema</code><em class="property"> = OrderedDict([('title', 'Chemical Treatment'), ('description', 'Schema for submitting a chemical or drug treatment.'), ('id', '/profiles/treatment_chemical.json'), ('$schema', 'http://json-schema.org/draft-04/schema#'), ('type', 'object'), ('required', ['chemical', 'lab', 'award']), ('identifyingProperties', ['uuid', 'aliases']), ('additionalProperties', False), ('mixinProperties', [OrderedDict([('$ref', 'treatment.json#/properties')]), OrderedDict([('$ref', 'mixins.json#/schema_version')]), OrderedDict([('$ref', 'mixins.json#/uuid')]), OrderedDict([('$ref', 'mixins.json#/aliases')]), OrderedDict([('$ref', 'mixins.json#/status')]), OrderedDict([('$ref', 'mixins.json#/attribution')]), OrderedDict([('$ref', 'mixins.json#/references')]), OrderedDict([('$ref', 'mixins.json#/notes')]), OrderedDict([('$ref', 'mixins.json#/submitted')]), OrderedDict([('$ref', 'mixins.json#/documents')])]), ('properties', OrderedDict([('documents', {'title': 'Documents', 'description': 'Documents that provide additional information (not data file).', 'comment': 'See Documents sheet or collection for existing items.', 'type': 'array', 'default': [], 'uniqueItems': True, 'items': {'title': 'Document', 'description': 'A document that provides additional information (not data file).', 'type': 'string', 'linkTo': 'Document'}}), ('date_created', {'rdfs:subPropertyOf': 'dc:created', 'title': 'Date created', 'exclude_from': 'submit4dn', 'type': 'string', 'anyOf': [{'format': 'date-time'}, {'format': 'date'}], 'serverDefault': 'now', 'permission': 'import_items'}), ('submitted_by', {'rdfs:subPropertyOf': 'dc:creator', 'title': 'Submitted by', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'User', 'serverDefault': 'userid', 'permission': 'import_items'}), ('notes', {'title': 'Notes', 'description': 'DCIC internal notes.', 'type': 'string', 'exclude_from': 'submit4dn', 'elasticsearch_mapping_index_type': {'title': 'Field mapping index type', 'description': 'Defines one of three types of indexing available', 'type': 'string', 'default': 'analyzed', 'enum': ['analyzed', 'not_analyzed', 'no']}}), ('references', {'title': 'References', 'description': 'The publications that provide more information about the object.', 'type': 'array', 'default': [], 'uniqueItems': True, 'items': {'title': 'Reference', 'description': 'A publication that provide smore information about the object.', 'type': 'string', 'linkTo': 'Publication'}}), ('lab', {'title': 'Lab', 'description': 'Lab associated with the submission.', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'Lab', 'linkSubmitsFor': True, 'default': ''}), ('award', {'title': 'Grant', 'description': 'Grant associated with the submission.', 'exclude_from': 'submit4dn', 'default': '', 'type': 'string', 'linkTo': 'Award'}), ('status', {'title': 'Status', 'exclude_from': 'submit4dn', 'type': 'string', 'default': 'in review by lab', 'permission': 'import_items', 'enum': ['released', 'current', 'revoked', 'deleted', 'replaced', 'in review by lab', 'in review by project', 'released to project']}), ('aliases', {'title': 'Lab aliases', 'description': 'Lab specific identifiers to reference an object.', 'type': 'array', 'comment': 'Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).', 'default': [], 'uniqueItems': True, 'items': {'uniqueKey': 'alias', 'title': 'Lab alias', 'description': 'A lab specific identifier to reference an object.', 'type': 'string', 'pattern': '^\\S+:\\S+'}}), ('uuid', {'title': 'UUID', 'type': 'string', 'format': 'uuid', 'exclude_from': 'submit4dn', 'serverDefault': 'uuid4', 'permission': 'import_items', 'requestMethod': 'POST'}), ('schema_version', {'title': 'Schema Version', 'internal_comment': 'Do not submit, value is assigned by the server. The version of the JSON schema that the server uses to validate the object. Schema version indicates generation of schema used to save version to to enable upgrade steps to work. Individual schemas should set the default.', 'type': 'string', 'exclude_from': 'submit4dn', 'pattern': '^\\d+(\\.\\d+)*$', 'requestMethod': [], 'default': '1'}), ('description', {'title': 'Description', 'description': 'A brief plain text description of the treatment.', 'type': 'string'}), ('chemical', {'title': 'Drug or Chemical', 'type': 'string', 'internal_comment': 'restricted to chEBI terms - validate against IDs?'}), ('concentration', {'title': 'Concentration', 'type': 'number'}), ('concentration_units', {'title': 'Concentration units', 'type': 'string', 'enum': ['pM', 'nM', 'μM', 'μg/mL', 'mM', 'mg/mL', 'ng/mL', 'M', 'percent', 'units', 'U/mL']}), ('duration', {'title': 'Duration', 'type': 'number'}), ('duration_units', {'title': 'Duration units', 'type': 'string', 'enum': ['second', 'minute', 'hour', 'day']}), ('temperature', {'title': 'Temperature (°C)', 'type': 'number'})]))])</em><a class="headerlink" href="#encoded.types.treatment.TreatmentChemical.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="encoded.types.treatment.TreatmentRnai">
+<em class="property">class </em><code class="descclassname">encoded.types.treatment.</code><code class="descname">TreatmentRnai</code><span class="sig-paren">(</span><em>registry</em>, <em>models</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/treatment.html#TreatmentRnai"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.treatment.TreatmentRnai" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#encoded.types.treatment.Treatment" title="encoded.types.treatment.Treatment"><code class="xref py py-class docutils literal"><span class="pre">encoded.types.treatment.Treatment</span></code></a></p>
+<p>Subclass of treatment for RNAi treatments.</p>
+<dl class="attribute">
+<dt id="encoded.types.treatment.TreatmentRnai.embedded">
+<code class="descname">embedded</code><em class="property"> = ['rnai_vendor', 'rnai_constructs', 'target']</em><a class="headerlink" href="#encoded.types.treatment.TreatmentRnai.embedded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.treatment.TreatmentRnai.item_type">
+<code class="descname">item_type</code><em class="property"> = 'treatment_rnai'</em><a class="headerlink" href="#encoded.types.treatment.TreatmentRnai.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.treatment.TreatmentRnai.schema">
+<code class="descname">schema</code><em class="property"> = OrderedDict([('title', 'RNAi Treatment'), ('description', 'Schema for submitting a RNAi treatment.'), ('id', '/profiles/treatment_rnai.json'), ('$schema', 'http://json-schema.org/draft-04/schema#'), ('type', 'object'), ('required', ['rnai_type', 'lab', 'award']), ('identifyingProperties', ['uuid', 'aliases']), ('additionalProperties', False), ('mixinProperties', [OrderedDict([('$ref', 'treatment.json#/properties')]), OrderedDict([('$ref', 'mixins.json#/schema_version')]), OrderedDict([('$ref', 'mixins.json#/uuid')]), OrderedDict([('$ref', 'mixins.json#/aliases')]), OrderedDict([('$ref', 'mixins.json#/status')]), OrderedDict([('$ref', 'mixins.json#/attribution')]), OrderedDict([('$ref', 'mixins.json#/references')]), OrderedDict([('$ref', 'mixins.json#/notes')]), OrderedDict([('$ref', 'mixins.json#/submitted')]), OrderedDict([('$ref', 'mixins.json#/documents')])]), ('properties', OrderedDict([('documents', {'title': 'Documents', 'description': 'Documents that provide additional information (not data file).', 'comment': 'See Documents sheet or collection for existing items.', 'type': 'array', 'default': [], 'uniqueItems': True, 'items': {'title': 'Document', 'description': 'A document that provides additional information (not data file).', 'type': 'string', 'linkTo': 'Document'}}), ('date_created', {'rdfs:subPropertyOf': 'dc:created', 'title': 'Date created', 'exclude_from': 'submit4dn', 'type': 'string', 'anyOf': [{'format': 'date-time'}, {'format': 'date'}], 'serverDefault': 'now', 'permission': 'import_items'}), ('submitted_by', {'rdfs:subPropertyOf': 'dc:creator', 'title': 'Submitted by', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'User', 'serverDefault': 'userid', 'permission': 'import_items'}), ('notes', {'title': 'Notes', 'description': 'DCIC internal notes.', 'type': 'string', 'exclude_from': 'submit4dn', 'elasticsearch_mapping_index_type': {'title': 'Field mapping index type', 'description': 'Defines one of three types of indexing available', 'type': 'string', 'default': 'analyzed', 'enum': ['analyzed', 'not_analyzed', 'no']}}), ('references', {'title': 'References', 'description': 'The publications that provide more information about the object.', 'type': 'array', 'default': [], 'uniqueItems': True, 'items': {'title': 'Reference', 'description': 'A publication that provide smore information about the object.', 'type': 'string', 'linkTo': 'Publication'}}), ('lab', {'title': 'Lab', 'description': 'Lab associated with the submission.', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'Lab', 'linkSubmitsFor': True, 'default': ''}), ('award', {'title': 'Grant', 'description': 'Grant associated with the submission.', 'exclude_from': 'submit4dn', 'default': '', 'type': 'string', 'linkTo': 'Award'}), ('status', {'title': 'Status', 'exclude_from': 'submit4dn', 'type': 'string', 'default': 'in review by lab', 'permission': 'import_items', 'enum': ['released', 'current', 'revoked', 'deleted', 'replaced', 'in review by lab', 'in review by project', 'released to project']}), ('aliases', {'title': 'Lab aliases', 'description': 'Lab specific identifiers to reference an object.', 'type': 'array', 'comment': 'Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).', 'default': [], 'uniqueItems': True, 'items': {'uniqueKey': 'alias', 'title': 'Lab alias', 'description': 'A lab specific identifier to reference an object.', 'type': 'string', 'pattern': '^\\S+:\\S+'}}), ('uuid', {'title': 'UUID', 'type': 'string', 'format': 'uuid', 'exclude_from': 'submit4dn', 'serverDefault': 'uuid4', 'permission': 'import_items', 'requestMethod': 'POST'}), ('schema_version', {'title': 'Schema Version', 'internal_comment': 'Do not submit, value is assigned by the server. The version of the JSON schema that the server uses to validate the object. Schema version indicates generation of schema used to save version to to enable upgrade steps to work. Individual schemas should set the default.', 'type': 'string', 'exclude_from': 'submit4dn', 'pattern': '^\\d+(\\.\\d+)*$', 'requestMethod': [], 'default': '1'}), ('description', {'title': 'Description', 'description': 'A brief plain text description of the treatment.', 'type': 'string'}), ('rnai_type', {'title': 'Type of RNAi', 'type': 'string', 'enum': ['shRNA', 'siRNA']}), ('target', {'title': 'Target', 'description': 'The targeted gene or genomic region that is targeted by the modification.', 'type': 'string', 'linkTo': 'Target'}), ('target_sequence', {'title': 'Target Sequence', 'description': 'The nucleotide sequence of the target region.', 'type': 'string', 'pattern': '^[ATGCN]+$'}), ('rnai_vendor', {'title': 'Source of RNAi', 'description': 'RNAi center that provided the RNAi.', 'type': 'string', 'linkTo': 'Vendor'}), ('rnai_constructs', {'title': 'Constructs', 'description': 'Recombinant constructs used for RNAi', 'type': 'array', 'items': OrderedDict([('title', 'Constructs'), ('description', 'A recombinant construct.'), ('type', 'string'), ('linkTo', 'Construct')])}), ('url', {'title': 'URL', 'description': 'An external resource with additional information about the construct.', 'type': 'string', 'format': 'uri'})]))])</em><a class="headerlink" href="#encoded.types.treatment.TreatmentRnai.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="encoded.types.target.html"
+                        title="previous chapter">encoded.types.target module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="encoded.types.user.html"
+                        title="next chapter">encoded.types.user module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pydoc/encoded.types.treatment.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.user.html" title="encoded.types.user module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.target.html" title="encoded.types.target module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.types.html" >encoded.types package</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

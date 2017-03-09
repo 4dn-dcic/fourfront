@@ -1,0 +1,7 @@
+encoded.tests.test_types_publication module
+===========================================
+
+.. automodule:: encoded.tests.test_types_publication
+    :members:
+    :undoc-members:
+    :show-inheritance:

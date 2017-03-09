@@ -1,0 +1,7 @@
+encoded.commands.generate_ontology module
+=========================================
+
+.. automodule:: encoded.commands.generate_ontology
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,7 @@
+encoded.types.experiment module
+===============================
+
+.. automodule:: encoded.types.experiment
+    :members:
+    :undoc-members:
+    :show-inheritance:

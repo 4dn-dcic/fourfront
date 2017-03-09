@@ -1,0 +1,10 @@
+encoded.upgrade package
+=======================
+
+Module contents
+---------------
+
+.. automodule:: encoded.upgrade
+    :members:
+    :undoc-members:
+    :show-inheritance:

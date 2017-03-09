@@ -1,0 +1,97 @@
+.. _module-viz_chart-data-controller.state:
+
+=================
+Object: ``state``
+=================
+
+
+Member Of :doc:`module-viz_chart-data-controller`
+
+.. toctree::
+   :maxdepth: 3
+   
+   
+.. contents:: Local Navigation
+   :local:
+
+
+
+Description
+===========
+
+Contains "state" of ChartDataController. Some of these are deprecated and will be removed.
+The most important ones are experiments and filteredExperiments.
+
+
+
+
+
+Members
+=======
+
+
+.. _module-viz_chart-data-controller.state.experiments:
+
+``experiments``
+---------------
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.state.filteredExperiments:
+
+``filteredExperiments``
+-----------------------
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.state.fetching:
+
+``fetching``
+------------
+
+
+
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.state.state:
+
+``state``
+---------
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.state.shortLabel:
+
+``shortLabel``
+--------------
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.state.expanded:
+
+``expanded``
+------------
+
+
+
+
+
+
+
+

@@ -1,0 +1,277 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.tests.testing_views module &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="encoded.types package" href="encoded.types.html" />
+    <link rel="prev" title="encoded.tests.testing_auditor module" href="encoded.tests.testing_auditor.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.html" title="encoded.types package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="encoded.tests.testing_auditor.html" title="encoded.tests.testing_auditor module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.tests.html" accesskey="U">encoded.tests package</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-encoded.tests.testing_views">
+<span id="encoded-tests-testing-views-module"></span><h1>encoded.tests.testing_views module<a class="headerlink" href="#module-encoded.tests.testing_views" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="encoded.tests.testing_views.TestingDependencies">
+<em class="property">class </em><code class="descclassname">encoded.tests.testing_views.</code><code class="descname">TestingDependencies</code><span class="sig-paren">(</span><em>registry</em>, <em>model</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/tests/testing_views.html#TestingDependencies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.tests.testing_views.TestingDependencies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">snovault.resources.Item</span></code></p>
+<dl class="attribute">
+<dt id="encoded.tests.testing_views.TestingDependencies.item_type">
+<code class="descname">item_type</code><em class="property"> = 'testing_dependencies'</em><a class="headerlink" href="#encoded.tests.testing_views.TestingDependencies.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.tests.testing_views.TestingDependencies.schema">
+<code class="descname">schema</code><em class="property"> = {'type': 'object', 'dependencies': {'dep1': ['dep2'], 'dep2': ['dep1']}, 'properties': {'dep1': {'type': 'string'}, 'dep2': {'type': 'string', 'enum': ['dep2']}}}</em><a class="headerlink" href="#encoded.tests.testing_views.TestingDependencies.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="encoded.tests.testing_views.TestingDownload">
+<em class="property">class </em><code class="descclassname">encoded.tests.testing_views.</code><code class="descname">TestingDownload</code><span class="sig-paren">(</span><em>registry</em>, <em>model</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/tests/testing_views.html#TestingDownload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.tests.testing_views.TestingDownload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">snovault.attachment.ItemWithAttachment</span></code></p>
+<dl class="attribute">
+<dt id="encoded.tests.testing_views.TestingDownload.item_type">
+<code class="descname">item_type</code><em class="property"> = 'testing_download'</em><a class="headerlink" href="#encoded.tests.testing_views.TestingDownload.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.tests.testing_views.TestingDownload.schema">
+<code class="descname">schema</code><em class="property"> = {'type': 'object', 'properties': {'attachment': {'type': 'object', 'attachment': True, 'properties': {'type': {'type': 'string', 'enum': ['image/png']}}}, 'attachment2': {'type': 'object', 'attachment': True, 'properties': {'type': {'type': 'string', 'enum': ['image/png']}}}}}</em><a class="headerlink" href="#encoded.tests.testing_views.TestingDownload.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="encoded.tests.testing_views.TestingKey">
+<em class="property">class </em><code class="descclassname">encoded.tests.testing_views.</code><code class="descname">TestingKey</code><span class="sig-paren">(</span><em>registry</em>, <em>model</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/tests/testing_views.html#TestingKey"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.tests.testing_views.TestingKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">snovault.resources.Item</span></code></p>
+<dl class="attribute">
+<dt id="encoded.tests.testing_views.TestingKey.item_type">
+<code class="descname">item_type</code><em class="property"> = 'testing_key'</em><a class="headerlink" href="#encoded.tests.testing_views.TestingKey.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.tests.testing_views.TestingKey.schema">
+<code class="descname">schema</code><em class="property"> = {'type': 'object', 'properties': {'name': {'type': 'string', 'uniqueKey': True}, 'accession': {'type': 'string', 'uniqueKey': 'testing_accession'}}}</em><a class="headerlink" href="#encoded.tests.testing_views.TestingKey.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="encoded.tests.testing_views.TestingLinkSource">
+<em class="property">class </em><code class="descclassname">encoded.tests.testing_views.</code><code class="descname">TestingLinkSource</code><span class="sig-paren">(</span><em>registry</em>, <em>model</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/tests/testing_views.html#TestingLinkSource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.tests.testing_views.TestingLinkSource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">snovault.resources.Item</span></code></p>
+<dl class="attribute">
+<dt id="encoded.tests.testing_views.TestingLinkSource.item_type">
+<code class="descname">item_type</code><em class="property"> = 'testing_link_source'</em><a class="headerlink" href="#encoded.tests.testing_views.TestingLinkSource.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.tests.testing_views.TestingLinkSource.schema">
+<code class="descname">schema</code><em class="property"> = {'type': 'object', 'properties': {'name': {'type': 'string'}, 'uuid': {'type': 'string'}, 'target': {'type': 'string', 'linkTo': 'TestingLinkTarget'}, 'status': {'type': 'string'}}, 'required': ['target'], 'additionalProperties': False}</em><a class="headerlink" href="#encoded.tests.testing_views.TestingLinkSource.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="encoded.tests.testing_views.TestingLinkTarget">
+<em class="property">class </em><code class="descclassname">encoded.tests.testing_views.</code><code class="descname">TestingLinkTarget</code><span class="sig-paren">(</span><em>registry</em>, <em>model</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/tests/testing_views.html#TestingLinkTarget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.tests.testing_views.TestingLinkTarget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">snovault.resources.Item</span></code></p>
+<dl class="attribute">
+<dt id="encoded.tests.testing_views.TestingLinkTarget.embedded">
+<code class="descname">embedded</code><em class="property"> = ['reverse']</em><a class="headerlink" href="#encoded.tests.testing_views.TestingLinkTarget.embedded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.tests.testing_views.TestingLinkTarget.item_type">
+<code class="descname">item_type</code><em class="property"> = 'testing_link_target'</em><a class="headerlink" href="#encoded.tests.testing_views.TestingLinkTarget.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.tests.testing_views.TestingLinkTarget.name_key">
+<code class="descname">name_key</code><em class="property"> = 'name'</em><a class="headerlink" href="#encoded.tests.testing_views.TestingLinkTarget.name_key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.tests.testing_views.TestingLinkTarget.rev">
+<code class="descname">rev</code><em class="property"> = {'reverse': ('TestingLinkSource', 'target')}</em><a class="headerlink" href="#encoded.tests.testing_views.TestingLinkTarget.rev" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="encoded.tests.testing_views.TestingLinkTarget.reverse">
+<code class="descname">reverse</code><span class="sig-paren">(</span><em>request</em>, <em>reverse</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/tests/testing_views.html#TestingLinkTarget.reverse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.tests.testing_views.TestingLinkTarget.reverse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.tests.testing_views.TestingLinkTarget.schema">
+<code class="descname">schema</code><em class="property"> = {'type': 'object', 'properties': {'name': {'type': 'string', 'uniqueKey': True}, 'uuid': {'type': 'string'}, 'status': {'type': 'string'}}, 'additionalProperties': False}</em><a class="headerlink" href="#encoded.tests.testing_views.TestingLinkTarget.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="encoded.tests.testing_views.TestingPostPutPatch">
+<em class="property">class </em><code class="descclassname">encoded.tests.testing_views.</code><code class="descname">TestingPostPutPatch</code><span class="sig-paren">(</span><em>registry</em>, <em>model</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/tests/testing_views.html#TestingPostPutPatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.tests.testing_views.TestingPostPutPatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">snovault.resources.Item</span></code></p>
+<dl class="attribute">
+<dt id="encoded.tests.testing_views.TestingPostPutPatch.item_type">
+<code class="descname">item_type</code><em class="property"> = 'testing_post_put_patch'</em><a class="headerlink" href="#encoded.tests.testing_views.TestingPostPutPatch.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.tests.testing_views.TestingPostPutPatch.schema">
+<code class="descname">schema</code><em class="property"> = {'required': ['required'], 'type': 'object', 'properties': {'schema_version': {'type': 'string', 'pattern': '^\\d+(\\.\\d+)*$', 'requestMethod': [], 'default': '1'}, 'uuid': {'title': 'UUID', 'description': '', 'type': 'string', 'format': 'uuid', 'permission': 'import_items', 'requestMethod': 'POST'}, 'required': {'type': 'string'}, 'simple1': {'type': 'string', 'default': 'simple1 default'}, 'simple2': {'type': 'string', 'default': 'simple2 default'}, 'protected': {'type': 'string', 'default': 'protected default', 'permission': 'import_items'}, 'protected_link': {'type': 'string', 'linkTo': 'TestingLinkTarget', 'permission': 'import_items'}}}</em><a class="headerlink" href="#encoded.tests.testing_views.TestingPostPutPatch.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="encoded.tests.testing_views.TestingServerDefault">
+<em class="property">class </em><code class="descclassname">encoded.tests.testing_views.</code><code class="descname">TestingServerDefault</code><span class="sig-paren">(</span><em>registry</em>, <em>model</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/tests/testing_views.html#TestingServerDefault"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.tests.testing_views.TestingServerDefault" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">snovault.resources.Item</span></code></p>
+<dl class="attribute">
+<dt id="encoded.tests.testing_views.TestingServerDefault.item_type">
+<code class="descname">item_type</code><em class="property"> = 'testing_server_default'</em><a class="headerlink" href="#encoded.tests.testing_views.TestingServerDefault.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.tests.testing_views.TestingServerDefault.schema">
+<code class="descname">schema</code><em class="property"> = {'type': 'object', 'properties': {'uuid': {'serverDefault': 'uuid4', 'type': 'string'}, 'user': {'serverDefault': 'userid', 'linkTo': 'User', 'type': 'string'}, 'now': {'serverDefault': 'now', 'format': 'date-time', 'type': 'string'}, 'accession': {'serverDefault': 'accession', 'accessionType': 'AB', 'format': 'accession', 'type': 'string'}}}</em><a class="headerlink" href="#encoded.tests.testing_views.TestingServerDefault.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.tests.testing_views.allowed">
+<code class="descclassname">encoded.tests.testing_views.</code><code class="descname">allowed</code><span class="sig-paren">(</span><em>context</em>, <em>request</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/tests/testing_views.html#allowed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.tests.testing_views.allowed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.tests.testing_views.includeme">
+<code class="descclassname">encoded.tests.testing_views.</code><code class="descname">includeme</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/tests/testing_views.html#includeme"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.tests.testing_views.includeme" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.tests.testing_views.testing_retry">
+<code class="descclassname">encoded.tests.testing_views.</code><code class="descname">testing_retry</code><span class="sig-paren">(</span><em>context</em>, <em>request</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/tests/testing_views.html#testing_retry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.tests.testing_views.testing_retry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.tests.testing_views.user">
+<code class="descclassname">encoded.tests.testing_views.</code><code class="descname">user</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/tests/testing_views.html#user"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.tests.testing_views.user" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="encoded.tests.testing_auditor.html"
+                        title="previous chapter">encoded.tests.testing_auditor module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="encoded.types.html"
+                        title="next chapter">encoded.types package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pydoc/encoded.tests.testing_views.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.html" title="encoded.types package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="encoded.tests.testing_auditor.html" title="encoded.tests.testing_auditor module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.tests.html" >encoded.tests package</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.audit.item &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../audit.html" accesskey="U">encoded.audit</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.audit.item</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">snovault</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">AuditFailure</span><span class="p">,</span>
+    <span class="n">audit_checker</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">snovault</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">UPGRADER</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">snovault.schema_utils</span> <span class="k">import</span> <span class="n">validate</span>
+<span class="kn">from</span> <span class="nn">snovault.util</span> <span class="k">import</span> <span class="n">simple_path_ids</span>
+
+
+<span class="nd">@audit_checker</span><span class="p">(</span><span class="s1">&#39;Item&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s1">&#39;object&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="audit_item_schema"><a class="viewcode-back" href="../../../pydoc/encoded.audit.item.html#encoded.audit.item.audit_item_schema">[docs]</a><span class="k">def</span> <span class="nf">audit_item_schema</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">system</span><span class="p">):</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">system</span><span class="p">[</span><span class="s1">&#39;context&#39;</span><span class="p">]</span>
+    <span class="n">registry</span> <span class="o">=</span> <span class="n">system</span><span class="p">[</span><span class="s1">&#39;registry&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">context</span><span class="o">.</span><span class="n">schema</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="n">properties</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">current_version</span> <span class="o">=</span> <span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;schema_version&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">target_version</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">type_info</span><span class="o">.</span><span class="n">schema_version</span>
+    <span class="k">if</span> <span class="n">target_version</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">current_version</span> <span class="o">!=</span> <span class="n">target_version</span><span class="p">:</span>
+        <span class="n">upgrader</span> <span class="o">=</span> <span class="n">registry</span><span class="p">[</span><span class="n">UPGRADER</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">properties</span> <span class="o">=</span> <span class="n">upgrader</span><span class="o">.</span><span class="n">upgrade</span><span class="p">(</span>
+                <span class="n">context</span><span class="o">.</span><span class="n">type_info</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">current_version</span><span class="p">,</span> <span class="n">target_version</span><span class="p">,</span>
+                <span class="n">finalize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span> <span class="n">registry</span><span class="o">=</span><span class="n">registry</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+            <span class="k">raise</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> upgrading from </span><span class="si">%r</span><span class="s1"> to </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">current_version</span><span class="p">,</span> <span class="n">target_version</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;upgrade failure&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INTERNAL_ACTION&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;schema_version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_version</span>
+
+    <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;uuid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">uuid</span><span class="p">)</span>
+    <span class="n">validated</span><span class="p">,</span> <span class="n">errors</span> <span class="o">=</span> <span class="n">validate</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">schema</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">properties</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">error</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">:</span>
+        <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;validation error&#39;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">error</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
+            <span class="n">category</span> <span class="o">+=</span> <span class="s1">&#39;: &#39;</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">path</span><span class="p">)</span>
+        <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;Object </span><span class="si">{}</span><span class="s1"> has schema error </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">],</span> <span class="n">error</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="n">category</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INTERNAL_ACTION&#39;</span><span class="p">)</span></div>
+
+<span class="c1"># 4 levels of status 0-3</span>
+<span class="c1"># embedded sub items should have an equal or greater level</span>
+<span class="c1"># than that of the item in which they are embedded</span>
+<span class="n">STATUS_LEVEL</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># standard_status</span>
+    <span class="s1">&#39;released&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;current&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;revoked&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;released to project&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s1">&#39;in review by project&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="s1">&#39;in review by lab&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;deleted&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="s1">&#39;replaced&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+
+    <span class="c1"># additional file statuses</span>
+    <span class="s1">&#39;uploading&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;uploaded&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s1">&#39;upload failed&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+
+    <span class="c1"># publication</span>
+    <span class="s1">&#39;published&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<span class="nd">@audit_checker</span><span class="p">(</span><span class="s1">&#39;Item&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="s1">&#39;object&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="audit_item_status"><a class="viewcode-back" href="../../../pydoc/encoded.audit.item.html#encoded.audit.item.audit_item_status">[docs]</a><span class="k">def</span> <span class="nf">audit_item_status</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">system</span><span class="p">):</span>
+    <span class="k">if</span> <span class="s1">&#39;status&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="n">level</span> <span class="o">=</span> <span class="n">STATUS_LEVEL</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="n">context</span> <span class="o">=</span> <span class="n">system</span><span class="p">[</span><span class="s1">&#39;context&#39;</span><span class="p">]</span>
+    <span class="n">request</span> <span class="o">=</span> <span class="n">system</span><span class="p">[</span><span class="s1">&#39;request&#39;</span><span class="p">]</span>
+    <span class="n">linked</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">schema_path</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">type_info</span><span class="o">.</span><span class="n">schema_links</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">schema_path</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;supercedes&#39;</span><span class="p">,</span> <span class="s1">&#39;step_run&#39;</span><span class="p">]:</span>
+            <span class="k">continue</span>
+        <span class="n">linked</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">simple_path_ids</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">schema_path</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">linked</span><span class="p">:</span>
+        <span class="n">linked_value</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s1">&#39;@@object&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;status&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">linked_value</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">linked_value</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;disabled&#39;</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">linked_level</span> <span class="o">=</span> <span class="n">STATUS_LEVEL</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">linked_value</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">],</span> <span class="mi">50</span><span class="p">)</span>
+<span class="c1">#        if linked_level == 0:</span>
+<span class="c1">#            detail = &#39;{} {} has {} subobject {}&#39;.format(</span>
+<span class="c1">#                value[&#39;status&#39;], value[&#39;@id&#39;], linked_value[&#39;status&#39;], linked_value[&#39;@id&#39;])</span>
+<span class="c1">#            yield AuditFailure(&#39;mismatched status&#39;, detail, level=&#39;INTERNAL_ACTION&#39;)</span>
+        <span class="k">if</span> <span class="n">linked_level</span> <span class="o">&lt;</span> <span class="n">level</span><span class="p">:</span>
+            <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> </span><span class="si">{}</span><span class="s1"> has </span><span class="si">{}</span><span class="s1"> subobject </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">value</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">],</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">],</span> <span class="n">linked_value</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">],</span> <span class="n">linked_value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span>
+            <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;mismatched status&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INTERNAL_ACTION&#39;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../audit.html" >encoded.audit</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

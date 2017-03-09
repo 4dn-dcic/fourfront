@@ -1,0 +1,7 @@
+encoded.types.summary_statistic module
+======================================
+
+.. automodule:: encoded.types.summary_statistic
+    :members:
+    :undoc-members:
+    :show-inheritance:

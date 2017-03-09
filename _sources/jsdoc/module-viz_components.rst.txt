@@ -1,0 +1,38 @@
+==========================
+Module: ``viz/components``
+==========================
+
+
+
+
+.. toctree::
+   :maxdepth: 3
+   
+   module-viz_components.Legend
+   module-viz_components.ZoomCursor
+   
+
+.. contents:: Local Navigation
+   :local:
+
+
+Description
+===========
+
+A collection of components to aid in visualization or charting.
+
+
+
+
+
+
+
+
+Examples
+========
+
+.. code-block:: javascript
+   :caption: Import and use components like any other modules, e.g.
+
+   var { FetchingView, Legend } = require('./viz/components');
+

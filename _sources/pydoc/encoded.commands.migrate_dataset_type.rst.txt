@@ -1,0 +1,7 @@
+encoded.commands.migrate_dataset_type module
+============================================
+
+.. automodule:: encoded.commands.migrate_dataset_type
+    :members:
+    :undoc-members:
+    :show-inheritance:

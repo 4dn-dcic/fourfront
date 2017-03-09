@@ -1,0 +1,730 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.search &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../encoded.html" accesskey="U">encoded</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.search</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">pyramid.view</span> <span class="k">import</span> <span class="n">view_config</span>
+<span class="kn">from</span> <span class="nn">snovault</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">AbstractCollection</span><span class="p">,</span>
+    <span class="n">TYPES</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">snovault.elasticsearch</span> <span class="k">import</span> <span class="n">ELASTIC_SEARCH</span>
+<span class="kn">from</span> <span class="nn">snovault.resource_views</span> <span class="k">import</span> <span class="n">collection_view_listing_db</span>
+<span class="kn">from</span> <span class="nn">elasticsearch.helpers</span> <span class="k">import</span> <span class="n">scan</span>
+<span class="kn">from</span> <span class="nn">pyramid.httpexceptions</span> <span class="k">import</span> <span class="n">HTTPBadRequest</span>
+<span class="kn">from</span> <span class="nn">pyramid.security</span> <span class="k">import</span> <span class="n">effective_principals</span>
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="k">import</span> <span class="n">urlencode</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+
+
+<div class="viewcode-block" id="includeme"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.includeme">[docs]</a><span class="k">def</span> <span class="nf">includeme</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_route</span><span class="p">(</span><span class="s1">&#39;search&#39;</span><span class="p">,</span> <span class="s1">&#39;/search{slash:/?}&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_route</span><span class="p">(</span><span class="s1">&#39;browse&#39;</span><span class="p">,</span> <span class="s1">&#39;/browse{slash:/?}&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_route</span><span class="p">(</span><span class="s1">&#39;available_facets&#39;</span><span class="p">,</span> <span class="s1">&#39;/facets{slash:/?}&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+<span class="n">sanitize_search_string_re</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[</span><span class="se">\\</span><span class="s1">\+\-\&amp;\|\!\(\)\{\}\[\]\^\~\:\/</span><span class="se">\\</span><span class="s1">\*\?]&#39;</span><span class="p">)</span>
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">route_name</span><span class="o">=</span><span class="s1">&#39;search&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="s1">&#39;search&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="search"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.search">[docs]</a><span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">search_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_generator</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">forced_type</span><span class="o">=</span><span class="s1">&#39;Search&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Search view connects to ElasticSearch and returns the results</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">types</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">TYPES</span><span class="p">]</span>
+    <span class="n">search_base</span> <span class="o">=</span> <span class="n">normalize_query</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="c1">### INITIALIZE RESULT</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;@context&#39;</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">route_path</span><span class="p">(</span><span class="s1">&#39;jsonld_context&#39;</span><span class="p">),</span>
+        <span class="s1">&#39;@id&#39;</span><span class="p">:</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">forced_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">search_base</span><span class="p">,</span>
+        <span class="s1">&#39;@type&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">forced_type</span><span class="p">],</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">forced_type</span><span class="p">,</span>
+        <span class="s1">&#39;filters&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;facets&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;@graph&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;notification&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;sort&#39;</span><span class="p">:</span> <span class="p">{}</span>  <span class="c1"># probably could eliminate</span>
+    <span class="p">}</span>
+    <span class="n">principals</span> <span class="o">=</span> <span class="n">effective_principals</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+    <span class="n">es</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">ELASTIC_SEARCH</span><span class="p">]</span>
+    <span class="n">es_index</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;snovault.elasticsearch.index&#39;</span><span class="p">]</span>
+    <span class="n">search_audit</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">has_permission</span><span class="p">(</span><span class="s1">&#39;search_audit&#39;</span><span class="p">)</span>
+
+    <span class="n">from_</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="n">get_pagination</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+    <span class="c1">### PREPARE SEARCH TERM</span>
+    <span class="n">prepared_terms</span> <span class="o">=</span> <span class="n">prepare_search_term</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+    <span class="n">doc_types</span> <span class="o">=</span> <span class="n">set_doc_types</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">types</span><span class="p">,</span> <span class="n">search_type</span><span class="p">)</span>
+
+    <span class="c1"># set up clear_filters path</span>
+    <span class="n">result</span><span class="p">[</span><span class="s1">&#39;clear_filters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">clear_filters_setup</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">doc_types</span><span class="p">,</span> <span class="n">forced_type</span><span class="p">)</span>
+
+    <span class="c1">### SET TYPE FILTERS</span>
+    <span class="n">build_type_filters</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">doc_types</span><span class="p">,</span> <span class="n">types</span><span class="p">)</span>
+
+    <span class="c1">### GET FILTERED QUERY</span>
+    <span class="c1"># Builds filtered query which supports multiple facet selection</span>
+    <span class="n">result_fields</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">list_result_fields</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">doc_types</span><span class="p">))</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">get_filtered_query</span><span class="p">(</span><span class="n">prepared_terms</span><span class="p">,</span>
+                               <span class="n">result_fields</span><span class="p">,</span>
+                               <span class="n">principals</span><span class="p">,</span>
+                               <span class="n">doc_types</span><span class="p">)</span>
+
+    <span class="c1"># TODO: decide if the schemas are useful</span>
+    <span class="c1"># commented out as not returning them currently</span>
+    <span class="c1"># schemas = [types[doc_type].schema for doc_type in doc_types]</span>
+
+    <span class="c1">### Set sort order</span>
+    <span class="c1"># has_sort = set_sort_order(request, search_term, types, doc_types, query, result)</span>
+    <span class="c1"># TODO: implement BOOST here? For now, don&#39;t set a sort order</span>
+    <span class="n">has_sort</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1">### Set filters</span>
+    <span class="n">used_filters</span> <span class="o">=</span> <span class="n">set_filters</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+
+    <span class="c1">### Set starting facets</span>
+    <span class="n">facets</span> <span class="o">=</span> <span class="n">initialize_facets</span><span class="p">(</span><span class="n">types</span><span class="p">,</span> <span class="n">doc_types</span><span class="p">,</span> <span class="n">search_audit</span><span class="p">,</span> <span class="n">principals</span><span class="p">)</span>
+
+    <span class="c1">### Adding facets to the query</span>
+    <span class="n">query</span><span class="p">[</span><span class="s1">&#39;aggs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">set_facets</span><span class="p">(</span><span class="n">facets</span><span class="p">,</span> <span class="n">used_filters</span><span class="p">,</span> <span class="n">principals</span><span class="p">,</span> <span class="n">doc_types</span><span class="p">)</span>
+
+    <span class="c1">### Execute the query</span>
+    <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+        <span class="n">es_results</span> <span class="o">=</span> <span class="n">get_all_results</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">size</span><span class="p">:</span>
+        <span class="n">es_results</span> <span class="o">=</span> <span class="n">es</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">es_index</span><span class="p">,</span> <span class="n">from_</span><span class="o">=</span><span class="n">from_</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># fallback size for elasticsearch is 10</span>
+        <span class="n">es_results</span> <span class="o">=</span> <span class="n">es</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">es_index</span><span class="p">)</span>
+
+    <span class="c1">### Record total number of hits</span>
+    <span class="n">result</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">total</span> <span class="o">=</span> <span class="n">es_results</span><span class="p">[</span><span class="s1">&#39;hits&#39;</span><span class="p">][</span><span class="s1">&#39;total&#39;</span><span class="p">]</span>
+
+    <span class="n">schemas</span> <span class="o">=</span> <span class="p">(</span><span class="n">types</span><span class="p">[</span><span class="n">item_type</span><span class="p">]</span><span class="o">.</span><span class="n">schema</span> <span class="k">for</span> <span class="n">item_type</span> <span class="ow">in</span> <span class="n">doc_types</span><span class="p">)</span>
+    <span class="n">result</span><span class="p">[</span><span class="s1">&#39;facets&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_facets</span><span class="p">(</span><span class="n">es_results</span><span class="p">,</span> <span class="n">facets</span><span class="p">,</span> <span class="n">used_filters</span><span class="p">,</span> <span class="n">schemas</span><span class="p">,</span> <span class="n">total</span><span class="p">)</span>
+
+    <span class="c1"># Add batch actions</span>
+    <span class="c1"># TODO: figure out exactly what this does. Provide download URLs?</span>
+    <span class="c1"># Implement later</span>
+    <span class="c1"># result.update(search_result_actions(request, doc_types, es_results))</span>
+
+    <span class="c1">### Add all link for collections</span>
+    <span class="k">if</span> <span class="n">size</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]:</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s1">&#39;limit&#39;</span><span class="p">]</span>
+        <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;limit&#39;</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">))</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">?</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">resource_path</span><span class="p">(</span><span class="n">context</span><span class="p">),</span> <span class="n">urlencode</span><span class="p">(</span><span class="n">params</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]:</span>
+        <span class="c1"># http://googlewebmastercentral.blogspot.com/2014/02/faceted-navigation-best-and-5-of-worst.html</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">=</span> <span class="mi">404</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;notification&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;No results found&#39;</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;@graph&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">result</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">return_generator</span> <span class="k">else</span> <span class="p">[]</span>
+
+    <span class="n">result</span><span class="p">[</span><span class="s1">&#39;notification&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Success&#39;</span>
+
+    <span class="c1">### Format results for JSON-LD</span>
+    <span class="n">graph</span> <span class="o">=</span> <span class="n">format_results</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">es_results</span><span class="p">[</span><span class="s1">&#39;hits&#39;</span><span class="p">][</span><span class="s1">&#39;hits&#39;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">__parent__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">return_generator</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">return_generator</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">graph</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="s1">&#39;@graph&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;@graph&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">route_name</span><span class="o">=</span><span class="s1">&#39;browse&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="s1">&#39;search&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="browse"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.browse">[docs]</a><span class="k">def</span> <span class="nf">browse</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">search_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_generator</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simply use search results for browse view</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">search</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">search_type</span><span class="p">,</span> <span class="n">return_generator</span><span class="p">,</span> <span class="n">forced_type</span><span class="o">=</span><span class="s1">&#39;Browse&#39;</span><span class="p">)</span></div>
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">AbstractCollection</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span>
+             <span class="n">name</span><span class="o">=</span><span class="s1">&#39;listing&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="collection_view"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.collection_view">[docs]</a><span class="k">def</span> <span class="nf">collection_view</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simply use search results for collections views (e.g./biosamples/)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">search</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">context</span><span class="o">.</span><span class="n">type_info</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">route_name</span><span class="o">=</span><span class="s1">&#39;available_facets&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="s1">&#39;search&#39;</span><span class="p">,</span> <span class="n">renderer</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="get_available_facets"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.get_available_facets">[docs]</a><span class="k">def</span> <span class="nf">get_available_facets</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">search_type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Method to get available facets for a content/data type; built off of search() without querying Elasticsearch.</span>
+<span class="sd">    Unlike in search(), due to lack of ES query, does not return possible terms nor counts of experiments matching the terms.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">types</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">TYPES</span><span class="p">]</span>
+    <span class="n">doc_types</span> <span class="o">=</span> <span class="n">set_doc_types</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">types</span><span class="p">,</span> <span class="n">search_type</span><span class="p">)</span>
+    <span class="n">principals</span> <span class="o">=</span> <span class="n">effective_principals</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+    <span class="n">facets</span> <span class="o">=</span> <span class="n">initialize_facets</span><span class="p">(</span><span class="n">types</span><span class="p">,</span> <span class="n">doc_types</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">has_permission</span><span class="p">(</span><span class="s1">&#39;search_audit&#39;</span><span class="p">),</span> <span class="n">principals</span><span class="p">)</span>
+
+    <span class="c1">### Mini version of format_facets</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">facet</span> <span class="ow">in</span> <span class="n">facets</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s1">&#39;field&#39;</span><span class="p">:</span> <span class="n">field</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">facet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+        <span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="get_pagination"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.get_pagination">[docs]</a><span class="k">def</span> <span class="nf">get_pagination</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fill from_ and size parameters for search if given in the query string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">from_</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;from&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;limit&#39;</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">size</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+       <span class="n">size</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="mi">25</span>
+    <span class="k">return</span> <span class="n">from_</span><span class="p">,</span> <span class="n">size</span></div>
+
+
+<div class="viewcode-block" id="get_all_results"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.get_all_results">[docs]</a><span class="k">def</span> <span class="nf">get_all_results</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">origQuery</span><span class="p">):</span>
+    <span class="n">es</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">ELASTIC_SEARCH</span><span class="p">]</span>
+    <span class="n">es_index</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;snovault.elasticsearch.index&#39;</span><span class="p">]</span>
+    <span class="n">from_</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">sizeIncrement</span> <span class="o">=</span> <span class="mi">1000</span> <span class="c1"># Decrease this to like 5 or 10 to test.</span>
+
+    <span class="n">es_result</span> <span class="o">=</span> <span class="n">es</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">origQuery</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">es_index</span><span class="p">,</span> <span class="n">from_</span><span class="o">=</span><span class="n">from_</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">sizeIncrement</span><span class="p">)</span> <span class="c1"># get our aggregations from here</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="n">es_result</span><span class="p">[</span><span class="s1">&#39;hits&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;total&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">extraRequestsNeeded</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">total</span> <span class="o">/</span> <span class="n">sizeIncrement</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span> <span class="c1"># Decrease by 1 (first es_result already happened)</span>
+
+    <span class="k">if</span> <span class="n">extraRequestsNeeded</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">es_result</span>
+
+    <span class="c1"># We don&#39;t need to grab aggs for subsequent queries, already obtained from first one, incr. performance instead maybe.</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="p">{</span> <span class="n">k</span><span class="p">:</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">origQuery</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s1">&#39;aggs&#39;</span> <span class="p">}</span>
+
+    <span class="k">while</span> <span class="n">extraRequestsNeeded</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># print(str(extraRequestsNeeded) + &quot; requests left to get all results.&quot;)</span>
+        <span class="n">from_</span> <span class="o">=</span> <span class="n">from_</span> <span class="o">+</span> <span class="n">sizeIncrement</span>
+        <span class="n">subsequent_es_result</span> <span class="o">=</span> <span class="n">es</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">es_index</span><span class="p">,</span> <span class="n">from_</span><span class="o">=</span><span class="n">from_</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">sizeIncrement</span><span class="p">)</span>
+        <span class="n">es_result</span><span class="p">[</span><span class="s1">&#39;hits&#39;</span><span class="p">][</span><span class="s1">&#39;hits&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">es_result</span><span class="p">[</span><span class="s1">&#39;hits&#39;</span><span class="p">][</span><span class="s1">&#39;hits&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">subsequent_es_result</span><span class="p">[</span><span class="s1">&#39;hits&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;hits&#39;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">extraRequestsNeeded</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="c1"># print(&quot;Found &quot; + str(len(es_result[&#39;hits&#39;][&#39;hits&#39;])) + &#39; results so far.&#39;)</span>
+    <span class="k">return</span> <span class="n">es_result</span></div>
+
+
+<div class="viewcode-block" id="normalize_query"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.normalize_query">[docs]</a><span class="k">def</span> <span class="nf">normalize_query</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Normalize the query used to make the search. If no type is provided,</span>
+<span class="sd">    use type=Item</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">types</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">TYPES</span><span class="p">]</span>
+    <span class="n">fixed_types</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">types</span><span class="p">[</span><span class="n">v</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;type&#39;</span> <span class="ow">and</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">types</span> <span class="k">else</span> <span class="n">v</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">)</span>
+    <span class="n">qs</span> <span class="o">=</span> <span class="n">urlencode</span><span class="p">([</span>
+        <span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span> <span class="n">v</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">fixed_types</span>
+    <span class="p">])</span>
+    <span class="c1"># default to type=Item if no type is specified</span>
+    <span class="n">qs</span> <span class="o">=</span> <span class="s1">&#39;?&#39;</span> <span class="o">+</span> <span class="n">qs</span> <span class="k">if</span> <span class="n">qs</span> <span class="k">else</span> <span class="s1">&#39;?type=Item&#39;</span>
+    <span class="k">if</span> <span class="s1">&#39;type=&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">qs</span><span class="p">:</span>
+        <span class="n">qs</span> <span class="o">+=</span> <span class="s1">&#39;&amp;type=Item&#39;</span>
+    <span class="k">return</span> <span class="n">qs</span></div>
+
+
+<div class="viewcode-block" id="clear_filters_setup"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.clear_filters_setup">[docs]</a><span class="k">def</span> <span class="nf">clear_filters_setup</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">doc_types</span><span class="p">,</span> <span class="n">forced_type</span><span class="p">):</span>
+    <span class="c1"># Clear Filters path -- make a path that clears all non-datatype filters.</span>
+    <span class="c1"># http://stackoverflow.com/questions/16491988/how-to-convert-a-list-of-strings-to-a-query-string#answer-16492046</span>
+    <span class="n">searchterm_specs</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">getall</span><span class="p">(</span><span class="s1">&#39;searchTerm&#39;</span><span class="p">)</span>
+    <span class="n">searchterm_only</span> <span class="o">=</span> <span class="n">urlencode</span><span class="p">([(</span><span class="s2">&quot;searchTerm&quot;</span><span class="p">,</span> <span class="n">searchterm</span><span class="p">)</span> <span class="k">for</span> <span class="n">searchterm</span> <span class="ow">in</span> <span class="n">searchterm_specs</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">searchterm_only</span><span class="p">:</span>
+        <span class="c1"># Search term in query string; clearing keeps that</span>
+        <span class="n">clear_qs</span> <span class="o">=</span> <span class="n">searchterm_only</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Possibly type(s) in query string</span>
+        <span class="n">clear_qs</span> <span class="o">=</span> <span class="n">urlencode</span><span class="p">([(</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="n">typ</span><span class="p">)</span> <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">doc_types</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">request</span><span class="o">.</span><span class="n">route_path</span><span class="p">(</span><span class="n">forced_type</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">slash</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="p">((</span><span class="s1">&#39;?&#39;</span> <span class="o">+</span> <span class="n">clear_qs</span><span class="p">)</span> <span class="k">if</span> <span class="n">clear_qs</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="build_type_filters"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.build_type_filters">[docs]</a><span class="k">def</span> <span class="nf">build_type_filters</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">doc_types</span><span class="p">,</span> <span class="n">types</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set the type filters for the search. If no doc_types, default to Item</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">doc_types</span><span class="p">:</span>
+        <span class="n">doc_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Item&#39;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">item_type</span> <span class="ow">in</span> <span class="n">doc_types</span><span class="p">:</span>
+            <span class="n">ti</span> <span class="o">=</span> <span class="n">types</span><span class="p">[</span><span class="n">item_type</span><span class="p">]</span>
+            <span class="n">qs</span> <span class="o">=</span> <span class="n">urlencode</span><span class="p">([</span>
+                <span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span> <span class="n">v</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">k</span> <span class="o">==</span> <span class="s1">&#39;type&#39;</span> <span class="ow">and</span> <span class="n">types</span><span class="p">[</span><span class="s1">&#39;Item&#39;</span> <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="s1">&#39;*&#39;</span> <span class="k">else</span> <span class="n">v</span><span class="p">]</span> <span class="ow">is</span> <span class="n">ti</span><span class="p">)</span>
+            <span class="p">])</span>
+            <span class="n">result</span><span class="p">[</span><span class="s1">&#39;filters&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s1">&#39;field&#39;</span><span class="p">:</span> <span class="s1">&#39;type&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;term&#39;</span><span class="p">:</span> <span class="n">ti</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="s1">&#39;remove&#39;</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">?</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">qs</span><span class="p">)</span>
+            <span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="prepare_search_term"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.prepare_search_term">[docs]</a><span class="k">def</span> <span class="nf">prepare_search_term</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Prepares search terms by making a dictionary where the keys are fields</span>
+<span class="sd">    and the values are arrays of query strings</span>
+<span class="sd">    Ignore certain keywords, such as type, format, and field</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">prepared_terms</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">prepared_vals</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;frame&#39;</span><span class="p">,</span> <span class="s1">&#39;format&#39;</span><span class="p">,</span> <span class="s1">&#39;limit&#39;</span><span class="p">,</span> <span class="s1">&#39;sort&#39;</span><span class="p">,</span> <span class="s1">&#39;from&#39;</span><span class="p">,</span> <span class="s1">&#39;field&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="s1">&#39;embedded.&#39;</span> <span class="o">+</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">prepared_terms</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">prepared_terms</span><span class="p">[</span><span class="s1">&#39;embedded.&#39;</span> <span class="o">+</span> <span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">prepared_terms</span><span class="p">[</span><span class="s1">&#39;embedded.&#39;</span> <span class="o">+</span> <span class="n">field</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">prepared_terms</span></div>
+
+
+<div class="viewcode-block" id="set_doc_types"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.set_doc_types">[docs]</a><span class="k">def</span> <span class="nf">set_doc_types</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">types</span><span class="p">,</span> <span class="n">search_type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set the type of documents resulting from the search; order and check for</span>
+<span class="sd">    invalid types as well.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">doc_types</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">search_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">doc_types</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">getall</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;*&#39;</span> <span class="ow">in</span> <span class="n">doc_types</span><span class="p">:</span>
+            <span class="n">doc_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Item&#39;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">doc_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">search_type</span><span class="p">]</span>
+    <span class="c1"># Normalize to item_type</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">doc_types</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">({</span><span class="n">types</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">doc_types</span><span class="p">})</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="c1"># Check for invalid types</span>
+        <span class="n">bad_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">doc_types</span> <span class="k">if</span> <span class="n">t</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">types</span><span class="p">]</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Invalid type: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">bad_types</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="n">HTTPBadRequest</span><span class="p">(</span><span class="n">explanation</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">doc_types</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">doc_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Item&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">doc_types</span></div>
+
+<div class="viewcode-block" id="get_search_fields"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.get_search_fields">[docs]</a><span class="k">def</span> <span class="nf">get_search_fields</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">doc_types</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns set of columns that are being searched and highlights</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;uuid&#39;</span><span class="p">}</span>
+    <span class="n">highlights</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">types</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">TYPES</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">doc_type</span> <span class="ow">in</span> <span class="n">doc_types</span><span class="p">:</span>
+        <span class="n">type_info</span> <span class="o">=</span> <span class="n">types</span><span class="p">[</span><span class="n">doc_type</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">type_info</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;boost_values&#39;</span><span class="p">,</span> <span class="p">()):</span>
+            <span class="n">fields</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;embedded.&#39;</span> <span class="o">+</span> <span class="n">value</span><span class="p">)</span>
+            <span class="n">highlights</span><span class="p">[</span><span class="s1">&#39;embedded.&#39;</span> <span class="o">+</span> <span class="n">value</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">return</span> <span class="n">fields</span><span class="p">,</span> <span class="n">highlights</span></div>
+
+
+<div class="viewcode-block" id="list_result_fields"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.list_result_fields">[docs]</a><span class="k">def</span> <span class="nf">list_result_fields</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">doc_types</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns set of fields that are requested by user or default fields.</span>
+<span class="sd">    These fields are used to further limit the results from the search.</span>
+<span class="sd">    Note that you must provide the full fieldname with embeds, such as:</span>
+<span class="sd">    &#39;field=biosample.biosource.individual.organism.name&#39; and not just</span>
+<span class="sd">    &#39;field=name&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;frame&#39;</span><span class="p">)</span>
+    <span class="n">fields_requested</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">getall</span><span class="p">(</span><span class="s1">&#39;field&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">fields_requested</span><span class="p">:</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;embedded.@id&#39;</span><span class="p">,</span> <span class="s1">&#39;embedded.@type&#39;</span><span class="p">}</span>
+        <span class="n">fields</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="s1">&#39;embedded.&#39;</span> <span class="o">+</span> <span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields_requested</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">frame</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;embedded&#39;</span><span class="p">,</span> <span class="s1">&#39;object&#39;</span><span class="p">]:</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">frame</span> <span class="o">+</span> <span class="s1">&#39;.*&#39;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;embedded.*&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">fields</span></div>
+
+
+<span class="c1"># TODO: Make ES5 complaint query dsl (&#39;query&#39; should be ok, but not &#39;filter&#39;)</span>
+<div class="viewcode-block" id="get_filtered_query"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.get_filtered_query">[docs]</a><span class="k">def</span> <span class="nf">get_filtered_query</span><span class="p">(</span><span class="n">prepared_terms</span><span class="p">,</span> <span class="n">result_fields</span><span class="p">,</span> <span class="n">principals</span><span class="p">,</span> <span class="n">doc_types</span><span class="p">):</span>
+    <span class="c1"># prepare the query from prepared_terms</span>
+    <span class="n">bool_query</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;should&quot;</span><span class="p">:[]}</span>
+    <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">terms</span> <span class="ow">in</span> <span class="n">prepared_terms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># Replaces query_search (text search?) w/ specific tests for field/term.</span>
+        <span class="n">this_query</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;query_string&quot;</span><span class="p">:{</span> <span class="s2">&quot;default_operator&quot;</span> <span class="p">:</span> <span class="s2">&quot;OR&quot;</span> <span class="p">}}</span>
+        <span class="n">this_query</span><span class="p">[</span><span class="s2">&quot;query_string&quot;</span><span class="p">][</span><span class="s2">&quot;fields&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">field</span><span class="p">]</span>
+
+        <span class="n">query_prep</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="se">\&quot;</span><span class="si">{0}</span><span class="se">\&quot;</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">term</span><span class="p">)</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">terms</span><span class="p">]</span>
+        <span class="n">this_query</span><span class="p">[</span><span class="s2">&quot;query_string&quot;</span><span class="p">][</span><span class="s2">&quot;query&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">query_prep</span><span class="p">)</span>
+        <span class="n">bool_query</span><span class="p">[</span><span class="s2">&quot;should&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">this_query</span><span class="p">)</span>
+    <span class="c1">### FOR ES1</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;bool&quot;</span> <span class="p">:</span> <span class="n">bool_query</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;filter&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;and&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;filters&#39;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="s1">&#39;terms&#39;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s1">&#39;principals_allowed.view&#39;</span><span class="p">:</span> <span class="n">principals</span>
+                        <span class="p">}</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="s1">&#39;terms&#39;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s1">&#39;embedded.@type.raw&#39;</span><span class="p">:</span> <span class="n">doc_types</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">]</span>
+            <span class="p">}</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;_source&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">result_fields</span><span class="p">),</span>
+    <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="set_filters"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.set_filters">[docs]</a><span class="k">def</span> <span class="nf">set_filters</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sets filters in the query. Use only for types. Specific fields are contained</span>
+<span class="sd">    within the query_string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">query_filters</span> <span class="o">=</span> <span class="n">query</span><span class="p">[</span><span class="s1">&#39;filter&#39;</span><span class="p">][</span><span class="s1">&#39;and&#39;</span><span class="p">][</span><span class="s1">&#39;filters&#39;</span><span class="p">]</span>
+    <span class="n">used_filters</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;limit&#39;</span><span class="p">,</span> <span class="s1">&#39;y.limit&#39;</span><span class="p">,</span> <span class="s1">&#39;x.limit&#39;</span><span class="p">,</span> <span class="s1">&#39;mode&#39;</span><span class="p">,</span> <span class="s1">&#39;annotation&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;format&#39;</span><span class="p">,</span> <span class="s1">&#39;frame&#39;</span><span class="p">,</span> <span class="s1">&#39;datastore&#39;</span><span class="p">,</span> <span class="s1">&#39;field&#39;</span><span class="p">,</span> <span class="s1">&#39;region&#39;</span><span class="p">,</span> <span class="s1">&#39;genome&#39;</span><span class="p">,</span>
+                     <span class="s1">&#39;sort&#39;</span><span class="p">,</span> <span class="s1">&#39;from&#39;</span><span class="p">,</span> <span class="s1">&#39;referrer&#39;</span><span class="p">]:</span>
+            <span class="k">continue</span>
+        <span class="k">elif</span> <span class="n">field</span> <span class="o">==</span> <span class="s1">&#39;type&#39;</span> <span class="ow">and</span> <span class="n">term</span> <span class="o">!=</span> <span class="s1">&#39;Item&#39;</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="c1"># Add filter to result</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="n">urlencode</span><span class="p">([</span>
+            <span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span> <span class="n">v</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="o">!=</span> <span class="n">term</span>
+        <span class="p">])</span>
+        <span class="n">remove_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">?</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">qs</span><span class="p">)</span>
+        <span class="c1"># default to searching type=Item rather than empty filter path</span>
+        <span class="k">if</span> <span class="n">remove_path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;?&#39;</span><span class="p">:</span>
+            <span class="n">remove_path</span> <span class="o">+=</span> <span class="s1">&#39;type=Item&#39;</span>
+
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;filters&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s1">&#39;field&#39;</span><span class="p">:</span> <span class="n">field</span><span class="p">,</span>
+            <span class="s1">&#39;term&#39;</span><span class="p">:</span> <span class="n">term</span><span class="p">,</span>
+            <span class="s1">&#39;remove&#39;</span><span class="p">:</span> <span class="n">remove_path</span>
+        <span class="p">})</span>
+
+        <span class="k">if</span> <span class="n">field</span> <span class="o">==</span> <span class="s1">&#39;searchTerm&#39;</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Add filter to query</span>
+        <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;audit&#39;</span><span class="p">):</span>
+            <span class="n">query_field</span> <span class="o">=</span> <span class="n">field</span>
+        <span class="k">elif</span> <span class="n">field</span> <span class="o">==</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span>
+            <span class="n">query_field</span> <span class="o">=</span> <span class="s1">&#39;embedded.@type.raw&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">query_field</span> <span class="o">=</span> <span class="s1">&#39;embedded.&#39;</span> <span class="o">+</span> <span class="n">field</span> <span class="o">+</span> <span class="s1">&#39;.raw&#39;</span>
+
+        <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">used_filters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">used_filters</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">term</span><span class="p">]</span>
+            <span class="n">query_filters</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s1">&#39;terms&#39;</span> <span class="p">:</span> <span class="p">{</span> <span class="n">query_field</span> <span class="p">:</span> <span class="n">used_filters</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="p">}</span>
+            <span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Update query[&#39;filters&#39;][&#39;and&#39;][&#39;filters&#39;][N] where N === { &#39;terms&#39; : ... }</span>
+            <span class="c1"># with term.</span>
+            <span class="n">query_filters</span><span class="o">.</span><span class="n">remove</span><span class="p">({</span>
+                <span class="s1">&#39;terms&#39;</span> <span class="p">:</span> <span class="p">{</span> <span class="n">query_field</span> <span class="p">:</span> <span class="n">used_filters</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="p">}</span>
+            <span class="p">})</span>
+            <span class="n">used_filters</span><span class="p">[</span><span class="n">field</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
+            <span class="n">query_filters</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s1">&#39;terms&#39;</span> <span class="p">:</span> <span class="p">{</span> <span class="n">query_field</span> <span class="p">:</span> <span class="n">used_filters</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="p">}</span>
+            <span class="p">})</span>
+
+        <span class="c1">#used_filters[field].append(term)</span>
+
+    <span class="k">return</span> <span class="n">used_filters</span></div>
+
+
+<div class="viewcode-block" id="initialize_facets"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.initialize_facets">[docs]</a><span class="k">def</span> <span class="nf">initialize_facets</span><span class="p">(</span><span class="n">types</span><span class="p">,</span> <span class="n">doc_types</span><span class="p">,</span> <span class="n">search_audit</span><span class="p">,</span> <span class="n">principals</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialize the facets used for the search. If searching across multiple</span>
+<span class="sd">    doc_types, only use the &#39;Data Type&#39; facet</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">facets</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Data Type&#39;</span><span class="p">}),</span>
+    <span class="p">]</span>
+    <span class="n">audit_facets</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s1">&#39;audit.ERROR.category&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Audit category: ERROR&#39;</span><span class="p">}),</span>
+        <span class="p">(</span><span class="s1">&#39;audit.NOT_COMPLIANT.category&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Audit category: NOT COMPLIANT&#39;</span><span class="p">}),</span>
+        <span class="p">(</span><span class="s1">&#39;audit.WARNING.category&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Audit category: WARNING&#39;</span><span class="p">}),</span>
+        <span class="p">(</span><span class="s1">&#39;audit.INTERNAL_ACTION.category&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Audit category: DCC ACTION&#39;</span><span class="p">})</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">doc_types</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="s1">&#39;facets&#39;</span> <span class="ow">in</span> <span class="n">types</span><span class="p">[</span><span class="n">doc_types</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">schema</span><span class="p">:</span>
+        <span class="n">facets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">types</span><span class="p">[</span><span class="n">doc_types</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">schema</span><span class="p">[</span><span class="s1">&#39;facets&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+    <span class="c1"># Display all audits if logged in, or all but INTERNAL_ACTION if logged out</span>
+    <span class="k">for</span> <span class="n">audit_facet</span> <span class="ow">in</span> <span class="n">audit_facets</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">search_audit</span> <span class="ow">and</span> <span class="s1">&#39;group.submitter&#39;</span> <span class="ow">in</span> <span class="n">principals</span> <span class="ow">or</span> <span class="s1">&#39;INTERNAL_ACTION&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">audit_facet</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">facets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">audit_facet</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">facets</span></div>
+
+
+<span class="c1"># TODO: polish this</span>
+<div class="viewcode-block" id="set_facets"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.set_facets">[docs]</a><span class="k">def</span> <span class="nf">set_facets</span><span class="p">(</span><span class="n">facets</span><span class="p">,</span> <span class="n">used_filters</span><span class="p">,</span> <span class="n">principals</span><span class="p">,</span> <span class="n">doc_types</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sets facets in the query using filters</span>
+
+<span class="sd">    :param facets: A list of tuples containing (0) field in object dot notation,  and (1) a dict or OrderedDict with title property.</span>
+<span class="sd">    :param used_filters: Dict of filters which are set for the ES query. Key is field type, e.g. &#39;experiments_in_set.award.project&#39;, and value is list of terms (strings).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">aggs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">facetFields</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">facets</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="c1"># List of first entry of tuples in facets list.</span>
+    <span class="c1"># E.g. &#39;type&#39;,&#39;experimentset_type&#39;,&#39;experiments_in_set.award.project&#39;, ...</span>
+
+    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">facetFields</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">field</span> <span class="o">==</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span>
+            <span class="n">query_field</span> <span class="o">=</span> <span class="s1">&#39;embedded.@type.raw&#39;</span>
+        <span class="k">elif</span> <span class="n">field</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;audit&#39;</span><span class="p">):</span>
+            <span class="n">query_field</span> <span class="o">=</span> <span class="n">field</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">query_field</span> <span class="o">=</span> <span class="s1">&#39;embedded.&#39;</span> <span class="o">+</span> <span class="n">field</span> <span class="o">+</span> <span class="s1">&#39;.raw&#39;</span>
+
+        <span class="n">agg_name</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+
+        <span class="n">aggregation</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;terms&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;field&#39;</span><span class="p">:</span> <span class="n">query_field</span><span class="p">,</span>
+                <span class="s1">&#39;min_doc_count&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">100</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="n">termFilter</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;bool&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;must&#39;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span><span class="s1">&#39;terms&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;principals_allowed.view&#39;</span><span class="p">:</span> <span class="n">principals</span><span class="p">}},</span>
+                    <span class="p">{</span><span class="s1">&#39;terms&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;embedded.@type.raw&#39;</span><span class="p">:</span> <span class="n">doc_types</span><span class="p">}},</span>
+                <span class="p">],</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Adding facets based on filters</span>
+        <span class="k">for</span> <span class="n">q_field</span><span class="p">,</span> <span class="n">q_terms</span> <span class="ow">in</span> <span class="n">used_filters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">q_field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">facetFields</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="n">q_field</span> <span class="o">==</span> <span class="n">field</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">elif</span> <span class="n">q_field</span> <span class="o">!=</span> <span class="n">field</span><span class="p">:</span> <span class="c1"># Get reduced count aggregation for term in field not set in filters.</span>
+                <span class="k">if</span> <span class="n">q_field</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;audit&#39;</span><span class="p">):</span>
+                    <span class="n">termFilter</span><span class="p">[</span><span class="s1">&#39;bool&#39;</span><span class="p">][</span><span class="s1">&#39;must&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;terms&#39;</span> <span class="p">:</span> <span class="p">{</span> <span class="n">q_field</span> <span class="p">:</span> <span class="n">q_terms</span> <span class="p">}})</span>
+                <span class="k">elif</span> <span class="ow">not</span> <span class="n">q_field</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;!&#39;</span><span class="p">):</span>
+                    <span class="n">termFilter</span><span class="p">[</span><span class="s1">&#39;bool&#39;</span><span class="p">][</span><span class="s1">&#39;must&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;terms&#39;</span> <span class="p">:</span> <span class="p">{</span> <span class="s1">&#39;embedded.&#39;</span> <span class="o">+</span> <span class="n">q_field</span> <span class="o">+</span> <span class="s1">&#39;.raw&#39;</span> <span class="p">:</span> <span class="n">q_terms</span> <span class="p">}})</span>
+                <span class="k">elif</span> <span class="n">q_field</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;!&#39;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">termFilter</span><span class="p">[</span><span class="s1">&#39;bool&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;must_not&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">termFilter</span><span class="p">[</span><span class="s1">&#39;bool&#39;</span><span class="p">][</span><span class="s1">&#39;must_not&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">termFilter</span><span class="p">[</span><span class="s1">&#39;bool&#39;</span><span class="p">][</span><span class="s1">&#39;must_not&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;terms&#39;</span> <span class="p">:</span> <span class="p">{</span><span class="s1">&#39;embedded.&#39;</span> <span class="o">+</span> <span class="n">q_field</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.raw&#39;</span><span class="p">:</span> <span class="n">q_terms</span><span class="p">}})</span>
+
+        <span class="n">aggs</span><span class="p">[</span><span class="n">agg_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;aggs&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="n">agg_name</span> <span class="p">:</span> <span class="n">aggregation</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;filter&#39;</span><span class="p">:</span> <span class="n">termFilter</span><span class="p">,</span>
+        <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">aggs</span></div>
+
+
+<div class="viewcode-block" id="format_facets"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.format_facets">[docs]</a><span class="k">def</span> <span class="nf">format_facets</span><span class="p">(</span><span class="n">es_results</span><span class="p">,</span> <span class="n">facets</span><span class="p">,</span> <span class="n">used_filters</span><span class="p">,</span> <span class="n">schemas</span><span class="p">,</span> <span class="n">total</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Format the facets for the final results based on the es results</span>
+<span class="sd">    These are stored within &#39;aggregations&#39; of the result</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># Loading facets in to the results</span>
+    <span class="k">if</span> <span class="s1">&#39;aggregations&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">es_results</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="n">aggregations</span> <span class="o">=</span> <span class="n">es_results</span><span class="p">[</span><span class="s1">&#39;aggregations&#39;</span><span class="p">]</span>
+    <span class="n">used_facets</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">facet</span> <span class="ow">in</span> <span class="n">facets</span><span class="p">:</span>
+        <span class="n">resultFacet</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;field&#39;</span> <span class="p">:</span> <span class="n">field</span><span class="p">,</span>
+            <span class="s1">&#39;title&#39;</span> <span class="p">:</span> <span class="n">facet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="n">field</span><span class="p">),</span>
+            <span class="s1">&#39;total&#39;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s1">&#39;terms&#39;</span> <span class="p">:</span> <span class="kc">None</span>
+        <span class="p">}</span>
+        <span class="n">used_facets</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+        <span class="n">agg_name</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">agg_name</span> <span class="ow">in</span> <span class="n">aggregations</span><span class="p">:</span>
+            <span class="n">resultFacet</span><span class="p">[</span><span class="s1">&#39;total&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aggregations</span><span class="p">[</span><span class="n">agg_name</span><span class="p">][</span><span class="s1">&#39;doc_count&#39;</span><span class="p">]</span>
+            <span class="n">resultFacet</span><span class="p">[</span><span class="s1">&#39;terms&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">aggregations</span><span class="p">[</span><span class="n">agg_name</span><span class="p">][</span><span class="n">agg_name</span><span class="p">][</span><span class="s1">&#39;buckets&#39;</span><span class="p">]</span>
+
+        <span class="c1"># Choosing to show facets with one term for summary info on search it provides</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">resultFacet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;terms&#39;</span><span class="p">,</span> <span class="p">[]))</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resultFacet</span><span class="p">)</span>
+
+    <span class="c1"># Show any filters that aren&#39;t facets as a fake facet with one entry,</span>
+    <span class="c1"># so that the filter can be viewed and removed</span>
+    <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">used_filters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">used_facets</span><span class="p">:</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="n">field</span>
+            <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">schemas</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;properties&#39;</span><span class="p">]:</span>
+                    <span class="n">title</span> <span class="o">=</span> <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;properties&#39;</span><span class="p">][</span><span class="n">field</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+                    <span class="k">break</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                <span class="s1">&#39;field&#39;</span><span class="p">:</span> <span class="n">field</span><span class="p">,</span>
+                <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">title</span><span class="p">,</span>
+                <span class="s1">&#39;terms&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="n">v</span><span class="p">}</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">],</span>
+                <span class="s1">&#39;total&#39;</span><span class="p">:</span> <span class="n">total</span><span class="p">,</span>
+                <span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="format_results"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.format_results">[docs]</a><span class="k">def</span> <span class="nf">format_results</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">hits</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Loads results to pass onto UI</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fields_requested</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">getall</span><span class="p">(</span><span class="s1">&#39;field&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">fields_requested</span><span class="p">:</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="s1">&#39;embedded&#39;</span>
+    <span class="k">elif</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;frame&#39;</span><span class="p">):</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;frame&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="s1">&#39;embedded&#39;</span>
+
+    <span class="k">if</span> <span class="n">frame</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;embedded&#39;</span><span class="p">,</span> <span class="s1">&#39;object&#39;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">hits</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">hit</span><span class="p">[</span><span class="s1">&#39;_source&#39;</span><span class="p">][</span><span class="n">frame</span><span class="p">]</span>
+        <span class="k">return</span></div>
+
+<span class="c1">### stupid things to remove; had to add because of other fxns importing</span>
+
+<span class="c1"># Update? used in ./batch_download.py</span>
+<div class="viewcode-block" id="iter_search_results"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.iter_search_results">[docs]</a><span class="k">def</span> <span class="nf">iter_search_results</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">search</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">return_generator</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<span class="c1"># DUMMY FUNCTION. TODO: update ./batch_download.py to use embeds instead of cols</span>
+<div class="viewcode-block" id="list_visible_columns_for_schemas"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.list_visible_columns_for_schemas">[docs]</a><span class="k">def</span> <span class="nf">list_visible_columns_for_schemas</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">schemas</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[]</span></div>
+
+<span class="c1"># DUMMY FUNCTION. TODO: update ./region_search.py</span>
+<div class="viewcode-block" id="search_result_actions"><a class="viewcode-back" href="../../pydoc/encoded.search.html#encoded.search.search_result_actions">[docs]</a><span class="k">def</span> <span class="nf">search_result_actions</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">doc_types</span><span class="p">,</span> <span class="n">es_results</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{}</span></div>
+
+<span class="n">_ASSEMBLY_MAPPER</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;GRCh38-minimal&#39;</span><span class="p">:</span> <span class="s1">&#39;hg38&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;GRCh38&#39;</span><span class="p">:</span> <span class="s1">&#39;hg38&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;GRCh37&#39;</span><span class="p">:</span> <span class="s1">&#39;hg19&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;GRCm38&#39;</span><span class="p">:</span> <span class="s1">&#39;mm10&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;GRCm37&#39;</span><span class="p">:</span> <span class="s1">&#39;mm9&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;BDGP6&#39;</span><span class="p">:</span> <span class="s1">&#39;dm4&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;BDGP5&#39;</span><span class="p">:</span> <span class="s1">&#39;dm3&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;WBcel235&#39;</span><span class="p">:</span> <span class="s1">&#39;WBcel235&#39;</span>
+<span class="p">}</span>
+
+<span class="n">hgConnect</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span>
+    <span class="s1">&#39;http://genome.ucsc.edu/cgi-bin/hgTracks&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;?hubClear=&#39;</span><span class="p">,</span>
+<span class="p">])</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../encoded.html" >encoded</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

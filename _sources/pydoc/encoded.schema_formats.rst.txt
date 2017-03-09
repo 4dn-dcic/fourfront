@@ -1,0 +1,7 @@
+encoded.schema_formats module
+=============================
+
+.. automodule:: encoded.schema_formats
+    :members:
+    :undoc-members:
+    :show-inheritance:

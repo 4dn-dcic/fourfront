@@ -1,0 +1,139 @@
+===============================
+Component: ``viz/BarPlotChart``
+===============================
+
+
+
+
+.. toctree::
+   :maxdepth: 3
+   
+   module-viz_BarPlotChart.statics
+   module-viz_BarPlotChart.UIControlsWrapper
+   
+
+.. contents:: Local Navigation
+   :local:
+
+
+Description
+===========
+
+Component for BarPlotChart. 
+Contains chart and labels only -- no controls.
+To add controls, wrap the chart in BarPlotChart.UIControlsWrapper, which will feed its state as props to BarPlotChart and has UI components
+for adjusting its state to select Charting options.
+Use BarPlotChart (or UIControlsWrapper, if is wrapping BarPlotChart) as child of ChartDataController.provider, which will feed props.experiments and props.filteredExperiments.
+
+Functions
+=========
+
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.width:
+
+
+``width``
+---------
+
+
+
+.. js:function:: width()
+
+    
+    :return width(): props.width or width of refs.container, if mounted.
+    
+
+
+.. _module-viz_BarPlotChart.height:
+
+
+``height``
+----------
+
+
+
+.. js:function:: height()
+
+    
+    :return height(): props.height or height of refs.container, if mounted.
+    
+
+
+
+
+
+.. _module-viz_BarPlotChart.getLegendData:
+
+
+``getLegendData``
+-----------------
+
+Call this function, e.g. through refs, to grab fields and terms for a/the Legend component.
+Internally, runs BarPlotChart.barDataToLegendData().
+
+.. js:function:: getLegendData()
+
+    
+    :return Array|null: List of fields containing terms. For use by legend component.
+    
+
+
+.. _module-viz_BarPlotChart.getTopLevelField:
+
+
+``getTopLevelField``
+--------------------
+
+Get the for-bar-filled field object used for the X axis.
+
+.. js:function:: getTopLevelField()
+
+    
+    :return Object: Top-level field containing terms.
+    
+
+
+.. _module-viz_BarPlotChart.renderAllExperimentsSilhouette:
+
+
+``renderAllExperimentsSilhouette``
+----------------------------------
+
+Used to help generate "highlighted" selected bars against the output of this: the "all experiments" bars silhoutte.
+Used conditionally in BarPlotChart.render to render clones of the BarChart behind the primary bars,
+using 'all experiments' data instead of the 'filtered' or 'selected' experiments.
+
+.. js:function:: renderAllExperimentsSilhouette(width, height[, styleOpts])
+
+    
+    :param number width: Width of available chart drawing area.
+    :param number height: Height of available chart drawing area.
+    :param Object styleOpts: Style options for the chart, including gap between bars, maximum bar width, etc.
+    :return Object: "All Experiments" bars silhouttes, wrapped in an object also containing barData for all experiments.
+    
+
+
+.. _module-viz_BarPlotChart.render:
+
+
+``render``
+----------
+
+Parses props.experiments and/or props.filterExperiments, depending on props.showType, aggregates experiments into fields,
+generates data for chart bars, and then draws and returns chart wrapped in a div React element.
+
+.. js:function:: render()
+
+    
+    :return React.Element: - Chart markup wrapped in a div.
+    
+
+
+
+
+

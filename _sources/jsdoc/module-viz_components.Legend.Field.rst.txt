@@ -1,0 +1,49 @@
+.. _undefined.Field:
+
+====================
+Namespace: ``Field``
+====================
+
+
+.. contents:: Local Navigation
+   :local:
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 1
+   
+   
+Description
+===========
+
+React component which represents a "Field", which might have multiple terms.
+
+Functions
+=========
+
+
+.. _module-viz_components.Legend.Field.getDefaultProps:
+
+
+``getDefaultProps``
+-------------------
+
+
+
+
+
+
+.. js:function:: getDefaultProps()
+
+    
+    
+
+
+Members
+=======
+
+
+
+

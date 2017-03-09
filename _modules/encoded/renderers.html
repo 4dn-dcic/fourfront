@@ -1,0 +1,414 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.renderers &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../encoded.html" accesskey="U">encoded</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.renderers</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pkg_resources</span> <span class="k">import</span> <span class="n">resource_filename</span>
+<span class="kn">from</span> <span class="nn">pyramid.events</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">BeforeRender</span><span class="p">,</span>
+    <span class="n">subscriber</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyramid.httpexceptions</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">HTTPMovedPermanently</span><span class="p">,</span>
+    <span class="n">HTTPPreconditionFailed</span><span class="p">,</span>
+    <span class="n">HTTPUnauthorized</span><span class="p">,</span>
+    <span class="n">HTTPForbidden</span><span class="p">,</span>
+    <span class="n">HTTPUnsupportedMediaType</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyramid.security</span> <span class="k">import</span> <span class="n">forget</span>
+<span class="kn">from</span> <span class="nn">pyramid.settings</span> <span class="k">import</span> <span class="n">asbool</span>
+<span class="kn">from</span> <span class="nn">pyramid.threadlocal</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">manager</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyramid.traversal</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">split_path_info</span><span class="p">,</span>
+    <span class="n">_join_path_tuple</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">snovault.validation</span> <span class="k">import</span> <span class="n">CSRFTokenError</span>
+<span class="kn">from</span> <span class="nn">subprocess_middleware.tween</span> <span class="k">import</span> <span class="n">SubprocessTween</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">psutil</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="includeme"><a class="viewcode-back" href="../../pydoc/encoded.renderers.html#encoded.renderers.includeme">[docs]</a><span class="k">def</span> <span class="nf">includeme</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_tween</span><span class="p">(</span>
+        <span class="s1">&#39;.renderers.fix_request_method_tween_factory&#39;</span><span class="p">,</span>
+        <span class="n">under</span><span class="o">=</span><span class="s1">&#39;snovault.stats.stats_tween_factory&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_tween</span><span class="p">(</span>
+        <span class="s1">&#39;.renderers.normalize_cookie_tween_factory&#39;</span><span class="p">,</span>
+        <span class="n">under</span><span class="o">=</span><span class="s1">&#39;.renderers.fix_request_method_tween_factory&#39;</span><span class="p">)</span>
+
+    <span class="n">renderer_tween</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;.renderers.debug_page_or_json&#39;</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;pyramid.reload_templates&#39;</span><span class="p">]</span>
+        <span class="k">else</span> <span class="s1">&#39;.renderers.page_or_json&#39;</span>
+    <span class="p">)</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">add_tween</span><span class="p">(</span>
+        <span class="n">renderer_tween</span><span class="p">,</span>
+        <span class="n">under</span><span class="o">=</span><span class="s1">&#39;.renderers.normalize_cookie_tween_factory&#39;</span><span class="p">)</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">add_tween</span><span class="p">(</span>
+        <span class="s1">&#39;.renderers.set_x_request_url_tween_factory&#39;</span><span class="p">,</span>
+        <span class="n">under</span><span class="o">=</span><span class="n">renderer_tween</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">add_tween</span><span class="p">(</span><span class="s1">&#39;.renderers.security_tween_factory&#39;</span><span class="p">,</span> <span class="n">under</span><span class="o">=</span><span class="s1">&#39;pyramid_tm.tm_tween_factory&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="fix_request_method_tween_factory"><a class="viewcode-back" href="../../pydoc/encoded.renderers.html#encoded.renderers.fix_request_method_tween_factory">[docs]</a><span class="k">def</span> <span class="nf">fix_request_method_tween_factory</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">registry</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Fix Request method changed by mod_wsgi.</span>
+
+<span class="sd">    See: https://github.com/GrahamDumpleton/mod_wsgi/issues/2</span>
+
+<span class="sd">    Apache config:</span>
+<span class="sd">        SetEnvIf Request_Method HEAD X_REQUEST_METHOD=HEAD</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">fix_request_method_tween</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+        <span class="n">environ</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">environ</span>
+        <span class="k">if</span> <span class="s1">&#39;X_REQUEST_METHOD&#39;</span> <span class="ow">in</span> <span class="n">environ</span><span class="p">:</span>
+            <span class="n">environ</span><span class="p">[</span><span class="s1">&#39;REQUEST_METHOD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">environ</span><span class="p">[</span><span class="s1">&#39;X_REQUEST_METHOD&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fix_request_method_tween</span></div>
+
+
+<div class="viewcode-block" id="security_tween_factory"><a class="viewcode-back" href="../../pydoc/encoded.renderers.html#encoded.renderers.security_tween_factory">[docs]</a><span class="k">def</span> <span class="nf">security_tween_factory</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">registry</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">security_tween</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+        <span class="n">login</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">expected_user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;X-If-Match-User&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">expected_user</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">login</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">authenticated_userid</span>
+            <span class="k">if</span> <span class="n">login</span> <span class="o">!=</span> <span class="s1">&#39;mailto.&#39;</span> <span class="o">+</span> <span class="n">expected_user</span><span class="p">:</span>
+                <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;X-If-Match-User does not match&#39;</span>
+                <span class="k">raise</span> <span class="n">HTTPPreconditionFailed</span><span class="p">(</span><span class="n">detail</span><span class="p">)</span>
+
+        <span class="c1"># Check if user logged in via Auth0 and set headers accordingly to inform React </span>
+        <span class="c1"># server-side/client-side render &amp; App.prototype.navigate() request response handling</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;auth0_expired&#39;</span><span class="p">):</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">auth0_expired</span><span class="p">:</span>
+                <span class="n">login</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">authenticated_userid</span>
+                <span class="k">if</span> <span class="n">login</span><span class="p">:</span>
+                    <span class="n">authtype</span><span class="p">,</span> <span class="n">email</span> <span class="o">=</span> <span class="n">login</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">authtype</span> <span class="o">==</span> <span class="s1">&#39;auth0&#39;</span> <span class="ow">and</span> <span class="n">request</span><span class="o">.</span><span class="n">content_type</span> <span class="o">!=</span> <span class="s1">&#39;application/json&#39;</span><span class="p">):</span>
+                        <span class="c1"># If successfully authenticated by Auth0, add JWT token and basic user details to response headers for server-side React to consume.</span>
+                        <span class="c1"># Do not add if returning JSON, as will bypass server-side React which will be unable to unset/delete them before sending response.</span>
+                        <span class="n">response</span> <span class="o">=</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+                        <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;X-Request-JWT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">cookies</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;jwtToken&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                        <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;X-User-Info&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">user_info</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">authtype</span> <span class="o">!=</span> <span class="s1">&#39;auth0&#39;</span> <span class="ow">and</span> <span class="n">request</span><span class="o">.</span><span class="n">content_type</span> <span class="o">!=</span> <span class="s1">&#39;application/json&#39;</span><span class="p">:</span>
+                        <span class="n">response</span> <span class="o">=</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+                        <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;X-Request-JWT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;null&quot;</span>
+
+            <span class="k">elif</span> <span class="n">request</span><span class="o">.</span><span class="n">auth0_expired</span><span class="p">:</span>
+                <span class="c1"># Inform libs/react-middleware.js of expired token to set logout state in front-end in response to</span>
+                <span class="c1"># either doc request or xhr request &amp; set appropriate alerts</span>
+                <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">is_xhr</span> <span class="ow">or</span> <span class="n">request</span><span class="o">.</span><span class="n">content_type</span> <span class="o">==</span> <span class="s1">&#39;application/json&#39;</span><span class="p">:</span>
+                    <span class="c1"># Do not change HTTPForbidden error detail (&quot;Bad or expired token.&quot;) below unless want bad things to happen on the front-end </span>
+                    <span class="c1"># (or find/replace in /src/encoded/static accordingly, incl browser.js &amp; components/app.js).</span>
+                    <span class="c1"># Could also remove this raise HTTPForbidden when all browsers consistently support XMLHttpRequest.getResponseHeaders() (a living standard)</span>
+                    <span class="c1"># to ID an expired token using X-Request-JWT header set below.</span>
+                    <span class="k">raise</span> <span class="n">HTTPForbidden</span><span class="p">(</span><span class="s2">&quot;Bad or expired token.&quot;</span><span class="p">)</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+                <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;X-Request-JWT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;expired&quot;</span>
+                <span class="c1"># Especially for initial document requests by browser, unset jwtToken cookie so initial client-side</span>
+                <span class="c1"># React render has App(instance).state.session = false (synced w/ server-side)</span>
+                <span class="n">response</span><span class="o">.</span><span class="n">set_cookie</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;jwtToken&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_age</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">path</span><span class="o">=</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+                <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">=</span> <span class="mi">403</span>
+
+        <span class="c1"># Older stuff (pre-Auth0)</span>
+        <span class="k">elif</span> <span class="n">request</span><span class="o">.</span><span class="n">authorization</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">asbool</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;X-Auth-Challenge&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)):</span>
+            <span class="n">login</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">authenticated_userid</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">login</span><span class="p">:</span>
+                <span class="c1"># wget may only send credentials following a challenge response.</span>
+                <span class="k">raise</span> <span class="n">HTTPForbidden</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;No Access&quot;</span><span class="p">)</span>
+
+
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;HEAD&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">content_type</span> <span class="o">!=</span> <span class="s1">&#39;application/json&#39;</span><span class="p">:</span>
+            <span class="n">detail</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> is not &#39;application/json&#39;&quot;</span> <span class="o">%</span> <span class="n">request</span><span class="o">.</span><span class="n">content_type</span>
+            <span class="k">raise</span> <span class="n">HTTPUnsupportedMediaType</span><span class="p">(</span><span class="n">detail</span><span class="p">)</span>
+
+        <span class="c1">#token = request.headers.get(&#39;X-CSRF-Token&#39;)</span>
+        <span class="c1">#if token is not None:</span>
+        <span class="c1">#    # Avoid dirtying the session and adding a Set-Cookie header</span>
+        <span class="c1">#    # XXX Should consider if this is a good idea or not and timeouts</span>
+        <span class="c1">#    if token == dict.get(request.session, &#39;_csrft_&#39;, None):</span>
+        <span class="c1">#        return handler(request)</span>
+        <span class="c1">#    raise CSRFTokenError(&#39;Incorrect CSRF token&#39;)</span>
+
+        <span class="k">return</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">login</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">namespace</span><span class="p">,</span> <span class="n">userid</span> <span class="o">=</span> <span class="n">login</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">namespace</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;mailto&#39;</span><span class="p">,</span> <span class="s1">&#39;auth0&#39;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">CSRFTokenError</span><span class="p">(</span><span class="s1">&#39;Missing CSRF token&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">security_tween</span></div>
+
+
+<div class="viewcode-block" id="normalize_cookie_tween_factory"><a class="viewcode-back" href="../../pydoc/encoded.renderers.html#encoded.renderers.normalize_cookie_tween_factory">[docs]</a><span class="k">def</span> <span class="nf">normalize_cookie_tween_factory</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">registry</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">webob.cookies</span> <span class="k">import</span> <span class="n">Cookie</span>
+
+    <span class="n">ignore</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;/favicon.ico&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">normalize_cookie_tween</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">path</span> <span class="ow">in</span> <span class="n">ignore</span> <span class="ow">or</span> <span class="n">request</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/static/&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="n">session</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">session</span>
+        <span class="c1">#if session or session._cookie_name not in request.cookies:</span>
+        <span class="c1">#    return handler(request)</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">getall</span><span class="p">(</span><span class="s1">&#39;Set-Cookie&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">existing</span><span class="p">:</span>
+            <span class="n">cookies</span> <span class="o">=</span> <span class="n">Cookie</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">header</span> <span class="ow">in</span> <span class="n">existing</span><span class="p">:</span>
+                <span class="n">cookies</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">_cookie_name</span> <span class="ow">in</span> <span class="n">cookies</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">response</span>
+
+        <span class="n">response</span><span class="o">.</span><span class="n">delete_cookie</span><span class="p">(</span>
+            <span class="n">session</span><span class="o">.</span><span class="n">_cookie_name</span><span class="p">,</span>
+            <span class="n">path</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">_cookie_path</span><span class="p">,</span>
+            <span class="n">domain</span><span class="o">=</span><span class="n">session</span><span class="o">.</span><span class="n">_cookie_domain</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">response</span>
+
+    <span class="k">return</span> <span class="n">normalize_cookie_tween</span></div>
+
+
+<div class="viewcode-block" id="set_x_request_url_tween_factory"><a class="viewcode-back" href="../../pydoc/encoded.renderers.html#encoded.renderers.set_x_request_url_tween_factory">[docs]</a><span class="k">def</span> <span class="nf">set_x_request_url_tween_factory</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">registry</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">set_x_request_url_tween</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">handler</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;X-Request-URL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">url</span>
+        <span class="k">return</span> <span class="n">response</span>
+
+    <span class="k">return</span> <span class="n">set_x_request_url_tween</span></div>
+
+
+<span class="nd">@subscriber</span><span class="p">(</span><span class="n">BeforeRender</span><span class="p">)</span>
+<div class="viewcode-block" id="canonical_redirect"><a class="viewcode-back" href="../../pydoc/encoded.renderers.html#encoded.renderers.canonical_redirect">[docs]</a><span class="k">def</span> <span class="nf">canonical_redirect</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+    <span class="n">request</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="s1">&#39;request&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Ignore subrequests</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">manager</span><span class="o">.</span><span class="n">stack</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;HEAD&#39;</span><span class="p">):</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status_int</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;encoded.canonical_redirect&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">path_info</span> <span class="o">==</span> <span class="s1">&#39;/&#39;</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">rendering_val</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span>
+
+    <span class="n">canonical</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">rendering_val</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;@id&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">canonical</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">canonical_path</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">canonical_qs</span> <span class="o">=</span> <span class="n">canonical</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;?&#39;</span><span class="p">)</span>
+
+    <span class="n">request_path</span> <span class="o">=</span> <span class="n">_join_path_tuple</span><span class="p">((</span><span class="s1">&#39;&#39;</span><span class="p">,)</span> <span class="o">+</span> <span class="n">split_path_info</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">path_info</span><span class="p">))</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">request_path</span> <span class="o">==</span> <span class="n">canonical_path</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="ow">and</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">path_info</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="n">canonical_path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="ow">and</span>
+            <span class="p">(</span><span class="n">canonical_qs</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">query_string</span><span class="p">))):</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="s1">&#39;/@@&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">path_info</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="n">qs</span> <span class="o">=</span> <span class="n">canonical_qs</span> <span class="ow">or</span> <span class="n">request</span><span class="o">.</span><span class="n">query_string</span>
+    <span class="n">location</span> <span class="o">=</span> <span class="n">canonical_path</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;?&#39;</span> <span class="k">if</span> <span class="n">qs</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">qs</span>
+    <span class="k">raise</span> <span class="n">HTTPMovedPermanently</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="n">location</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="should_transform"><a class="viewcode-back" href="../../pydoc/encoded.renderers.html#encoded.renderers.should_transform">[docs]</a><span class="k">def</span> <span class="nf">should_transform</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;HEAD&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">content_type</span> <span class="o">!=</span> <span class="s1">&#39;application/json&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="nb">format</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;format&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">original_vary</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">vary</span> <span class="ow">or</span> <span class="p">()</span>
+        <span class="n">response</span><span class="o">.</span><span class="n">vary</span> <span class="o">=</span> <span class="n">original_vary</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;Accept&#39;</span><span class="p">,</span> <span class="s1">&#39;Authorization&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">authorization</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">format</span> <span class="o">=</span> <span class="s1">&#39;json&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mime_type</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">accept</span><span class="o">.</span><span class="n">best_match</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="s1">&#39;text/html&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;application/ld+json&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;application/json&#39;</span><span class="p">,</span>
+                <span class="p">],</span>
+                <span class="s1">&#39;text/html&#39;</span><span class="p">)</span>
+            <span class="nb">format</span> <span class="o">=</span> <span class="n">mime_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;ld+json&#39;</span><span class="p">:</span>
+                <span class="nb">format</span> <span class="o">=</span> <span class="s1">&#39;json&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">format</span> <span class="o">=</span> <span class="nb">format</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;html&#39;</span><span class="p">,</span> <span class="s1">&#39;json&#39;</span><span class="p">):</span>
+            <span class="nb">format</span> <span class="o">=</span> <span class="s1">&#39;html&#39;</span>
+
+    <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s1">&#39;json&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">request</span><span class="o">.</span><span class="n">_transform_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="after_transform"><a class="viewcode-back" href="../../pydoc/encoded.renderers.html#encoded.renderers.after_transform">[docs]</a><span class="k">def</span> <span class="nf">after_transform</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">end</span> <span class="o">-</span> <span class="n">request</span><span class="o">.</span><span class="n">_transform_start</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e6</span><span class="p">)</span>
+    <span class="n">stats</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">_stats</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;render_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;render_count&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s1">&#39;render_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;render_time&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">duration</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">_stats_html_attribute</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<span class="c1"># Rendering huge pages can make the node process memory usage explode.</span>
+<span class="c1"># Ideally we would let the OS handle this with `ulimit` or by calling</span>
+<span class="c1"># `resource.setrlimit()` from  a `subprocess.Popen(preexec_fn=...)`.</span>
+<span class="c1"># Unfortunately Linux does not enforce RLIMIT_RSS.</span>
+<span class="c1"># An alternative would be to use cgroups, but that makes per-process limits</span>
+<span class="c1"># tricky to enforce (we would need to create one cgroup per process.)</span>
+<span class="c1"># So we just manually check the resource usage after each transform.</span>
+
+<span class="n">rss_limit</span> <span class="o">=</span> <span class="mi">256</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1024</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># MB</span>
+
+
+<div class="viewcode-block" id="reload_process"><a class="viewcode-back" href="../../pydoc/encoded.renderers.html#encoded.renderers.reload_process">[docs]</a><span class="k">def</span> <span class="nf">reload_process</span><span class="p">(</span><span class="n">process</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">psutil</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span><span class="o">.</span><span class="n">memory_info</span><span class="p">()</span><span class="o">.</span><span class="n">rss</span> <span class="o">&gt;</span> <span class="n">rss_limit</span></div>
+
+<span class="n">node_env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">node_env</span><span class="p">[</span><span class="s1">&#39;NODE_PATH&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+<span class="n">page_or_json</span> <span class="o">=</span> <span class="n">SubprocessTween</span><span class="p">(</span>
+    <span class="n">should_transform</span><span class="o">=</span><span class="n">should_transform</span><span class="p">,</span>
+    <span class="n">after_transform</span><span class="o">=</span><span class="n">after_transform</span><span class="p">,</span>
+    <span class="n">reload_process</span><span class="o">=</span><span class="n">reload_process</span><span class="p">,</span>
+    <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;node&#39;</span><span class="p">,</span> <span class="n">resource_filename</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="s1">&#39;static/build/renderer.js&#39;</span><span class="p">)],</span>
+    <span class="n">env</span><span class="o">=</span><span class="n">node_env</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="n">debug_page_or_json</span> <span class="o">=</span> <span class="n">SubprocessTween</span><span class="p">(</span>
+    <span class="n">should_transform</span><span class="o">=</span><span class="n">should_transform</span><span class="p">,</span>
+    <span class="n">after_transform</span><span class="o">=</span><span class="n">after_transform</span><span class="p">,</span>
+    <span class="n">reload_process</span><span class="o">=</span><span class="n">reload_process</span><span class="p">,</span>
+    <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;node&#39;</span><span class="p">,</span> <span class="n">resource_filename</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="s1">&#39;static/build/renderer.js&#39;</span><span class="p">)],</span>
+    <span class="n">env</span><span class="o">=</span><span class="n">node_env</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../encoded.html" >encoded</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

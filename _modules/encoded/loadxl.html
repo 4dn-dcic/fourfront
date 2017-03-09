@@ -1,0 +1,831 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.loadxl &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../encoded.html" accesskey="U">encoded</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.loadxl</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Load collections and determine the order.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">past.builtins</span> <span class="k">import</span> <span class="n">basestring</span>
+<span class="kn">from</span> <span class="nn">.typedsheets</span> <span class="k">import</span> <span class="n">cast_row_values</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">reduce</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">boto3</span>
+<span class="c1"># from pyramid.settings import asbool</span>
+<span class="c1"># from snovault.storage import User</span>
+
+<span class="n">text</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="sa">u</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;encoded&#39;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>  <span class="c1"># doesn&#39;t work to shut off sqla INFO</span>
+
+<span class="n">ORDER</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;user&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;award&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;lab&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ontology&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ontology_term&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;organism&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;genomic_region&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;publication&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;publication_tracking&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;document&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;image&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;vendor&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;construct&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;modification&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;protocol&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;sop_map&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;biosample_cell_culture&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;individual_human&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;individual_mouse&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;biosource&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;enzyme&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;treatment_rnai&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;treatment_chemical&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;biosample&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;quality_metric_fastqc&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;quality_metric_bamqc&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;quality_metric_pairsqc&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;file_fastq&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;file_fasta&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;file_processed&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;file_reference&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;file_calibration&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;file_set&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;file_set_calibration&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;experiment_hi_c&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;experiment_capture_c&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;experiment_repliseq&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;experiment_set&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;experiment_set_replicate&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;software&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;analysis_step&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;workflow&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;workflow_mapping&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;workflow_run_sbg&#39;</span>
+<span class="p">]</span>
+
+<span class="n">IS_ATTACHMENT</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;attachment&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;IDR_plot_true&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;IDR_plot_rep1_pr&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;IDR_plot_rep2_pr&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;IDR_plot_pool_pr&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;IDR_parameters_true&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;IDR_parameters_rep1_pr&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;IDR_parameters_rep2_pr&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;IDR_parameters_pool_pr&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;cross_correlation_plot&#39;</span>
+<span class="p">]</span>
+
+<span class="c1">##############################################################################</span>
+<span class="c1"># Pipeline components</span>
+<span class="c1">#</span>
+<span class="c1"># http://www.stylight.com/Numbers/pipes-and-filters-architectures-with-python-generators/</span>
+<span class="c1">#</span>
+<span class="c1"># Dictionaries are passed through the pipeline. By convention, values starting</span>
+<span class="c1"># with an underscore (_) are ignored by the component posting a final value</span>
+<span class="c1"># so are free for communicating information down the pipeline.</span>
+
+
+<div class="viewcode-block" id="noop"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.noop">[docs]</a><span class="k">def</span> <span class="nf">noop</span><span class="p">(</span><span class="n">dictrows</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; No-op component</span>
+
+<span class="sd">    Useful for pipeline component factories.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">dictrows</span></div>
+
+
+<div class="viewcode-block" id="remove_keys_with_empty_value"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.remove_keys_with_empty_value">[docs]</a><span class="k">def</span> <span class="nf">remove_keys_with_empty_value</span><span class="p">(</span><span class="n">dictrows</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">dictrows</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">row</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">and</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="p">}</span></div>
+
+
+<span class="c1">##############################################################################</span>
+<span class="c1"># Pipeline component factories</span>
+
+
+<div class="viewcode-block" id="warn_keys_with_unknown_value_except_for"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.warn_keys_with_unknown_value_except_for">[docs]</a><span class="k">def</span> <span class="nf">warn_keys_with_unknown_value_except_for</span><span class="p">(</span><span class="o">*</span><span class="n">keys</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">component</span><span class="p">(</span><span class="n">dictrows</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">dictrows</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">row</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keys</span> <span class="ow">and</span> <span class="n">text</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;unknown&#39;</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;unknown </span><span class="si">%r</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;uuid&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;empty uuid&gt;&#39;</span><span class="p">)))</span>
+            <span class="k">yield</span> <span class="n">row</span>
+
+    <span class="k">return</span> <span class="n">component</span></div>
+
+
+<div class="viewcode-block" id="skip_rows_missing_all_keys"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.skip_rows_missing_all_keys">[docs]</a><span class="k">def</span> <span class="nf">skip_rows_missing_all_keys</span><span class="p">(</span><span class="o">*</span><span class="n">keys</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">component</span><span class="p">(</span><span class="n">dictrows</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">dictrows</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">key</span> <span class="ow">in</span> <span class="n">row</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">):</span>
+                <span class="n">row</span><span class="p">[</span><span class="s1">&#39;_skip&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">yield</span> <span class="n">row</span>
+
+    <span class="k">return</span> <span class="n">component</span></div>
+
+
+<div class="viewcode-block" id="skip_rows_with_all_key_value"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.skip_rows_with_all_key_value">[docs]</a><span class="k">def</span> <span class="nf">skip_rows_with_all_key_value</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">component</span><span class="p">(</span><span class="n">dictrows</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">dictrows</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">==</span> <span class="n">v</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">row</span> <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kw</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="n">row</span><span class="p">[</span><span class="s1">&#39;_skip&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">yield</span> <span class="n">row</span>
+
+    <span class="k">return</span> <span class="n">component</span></div>
+
+
+<div class="viewcode-block" id="skip_rows_without_all_key_value"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.skip_rows_without_all_key_value">[docs]</a><span class="k">def</span> <span class="nf">skip_rows_without_all_key_value</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">component</span><span class="p">(</span><span class="n">dictrows</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">dictrows</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">==</span> <span class="n">v</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">row</span> <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kw</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="n">row</span><span class="p">[</span><span class="s1">&#39;_skip&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">yield</span> <span class="n">row</span>
+
+    <span class="k">return</span> <span class="n">component</span></div>
+
+
+<div class="viewcode-block" id="remove_keys"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.remove_keys">[docs]</a><span class="k">def</span> <span class="nf">remove_keys</span><span class="p">(</span><span class="o">*</span><span class="n">keys</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">component</span><span class="p">(</span><span class="n">dictrows</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">dictrows</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
+                <span class="n">row</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">row</span>
+
+    <span class="k">return</span> <span class="n">component</span></div>
+
+
+<div class="viewcode-block" id="skip_rows_with_all_falsey_value"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.skip_rows_with_all_falsey_value">[docs]</a><span class="k">def</span> <span class="nf">skip_rows_with_all_falsey_value</span><span class="p">(</span><span class="o">*</span><span class="n">keys</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">component</span><span class="p">(</span><span class="n">dictrows</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">dictrows</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="ow">not</span> <span class="n">row</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">row</span> <span class="k">else</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">):</span>
+                <span class="n">row</span><span class="p">[</span><span class="s1">&#39;_skip&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">yield</span> <span class="n">row</span>
+
+    <span class="k">return</span> <span class="n">component</span></div>
+
+
+<div class="viewcode-block" id="add_attachments"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.add_attachments">[docs]</a><span class="k">def</span> <span class="nf">add_attachments</span><span class="p">(</span><span class="n">docsdir</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">component</span><span class="p">(</span><span class="n">dictrows</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">dictrows</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">attachment_property</span> <span class="ow">in</span> <span class="n">IS_ATTACHMENT</span><span class="p">:</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">attachment_property</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">path</span> <span class="o">=</span> <span class="n">find_doc</span><span class="p">(</span><span class="n">docsdir</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+                    <span class="n">row</span><span class="p">[</span><span class="n">attachment_property</span><span class="p">]</span> <span class="o">=</span> <span class="n">attachment</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">row</span><span class="p">[</span><span class="s1">&#39;_errors&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">row</span>
+
+    <span class="k">return</span> <span class="n">component</span></div>
+
+
+<span class="c1">##############################################################################</span>
+<span class="c1"># Read input from spreadsheets</span>
+<span class="c1">#</span>
+<span class="c1"># Downloading a zipfile of xlsx files from Google Drive is most convenient</span>
+<span class="c1"># but it&#39;s better to check tsv into git.</span>
+
+
+<div class="viewcode-block" id="read_single_sheet"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.read_single_sheet">[docs]</a><span class="k">def</span> <span class="nf">read_single_sheet</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Read an xlsx, csv or tsv from a zipfile or directory</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">zipfile</span> <span class="k">import</span> <span class="n">ZipFile</span>
+    <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">xlreader</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">root</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">stream</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.xlsx&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">read_xl</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.tsv&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="s1">&#39;excel-tab&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.csv&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.json&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">read_json</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown file extension for </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">path</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.xlsx&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cast_row_values</span><span class="p">(</span><span class="n">xlreader</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">),</span> <span class="n">sheetname</span><span class="o">=</span><span class="n">name</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.zip&#39;</span><span class="p">):</span>
+        <span class="n">zf</span> <span class="o">=</span> <span class="n">ZipFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="n">zf</span><span class="o">.</span><span class="n">namelist</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.xlsx&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="n">stream</span> <span class="o">=</span> <span class="n">zf</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.xlsx&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">read_xl</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.tsv&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="n">stream</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">TextIOWrapper</span><span class="p">(</span><span class="n">zf</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.tsv&#39;</span><span class="p">),</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="s1">&#39;excel-tab&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="n">stream</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">TextIOWrapper</span><span class="p">(</span><span class="n">zf</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span><span class="p">),</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+            <span class="n">stream</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">TextIOWrapper</span><span class="p">(</span><span class="n">zf</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span><span class="p">),</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">read_json</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">root</span> <span class="o">+</span> <span class="s1">&#39;.xlsx&#39;</span><span class="p">):</span>
+            <span class="n">stream</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">root</span> <span class="o">+</span> <span class="s1">&#39;.xlsx&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">read_xl</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">root</span> <span class="o">+</span> <span class="s1">&#39;.tsv&#39;</span><span class="p">):</span>
+            <span class="n">stream</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">root</span> <span class="o">+</span> <span class="s1">&#39;.tsv&#39;</span><span class="p">,</span> <span class="s1">&#39;rU&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="n">dialect</span><span class="o">=</span><span class="s1">&#39;excel-tab&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">root</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span><span class="p">):</span>
+            <span class="n">stream</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">root</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;rU&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">root</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span><span class="p">):</span>
+            <span class="n">stream</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">root</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">read_json</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">[]</span></div>
+
+
+<div class="viewcode-block" id="read_xl"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.read_xl">[docs]</a><span class="k">def</span> <span class="nf">read_xl</span><span class="p">(</span><span class="n">stream</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">xlreader</span>
+    <span class="k">return</span> <span class="n">cast_row_values</span><span class="p">(</span><span class="n">xlreader</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="n">stream</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="read_csv"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.read_csv">[docs]</a><span class="k">def</span> <span class="nf">read_csv</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">csv</span>
+    <span class="k">return</span> <span class="n">cast_row_values</span><span class="p">(</span><span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="read_json"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.read_json">[docs]</a><span class="k">def</span> <span class="nf">read_json</span><span class="p">(</span><span class="n">stream</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">json</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">obj</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">obj</span></div>
+
+
+<span class="c1">##############################################################################</span>
+<span class="c1"># Posting json</span>
+<span class="c1">#</span>
+<span class="c1"># This would a one liner except for logging</span>
+
+<div class="viewcode-block" id="request_url"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.request_url">[docs]</a><span class="k">def</span> <span class="nf">request_url</span><span class="p">(</span><span class="n">item_type</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">component</span><span class="p">(</span><span class="n">rows</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;_url&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">item_type</span>
+                <span class="k">yield</span> <span class="n">row</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="s1">&#39;@id&#39;</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">url</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
+                    <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">url</span>
+                <span class="n">row</span><span class="p">[</span><span class="s1">&#39;_url&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">url</span>
+                <span class="k">yield</span> <span class="n">row</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># XXX support for aliases</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;uuid&#39;</span><span class="p">,</span> <span class="s1">&#39;accession&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">row</span><span class="p">:</span>
+                    <span class="n">url</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;_url&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">row</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">row</span><span class="p">[</span><span class="s1">&#39;_errors&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No key found. Need uuid or accession.&#39;</span><span class="p">)</span>
+
+            <span class="k">yield</span> <span class="n">row</span>
+
+    <span class="k">return</span> <span class="n">component</span></div>
+
+
+<div class="viewcode-block" id="make_request"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.make_request">[docs]</a><span class="k">def</span> <span class="nf">make_request</span><span class="p">(</span><span class="n">testapp</span><span class="p">,</span> <span class="n">item_type</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+    <span class="n">json_method</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">testapp</span><span class="p">,</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;_json&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">component</span><span class="p">(</span><span class="n">rows</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_skip&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_errors&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_url&#39;</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Keys with leading underscores are for communicating between</span>
+            <span class="c1"># sections</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;_value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">row</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">)</span>
+            <span class="p">}</span>
+
+            <span class="n">url</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;_url&#39;</span><span class="p">]</span>
+            <span class="n">row</span><span class="p">[</span><span class="s1">&#39;_response&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json_method</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
+
+            <span class="k">yield</span> <span class="n">row</span>
+
+    <span class="k">return</span> <span class="n">component</span></div>
+
+
+<span class="c1">##############################################################################</span>
+<span class="c1"># Logging</span>
+
+
+<div class="viewcode-block" id="trim"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.trim">[docs]</a><span class="k">def</span> <span class="nf">trim</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Shorten excessively long fields in error log.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">trim</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">trim</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">basestring</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">160</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">value</span><span class="p">[:</span><span class="mi">77</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;...&#39;</span> <span class="o">+</span> <span class="n">value</span><span class="p">[</span><span class="o">-</span><span class="mi">80</span><span class="p">:]</span>
+    <span class="k">return</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="pipeline_logger"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.pipeline_logger">[docs]</a><span class="k">def</span> <span class="nf">pipeline_logger</span><span class="p">(</span><span class="n">item_type</span><span class="p">,</span> <span class="n">phase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">component</span><span class="p">(</span><span class="n">rows</span><span class="p">):</span>
+        <span class="n">created</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">updated</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">errors</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">skipped</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">rows</span><span class="p">):</span>
+            <span class="n">row_number</span> <span class="o">=</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">2</span>  <span class="c1"># header row</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_response&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># _skip = row.get(&#39;_skip&#39;)</span>
+                <span class="n">_errors</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_errors&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_skip&#39;</span><span class="p">):</span>
+                    <span class="n">skipped</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">elif</span> <span class="n">_errors</span><span class="p">:</span>
+                    <span class="n">errors</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> row </span><span class="si">%d</span><span class="s1">: Error PROCESSING: </span><span class="si">%s</span><span class="se">\n</span><span class="si">%r</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">item_type</span><span class="p">,</span> <span class="n">row_number</span><span class="p">,</span> <span class="n">_errors</span><span class="p">,</span> <span class="n">trim</span><span class="p">(</span><span class="n">row</span><span class="p">)))</span>
+                <span class="k">yield</span> <span class="n">row</span>
+                <span class="k">continue</span>
+
+            <span class="n">url</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_url&#39;</span><span class="p">)</span>
+            <span class="c1"># uuid = row.get(&#39;uuid&#39;)</span>
+
+            <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">status_int</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                <span class="n">updated</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;UPDATED: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">url</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">status_int</span> <span class="o">==</span> <span class="mi">201</span><span class="p">:</span>
+                <span class="n">created</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;CREATED: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">res</span><span class="o">.</span><span class="n">location</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">status_int</span> <span class="o">==</span> <span class="mi">409</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;CONFLICT: </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">[</span><span class="s1">&#39;detail&#39;</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">status_int</span> <span class="o">==</span> <span class="mi">422</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;VALIDATION FAILED: </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trim</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">json</span><span class="p">[</span><span class="s1">&#39;errors&#39;</span><span class="p">]))</span>
+
+            <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">status_int</span> <span class="o">//</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">errors</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> row </span><span class="si">%d</span><span class="s1">: </span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">)</span><span class="se">\n</span><span class="si">%r</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">item_type</span><span class="p">,</span> <span class="n">row_number</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">trim</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;_value&#39;</span><span class="p">])))</span>
+
+            <span class="k">yield</span> <span class="n">row</span>
+
+        <span class="n">loaded</span> <span class="o">=</span> <span class="n">created</span> <span class="o">+</span> <span class="n">updated</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Loaded </span><span class="si">%d</span><span class="s1"> of </span><span class="si">%d</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> (phase </span><span class="si">%s</span><span class="s1">). CREATED: </span><span class="si">%d</span><span class="s1">, UPDATED: </span><span class="si">%d</span><span class="s1">, SKIPPED: </span><span class="si">%d</span><span class="s1">, ERRORS: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">loaded</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">item_type</span><span class="p">,</span> <span class="n">phase</span><span class="p">,</span> <span class="n">created</span><span class="p">,</span> <span class="n">updated</span><span class="p">,</span> <span class="n">skipped</span><span class="p">,</span> <span class="n">errors</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">component</span></div>
+
+
+<span class="c1">##############################################################################</span>
+<span class="c1"># Attachments</span>
+
+
+<div class="viewcode-block" id="find_doc"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.find_doc">[docs]</a><span class="k">def</span> <span class="nf">find_doc</span><span class="p">(</span><span class="n">docsdir</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;smth.&quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">dirpath</span> <span class="ow">in</span> <span class="n">docsdir</span><span class="p">:</span>
+        <span class="n">candidate</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirpath</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">candidate</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Duplicate filenames: </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">candidate</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">candidate</span>
+    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;File not found: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span></div>
+
+
+<div class="viewcode-block" id="attachment"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.attachment">[docs]</a><span class="k">def</span> <span class="nf">attachment</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create an attachment upload object from a filename Embeds the attachment as a data url.&quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">magic</span>
+    <span class="kn">import</span> <span class="nn">mimetypes</span>
+    <span class="kn">from</span> <span class="nn">PIL</span> <span class="k">import</span> <span class="n">Image</span>
+    <span class="kn">from</span> <span class="nn">base64</span> <span class="k">import</span> <span class="n">b64encode</span>
+
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">mime_type</span><span class="p">,</span> <span class="n">encoding</span> <span class="o">=</span> <span class="n">mimetypes</span><span class="o">.</span><span class="n">guess_type</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">major</span><span class="p">,</span> <span class="n">minor</span> <span class="o">=</span> <span class="n">mime_type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">detected_type</span> <span class="o">=</span> <span class="n">magic</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mime</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="n">detected_type</span> <span class="o">=</span> <span class="n">magic</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mime</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># XXX This validation logic should move server-side.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">detected_type</span> <span class="o">==</span> <span class="n">mime_type</span> <span class="ow">or</span>
+            <span class="n">detected_type</span> <span class="o">==</span> <span class="s1">&#39;text/plain&#39;</span> <span class="ow">and</span> <span class="n">major</span> <span class="o">==</span> <span class="s1">&#39;text&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Wrong extension for </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">detected_type</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">stream</span><span class="p">:</span>
+        <span class="n">attach</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;download&#39;</span><span class="p">:</span> <span class="n">filename</span><span class="p">,</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">mime_type</span><span class="p">,</span>
+            <span class="s1">&#39;href&#39;</span><span class="p">:</span> <span class="s1">&#39;data:</span><span class="si">%s</span><span class="s1">;base64,</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mime_type</span><span class="p">,</span> <span class="n">b64encode</span><span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">read</span><span class="p">())</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">))</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">mime_type</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;application/pdf&#39;</span><span class="p">,</span> <span class="s2">&quot;application/zip&quot;</span><span class="p">,</span><span class="s1">&#39;text/plain&#39;</span><span class="p">,</span> <span class="s1">&#39;text/tab-separated-values&#39;</span><span class="p">,</span> <span class="s1">&#39;text/html&#39;</span><span class="p">):</span>
+            <span class="c1"># XXX Should use chardet to detect charset for text files here.</span>
+            <span class="k">return</span> <span class="n">attach</span>
+
+        <span class="k">if</span> <span class="n">major</span> <span class="o">==</span> <span class="s1">&#39;image&#39;</span> <span class="ow">and</span> <span class="n">minor</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;png&#39;</span><span class="p">,</span> <span class="s1">&#39;jpeg&#39;</span><span class="p">,</span> <span class="s1">&#39;gif&#39;</span><span class="p">,</span> <span class="s1">&#39;tiff&#39;</span><span class="p">):</span>
+            <span class="c1"># XXX we should just convert our tiffs to pngs</span>
+            <span class="n">stream</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">im</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">stream</span><span class="p">)</span>
+            <span class="n">im</span><span class="o">.</span><span class="n">verify</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">im</span><span class="o">.</span><span class="n">format</span> <span class="o">!=</span> <span class="n">minor</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Image file format </span><span class="si">%r</span><span class="s2"> does not match extension for </span><span class="si">%s</span><span class="s2">&quot;</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span> <span class="o">%</span> <span class="p">(</span><span class="n">im</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span>
+
+            <span class="n">attach</span><span class="p">[</span><span class="s1">&#39;width&#39;</span><span class="p">],</span> <span class="n">attach</span><span class="p">[</span><span class="s1">&#39;height&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">size</span>
+            <span class="k">return</span> <span class="n">attach</span>
+
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown file type for </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span></div>
+
+
+<span class="c1">##############################################################################</span>
+<span class="c1"># Pipelines</span>
+
+
+<div class="viewcode-block" id="combine"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.combine">[docs]</a><span class="k">def</span> <span class="nf">combine</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Construct a combined generator from a source and pipeline.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">y</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="process"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.process">[docs]</a><span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="n">rows</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Pull rows through the pipeline.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="get_pipeline"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.get_pipeline">[docs]</a><span class="k">def</span> <span class="nf">get_pipeline</span><span class="p">(</span><span class="n">testapp</span><span class="p">,</span> <span class="n">docsdir</span><span class="p">,</span> <span class="n">test_only</span><span class="p">,</span> <span class="n">item_type</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;smth.&quot;&quot;&quot;</span>
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">skip_rows_with_all_key_value</span><span class="p">(</span><span class="n">test</span><span class="o">=</span><span class="s1">&#39;skip&#39;</span><span class="p">),</span>
+        <span class="n">skip_rows_with_all_key_value</span><span class="p">(</span><span class="n">_test</span><span class="o">=</span><span class="s1">&#39;skip&#39;</span><span class="p">),</span>
+        <span class="n">skip_rows_with_all_falsey_value</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">test_only</span> <span class="k">else</span> <span class="n">noop</span><span class="p">,</span>
+        <span class="n">skip_rows_with_all_falsey_value</span><span class="p">(</span><span class="s1">&#39;_test&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">test_only</span> <span class="k">else</span> <span class="n">noop</span><span class="p">,</span>
+        <span class="n">remove_keys_with_empty_value</span><span class="p">,</span>
+        <span class="n">skip_rows_missing_all_keys</span><span class="p">(</span><span class="s1">&#39;uuid&#39;</span><span class="p">,</span> <span class="s1">&#39;accession&#39;</span><span class="p">,</span> <span class="s1">&#39;@id&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">),</span>
+        <span class="n">remove_keys</span><span class="p">(</span><span class="s1">&#39;schema_version&#39;</span><span class="p">),</span>
+        <span class="n">warn_keys_with_unknown_value_except_for</span><span class="p">(</span>
+            <span class="s1">&#39;lot_id&#39;</span><span class="p">,</span> <span class="s1">&#39;sex&#39;</span><span class="p">,</span> <span class="s1">&#39;life_stage&#39;</span><span class="p">,</span> <span class="s1">&#39;health_status&#39;</span><span class="p">,</span> <span class="s1">&#39;ethnicity&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;strain_background&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="s1">&#39;version&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;model_organism_health_status&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;model_organism_age&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;model_organism_sex&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;mouse_life_stage&#39;</span><span class="p">,</span>
+            <span class="c1"># &#39;flowcell_details.machine&#39;,</span>
+        <span class="p">),</span>
+        <span class="n">add_attachments</span><span class="p">(</span><span class="n">docsdir</span><span class="p">),</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="n">phase</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;POST&#39;</span>
+        <span class="n">pipeline</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">PHASE1_PIPELINES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item_type</span><span class="p">,</span> <span class="p">[]))</span>
+    <span class="k">elif</span> <span class="n">phase</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;PUT&#39;</span>
+        <span class="n">pipeline</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">PHASE2_PIPELINES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item_type</span><span class="p">,</span> <span class="p">[]))</span>
+
+    <span class="n">pipeline</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span>
+        <span class="n">request_url</span><span class="p">(</span><span class="n">item_type</span><span class="p">,</span> <span class="n">method</span><span class="p">),</span>
+        <span class="n">remove_keys</span><span class="p">(</span><span class="s1">&#39;uuid&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;PUT&#39;</span><span class="p">,</span> <span class="s1">&#39;PATCH&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">noop</span><span class="p">,</span>
+        <span class="n">make_request</span><span class="p">(</span><span class="n">testapp</span><span class="p">,</span> <span class="n">item_type</span><span class="p">,</span> <span class="n">method</span><span class="p">),</span>
+        <span class="n">pipeline_logger</span><span class="p">(</span><span class="n">item_type</span><span class="p">,</span> <span class="n">phase</span><span class="p">),</span>
+    <span class="p">])</span>
+    <span class="k">return</span> <span class="n">pipeline</span></div>
+
+
+<span class="c1"># Additional pipeline sections for item types</span>
+
+<span class="n">PHASE1_PIPELINES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;ontology&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">remove_keys</span><span class="p">(</span><span class="s1">&#39;synonym_terms&#39;</span><span class="p">,</span> <span class="s1">&#39;definition_terms&#39;</span><span class="p">,</span> <span class="s1">&#39;relation_terms&#39;</span><span class="p">)</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;ontology_term&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">remove_keys</span><span class="p">(</span><span class="s1">&#39;parents&#39;</span><span class="p">,</span> <span class="s1">&#39;slim_terms&#39;</span><span class="p">)</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">remove_keys</span><span class="p">(</span><span class="s1">&#39;lab&#39;</span><span class="p">,</span> <span class="s1">&#39;submits_for&#39;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;file_fastq&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">remove_keys</span><span class="p">(</span><span class="s1">&#39;related_files&#39;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;file_fasta&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">remove_keys</span><span class="p">(</span><span class="s1">&#39;related_files&#39;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;file_processed&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">remove_keys</span><span class="p">(</span><span class="s1">&#39;related_files&#39;</span><span class="p">,</span> <span class="s2">&quot;workflow_run&quot;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;file_reference&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">remove_keys</span><span class="p">(</span><span class="s1">&#39;related_files&#39;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;file_set&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">remove_keys</span><span class="p">(</span><span class="s1">&#39;files_in_set&#39;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;experiment_hi_c&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">remove_keys</span><span class="p">(</span><span class="s1">&#39;experiment_relation&#39;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;experiment_capture_c&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">remove_keys</span><span class="p">(</span><span class="s1">&#39;experiment_relation&#39;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;experiment_repliseq&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">remove_keys</span><span class="p">(</span><span class="s1">&#39;experiment_relation&#39;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;publication&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">remove_keys</span><span class="p">(</span><span class="s1">&#39;exp_sets_prod_in_pub&#39;</span><span class="p">,</span> <span class="s1">&#39;exp_sets_used_in_pub&#39;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;publication_tracking&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">remove_keys</span><span class="p">(</span><span class="s1">&#39;experiment_sets_in_pub&#39;</span><span class="p">),</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+
+
+<span class="c1">##############################################################################</span>
+<span class="c1"># Phase 2 pipelines</span>
+<span class="c1">#</span>
+<span class="c1"># A second pass is required to cope with reference cycles. Only rows with</span>
+<span class="c1"># filtered out keys are updated.</span>
+
+
+<span class="n">PHASE2_PIPELINES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;ontology&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">skip_rows_missing_all_keys</span><span class="p">(</span><span class="s1">&#39;synonym_terms&#39;</span><span class="p">,</span> <span class="s1">&#39;definition_terms&#39;</span><span class="p">,</span> <span class="s1">&#39;relation_terms&#39;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;ontology_term&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">skip_rows_missing_all_keys</span><span class="p">(</span><span class="s1">&#39;parents&#39;</span><span class="p">,</span> <span class="s1">&#39;slim_terms&#39;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">skip_rows_missing_all_keys</span><span class="p">(</span><span class="s1">&#39;lab&#39;</span><span class="p">,</span> <span class="s1">&#39;submits_for&#39;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;file_fastq&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">skip_rows_missing_all_keys</span><span class="p">(</span><span class="s1">&#39;related_files&#39;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;file_fasta&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">skip_rows_missing_all_keys</span><span class="p">(</span><span class="s1">&#39;related_files&#39;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;file_processed&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">skip_rows_missing_all_keys</span><span class="p">(</span><span class="s1">&#39;related_files&#39;</span><span class="p">,</span> <span class="s2">&quot;workflow_run&quot;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;file_reference&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">skip_rows_missing_all_keys</span><span class="p">(</span><span class="s1">&#39;related_files&#39;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;file_set&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">skip_rows_missing_all_keys</span><span class="p">(</span><span class="s1">&#39;files_in_set&#39;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;experiment_hi_c&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">skip_rows_missing_all_keys</span><span class="p">(</span><span class="s1">&#39;experiment_relation&#39;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;experiment_capture_c&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">skip_rows_missing_all_keys</span><span class="p">(</span><span class="s1">&#39;experiment_relation&#39;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;experiment_repliseq&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">skip_rows_missing_all_keys</span><span class="p">(</span><span class="s1">&#39;experiment_relation&#39;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;publication&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">skip_rows_missing_all_keys</span><span class="p">(</span><span class="s1">&#39;exp_sets_prod_in_pub&#39;</span><span class="p">,</span> <span class="s1">&#39;exp_sets_used_in_pub&#39;</span><span class="p">),</span>
+    <span class="p">],</span>
+    <span class="s1">&#39;publication_tracking&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="n">skip_rows_missing_all_keys</span><span class="p">(</span><span class="s1">&#39;experiment_sets_in_pub&#39;</span><span class="p">),</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="load_all"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.load_all">[docs]</a><span class="k">def</span> <span class="nf">load_all</span><span class="p">(</span><span class="n">testapp</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">docsdir</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;smth.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">item_type</span> <span class="ow">in</span> <span class="n">ORDER</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">source</span> <span class="o">=</span> <span class="n">read_single_sheet</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">item_type</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Opening </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> failed.&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">item_type</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">pipeline</span> <span class="o">=</span> <span class="n">get_pipeline</span><span class="p">(</span><span class="n">testapp</span><span class="p">,</span> <span class="n">docsdir</span><span class="p">,</span> <span class="n">test</span><span class="p">,</span> <span class="n">item_type</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">process</span><span class="p">(</span><span class="n">combine</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">item_type</span> <span class="ow">in</span> <span class="n">ORDER</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">item_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">PHASE2_PIPELINES</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">source</span> <span class="o">=</span> <span class="n">read_single_sheet</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">item_type</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">pipeline</span> <span class="o">=</span> <span class="n">get_pipeline</span><span class="p">(</span><span class="n">testapp</span><span class="p">,</span> <span class="n">docsdir</span><span class="p">,</span> <span class="n">test</span><span class="p">,</span> <span class="n">item_type</span><span class="p">,</span> <span class="n">phase</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">process</span><span class="p">(</span><span class="n">combine</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">pipeline</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="generate_access_key"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.generate_access_key">[docs]</a><span class="k">def</span> <span class="nf">generate_access_key</span><span class="p">(</span><span class="n">testapp</span><span class="p">,</span> <span class="n">store_access_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">server</span><span class="o">=</span><span class="s1">&#39;http://localhost:8000&#39;</span><span class="p">,</span>  <span class="n">email</span><span class="o">=</span><span class="s1">&#39;4dndcic@gmail.com&#39;</span><span class="p">):</span>
+
+    <span class="c1"># get admin user and generate access keys</span>
+    <span class="k">if</span> <span class="n">store_access_key</span><span class="p">:</span>
+        <span class="c1"># we probably don&#39;t have elasticsearch index updated yet</span>
+        <span class="n">admin</span> <span class="o">=</span> <span class="n">testapp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;/users/</span><span class="si">%s</span><span class="s1">?datastore=database&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">email</span><span class="p">))</span><span class="o">.</span><span class="n">follow</span><span class="p">()</span><span class="o">.</span><span class="n">json</span>
+
+        <span class="c1"># don&#39;t create one if we already have</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">admin</span><span class="p">[</span><span class="s1">&#39;access_keys&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;key for submit4dn&#39;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;key found not generating new one&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+
+        <span class="n">access_key_req</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="n">admin</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;key for submit4dn&#39;</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">testapp</span><span class="o">.</span><span class="n">post_json</span><span class="p">(</span><span class="s1">&#39;/access_key&#39;</span><span class="p">,</span> <span class="n">access_key_req</span><span class="p">)</span><span class="o">.</span><span class="n">json</span>
+        <span class="k">if</span> <span class="n">store_access_key</span> <span class="o">==</span> <span class="s1">&#39;local&#39;</span><span class="p">:</span>
+            <span class="c1"># for local storing we always connecting to local server</span>
+            <span class="n">server</span> <span class="o">=</span> <span class="s1">&#39;http://localhost:8000&#39;</span>
+        <span class="n">akey</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;default&#39;</span><span class="p">:</span>
+                <span class="p">{</span><span class="s1">&#39;secret&#39;</span><span class="p">:</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;secret_access_key&#39;</span><span class="p">],</span>
+                 <span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;access_key_id&#39;</span><span class="p">],</span>
+                 <span class="s1">&#39;server&#39;</span><span class="p">:</span> <span class="n">server</span><span class="p">,</span>
+                 <span class="p">}</span>
+                <span class="p">}</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">akey</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="store_keys"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.store_keys">[docs]</a><span class="k">def</span> <span class="nf">store_keys</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">store_access_key</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">keys</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="c1"># write to ~/keypairs.json</span>
+        <span class="k">if</span> <span class="n">store_access_key</span> <span class="o">==</span> <span class="s1">&#39;local&#39;</span><span class="p">:</span>
+            <span class="n">home_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">&#39;~&#39;</span><span class="p">)</span>
+            <span class="n">keypairs_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">home_dir</span><span class="p">,</span> <span class="s1">&#39;keypairs.json&#39;</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Storing access keys to </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">keypairs_filename</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">keypairs_filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">keypairs</span><span class="p">:</span>
+                    <span class="c1"># write to file for local</span>
+                    <span class="n">keypairs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">store_access_key</span> <span class="o">==</span> <span class="s1">&#39;s3&#39;</span><span class="p">:</span>
+            <span class="n">s3bucket</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;system_bucket&#39;</span><span class="p">]</span>
+            <span class="n">secret</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;AWS_SECRET_KEY&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">secret</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;no secrets for s3 upload, you probably shouldn&#39;t be doing&quot;</span>
+                      <span class="s2">&quot;this from yourlocal machine&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;halt and catch fire&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+
+            <span class="n">s3</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s1">&#39;s3&#39;</span><span class="p">)</span>
+            <span class="n">secret</span> <span class="o">=</span> <span class="n">secret</span><span class="p">[:</span><span class="mi">32</span><span class="p">]</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Uploading S3 object with SSE-C&quot;</span><span class="p">)</span>
+            <span class="n">s3</span><span class="o">.</span><span class="n">put_object</span><span class="p">(</span><span class="n">Bucket</span><span class="o">=</span><span class="n">s3bucket</span><span class="p">,</span>
+                          <span class="n">Key</span><span class="o">=</span><span class="s1">&#39;illnevertell&#39;</span><span class="p">,</span>
+                          <span class="n">Body</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span>
+                          <span class="n">SSECustomerKey</span><span class="o">=</span><span class="n">secret</span><span class="p">,</span>
+                          <span class="n">SSECustomerAlgorithm</span><span class="o">=</span><span class="s1">&#39;AES256&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="load_test_data"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.load_test_data">[docs]</a><span class="k">def</span> <span class="nf">load_test_data</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">access_key_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;smth.&quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">webtest</span> <span class="k">import</span> <span class="n">TestApp</span>
+    <span class="n">environ</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;HTTP_ACCEPT&#39;</span><span class="p">:</span> <span class="s1">&#39;application/json&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;REMOTE_USER&#39;</span><span class="p">:</span> <span class="s1">&#39;TEST&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">testapp</span> <span class="o">=</span> <span class="n">TestApp</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">environ</span><span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">pkg_resources</span> <span class="k">import</span> <span class="n">resource_filename</span>
+    <span class="n">inserts</span> <span class="o">=</span> <span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;encoded&#39;</span><span class="p">,</span> <span class="s1">&#39;tests/data/inserts/&#39;</span><span class="p">)</span>
+    <span class="n">docsdir</span> <span class="o">=</span> <span class="p">[</span><span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;encoded&#39;</span><span class="p">,</span> <span class="s1">&#39;tests/data/documents/&#39;</span><span class="p">)]</span>
+    <span class="n">load_all</span><span class="p">(</span><span class="n">testapp</span><span class="p">,</span> <span class="n">inserts</span><span class="p">,</span> <span class="n">docsdir</span><span class="p">)</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="n">generate_access_key</span><span class="p">(</span><span class="n">testapp</span><span class="p">,</span> <span class="n">access_key_loc</span><span class="p">,</span>
+                               <span class="n">server</span><span class="o">=</span><span class="s2">&quot;https://testportal.4dnucleome.org&quot;</span><span class="p">)</span>
+    <span class="n">store_keys</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">access_key_loc</span><span class="p">,</span> <span class="n">keys</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="load_prod_data"><a class="viewcode-back" href="../../pydoc/encoded.loadxl.html#encoded.loadxl.load_prod_data">[docs]</a><span class="k">def</span> <span class="nf">load_prod_data</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">access_key_loc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;smth.&quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">webtest</span> <span class="k">import</span> <span class="n">TestApp</span>
+    <span class="n">environ</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;HTTP_ACCEPT&#39;</span><span class="p">:</span> <span class="s1">&#39;application/json&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;REMOTE_USER&#39;</span><span class="p">:</span> <span class="s1">&#39;TEST&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">testapp</span> <span class="o">=</span> <span class="n">TestApp</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">environ</span><span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">pkg_resources</span> <span class="k">import</span> <span class="n">resource_filename</span>
+    <span class="n">inserts</span> <span class="o">=</span> <span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;encoded&#39;</span><span class="p">,</span> <span class="s1">&#39;tests/data/prod-inserts/&#39;</span><span class="p">)</span>
+    <span class="n">docsdir</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">load_all</span><span class="p">(</span><span class="n">testapp</span><span class="p">,</span> <span class="n">inserts</span><span class="p">,</span> <span class="n">docsdir</span><span class="p">)</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="n">generate_access_key</span><span class="p">(</span><span class="n">testapp</span><span class="p">,</span> <span class="n">access_key_loc</span><span class="p">,</span>
+                               <span class="n">server</span><span class="o">=</span><span class="s2">&quot;https://data.4dnucleome.org&quot;</span><span class="p">)</span>
+    <span class="n">store_keys</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">access_key_loc</span><span class="p">,</span> <span class="n">keys</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../encoded.html" >encoded</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

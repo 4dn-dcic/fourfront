@@ -1,0 +1,251 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.types &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../encoded.html" accesskey="U">encoded</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.types</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;init.py lists all the collections that do not have a dedicated types file.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">snovault.attachment</span> <span class="k">import</span> <span class="n">ItemWithAttachment</span>
+<span class="kn">from</span> <span class="nn">snovault</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="c1"># calculated_property,</span>
+    <span class="n">collection</span><span class="p">,</span>
+    <span class="n">load_schema</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># from pyramid.traversal import find_root</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">Item</span>
+    <span class="c1"># paths_filtered_by_status,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="includeme"><a class="viewcode-back" href="../../pydoc/encoded.types.html#encoded.types.includeme">[docs]</a><span class="k">def</span> <span class="nf">includeme</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;include me method.&quot;&quot;&quot;</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">scan</span><span class="p">()</span></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;analysis-steps&#39;</span><span class="p">,</span>
+    <span class="n">unique_key</span><span class="o">=</span><span class="s1">&#39;analysis_step:name&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;AnalysisSteps&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing of analysis steps for 4DN analyses&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="AnalysisStep"><a class="viewcode-back" href="../../pydoc/encoded.types.html#encoded.types.AnalysisStep">[docs]</a><span class="k">class</span> <span class="nc">AnalysisStep</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The AnalysisStep class that descrbes a step in a workflow.&quot;&quot;&quot;</span>
+
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;analysis_step&#39;</span>
+    <span class="n">name_key</span> <span class="o">=</span> <span class="s1">&#39;name&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/analysis_step.json&#39;</span><span class="p">)</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;software_used&#39;</span><span class="p">,</span> <span class="s1">&#39;qa_stats_generated&#39;</span><span class="p">]</span></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;awards&#39;</span><span class="p">,</span>
+    <span class="n">unique_key</span><span class="o">=</span><span class="s1">&#39;award:name&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Awards (Grants)&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing of awards (aka grants)&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="Award"><a class="viewcode-back" href="../../pydoc/encoded.types.html#encoded.types.Award">[docs]</a><span class="k">class</span> <span class="nc">Award</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Award class.&quot;&quot;&quot;</span>
+
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;award&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/award.json&#39;</span><span class="p">)</span>
+    <span class="n">name_key</span> <span class="o">=</span> <span class="s1">&#39;name&#39;</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pi&#39;</span><span class="p">]</span></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;biosample-cell-cultures&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Biosample Cell Culture Information&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing Biosample Cell Culture Information&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="BiosampleCellCulture"><a class="viewcode-back" href="../../pydoc/encoded.types.html#encoded.types.BiosampleCellCulture">[docs]</a><span class="k">class</span> <span class="nc">BiosampleCellCulture</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Cell culture details for Biosample.&quot;&quot;&quot;</span>
+
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;biosample_cell_culture&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/biosample_cell_culture.json&#39;</span><span class="p">)</span></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;constructs&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Constructs&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing of Constructs&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="Construct"><a class="viewcode-back" href="../../pydoc/encoded.types.html#encoded.types.Construct">[docs]</a><span class="k">class</span> <span class="nc">Construct</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Construct class.&quot;&quot;&quot;</span>
+
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;construct&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/construct.json&#39;</span><span class="p">)</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;documents&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Documents&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing of Documents&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="Document"><a class="viewcode-back" href="../../pydoc/encoded.types.html#encoded.types.Document">[docs]</a><span class="k">class</span> <span class="nc">Document</span><span class="p">(</span><span class="n">ItemWithAttachment</span><span class="p">,</span> <span class="n">Item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Document class.&quot;&quot;&quot;</span>
+
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;document&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/document.json&#39;</span><span class="p">)</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;lab&#39;</span><span class="p">,</span> <span class="s1">&#39;award&#39;</span><span class="p">,</span> <span class="s1">&#39;submitted_by&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Document.display_title"><a class="viewcode-back" href="../../pydoc/encoded.types.html#encoded.types.Document.display_title">[docs]</a>    <span class="k">def</span> <span class="nf">display_title</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;attachment&#39;</span><span class="p">):</span>
+            <span class="n">attach</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;attachment&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">attach</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;download&#39;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">attach</span><span class="p">[</span><span class="s1">&#39;download&#39;</span><span class="p">]</span></div></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;enzymes&#39;</span><span class="p">,</span>
+    <span class="n">unique_key</span><span class="o">=</span><span class="s1">&#39;enzyme:name&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Enzymes&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing of enzymes&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="Enzyme"><a class="viewcode-back" href="../../pydoc/encoded.types.html#encoded.types.Enzyme">[docs]</a><span class="k">class</span> <span class="nc">Enzyme</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Enzyme class.&quot;&quot;&quot;</span>
+
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;enzyme&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/enzyme.json&#39;</span><span class="p">)</span>
+    <span class="n">name_key</span> <span class="o">=</span> <span class="s1">&#39;name&#39;</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;enzyme_source&#39;</span><span class="p">]</span></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;genomic-regions&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Genomic Regions&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing of genomic regions&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="GenomicRegion"><a class="viewcode-back" href="../../pydoc/encoded.types.html#encoded.types.GenomicRegion">[docs]</a><span class="k">class</span> <span class="nc">GenomicRegion</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The GenomicRegion class that describes a region of a genome.&quot;&quot;&quot;</span>
+
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;genomic_region&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/genomic_region.json&#39;</span><span class="p">)</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;organisms&#39;</span><span class="p">,</span>
+    <span class="n">unique_key</span><span class="o">=</span><span class="s1">&#39;organism:name&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Organisms&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing of all registered organisms&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="Organism"><a class="viewcode-back" href="../../pydoc/encoded.types.html#encoded.types.Organism">[docs]</a><span class="k">class</span> <span class="nc">Organism</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Organism class.&quot;&quot;&quot;</span>
+
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;organism&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/organism.json&#39;</span><span class="p">)</span>
+    <span class="n">name_key</span> <span class="o">=</span> <span class="s1">&#39;name&#39;</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;protocols&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Protocols&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing of protocols&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="Protocol"><a class="viewcode-back" href="../../pydoc/encoded.types.html#encoded.types.Protocol">[docs]</a><span class="k">class</span> <span class="nc">Protocol</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Protocol class.&quot;&quot;&quot;</span>
+
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;protocol&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/protocol.json&#39;</span><span class="p">)</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="p">[]</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../encoded.html" >encoded</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

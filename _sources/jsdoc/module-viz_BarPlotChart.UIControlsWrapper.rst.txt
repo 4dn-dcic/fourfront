@@ -1,0 +1,69 @@
+.. _module-viz_BarPlotChart.UIControlsWrapper:
+
+================================
+Component: ``UIControlsWrapper``
+================================
+
+
+Member Of :doc:`module-viz_BarPlotChart`
+
+
+.. toctree::
+   :maxdepth: 3
+   
+   
+
+.. contents:: Local Navigation
+   :local:
+
+
+Description
+===========
+
+Component which wraps the BarPlotChart and provides some UI buttons and stuff.
+Passes props to BarPlotChart.
+
+Functions
+=========
+
+
+
+.. _module-viz_BarPlotChart.UIControlsWrapper.getDefaultProps:
+
+
+``getDefaultProps``
+-------------------
+
+Default props for the UIControlsWrapper.
+
+.. js:function:: getDefaultProps()
+
+    
+    
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.UIControlsWrapper.adjustedChildChart:
+
+
+``adjustedChildChart``
+----------------------
+
+Clones props.children, expecting a Chart React Component as the sole child, and extends Chart props with 'fields', 'showType', and 'aggregateType'.
+
+.. js:function:: adjustedChildChart()
+
+    
+    :return React.Component: Cloned & extended props.children.
+    
+
+
+
+
+
+
+
+

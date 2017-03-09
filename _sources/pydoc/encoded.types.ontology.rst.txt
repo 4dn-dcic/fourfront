@@ -1,0 +1,7 @@
+encoded.types.ontology module
+=============================
+
+.. automodule:: encoded.types.ontology
+    :members:
+    :undoc-members:
+    :show-inheritance:

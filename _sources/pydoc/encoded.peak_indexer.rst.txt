@@ -1,0 +1,7 @@
+encoded.peak_indexer module
+===========================
+
+.. automodule:: encoded.peak_indexer
+    :members:
+    :undoc-members:
+    :show-inheritance:

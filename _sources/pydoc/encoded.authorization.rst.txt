@@ -1,0 +1,7 @@
+encoded.authorization module
+============================
+
+.. automodule:: encoded.authorization
+    :members:
+    :undoc-members:
+    :show-inheritance:

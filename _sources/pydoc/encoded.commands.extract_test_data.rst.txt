@@ -1,0 +1,7 @@
+encoded.commands.extract_test_data module
+=========================================
+
+.. automodule:: encoded.commands.extract_test_data
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,7 @@
+encoded.tests.features.test_submitter_user module
+=================================================
+
+.. automodule:: encoded.tests.features.test_submitter_user
+    :members:
+    :undoc-members:
+    :show-inheritance:

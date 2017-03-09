@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Authentication and authorization &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Dependency tracking and invalidation" href="invalidation.html" />
+    <link rel="prev" title="The object lifecycle" href="object-lifecycle.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="invalidation.html" title="Dependency tracking and invalidation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="object-lifecycle.html" title="The object lifecycle"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="static_documentation_contents.html" accesskey="U">Tutorials and Other Documents</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="authentication-and-authorization">
+<h1>Authentication and authorization<a class="headerlink" href="#authentication-and-authorization" title="Permalink to this headline">¶</a></h1>
+<p>Background reading: <a class="reference external" href="http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/security.html">Pyramid&#8217;s security system</a>.</p>
+<p>I extend Pyramid&#8217;s built in ACL based security system with my <a class="reference external" href="https://pypi.python.org/pypi/pyramid_localroles/">pyramid_localroles</a> plugin so we can map permissions to roles (e.g. &#8216;role.lab_submitter&#8217;) rather than directly to users.</p>
+<p>For more on roles and local roles see:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://docs.zope.org/zope2/zope2book/Security.html#different-levels-of-access-with-roles">http://docs.zope.org/zope2/zope2book/Security.html#different-levels-of-access-with-roles</a></li>
+<li><a class="reference external" href="http://www.sixfeetup.com/blog/basic-roles-and-permissions-in-plone">http://www.sixfeetup.com/blog/basic-roles-and-permissions-in-plone</a></li>
+<li><a class="reference external" href="https://www.packtpub.com/books/content/plone-4-development-understanding-zope-security">https://www.packtpub.com/books/content/plone-4-development-understanding-zope-security</a></li>
+</ul>
+<div class="section" id="authentication">
+<h2>Authentication<a class="headerlink" href="#authentication" title="Permalink to this headline">¶</a></h2>
+<p>An authentication policy identifies who you are, returning a user id.
+We use pyramid_multiauth to extract authentication from any of <a class="reference external" href="https://www.persona.org/">Persona</a>, session cookies, or HTTP basic auth (access keys).</p>
+</div>
+<div class="section" id="authorization">
+<h2>Authorization<a class="headerlink" href="#authorization" title="Permalink to this headline">¶</a></h2>
+<p>From the authenticated user id, the groupfinder in <a class="reference external" href="../src/encoded/authorization.py">authorization.py</a> maps the user id to a number of &#8220;principals&#8221;, user or group identifiers.
+We lookup the user object and add groups based on the properties:</p>
+<ul class="simple">
+<li>groups [&lt;string&gt;..] - global groups like &#8216;admin&#8217;. Generates: <cite>group.admin</cite>.</li>
+<li>submits_for: [lab..] - allow editing based on object.lab property. Generates: <cite>submits_for.&lt;lab-uuid&gt;</cite>.</li>
+<li>viewing_groups: [&lt;string..&gt;] - allow viewing of in progress data based on object.award.viewing_group (ENCODE, GGR, REMC.) Generates: <cite>viewing_group.ENCODE</cite>.</li>
+</ul>
+<p>Views are protected by permissions (<cite>view</cite>, <cite>edit</cite>, etc.)</p>
+<p>When you PUT to /experiment/ENCSR123ABC/ then Pyramid will traverse to the experiment object (see: <a class="reference external" href="http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/resources.html#location-aware">Location aware resources</a>) and lookup a view for to PUT which is protected with the <cite>edit</cite> permission.</p>
+<p>At this point my pyramid_localroles plugin steps in and extends the authenticated principals passed to the ACLAuthorizationPolicy (the global groups that apply across the whole site) with location aware local roles such as <cite>role.lab_submitter</cite> and <cite>role.viewing_group_member</cite> by reference to the <cite>__ac_local_roles__</cite> method (<a class="reference external" href="../src/encoded/types/base.py">base.py</a>) of the context object which returns a mapping based on the context object&#8217;s &#8216;lab&#8217; and award property, e.g:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="s1">&#39;submits_for.&lt;context-lab-uuid&gt;&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;role.lab_submitter&#39;</span><span class="p">],</span>
+  <span class="s1">&#39;viewing_group.&lt;context-award-viewing_group&gt;&#39;&#39;: [&#39;</span><span class="n">role</span><span class="o">.</span><span class="n">viewing_group_member</span><span class="s1">&#39;],</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The ACL authorization policy will then lookup the Access Control List on the experiment object (the &#8216;context&#8217;) by looking at its <cite>__acl__</cite> property/method, and then the <cite>__acl__</cite> property/methods of its parents (the /experiments collection and the root object.)
+We define an <cite>__acl__</cite> method on the EncodedRoot object (<a class="reference external" href="../src/encoded/root.py">root.py</a>), Collection and Item objects (<a class="reference external" href="../src/encoded/types/base.py">base.py</a>.)
+The <cite>__acl__</cite> method for an Item returns a different ACL list depending on the object&#8217;s &#8216;status&#8217;.
+This way we allow lab submitters to edit their own &#8216;in progress&#8217; objects but not &#8216;released&#8217; objects.</p>
+</div>
+<div class="section" id="permissions">
+<h2>Permissions<a class="headerlink" href="#permissions" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>add</li>
+<li>add_unvalidated (admin)</li>
+<li>audit - view audits on an individual content item</li>
+<li>edit</li>
+<li>edit_unvalidated (admin)</li>
+<li>expand (system)</li>
+<li>forms - who can see forms</li>
+<li>impersonate (admin)</li>
+<li>import_items (admin)</li>
+<li>index (system)</li>
+<li>list</li>
+<li>search</li>
+<li>search_audit - global permission to see audits in search results</li>
+<li>submit_for_any (admin)</li>
+<li>view</li>
+<li>view_details - protection of user contact information</li>
+<li>view_raw (admin)</li>
+<li>visible_for_edit - hiding deleted child objects from edit</li>
+</ul>
+<p>Permissions of items are tied to the statuses of items. We have 8 statuses for most items (there are exceptions like file and publication)</p>
+<ul class="simple">
+<li>Current : Everyone can view, admin can edit</li>
+<li>Released : Everyone can view, admin can edit</li>
+<li>Revoked : Everyone can view, admin can edit</li>
+<li>Deleted : Nobody can view, admin can edit</li>
+<li>Replaced : Nobody can view, admin can edit</li>
+<li>In review by lab : Lab members can view, submitter can edit</li>
+<li>In review by project : Project members can view, submitter can edit</li>
+<li>Released to project : Project members can view</li>
+</ul>
+<p>This gnu grep expression will extract a list of permissions (brew tap homebrew/dupes; brew install grep):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ ggrep --no-filename -roP &quot;(?&lt;=permission[=(][&#39;\&quot;])[^&#39;\&quot;]+&quot; src/ | sort | uniq
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Authentication and authorization</a><ul>
+<li><a class="reference internal" href="#authentication">Authentication</a></li>
+<li><a class="reference internal" href="#authorization">Authorization</a></li>
+<li><a class="reference internal" href="#permissions">Permissions</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="object-lifecycle.html"
+                        title="previous chapter">The object lifecycle</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="invalidation.html"
+                        title="next chapter">Dependency tracking and invalidation</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/authentication.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="invalidation.html" title="Dependency tracking and invalidation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="object-lifecycle.html" title="The object lifecycle"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="static_documentation_contents.html" >Tutorials and Other Documents</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

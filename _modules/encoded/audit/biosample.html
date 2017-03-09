@@ -1,0 +1,524 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.audit.biosample &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../audit.html" accesskey="U">encoded.audit</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.audit.biosample</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">snovault</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">AuditFailure</span><span class="p">,</span>
+    <span class="n">audit_checker</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">.ontology_data</span> <span class="k">import</span> <span class="n">biosampleType_ontologyPrefix</span>
+<span class="kn">from</span> <span class="nn">.gtex_data</span> <span class="k">import</span> <span class="n">gtexDonorsList</span>
+<span class="kn">from</span> <span class="nn">.gtex_data</span> <span class="k">import</span> <span class="n">gtexParentsList</span>
+
+
+<span class="n">term_mapping</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;head&quot;</span><span class="p">:</span> <span class="s2">&quot;UBERON:0000033&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;limb&quot;</span><span class="p">:</span> <span class="s2">&quot;UBERON:0002101&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;salivary gland&quot;</span><span class="p">:</span> <span class="s2">&quot;UBERON:0001044&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;male accessory sex gland&quot;</span><span class="p">:</span> <span class="s2">&quot;UBERON:0010147&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;testis&quot;</span><span class="p">:</span> <span class="s2">&quot;UBERON:0000473&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;female gonad&quot;</span><span class="p">:</span> <span class="s2">&quot;UBERON:0000992&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;digestive system&quot;</span><span class="p">:</span> <span class="s2">&quot;UBERON:0001007&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;arthropod fat body&quot;</span><span class="p">:</span> <span class="s2">&quot;UBERON:0003917&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;antenna&quot;</span><span class="p">:</span> <span class="s2">&quot;UBERON:0000972&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;adult maxillary segment&quot;</span><span class="p">:</span> <span class="s2">&quot;FBbt:00003016&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;female reproductive system&quot;</span><span class="p">:</span> <span class="s2">&quot;UBERON:0000474&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;male reproductive system&quot;</span><span class="p">:</span> <span class="s2">&quot;UBERON:0000079&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;nucleus&quot;</span><span class="p">:</span> <span class="s2">&quot;GO:0005634&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;cytosol&quot;</span><span class="p">:</span> <span class="s2">&quot;GO:0005829&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;chromatin&quot;</span><span class="p">:</span> <span class="s2">&quot;GO:0000785&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;membrane&quot;</span><span class="p">:</span> <span class="s2">&quot;GO:0016020&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;mitochondria&quot;</span><span class="p">:</span> <span class="s2">&quot;GO:0005739&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;nuclear matrix&quot;</span><span class="p">:</span> <span class="s2">&quot;GO:0016363&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;nucleolus&quot;</span><span class="p">:</span> <span class="s2">&quot;GO:0005730&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;nucleoplasm&quot;</span><span class="p">:</span> <span class="s2">&quot;GO:0005654&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;polysome&quot;</span><span class="p">:</span> <span class="s2">&quot;GO:0005844&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;insoluble cytoplasmic fraction&quot;</span><span class="p">:</span> <span class="s2">&quot;NTR:0002594&quot;</span>
+<span class="p">}</span>
+
+<span class="n">model_organism_terms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;model_organism_mating_status&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;model_organism_sex&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;mouse_life_stage&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;fly_life_stage&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;fly_synchronization_stage&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;post_synchronization_time&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;post_synchronization_time_units&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;worm_life_stage&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;worm_synchronization_stage&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;model_organism_age&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;model_organism_age_units&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;model_organism_health_status&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;model_organism_donor_constructs&#39;</span><span class="p">]</span>
+
+
+<span class="nd">@audit_checker</span><span class="p">(</span><span class="s1">&#39;biosample&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;biosource&#39;</span><span class="p">,</span> <span class="s1">&#39;cell_culture_details&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="audit_biosample_tier1_cell_lines_have_required_cell_culture_properties"><a class="viewcode-back" href="../../../pydoc/encoded.audit.biosample.html#encoded.audit.biosample.audit_biosample_tier1_cell_lines_have_required_cell_culture_properties">[docs]</a><span class="k">def</span> <span class="nf">audit_biosample_tier1_cell_lines_have_required_cell_culture_properties</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">system</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    tier1 cell lines have required fields from biosample_cell_culture</span>
+<span class="sd">    that must be present and that depend on the cell_line</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># check to see if any of the biosources (usually only 1) are Tier1 cell_lines</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">bs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cell_line_tier&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;Tier 1&#39;</span> <span class="k">for</span> <span class="n">bs</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;biosource&#39;</span><span class="p">)):</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;biosource&#39;</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># special case for multi-biosource</span>
+        <span class="k">return</span>
+    <span class="n">required</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;culture_duration&#39;</span><span class="p">,</span> <span class="s1">&#39;morphology_image&#39;</span><span class="p">]</span>
+    <span class="n">missing</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="s1">&#39;cell_culture_details&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+        <span class="n">missing</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;cell_culture_details&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cell_cult_info</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;cell_culture_details&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s1">&#39;passage_number&#39;</span> <span class="ow">in</span> <span class="n">cell_cult_info</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cell_cult_info</span><span class="p">[</span><span class="s1">&#39;passage_number&#39;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">10</span><span class="p">:</span>
+                <span class="c1"># they need karyotype image so add to required</span>
+                <span class="n">required</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;karyotype_image:karyotype&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">required</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">prop</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cell_cult_info</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">prop</span><span class="p">:</span>
+                    <span class="n">orred</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+                    <span class="n">ok</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">for</span> <span class="n">choice</span> <span class="ow">in</span> <span class="n">orred</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">choice</span> <span class="ow">in</span> <span class="n">cell_cult_info</span><span class="p">:</span>
+                            <span class="n">ok</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">ok</span><span class="p">:</span>
+                        <span class="n">missing</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">orred</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">missing</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prop</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+        <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;In Biosample </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span> <span class="o">+</span> \
+                 <span class="s1">&#39; - Missing Required Info for Tier 1 Cell Line &#39;</span> <span class="o">+</span> \
+                 <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;biosource&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;cell_line&#39;</span><span class="p">])</span> <span class="o">+</span> \
+                 <span class="s1">&#39; linked BiosampleCellCulture is missing required </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;missing mandatory metadata&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span>
+                           <span class="n">level</span><span class="o">=</span><span class="s1">&#39;ERROR&#39;</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+<span class="c1">#@audit_checker(&#39;biosample&#39;, frame=[&#39;organism&#39;])</span>
+<div class="viewcode-block" id="audit_biosample_human_no_model_organism_properties"><a class="viewcode-back" href="../../../pydoc/encoded.audit.biosample.html#encoded.audit.biosample.audit_biosample_human_no_model_organism_properties">[docs]</a><span class="k">def</span> <span class="nf">audit_biosample_human_no_model_organism_properties</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">system</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    human bioamples shouldn&#39;t have model organism properties initiated</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="s1">&#39;organism&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;organism&#39;</span><span class="p">][</span><span class="s1">&#39;scientific_name&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;Homo sapiens&#39;</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">terms_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">model_organism_terms</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+            <span class="n">terms_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">terms_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;Human biosample </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span> <span class="o">+</span> \
+                 <span class="s1">&#39; contains model organism fileld </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">terms_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;model organism term in human biosample&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span>
+                           <span class="n">level</span><span class="o">=</span><span class="s1">&#39;ERROR&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">terms_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;Human biosample </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span> <span class="o">+</span> \
+                 <span class="s1">&#39; contains model organism filelds </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">terms_list</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;model organism term in human biosample&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span>
+                           <span class="n">level</span><span class="o">=</span><span class="s1">&#39;ERROR&#39;</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+
+<span class="c1">#@audit_checker(&#39;biosample&#39;, frame=[&#39;source&#39;, &#39;part_of&#39;, &#39;donor&#39;])</span>
+<div class="viewcode-block" id="audit_biosample_gtex_children"><a class="viewcode-back" href="../../../pydoc/encoded.audit.biosample.html#encoded.audit.biosample.audit_biosample_gtex_children">[docs]</a><span class="k">def</span> <span class="nf">audit_biosample_gtex_children</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">system</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    GTEX children biosamples have to be properly registered.</span>
+<span class="sd">    - aliases (column A from plate-maps)</span>
+<span class="sd">    - part_of pointing to the parent biosample</span>
+<span class="sd">    - source Kristin Ardlie</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;deleted&#39;</span><span class="p">,</span> <span class="s1">&#39;replaced&#39;</span><span class="p">,</span> <span class="s1">&#39;revoked&#39;</span><span class="p">]:</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="s1">&#39;donor&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;donor&#39;</span><span class="p">][</span><span class="s1">&#39;accession&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">gtexDonorsList</span><span class="p">)</span> <span class="ow">and</span> \
+       <span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;accession&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">gtexParentsList</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;source&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+            <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;GTEX biosample </span><span class="si">{}</span><span class="s1"> has no source&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span>
+            <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;GTEX biosample missing source&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INTERNAL_ACTION&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">][</span><span class="s1">&#39;uuid&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;f85ecd67-abf2-4a26-89c8-53a7273c8b0c&#39;</span><span class="p">):</span>
+                <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;GTEX biosample </span><span class="si">{}</span><span class="s1"> has incorrect source </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">],</span>
+                    <span class="n">value</span><span class="p">[</span><span class="s1">&#39;source&#39;</span><span class="p">][</span><span class="s1">&#39;title&#39;</span><span class="p">])</span>
+                <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;GTEX biosample incorrect source&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INTERNAL_ACTION&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;part_of&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+            <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;GTEX child biosample </span><span class="si">{}</span><span class="s1"> is not asociated with any parent biosample&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span>
+            <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;GTEX biosample missing part_of property&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span>
+                               <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INTERNAL_ACTION&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">partOfBiosample</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;part_of&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">partOfBiosample</span><span class="p">[</span><span class="s1">&#39;accession&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">gtexParentsList</span><span class="p">):</span>
+                <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;GTEX child biosample </span><span class="si">{}</span><span class="s1"> is asociated &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span> <span class="o">+</span> \
+                         <span class="s1">&#39;with biosample </span><span class="si">{}</span><span class="s1"> which is &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">partOfBiosample</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span> <span class="o">+</span> \
+                         <span class="s1">&#39;not a part of parent biosamples list&#39;</span>
+                <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;GTEX biosample invalid part_of property&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span>
+                                   <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INTERNAL_ACTION&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;biosample_term_id&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">partOfBiosample</span><span class="p">[</span><span class="s1">&#39;biosample_term_id&#39;</span><span class="p">]:</span>
+                    <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;GTEX child biosample </span><span class="si">{}</span><span class="s1"> is associated with &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span> <span class="o">+</span> \
+                             <span class="s1">&#39;biosample </span><span class="si">{}</span><span class="s1"> that has a different &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">partOfBiosample</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span> <span class="o">+</span> \
+                             <span class="s1">&#39;biosample_term_id </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">partOfBiosample</span><span class="p">[</span><span class="s1">&#39;biosample_term_id&#39;</span><span class="p">])</span>
+                    <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;GTEX biosample invalid part_of property&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span>
+                                       <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INTERNAL_ACTION&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;aliases&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">):</span>
+            <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;GTEX biosample </span><span class="si">{}</span><span class="s1"> has no aliases&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span>
+            <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;GTEX biosample missing aliases&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INTERNAL_ACTION&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">donorAliases</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;donor&#39;</span><span class="p">][</span><span class="s1">&#39;aliases&#39;</span><span class="p">]</span>
+            <span class="n">repDonorAlias</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">for</span> <span class="n">da</span> <span class="ow">in</span> <span class="n">donorAliases</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">da</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">7</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;gtex:PT&#39;</span><span class="p">:</span>
+                    <span class="n">repDonorAlias</span> <span class="o">=</span> <span class="s1">&#39;gtex:ENC-&#39;</span><span class="o">+</span><span class="n">da</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">13</span><span class="p">]</span>
+            <span class="n">childAliases</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;aliases&#39;</span><span class="p">]</span>
+            <span class="n">aliasFlag</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">ca</span> <span class="ow">in</span> <span class="n">childAliases</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ca</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">14</span><span class="p">]</span> <span class="o">==</span> <span class="n">repDonorAlias</span><span class="p">:</span>
+                    <span class="n">aliasFlag</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">aliasFlag</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;GTEX biosample </span><span class="si">{}</span><span class="s1"> aliases </span><span class="si">{}</span><span class="s1"> &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">],</span>
+                                                                <span class="n">childAliases</span><span class="p">)</span> <span class="o">+</span> \
+                         <span class="s1">&#39;do not include an alias based on plate-map, column A identifier&#39;</span>
+                <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;GTEX biosample missing aliases&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span>
+                                   <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INTERNAL_ACTION&#39;</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+<span class="c1">#@audit_checker(&#39;biosample&#39;, frame=&#39;object&#39;)</span>
+<div class="viewcode-block" id="audit_biosample_term"><a class="viewcode-back" href="../../../pydoc/encoded.audit.biosample.html#encoded.audit.biosample.audit_biosample_term">[docs]</a><span class="k">def</span> <span class="nf">audit_biosample_term</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">system</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Biosample_term_id and biosample_term_name</span>
+<span class="sd">    and biosample_type should all be present.</span>
+<span class="sd">    This should be handled by schemas.</span>
+<span class="sd">    Biosample_term_id should be in the ontology.</span>
+<span class="sd">    Biosample_term_name should match biosample_term_id.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;deleted&#39;</span><span class="p">]:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="s1">&#39;biosample_term_id&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="n">ontology</span> <span class="o">=</span> <span class="n">system</span><span class="p">[</span><span class="s1">&#39;registry&#39;</span><span class="p">][</span><span class="s1">&#39;ontology&#39;</span><span class="p">]</span>
+    <span class="n">term_id</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;biosample_term_id&#39;</span><span class="p">]</span>
+    <span class="n">term_name</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;biosample_term_name&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">term_id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;NTR:&#39;</span><span class="p">):</span>
+        <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;Biosample </span><span class="si">{}</span><span class="s1"> has a New Term Request </span><span class="si">{}</span><span class="s1"> - </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">],</span>
+            <span class="n">term_id</span><span class="p">,</span>
+            <span class="n">term_name</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;NTR biosample&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INTERNAL_ACTION&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">biosample_prefix</span> <span class="o">=</span> <span class="n">term_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">biosample_prefix</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">biosampleType_ontologyPrefix</span><span class="p">[</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;biosample_type&#39;</span><span class="p">]]:</span>
+        <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;Biosample </span><span class="si">{}</span><span class="s1"> of &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span> <span class="o">+</span> \
+                 <span class="s1">&#39;type </span><span class="si">{}</span><span class="s1"> &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;biosample_type&#39;</span><span class="p">])</span> <span class="o">+</span> \
+                 <span class="s1">&#39;has biosample_term_id </span><span class="si">{}</span><span class="s1"> &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;biosample_term_id&#39;</span><span class="p">])</span> <span class="o">+</span> \
+                 <span class="s1">&#39;that is not one of &#39;</span> <span class="o">+</span> \
+                 <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">biosampleType_ontologyPrefix</span><span class="p">[</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;biosample_type&#39;</span><span class="p">]])</span>
+        <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;biosample term-type mismatch&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INTERNAL_ACTION&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">term_id</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ontology</span><span class="p">:</span>
+        <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;Biosample </span><span class="si">{}</span><span class="s1"> has biosample_term_id of </span><span class="si">{}</span><span class="s1"> which is not in ontology&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">],</span>
+            <span class="n">term_id</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;term_id not in ontology&#39;</span><span class="p">,</span> <span class="n">term_id</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INTERNAL_ACTION&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">ontology_term_name</span> <span class="o">=</span> <span class="n">ontology</span><span class="p">[</span><span class="n">term_id</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">ontology_term_name</span> <span class="o">!=</span> <span class="n">term_name</span> <span class="ow">and</span> <span class="n">term_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ontology</span><span class="p">[</span><span class="n">term_id</span><span class="p">][</span><span class="s1">&#39;synonyms&#39;</span><span class="p">]:</span>
+        <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;Biosample </span><span class="si">{}</span><span class="s1"> has &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span> <span class="o">+</span> \
+                 <span class="s1">&#39;a mismatch between biosample_term_id </span><span class="si">{}</span><span class="s1"> &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">term_id</span><span class="p">)</span> <span class="o">+</span> \
+                 <span class="s1">&#39;and biosample_term_name </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">term_name</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;mismatched ontology term&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;ERROR&#39;</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+
+<span class="c1">#@audit_checker(&#39;biosample&#39;, frame=&#39;object&#39;)</span>
+<div class="viewcode-block" id="audit_biosample_culture_date"><a class="viewcode-back" href="../../../pydoc/encoded.audit.biosample.html#encoded.audit.biosample.audit_biosample_culture_date">[docs]</a><span class="k">def</span> <span class="nf">audit_biosample_culture_date</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">system</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    A culture_harvest_date should not precede</span>
+<span class="sd">    a culture_start_date.</span>
+<span class="sd">    This should move to the schema.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;deleted&#39;</span><span class="p">]:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;culture_start_date&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;culture_harvest_date&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;culture_harvest_date&#39;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;culture_start_date&#39;</span><span class="p">]:</span>
+        <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;Biosample </span><span class="si">{}</span><span class="s1"> has a culture_harvest_date </span><span class="si">{}</span><span class="s1"> which precedes the culture_start_date </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">],</span>
+            <span class="n">value</span><span class="p">[</span><span class="s1">&#39;culture_harvest_date&#39;</span><span class="p">],</span>
+            <span class="n">value</span><span class="p">[</span><span class="s1">&#39;culture_start_date&#39;</span><span class="p">])</span>
+        <span class="k">raise</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;invalid dates&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;ERROR&#39;</span><span class="p">)</span></div>
+
+
+<span class="c1">#@audit_checker(&#39;biosample&#39;, frame=[&#39;organism&#39;, &#39;donor&#39;, &#39;donor.organism&#39;, &#39;donor.mutated_gene&#39;, &#39;donor.mutated_gene.organism&#39;])</span>
+<div class="viewcode-block" id="audit_biosample_donor"><a class="viewcode-back" href="../../../pydoc/encoded.audit.biosample.html#encoded.audit.biosample.audit_biosample_donor">[docs]</a><span class="k">def</span> <span class="nf">audit_biosample_donor</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">system</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    A biosample should have a donor.</span>
+<span class="sd">    The organism of donor and biosample should match.</span>
+<span class="sd">    Pooled_from biosamples do not need donors??</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;deleted&#39;</span><span class="p">]:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;donor&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;pooled_from&#39;</span><span class="p">]):</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;donor&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;pooled_from&#39;</span><span class="p">]):</span>
+        <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;Biosample </span><span class="si">{}</span><span class="s1"> requires a donor&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span>
+        <span class="k">raise</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;missing donor&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;ERROR&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">donor</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;donor&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;organism&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">donor</span><span class="p">[</span><span class="s1">&#39;organism&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]:</span>
+        <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;Biosample </span><span class="si">{}</span><span class="s1"> is organism </span><span class="si">{}</span><span class="s1">, yet its donor </span><span class="si">{}</span><span class="s1"> is organism </span><span class="si">{}</span><span class="s1">. Biosamples require a donor of the same species&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">],</span>
+            <span class="n">value</span><span class="p">[</span><span class="s1">&#39;organism&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+            <span class="n">donor</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">],</span>
+            <span class="n">donor</span><span class="p">[</span><span class="s1">&#39;organism&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+        <span class="k">raise</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;mismatched organism&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;ERROR&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;mutated_gene&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">donor</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;organism&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">donor</span><span class="p">[</span><span class="s1">&#39;mutated_gene&#39;</span><span class="p">][</span><span class="s1">&#39;organism&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]:</span>
+        <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;Biosample </span><span class="si">{}</span><span class="s1"> is organism </span><span class="si">{}</span><span class="s1">, but its donor </span><span class="si">{}</span><span class="s1"> mutated_gene is in </span><span class="si">{}</span><span class="s1">. Donor mutated_gene should be of the same species as the donor and biosample&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">],</span>
+            <span class="n">value</span><span class="p">[</span><span class="s1">&#39;organism&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+            <span class="n">donor</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">],</span>
+            <span class="n">donor</span><span class="p">[</span><span class="s1">&#39;mutated_gene&#39;</span><span class="p">][</span><span class="s1">&#39;organism&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+        <span class="k">raise</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;mismatched mutated_gene organism&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;ERROR&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">donor</span><span class="p">[</span><span class="s1">&#39;mutated_gene&#39;</span><span class="p">][</span><span class="s1">&#39;investigated_as&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;histone modification&#39;</span><span class="p">,</span> <span class="s1">&#39;tag&#39;</span><span class="p">,</span> <span class="s1">&#39;control&#39;</span><span class="p">,</span> <span class="s1">&#39;recombinant protein&#39;</span><span class="p">,</span> <span class="s1">&#39;nucleotide modification&#39;</span><span class="p">,</span> <span class="s1">&#39;other post-translational modification&#39;</span><span class="p">]:</span>
+            <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;Donor </span><span class="si">{}</span><span class="s1"> has an invalid mutated_gene </span><span class="si">{}</span><span class="s1">. Donor mutated_genes should not be tags, controls, recombinant proteins or modifications&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">donor</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">],</span>
+                <span class="n">donor</span><span class="p">[</span><span class="s1">&#39;mutated_gene&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+            <span class="k">raise</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;invalid donor mutated_gene&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;ERROR&#39;</span><span class="p">)</span></div>
+
+
+<span class="c1">#@audit_checker(&#39;biosample&#39;, frame=&#39;object&#39;)</span>
+<div class="viewcode-block" id="audit_biosample_subcellular_term_match"><a class="viewcode-back" href="../../../pydoc/encoded.audit.biosample.html#encoded.audit.biosample.audit_biosample_subcellular_term_match">[docs]</a><span class="k">def</span> <span class="nf">audit_biosample_subcellular_term_match</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">system</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The subcellular_fraction_term_name and subcellular_fraction_term_id</span>
+<span class="sd">    should be concordant. This should be a calculated field</span>
+<span class="sd">    If one exists the other should. This should be handled in the schema.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;deleted&#39;</span><span class="p">]:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;subcellular_fraction_term_name&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="s1">&#39;subcellular_fraction_term_id&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span>
+
+    <span class="n">expected_name</span> <span class="o">=</span> <span class="n">term_mapping</span><span class="p">[</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;subcellular_fraction_term_name&#39;</span><span class="p">]]</span>
+    <span class="k">if</span> <span class="n">expected_name</span> <span class="o">!=</span> <span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;subcellular_fraction_term_id&#39;</span><span class="p">]):</span>
+        <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;Biosample </span><span class="si">{}</span><span class="s1"> has a mismatch between subcellular_fraction_term_name &quot;</span><span class="si">{}</span><span class="s1">&quot; and subcellular_fraction_term_id &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">],</span>
+            <span class="n">value</span><span class="p">[</span><span class="s1">&#39;subcellular_fraction_term_name&#39;</span><span class="p">],</span>
+            <span class="n">value</span><span class="p">[</span><span class="s1">&#39;subcellular_fraction_term_id&#39;</span><span class="p">])</span>
+        <span class="k">raise</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;mismatched subcellular_fraction_term&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;ERROR&#39;</span><span class="p">)</span></div>
+
+
+<span class="c1">#@audit_checker(&#39;biosample&#39;, frame=&#39;object&#39;)</span>
+<div class="viewcode-block" id="audit_biosample_depleted_term_match"><a class="viewcode-back" href="../../../pydoc/encoded.audit.biosample.html#encoded.audit.biosample.audit_biosample_depleted_term_match">[docs]</a><span class="k">def</span> <span class="nf">audit_biosample_depleted_term_match</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">system</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    The depleted_in_term_name and depleted_in_term_name</span>
+<span class="sd">    should be concordant. This should be a calcualted field.</span>
+<span class="sd">    If one exists, the other should.  This should be handled in the schema.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;deleted&#39;</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="s1">&#39;depleted_in_term_name&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;depleted_in_term_name&#39;</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;depleted_in_term_id&#39;</span><span class="p">]):</span>
+        <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;Biosample </span><span class="si">{}</span><span class="s1"> has a depleted_in_term_name array and depleted_in_term_id array of differing lengths&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span>
+        <span class="k">raise</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;mismatched depleted_in_term length&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;ERROR&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">dep_term</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;depleted_in_term_name&#39;</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">term_mapping</span><span class="p">[</span><span class="n">dep_term</span><span class="p">])</span> <span class="o">!=</span> <span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;depleted_in_term_id&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]):</span>
+            <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;Biosample </span><span class="si">{}</span><span class="s1"> has a mismatch between </span><span class="si">{}</span><span class="s1"> and </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">],</span>
+                <span class="n">dep_term</span><span class="p">,</span>
+                <span class="n">value</span><span class="p">[</span><span class="s1">&#39;depleted_in_term_id&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">raise</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;mismatched depleted_in_term&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;ERROR&#39;</span><span class="p">)</span></div>
+
+
+<span class="c1">#@audit_checker(&#39;biosample&#39;, frame=&#39;object&#39;)</span>
+<div class="viewcode-block" id="audit_biosample_transfection_type"><a class="viewcode-back" href="../../../pydoc/encoded.audit.biosample.html#encoded.audit.biosample.audit_biosample_transfection_type">[docs]</a><span class="k">def</span> <span class="nf">audit_biosample_transfection_type</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">system</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    A biosample with constructs or rnais should have a</span>
+<span class="sd">    transfection_type</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;deleted&#39;</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;rnais&#39;</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;transfection_type&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;Biosample </span><span class="si">{}</span><span class="s1"> with a value for RNAi requires transfection_type&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span>
+        <span class="k">raise</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;missing transfection_type&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;ERROR&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;constructs&#39;</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">&#39;transfection_type&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;Biosample </span><span class="si">{}</span><span class="s1"> with a value for construct requires transfection_type&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span>
+        <span class="k">raise</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;missing transfection_type&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;ERROR&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="is_part_of"><a class="viewcode-back" href="../../../pydoc/encoded.audit.biosample.html#encoded.audit.biosample.is_part_of">[docs]</a><span class="k">def</span> <span class="nf">is_part_of</span><span class="p">(</span><span class="n">term_id</span><span class="p">,</span> <span class="n">part_of_term_id</span><span class="p">,</span> <span class="n">ontology</span><span class="p">):</span>
+    <span class="k">if</span> <span class="s1">&#39;part_of&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ontology</span><span class="p">[</span><span class="n">term_id</span><span class="p">]</span> <span class="ow">or</span> <span class="n">ontology</span><span class="p">[</span><span class="n">term_id</span><span class="p">][</span><span class="s1">&#39;part_of&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="p">[]:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">part_of_term_id</span> <span class="ow">in</span> <span class="n">ontology</span><span class="p">[</span><span class="n">term_id</span><span class="p">][</span><span class="s1">&#39;part_of&#39;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">parents</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ontology</span><span class="p">[</span><span class="n">term_id</span><span class="p">][</span><span class="s1">&#39;part_of&#39;</span><span class="p">]:</span>
+            <span class="n">parents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">is_part_of</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">part_of_term_id</span><span class="p">,</span> <span class="n">ontology</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">parents</span><span class="p">)</span></div>
+
+
+<span class="c1">#@audit_checker(&#39;biosample&#39;, frame=[&#39;part_of&#39;])</span>
+<div class="viewcode-block" id="audit_biosample_part_of_consistency"><a class="viewcode-back" href="../../../pydoc/encoded.audit.biosample.html#encoded.audit.biosample.audit_biosample_part_of_consistency">[docs]</a><span class="k">def</span> <span class="nf">audit_biosample_part_of_consistency</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">system</span><span class="p">):</span>
+    <span class="k">if</span> <span class="s1">&#39;part_of&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">part_of_biosample</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;part_of&#39;</span><span class="p">]</span>
+        <span class="n">term_id</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;biosample_term_id&#39;</span><span class="p">]</span>
+        <span class="n">part_of_term_id</span> <span class="o">=</span> <span class="n">part_of_biosample</span><span class="p">[</span><span class="s1">&#39;biosample_term_id&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s1">&#39;biosample_term_name&#39;</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+            <span class="n">term_name</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;biosample_term_name&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">term_name</span> <span class="o">=</span> <span class="n">term_id</span>
+        <span class="k">if</span> <span class="s1">&#39;biosample_term_name&#39;</span> <span class="ow">in</span> <span class="n">part_of_biosample</span><span class="p">:</span>
+            <span class="n">part_of_term_name</span> <span class="o">=</span> <span class="n">part_of_biosample</span><span class="p">[</span><span class="s1">&#39;biosample_term_name&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">part_of_term_name</span> <span class="o">=</span> <span class="n">part_of_term_id</span>
+
+        <span class="k">if</span> <span class="n">term_id</span> <span class="o">==</span> <span class="n">part_of_term_id</span> <span class="ow">or</span> <span class="n">part_of_term_id</span> <span class="o">==</span> <span class="s1">&#39;UBERON:0000468&#39;</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">ontology</span> <span class="o">=</span> <span class="n">system</span><span class="p">[</span><span class="s1">&#39;registry&#39;</span><span class="p">][</span><span class="s1">&#39;ontology&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">term_id</span> <span class="ow">in</span> <span class="n">ontology</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">part_of_term_id</span> <span class="ow">in</span> <span class="n">ontology</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">is_part_of</span><span class="p">(</span><span class="n">term_id</span><span class="p">,</span> <span class="n">part_of_term_id</span><span class="p">,</span> <span class="n">ontology</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="k">return</span>
+
+        <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;Biosample </span><span class="si">{}</span><span class="s1"> &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span> <span class="o">+</span> \
+                 <span class="s1">&#39;with biosample term </span><span class="si">{}</span><span class="s1"> &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">term_name</span><span class="p">)</span> <span class="o">+</span> \
+                 <span class="s1">&#39;was separated from biosample </span><span class="si">{}</span><span class="s1"> &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">part_of_biosample</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span> <span class="o">+</span> \
+                 <span class="s1">&#39;with biosample term </span><span class="si">{}</span><span class="s1">. &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">part_of_term_name</span><span class="p">)</span> <span class="o">+</span> \
+                 <span class="s1">&#39;The </span><span class="si">{}</span><span class="s1"> &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">term_id</span><span class="p">)</span> <span class="o">+</span> \
+                 <span class="s1">&#39;ontology does not note that part_of relationship.&#39;</span>
+        <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;inconsistent biosample_term_id&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span>
+                           <span class="n">level</span><span class="o">=</span><span class="s1">&#39;INTERNAL_ACTION&#39;</span><span class="p">)</span>
+        <span class="k">return</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../audit.html" >encoded.audit</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

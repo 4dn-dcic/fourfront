@@ -1,0 +1,465 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>The object lifecycle &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Authentication and authorization" href="authentication.html" />
+    <link rel="prev" title="Database Documentation" href="database.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="authentication.html" title="Authentication and authorization"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="database.html" title="Database Documentation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="static_documentation_contents.html" accesskey="U">Tutorials and Other Documents</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="the-object-lifecycle">
+<h1>The object lifecycle<a class="headerlink" href="#the-object-lifecycle" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="retrieval-get">
+<h2>Retrieval (GET)<a class="headerlink" href="#retrieval-get" title="Permalink to this headline">¶</a></h2>
+<p>Data can be retrieved from the database in one of a few &#8220;frames&#8221; which specify how much data is in the returned object.
+The object and embedded frames are indexed in elasticsearch, the page properties are applied at &#8220;GET&#8221;.  Usually you will specify format=json (or set content-type: application/json) if you wish to return a JSON object directly.</p>
+<ul class="simple">
+<li>frame=raw</li>
+</ul>
+<p>Objects are stored in the DB &#8220;raw&#8221; - with only the properties that are submitted with links as uuids.</p>
+<ul class="simple">
+<li>frame=object</li>
+</ul>
+<p>This is the raw object with additional &#8220;&#64;properties&#8221; (&#64;id, &#64;type) and calculated properties (defined in python code &#8220;types&#8221; package).</p>
+<ul class="simple">
+<li>frame=edit</li>
+</ul>
+<p>This is the frame=object without calculated properties</p>
+<ul class="simple">
+<li>frame=embedded</li>
+</ul>
+<p>This is the frame=object object with all the embedded properties (also specified in the &#8220;types&#8221; package)</p>
+<ul class="simple">
+<li>frame=page</li>
+</ul>
+<p>This is the default object returned if frame is not specified.  It is the frame=embedded object with several UI and form properties added including &#64;context, audit, and actions.</p>
+</div>
+<div class="section" id="submission-post">
+<h2>Submission (POST)<a class="headerlink" href="#submission-post" title="Permalink to this headline">¶</a></h2>
+<p>POST /biosample:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;biosample_type&quot;</span><span class="p">:</span> <span class="s2">&quot;DNA&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;biosample_term_id&quot;</span><span class="p">:</span> <span class="s2">&quot;UBERON:349829&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;aliases&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;my-lab:sample1&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;award&quot;</span><span class="p">:</span> <span class="s2">&quot;my-award&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lab&quot;</span><span class="p">:</span> <span class="s2">&quot;my-lab&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;some-source&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;organism&quot;</span><span class="p">:</span> <span class="s2">&quot;human&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="validation">
+<h2>Validation<a class="headerlink" href="#validation" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Does submission conform to schema?</li>
+<li>Structural conformance</li>
+<li>Link resolution</li>
+<li>Value format validation</li>
+<li>Permission checking</li>
+</ul>
+</div>
+<div class="section" id="link-resolution">
+<h2>Link resolution<a class="headerlink" href="#link-resolution" title="Permalink to this headline">¶</a></h2>
+<p>Links are resolved relative to their configured base url, normally their collection.
+Absolute paths and UUIDs are also valid, as are aliases and other uniquely identifying properties:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;award&quot;</span><span class="p">:</span> <span class="s2">&quot;fae1bd8b-0d90-4ada-b51f-0ecc413e904d&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lab&quot;</span><span class="p">:</span> <span class="s2">&quot;b635b4ed-dba3-4672-ace9-11d76a8d03af&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;1d5be796-8f80-4fd4-b6c7-6674318657eb&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;organism&quot;</span><span class="p">:</span> <span class="s2">&quot;7745b647-ff15-4ff3-9ced-b897d4e2983c&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="default-values">
+<h2>Default values<a class="headerlink" href="#default-values" title="Permalink to this headline">¶</a></h2>
+<p>Static and calculated defaults:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="s2">&quot;7c245cea-7d59-45fb-9ebe-f0454c5fe950&quot;</span>
+    <span class="s2">&quot;accession&quot;</span><span class="p">:</span> <span class="s2">&quot;ENCBS000TST&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;date_created&quot;</span><span class="p">:</span> <span class="s2">&quot;2014-01-20T10:30:00-0800&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;IN PROGRESS&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;submitted_by&quot;</span><span class="p">:</span> <span class="s2">&quot;bb319896-3f78-4e24-b6e1-e4961822bc9b&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="storage">
+<h2>Storage<a class="headerlink" href="#storage" title="Permalink to this headline">¶</a></h2>
+<p>Resource record created for uuid with item_type:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">uuid</span><span class="p">:</span> <span class="s2">&quot;7c245cea-7d59-45fb-9ebe-f0454c5fe950&quot;</span>
+<span class="n">item_type</span><span class="p">:</span> <span class="s2">&quot;biosample&quot;</span>
+</pre></div>
+</div>
+<p><em>Raw</em> properties:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;biosample_type&quot;</span><span class="p">:</span> <span class="s2">&quot;DNA&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;biosample_term_id&quot;</span><span class="p">:</span> <span class="s2">&quot;UBERON:349829&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;aliases&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;my-lab:sample1&quot;</span><span class="p">],</span>
+
+    <span class="s2">&quot;award&quot;</span><span class="p">:</span> <span class="s2">&quot;fae1bd8b-0d90-4ada-b51f-0ecc413e904d&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lab&quot;</span><span class="p">:</span> <span class="s2">&quot;b635b4ed-dba3-4672-ace9-11d76a8d03af&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;1d5be796-8f80-4fd4-b6c7-6674318657eb&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;organism&quot;</span><span class="p">:</span> <span class="s2">&quot;7745b647-ff15-4ff3-9ced-b897d4e2983c&quot;</span><span class="p">,</span>
+
+    <span class="s2">&quot;accession&quot;</span><span class="p">:</span> <span class="s2">&quot;ENCBS000TST&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;date_created&quot;</span><span class="p">:</span> <span class="s2">&quot;2014-01-20T10:30:00-0800&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;IN PROGRESS&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;submitted_by&quot;</span><span class="p">:</span> <span class="s2">&quot;bb319896-3f78-4e24-b6e1-e4961822bc9b&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Rows are inserted to enforce unique constraints:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">keys</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s2">&quot;accession&quot;</span><span class="p">,</span> <span class="s2">&quot;ENCBS000TST&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;alias&quot;</span><span class="p">,</span> <span class="s2">&quot;my-lab:sample1&quot;</span><span class="p">),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>and to maintain referential integrity:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">links</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s2">&quot;award&quot;</span><span class="p">,</span> <span class="s2">&quot;fae1bd8b-0d90-4ada-b51f-0ecc413e904d&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;lab&quot;</span><span class="p">,</span> <span class="s2">&quot;b635b4ed-dba3-4672-ace9-11d76a8d03af&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;source&quot;</span><span class="p">,</span> <span class="s2">&quot;1d5be796-8f80-4fd4-b6c7-6674318657eb&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;organism&quot;</span><span class="p">,</span> <span class="s2">&quot;7745b647-ff15-4ff3-9ced-b897d4e2983c&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;submitted_by&quot;</span><span class="p">,</span> <span class="s2">&quot;bb319896-3f78-4e24-b6e1-e4961822bc9b&quot;</span><span class="p">),</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Also:</dt>
+<dd><ul class="first last simple">
+<li>additional property sheets</li>
+<li>transaction logging</li>
+<li>object versioning</li>
+</ul>
+</dd>
+</dl>
+<div class="section" id="rendering">
+<h3>Rendering<a class="headerlink" href="#rendering" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">*</span> <span class="n">raw</span> <span class="n">properties</span>
+  <span class="o">-&gt;</span> <span class="n">link</span> <span class="n">canonicalization</span>
+    <span class="o">-&gt;</span> <span class="n">calculated</span> <span class="n">properties</span>
+      <span class="o">-&gt;</span> <span class="n">embedding</span>
+        <span class="o">-&gt;</span> <span class="n">page</span> <span class="n">expansion</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="link-canonicalization">
+<h2>Link canonicalization<a class="headerlink" href="#link-canonicalization" title="Permalink to this headline">¶</a></h2>
+<p>Specified in the schema. UUID&#8217;s are converted to resource paths.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;award&quot;</span><span class="p">:</span> <span class="s2">&quot;/awards/my-award/&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lab&quot;</span><span class="p">:</span> <span class="s2">&quot;/labs/my-lab&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;/sources/some-source/&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;organism&quot;</span><span class="p">:</span> <span class="s2">&quot;/organisms/human/&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;submitted_by&quot;</span><span class="p">:</span> <span class="s2">&quot;/users/me/&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="calculated-properties">
+<h2>Calculated properties<a class="headerlink" href="#calculated-properties" title="Permalink to this headline">¶</a></h2>
+<p>These include the JSON-LD boilerplate along with other dynamically calculated properties such as a consistently formatted title and reverse links pulled from the links table.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;@id&quot;</span><span class="p">:</span> <span class="s2">&quot;/biosamples/ENCBS000TST/&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;@type&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;biosample&quot;</span><span class="p">,</span> <span class="s2">&quot;item&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="s2">&quot;7c245cea-7d59-45fb-9ebe-f0454c5fe950&quot;</span>
+    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ENCBS000TST&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Biosample ENCBS000TST (human)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;characterizations&quot;</span><span class="p">:</span> <span class="p">[],</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="json-result">
+<h2>JSON result<a class="headerlink" href="#json-result" title="Permalink to this headline">¶</a></h2>
+<p>Combining gives us:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;biosample_type&quot;</span><span class="p">:</span> <span class="s2">&quot;DNA&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;biosample_term_id&quot;</span><span class="p">:</span> <span class="s2">&quot;UBERON:349829&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;aliases&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;my-lab:sample1&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;accession&quot;</span><span class="p">:</span> <span class="s2">&quot;ENCBS000TST&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;date_created&quot;</span><span class="p">:</span> <span class="s2">&quot;2014-01-20T10:30:00-0800&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;IN PROGRESS&quot;</span><span class="p">,</span>
+
+    <span class="s2">&quot;award&quot;</span><span class="p">:</span> <span class="s2">&quot;/awards/my-award/&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lab&quot;</span><span class="p">:</span> <span class="s2">&quot;/labs/my-lab&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;/sources/some-source/&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;organism&quot;</span><span class="p">:</span> <span class="s2">&quot;/organisms/human/&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;submitted_by&quot;</span><span class="p">:</span> <span class="s2">&quot;/users/me/&quot;</span><span class="p">,</span>
+
+    <span class="s2">&quot;@id&quot;</span><span class="p">:</span> <span class="s2">&quot;/biosamples/ENCBS000TST/&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;@type&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;biosample&quot;</span><span class="p">,</span> <span class="s2">&quot;item&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="s2">&quot;7c245cea-7d59-45fb-9ebe-f0454c5fe950&quot;</span>
+    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ENCBS000TST&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Biosample ENCBS000TST (human)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;characterizations&quot;</span><span class="p">:</span> <span class="p">[],</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This is the representation returned within the POST/PUT/PATCH result and when specifying <code class="docutils literal"><span class="pre">frame=object</span></code> within the query parameters.</p>
+</div>
+<div class="section" id="embedding">
+<h2>Embedding<a class="headerlink" href="#embedding" title="Permalink to this headline">¶</a></h2>
+<p>Each object type specifies its embedded properties, for biosample we have:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span>
+    <span class="s2">&quot;donor.organism&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;submitted_by&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lab&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;award&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;source&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;treatments.protocols.submitted_by&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;treatments.protocols.lab&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;treatments.protocols.award&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;constructs.documents.submitted_by&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;constructs.documents.award&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;constructs.documents.lab&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;constructs.target&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;protocol_documents.lab&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;protocol_documents.award&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;protocol_documents.submitted_by&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;derived_from&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;part_of&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;pooled_from&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;characterizations.submitted_by&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;characterizations.award&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;characterizations.lab&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rnais.target.organism&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rnais.source&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rnais.documents.submitted_by&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rnais.documents.award&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;rnais.documents.lab&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;organism&quot;</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>The specified links are then replaced with objects:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;biosample_type&quot;</span><span class="p">:</span> <span class="s2">&quot;DNA&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;biosample_term_id&quot;</span><span class="p">:</span> <span class="s2">&quot;UBERON:349829&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;aliases&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;my-lab:sample1&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;accession&quot;</span><span class="p">:</span> <span class="s2">&quot;ENCBS000TST&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;date_created&quot;</span><span class="p">:</span> <span class="s2">&quot;2014-01-20T10:30:00-0800&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;IN PROGRESS&quot;</span><span class="p">,</span>
+
+    <span class="s2">&quot;award&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;@id&quot;</span><span class="p">:</span> <span class="s2">&quot;/awards/my-award/&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@type&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;award&quot;</span><span class="p">,</span> <span class="s2">&quot;item&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="s2">&quot;fae1bd8b-0d90-4ada-b51f-0ecc413e904d&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;my-award&quot;</span>
+    <span class="p">},</span>
+
+    <span class="s2">&quot;lab&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;@id&quot;</span><span class="p">:</span> <span class="s2">&quot;/labs/my-lab&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@type&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;lab&quot;</span><span class="p">,</span> <span class="s2">&quot;item&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="s2">&quot;b635b4ed-dba3-4672-ace9-11d76a8d03af&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;my-lab&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;My Lab&quot;</span>
+    <span class="p">},</span>
+
+    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;@id&quot;</span><span class="p">:</span> <span class="s2">&quot;/sources/some-source/&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@type&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">,</span> <span class="s2">&quot;item&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="s2">&quot;1d5be796-8f80-4fd4-b6c7-6674318657eb&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;some-source&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Some source&quot;</span>
+    <span class="p">},</span>
+
+    <span class="s2">&quot;organism&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;@id&quot;</span><span class="p">:</span> <span class="s2">&quot;/organisms/human/&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@type&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;organism&quot;</span><span class="p">,</span> <span class="s2">&quot;item&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="s2">&quot;7745b647-ff15-4ff3-9ced-b897d4e2983c&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;human&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;scientific_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Homo sapiens&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;taxon_id&quot;</span><span class="p">:</span> <span class="s2">&quot;9606&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+
+    <span class="s2">&quot;submitted_by&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;@id&quot;</span><span class="p">:</span> <span class="s2">&quot;/users/me/&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;@type&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;item&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="s2">&quot;bb319896-3f78-4e24-b6e1-e4961822bc9b&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;My Name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;lab&quot;</span><span class="p">:</span> <span class="s2">&quot;/labs/my-lab&quot;</span>
+    <span class="p">},</span>
+
+    <span class="s2">&quot;@id&quot;</span><span class="p">:</span> <span class="s2">&quot;/biosamples/ENCBS000TST/&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;@type&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;biosample&quot;</span><span class="p">,</span> <span class="s2">&quot;item&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;uuid&quot;</span><span class="p">:</span> <span class="s2">&quot;7c245cea-7d59-45fb-9ebe-f0454c5fe950&quot;</span>
+    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ENCBS000TST&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Biosample ENCBS000TST (human)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;characterizations&quot;</span><span class="p">:</span> <span class="p">[],</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This embedded object is indexed in elasticsearch to allow searching and faceting across the embedded values.
+It is returned when when specifying <code class="docutils literal"><span class="pre">frame=embedded</span></code> within the query parameters.</p>
+</div>
+<div class="section" id="page-expansion">
+<h2>Page expansion<a class="headerlink" href="#page-expansion" title="Permalink to this headline">¶</a></h2>
+<p>The final step in the rendering pipeline is applied only to single items, not to search results.
+It provides the opportunity to add properties that are restricted or tailored to certain users, such as the actions and audit results:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;profile&quot;</span><span class="p">:</span> <span class="s2">&quot;/profiles/biosample.json&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;href&quot;</span><span class="p">:</span> <span class="s2">&quot;/biosamples/ENCBS000TST/#!edit&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;edit&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Edit&quot;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;profile&quot;</span><span class="p">:</span> <span class="s2">&quot;/profiles/biosample.json&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;href&quot;</span><span class="p">:</span> <span class="s2">&quot;/biosamples/ENCBS000TST/#!edit-json&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;edit-json&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Edit JSON&quot;</span>
+        <span class="p">}</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;audit&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;ERROR&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;missing donor&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;audit_biosample_donor&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="mi">60</span><span class="p">,</span>
+                <span class="s2">&quot;detail&quot;</span><span class="p">:</span> <span class="s2">&quot;Biosample ENCBS000TST requires a donor&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;/biosamples/ENCBS000TST/&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;level_name&quot;</span><span class="p">:</span> <span class="s2">&quot;ERROR&quot;</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">The object lifecycle</a><ul>
+<li><a class="reference internal" href="#retrieval-get">Retrieval (GET)</a></li>
+<li><a class="reference internal" href="#submission-post">Submission (POST)</a></li>
+<li><a class="reference internal" href="#validation">Validation</a></li>
+<li><a class="reference internal" href="#link-resolution">Link resolution</a></li>
+<li><a class="reference internal" href="#default-values">Default values</a></li>
+<li><a class="reference internal" href="#storage">Storage</a><ul>
+<li><a class="reference internal" href="#rendering">Rendering</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#link-canonicalization">Link canonicalization</a></li>
+<li><a class="reference internal" href="#calculated-properties">Calculated properties</a></li>
+<li><a class="reference internal" href="#json-result">JSON result</a></li>
+<li><a class="reference internal" href="#embedding">Embedding</a></li>
+<li><a class="reference internal" href="#page-expansion">Page expansion</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="database.html"
+                        title="previous chapter">Database Documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="authentication.html"
+                        title="next chapter">Authentication and authorization</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/object-lifecycle.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="authentication.html" title="Authentication and authorization"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="database.html" title="Database Documentation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="static_documentation_contents.html" >Tutorials and Other Documents</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

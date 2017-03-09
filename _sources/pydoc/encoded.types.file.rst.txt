@@ -1,0 +1,7 @@
+encoded.types.file module
+=========================
+
+.. automodule:: encoded.types.file
+    :members:
+    :undoc-members:
+    :show-inheritance:

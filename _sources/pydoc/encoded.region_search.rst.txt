@@ -1,0 +1,7 @@
+encoded.region_search module
+============================
+
+.. automodule:: encoded.region_search
+    :members:
+    :undoc-members:
+    :show-inheritance:

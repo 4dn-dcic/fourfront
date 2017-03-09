@@ -1,0 +1,290 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Object: viz/utilities &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Namespace: style" href="module-viz_utilities.style.html" />
+    <link rel="prev" title="Namespace: ZoomCursor" href="module-viz_components.ZoomCursor.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="module-viz_utilities.style.html" title="Namespace: style"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="module-viz_components.ZoomCursor.html" title="Namespace: ZoomCursor"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">JavaScript API Reference</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="object-viz-utilities">
+<h1>Object: <code class="docutils literal"><span class="pre">viz/utilities</span></code><a class="headerlink" href="#object-viz-utilities" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="module-viz_utilities.style.html">Namespace: <code class="docutils literal"><span class="pre">style</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="module-viz_utilities.style.html#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="module-viz_utilities.style.html#translate3d"><code class="docutils literal"><span class="pre">translate3d</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-viz_utilities.style.html#translate"><code class="docutils literal"><span class="pre">translate</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-viz_utilities.style.html#rotate3d"><code class="docutils literal"><span class="pre">rotate3d</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-viz_utilities.style.html#scale3d"><code class="docutils literal"><span class="pre">scale3d</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="contents local topic" id="local-navigation">
+<p class="topic-title first">Local Navigation</p>
+<ul class="simple">
+<li><a class="reference internal" href="#description" id="id1">Description</a></li>
+<li><a class="reference internal" href="#functions" id="id2">Functions</a><ul>
+<li><a class="reference internal" href="#stringtocolor" id="id3"><code class="docutils literal"><span class="pre">stringToColor</span></code></a></li>
+<li><a class="reference internal" href="#requestanimationframe" id="id4"><code class="docutils literal"><span class="pre">requestAnimationFrame</span></code></a></li>
+<li><a class="reference internal" href="#addtocolorcachebyfield" id="id5"><code class="docutils literal"><span class="pre">addToColorCacheByField</span></code></a></li>
+<li><a class="reference internal" href="#getfromcolorcachebyfield" id="id6"><code class="docutils literal"><span class="pre">getFromColorCacheByField</span></code></a></li>
+<li><a class="reference internal" href="#colorfornode" id="id7"><code class="docutils literal"><span class="pre">colorForNode</span></code></a></li>
+<li><a class="reference internal" href="#colorfornodeautogenerated" id="id8"><code class="docutils literal"><span class="pre">colorForNodeAutoGenerated</span></code></a></li>
+<li><a class="reference internal" href="#extendstyleoptions" id="id9"><code class="docutils literal"><span class="pre">extendStyleOptions</span></code></a></li>
+<li><a class="reference internal" href="#getcommondefaultstyleopts" id="id10"><code class="docutils literal"><span class="pre">getCommonDefaultStyleOpts</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="description">
+<h2><a class="toc-backref" href="#id1">Description</a><a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>Utility functions for aiding with visualizations.</p>
+</div>
+<div class="section" id="functions">
+<h2><a class="toc-backref" href="#id2">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="stringtocolor">
+<span id="module-viz-utilities-stringtocolor"></span><h3><a class="toc-backref" href="#id3"><code class="docutils literal"><span class="pre">stringToColor</span></code></a><a class="headerlink" href="#stringtocolor" title="Permalink to this headline">¶</a></h3>
+<p>Taken from <a class="reference external" href="http://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript">http://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript</a></p>
+<dl class="function">
+<dt id="stringToColor">
+<code class="descname">stringToColor</code><span class="sig-paren">(</span><em>str</em><span class="sig-paren">)</span><a class="headerlink" href="#stringToColor" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>str</strong> (<em>string</em>) &#8211; String to generate a color form.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return string:</th><td class="field-body"><p class="first last">A CSS color.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="requestanimationframe">
+<span id="module-viz-utilities-requestanimationframe"></span><h3><a class="toc-backref" href="#id4"><code class="docutils literal"><span class="pre">requestAnimationFrame</span></code></a><a class="headerlink" href="#requestanimationframe" title="Permalink to this headline">¶</a></h3>
+<p>Helper function for window.requestAnimationFrame. Falls back to browser-prefixed versions if default not available, or falls back to setTimeout with 0ms delay if no requestAnimationFrame available at all.</p>
+<dl class="function">
+<dt id="requestAnimationFrame">
+<code class="descname">requestAnimationFrame</code><span class="sig-paren">(</span><em>cb</em><span class="sig-paren">)</span><a class="headerlink" href="#requestAnimationFrame" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>cb</strong> (<em>function</em>) &#8211; Callback method.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return undefined|string:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">Undefined or timeout ID if falling back to setTimeout.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="addtocolorcachebyfield">
+<span id="module-viz-utilities-addtocolorcachebyfield"></span><h3><a class="toc-backref" href="#id5"><code class="docutils literal"><span class="pre">addToColorCacheByField</span></code></a><a class="headerlink" href="#addtocolorcachebyfield" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="addToColorCacheByField">
+<code class="descname">addToColorCacheByField</code><span class="sig-paren">(</span><em>field, term[, color][, palette]</em><span class="sig-paren">)</span><a class="headerlink" href="#addToColorCacheByField" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>field</strong> (<em>string</em>) &#8211; </li>
+<li><strong>term</strong> (<em>string</em>) &#8211; </li>
+<li><strong>color</strong> (<em>string|Object</em>) &#8211; </li>
+<li><strong>palette</strong> (<em>string</em>) &#8211; </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return string|Object:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="getfromcolorcachebyfield">
+<span id="module-viz-utilities-getfromcolorcachebyfield"></span><h3><a class="toc-backref" href="#id6"><code class="docutils literal"><span class="pre">getFromColorCacheByField</span></code></a><a class="headerlink" href="#getfromcolorcachebyfield" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="getFromColorCacheByField">
+<code class="descname">getFromColorCacheByField</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getFromColorCacheByField" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="colorfornode">
+<span id="module-viz-utilities-colorfornode"></span><h3><a class="toc-backref" href="#id7"><code class="docutils literal"><span class="pre">colorForNode</span></code></a><a class="headerlink" href="#colorfornode" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="colorForNode">
+<code class="descname">colorForNode</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#colorForNode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="colorfornodeautogenerated">
+<span id="module-viz-utilities-colorfornodeautogenerated"></span><h3><a class="toc-backref" href="#id8"><code class="docutils literal"><span class="pre">colorForNodeAutoGenerated</span></code></a><a class="headerlink" href="#colorfornodeautogenerated" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="colorForNodeAutoGenerated">
+<code class="descname">colorForNodeAutoGenerated</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#colorForNodeAutoGenerated" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="extendstyleoptions">
+<span id="module-viz-utilities-extendstyleoptions"></span><h3><a class="toc-backref" href="#id9"><code class="docutils literal"><span class="pre">extendStyleOptions</span></code></a><a class="headerlink" href="#extendstyleoptions" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="extendStyleOptions">
+<code class="descname">extendStyleOptions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#extendStyleOptions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getcommondefaultstyleopts">
+<span id="module-viz-utilities-getcommondefaultstyleopts"></span><h3><a class="toc-backref" href="#id10"><code class="docutils literal"><span class="pre">getCommonDefaultStyleOpts</span></code></a><a class="headerlink" href="#getcommondefaultstyleopts" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="getCommonDefaultStyleOpts">
+<code class="descname">getCommonDefaultStyleOpts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getCommonDefaultStyleOpts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Object: <code class="docutils literal"><span class="pre">viz/utilities</span></code></a><ul>
+<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#stringtocolor"><code class="docutils literal"><span class="pre">stringToColor</span></code></a></li>
+<li><a class="reference internal" href="#requestanimationframe"><code class="docutils literal"><span class="pre">requestAnimationFrame</span></code></a></li>
+<li><a class="reference internal" href="#addtocolorcachebyfield"><code class="docutils literal"><span class="pre">addToColorCacheByField</span></code></a></li>
+<li><a class="reference internal" href="#getfromcolorcachebyfield"><code class="docutils literal"><span class="pre">getFromColorCacheByField</span></code></a></li>
+<li><a class="reference internal" href="#colorfornode"><code class="docutils literal"><span class="pre">colorForNode</span></code></a></li>
+<li><a class="reference internal" href="#colorfornodeautogenerated"><code class="docutils literal"><span class="pre">colorForNodeAutoGenerated</span></code></a></li>
+<li><a class="reference internal" href="#extendstyleoptions"><code class="docutils literal"><span class="pre">extendStyleOptions</span></code></a></li>
+<li><a class="reference internal" href="#getcommondefaultstyleopts"><code class="docutils literal"><span class="pre">getCommonDefaultStyleOpts</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="module-viz_components.ZoomCursor.html"
+                        title="previous chapter">Namespace: <code class="docutils literal"><span class="pre">ZoomCursor</span></code></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="module-viz_utilities.style.html"
+                        title="next chapter">Namespace: <code class="docutils literal"><span class="pre">style</span></code></a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/jsdoc/module-viz_utilities.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="module-viz_utilities.style.html" title="Namespace: style"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="module-viz_components.ZoomCursor.html" title="Namespace: ZoomCursor"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

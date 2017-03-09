@@ -1,0 +1,333 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.audit.replicate_set &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../audit.html" accesskey="U">encoded.audit</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.audit.replicate_set</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">snovault</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">AuditFailure</span><span class="p">,</span>
+    <span class="n">audit_checker</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+
+
+<span class="nd">@audit_checker</span><span class="p">(</span>
+    <span class="s1">&#39;experiment_set_replicate&#39;</span><span class="p">,</span>
+    <span class="n">frame</span><span class="o">=</span><span class="p">[</span>
+        <span class="s1">&#39;replicate_exps&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;replicate_exps.replicate_exp&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<div class="viewcode-block" id="audit_replicate_sets_have_replicate_experiments"><a class="viewcode-back" href="../../../pydoc/encoded.audit.replicate_set.html#encoded.audit.replicate_set.audit_replicate_sets_have_replicate_experiments">[docs]</a><span class="k">def</span> <span class="nf">audit_replicate_sets_have_replicate_experiments</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">system</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    the experiments present in a replicate set must be consistent</span>
+<span class="sd">    with regard to their designation as bio or technical replicate</span>
+<span class="sd">    and numbering sequentially</span>
+
+<span class="sd">    warning is generated if there is only one biorep number</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># check to see if there are any experiments in the replicate_set</span>
+    <span class="n">reps</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;replicate_exps&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">reps</span><span class="p">:</span>
+        <span class="c1"># replicate_set contains only a single experiment so warn</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">reps</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;In ReplicateSet </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span> <span class="o">+</span> \
+                <span class="s1">&#39; - Only a single experiment present &#39;</span> <span class="o">+</span> \
+                <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;replicate_exps&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;replicate_exp&#39;</span><span class="p">][</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span>
+            <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;missing replicate&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;WARNING&#39;</span><span class="p">)</span>
+
+        <span class="n">rep_nos</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([(</span><span class="n">rep</span><span class="p">[</span><span class="s1">&#39;bio_rep_no&#39;</span><span class="p">],</span> <span class="n">rep</span><span class="p">[</span><span class="s1">&#39;tec_rep_no&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">rep</span> <span class="ow">in</span> <span class="n">reps</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="n">bio_nos</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rep_nos</span><span class="p">]</span>
+
+        <span class="c1"># biorep numbers are all the same</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">bio_nos</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;In ReplicateSet </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span> <span class="o">+</span> \
+                <span class="s1">&#39; - Only technical replicates present - multiple experiments &#39;</span> <span class="o">+</span> \
+                <span class="s1">&#39;but single bio replicate number </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bio_nos</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;missing replicate&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;WARNING&#39;</span><span class="p">)</span>
+
+        <span class="c1"># rep numbers are not sequential i.e. there is a gap</span>
+        <span class="k">def</span> <span class="nf">is_coherent</span><span class="p">(</span><span class="n">seq</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="n">seq</span> <span class="o">==</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">seq</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">seq</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="n">details</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># check biorep numbers</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_coherent</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">bio_nos</span><span class="p">))):</span>
+            <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;In ReplicateSet </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span> <span class="o">+</span>
+                           <span class="s1">&#39; - biological replicate numbers are not in sequence &#39;</span> <span class="o">+</span>
+                           <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bio_nos</span><span class="p">))</span>
+
+        <span class="c1"># check tecrep numbers of each biorep</span>
+        <span class="n">bio_no</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">tec_nos</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">rep</span> <span class="ow">in</span> <span class="n">rep_nos</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">rep</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">bio_no</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">tec_nos</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_coherent</span><span class="p">(</span><span class="n">tec_nos</span><span class="p">):</span>
+                    <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;In ReplicateSet </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span> <span class="o">+</span>
+                                   <span class="s1">&#39; - technical replicate numbers for bioreplicate number &#39;</span> <span class="o">+</span>
+                                   <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> are not in sequence &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bio_no</span><span class="p">)</span> <span class="o">+</span>
+                                   <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tec_nos</span><span class="p">))</span>
+                <span class="n">bio_no</span> <span class="o">=</span> <span class="n">rep</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">tec_nos</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">tec_nos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rep</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">last_rep</span> <span class="o">=</span> <span class="n">rep_nos</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">last_rep</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">bio_no</span><span class="p">:</span>
+            <span class="c1"># need to check if the last item is in sequence</span>
+            <span class="n">tec_nos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">last_rep</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_coherent</span><span class="p">(</span><span class="n">tec_nos</span><span class="p">):</span>
+                <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;In ReplicateSet </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span> <span class="o">+</span>
+                               <span class="s1">&#39; - technical replicate numbers for bioreplicate number &#39;</span> <span class="o">+</span>
+                               <span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> are not in sequence &#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bio_no</span><span class="p">)</span> <span class="o">+</span>
+                               <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tec_nos</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">details</span><span class="p">:</span>
+            <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">details</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;missing replicate&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;WARNING&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span></div>
+
+
+<span class="nd">@audit_checker</span><span class="p">(</span>
+    <span class="s1">&#39;experiment_set_replicate&#39;</span><span class="p">,</span>
+    <span class="n">frame</span><span class="o">=</span><span class="p">[</span>
+        <span class="s1">&#39;replicate_exps&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;replicate_exps.replicate_exp&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;replicate_exps.replicate_exp.files.files&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;replicate_exps.replicate_exp.replicate_exp&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;replicate_exps.replicate_exp.biosample.biosample&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;replicate_exps.replicate_exp.biosample.cell_culture_details.cell_culture_details&#39;</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<div class="viewcode-block" id="audit_replicate_sets_consistency_check"><a class="viewcode-back" href="../../../pydoc/encoded.audit.replicate_set.html#encoded.audit.replicate_set.audit_replicate_sets_consistency_check">[docs]</a><span class="k">def</span> <span class="nf">audit_replicate_sets_consistency_check</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">system</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    the experiments present in a replicate set must be consistent</span>
+<span class="sd">    with regard to their shared fields in biosample and experiment</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">fields2ignore</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s1">&#39;@id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;@type&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;display_title&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;link_id&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;accession&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;aliases&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;alternate_accessions&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;audit&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;award&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;date_created&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;dbxrefs&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;documents&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;lab&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;references&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;schema_version&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;sop_mapping&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;status&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;submitted_by&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;uuid&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;bio_rep_no&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;experiment_relation&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;files&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;filesets&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;average_fragment_size&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;fragment_size_range&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;experiment_summary&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;biosample_relation&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;biosource_summary&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;modifications_summary&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;modifications_summary_short&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;treatments_summary&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;karyotype_image&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;morphology_image&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;passage_number&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;protocol_additional&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;culture_start_date&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;culture_harvest_date&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;culture_duration&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;culture_duration_units&#39;</span>
+    <span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">merge_items</span><span class="p">(</span><span class="n">merged</span><span class="p">,</span> <span class="n">mergee</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">mergee</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">merged</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">merged</span>
+
+    <span class="k">def</span> <span class="nf">stringify</span><span class="p">(</span><span class="n">l</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">l</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">l</span><span class="p">:</span>
+                    <span class="n">x</span><span class="o">.</span><span class="n">sort</span>
+                    <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">stringify</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+                    <span class="n">r</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">r</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">l</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">find_conflict</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fields2ignore</span><span class="p">:</span>
+            <span class="n">stringified</span> <span class="o">=</span> <span class="n">stringify</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">stringified</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">field</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        add to detail array the conflicting fields and values for the particular experiment</span>
+<span class="sd">        they can occur on the cell_culture_detail, biosample or experiment level</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">get_conflict_detail</span><span class="p">(</span><span class="n">conflict</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">collection</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">Counter</span>
+        <span class="n">v_strings</span> <span class="o">=</span> <span class="n">stringify</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">cnts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">Counter</span><span class="p">(</span><span class="n">v_strings</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">collection</span> <span class="o">==</span> <span class="s1">&#39;cell_culture_details&#39;</span><span class="p">:</span>
+            <span class="n">sstart</span> <span class="o">=</span> <span class="s1">&#39;Cell Culture Detail field &#39;</span>
+        <span class="k">elif</span> <span class="n">collection</span> <span class="o">==</span> <span class="s1">&#39;biosamples&#39;</span><span class="p">:</span>
+            <span class="n">sstart</span> <span class="o">=</span> <span class="s1">&#39;Biosample field &#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sstart</span> <span class="o">=</span> <span class="s1">&#39;Experiment field &#39;</span>
+        <span class="k">return</span> <span class="n">sstart</span> <span class="o">+</span> <span class="n">conflict</span> <span class="o">+</span> <span class="s1">&#39; has conflicting values &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cnts</span><span class="p">)</span>
+
+    <span class="n">reps</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;replicate_exps&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">reps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">repcnt</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">reps</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">repcnt</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">                all experiments in a replicate set should share the</span>
+<span class="sd">                same experimental details except for biosample, description</span>
+<span class="sd">                and raw files</span>
+<span class="sd">            &#39;&#39;&#39;</span>
+            <span class="c1"># first merge all the experiments of the replicate</span>
+            <span class="n">merged_expts</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">rep</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">reps</span><span class="p">):</span>
+                <span class="c1"># if i == 3:</span>
+                    <span class="c1"># print(rep)</span>
+                <span class="n">expt</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;replicate_exps&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;replicate_exp&#39;</span><span class="p">]</span>
+                <span class="n">expt</span><span class="p">[</span><span class="s1">&#39;bio_rep_no&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rep</span><span class="p">[</span><span class="s1">&#39;bio_rep_no&#39;</span><span class="p">]</span>
+                <span class="n">merged_expts</span> <span class="o">=</span> <span class="n">merge_items</span><span class="p">(</span><span class="n">merged_expts</span><span class="p">,</span> <span class="n">expt</span><span class="p">)</span>
+            <span class="c1"># print(merged_expts)</span>
+
+            <span class="n">details</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">merged_expts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">field</span> <span class="o">==</span> <span class="s1">&#39;biosample&#39;</span><span class="p">:</span>
+                    <span class="n">merged_biosamples</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+                    <span class="c1"># check for biosample concurrence</span>
+                    <span class="k">for</span> <span class="n">biosample</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+                        <span class="n">merged_biosamples</span> <span class="o">=</span> <span class="n">merge_items</span><span class="p">(</span><span class="n">merged_biosamples</span><span class="p">,</span> <span class="n">biosample</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">bfield</span><span class="p">,</span> <span class="n">bvalues</span> <span class="ow">in</span> <span class="n">merged_biosamples</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="n">bfield</span> <span class="o">==</span> <span class="s1">&#39;cell_culture_details&#39;</span><span class="p">:</span>
+                            <span class="n">merged_cc_details</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+                            <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">bvalues</span><span class="p">:</span>
+                                <span class="n">merged_cc_details</span> <span class="o">=</span> <span class="n">merge_items</span><span class="p">(</span><span class="n">merged_cc_details</span><span class="p">,</span> <span class="n">cc</span><span class="p">)</span>
+                            <span class="k">for</span> <span class="n">cfield</span><span class="p">,</span> <span class="n">cvalues</span> <span class="ow">in</span> <span class="n">merged_cc_details</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                                <span class="n">conflict</span> <span class="o">=</span> <span class="n">find_conflict</span><span class="p">(</span><span class="n">cfield</span><span class="p">,</span> <span class="n">cvalues</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">conflict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                                    <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">get_conflict_detail</span><span class="p">(</span><span class="n">conflict</span><span class="p">,</span> <span class="n">cvalues</span><span class="p">,</span> <span class="s1">&#39;cell_culture_details&#39;</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">conflict</span> <span class="o">=</span> <span class="n">find_conflict</span><span class="p">(</span><span class="n">bfield</span><span class="p">,</span> <span class="n">bvalues</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">conflict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                                <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">get_conflict_detail</span><span class="p">(</span><span class="n">conflict</span><span class="p">,</span> <span class="n">bvalues</span><span class="p">,</span> <span class="s1">&#39;biosamples&#39;</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">conflict</span> <span class="o">=</span> <span class="n">find_conflict</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">conflict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">get_conflict_detail</span><span class="p">(</span><span class="n">conflict</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="s1">&#39;experiments&#39;</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">details</span><span class="p">:</span>
+                <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">details</span><span class="p">)</span>
+                <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;inconsistent replicate data&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;ERROR&#39;</span><span class="p">)</span>
+
+            <span class="k">return</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../audit.html" >encoded.audit</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

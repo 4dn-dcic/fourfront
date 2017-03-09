@@ -1,0 +1,240 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.types.access_key &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../types.html" accesskey="U">encoded.types</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.types.access_key</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Access_key types file.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">pyramid.security</span> <span class="k">import</span> <span class="n">effective_principals</span>
+<span class="kn">from</span> <span class="nn">pyramid.view</span> <span class="k">import</span> <span class="n">view_config</span>
+<span class="kn">from</span> <span class="nn">pyramid.security</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">Allow</span><span class="p">,</span>
+    <span class="n">Deny</span><span class="p">,</span>
+    <span class="n">Authenticated</span><span class="p">,</span>
+    <span class="n">Everyone</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyramid.settings</span> <span class="k">import</span> <span class="n">asbool</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">Item</span><span class="p">,</span>
+    <span class="n">DELETED</span><span class="p">,</span>
+    <span class="n">ONLY_ADMIN_VIEW</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">..authentication</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">generate_password</span><span class="p">,</span>
+    <span class="n">generate_user</span><span class="p">,</span>
+    <span class="n">CRYPT_CONTEXT</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">snovault</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">collection</span><span class="p">,</span>
+    <span class="n">load_schema</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">snovault.crud_views</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">collection_add</span><span class="p">,</span>
+    <span class="n">item_edit</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">snovault.validators</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">validate_item_content_post</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;access-keys&#39;</span><span class="p">,</span>
+    <span class="n">unique_key</span><span class="o">=</span><span class="s1">&#39;access_key:access_key_id&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Access keys&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Programmatic access keys&#39;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="n">acl</span><span class="o">=</span><span class="p">[</span>
+        <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="n">Authenticated</span><span class="p">,</span> <span class="s1">&#39;add&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="s1">&#39;group.admin&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="s1">&#39;group.read-only-admin&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="s1">&#39;remoteuser.INDEXER&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="s1">&#39;remoteuser.EMBED&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="n">Deny</span><span class="p">,</span> <span class="n">Everyone</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">),</span>
+    <span class="p">])</span>
+<div class="viewcode-block" id="AccessKey"><a class="viewcode-back" href="../../../pydoc/encoded.types.access_key.html#encoded.types.access_key.AccessKey">[docs]</a><span class="k">class</span> <span class="nc">AccessKey</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;AccessKey class.&quot;&quot;&quot;</span>
+
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;access_key&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/access_key.json&#39;</span><span class="p">)</span>
+    <span class="n">name_key</span> <span class="o">=</span> <span class="s1">&#39;access_key_id&#39;</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">STATUS_ACL</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;current&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="n">Allow</span><span class="p">,</span> <span class="s1">&#39;role.owner&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;view&#39;</span><span class="p">,</span> <span class="s1">&#39;edit&#39;</span><span class="p">])]</span> <span class="o">+</span> <span class="n">ONLY_ADMIN_VIEW</span><span class="p">,</span>
+        <span class="s1">&#39;deleted&#39;</span><span class="p">:</span> <span class="n">DELETED</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__ac_local_roles__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;grab and return user as owner.&quot;&quot;&quot;</span>
+        <span class="n">owner</span> <span class="o">=</span> <span class="s1">&#39;userid.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;user&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">owner</span><span class="p">:</span> <span class="s1">&#39;role.owner&#39;</span><span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__json__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;delete the secret access key has from the object when used.&quot;&quot;&quot;</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">AccessKey</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__json__</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;secret_access_key_hash&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">properties</span>
+
+<div class="viewcode-block" id="AccessKey.update"><a class="viewcode-back" href="../../../pydoc/encoded.types.access_key.html#encoded.types.access_key.AccessKey.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">sheets</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;smth.&quot;&quot;&quot;</span>
+        <span class="c1"># make sure PUTs preserve the secret access key hash</span>
+        <span class="k">if</span> <span class="s1">&#39;secret_access_key_hash&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+            <span class="n">new_properties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">new_properties</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
+            <span class="n">properties</span> <span class="o">=</span> <span class="n">new_properties</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_update</span><span class="p">(</span><span class="n">properties</span><span class="p">,</span> <span class="n">sheets</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AccessKey.Collection"><a class="viewcode-back" href="../../../pydoc/encoded.types.access_key.html#encoded.types.access_key.AccessKey.Collection">[docs]</a>    <span class="k">class</span> <span class="nc">Collection</span><span class="p">(</span><span class="n">Item</span><span class="o">.</span><span class="n">Collection</span><span class="p">):</span>
+        <span class="k">pass</span></div></div>
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">AccessKey</span><span class="o">.</span><span class="n">Collection</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span>
+             <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">validate_item_content_post</span><span class="p">])</span>
+<div class="viewcode-block" id="access_key_add"><a class="viewcode-back" href="../../../pydoc/encoded.types.access_key.html#encoded.types.access_key.access_key_add">[docs]</a><span class="k">def</span> <span class="nf">access_key_add</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;smth.&quot;&quot;&quot;</span>
+    <span class="n">crypt_context</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">CRYPT_CONTEXT</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="s1">&#39;access_key_id&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">validated</span><span class="p">:</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">validated</span><span class="p">[</span><span class="s1">&#39;access_key_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">generate_user</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="s1">&#39;user&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">validated</span><span class="p">:</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">validated</span><span class="p">[</span><span class="s1">&#39;user&#39;</span><span class="p">],</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">principal</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">principal</span> <span class="ow">in</span> <span class="n">effective_principals</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">principal</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;userid.&#39;</span><span class="p">)</span>
+        <span class="p">]</span>
+
+    <span class="n">password</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="s1">&#39;secret_access_key_hash&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">validated</span><span class="p">:</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="n">generate_password</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">validated</span><span class="p">[</span><span class="s1">&#39;secret_access_key_hash&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">crypt_context</span><span class="o">.</span><span class="n">encrypt</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">collection_add</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">password</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;secret_access_key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;secret_access_key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">password</span>
+
+    <span class="n">result</span><span class="p">[</span><span class="s1">&#39;access_key_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">validated</span><span class="p">[</span><span class="s1">&#39;access_key_id&#39;</span><span class="p">]</span>
+    <span class="n">result</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">validated</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;reset-secret&#39;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">AccessKey</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="s1">&#39;edit&#39;</span><span class="p">,</span>
+             <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="n">subpath_segments</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<div class="viewcode-block" id="access_key_reset_secret"><a class="viewcode-back" href="../../../pydoc/encoded.types.access_key.html#encoded.types.access_key.access_key_reset_secret">[docs]</a><span class="k">def</span> <span class="nf">access_key_reset_secret</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;smth.&quot;&quot;&quot;</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">validated</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">crypt_context</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">CRYPT_CONTEXT</span><span class="p">]</span>
+    <span class="n">password</span> <span class="o">=</span> <span class="n">generate_password</span><span class="p">()</span>
+    <span class="n">new_hash</span> <span class="o">=</span> <span class="n">crypt_context</span><span class="o">.</span><span class="n">encrypt</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">validated</span><span class="p">[</span><span class="s1">&#39;secret_access_key_hash&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_hash</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">item_edit</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">render</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">result</span><span class="p">[</span><span class="s1">&#39;access_key_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">validated</span><span class="p">[</span><span class="s1">&#39;access_key_id&#39;</span><span class="p">]</span>
+    <span class="n">result</span><span class="p">[</span><span class="s1">&#39;secret_access_key&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">password</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">AccessKey</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="s1">&#39;view_raw&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span>
+             <span class="n">name</span><span class="o">=</span><span class="s1">&#39;raw&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="access_key_view_raw"><a class="viewcode-back" href="../../../pydoc/encoded.types.access_key.html#encoded.types.access_key.access_key_view_raw">[docs]</a><span class="k">def</span> <span class="nf">access_key_view_raw</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;smth.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">asbool</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;upgrade&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)):</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">upgrade_properties</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">del</span> <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;secret_access_key_hash&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">properties</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../types.html" >encoded.types</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

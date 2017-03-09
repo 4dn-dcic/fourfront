@@ -1,0 +1,7 @@
+encoded.audit.replicate_set module
+==================================
+
+.. automodule:: encoded.audit.replicate_set
+    :members:
+    :undoc-members:
+    :show-inheritance:

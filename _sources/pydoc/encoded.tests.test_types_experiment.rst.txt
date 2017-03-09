@@ -1,0 +1,7 @@
+encoded.tests.test_types_experiment module
+==========================================
+
+.. automodule:: encoded.tests.test_types_experiment
+    :members:
+    :undoc-members:
+    :show-inheritance:

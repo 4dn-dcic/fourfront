@@ -1,0 +1,7 @@
+encoded.types.software module
+=============================
+
+.. automodule:: encoded.types.software
+    :members:
+    :undoc-members:
+    :show-inheritance:

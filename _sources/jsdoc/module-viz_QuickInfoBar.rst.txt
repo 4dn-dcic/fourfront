@@ -1,0 +1,126 @@
+===============================
+Component: ``viz/QuickInfoBar``
+===============================
+
+
+
+
+.. toctree::
+   :maxdepth: 3
+   
+   
+
+.. contents:: Local Navigation
+   :local:
+
+
+Description
+===========
+
+Bar shown below header on home and browse pages.
+Shows counts of selected experiment_sets, experiments, and files against those properties' total counts.
+
+Functions
+=========
+
+
+
+
+.. _module-viz_QuickInfoBar.getInitialState:
+
+
+``getInitialState``
+-------------------
+
+
+
+.. js:function:: getInitialState()
+
+    
+    :return Object.<number, boolean, string>: Initial State
+    
+
+
+
+
+.. _module-viz_QuickInfoBar.updateCurrentAndTotalCounts:
+
+
+``updateCurrentAndTotalCounts``
+-------------------------------
+
+
+
+.. js:function:: updateCurrentAndTotalCounts()
+
+    
+    
+
+
+.. _module-viz_QuickInfoBar.updateCurrentCounts:
+
+
+``updateCurrentCounts``
+-----------------------
+
+
+
+.. js:function:: updateCurrentCounts()
+
+    
+    
+
+
+.. _module-viz_QuickInfoBar.updateTotalCounts:
+
+
+``updateTotalCounts``
+---------------------
+
+
+
+.. js:function:: updateTotalCounts()
+
+    
+    
+
+
+.. _module-viz_QuickInfoBar.isInvisible:
+
+
+``isInvisible``
+---------------
+
+Check if component is visible or not.
+
+.. js:function:: isInvisible()
+
+    
+    
+
+
+.. _module-viz_QuickInfoBar.componentWillReceiveProps:
+
+
+``componentWillReceiveProps``
+-----------------------------
+
+Updates state.show if no filters are selected.
+
+.. js:function:: componentWillReceiveProps(nextProps)
+
+    
+    :param Object nextProps: Next props.
+    :return undefined: Updates state.show if no filters are selected.
+    
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,7 @@
+encoded.types.user module
+=========================
+
+.. automodule:: encoded.types.user
+    :members:
+    :undoc-members:
+    :show-inheritance:

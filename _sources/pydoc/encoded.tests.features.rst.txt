@@ -1,0 +1,24 @@
+encoded.tests.features package
+==============================
+
+Submodules
+----------
+
+.. toctree::
+
+   encoded.tests.features.browsersteps
+   encoded.tests.features.conftest
+   encoded.tests.features.customsteps
+   encoded.tests.features.test_admin_user
+   encoded.tests.features.test_generics
+   encoded.tests.features.test_nodata
+   encoded.tests.features.test_submitter_user
+   encoded.tests.features.test_workbook
+
+Module contents
+---------------
+
+.. automodule:: encoded.tests.features
+    :members:
+    :undoc-members:
+    :show-inheritance:

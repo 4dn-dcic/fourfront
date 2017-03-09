@@ -1,0 +1,427 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: {React Component} viz/QuickInfoBar &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-react-component-viz-quickinfobar">
+<h1>Module: <code class="docutils literal"><span class="pre">{React</span> <span class="pre">Component}</span> <span class="pre">viz/QuickInfoBar</span></code><a class="headerlink" href="#module-react-component-viz-quickinfobar" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<div class="contents local topic" id="local-navigation">
+<p class="topic-title first">Local Navigation</p>
+<ul class="simple">
+<li><a class="reference internal" href="#description" id="id49">Description</a></li>
+<li><a class="reference internal" href="#functions" id="id50">Functions</a><ul>
+<li><a class="reference internal" href="#getinitialstate" id="id51"><code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
+<li><a class="reference internal" href="#updatecurrentandtotalcounts" id="id52"><code class="docutils literal"><span class="pre">updateCurrentAndTotalCounts</span></code></a></li>
+<li><a class="reference internal" href="#updatecurrentcounts" id="id53"><code class="docutils literal"><span class="pre">updateCurrentCounts</span></code></a></li>
+<li><a class="reference internal" href="#updatetotalcounts" id="id54"><code class="docutils literal"><span class="pre">updateTotalCounts</span></code></a></li>
+<li><a class="reference internal" href="#isinvisible" id="id55"><code class="docutils literal"><span class="pre">isInvisible</span></code></a></li>
+<li><a class="reference internal" href="#componentwillreceiveprops" id="id56"><code class="docutils literal"><span class="pre">componentWillReceiveProps</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#members" id="id57">Members</a><ul>
+<li><a class="reference internal" href="#offset" id="id58"><code class="docutils literal"><span class="pre">offset</span></code></a></li>
+<li><a class="reference internal" href="#module-7breact-20component-7d-20viz-quickinfobar-id" id="id59"><code class="docutils literal"><span class="pre">id</span></code></a></li>
+<li><a class="reference internal" href="#classname" id="id60"><code class="docutils literal"><span class="pre">className</span></code></a></li>
+<li><a class="reference internal" href="#showcurrent" id="id61"><code class="docutils literal"><span class="pre">showCurrent</span></code></a></li>
+<li><a class="reference internal" href="#count-experiments" id="id62"><code class="docutils literal"><span class="pre">count_experiments</span></code></a></li>
+<li><a class="reference internal" href="#count-experiment-sets" id="id63"><code class="docutils literal"><span class="pre">count_experiment_sets</span></code></a></li>
+<li><a class="reference internal" href="#count-files" id="id64"><code class="docutils literal"><span class="pre">count_files</span></code></a></li>
+<li><a class="reference internal" href="#count-experiments-total" id="id65"><code class="docutils literal"><span class="pre">count_experiments_total</span></code></a></li>
+<li><a class="reference internal" href="#count-experiment-sets-total" id="id66"><code class="docutils literal"><span class="pre">count_experiment_sets_total</span></code></a></li>
+<li><a class="reference internal" href="#count-files-total" id="id67"><code class="docutils literal"><span class="pre">count_files_total</span></code></a></li>
+<li><a class="reference internal" href="#mounted" id="id68"><code class="docutils literal"><span class="pre">mounted</span></code></a></li>
+<li><a class="reference internal" href="#show" id="id69"><code class="docutils literal"><span class="pre">show</span></code></a></li>
+<li><a class="reference internal" href="#id1" id="id70"><code class="docutils literal"><span class="pre">mounted</span></code></a></li>
+<li><a class="reference internal" href="#id3" id="id71"><code class="docutils literal"><span class="pre">count_experiments</span></code></a></li>
+<li><a class="reference internal" href="#id5" id="id72"><code class="docutils literal"><span class="pre">count_experiment_sets</span></code></a></li>
+<li><a class="reference internal" href="#id7" id="id73"><code class="docutils literal"><span class="pre">count_files</span></code></a></li>
+<li><a class="reference internal" href="#id9" id="id74"><code class="docutils literal"><span class="pre">count_experiments_total</span></code></a></li>
+<li><a class="reference internal" href="#id11" id="id75"><code class="docutils literal"><span class="pre">count_experiment_sets_total</span></code></a></li>
+<li><a class="reference internal" href="#id13" id="id76"><code class="docutils literal"><span class="pre">count_files_total</span></code></a></li>
+<li><a class="reference internal" href="#id15" id="id77"><code class="docutils literal"><span class="pre">count_experiments</span></code></a></li>
+<li><a class="reference internal" href="#id17" id="id78"><code class="docutils literal"><span class="pre">count_experiment_sets</span></code></a></li>
+<li><a class="reference internal" href="#id19" id="id79"><code class="docutils literal"><span class="pre">count_files</span></code></a></li>
+<li><a class="reference internal" href="#id21" id="id80"><code class="docutils literal"><span class="pre">count_experiments_total</span></code></a></li>
+<li><a class="reference internal" href="#id23" id="id81"><code class="docutils literal"><span class="pre">count_experiment_sets_total</span></code></a></li>
+<li><a class="reference internal" href="#id25" id="id82"><code class="docutils literal"><span class="pre">count_files_total</span></code></a></li>
+<li><a class="reference internal" href="#id27" id="id83"><code class="docutils literal"><span class="pre">show</span></code></a></li>
+<li><a class="reference internal" href="#cn" id="id84"><code class="docutils literal"><span class="pre">cn</span></code></a></li>
+<li><a class="reference internal" href="#id29" id="id85"><code class="docutils literal"><span class="pre">cn</span></code></a></li>
+<li><a class="reference internal" href="#stats" id="id86"><code class="docutils literal"><span class="pre">stats</span></code></a></li>
+<li><a class="reference internal" href="#id31" id="id87"><code class="docutils literal"><span class="pre">stats</span></code></a></li>
+<li><a class="reference internal" href="#id33" id="id88"><code class="docutils literal"><span class="pre">className</span></code></a></li>
+<li><a class="reference internal" href="#id35" id="id89"><code class="docutils literal"><span class="pre">className</span></code></a></li>
+<li><a class="reference internal" href="#id37" id="id90"><code class="docutils literal"><span class="pre">className</span></code></a></li>
+<li><a class="reference internal" href="#id39" id="id91"><code class="docutils literal"><span class="pre">show</span></code></a></li>
+<li><a class="reference internal" href="#id41" id="id92"><code class="docutils literal"><span class="pre">show</span></code></a></li>
+<li><a class="reference internal" href="#opacity" id="id93"><code class="docutils literal"><span class="pre">opacity</span></code></a></li>
+<li><a class="reference internal" href="#id43" id="id94"><code class="docutils literal"><span class="pre">show</span></code></a></li>
+<li><a class="reference internal" href="#id45" id="id95"><code class="docutils literal"><span class="pre">opacity</span></code></a></li>
+<li><a class="reference internal" href="#value" id="id96"><code class="docutils literal"><span class="pre">value</span></code></a></li>
+<li><a class="reference internal" href="#label" id="id97"><code class="docutils literal"><span class="pre">label</span></code></a></li>
+<li><a class="reference internal" href="#classnameid" id="id98"><code class="docutils literal"><span class="pre">classNameID</span></code></a></li>
+<li><a class="reference internal" href="#id47" id="id99"><code class="docutils literal"><span class="pre">id</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="description">
+<h2><a class="toc-backref" href="#id49">Description</a><a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>Bar shown below header on home and browse pages.
+Shows counts of selected experiment_sets, experiments, and files against those properties&#8217; total counts.</p>
+</div>
+<div class="section" id="functions">
+<h2><a class="toc-backref" href="#id50">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="getinitialstate">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-getinitialstate"></span><h3><a class="toc-backref" href="#id51"><code class="docutils literal"><span class="pre">getInitialState</span></code></a><a class="headerlink" href="#getinitialstate" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="getInitialState">
+<code class="descname">getInitialState</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getInitialState" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Return Object.&lt;number, boolean, string&gt;:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">Initial State</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="updatecurrentandtotalcounts">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-updatecurrentandtotalcounts"></span><h3><a class="toc-backref" href="#id52"><code class="docutils literal"><span class="pre">updateCurrentAndTotalCounts</span></code></a><a class="headerlink" href="#updatecurrentandtotalcounts" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="updateCurrentAndTotalCounts">
+<code class="descname">updateCurrentAndTotalCounts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#updateCurrentAndTotalCounts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="updatecurrentcounts">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-updatecurrentcounts"></span><h3><a class="toc-backref" href="#id53"><code class="docutils literal"><span class="pre">updateCurrentCounts</span></code></a><a class="headerlink" href="#updatecurrentcounts" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="updateCurrentCounts">
+<code class="descname">updateCurrentCounts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#updateCurrentCounts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="updatetotalcounts">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-updatetotalcounts"></span><h3><a class="toc-backref" href="#id54"><code class="docutils literal"><span class="pre">updateTotalCounts</span></code></a><a class="headerlink" href="#updatetotalcounts" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="updateTotalCounts">
+<code class="descname">updateTotalCounts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#updateTotalCounts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="isinvisible">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-isinvisible"></span><h3><a class="toc-backref" href="#id55"><code class="docutils literal"><span class="pre">isInvisible</span></code></a><a class="headerlink" href="#isinvisible" title="Permalink to this headline">¶</a></h3>
+<p>Check if component is visible or not.</p>
+<dl class="function">
+<dt id="isInvisible">
+<code class="descname">isInvisible</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isInvisible" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="componentwillreceiveprops">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-componentwillreceiveprops"></span><h3><a class="toc-backref" href="#id56"><code class="docutils literal"><span class="pre">componentWillReceiveProps</span></code></a><a class="headerlink" href="#componentwillreceiveprops" title="Permalink to this headline">¶</a></h3>
+<p>Updates state.show if no filters are selected.</p>
+<dl class="function">
+<dt id="componentWillReceiveProps">
+<code class="descname">componentWillReceiveProps</code><span class="sig-paren">(</span><em>nextProps</em><span class="sig-paren">)</span><a class="headerlink" href="#componentWillReceiveProps" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>nextProps</strong> (<em>Object</em>) &#8211; Next props.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return undefined:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">Updates state.show if no filters are selected.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="members">
+<h2><a class="toc-backref" href="#id57">Members</a><a class="headerlink" href="#members" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="offset">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-offset"></span><h3><a class="toc-backref" href="#id58"><code class="docutils literal"><span class="pre">offset</span></code></a><a class="headerlink" href="#offset" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="module-7breact-20component-7d-20viz-quickinfobar-id">
+<span id="id"></span><h3><a class="toc-backref" href="#id59"><code class="docutils literal"><span class="pre">id</span></code></a><a class="headerlink" href="#module-7breact-20component-7d-20viz-quickinfobar-id" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="classname">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-classname"></span><h3><a class="toc-backref" href="#id60"><code class="docutils literal"><span class="pre">className</span></code></a><a class="headerlink" href="#classname" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="showcurrent">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-showcurrent"></span><h3><a class="toc-backref" href="#id61"><code class="docutils literal"><span class="pre">showCurrent</span></code></a><a class="headerlink" href="#showcurrent" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="count-experiments">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-count-experiments"></span><h3><a class="toc-backref" href="#id62"><code class="docutils literal"><span class="pre">count_experiments</span></code></a><a class="headerlink" href="#count-experiments" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="count-experiment-sets">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-count-experiment-sets"></span><h3><a class="toc-backref" href="#id63"><code class="docutils literal"><span class="pre">count_experiment_sets</span></code></a><a class="headerlink" href="#count-experiment-sets" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="count-files">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-count-files"></span><h3><a class="toc-backref" href="#id64"><code class="docutils literal"><span class="pre">count_files</span></code></a><a class="headerlink" href="#count-files" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="count-experiments-total">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-count-experiments-total"></span><h3><a class="toc-backref" href="#id65"><code class="docutils literal"><span class="pre">count_experiments_total</span></code></a><a class="headerlink" href="#count-experiments-total" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="count-experiment-sets-total">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-count-experiment-sets-total"></span><h3><a class="toc-backref" href="#id66"><code class="docutils literal"><span class="pre">count_experiment_sets_total</span></code></a><a class="headerlink" href="#count-experiment-sets-total" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="count-files-total">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-count-files-total"></span><h3><a class="toc-backref" href="#id67"><code class="docutils literal"><span class="pre">count_files_total</span></code></a><a class="headerlink" href="#count-files-total" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="mounted">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-mounted"></span><h3><a class="toc-backref" href="#id68"><code class="docutils literal"><span class="pre">mounted</span></code></a><a class="headerlink" href="#mounted" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="show">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-show"></span><h3><a class="toc-backref" href="#id69"><code class="docutils literal"><span class="pre">show</span></code></a><a class="headerlink" href="#show" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id1">
+<span id="id2"></span><h3><a class="toc-backref" href="#id70"><code class="docutils literal"><span class="pre">mounted</span></code></a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id3">
+<span id="id4"></span><h3><a class="toc-backref" href="#id71"><code class="docutils literal"><span class="pre">count_experiments</span></code></a><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id5">
+<span id="id6"></span><h3><a class="toc-backref" href="#id72"><code class="docutils literal"><span class="pre">count_experiment_sets</span></code></a><a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id7">
+<span id="id8"></span><h3><a class="toc-backref" href="#id73"><code class="docutils literal"><span class="pre">count_files</span></code></a><a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id9">
+<span id="id10"></span><h3><a class="toc-backref" href="#id74"><code class="docutils literal"><span class="pre">count_experiments_total</span></code></a><a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id11">
+<span id="id12"></span><h3><a class="toc-backref" href="#id75"><code class="docutils literal"><span class="pre">count_experiment_sets_total</span></code></a><a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id13">
+<span id="id14"></span><h3><a class="toc-backref" href="#id76"><code class="docutils literal"><span class="pre">count_files_total</span></code></a><a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id15">
+<span id="id16"></span><h3><a class="toc-backref" href="#id77"><code class="docutils literal"><span class="pre">count_experiments</span></code></a><a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id17">
+<span id="id18"></span><h3><a class="toc-backref" href="#id78"><code class="docutils literal"><span class="pre">count_experiment_sets</span></code></a><a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id19">
+<span id="id20"></span><h3><a class="toc-backref" href="#id79"><code class="docutils literal"><span class="pre">count_files</span></code></a><a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id21">
+<span id="id22"></span><h3><a class="toc-backref" href="#id80"><code class="docutils literal"><span class="pre">count_experiments_total</span></code></a><a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id23">
+<span id="id24"></span><h3><a class="toc-backref" href="#id81"><code class="docutils literal"><span class="pre">count_experiment_sets_total</span></code></a><a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id25">
+<span id="id26"></span><h3><a class="toc-backref" href="#id82"><code class="docutils literal"><span class="pre">count_files_total</span></code></a><a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id27">
+<span id="id28"></span><h3><a class="toc-backref" href="#id83"><code class="docutils literal"><span class="pre">show</span></code></a><a class="headerlink" href="#id27" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="cn">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-cn"></span><h3><a class="toc-backref" href="#id84"><code class="docutils literal"><span class="pre">cn</span></code></a><a class="headerlink" href="#cn" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id29">
+<span id="id30"></span><h3><a class="toc-backref" href="#id85"><code class="docutils literal"><span class="pre">cn</span></code></a><a class="headerlink" href="#id29" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="stats">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-stats"></span><h3><a class="toc-backref" href="#id86"><code class="docutils literal"><span class="pre">stats</span></code></a><a class="headerlink" href="#stats" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id31">
+<span id="id32"></span><h3><a class="toc-backref" href="#id87"><code class="docutils literal"><span class="pre">stats</span></code></a><a class="headerlink" href="#id31" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id33">
+<span id="id34"></span><h3><a class="toc-backref" href="#id88"><code class="docutils literal"><span class="pre">className</span></code></a><a class="headerlink" href="#id33" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id35">
+<span id="id36"></span><h3><a class="toc-backref" href="#id89"><code class="docutils literal"><span class="pre">className</span></code></a><a class="headerlink" href="#id35" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id37">
+<span id="id38"></span><h3><a class="toc-backref" href="#id90"><code class="docutils literal"><span class="pre">className</span></code></a><a class="headerlink" href="#id37" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id39">
+<span id="id40"></span><h3><a class="toc-backref" href="#id91"><code class="docutils literal"><span class="pre">show</span></code></a><a class="headerlink" href="#id39" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id41">
+<span id="id42"></span><h3><a class="toc-backref" href="#id92"><code class="docutils literal"><span class="pre">show</span></code></a><a class="headerlink" href="#id41" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="opacity">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-opacity"></span><h3><a class="toc-backref" href="#id93"><code class="docutils literal"><span class="pre">opacity</span></code></a><a class="headerlink" href="#opacity" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id43">
+<span id="id44"></span><h3><a class="toc-backref" href="#id94"><code class="docutils literal"><span class="pre">show</span></code></a><a class="headerlink" href="#id43" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id45">
+<span id="id46"></span><h3><a class="toc-backref" href="#id95"><code class="docutils literal"><span class="pre">opacity</span></code></a><a class="headerlink" href="#id45" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="value">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-value"></span><h3><a class="toc-backref" href="#id96"><code class="docutils literal"><span class="pre">value</span></code></a><a class="headerlink" href="#value" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="label">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-label"></span><h3><a class="toc-backref" href="#id97"><code class="docutils literal"><span class="pre">label</span></code></a><a class="headerlink" href="#label" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="classnameid">
+<span id="module-7breact-20component-7d-20viz-quickinfobar-classnameid"></span><h3><a class="toc-backref" href="#id98"><code class="docutils literal"><span class="pre">classNameID</span></code></a><a class="headerlink" href="#classnameid" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="id47">
+<span id="id48"></span><h3><a class="toc-backref" href="#id99"><code class="docutils literal"><span class="pre">id</span></code></a><a class="headerlink" href="#id47" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Module: <code class="docutils literal"><span class="pre">{React</span> <span class="pre">Component}</span> <span class="pre">viz/QuickInfoBar</span></code></a><ul>
+<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#getinitialstate"><code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
+<li><a class="reference internal" href="#updatecurrentandtotalcounts"><code class="docutils literal"><span class="pre">updateCurrentAndTotalCounts</span></code></a></li>
+<li><a class="reference internal" href="#updatecurrentcounts"><code class="docutils literal"><span class="pre">updateCurrentCounts</span></code></a></li>
+<li><a class="reference internal" href="#updatetotalcounts"><code class="docutils literal"><span class="pre">updateTotalCounts</span></code></a></li>
+<li><a class="reference internal" href="#isinvisible"><code class="docutils literal"><span class="pre">isInvisible</span></code></a></li>
+<li><a class="reference internal" href="#componentwillreceiveprops"><code class="docutils literal"><span class="pre">componentWillReceiveProps</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#members">Members</a><ul>
+<li><a class="reference internal" href="#offset"><code class="docutils literal"><span class="pre">offset</span></code></a></li>
+<li><a class="reference internal" href="#module-7breact-20component-7d-20viz-quickinfobar-id"><code class="docutils literal"><span class="pre">id</span></code></a></li>
+<li><a class="reference internal" href="#classname"><code class="docutils literal"><span class="pre">className</span></code></a></li>
+<li><a class="reference internal" href="#showcurrent"><code class="docutils literal"><span class="pre">showCurrent</span></code></a></li>
+<li><a class="reference internal" href="#count-experiments"><code class="docutils literal"><span class="pre">count_experiments</span></code></a></li>
+<li><a class="reference internal" href="#count-experiment-sets"><code class="docutils literal"><span class="pre">count_experiment_sets</span></code></a></li>
+<li><a class="reference internal" href="#count-files"><code class="docutils literal"><span class="pre">count_files</span></code></a></li>
+<li><a class="reference internal" href="#count-experiments-total"><code class="docutils literal"><span class="pre">count_experiments_total</span></code></a></li>
+<li><a class="reference internal" href="#count-experiment-sets-total"><code class="docutils literal"><span class="pre">count_experiment_sets_total</span></code></a></li>
+<li><a class="reference internal" href="#count-files-total"><code class="docutils literal"><span class="pre">count_files_total</span></code></a></li>
+<li><a class="reference internal" href="#mounted"><code class="docutils literal"><span class="pre">mounted</span></code></a></li>
+<li><a class="reference internal" href="#show"><code class="docutils literal"><span class="pre">show</span></code></a></li>
+<li><a class="reference internal" href="#id1"><code class="docutils literal"><span class="pre">mounted</span></code></a></li>
+<li><a class="reference internal" href="#id3"><code class="docutils literal"><span class="pre">count_experiments</span></code></a></li>
+<li><a class="reference internal" href="#id5"><code class="docutils literal"><span class="pre">count_experiment_sets</span></code></a></li>
+<li><a class="reference internal" href="#id7"><code class="docutils literal"><span class="pre">count_files</span></code></a></li>
+<li><a class="reference internal" href="#id9"><code class="docutils literal"><span class="pre">count_experiments_total</span></code></a></li>
+<li><a class="reference internal" href="#id11"><code class="docutils literal"><span class="pre">count_experiment_sets_total</span></code></a></li>
+<li><a class="reference internal" href="#id13"><code class="docutils literal"><span class="pre">count_files_total</span></code></a></li>
+<li><a class="reference internal" href="#id15"><code class="docutils literal"><span class="pre">count_experiments</span></code></a></li>
+<li><a class="reference internal" href="#id17"><code class="docutils literal"><span class="pre">count_experiment_sets</span></code></a></li>
+<li><a class="reference internal" href="#id19"><code class="docutils literal"><span class="pre">count_files</span></code></a></li>
+<li><a class="reference internal" href="#id21"><code class="docutils literal"><span class="pre">count_experiments_total</span></code></a></li>
+<li><a class="reference internal" href="#id23"><code class="docutils literal"><span class="pre">count_experiment_sets_total</span></code></a></li>
+<li><a class="reference internal" href="#id25"><code class="docutils literal"><span class="pre">count_files_total</span></code></a></li>
+<li><a class="reference internal" href="#id27"><code class="docutils literal"><span class="pre">show</span></code></a></li>
+<li><a class="reference internal" href="#cn"><code class="docutils literal"><span class="pre">cn</span></code></a></li>
+<li><a class="reference internal" href="#id29"><code class="docutils literal"><span class="pre">cn</span></code></a></li>
+<li><a class="reference internal" href="#stats"><code class="docutils literal"><span class="pre">stats</span></code></a></li>
+<li><a class="reference internal" href="#id31"><code class="docutils literal"><span class="pre">stats</span></code></a></li>
+<li><a class="reference internal" href="#id33"><code class="docutils literal"><span class="pre">className</span></code></a></li>
+<li><a class="reference internal" href="#id35"><code class="docutils literal"><span class="pre">className</span></code></a></li>
+<li><a class="reference internal" href="#id37"><code class="docutils literal"><span class="pre">className</span></code></a></li>
+<li><a class="reference internal" href="#id39"><code class="docutils literal"><span class="pre">show</span></code></a></li>
+<li><a class="reference internal" href="#id41"><code class="docutils literal"><span class="pre">show</span></code></a></li>
+<li><a class="reference internal" href="#opacity"><code class="docutils literal"><span class="pre">opacity</span></code></a></li>
+<li><a class="reference internal" href="#id43"><code class="docutils literal"><span class="pre">show</span></code></a></li>
+<li><a class="reference internal" href="#id45"><code class="docutils literal"><span class="pre">opacity</span></code></a></li>
+<li><a class="reference internal" href="#value"><code class="docutils literal"><span class="pre">value</span></code></a></li>
+<li><a class="reference internal" href="#label"><code class="docutils literal"><span class="pre">label</span></code></a></li>
+<li><a class="reference internal" href="#classnameid"><code class="docutils literal"><span class="pre">classNameID</span></code></a></li>
+<li><a class="reference internal" href="#id47"><code class="docutils literal"><span class="pre">id</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/jsdoc/module-%257BReact%2520Component%257D%2520viz_QuickInfoBar.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

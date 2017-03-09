@@ -1,0 +1,7 @@
+encoded.tests.test_fixtures module
+==================================
+
+.. automodule:: encoded.tests.test_fixtures
+    :members:
+    :undoc-members:
+    :show-inheritance:

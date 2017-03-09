@@ -1,0 +1,7 @@
+encoded.types.biosource module
+==============================
+
+.. automodule:: encoded.types.biosource
+    :members:
+    :undoc-members:
+    :show-inheritance:

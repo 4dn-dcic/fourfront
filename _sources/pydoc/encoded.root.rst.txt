@@ -1,0 +1,7 @@
+encoded.root module
+===================
+
+.. automodule:: encoded.root
+    :members:
+    :undoc-members:
+    :show-inheritance:

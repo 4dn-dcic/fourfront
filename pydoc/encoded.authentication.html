@@ -1,0 +1,260 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.authentication module &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="encoded.authorization module" href="encoded.authorization.html" />
+    <link rel="prev" title="encoded.upgrade package" href="encoded.upgrade.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.authorization.html" title="encoded.authorization module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="encoded.upgrade.html" title="encoded.upgrade package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" accesskey="U">encoded package</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-encoded.authentication">
+<span id="encoded-authentication-module"></span><h1>encoded.authentication module<a class="headerlink" href="#module-encoded.authentication" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="encoded.authentication.Auth0AuthenticationPolicy">
+<em class="property">class </em><code class="descclassname">encoded.authentication.</code><code class="descname">Auth0AuthenticationPolicy</code><a class="reference internal" href="../_modules/encoded/authentication.html#Auth0AuthenticationPolicy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.authentication.Auth0AuthenticationPolicy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pyramid.authentication.CallbackAuthenticationPolicy</span></code></p>
+<dl class="method">
+<dt id="encoded.authentication.Auth0AuthenticationPolicy.get_token_info">
+<code class="descname">get_token_info</code><span class="sig-paren">(</span><em>token</em>, <em>request</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/authentication.html#Auth0AuthenticationPolicy.get_token_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.authentication.Auth0AuthenticationPolicy.get_token_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>given a jwt get token info from auth0, handle
+retrying and what not</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.authentication.Auth0AuthenticationPolicy.login_path">
+<code class="descname">login_path</code><em class="property"> = '/login'</em><a class="headerlink" href="#encoded.authentication.Auth0AuthenticationPolicy.login_path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.authentication.Auth0AuthenticationPolicy.method">
+<code class="descname">method</code><em class="property"> = 'POST'</em><a class="headerlink" href="#encoded.authentication.Auth0AuthenticationPolicy.method" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="encoded.authentication.Auth0AuthenticationPolicy.unauthenticated_userid">
+<code class="descname">unauthenticated_userid</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/authentication.html#Auth0AuthenticationPolicy.unauthenticated_userid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.authentication.Auth0AuthenticationPolicy.unauthenticated_userid" title="Permalink to this definition">¶</a></dt>
+<dd><p>So basically this is used to do a login, instead of the actual
+login view... not sure why, but yeah..</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="encoded.authentication.BasicAuthAuthenticationPolicy">
+<em class="property">class </em><code class="descclassname">encoded.authentication.</code><code class="descname">BasicAuthAuthenticationPolicy</code><span class="sig-paren">(</span><em>check</em>, <em>*args</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/authentication.html#BasicAuthAuthenticationPolicy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.authentication.BasicAuthAuthenticationPolicy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pyramid.authentication.BasicAuthAuthenticationPolicy</span></code></p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="encoded.authentication.LoginDenied">
+<em class="property">exception </em><code class="descclassname">encoded.authentication.</code><code class="descname">LoginDenied</code><span class="sig-paren">(</span><em>detail=None</em>, <em>headers=None</em>, <em>comment=None</em>, <em>body_template=None</em>, <em>result=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/authentication.html#LoginDenied"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.authentication.LoginDenied" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pyramid.httpexceptions.HTTPForbidden</span></code></p>
+<dl class="attribute">
+<dt id="encoded.authentication.LoginDenied.title">
+<code class="descname">title</code><em class="property"> = 'Login failure'</em><a class="headerlink" href="#encoded.authentication.LoginDenied.title" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="encoded.authentication.NamespacedAuthenticationPolicy">
+<em class="property">class </em><code class="descclassname">encoded.authentication.</code><code class="descname">NamespacedAuthenticationPolicy</code><span class="sig-paren">(</span><em>namespace</em>, <em>base</em>, <em>*args</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/authentication.html#NamespacedAuthenticationPolicy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.authentication.NamespacedAuthenticationPolicy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Wrapper for authentication policy classes</p>
+<p>As userids are included in the list of principals, it seems good practice
+to namespace them to avoid clashes.</p>
+<p>Constructor Arguments</p>
+<p><code class="docutils literal"><span class="pre">namespace</span></code></p>
+<blockquote>
+<div>The namespace used (string).</div></blockquote>
+<p><code class="docutils literal"><span class="pre">base</span></code></p>
+<blockquote>
+<div>The base authentication policy (class or dotted name).</div></blockquote>
+<p>Remaining arguments are passed to the <code class="docutils literal"><span class="pre">base</span></code> constructor.</p>
+<p>Example</p>
+<p>To make a <code class="docutils literal"><span class="pre">REMOTE_USER</span></code> &#8216;admin&#8217; be &#8216;user.admin&#8217;</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">policy</span> <span class="o">=</span> <span class="n">NamespacedAuthenticationPolicy</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;pyramid.authentication.RemoteUserAuthenticationPolicy&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="encoded.authentication.NamespacedAuthenticationPolicy.remember">
+<code class="descname">remember</code><span class="sig-paren">(</span><em>request</em>, <em>principal</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/authentication.html#NamespacedAuthenticationPolicy.remember"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.authentication.NamespacedAuthenticationPolicy.remember" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="encoded.authentication.NamespacedAuthenticationPolicy.unauthenticated_userid">
+<code class="descname">unauthenticated_userid</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/authentication.html#NamespacedAuthenticationPolicy.unauthenticated_userid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.authentication.NamespacedAuthenticationPolicy.unauthenticated_userid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.authentication.basic_auth_check">
+<code class="descclassname">encoded.authentication.</code><code class="descname">basic_auth_check</code><span class="sig-paren">(</span><em>username</em>, <em>password</em>, <em>request</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/authentication.html#basic_auth_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.authentication.basic_auth_check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.authentication.generate_password">
+<code class="descclassname">encoded.authentication.</code><code class="descname">generate_password</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/authentication.html#generate_password"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.authentication.generate_password" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a password with 80 bits of entropy</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.authentication.generate_user">
+<code class="descclassname">encoded.authentication.</code><code class="descname">generate_user</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/authentication.html#generate_user"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.authentication.generate_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a random user name with 64 bits of entropy
+Used to generate access_key</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.authentication.get_jwt">
+<code class="descclassname">encoded.authentication.</code><code class="descname">get_jwt</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/authentication.html#get_jwt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.authentication.get_jwt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.authentication.impersonate_user">
+<code class="descclassname">encoded.authentication.</code><code class="descname">impersonate_user</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/authentication.html#impersonate_user"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.authentication.impersonate_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>As an admin, impersonate a different user.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.authentication.includeme">
+<code class="descclassname">encoded.authentication.</code><code class="descname">includeme</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/authentication.html#includeme"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.authentication.includeme" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.authentication.login">
+<code class="descclassname">encoded.authentication.</code><code class="descname">login</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/authentication.html#login"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.authentication.login" title="Permalink to this definition">¶</a></dt>
+<dd><p>check the auth0 assertion and remember the user</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.authentication.logout">
+<code class="descclassname">encoded.authentication.</code><code class="descname">logout</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/authentication.html#logout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.authentication.logout" title="Permalink to this definition">¶</a></dt>
+<dd><p>View to forget the user</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.authentication.me">
+<code class="descclassname">encoded.authentication.</code><code class="descname">me</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/authentication.html#me"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.authentication.me" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias /users/&lt;uuid-of-current-user&gt;</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.authentication.session_properties">
+<code class="descclassname">encoded.authentication.</code><code class="descname">session_properties</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/authentication.html#session_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.authentication.session_properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="encoded.upgrade.html"
+                        title="previous chapter">encoded.upgrade package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="encoded.authorization.html"
+                        title="next chapter">encoded.authorization module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pydoc/encoded.authentication.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.authorization.html" title="encoded.authorization module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="encoded.upgrade.html" title="encoded.upgrade package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

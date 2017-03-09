@@ -1,0 +1,32 @@
+.. _undefined.Legend:
+
+=====================
+Namespace: ``Legend``
+=====================
+
+
+.. contents:: Local Navigation
+   :local:
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 1
+   
+   
+Description
+===========
+
+
+
+Functions
+=========
+
+
+Members
+=======
+
+
+
+

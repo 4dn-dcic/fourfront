@@ -1,0 +1,398 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">future.standard_library</span> <span class="k">import</span> <span class="n">install_aliases</span>
+<span class="n">install_aliases</span><span class="p">()</span>  <span class="c1"># NOQA</span>
+<span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">import</span> <span class="nn">codecs</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">netaddr</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">subprocess32</span> <span class="k">as</span> <span class="nn">subprocess</span>  <span class="c1"># Closes pipes on failure</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">from</span> <span class="nn">pyramid.config</span> <span class="k">import</span> <span class="n">Configurator</span>
+<span class="kn">from</span> <span class="nn">pyramid.path</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">AssetResolver</span><span class="p">,</span>
+    <span class="n">caller_package</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">pyramid.authorization</span> <span class="k">import</span> <span class="n">ACLAuthorizationPolicy</span>
+<span class="kn">from</span> <span class="nn">pyramid.session</span> <span class="k">import</span> <span class="n">SignedCookieSessionFactory</span>
+<span class="kn">from</span> <span class="nn">pyramid.settings</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">aslist</span><span class="p">,</span>
+    <span class="n">asbool</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="k">import</span> <span class="n">engine_from_config</span>
+<span class="kn">from</span> <span class="nn">webob.cookies</span> <span class="k">import</span> <span class="n">JSONSerializer</span>
+<span class="kn">from</span> <span class="nn">snovault.elasticsearch</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">PyramidJSONSerializer</span><span class="p">,</span>
+    <span class="n">TimedUrllib3HttpConnection</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">snovault.elasticsearch.interfaces</span> <span class="k">import</span> <span class="n">SNP_SEARCH_ES</span>
+<span class="kn">from</span> <span class="nn">snovault.json_renderer</span> <span class="k">import</span> <span class="n">json_renderer</span>
+<span class="kn">from</span> <span class="nn">elasticsearch</span> <span class="k">import</span> <span class="n">Elasticsearch</span>
+<span class="n">STATIC_MAX_AGE</span> <span class="o">=</span> <span class="mi">0</span>
+
+
+<div class="viewcode-block" id="json_asset"><a class="viewcode-back" href="../pydoc/encoded.html#encoded.json_asset">[docs]</a><span class="k">def</span> <span class="nf">json_asset</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="n">utf8</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">getreader</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="n">asset</span> <span class="o">=</span> <span class="n">AssetResolver</span><span class="p">(</span><span class="n">caller_package</span><span class="p">())</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">utf8</span><span class="p">(</span><span class="n">asset</span><span class="o">.</span><span class="n">stream</span><span class="p">()),</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="static_resources"><a class="viewcode-back" href="../pydoc/encoded.html#encoded.static_resources">[docs]</a><span class="k">def</span> <span class="nf">static_resources</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">pkg_resources</span> <span class="k">import</span> <span class="n">resource_filename</span>
+    <span class="kn">import</span> <span class="nn">mimetypes</span>
+    <span class="n">mimetypes</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+    <span class="n">mimetypes</span><span class="o">.</span><span class="n">init</span><span class="p">([</span><span class="n">resource_filename</span><span class="p">(</span><span class="s1">&#39;encoded&#39;</span><span class="p">,</span> <span class="s1">&#39;static/mime.types&#39;</span><span class="p">)])</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_static_view</span><span class="p">(</span><span class="s1">&#39;static&#39;</span><span class="p">,</span> <span class="s1">&#39;static&#39;</span><span class="p">,</span> <span class="n">cache_max_age</span><span class="o">=</span><span class="n">STATIC_MAX_AGE</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_static_view</span><span class="p">(</span><span class="s1">&#39;profiles&#39;</span><span class="p">,</span> <span class="s1">&#39;schemas&#39;</span><span class="p">,</span> <span class="n">cache_max_age</span><span class="o">=</span><span class="n">STATIC_MAX_AGE</span><span class="p">)</span>
+
+    <span class="c1"># Favicon</span>
+    <span class="n">favicon_path</span> <span class="o">=</span> <span class="s1">&#39;/static/img/favicon.ico&#39;</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">route_prefix</span><span class="p">:</span>
+        <span class="n">favicon_path</span> <span class="o">=</span> <span class="s1">&#39;/</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">route_prefix</span><span class="p">,</span> <span class="n">favicon_path</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_route</span><span class="p">(</span><span class="s1">&#39;favicon.ico&#39;</span><span class="p">,</span> <span class="s1">&#39;favicon.ico&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">favicon</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+        <span class="n">subreq</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">subreq</span><span class="o">.</span><span class="n">path_info</span> <span class="o">=</span> <span class="n">favicon_path</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">invoke_subrequest</span><span class="p">(</span><span class="n">subreq</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">response</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">favicon</span><span class="p">,</span> <span class="n">route_name</span><span class="o">=</span><span class="s1">&#39;favicon.ico&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Robots.txt</span>
+    <span class="n">robots_txt_path</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;testing&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;true&#39;</span><span class="p">,</span> <span class="s1">&#39;True&#39;</span><span class="p">]:</span>
+        <span class="n">robots_txt_path</span> <span class="o">=</span> <span class="s1">&#39;/static/dev-robots.txt&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">robots_txt_path</span> <span class="o">=</span> <span class="s1">&#39;/static/robots.txt&#39;</span>
+
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">route_prefix</span><span class="p">:</span>
+        <span class="n">robots_txt_path</span> <span class="o">=</span> <span class="s1">&#39;/</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">route_prefix</span><span class="p">,</span> <span class="n">robots_txt_path</span><span class="p">)</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">add_route</span><span class="p">(</span><span class="s1">&#39;robots.txt-conditional&#39;</span><span class="p">,</span> <span class="s1">&#39;/robots.txt&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">robots_txt</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+        <span class="n">subreq</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">subreq</span><span class="o">.</span><span class="n">path_info</span> <span class="o">=</span> <span class="n">robots_txt_path</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">invoke_subrequest</span><span class="p">(</span><span class="n">subreq</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">response</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">robots_txt</span><span class="p">,</span> <span class="n">route_name</span><span class="o">=</span><span class="s1">&#39;robots.txt-conditional&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="changelogs"><a class="viewcode-back" href="../pydoc/encoded.html#encoded.changelogs">[docs]</a><span class="k">def</span> <span class="nf">changelogs</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_static_view</span><span class="p">(</span>
+        <span class="s1">&#39;profiles/changelogs&#39;</span><span class="p">,</span> <span class="s1">&#39;schemas/changelogs&#39;</span><span class="p">,</span> <span class="n">cache_max_age</span><span class="o">=</span><span class="n">STATIC_MAX_AGE</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="configure_engine"><a class="viewcode-back" href="../pydoc/encoded.html#encoded.configure_engine">[docs]</a><span class="k">def</span> <span class="nf">configure_engine</span><span class="p">(</span><span class="n">settings</span><span class="p">):</span>
+    <span class="n">engine_url</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;sqlalchemy.url&#39;</span><span class="p">]</span>
+
+    <span class="n">engine_opts</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">engine_url</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;postgresql&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;indexer_worker&#39;</span><span class="p">):</span>
+            <span class="n">application_name</span> <span class="o">=</span> <span class="s1">&#39;indexer_worker&#39;</span>
+        <span class="k">elif</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;indexer&#39;</span><span class="p">):</span>
+            <span class="n">application_name</span> <span class="o">=</span> <span class="s1">&#39;indexer&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">application_name</span> <span class="o">=</span> <span class="s1">&#39;app&#39;</span>
+        <span class="n">engine_opts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">isolation_level</span><span class="o">=</span><span class="s1">&#39;REPEATABLE READ&#39;</span><span class="p">,</span>
+            <span class="n">json_serializer</span><span class="o">=</span><span class="n">json_renderer</span><span class="o">.</span><span class="n">dumps</span><span class="p">,</span>
+            <span class="n">connect_args</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;application_name&#39;</span><span class="p">:</span> <span class="n">application_name</span><span class="p">}</span>
+        <span class="p">)</span>
+    <span class="n">engine</span> <span class="o">=</span> <span class="n">engine_from_config</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s1">&#39;sqlalchemy.&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">engine_opts</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">engine</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">drivername</span> <span class="o">==</span> <span class="s1">&#39;postgresql&#39;</span><span class="p">:</span>
+        <span class="n">timeout</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;postgresql.statement_timeout&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">timeout</span><span class="p">:</span>
+            <span class="n">timeout</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
+            <span class="n">set_postgresql_statement_timeout</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">engine</span></div>
+
+
+<div class="viewcode-block" id="set_postgresql_statement_timeout"><a class="viewcode-back" href="../pydoc/encoded.html#encoded.set_postgresql_statement_timeout">[docs]</a><span class="k">def</span> <span class="nf">set_postgresql_statement_timeout</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">20</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Prevent Postgres waiting indefinitely for a lock.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="k">import</span> <span class="n">event</span>
+    <span class="kn">import</span> <span class="nn">psycopg2</span>
+
+    <span class="nd">@event</span><span class="o">.</span><span class="n">listens_for</span><span class="p">(</span><span class="n">engine</span><span class="p">,</span> <span class="s1">&#39;connect&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="n">dbapi_connection</span><span class="p">,</span> <span class="n">connection_record</span><span class="p">):</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="n">dbapi_connection</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SET statement_timeout TO </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">timeout</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">psycopg2</span><span class="o">.</span><span class="n">Error</span><span class="p">:</span>
+            <span class="n">dbapi_connection</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">cursor</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">dbapi_connection</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="configure_dbsession"><a class="viewcode-back" href="../pydoc/encoded.html#encoded.configure_dbsession">[docs]</a><span class="k">def</span> <span class="nf">configure_dbsession</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">clear_data</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">snovault</span> <span class="k">import</span> <span class="n">DBSESSION</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span>
+    <span class="n">DBSession</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">DBSESSION</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">DBSession</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">engine</span> <span class="o">=</span> <span class="n">configure_engine</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
+
+        <span class="kn">from</span> <span class="nn">snovault.storage</span> <span class="k">import</span> <span class="n">Base</span>
+        <span class="c1"># useful for test instances where we want to clear the data</span>
+        <span class="k">if</span> <span class="n">clear_data</span><span class="p">:</span>
+            <span class="n">Base</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">drop_all</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">asbool</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;create_tables&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)):</span>
+            <span class="n">Base</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">create_all</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+
+        <span class="kn">import</span> <span class="nn">snovault.storage</span>
+        <span class="kn">import</span> <span class="nn">zope.sqlalchemy</span>
+        <span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="k">import</span> <span class="n">orm</span>
+
+        <span class="n">DBSession</span> <span class="o">=</span> <span class="n">orm</span><span class="o">.</span><span class="n">scoped_session</span><span class="p">(</span><span class="n">orm</span><span class="o">.</span><span class="n">sessionmaker</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="n">engine</span><span class="p">))</span>
+        <span class="n">zope</span><span class="o">.</span><span class="n">sqlalchemy</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">DBSession</span><span class="p">)</span>
+        <span class="n">snovault</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">DBSession</span><span class="p">)</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">DBSESSION</span><span class="p">]</span> <span class="o">=</span> <span class="n">DBSession</span></div>
+
+
+<div class="viewcode-block" id="load_workbook"><a class="viewcode-back" href="../pydoc/encoded.html#encoded.load_workbook">[docs]</a><span class="k">def</span> <span class="nf">load_workbook</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">workbook_filename</span><span class="p">,</span> <span class="n">docsdir</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">.loadxl</span> <span class="k">import</span> <span class="n">load_all</span>
+    <span class="kn">from</span> <span class="nn">webtest</span> <span class="k">import</span> <span class="n">TestApp</span>
+    <span class="n">environ</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;HTTP_ACCEPT&#39;</span><span class="p">:</span> <span class="s1">&#39;application/json&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;REMOTE_USER&#39;</span><span class="p">:</span> <span class="s1">&#39;IMPORT&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">testapp</span> <span class="o">=</span> <span class="n">TestApp</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">environ</span><span class="p">)</span>
+    <span class="n">load_all</span><span class="p">(</span><span class="n">testapp</span><span class="p">,</span> <span class="n">workbook_filename</span><span class="p">,</span> <span class="n">docsdir</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="n">test</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="json_from_path"><a class="viewcode-back" href="../pydoc/encoded.html#encoded.json_from_path">[docs]</a><span class="k">def</span> <span class="nf">json_from_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">default</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="session"><a class="viewcode-back" href="../pydoc/encoded.html#encoded.session">[docs]</a><span class="k">def</span> <span class="nf">session</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; To create a session secret on the server:</span>
+
+<span class="sd">    $ cat /dev/urandom | head -c 256 | base64 &gt; session-secret.b64</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span>
+    <span class="k">if</span> <span class="s1">&#39;session.secret&#39;</span> <span class="ow">in</span> <span class="n">settings</span><span class="p">:</span>
+        <span class="n">secret</span> <span class="o">=</span> <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;session.secret&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">secret</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
+            <span class="n">secret</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">secret</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">secret</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">secret</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">secret</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">urandom</span><span class="p">(</span><span class="mi">256</span><span class="p">)</span>
+    <span class="c1"># auth_tkt has no timeout set</span>
+    <span class="c1"># cookie will still expire at browser close</span>
+    <span class="k">if</span> <span class="s1">&#39;session.timeout&#39;</span> <span class="ow">in</span> <span class="n">settings</span><span class="p">:</span>
+        <span class="n">timeout</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;session.timeout&#39;</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">timeout</span> <span class="o">=</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">24</span>
+    <span class="n">session_factory</span> <span class="o">=</span> <span class="n">SignedCookieSessionFactory</span><span class="p">(</span>
+        <span class="n">secret</span><span class="o">=</span><span class="n">secret</span><span class="p">,</span>
+        <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span>
+        <span class="n">reissue_time</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">32</span><span class="p">,</span>  <span class="c1"># None does not work</span>
+        <span class="n">serializer</span><span class="o">=</span><span class="n">JSONSerializer</span><span class="p">(),</span>
+    <span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">set_session_factory</span><span class="p">(</span><span class="n">session_factory</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="app_version"><a class="viewcode-back" href="../pydoc/encoded.html#encoded.app_version">[docs]</a><span class="k">def</span> <span class="nf">app_version</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">hashlib</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+    <span class="kn">import</span> <span class="nn">subprocess</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;snovault.app_version&#39;</span><span class="p">):</span>
+        <span class="c1"># we update version as part of deployment process `deploy_beanstalk.py`</span>
+        <span class="c1"># but if we didn&#39;t check env then git</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ENCODED_VERSION&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">version</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">version</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">(</span>
+                    <span class="p">[</span><span class="s1">&#39;git&#39;</span><span class="p">,</span> <span class="s1">&#39;-C&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;describe&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">diff</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">(</span>
+                    <span class="p">[</span><span class="s1">&#39;git&#39;</span><span class="p">,</span> <span class="s1">&#39;-C&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;diff&#39;</span><span class="p">,</span> <span class="s1">&#39;--no-ext-diff&#39;</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">diff</span><span class="p">:</span>
+                    <span class="n">version</span> <span class="o">+=</span> <span class="s1">&#39;-patch&#39;</span> <span class="o">+</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha1</span><span class="p">(</span><span class="n">diff</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()[:</span><span class="mi">7</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">version</span> <span class="o">=</span> <span class="s2">&quot;test&quot;</span>
+
+        <span class="n">config</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;snovault.app_version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">version</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../pydoc/encoded.html#encoded.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">global_config</span><span class="p">,</span> <span class="o">**</span><span class="n">local_config</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; This function returns a Pyramid WSGI application.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">global_config</span>
+    <span class="n">settings</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">local_config</span><span class="p">)</span>
+
+    <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;snovault.jsonld.namespaces&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json_asset</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/namespaces.json&#39;</span><span class="p">)</span>
+    <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;snovault.jsonld.terms_namespace&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;https://www.encodeproject.org/terms/&#39;</span>
+    <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;snovault.jsonld.terms_prefix&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;encode&#39;</span>
+    <span class="c1"># set auth0 keys</span>
+    <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;auth0.secret&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Auth0Secret&quot;</span><span class="p">)</span>
+    <span class="n">settings</span><span class="p">[</span><span class="s1">&#39;auth0.client&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;Auth0Client&quot;</span><span class="p">)</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">Configurator</span><span class="p">(</span><span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">)</span>
+
+    <span class="kn">from</span> <span class="nn">snovault.elasticsearch</span> <span class="k">import</span> <span class="n">APP_FACTORY</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">APP_FACTORY</span><span class="p">]</span> <span class="o">=</span> <span class="n">main</span>  <span class="c1"># used by mp_indexer</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="n">app_version</span><span class="p">)</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="s1">&#39;pyramid_multiauth&#39;</span><span class="p">)</span>  <span class="c1"># must be before calling set_authorization_policy</span>
+    <span class="kn">from</span> <span class="nn">pyramid_localroles</span> <span class="k">import</span> <span class="n">LocalRolesAuthorizationPolicy</span>
+    <span class="c1"># Override default authz policy set by pyramid_multiauth</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">set_authorization_policy</span><span class="p">(</span><span class="n">LocalRolesAuthorizationPolicy</span><span class="p">())</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="n">session</span><span class="p">)</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="n">configure_dbsession</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="s1">&#39;snovault&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>  <span class="c1"># commit so search can override listing</span>
+
+    <span class="c1"># Render an HTML page to browsers and a JSON document for API clients</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="s1">&#39;.renderers&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="s1">&#39;.authentication&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="s1">&#39;.server_defaults&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="s1">&#39;.types&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="s1">&#39;.root&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="s1">&#39;.batch_download&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="s1">&#39;.visualization&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;elasticsearch.server&#39;</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="p">:</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="s1">&#39;snovault.elasticsearch&#39;</span><span class="p">)</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="s1">&#39;.search&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;snp_search.server&#39;</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="p">:</span>
+        <span class="n">addresses</span> <span class="o">=</span> <span class="n">aslist</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;snp_search.server&#39;</span><span class="p">])</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">&#39;snp_search&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Elasticsearch</span><span class="p">(</span>
+            <span class="n">addresses</span><span class="p">,</span>
+            <span class="n">serializer</span><span class="o">=</span><span class="n">PyramidJSONSerializer</span><span class="p">(</span><span class="n">json_renderer</span><span class="p">),</span>
+            <span class="n">connection_class</span><span class="o">=</span><span class="n">TimedUrllib3HttpConnection</span><span class="p">,</span>
+            <span class="n">retry_on_timeout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="s1">&#39;.region_search&#39;</span><span class="p">)</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="s1">&#39;.peak_indexer&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="n">static_resources</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="n">changelogs</span><span class="p">)</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">&#39;ontology&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json_from_path</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ontology_path&#39;</span><span class="p">),</span> <span class="p">{})</span>
+    <span class="n">aws_ip_ranges</span> <span class="o">=</span> <span class="n">json_from_path</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;aws_ip_ranges_path&#39;</span><span class="p">),</span> <span class="p">{</span><span class="s1">&#39;prefixes&#39;</span><span class="p">:</span> <span class="p">[]})</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">&#39;aws_ipset&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">netaddr</span><span class="o">.</span><span class="n">IPSet</span><span class="p">(</span>
+        <span class="n">record</span><span class="p">[</span><span class="s1">&#39;ip_prefix&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">aws_ip_ranges</span><span class="p">[</span><span class="s1">&#39;prefixes&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">record</span><span class="p">[</span><span class="s1">&#39;service&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;AMAZON&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">asbool</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;testing&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)):</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="s1">&#39;.tests.testing_views&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Load upgrades last so that all views (including testing views) are</span>
+    <span class="c1"># registered.</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="s1">&#39;.upgrade&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="s1">&#39;.audit&#39;</span><span class="p">)</span>
+
+    <span class="n">app</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">make_wsgi_app</span><span class="p">()</span>
+
+    <span class="n">workbook_filename</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;load_workbook&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">load_test_only</span> <span class="o">=</span> <span class="n">asbool</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;load_test_only&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+    <span class="n">docsdir</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;load_docsdir&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">docsdir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">docsdir</span> <span class="o">=</span> <span class="p">[</span><span class="n">path</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">docsdir</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">workbook_filename</span><span class="p">:</span>
+        <span class="n">load_workbook</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">workbook_filename</span><span class="p">,</span> <span class="n">docsdir</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="n">load_test_only</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">app</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

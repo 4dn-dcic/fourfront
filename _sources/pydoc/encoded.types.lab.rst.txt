@@ -1,0 +1,7 @@
+encoded.types.lab module
+========================
+
+.. automodule:: encoded.types.lab
+    :members:
+    :undoc-members:
+    :show-inheritance:

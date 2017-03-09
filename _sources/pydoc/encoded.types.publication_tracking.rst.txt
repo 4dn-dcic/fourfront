@@ -1,0 +1,7 @@
+encoded.types.publication_tracking module
+=========================================
+
+.. automodule:: encoded.types.publication_tracking
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,7 @@
+encoded.commands.deploy module
+==============================
+
+.. automodule:: encoded.commands.deploy
+    :members:
+    :undoc-members:
+    :show-inheritance:

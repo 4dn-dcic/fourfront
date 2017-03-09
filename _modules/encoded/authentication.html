@@ -1,0 +1,483 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.authentication &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../encoded.html" accesskey="U">encoded</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.authentication</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">base64</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">operator</span> <span class="k">import</span> <span class="n">itemgetter</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">jwt</span>
+<span class="kn">from</span> <span class="nn">base64</span> <span class="k">import</span> <span class="n">b64decode</span>
+
+<span class="kn">from</span> <span class="nn">passlib.context</span> <span class="k">import</span> <span class="n">CryptContext</span>
+<span class="kn">from</span> <span class="nn">pyramid.authentication</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">BasicAuthAuthenticationPolicy</span> <span class="k">as</span> <span class="n">_BasicAuthAuthenticationPolicy</span><span class="p">,</span>
+    <span class="n">CallbackAuthenticationPolicy</span>
+<span class="p">)</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">pyramid.path</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">DottedNameResolver</span><span class="p">,</span>
+    <span class="n">caller_package</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyramid.security</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">NO_PERMISSION_REQUIRED</span><span class="p">,</span>
+    <span class="n">remember</span><span class="p">,</span>
+    <span class="n">forget</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyramid.httpexceptions</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">HTTPForbidden</span><span class="p">,</span>
+    <span class="n">HTTPFound</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyramid.view</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">view_config</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyramid.settings</span> <span class="k">import</span> <span class="n">asbool</span>
+<span class="kn">from</span> <span class="nn">snovault</span> <span class="k">import</span> <span class="n">ROOT</span>
+<span class="kn">from</span> <span class="nn">snovault.storage</span> <span class="k">import</span> <span class="n">User</span>
+<span class="kn">from</span> <span class="nn">snovault</span> <span class="k">import</span> <span class="n">COLLECTIONS</span>
+<span class="kn">from</span> <span class="nn">snovault.validation</span> <span class="k">import</span> <span class="n">ValidationFailure</span>
+<span class="kn">from</span> <span class="nn">snovault.calculated</span> <span class="k">import</span> <span class="n">calculate_properties</span>
+<span class="kn">from</span> <span class="nn">snovault.validators</span> <span class="k">import</span> <span class="n">no_validate_item_content_post</span>
+
+<span class="n">CRYPT_CONTEXT</span> <span class="o">=</span> <span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;:crypt_context&#39;</span>
+
+
+<div class="viewcode-block" id="includeme"><a class="viewcode-back" href="../../pydoc/encoded.authentication.html#encoded.authentication.includeme">[docs]</a><span class="k">def</span> <span class="nf">includeme</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="s1">&#39;.edw_hash&#39;</span><span class="p">)</span>
+    <span class="n">setting_prefix</span> <span class="o">=</span> <span class="s1">&#39;passlib.&#39;</span>
+    <span class="n">passlib_settings</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">k</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">setting_prefix</span><span class="p">):]:</span> <span class="n">v</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">setting_prefix</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">passlib_settings</span><span class="p">:</span>
+        <span class="n">passlib_settings</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;schemes&#39;</span><span class="p">:</span> <span class="s1">&#39;edw_hash, unix_disabled&#39;</span><span class="p">}</span>
+    <span class="n">crypt_context</span> <span class="o">=</span> <span class="n">CryptContext</span><span class="p">(</span><span class="o">**</span><span class="n">passlib_settings</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">CRYPT_CONTEXT</span><span class="p">]</span> <span class="o">=</span> <span class="n">crypt_context</span>
+
+    <span class="c1"># basic login route</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_route</span><span class="p">(</span><span class="s1">&#39;login&#39;</span><span class="p">,</span> <span class="s1">&#39;/login&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_route</span><span class="p">(</span><span class="s1">&#39;logout&#39;</span><span class="p">,</span> <span class="s1">&#39;/logout&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_route</span><span class="p">(</span><span class="s1">&#39;me&#39;</span><span class="p">,</span> <span class="s1">&#39;/me&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_route</span><span class="p">(</span><span class="s1">&#39;impersonate-user&#39;</span><span class="p">,</span> <span class="s1">&#39;/impersonate-user&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_route</span><span class="p">(</span><span class="s1">&#39;session-properties&#39;</span><span class="p">,</span> <span class="s1">&#39;/session-properties&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NamespacedAuthenticationPolicy"><a class="viewcode-back" href="../../pydoc/encoded.authentication.html#encoded.authentication.NamespacedAuthenticationPolicy">[docs]</a><span class="k">class</span> <span class="nc">NamespacedAuthenticationPolicy</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Wrapper for authentication policy classes</span>
+
+<span class="sd">    As userids are included in the list of principals, it seems good practice</span>
+<span class="sd">    to namespace them to avoid clashes.</span>
+
+<span class="sd">    Constructor Arguments</span>
+
+<span class="sd">    ``namespace``</span>
+
+<span class="sd">        The namespace used (string).</span>
+
+<span class="sd">    ``base``</span>
+
+<span class="sd">        The base authentication policy (class or dotted name).</span>
+
+<span class="sd">    Remaining arguments are passed to the ``base`` constructor.</span>
+
+<span class="sd">    Example</span>
+
+<span class="sd">    To make a ``REMOTE_USER`` &#39;admin&#39; be &#39;user.admin&#39;</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        policy = NamespacedAuthenticationPolicy(&#39;user&#39;,</span>
+<span class="sd">            &#39;pyramid.authentication.RemoteUserAuthenticationPolicy&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="c1"># Dotted name support makes it easy to configure with pyramid_multiauth</span>
+        <span class="n">name_resolver</span> <span class="o">=</span> <span class="n">DottedNameResolver</span><span class="p">(</span><span class="n">caller_package</span><span class="p">())</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">name_resolver</span><span class="o">.</span><span class="n">maybe_resolve</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+        <span class="c1"># Dynamically create a subclass</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Namespaced_</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">namespace</span><span class="p">,</span> <span class="n">base</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="n">klass</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">base</span><span class="p">),</span> <span class="p">{</span><span class="s1">&#39;_namespace_prefix&#39;</span><span class="p">:</span> <span class="n">namespace</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span><span class="p">})</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">NamespacedAuthenticationPolicy</span><span class="p">,</span> <span class="n">klass</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">NamespacedAuthenticationPolicy</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+<div class="viewcode-block" id="NamespacedAuthenticationPolicy.unauthenticated_userid"><a class="viewcode-back" href="../../pydoc/encoded.authentication.html#encoded.authentication.NamespacedAuthenticationPolicy.unauthenticated_userid">[docs]</a>    <span class="k">def</span> <span class="nf">unauthenticated_userid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="bp">cls</span>  <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">NamespacedAuthenticationPolicy</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">userid</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">NamespacedAuthenticationPolicy</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span> \
+            <span class="o">.</span><span class="n">unauthenticated_userid</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">userid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">userid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_namespace_prefix</span> <span class="o">+</span> <span class="n">userid</span>
+        <span class="k">return</span> <span class="n">userid</span></div>
+
+<div class="viewcode-block" id="NamespacedAuthenticationPolicy.remember"><a class="viewcode-back" href="../../pydoc/encoded.authentication.html#encoded.authentication.NamespacedAuthenticationPolicy.remember">[docs]</a>    <span class="k">def</span> <span class="nf">remember</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">principal</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">principal</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_namespace_prefix</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="n">principal</span> <span class="o">=</span> <span class="n">principal</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_namespace_prefix</span><span class="p">):]</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">NamespacedAuthenticationPolicy</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span> \
+            <span class="o">.</span><span class="n">remember</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">principal</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="BasicAuthAuthenticationPolicy"><a class="viewcode-back" href="../../pydoc/encoded.authentication.html#encoded.authentication.BasicAuthAuthenticationPolicy">[docs]</a><span class="k">class</span> <span class="nc">BasicAuthAuthenticationPolicy</span><span class="p">(</span><span class="n">_BasicAuthAuthenticationPolicy</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">check</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="c1"># Dotted name support makes it easy to configure with pyramid_multiauth</span>
+        <span class="n">name_resolver</span> <span class="o">=</span> <span class="n">DottedNameResolver</span><span class="p">(</span><span class="n">caller_package</span><span class="p">())</span>
+        <span class="n">check</span> <span class="o">=</span> <span class="n">name_resolver</span><span class="o">.</span><span class="n">maybe_resolve</span><span class="p">(</span><span class="n">check</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BasicAuthAuthenticationPolicy</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">check</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LoginDenied"><a class="viewcode-back" href="../../pydoc/encoded.authentication.html#encoded.authentication.LoginDenied">[docs]</a><span class="k">class</span> <span class="nc">LoginDenied</span><span class="p">(</span><span class="n">HTTPForbidden</span><span class="p">):</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Login failure&#39;</span></div>
+
+
+<span class="n">_fake_user</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
+
+
+
+<div class="viewcode-block" id="Auth0AuthenticationPolicy"><a class="viewcode-back" href="../../pydoc/encoded.authentication.html#encoded.authentication.Auth0AuthenticationPolicy">[docs]</a><span class="k">class</span> <span class="nc">Auth0AuthenticationPolicy</span><span class="p">(</span><span class="n">CallbackAuthenticationPolicy</span><span class="p">):</span>
+
+    <span class="n">login_path</span> <span class="o">=</span> <span class="s1">&#39;/login&#39;</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;POST&#39;</span>
+
+<div class="viewcode-block" id="Auth0AuthenticationPolicy.unauthenticated_userid"><a class="viewcode-back" href="../../pydoc/encoded.authentication.html#encoded.authentication.Auth0AuthenticationPolicy.unauthenticated_userid">[docs]</a>    <span class="k">def</span> <span class="nf">unauthenticated_userid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        So basically this is used to do a login, instead of the actual</span>
+<span class="sd">        login view... not sure why, but yeah..</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+
+        <span class="c1"># we will cache it for the life of this request, cause pyramids does traversal</span>
+        <span class="n">cached</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;_auth0_authenticated&#39;</span><span class="p">,</span> <span class="n">_fake_user</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cached</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_fake_user</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cached</span>
+
+        <span class="c1"># try to find the token in the request (should be in the header)</span>
+        <span class="n">id_token</span> <span class="o">=</span> <span class="n">get_jwt</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">id_token</span><span class="p">:</span>
+            <span class="c1"># can I thrown an 403 here?</span>
+            <span class="c1">#print(&#39;Missing assertion.&#39;, &#39;unauthenticated_userid&#39;, request)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">user_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_token_info</span><span class="p">(</span><span class="n">id_token</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">user_info</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">email</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">_auth0_authenticated</span> <span class="o">=</span> <span class="n">user_info</span><span class="p">[</span><span class="s1">&#39;email&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+        <span class="c1"># Allow us to access basic user credentials from request obj after authenticating &amp; saving request....authenticated above</span>
+        <span class="k">def</span> <span class="nf">getUserInfo</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+            <span class="n">user_props</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="s1">&#39;/session-properties&#39;</span><span class="p">,</span> <span class="n">as_user</span><span class="o">=</span><span class="n">email</span><span class="p">)</span>
+            <span class="n">user_details</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="s1">&#39;/me&#39;</span><span class="p">,</span> <span class="n">as_user</span><span class="o">=</span><span class="n">email</span><span class="p">)</span>
+            <span class="n">includedDetailFields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;email&#39;</span><span class="p">,</span> <span class="s1">&#39;first_name&#39;</span><span class="p">,</span><span class="s1">&#39;last_name&#39;</span><span class="p">,</span><span class="s1">&#39;groups&#39;</span><span class="p">,</span><span class="s1">&#39;timezone&#39;</span><span class="p">,</span><span class="s1">&#39;status&#39;</span><span class="p">]</span>
+            <span class="n">user_props</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                <span class="c1"># Only include certain fields from profile</span>
+                <span class="s2">&quot;details&quot;</span> <span class="p">:</span> <span class="p">{</span> <span class="n">p</span><span class="p">:</span><span class="n">v</span> <span class="k">for</span> <span class="n">p</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">user_details</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">includedDetailFields</span><span class="p">},</span>
+                <span class="s2">&quot;id_token&quot;</span> <span class="p">:</span> <span class="n">id_token</span>
+            <span class="p">})</span>
+            <span class="k">return</span> <span class="n">user_props</span>
+
+        <span class="n">request</span><span class="o">.</span><span class="n">set_property</span><span class="p">(</span><span class="n">getUserInfo</span><span class="p">,</span> <span class="s2">&quot;user_info&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">email</span></div>
+
+
+<div class="viewcode-block" id="Auth0AuthenticationPolicy.get_token_info"><a class="viewcode-back" href="../../pydoc/encoded.authentication.html#encoded.authentication.Auth0AuthenticationPolicy.get_token_info">[docs]</a>    <span class="k">def</span> <span class="nf">get_token_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        given a jwt get token info from auth0, handle</span>
+<span class="sd">        retrying and what not</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># lets see if we have an auth0 token or our own</span>
+            <span class="n">registry</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span>
+            <span class="n">auth0_client</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;auth0.client&#39;</span><span class="p">)</span>
+            <span class="n">auth0_secret</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;auth0.secret&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">auth0_client</span> <span class="ow">and</span> <span class="n">auth0_secret</span><span class="p">:</span>
+                <span class="c1"># leeway accounts for clock drift between us and auth0</span>
+                <span class="n">payload</span> <span class="o">=</span> <span class="n">jwt</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">b64decode</span><span class="p">(</span><span class="n">auth0_secret</span><span class="p">,</span> <span class="s1">&#39;-_&#39;</span><span class="p">),</span>
+                                     <span class="n">audience</span><span class="o">=</span><span class="n">auth0_client</span><span class="p">,</span> <span class="n">leeway</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s1">&#39;email&#39;</span> <span class="ow">in</span> <span class="n">payload</span> <span class="ow">and</span> <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;email_verified&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="n">request</span><span class="o">.</span><span class="n">set_property</span><span class="p">(</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;auth0_expired&#39;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">payload</span>
+
+            <span class="k">else</span><span class="p">:</span> <span class="c1"># we don&#39;t have the key, let auth0 do the work for us</span>
+                <span class="n">user_url</span> <span class="o">=</span> <span class="s2">&quot;https://</span><span class="si">{domain}</span><span class="s2">/tokeninfo&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;hms-dbmi.auth0.com&#39;</span><span class="p">)</span>
+                <span class="n">resp</span>  <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">user_url</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;id_token&#39;</span><span class="p">:</span><span class="n">token</span><span class="p">})</span>
+                <span class="n">payload</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+                <span class="k">if</span> <span class="s1">&#39;email&#39;</span> <span class="ow">in</span> <span class="n">payload</span> <span class="ow">and</span> <span class="n">payload</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;email_verified&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="n">request</span><span class="o">.</span><span class="n">set_property</span><span class="p">(</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;auth0_expired&#39;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">payload</span>
+
+        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="n">jwt</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidTokenError</span><span class="p">,</span> <span class="n">jwt</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">InvalidKeyError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># Catch errors from decoding JWT</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Invalid JWT assertion : </span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">set_property</span><span class="p">(</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;auth0_expired&#39;</span><span class="p">)</span> <span class="c1"># Allow us to return 403 code &amp;or unset cookie in renderers.py</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;didn&#39;t get email or email is not verified&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div></div>
+
+
+<div class="viewcode-block" id="get_jwt"><a class="viewcode-back" href="../../pydoc/encoded.authentication.html#encoded.authentication.get_jwt">[docs]</a><span class="k">def</span> <span class="nf">get_jwt</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">token</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># ensure this is a jwt token not basic auth:</span>
+        <span class="n">auth_type</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;Authorization&#39;</span><span class="p">][:</span><span class="mi">6</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">auth_type</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;bearer&#39;</span><span class="p">:</span>
+            <span class="n">token</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s1">&#39;Authorization&#39;</span><span class="p">][</span><span class="mi">7</span><span class="p">:]</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">token</span><span class="p">:</span>
+        <span class="n">token</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">cookies</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;jwtToken&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">token</span></div>
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">route_name</span><span class="o">=</span><span class="s1">&#39;login&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span>
+             <span class="n">permission</span><span class="o">=</span><span class="n">NO_PERMISSION_REQUIRED</span><span class="p">)</span>
+<div class="viewcode-block" id="login"><a class="viewcode-back" href="../../pydoc/encoded.authentication.html#encoded.authentication.login">[docs]</a><span class="k">def</span> <span class="nf">login</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;check the auth0 assertion and remember the user&#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="s1">&#39;user_info&#39;</span><span class="p">):</span>
+        <span class="n">user_info</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">user_info</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">user_info</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">LoginDenied</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">LoginDenied</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">user_info</span></div>
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">route_name</span><span class="o">=</span><span class="s1">&#39;logout&#39;</span><span class="p">,</span>
+             <span class="n">permission</span><span class="o">=</span><span class="n">NO_PERMISSION_REQUIRED</span><span class="p">,</span> <span class="n">http_cache</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<div class="viewcode-block" id="logout"><a class="viewcode-back" href="../../pydoc/encoded.authentication.html#encoded.authentication.logout">[docs]</a><span class="k">def</span> <span class="nf">logout</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;View to forget the user&quot;&quot;&quot;</span>
+    <span class="c1">#request.session.invalidate()</span>
+    <span class="c1">#request.response.headerlist.extend(forget(request))</span>
+
+    <span class="c1"># call auth0 to logout</span>
+    <span class="n">auth0_logout_url</span> <span class="o">=</span> <span class="s2">&quot;https://</span><span class="si">{domain}</span><span class="s2">/v2/logout&quot;</span> \
+                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">domain</span><span class="o">=</span><span class="s1">&#39;hms-dbmi.auth0.com&#39;</span><span class="p">)</span>
+
+    <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">auth0_logout_url</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">asbool</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;redirect&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="n">HTTPFound</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="n">request</span><span class="o">.</span><span class="n">resource_path</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">root</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="p">{}</span></div>
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">route_name</span><span class="o">=</span><span class="s1">&#39;me&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="n">NO_PERMISSION_REQUIRED</span><span class="p">)</span>
+<div class="viewcode-block" id="me"><a class="viewcode-back" href="../../pydoc/encoded.authentication.html#encoded.authentication.me">[docs]</a><span class="k">def</span> <span class="nf">me</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Alias /users/&lt;uuid-of-current-user&gt;&#39;&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">principal</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">effective_principals</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">principal</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;userid.&#39;</span><span class="p">):</span>
+            <span class="k">break</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPForbidden</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;Not logged in.&quot;</span><span class="p">)</span>
+
+    <span class="n">namespace</span><span class="p">,</span> <span class="n">userid</span> <span class="o">=</span> <span class="n">principal</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># return { &quot;uuid&quot; : userid } # Uncomment and delete below code to just grab UUID.</span>
+
+    <span class="n">request</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">=</span> <span class="mi">307</span> <span class="c1"># Prevent from creating 301 redirects which are then cached permanently by browser</span>
+    <span class="n">properties</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="s1">&#39;/users/&#39;</span> <span class="o">+</span> <span class="n">userid</span><span class="p">,</span> <span class="n">as_user</span><span class="o">=</span><span class="n">userid</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">properties</span></div>
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">route_name</span><span class="o">=</span><span class="s1">&#39;session-properties&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span>
+             <span class="n">permission</span><span class="o">=</span><span class="n">NO_PERMISSION_REQUIRED</span><span class="p">)</span>
+<div class="viewcode-block" id="session_properties"><a class="viewcode-back" href="../../pydoc/encoded.authentication.html#encoded.authentication.session_properties">[docs]</a><span class="k">def</span> <span class="nf">session_properties</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">principal</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">effective_principals</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">principal</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;userid.&#39;</span><span class="p">):</span>
+            <span class="k">break</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+    <span class="n">namespace</span><span class="p">,</span> <span class="n">userid</span> <span class="o">=</span> <span class="n">principal</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">COLLECTIONS</span><span class="p">][</span><span class="s1">&#39;user&#39;</span><span class="p">][</span><span class="n">userid</span><span class="p">]</span>
+    <span class="n">user_actions</span> <span class="o">=</span> <span class="n">calculate_properties</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="s1">&#39;user_action&#39;</span><span class="p">)</span>
+
+    <span class="n">properties</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="c1">#&#39;user&#39;: request.embed(request.resource_path(user)),</span>
+        <span class="s1">&#39;user_actions&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">user_actions</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">0</span><span class="p">))]</span>
+    <span class="p">}</span>
+
+    <span class="c1">#if &#39;auth.userid&#39; in request.session:</span>
+    <span class="c1">#    properties[&#39;auth.userid&#39;] = request.session[&#39;auth.userid&#39;]</span>
+
+    <span class="k">return</span> <span class="n">properties</span></div>
+
+
+<div class="viewcode-block" id="basic_auth_check"><a class="viewcode-back" href="../../pydoc/encoded.authentication.html#encoded.authentication.basic_auth_check">[docs]</a><span class="k">def</span> <span class="nf">basic_auth_check</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="c1"># We may get called before the context is found and the root set</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">ROOT</span><span class="p">]</span>
+    <span class="n">collection</span> <span class="o">=</span> <span class="n">root</span><span class="p">[</span><span class="s1">&#39;access-keys&#39;</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">access_key</span> <span class="o">=</span> <span class="n">collection</span><span class="p">[</span><span class="n">username</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">properties</span> <span class="o">=</span> <span class="n">access_key</span><span class="o">.</span><span class="n">properties</span>
+    <span class="nb">hash</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;secret_access_key_hash&#39;</span><span class="p">]</span>
+
+    <span class="n">crypt_context</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">CRYPT_CONTEXT</span><span class="p">]</span>
+    <span class="n">valid</span> <span class="o">=</span> <span class="n">crypt_context</span><span class="o">.</span><span class="n">verify</span><span class="p">(</span><span class="n">password</span><span class="p">,</span> <span class="nb">hash</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">valid</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1">#valid, new_hash = crypt_context.verify_and_update(password, hash)</span>
+    <span class="c1">#if new_hash:</span>
+    <span class="c1">#    replace_user_hash(user, new_hash)</span>
+
+    <span class="k">return</span> <span class="p">[]</span></div>
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">route_name</span><span class="o">=</span><span class="s1">&#39;impersonate-user&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span>
+             <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">no_validate_item_content_post</span><span class="p">],</span>
+             <span class="n">permission</span><span class="o">=</span><span class="s1">&#39;impersonate&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="impersonate_user"><a class="viewcode-back" href="../../pydoc/encoded.authentication.html#encoded.authentication.impersonate_user">[docs]</a><span class="k">def</span> <span class="nf">impersonate_user</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;As an admin, impersonate a different user.&quot;&quot;&quot;</span>
+    <span class="n">userid</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">validated</span><span class="p">[</span><span class="s1">&#39;userid&#39;</span><span class="p">]</span>
+    <span class="n">users</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">COLLECTIONS</span><span class="p">][</span><span class="s1">&#39;user&#39;</span><span class="p">]</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">users</span><span class="p">[</span><span class="n">userid</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ValidationFailure</span><span class="p">(</span><span class="s1">&#39;body&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;userid&#39;</span><span class="p">],</span> <span class="s1">&#39;User not found.&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">user</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="s1">&#39;current&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ValidationFailure</span><span class="p">(</span><span class="s1">&#39;body&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;userid&#39;</span><span class="p">],</span> <span class="s1">&#39;User is not enabled.&#39;</span><span class="p">)</span>
+
+    <span class="n">user_actions</span> <span class="o">=</span> <span class="n">calculate_properties</span><span class="p">(</span><span class="n">users</span><span class="p">[</span><span class="n">userid</span><span class="p">],</span> <span class="n">request</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="s1">&#39;user_action&#39;</span><span class="p">)</span>
+    <span class="n">user_properties</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;user_actions&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">user_actions</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">0</span><span class="p">))]</span>
+    <span class="p">}</span>
+    <span class="c1"># pop off impersonate user action if not admin</span>
+    <span class="n">user_properties</span><span class="p">[</span><span class="s1">&#39;user_actions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">user_properties</span><span class="p">[</span><span class="s1">&#39;user_actions&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;impersonate&#39;</span><span class="p">)]</span>
+    <span class="c1"># make a key</span>
+    <span class="n">registry</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span>
+    <span class="n">auth0_client</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;auth0.client&#39;</span><span class="p">)</span>
+    <span class="n">auth0_secret</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;auth0.secret&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">auth0_client</span> <span class="ow">and</span> <span class="n">auth0_secret</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">HTTPForbidden</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s2">&quot;no keys to impersonate user&quot;</span><span class="p">)</span>
+
+    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;email&#39;</span><span class="p">:</span> <span class="n">userid</span><span class="p">,</span>
+               <span class="s1">&#39;email_verified&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+               <span class="s1">&#39;aud&#39;</span><span class="p">:</span> <span class="n">auth0_client</span><span class="p">,</span>
+              <span class="p">}</span>
+    <span class="n">id_token</span> <span class="o">=</span> <span class="n">jwt</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">b64decode</span><span class="p">(</span><span class="n">auth0_secret</span><span class="p">,</span> <span class="s1">&#39;-_&#39;</span><span class="p">),</span> <span class="n">algorithm</span><span class="o">=</span><span class="s1">&#39;HS256&#39;</span><span class="p">)</span>
+    <span class="n">user_properties</span><span class="p">[</span><span class="s1">&#39;id_token&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">id_token</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">user_properties</span></div>
+
+
+<div class="viewcode-block" id="generate_user"><a class="viewcode-back" href="../../pydoc/encoded.authentication.html#encoded.authentication.generate_user">[docs]</a><span class="k">def</span> <span class="nf">generate_user</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Generate a random user name with 64 bits of entropy</span>
+<span class="sd">        Used to generate access_key</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Take a random 5 char binary string (80 bits of</span>
+    <span class="c1"># entropy) and encode it as upper cased base32 (8 chars)</span>
+    <span class="n">random_bytes</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">urandom</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b32encode</span><span class="p">(</span><span class="n">random_bytes</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">user</span></div>
+
+
+<div class="viewcode-block" id="generate_password"><a class="viewcode-back" href="../../pydoc/encoded.authentication.html#encoded.authentication.generate_password">[docs]</a><span class="k">def</span> <span class="nf">generate_password</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; Generate a password with 80 bits of entropy</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Take a random 10 char binary string (80 bits of</span>
+    <span class="c1"># entropy) and encode it as lower cased base32 (16 chars)</span>
+    <span class="n">random_bytes</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">urandom</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">password</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b32encode</span><span class="p">(</span><span class="n">random_bytes</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">password</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../encoded.html" >encoded</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

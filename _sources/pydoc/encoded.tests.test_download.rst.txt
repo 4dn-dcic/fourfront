@@ -1,0 +1,7 @@
+encoded.tests.test_download module
+==================================
+
+.. automodule:: encoded.tests.test_download
+    :members:
+    :undoc-members:
+    :show-inheritance:

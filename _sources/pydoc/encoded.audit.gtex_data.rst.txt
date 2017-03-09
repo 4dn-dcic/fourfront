@@ -1,0 +1,7 @@
+encoded.audit.gtex_data module
+==============================
+
+.. automodule:: encoded.audit.gtex_data
+    :members:
+    :undoc-members:
+    :show-inheritance:

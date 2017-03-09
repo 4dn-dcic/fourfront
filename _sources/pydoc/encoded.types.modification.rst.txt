@@ -1,0 +1,7 @@
+encoded.types.modification module
+=================================
+
+.. automodule:: encoded.types.modification
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,35 @@
+encoded.commands package
+========================
+
+Submodules
+----------
+
+.. toctree::
+
+   encoded.commands.add_date_created
+   encoded.commands.aws_deploy
+   encoded.commands.check_rendering
+   encoded.commands.deploy
+   encoded.commands.dropdb
+   encoded.commands.es_index_data
+   encoded.commands.extract_test_data
+   encoded.commands.generate_annotations
+   encoded.commands.generate_ontology
+   encoded.commands.import_data
+   encoded.commands.index_annotations
+   encoded.commands.jsonld_rdf
+   encoded.commands.load_data
+   encoded.commands.migrate_attachments_aws
+   encoded.commands.migrate_dataset_type
+   encoded.commands.migrate_files_aws
+   encoded.commands.owltools
+   encoded.commands.profile
+   encoded.commands.spreadsheet_to_json
+
+Module contents
+---------------
+
+.. automodule:: encoded.commands
+    :members:
+    :undoc-members:
+    :show-inheritance:

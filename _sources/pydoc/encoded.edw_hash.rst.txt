@@ -1,0 +1,7 @@
+encoded.edw_hash module
+=======================
+
+.. automodule:: encoded.edw_hash
+    :members:
+    :undoc-members:
+    :show-inheritance:

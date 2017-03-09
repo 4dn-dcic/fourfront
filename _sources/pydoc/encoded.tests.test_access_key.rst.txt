@@ -1,0 +1,7 @@
+encoded.tests.test_access_key module
+====================================
+
+.. automodule:: encoded.tests.test_access_key
+    :members:
+    :undoc-members:
+    :show-inheritance:

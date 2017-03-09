@@ -1,0 +1,7 @@
+encoded.commands.spreadsheet_to_json module
+===========================================
+
+.. automodule:: encoded.commands.spreadsheet_to_json
+    :members:
+    :undoc-members:
+    :show-inheritance:

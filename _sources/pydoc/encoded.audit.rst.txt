@@ -1,0 +1,24 @@
+encoded.audit package
+=====================
+
+Submodules
+----------
+
+.. toctree::
+
+   encoded.audit.biosample
+   encoded.audit.conditions
+   encoded.audit.dataset
+   encoded.audit.gtex_data
+   encoded.audit.item
+   encoded.audit.ontology_data
+   encoded.audit.replicate_set
+   encoded.audit.standards_data
+
+Module contents
+---------------
+
+.. automodule:: encoded.audit
+    :members:
+    :undoc-members:
+    :show-inheritance:

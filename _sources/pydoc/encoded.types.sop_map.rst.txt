@@ -1,0 +1,7 @@
+encoded.types.sop_map module
+============================
+
+.. automodule:: encoded.types.sop_map
+    :members:
+    :undoc-members:
+    :show-inheritance:

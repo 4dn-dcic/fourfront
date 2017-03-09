@@ -1,0 +1,7 @@
+encoded.tests.test_embedding module
+===================================
+
+.. automodule:: encoded.tests.test_embedding
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,7 @@
+encoded.types.image module
+==========================
+
+.. automodule:: encoded.types.image
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,549 @@
+==============================================
+Module: ``{React Component} viz/QuickInfoBar``
+==============================================
+
+
+
+.. toctree::
+   :maxdepth: 3
+   
+   
+.. contents:: Local Navigation
+   :local:
+
+
+
+Description
+===========
+
+Bar shown below header on home and browse pages.
+Shows counts of selected experiment_sets, experiments, and files against those properties' total counts.
+
+Functions
+=========
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.getInitialState:
+
+
+``getInitialState``
+-------------------
+
+
+
+.. js:function:: getInitialState()
+
+    
+    :return Object.<number, boolean, string>: Initial State
+    
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.updateCurrentAndTotalCounts:
+
+
+``updateCurrentAndTotalCounts``
+-------------------------------
+
+
+
+.. js:function:: updateCurrentAndTotalCounts()
+
+    
+    
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.updateCurrentCounts:
+
+
+``updateCurrentCounts``
+-----------------------
+
+
+
+.. js:function:: updateCurrentCounts()
+
+    
+    
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.updateTotalCounts:
+
+
+``updateTotalCounts``
+---------------------
+
+
+
+.. js:function:: updateTotalCounts()
+
+    
+    
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.isInvisible:
+
+
+``isInvisible``
+---------------
+
+Check if component is visible or not.
+
+.. js:function:: isInvisible()
+
+    
+    
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.componentWillReceiveProps:
+
+
+``componentWillReceiveProps``
+-----------------------------
+
+Updates state.show if no filters are selected.
+
+.. js:function:: componentWillReceiveProps(nextProps)
+
+    
+    :param Object nextProps: Next props.
+    :return undefined: Updates state.show if no filters are selected.
+    
+
+
+
+
+
+
+
+
+Members
+=======
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.offset:
+
+``offset``
+----------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.id:
+
+``id``
+------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.className:
+
+``className``
+-------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.showCurrent:
+
+``showCurrent``
+---------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.count_experiments:
+
+``count_experiments``
+---------------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.count_experiment_sets:
+
+``count_experiment_sets``
+-------------------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.count_files:
+
+``count_files``
+---------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.count_experiments_total:
+
+``count_experiments_total``
+---------------------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.count_experiment_sets_total:
+
+``count_experiment_sets_total``
+-------------------------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.count_files_total:
+
+``count_files_total``
+---------------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.mounted:
+
+``mounted``
+-----------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.show:
+
+``show``
+--------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.mounted:
+
+``mounted``
+-----------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.count_experiments:
+
+``count_experiments``
+---------------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.count_experiment_sets:
+
+``count_experiment_sets``
+-------------------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.count_files:
+
+``count_files``
+---------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.count_experiments_total:
+
+``count_experiments_total``
+---------------------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.count_experiment_sets_total:
+
+``count_experiment_sets_total``
+-------------------------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.count_files_total:
+
+``count_files_total``
+---------------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.count_experiments:
+
+``count_experiments``
+---------------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.count_experiment_sets:
+
+``count_experiment_sets``
+-------------------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.count_files:
+
+``count_files``
+---------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.count_experiments_total:
+
+``count_experiments_total``
+---------------------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.count_experiment_sets_total:
+
+``count_experiment_sets_total``
+-------------------------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.count_files_total:
+
+``count_files_total``
+---------------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.show:
+
+``show``
+--------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.cn:
+
+``cn``
+------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.cn:
+
+``cn``
+------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.stats:
+
+``stats``
+---------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.stats:
+
+``stats``
+---------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.className:
+
+``className``
+-------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.className:
+
+``className``
+-------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.className:
+
+``className``
+-------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.show:
+
+``show``
+--------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.show:
+
+``show``
+--------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.opacity:
+
+``opacity``
+-----------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.show:
+
+``show``
+--------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.opacity:
+
+``opacity``
+-----------
+
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.value:
+
+``value``
+---------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.label:
+
+``label``
+---------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.classNameID:
+
+``classNameID``
+---------------
+
+
+
+
+
+
+.. _module-%7BReact%20Component%7D%20viz_QuickInfoBar.id:
+
+``id``
+------
+
+
+
+
+
+
+
+

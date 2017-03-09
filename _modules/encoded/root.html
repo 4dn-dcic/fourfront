@@ -1,0 +1,320 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.root &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../encoded.html" accesskey="U">encoded</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.root</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">re</span> <span class="k">import</span> <span class="n">escape</span>
+<span class="kn">from</span> <span class="nn">pyramid.decorator</span> <span class="k">import</span> <span class="n">reify</span>
+<span class="kn">from</span> <span class="nn">snovault</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">Root</span><span class="p">,</span>
+    <span class="n">calculated_property</span><span class="p">,</span>
+    <span class="n">root</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.schema_formats</span> <span class="k">import</span> <span class="n">is_accession</span>
+<span class="kn">from</span> <span class="nn">pyramid.security</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">ALL_PERMISSIONS</span><span class="p">,</span>
+    <span class="n">Allow</span><span class="p">,</span>
+    <span class="n">Authenticated</span><span class="p">,</span>
+    <span class="n">Deny</span><span class="p">,</span>
+    <span class="n">Everyone</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="includeme"><a class="viewcode-back" href="../../pydoc/encoded.root.html#encoded.root.includeme">[docs]</a><span class="k">def</span> <span class="nf">includeme</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="n">static_pages</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+
+<span class="n">cachedFileContents</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1"># Should we cache in RAM like this (?), let perform file I/O, or something else?</span>
+<span class="n">pageLocations</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="getStaticFileContent"><a class="viewcode-back" href="../../pydoc/encoded.root.html#encoded.root.getStaticFileContent">[docs]</a><span class="k">def</span> <span class="nf">getStaticFileContent</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">directory</span><span class="p">,</span> <span class="n">contentFilesLocation</span><span class="p">):</span>
+    <span class="n">cachedName</span> <span class="o">=</span> <span class="n">directory</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">cachedFileContents</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cachedName</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">output</span><span class="p">:</span>
+        <span class="c1">#print(&quot;\n\n\nGot cached output for &quot; + filename)     # Works</span>
+        <span class="k">return</span> <span class="n">output</span>
+    <span class="n">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">contentFilesLocation</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">filename</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">cachedFileContents</span><span class="p">[</span><span class="n">cachedName</span><span class="p">]</span> <span class="o">=</span> <span class="n">output</span>
+    <span class="k">return</span> <span class="n">output</span></div>
+
+<div class="viewcode-block" id="listFilesInInDirectory"><a class="viewcode-back" href="../../pydoc/encoded.root.html#encoded.root.listFilesInInDirectory">[docs]</a><span class="k">def</span> <span class="nf">listFilesInInDirectory</span><span class="p">(</span><span class="n">dirLocation</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span> <span class="n">fn</span> <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dirLocation</span><span class="p">)</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">dirLocation</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">fn</span><span class="p">)</span> <span class="p">]</span></div>
+
+<div class="viewcode-block" id="static_pages"><a class="viewcode-back" href="../../pydoc/encoded.root.html#encoded.root.static_pages">[docs]</a><span class="k">def</span> <span class="nf">static_pages</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Setup static routes &amp; content from static files (HTML or Markdown)&#39;&#39;&#39;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">contentFilesLocation</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+        <span class="n">pageLocations</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">getStaticFileContent</span><span class="p">(</span><span class="s2">&quot;static_pages.json&quot;</span><span class="p">,</span> <span class="s2">&quot;/static/data&quot;</span><span class="p">,</span> <span class="n">contentFilesLocation</span> <span class="o">+</span> <span class="s2">&quot;/static/data&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;pages&#39;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error opening &#39;&quot;</span> <span class="o">+</span> <span class="n">contentFilesLocation</span> <span class="o">+</span> <span class="s2">&quot;/static/data/static_pages.json&#39;&quot;</span><span class="p">)</span>
+
+
+    <span class="n">config</span><span class="o">.</span><span class="n">add_route</span><span class="p">(</span>
+        <span class="s1">&#39;static-page&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;/{page:(&#39;</span> <span class="o">+</span> <span class="s1">&#39;|&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="nb">map</span><span class="p">(</span><span class="n">escape</span><span class="p">,</span> <span class="n">pageLocations</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;)}&#39;</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">static_page</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+
+        <span class="n">page</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">matchdict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;page&#39;</span><span class="p">,</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">contentFilesLocation</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+        
+        <span class="n">pageMeta</span> <span class="o">=</span> <span class="n">pageLocations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pageMeta</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="n">pageMeta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;directory&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">contentFilesLocation</span> <span class="o">+=</span> <span class="s2">&quot;/../..&quot;</span> <span class="c1"># get us to root of Git repo.</span>
+            <span class="n">contentFilesLocation</span> <span class="o">+=</span> <span class="n">pageMeta</span><span class="p">[</span><span class="s1">&#39;directory&#39;</span><span class="p">]</span>
+            
+            <span class="k">if</span> <span class="n">pageMeta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sections&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">sections</span> <span class="o">=</span> <span class="n">pageMeta</span><span class="p">[</span><span class="s1">&#39;sections&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sections</span> <span class="o">=</span> <span class="p">[</span> <span class="p">{</span> <span class="s1">&#39;filename&#39;</span> <span class="p">:</span> <span class="n">fn</span> <span class="p">}</span> <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">listFilesInInDirectory</span><span class="p">(</span><span class="n">contentFilesLocation</span><span class="p">)</span> <span class="p">]</span>
+            
+            <span class="c1"># Set order (as py dicts don&#39;t maintain order)</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sections</span><span class="p">:</span>
+                <span class="n">s</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">order</span> <span class="o">=</span> <span class="n">i</span><span class="p">)</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sections</span><span class="p">:</span>
+                    <span class="n">filenameParts</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                    <span class="n">content</span><span class="p">[</span><span class="n">filenameParts</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s1">&#39;content&#39;</span> <span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;content&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">or</span> <span class="n">getStaticFileContent</span><span class="p">(</span>
+                            <span class="n">s</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">],</span>
+                            <span class="n">pageMeta</span><span class="p">[</span><span class="s1">&#39;directory&#39;</span><span class="p">],</span>
+                            <span class="n">contentFilesLocation</span>
+                        <span class="p">),</span>
+                        <span class="s1">&#39;title&#39;</span>   <span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                        <span class="s1">&#39;order&#39;</span>   <span class="p">:</span> <span class="n">s</span><span class="p">[</span><span class="s1">&#39;order&#39;</span><span class="p">],</span>
+                        <span class="s1">&#39;filetype&#39;</span><span class="p">:</span> <span class="n">filenameParts</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">filenameParts</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="p">}</span>
+                    <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+                        <span class="n">content</span><span class="p">[</span><span class="n">filenameParts</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;toc-title&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+                        <span class="n">content</span><span class="p">[</span><span class="n">filenameParts</span><span class="p">[</span><span class="mi">0</span><span class="p">]][</span><span class="s1">&#39;toc-title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="s1">&#39;toc-title&#39;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Could not get contents from &#39;</span> <span class="o">+</span> <span class="n">contentFilesLocation</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No directory set for page </span><span class="se">\&quot;</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">page</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2"> in /static/data/directories.json, checking default (/static/data)&quot;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">contentFilesLocation</span> <span class="o">+=</span> <span class="s2">&quot;/static/data/&quot;</span>     <span class="c1"># Where the static files be stored by default.</span>
+                <span class="n">contentFilesLocation</span> <span class="o">+=</span> <span class="n">page</span>
+                <span class="n">content</span> <span class="o">=</span> <span class="p">{</span> <span class="n">fn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">getStaticFileContent</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">contentFilesLocation</span><span class="p">)</span> <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">contentFilesLocation</span><span class="p">)</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">contentFilesLocation</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">fn</span><span class="p">)</span> <span class="p">}</span>
+            <span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No files found for static page: </span><span class="se">\&quot;</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">page</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Dummy-like &#39;context&#39; JSON response</span>
+        <span class="n">pathParts</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">matchdict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;page&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+        <span class="n">atTypes</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span> <span class="n">pgType</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="k">for</span> <span class="n">pgType</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">pathParts</span><span class="p">))[</span><span class="n">pathIndex</span><span class="p">:]</span> <span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;Page&#39;</span> <span class="k">for</span> <span class="n">pathIndex</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">pathParts</span><span class="p">))</span>
+        <span class="p">]</span> <span class="c1"># creates e.g. SubmittingHelpPage, HelpPage</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">response</span>
+        <span class="n">response</span><span class="o">.</span><span class="n">content_type</span> <span class="o">=</span> <span class="s1">&#39;application/json; charset=utf-8&#39;</span>
+
+        <span class="n">responseDict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;title&quot;</span> <span class="p">:</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">pageMeta</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="n">pageMeta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">))</span> <span class="ow">or</span> <span class="n">request</span><span class="o">.</span><span class="n">matchdict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;page&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">capitalize</span><span class="p">(),</span>
+            <span class="s2">&quot;notification&quot;</span> <span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;@type&quot;</span> <span class="p">:</span> <span class="n">atTypes</span> <span class="o">+</span> <span class="p">[</span> <span class="s2">&quot;StaticPage&quot;</span><span class="p">,</span> <span class="s2">&quot;Portal&quot;</span> <span class="p">],</span>
+            <span class="s2">&quot;@context&quot;</span> <span class="p">:</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">request</span><span class="o">.</span><span class="n">matchdict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;page&#39;</span><span class="p">,</span><span class="s1">&#39;static-pages&#39;</span><span class="p">),</span>
+            <span class="s2">&quot;@id&quot;</span> <span class="p">:</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">request</span><span class="o">.</span><span class="n">matchdict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;page&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">),</span>
+            <span class="s2">&quot;content&quot;</span> <span class="p">:</span> <span class="n">content</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pageMeta</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="n">pageMeta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;table-of-contents&#39;</span><span class="p">):</span>
+            <span class="n">responseDict</span><span class="p">[</span><span class="s1">&#39;toc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pageMeta</span><span class="p">[</span><span class="s1">&#39;table-of-contents&#39;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">responseDict</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">static_page</span><span class="p">,</span> <span class="n">route_name</span><span class="o">=</span><span class="s1">&#39;static-page&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="acl_from_settings"><a class="viewcode-back" href="../../pydoc/encoded.root.html#encoded.root.acl_from_settings">[docs]</a><span class="k">def</span> <span class="nf">acl_from_settings</span><span class="p">(</span><span class="n">settings</span><span class="p">):</span>
+    <span class="c1"># XXX Unsure if any of the demo instance still need this</span>
+    <span class="n">acl</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;allow.&#39;</span><span class="p">):</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="n">Allow</span>
+            <span class="n">permission</span> <span class="o">=</span> <span class="n">k</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s1">&#39;allow.&#39;</span><span class="p">):]</span>
+            <span class="n">principals</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;deny.&#39;</span><span class="p">):</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="n">Deny</span>
+            <span class="n">permission</span> <span class="o">=</span> <span class="n">k</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s1">&#39;deny.&#39;</span><span class="p">):]</span>
+            <span class="n">principals</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">permission</span> <span class="o">==</span> <span class="s1">&#39;ALL_PERMISSIONS&#39;</span><span class="p">:</span>
+            <span class="n">permission</span> <span class="o">=</span> <span class="n">ALL_PERMISSIONS</span>
+        <span class="k">for</span> <span class="n">principal</span> <span class="ow">in</span> <span class="n">principals</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">principal</span> <span class="o">==</span> <span class="s1">&#39;Authenticated&#39;</span><span class="p">:</span>
+                <span class="n">principal</span> <span class="o">=</span> <span class="n">Authenticated</span>
+            <span class="k">elif</span> <span class="n">principal</span> <span class="o">==</span> <span class="s1">&#39;Everyone&#39;</span><span class="p">:</span>
+                <span class="n">principal</span> <span class="o">=</span> <span class="n">Everyone</span>
+            <span class="n">acl</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">action</span><span class="p">,</span> <span class="n">principal</span><span class="p">,</span> <span class="n">permission</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">acl</span></div>
+
+
+<span class="nd">@root</span>
+<div class="viewcode-block" id="EncodedRoot"><a class="viewcode-back" href="../../pydoc/encoded.root.html#encoded.root.EncodedRoot">[docs]</a><span class="k">class</span> <span class="nc">EncodedRoot</span><span class="p">(</span><span class="n">Root</span><span class="p">):</span>
+    <span class="n">properties</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Home&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;portal_title&#39;</span><span class="p">:</span> <span class="s1">&#39;4DN Data Portal&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="nd">@reify</span>
+    <span class="k">def</span> <span class="nf">__acl__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">acl</span> <span class="o">=</span> <span class="n">acl_from_settings</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="n">Everyone</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="s1">&#39;search&#39;</span><span class="p">,</span> <span class="s1">&#39;search_audit&#39;</span><span class="p">,</span> <span class="s1">&#39;audit&#39;</span><span class="p">]),</span>
+            <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="s1">&#39;group.admin&#39;</span><span class="p">,</span> <span class="n">ALL_PERMISSIONS</span><span class="p">),</span>
+            <span class="c1"># Avoid schema validation errors during audit</span>
+            <span class="p">(</span><span class="n">Allow</span><span class="p">,</span> <span class="s1">&#39;remoteuser.EMBED&#39;</span><span class="p">,</span> <span class="s1">&#39;import_items&#39;</span><span class="p">),</span>
+        <span class="p">]</span> <span class="o">+</span> <span class="n">Root</span><span class="o">.</span><span class="n">__acl__</span>
+        <span class="k">return</span> <span class="n">acl</span>
+
+<div class="viewcode-block" id="EncodedRoot.get"><a class="viewcode-back" href="../../pydoc/encoded.root.html#encoded.root.EncodedRoot.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">resource</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">EncodedRoot</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">resource</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">resource</span>
+        <span class="n">resource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">get_by_unique_key</span><span class="p">(</span><span class="s1">&#39;page:location&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">resource</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">resource</span>
+        <span class="k">if</span> <span class="n">is_accession</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+            <span class="n">resource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">get_by_unique_key</span><span class="p">(</span><span class="s1">&#39;accession&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">resource</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">resource</span>
+        <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">resource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">get_by_unique_key</span><span class="p">(</span><span class="s1">&#39;alias&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">resource</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">resource</span>
+        <span class="k">return</span> <span class="n">default</span></div>
+
+<div class="viewcode-block" id="EncodedRoot.get_by_uuid"><a class="viewcode-back" href="../../pydoc/encoded.root.html#encoded.root.EncodedRoot.get_by_uuid">[docs]</a>    <span class="k">def</span> <span class="nf">get_by_uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">get_by_uuid</span><span class="p">(</span><span class="n">uuid</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="EncodedRoot.jsonld_context"><a class="viewcode-back" href="../../pydoc/encoded.root.html#encoded.root.EncodedRoot.jsonld_context">[docs]</a>    <span class="k">def</span> <span class="nf">jsonld_context</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Inherits from &#39;@context&#39; calculated property of Resource in snovault/resources.py&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="s1">&#39;/home&#39;</span></div>
+
+<div class="viewcode-block" id="EncodedRoot.jsonld_type"><a class="viewcode-back" href="../../pydoc/encoded.root.html#encoded.root.EncodedRoot.jsonld_type">[docs]</a>    <span class="k">def</span> <span class="nf">jsonld_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Inherits from &#39;@type&#39; calculated property of Root in snovault/resources.py&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;HomePage&#39;</span><span class="p">,</span> <span class="s1">&#39;StaticPage&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="nb">super</span><span class="p">(</span><span class="n">EncodedRoot</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">jsonld_type</span><span class="p">()</span></div>
+
+    <span class="nd">@calculated_property</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Static Page Content&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="EncodedRoot.content"><a class="viewcode-back" href="../../pydoc/encoded.root.html#encoded.root.EncodedRoot.content">[docs]</a>    <span class="k">def</span> <span class="nf">content</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">contentFilesLocation</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+            <span class="n">contentFilesLocation</span> <span class="o">+=</span> <span class="s2">&quot;/static/data/home&quot;</span> <span class="c1"># Where the static files be stored. TODO: Put in .ini file</span>
+            <span class="k">return</span> <span class="p">{</span> <span class="n">fn</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">getStaticFileContent</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s1">&#39;home&#39;</span><span class="p">,</span> <span class="n">contentFilesLocation</span><span class="p">)</span> <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">contentFilesLocation</span><span class="p">)</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">contentFilesLocation</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">fn</span><span class="p">)</span> <span class="p">}</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No content files found for Root object (aka Home, &#39;/&#39;).&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">{}</span></div>
+
+    <span class="nd">@calculated_property</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Application version&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="EncodedRoot.app_version"><a class="viewcode-back" href="../../pydoc/encoded.root.html#encoded.root.EncodedRoot.app_version">[docs]</a>    <span class="k">def</span> <span class="nf">app_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">registry</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;snovault.app_version&#39;</span><span class="p">]</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../encoded.html" >encoded</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

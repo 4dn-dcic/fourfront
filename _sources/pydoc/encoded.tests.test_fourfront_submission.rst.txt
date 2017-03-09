@@ -1,0 +1,7 @@
+encoded.tests.test_fourfront_submission module
+==============================================
+
+.. automodule:: encoded.tests.test_fourfront_submission
+    :members:
+    :undoc-members:
+    :show-inheritance:

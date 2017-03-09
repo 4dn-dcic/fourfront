@@ -1,0 +1,7 @@
+encoded.tests.datafixtures module
+=================================
+
+.. automodule:: encoded.tests.datafixtures
+    :members:
+    :undoc-members:
+    :show-inheritance:

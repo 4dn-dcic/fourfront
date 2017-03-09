@@ -1,0 +1,7 @@
+encoded.commands.es_index_data module
+=====================================
+
+.. automodule:: encoded.commands.es_index_data
+    :members:
+    :undoc-members:
+    :show-inheritance:

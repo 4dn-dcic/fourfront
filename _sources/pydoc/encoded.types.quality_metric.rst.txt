@@ -1,0 +1,7 @@
+encoded.types.quality_metric module
+===================================
+
+.. automodule:: encoded.types.quality_metric
+    :members:
+    :undoc-members:
+    :show-inheritance:

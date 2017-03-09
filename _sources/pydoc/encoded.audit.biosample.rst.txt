@@ -1,0 +1,7 @@
+encoded.audit.biosample module
+==============================
+
+.. automodule:: encoded.audit.biosample
+    :members:
+    :undoc-members:
+    :show-inheritance:

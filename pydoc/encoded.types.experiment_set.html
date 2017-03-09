@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.types.experiment_set module &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="encoded.types.file module" href="encoded.types.file.html" />
+    <link rel="prev" title="encoded.types.experiment module" href="encoded.types.experiment.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.file.html" title="encoded.types.file module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.experiment.html" title="encoded.types.experiment module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.types.html" accesskey="U">encoded.types package</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-encoded.types.experiment_set">
+<span id="encoded-types-experiment-set-module"></span><h1>encoded.types.experiment_set module<a class="headerlink" href="#module-encoded.types.experiment_set" title="Permalink to this headline">¶</a></h1>
+<p>Collection for ExperimentSet and ExperimentSetReplicate.</p>
+<dl class="class">
+<dt id="encoded.types.experiment_set.ExperimentSet">
+<em class="property">class </em><code class="descclassname">encoded.types.experiment_set.</code><code class="descname">ExperimentSet</code><span class="sig-paren">(</span><em>registry</em>, <em>models</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/experiment_set.html#ExperimentSet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.experiment_set.ExperimentSet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="encoded.types.base.html#encoded.types.base.Item" title="encoded.types.base.Item"><code class="xref py py-class docutils literal"><span class="pre">encoded.types.base.Item</span></code></a></p>
+<p>The experiment set class.</p>
+<dl class="attribute">
+<dt id="encoded.types.experiment_set.ExperimentSet.base_types">
+<code class="descname">base_types</code><em class="property"> = ['ExperimentSet', 'Item']</em><a class="headerlink" href="#encoded.types.experiment_set.ExperimentSet.base_types" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.experiment_set.ExperimentSet.embedded">
+<code class="descname">embedded</code><em class="property"> = ['award', 'lab', 'produced_in_pub', 'publications', 'experiments_in_set', 'experiments_in_set.protocol', 'experiments_in_set.protocol_variation', 'experiments_in_set.lab', 'experiments_in_set.award', 'experiments_in_set.biosample', 'experiments_in_set.biosample.biosource', 'experiments_in_set.biosample.modifications', 'experiments_in_set.biosample.treatments', 'experiments_in_set.biosample.biosource.individual.organism', 'experiments_in_set.files', 'experiments_in_set.files.related_files.relationship_type', 'experiments_in_set.files.related_files.file.uuid', 'experiments_in_set.filesets', 'experiments_in_set.filesets.files_in_set', 'experiments_in_set.filesets.files_in_set.related_files.relationship_type', 'experiments_in_set.filesets.files_in_set.related_files.file.uuid', 'experiments_in_set.digestion_enzyme']</em><a class="headerlink" href="#encoded.types.experiment_set.ExperimentSet.embedded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.experiment_set.ExperimentSet.item_type">
+<code class="descname">item_type</code><em class="property"> = 'experiment_set'</em><a class="headerlink" href="#encoded.types.experiment_set.ExperimentSet.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.experiment_set.ExperimentSet.name_key">
+<code class="descname">name_key</code><em class="property"> = 'accession'</em><a class="headerlink" href="#encoded.types.experiment_set.ExperimentSet.name_key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="encoded.types.experiment_set.ExperimentSet.produced_in_pub">
+<code class="descname">produced_in_pub</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/experiment_set.html#ExperimentSet.produced_in_pub"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.experiment_set.ExperimentSet.produced_in_pub" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="encoded.types.experiment_set.ExperimentSet.publications_of_set">
+<code class="descname">publications_of_set</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/experiment_set.html#ExperimentSet.publications_of_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.experiment_set.ExperimentSet.publications_of_set" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.experiment_set.ExperimentSet.schema">
+<code class="descname">schema</code><em class="property"> = OrderedDict([('title', 'Experiment set'), ('description', 'Schema for submitting metadata for an experiment set.'), ('id', '/profiles/experiment_set.json'), ('$schema', 'http://json-schema.org/draft-04/schema#'), ('type', 'object'), ('required', ['award', 'lab', 'description']), ('identifyingProperties', ['uuid', 'aliases']), ('additionalProperties', False), ('mixinProperties', [OrderedDict([('$ref', 'mixins.json#/schema_version')]), OrderedDict([('$ref', 'mixins.json#/accession')]), OrderedDict([('$ref', 'mixins.json#/uuid')]), OrderedDict([('$ref', 'mixins.json#/aliases')]), OrderedDict([('$ref', 'mixins.json#/status')]), OrderedDict([('$ref', 'mixins.json#/attribution')]), OrderedDict([('$ref', 'mixins.json#/submitted')]), OrderedDict([('$ref', 'mixins.json#/notes')]), OrderedDict([('$ref', 'mixins.json#/documents')])]), ('properties', OrderedDict([('documents', {'title': 'Documents', 'description': 'Documents that provide additional information (not data file).', 'comment': 'See Documents sheet or collection for existing items.', 'type': 'array', 'default': [], 'uniqueItems': True, 'items': {'title': 'Document', 'description': 'A document that provides additional information (not data file).', 'type': 'string', 'linkTo': 'Document'}}), ('notes', {'title': 'Notes', 'description': 'DCIC internal notes.', 'type': 'string', 'exclude_from': 'submit4dn', 'elasticsearch_mapping_index_type': {'title': 'Field mapping index type', 'description': 'Defines one of three types of indexing available', 'type': 'string', 'default': 'analyzed', 'enum': ['analyzed', 'not_analyzed', 'no']}}), ('date_created', {'rdfs:subPropertyOf': 'dc:created', 'title': 'Date created', 'exclude_from': 'submit4dn', 'type': 'string', 'anyOf': [{'format': 'date-time'}, {'format': 'date'}], 'serverDefault': 'now', 'permission': 'import_items'}), ('submitted_by', {'rdfs:subPropertyOf': 'dc:creator', 'title': 'Submitted by', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'User', 'serverDefault': 'userid', 'permission': 'import_items'}), ('lab', {'title': 'Lab', 'description': 'Lab associated with the submission.', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'Lab', 'linkSubmitsFor': True, 'default': ''}), ('award', {'title': 'Grant', 'description': 'Grant associated with the submission.', 'exclude_from': 'submit4dn', 'default': '', 'type': 'string', 'linkTo': 'Award'}), ('status', {'title': 'Status', 'exclude_from': 'submit4dn', 'type': 'string', 'default': 'in review by lab', 'permission': 'import_items', 'enum': ['released', 'current', 'revoked', 'deleted', 'replaced', 'in review by lab', 'in review by project', 'released to project']}), ('aliases', {'title': 'Lab aliases', 'description': 'Lab specific identifiers to reference an object.', 'type': 'array', 'comment': 'Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).', 'default': [], 'uniqueItems': True, 'items': {'uniqueKey': 'alias', 'title': 'Lab alias', 'description': 'A lab specific identifier to reference an object.', 'type': 'string', 'pattern': '^\\S+:\\S+'}}), ('uuid', {'title': 'UUID', 'type': 'string', 'format': 'uuid', 'exclude_from': 'submit4dn', 'serverDefault': 'uuid4', 'permission': 'import_items', 'requestMethod': 'POST'}), ('accession', {'title': 'Accession', 'description': 'A unique identifier to be used to reference the object.', 'internal_comment': 'Only admins are allowed to set or update this value.', 'exclude_from': 'submit4dn', 'type': 'string', 'format': 'accession', 'permission': 'import_items', 'serverDefault': 'accession', 'accessionType': 'ES'}), ('alternate_accessions', {'title': 'Alternate accessions', 'description': 'Accessions previously assigned to objects that have been merged with this object.', 'type': 'array', 'internal_comment': 'Only admins are allowed to set or update this value.', 'exclude_from': 'submit4dn', 'default': [], 'items': {'title': 'Alternate Accession', 'description': 'An accession previously assigned to an object that has been merged with this object.', 'type': 'string', 'permission': 'import_items', 'format': 'accession'}}), ('schema_version', {'title': 'Schema Version', 'internal_comment': 'Do not submit, value is assigned by the server. The version of the JSON schema that the server uses to validate the object. Schema version indicates generation of schema used to save version to to enable upgrade steps to work. Individual schemas should set the default.', 'type': 'string', 'exclude_from': 'submit4dn', 'pattern': '^\\d+(\\.\\d+)*$', 'requestMethod': [], 'default': '1'}), ('experiments_in_set', {'title': 'Set of experiments', 'description': 'List of experiments to be associatedas a set.', 'type': 'array', 'exclude_from': 'submit4dn', 'default': [], 'uniqueItems': True, 'items': OrderedDict([('title', 'Experiment'), ('type', 'string'), ('linkTo', 'Experiment')])}), ('experimentset_type', {'title': 'Experiment Set type', 'description': 'The categorization of the set of experiments.', 'type': 'string', 'default': 'custom', 'exclude_from': 'submit4dn', 'enum': ['custom', 'replicate']}), ('description', {'title': 'Description', 'description': 'A description of why experiments are part of the set.', 'type': 'string', 'default': ''})])), ('facets', OrderedDict([('experimentset_type', OrderedDict([('title', 'Experiment Set Type')])), ('experiments_in_set.experiment_type', OrderedDict([('title', 'Experiment Type')])), ('experiments_in_set.award.project', OrderedDict([('title', 'Project')])), ('experiments_in_set.biosample.biosource.individual.organism.name', OrderedDict([('title', 'Organism')])), ('experiments_in_set.biosample.biosource.biosource_type', OrderedDict([('title', 'Biosource type')])), ('experiments_in_set.biosample.biosource_summary', OrderedDict([('title', 'Biosource')])), ('experiments_in_set.digestion_enzyme.name', OrderedDict([('title', 'Enzyme')])), ('experiments_in_set.biosample.modifications_summary', OrderedDict([('title', 'Modifications')])), ('experiments_in_set.biosample.treatments_summary', OrderedDict([('title', 'Treatments')])), ('experiments_in_set.lab.title', OrderedDict([('title', 'Lab')]))]))])</em><a class="headerlink" href="#encoded.types.experiment_set.ExperimentSet.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="encoded.types.experiment_set.ExperimentSetReplicate">
+<em class="property">class </em><code class="descclassname">encoded.types.experiment_set.</code><code class="descname">ExperimentSetReplicate</code><span class="sig-paren">(</span><em>registry</em>, <em>models</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/experiment_set.html#ExperimentSetReplicate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.experiment_set.ExperimentSetReplicate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#encoded.types.experiment_set.ExperimentSet" title="encoded.types.experiment_set.ExperimentSet"><code class="xref py py-class docutils literal"><span class="pre">encoded.types.experiment_set.ExperimentSet</span></code></a></p>
+<p>The experiment set class for replicate experiments.</p>
+<dl class="attribute">
+<dt id="encoded.types.experiment_set.ExperimentSetReplicate.embedded">
+<code class="descname">embedded</code><em class="property"> = ['award', 'lab', 'produced_in_pub', 'publications', 'experiments_in_set', 'experiments_in_set.protocol', 'experiments_in_set.protocol_variation', 'experiments_in_set.lab', 'experiments_in_set.award', 'experiments_in_set.biosample', 'experiments_in_set.biosample.biosource', 'experiments_in_set.biosample.modifications', 'experiments_in_set.biosample.treatments', 'experiments_in_set.biosample.biosource.individual.organism', 'experiments_in_set.files', 'experiments_in_set.files.related_files.relationship_type', 'experiments_in_set.files.related_files.file.uuid', 'experiments_in_set.filesets', 'experiments_in_set.filesets.files_in_set', 'experiments_in_set.filesets.files_in_set.related_files.relationship_type', 'experiments_in_set.filesets.files_in_set.related_files.file.uuid', 'experiments_in_set.digestion_enzyme', 'replicate_exps', 'replicate_exps.replicate_exp.accession', 'replicate_exps.replicate_exp.uuid']</em><a class="headerlink" href="#encoded.types.experiment_set.ExperimentSetReplicate.embedded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.experiment_set.ExperimentSetReplicate.item_type">
+<code class="descname">item_type</code><em class="property"> = 'experiment_set_replicate'</em><a class="headerlink" href="#encoded.types.experiment_set.ExperimentSetReplicate.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.experiment_set.ExperimentSetReplicate.name_key">
+<code class="descname">name_key</code><em class="property"> = 'accession'</em><a class="headerlink" href="#encoded.types.experiment_set.ExperimentSetReplicate.name_key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.experiment_set.ExperimentSetReplicate.schema">
+<code class="descname">schema</code><em class="property"> = OrderedDict([('title', 'Experiment set for Replicate experiments'), ('description', 'Schema for submitting metadata for an experiment set.'), ('id', '/profiles/experiment_set_replicate.json'), ('$schema', 'http://json-schema.org/draft-04/schema#'), ('type', 'object'), ('required', ['award', 'lab', 'description']), ('identifyingProperties', ['uuid', 'aliases']), ('additionalProperties', False), ('mixinProperties', [OrderedDict([('$ref', 'mixins.json#/schema_version')]), OrderedDict([('$ref', 'mixins.json#/accession')]), OrderedDict([('$ref', 'mixins.json#/uuid')]), OrderedDict([('$ref', 'mixins.json#/aliases')]), OrderedDict([('$ref', 'mixins.json#/status')]), OrderedDict([('$ref', 'mixins.json#/attribution')]), OrderedDict([('$ref', 'mixins.json#/submitted')]), OrderedDict([('$ref', 'mixins.json#/notes')]), OrderedDict([('$ref', 'mixins.json#/documents')]), OrderedDict([('$ref', 'experiment_set.json#/properties')])]), ('properties', OrderedDict([('schema_version', {'default': '1', 'title': 'Schema Version', 'internal_comment': 'Do not submit, value is assigned by the server. The version of the JSON schema that the server uses to validate the object. Schema version indicates generation of schema used to save version to to enable upgrade steps to work. Individual schemas should set the default.', 'type': 'string', 'exclude_from': 'submit4dn', 'pattern': '^\\d+(\\.\\d+)*$', 'requestMethod': []}), ('accession', {'accessionType': 'ES', 'title': 'Accession', 'description': 'A unique identifier to be used to reference the object.', 'internal_comment': 'Only admins are allowed to set or update this value.', 'exclude_from': 'submit4dn', 'type': 'string', 'format': 'accession', 'permission': 'import_items', 'serverDefault': 'accession'}), ('experiments_in_set', {'title': 'Set of experiments', 'description': 'List of experiments to be associatedas a set.', 'type': 'array', 'exclude_from': 'submit4dn', 'default': [], 'uniqueItems': True, 'items': {'title': 'Experiment', 'type': 'string', 'linkTo': 'Experiment'}}), ('experimentset_type', {'title': 'Experiment Set type', 'description': 'The categorization of the set of experiments.', 'type': 'string', 'default': 'replicate', 'exclude_from': 'submit4dn', 'enum': ['custom', 'replicate']}), ('description', {'title': 'Description', 'description': 'A description of why experiments are part of the set.', 'type': 'string', 'default': ''}), ('documents', {'title': 'Documents', 'description': 'Documents that provide additional information (not data file).', 'comment': 'See Documents sheet or collection for existing items.', 'type': 'array', 'default': [], 'uniqueItems': True, 'items': {'title': 'Document', 'description': 'A document that provides additional information (not data file).', 'type': 'string', 'linkTo': 'Document'}}), ('notes', {'title': 'Notes', 'description': 'DCIC internal notes.', 'type': 'string', 'exclude_from': 'submit4dn', 'elasticsearch_mapping_index_type': {'title': 'Field mapping index type', 'description': 'Defines one of three types of indexing available', 'type': 'string', 'default': 'analyzed', 'enum': ['analyzed', 'not_analyzed', 'no']}}), ('date_created', {'rdfs:subPropertyOf': 'dc:created', 'title': 'Date created', 'exclude_from': 'submit4dn', 'type': 'string', 'anyOf': [{'format': 'date-time'}, {'format': 'date'}], 'serverDefault': 'now', 'permission': 'import_items'}), ('submitted_by', {'rdfs:subPropertyOf': 'dc:creator', 'title': 'Submitted by', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'User', 'serverDefault': 'userid', 'permission': 'import_items'}), ('lab', {'title': 'Lab', 'description': 'Lab associated with the submission.', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'Lab', 'linkSubmitsFor': True, 'default': ''}), ('award', {'title': 'Grant', 'description': 'Grant associated with the submission.', 'exclude_from': 'submit4dn', 'default': '', 'type': 'string', 'linkTo': 'Award'}), ('status', {'title': 'Status', 'exclude_from': 'submit4dn', 'type': 'string', 'default': 'in review by lab', 'permission': 'import_items', 'enum': ['released', 'current', 'revoked', 'deleted', 'replaced', 'in review by lab', 'in review by project', 'released to project']}), ('aliases', {'title': 'Lab aliases', 'description': 'Lab specific identifiers to reference an object.', 'type': 'array', 'comment': 'Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).', 'default': [], 'uniqueItems': True, 'items': {'uniqueKey': 'alias', 'title': 'Lab alias', 'description': 'A lab specific identifier to reference an object.', 'type': 'string', 'pattern': '^\\S+:\\S+'}}), ('uuid', {'title': 'UUID', 'type': 'string', 'format': 'uuid', 'exclude_from': 'submit4dn', 'serverDefault': 'uuid4', 'permission': 'import_items', 'requestMethod': 'POST'}), ('alternate_accessions', {'title': 'Alternate accessions', 'description': 'Accessions previously assigned to objects that have been merged with this object.', 'type': 'array', 'internal_comment': 'Only admins are allowed to set or update this value.', 'exclude_from': 'submit4dn', 'default': [], 'items': {'title': 'Alternate Accession', 'description': 'An accession previously assigned to an object that has been merged with this object.', 'type': 'string', 'permission': 'import_items', 'format': 'accession'}}), ('replicate_exps', {'title': 'Set of replicate experiments', 'description': 'Replicate experiments with biological and technical replication numbers.', 'type': 'array', 'default': [], 'exclude_from': 'submit4dn', 'uniqueItems': True, 'items': OrderedDict([('title', 'Replicate experiment'), ('type', 'object'), ('required', ['replicate_exp', 'bio_rep_no', 'tec_rep_no']), ('additionalProperties', False), ('properties', OrderedDict([('replicate_exp', OrderedDict([('title', 'Experiment'), ('type', 'string'), ('linkTo', 'Experiment')])), ('bio_rep_no', OrderedDict([('title', 'Biological replicate number'), ('description', 'Biological replicate identifier for the experiment in an experiment set'), ('type', 'integer')])), ('tec_rep_no', OrderedDict([('title', 'Technical replicate number'), ('description', 'Technical replicate identifier for the experiment in a biological replicate group'), ('type', 'integer')]))]))])})])), ('facets', OrderedDict([('experimentset_type', OrderedDict([('title', 'Experiment set type')])), ('experiments_in_set.award.project', OrderedDict([('title', 'Project')])), ('experiments_in_set.biosample.biosource.individual.organism.name', OrderedDict([('title', 'Organism')])), ('experiments_in_set.biosample.biosource.biosource_type', OrderedDict([('title', 'Biosource type')])), ('experiments_in_set.biosample.biosource_summary', OrderedDict([('title', 'Biosource')])), ('experiments_in_set.digestion_enzyme.name', OrderedDict([('title', 'Enzyme')])), ('experiments_in_set.biosample.modifications_summary', OrderedDict([('title', 'Modifications')])), ('experiments_in_set.biosample.treatments_summary', OrderedDict([('title', 'Treatments')])), ('experiments_in_set.lab.title', OrderedDict([('title', 'Lab')]))]))])</em><a class="headerlink" href="#encoded.types.experiment_set.ExperimentSetReplicate.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.types.experiment_set.invalidate_linked_items">
+<code class="descclassname">encoded.types.experiment_set.</code><code class="descname">invalidate_linked_items</code><span class="sig-paren">(</span><em>item</em>, <em>field</em>, <em>updates=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/experiment_set.html#invalidate_linked_items"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.experiment_set.invalidate_linked_items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Invalidates the linkTo item(s) in the given field of an item
+which will trigger re-indexing the linked items
+a dictionary of field value pairs to update for the linked item(s)
+can be provided that will be applied prior to invalidation -
+beware that each update will be applied to every linked item in the field</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.types.experiment_set.is_newer_than">
+<code class="descclassname">encoded.types.experiment_set.</code><code class="descname">is_newer_than</code><span class="sig-paren">(</span><em>d1</em>, <em>d2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/experiment_set.html#is_newer_than"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.experiment_set.is_newer_than" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes 2 strings in format YYYY-MM-DD and tries to convert to date
+and if successful returns True if first string is more recent than
+second string, otherwise returns False</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="encoded.types.experiment.html"
+                        title="previous chapter">encoded.types.experiment module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="encoded.types.file.html"
+                        title="next chapter">encoded.types.file module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pydoc/encoded.types.experiment_set.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.file.html" title="encoded.types.file module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.experiment.html" title="encoded.types.experiment module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.types.html" >encoded.types package</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

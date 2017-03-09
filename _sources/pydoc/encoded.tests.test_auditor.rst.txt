@@ -1,0 +1,7 @@
+encoded.tests.test_auditor module
+=================================
+
+.. automodule:: encoded.tests.test_auditor
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.types.individual module &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="encoded.types.lab module" href="encoded.types.lab.html" />
+    <link rel="prev" title="encoded.types.image module" href="encoded.types.image.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.lab.html" title="encoded.types.lab module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.image.html" title="encoded.types.image module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.types.html" accesskey="U">encoded.types package</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-encoded.types.individual">
+<span id="encoded-types-individual-module"></span><h1>encoded.types.individual module<a class="headerlink" href="#module-encoded.types.individual" title="Permalink to this headline">¶</a></h1>
+<p>The type file for the collection Individual (Encode Donor).</p>
+<dl class="class">
+<dt id="encoded.types.individual.Individual">
+<em class="property">class </em><code class="descclassname">encoded.types.individual.</code><code class="descname">Individual</code><span class="sig-paren">(</span><em>registry</em>, <em>models</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/individual.html#Individual"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.individual.Individual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="encoded.types.base.html#encoded.types.base.Item" title="encoded.types.base.Item"><code class="xref py py-class docutils literal"><span class="pre">encoded.types.base.Item</span></code></a></p>
+<p>the base class for individual collection.</p>
+<dl class="attribute">
+<dt id="encoded.types.individual.Individual.base_types">
+<code class="descname">base_types</code><em class="property"> = ['Individual', 'Item']</em><a class="headerlink" href="#encoded.types.individual.Individual.base_types" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.individual.Individual.embedded">
+<code class="descname">embedded</code><em class="property"> = ['organism']</em><a class="headerlink" href="#encoded.types.individual.Individual.embedded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.individual.Individual.name_key">
+<code class="descname">name_key</code><em class="property"> = 'accession'</em><a class="headerlink" href="#encoded.types.individual.Individual.name_key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.individual.Individual.schema">
+<code class="descname">schema</code><em class="property"> = OrderedDict([('title', 'Individual'), ('description', 'Base schema for individuals.'), ('id', '/profiles/individual.json'), ('$schema', 'http://json-schema.org/draft-04/schema#'), ('type', 'object'), ('identifyingProperties', ['uuid', 'accession', 'aliases']), ('required', ['organism']), ('dependencies', OrderedDict([('age', ['age_units'])])), ('properties', OrderedDict([('accession', OrderedDict([('accessionType', 'IN')])), ('organism', OrderedDict([('title', 'Organism'), ('description', 'Organism of the individual.'), ('type', 'string'), ('linkTo', 'Organism')])), ('age', OrderedDict([('title', 'Age of the Individual'), ('description', ' The age of the individual when biological material was sampled.'), ('type', 'number')])), ('age_units', OrderedDict([('title', 'Age units'), ('type', 'string'), ('enum', ['day', 'week', 'month', 'year'])])), ('sex', OrderedDict([('title', 'Sex'), ('type', 'string'), ('default', 'unknown'), ('enum', ['male', 'female', 'unknown', 'mixed'])])), ('url', OrderedDict([('title', 'URL'), ('description', 'An external resource with additional information about the individual.'), ('type', 'string'), ('format', 'uri')]))]))])</em><a class="headerlink" href="#encoded.types.individual.Individual.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="encoded.types.individual.IndividualHuman">
+<em class="property">class </em><code class="descclassname">encoded.types.individual.</code><code class="descname">IndividualHuman</code><span class="sig-paren">(</span><em>registry</em>, <em>models</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/individual.html#IndividualHuman"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.individual.IndividualHuman" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#encoded.types.individual.Individual" title="encoded.types.individual.Individual"><code class="xref py py-class docutils literal"><span class="pre">encoded.types.individual.Individual</span></code></a></p>
+<p>the sub class of individuals for human species.</p>
+<dl class="attribute">
+<dt id="encoded.types.individual.IndividualHuman.embedded">
+<code class="descname">embedded</code><em class="property"> = ['organism']</em><a class="headerlink" href="#encoded.types.individual.IndividualHuman.embedded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.individual.IndividualHuman.item_type">
+<code class="descname">item_type</code><em class="property"> = 'individual_human'</em><a class="headerlink" href="#encoded.types.individual.IndividualHuman.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.individual.IndividualHuman.schema">
+<code class="descname">schema</code><em class="property"> = OrderedDict([('title', 'Human Individual'), ('description', 'Schema for submitting a human individual.'), ('id', '/profiles/individual_human.json'), ('$schema', 'http://json-schema.org/draft-04/schema#'), ('type', 'object'), ('required', ['award', 'lab']), ('identifyingProperties', ['uuid', 'accession', 'aliases']), ('additionalProperties', False), ('mixinProperties', [OrderedDict([('$ref', 'mixins.json#/schema_version')]), OrderedDict([('$ref', 'mixins.json#/uuid')]), OrderedDict([('$ref', 'mixins.json#/status')]), OrderedDict([('$ref', 'individual.json#/properties')]), OrderedDict([('$ref', 'mixins.json#/accession')]), OrderedDict([('$ref', 'mixins.json#/aliases')]), OrderedDict([('$ref', 'mixins.json#/attribution')]), OrderedDict([('$ref', 'mixins.json#/submitted')]), OrderedDict([('$ref', 'mixins.json#/documents')]), OrderedDict([('$ref', 'mixins.json#/notes')])]), ('dependencies', OrderedDict([('age', ['age_units'])])), ('properties', OrderedDict([('notes', {'title': 'Notes', 'description': 'DCIC internal notes.', 'type': 'string', 'exclude_from': 'submit4dn', 'elasticsearch_mapping_index_type': {'title': 'Field mapping index type', 'description': 'Defines one of three types of indexing available', 'type': 'string', 'default': 'analyzed', 'enum': ['analyzed', 'not_analyzed', 'no']}}), ('documents', {'title': 'Documents', 'description': 'Documents that provide additional information (not data file).', 'comment': 'See Documents sheet or collection for existing items.', 'type': 'array', 'default': [], 'uniqueItems': True, 'items': {'title': 'Document', 'description': 'A document that provides additional information (not data file).', 'type': 'string', 'linkTo': 'Document'}}), ('date_created', {'rdfs:subPropertyOf': 'dc:created', 'title': 'Date created', 'exclude_from': 'submit4dn', 'type': 'string', 'anyOf': [{'format': 'date-time'}, {'format': 'date'}], 'serverDefault': 'now', 'permission': 'import_items'}), ('submitted_by', {'rdfs:subPropertyOf': 'dc:creator', 'title': 'Submitted by', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'User', 'serverDefault': 'userid', 'permission': 'import_items'}), ('lab', {'title': 'Lab', 'description': 'Lab associated with the submission.', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'Lab', 'linkSubmitsFor': True, 'default': ''}), ('award', {'title': 'Grant', 'description': 'Grant associated with the submission.', 'exclude_from': 'submit4dn', 'default': '', 'type': 'string', 'linkTo': 'Award'}), ('aliases', {'title': 'Lab aliases', 'description': 'Lab specific identifiers to reference an object.', 'type': 'array', 'comment': 'Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).', 'default': [], 'uniqueItems': True, 'items': {'uniqueKey': 'alias', 'title': 'Lab alias', 'description': 'A lab specific identifier to reference an object.', 'type': 'string', 'pattern': '^\\S+:\\S+'}}), ('accession', {'title': 'Accession', 'description': 'A unique identifier to be used to reference the object.', 'internal_comment': 'Only admins are allowed to set or update this value.', 'exclude_from': 'submit4dn', 'type': 'string', 'format': 'accession', 'permission': 'import_items', 'serverDefault': 'accession', 'accessionType': 'IN'}), ('alternate_accessions', {'title': 'Alternate accessions', 'description': 'Accessions previously assigned to objects that have been merged with this object.', 'type': 'array', 'internal_comment': 'Only admins are allowed to set or update this value.', 'exclude_from': 'submit4dn', 'default': [], 'items': {'title': 'Alternate Accession', 'description': 'An accession previously assigned to an object that has been merged with this object.', 'type': 'string', 'permission': 'import_items', 'format': 'accession'}}), ('organism', {'title': 'Organism', 'description': 'Organism of the individual.', 'type': 'string', 'linkTo': 'Organism', 'default': '7745b647-ff15-4ff3-9ced-b897d4e2983c', 'exclude_from': 'submit4dn', 'linkEnum': ['7745b647-ff15-4ff3-9ced-b897d4e2983c']}), ('age', {'title': 'Age of the Individual', 'description': ' The age of the individual when biological material was sampled.', 'type': 'number'}), ('age_units', {'title': 'Age units', 'type': 'string', 'enum': ['day', 'week', 'month', 'year']}), ('sex', {'title': 'Sex', 'type': 'string', 'default': 'unknown', 'enum': ['male', 'female', 'unknown', 'mixed']}), ('url', {'title': 'URL', 'description': 'An external resource with additional information about the individual.', 'type': 'string', 'format': 'uri'}), ('status', {'title': 'Status', 'exclude_from': 'submit4dn', 'type': 'string', 'default': 'in review by lab', 'permission': 'import_items', 'enum': ['released', 'current', 'revoked', 'deleted', 'replaced', 'in review by lab', 'in review by project', 'released to project']}), ('uuid', {'title': 'UUID', 'type': 'string', 'format': 'uuid', 'exclude_from': 'submit4dn', 'serverDefault': 'uuid4', 'permission': 'import_items', 'requestMethod': 'POST'}), ('schema_version', {'title': 'Schema Version', 'internal_comment': 'Do not submit, value is assigned by the server. The version of the JSON schema that the server uses to validate the object. Schema version indicates generation of schema used to save version to to enable upgrade steps to work. Individual schemas should set the default.', 'type': 'string', 'exclude_from': 'submit4dn', 'pattern': '^\\d+(\\.\\d+)*$', 'requestMethod': [], 'default': '1'}), ('ethnicity', {'title': 'Ethnicity', 'type': 'string'}), ('health_status', {'title': 'Individual health status', 'type': 'string'}), ('life_stage', {'title': 'Life stage', 'type': 'string', 'enum': ['fetal', 'newborn', 'child', 'adult', 'unknown', 'embryonic', 'postnatal']}), ('dbxrefs', {'&#64;type': '&#64;id', 'rdfs:subPropertyOf': 'rdfs:seeAlso', 'title': 'External identifiers', 'description': 'Unique identifiers from external resources.', 'type': 'array', 'default': [], 'uniqueItems': True, 'items': OrderedDict([('title', 'External identifier'), ('description', 'A unique identifier from external resource.'), ('type', 'string'), ('pattern', '^((PGP:hu[\\S\\s\\d]+)|(GTEx:[a-zA-Z0-9\\-_]+)|(GEO:SAMN\\d+))$')])})]))])</em><a class="headerlink" href="#encoded.types.individual.IndividualHuman.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="encoded.types.individual.IndividualMouse">
+<em class="property">class </em><code class="descclassname">encoded.types.individual.</code><code class="descname">IndividualMouse</code><span class="sig-paren">(</span><em>registry</em>, <em>models</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/individual.html#IndividualMouse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.individual.IndividualMouse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#encoded.types.individual.Individual" title="encoded.types.individual.Individual"><code class="xref py py-class docutils literal"><span class="pre">encoded.types.individual.Individual</span></code></a></p>
+<p>the sub class of individuals for mouse species.</p>
+<dl class="attribute">
+<dt id="encoded.types.individual.IndividualMouse.embedded">
+<code class="descname">embedded</code><em class="property"> = ['organism', 'mouse_vendor']</em><a class="headerlink" href="#encoded.types.individual.IndividualMouse.embedded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.individual.IndividualMouse.item_type">
+<code class="descname">item_type</code><em class="property"> = 'individual_mouse'</em><a class="headerlink" href="#encoded.types.individual.IndividualMouse.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.individual.IndividualMouse.schema">
+<code class="descname">schema</code><em class="property"> = OrderedDict([('title', 'Mouse Individual'), ('description', 'Schema for submitting a mouse individual.'), ('id', '/profiles/individual_mouse.json'), ('$schema', 'http://json-schema.org/draft-04/schema#'), ('type', 'object'), ('required', ['award', 'lab']), ('identifyingProperties', ['uuid', 'accession', 'aliases']), ('additionalProperties', False), ('mixinProperties', [OrderedDict([('$ref', 'mixins.json#/schema_version')]), OrderedDict([('$ref', 'mixins.json#/uuid')]), OrderedDict([('$ref', 'mixins.json#/status')]), OrderedDict([('$ref', 'individual.json#/properties')]), OrderedDict([('$ref', 'mixins.json#/accession')]), OrderedDict([('$ref', 'mixins.json#/aliases')]), OrderedDict([('$ref', 'mixins.json#/attribution')]), OrderedDict([('$ref', 'mixins.json#/submitted')]), OrderedDict([('$ref', 'mixins.json#/documents')]), OrderedDict([('$ref', 'mixins.json#/notes')])]), ('dependencies', OrderedDict([('age', ['age_units'])])), ('properties', OrderedDict([('notes', {'title': 'Notes', 'description': 'DCIC internal notes.', 'type': 'string', 'exclude_from': 'submit4dn', 'elasticsearch_mapping_index_type': {'title': 'Field mapping index type', 'description': 'Defines one of three types of indexing available', 'type': 'string', 'default': 'analyzed', 'enum': ['analyzed', 'not_analyzed', 'no']}}), ('documents', {'title': 'Documents', 'description': 'Documents that provide additional information (not data file).', 'comment': 'See Documents sheet or collection for existing items.', 'type': 'array', 'default': [], 'uniqueItems': True, 'items': {'title': 'Document', 'description': 'A document that provides additional information (not data file).', 'type': 'string', 'linkTo': 'Document'}}), ('date_created', {'rdfs:subPropertyOf': 'dc:created', 'title': 'Date created', 'exclude_from': 'submit4dn', 'type': 'string', 'anyOf': [{'format': 'date-time'}, {'format': 'date'}], 'serverDefault': 'now', 'permission': 'import_items'}), ('submitted_by', {'rdfs:subPropertyOf': 'dc:creator', 'title': 'Submitted by', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'User', 'serverDefault': 'userid', 'permission': 'import_items'}), ('lab', {'title': 'Lab', 'description': 'Lab associated with the submission.', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'Lab', 'linkSubmitsFor': True, 'default': ''}), ('award', {'title': 'Grant', 'description': 'Grant associated with the submission.', 'exclude_from': 'submit4dn', 'default': '', 'type': 'string', 'linkTo': 'Award'}), ('aliases', {'title': 'Lab aliases', 'description': 'Lab specific identifiers to reference an object.', 'type': 'array', 'comment': 'Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).', 'default': [], 'uniqueItems': True, 'items': {'uniqueKey': 'alias', 'title': 'Lab alias', 'description': 'A lab specific identifier to reference an object.', 'type': 'string', 'pattern': '^\\S+:\\S+'}}), ('accession', {'title': 'Accession', 'description': 'A unique identifier to be used to reference the object.', 'internal_comment': 'Only admins are allowed to set or update this value.', 'exclude_from': 'submit4dn', 'type': 'string', 'format': 'accession', 'permission': 'import_items', 'serverDefault': 'accession', 'accessionType': 'IN'}), ('alternate_accessions', {'title': 'Alternate accessions', 'description': 'Accessions previously assigned to objects that have been merged with this object.', 'type': 'array', 'internal_comment': 'Only admins are allowed to set or update this value.', 'exclude_from': 'submit4dn', 'default': [], 'items': {'title': 'Alternate Accession', 'description': 'An accession previously assigned to an object that has been merged with this object.', 'type': 'string', 'permission': 'import_items', 'format': 'accession'}}), ('organism', {'title': 'Organism', 'description': 'Organism of the individual.', 'type': 'string', 'linkTo': 'Organism', 'default': '3413218c-3d86-498b-a0a2-9a406638e786', 'exclude_from': 'submit4dn', 'linkEnum': ['3413218c-3d86-498b-a0a2-9a406638e786']}), ('age', {'title': 'Age of the Individual', 'description': ' The age of the individual when biological material was sampled.', 'type': 'number'}), ('age_units', {'title': 'Age units', 'type': 'string', 'enum': ['day', 'week', 'month', 'year']}), ('sex', {'title': 'Sex', 'type': 'string', 'default': 'unknown', 'enum': ['male', 'female', 'unknown', 'mixed']}), ('url', {'title': 'URL', 'description': 'An external resource with additional information about the individual.', 'type': 'string', 'format': 'uri'}), ('status', {'title': 'Status', 'exclude_from': 'submit4dn', 'type': 'string', 'default': 'in review by lab', 'permission': 'import_items', 'enum': ['released', 'current', 'revoked', 'deleted', 'replaced', 'in review by lab', 'in review by project', 'released to project']}), ('uuid', {'title': 'UUID', 'type': 'string', 'format': 'uuid', 'exclude_from': 'submit4dn', 'serverDefault': 'uuid4', 'permission': 'import_items', 'requestMethod': 'POST'}), ('schema_version', {'title': 'Schema Version', 'internal_comment': 'Do not submit, value is assigned by the server. The version of the JSON schema that the server uses to validate the object. Schema version indicates generation of schema used to save version to to enable upgrade steps to work. Individual schemas should set the default.', 'type': 'string', 'exclude_from': 'submit4dn', 'pattern': '^\\d+(\\.\\d+)*$', 'requestMethod': [], 'default': '1'}), ('mouse_life_stage', {'title': 'Mouse Life stage', 'type': 'string', 'enum': ['pup', 'fetus', 'adult']}), ('mouse_strain', {'title': 'Mouse Strain', 'type': 'string', 'description': 'Can be an object of straing with dbxref for strain'}), ('mouse_vendor', {'title': 'Vendor for the mouse individual', 'type': 'string', 'linkTo': 'Vendor'}), ('dbxrefs', {'&#64;type': '&#64;id', 'rdfs:subPropertyOf': 'rdfs:seeAlso', 'title': 'External identifiers', 'description': 'Unique identifiers from external resources.', 'type': 'array', 'default': [], 'uniqueItems': True, 'items': OrderedDict([('title', 'External identifier'), ('description', 'A unique identifier from external resource.'), ('type', 'string'), ('pattern', '^(GEO:SAMN\\d+)$')])})]))])</em><a class="headerlink" href="#encoded.types.individual.IndividualMouse.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="encoded.types.image.html"
+                        title="previous chapter">encoded.types.image module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="encoded.types.lab.html"
+                        title="next chapter">encoded.types.lab module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pydoc/encoded.types.individual.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.lab.html" title="encoded.types.lab module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.image.html" title="encoded.types.image module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.types.html" >encoded.types package</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

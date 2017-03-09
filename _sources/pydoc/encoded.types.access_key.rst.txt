@@ -1,0 +1,7 @@
+encoded.types.access_key module
+===============================
+
+.. automodule:: encoded.types.access_key
+    :members:
+    :undoc-members:
+    :show-inheritance:

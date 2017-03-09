@@ -1,0 +1,401 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.peak_indexer &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../encoded.html" accesskey="U">encoded</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.peak_indexer</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">urllib3</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">gzip</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">from</span> <span class="nn">pyramid.view</span> <span class="k">import</span> <span class="n">view_config</span>
+<span class="kn">from</span> <span class="nn">elasticsearch.exceptions</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">NotFoundError</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">snovault</span> <span class="k">import</span> <span class="n">DBSESSION</span>
+<span class="kn">from</span> <span class="nn">snovault.storage</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">TransactionRecord</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">snovault.elasticsearch.indexer</span> <span class="k">import</span> <span class="n">all_uuids</span>
+<span class="kn">from</span> <span class="nn">snovault.elasticsearch.interfaces</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">ELASTIC_SEARCH</span><span class="p">,</span>
+    <span class="n">SNP_SEARCH_ES</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="n">SEARCH_MAX</span> <span class="o">=</span> <span class="mi">99999</span>  <span class="c1"># OutOfMemoryError if too high</span>
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="c1"># hashmap of assays and corresponding file types that are being indexed</span>
+<span class="n">_INDEXED_DATA</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;ChIP-seq&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;output_type&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;optimal idr thresholded peaks&#39;</span><span class="p">],</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;DNase-seq&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;file_type&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;bed narrowPeak&#39;</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;eCLIP&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;file_type&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;bed narrowPeak&#39;</span><span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1"># Species and references being indexed</span>
+<span class="n">_SPECIES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;Homo sapiens&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;hg19&#39;</span><span class="p">]</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="includeme"><a class="viewcode-back" href="../../pydoc/encoded.peak_indexer.html#encoded.peak_indexer.includeme">[docs]</a><span class="k">def</span> <span class="nf">includeme</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_route</span><span class="p">(</span><span class="s1">&#39;index_file&#39;</span><span class="p">,</span> <span class="s1">&#39;/index_file&#39;</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="tsvreader"><a class="viewcode-back" href="../../pydoc/encoded.peak_indexer.html#encoded.peak_indexer.tsvreader">[docs]</a><span class="k">def</span> <span class="nf">tsvreader</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">row</span></div>
+
+<span class="c1"># Mapping should be generated dynamically for each assembly type</span>
+<div class="viewcode-block" id="get_mapping"><a class="viewcode-back" href="../../pydoc/encoded.peak_indexer.html#encoded.peak_indexer.get_mapping">[docs]</a><span class="k">def</span> <span class="nf">get_mapping</span><span class="p">(</span><span class="n">assembly_name</span><span class="o">=</span><span class="s1">&#39;hg19&#39;</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="n">assembly_name</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;_all&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;enabled&#39;</span><span class="p">:</span> <span class="kc">False</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;_source&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;enabled&#39;</span><span class="p">:</span> <span class="kc">True</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;properties&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;uuid&#39;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="s1">&#39;not_analyzed&#39;</span>
+                <span class="p">},</span>
+                <span class="s1">&#39;positions&#39;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;nested&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;properties&#39;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s1">&#39;start&#39;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;long&#39;</span>
+                        <span class="p">},</span>
+                        <span class="s1">&#39;end&#39;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;long&#39;</span>
+                        <span class="p">}</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="index_settings"><a class="viewcode-back" href="../../pydoc/encoded.peak_indexer.html#encoded.peak_indexer.index_settings">[docs]</a><span class="k">def</span> <span class="nf">index_settings</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;number_of_shards&#39;</span><span class="p">:</span> <span class="mi">1</span>
+        <span class="p">}</span>
+    <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="get_assay_term_name"><a class="viewcode-back" href="../../pydoc/encoded.peak_indexer.html#encoded.peak_indexer.get_assay_term_name">[docs]</a><span class="k">def</span> <span class="nf">get_assay_term_name</span><span class="p">(</span><span class="n">accession</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Input file accession and returns assay_term_name of the experiment the file</span>
+<span class="sd">    belongs to</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">accession</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;assay_term_name&#39;</span> <span class="ow">in</span> <span class="n">context</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">context</span><span class="p">[</span><span class="s1">&#39;assay_term_name&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="index_peaks"><a class="viewcode-back" href="../../pydoc/encoded.peak_indexer.html#encoded.peak_indexer.index_peaks">[docs]</a><span class="k">def</span> <span class="nf">index_peaks</span><span class="p">(</span><span class="n">uuid</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Indexes bed files in elasticsearch index</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="p">),</span> <span class="s1">&#39;@@object&#39;</span><span class="p">)</span>
+
+
+
+    <span class="k">if</span> <span class="s1">&#39;File&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">context</span><span class="p">[</span><span class="s1">&#39;@type&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="s1">&#39;dataset&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">context</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="s1">&#39;status&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">context</span> <span class="ow">or</span> <span class="n">context</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;released&#39;</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="c1"># Index human data for now       </span>
+    <span class="k">if</span> <span class="s1">&#39;assembly&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">context</span> <span class="ow">or</span> <span class="s1">&#39;hg19&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">context</span><span class="p">[</span><span class="s1">&#39;assembly&#39;</span><span class="p">]:</span>
+        <span class="k">return</span>
+
+    <span class="n">assay_term_name</span> <span class="o">=</span> <span class="n">get_assay_term_name</span><span class="p">(</span><span class="n">context</span><span class="p">[</span><span class="s1">&#39;dataset&#39;</span><span class="p">],</span> <span class="n">request</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">assay_term_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">assay_term_name</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Hashable</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    
+    <span class="n">flag</span> <span class="o">=</span> <span class="kc">False</span>
+    
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">_INDEXED_DATA</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">assay_term_name</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">context</span> <span class="ow">and</span> <span class="n">context</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;file_format&#39;</span> <span class="ow">in</span> <span class="n">context</span> <span class="ow">and</span> <span class="n">context</span><span class="p">[</span><span class="s1">&#39;file_format&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;bed&#39;</span><span class="p">:</span>
+                <span class="n">flag</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">break</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">flag</span><span class="p">:</span>
+        <span class="k">return</span>
+
+
+
+
+    <span class="n">urllib3</span><span class="o">.</span><span class="n">disable_warnings</span><span class="p">()</span>
+    <span class="n">es</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">SNP_SEARCH_ES</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">http</span> <span class="o">=</span> <span class="n">urllib3</span><span class="o">.</span><span class="n">PoolManager</span><span class="p">()</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">http</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">host_url</span> <span class="o">+</span> <span class="n">context</span><span class="p">[</span><span class="s1">&#39;href&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;File status is not 200: </span><span class="si">{}</span><span class="s1">, will not index file&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">status</span><span class="p">))</span>
+        <span class="k">return</span>
+    <span class="n">comp</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">()</span>
+    <span class="n">comp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">comp</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">r</span><span class="o">.</span><span class="n">release_conn</span><span class="p">()</span>
+    <span class="n">file_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+
+    <span class="k">with</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">comp</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;rt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">tsvreader</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
+            <span class="n">chrom</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">chrom</span> <span class="ow">in</span> <span class="n">file_data</span><span class="p">:</span>
+                    <span class="n">file_data</span><span class="p">[</span><span class="n">chrom</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+                        <span class="s1">&#39;start&#39;</span><span class="p">:</span> <span class="n">start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="s1">&#39;end&#39;</span><span class="p">:</span> <span class="n">end</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="p">})</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">file_data</span><span class="p">[</span><span class="n">chrom</span><span class="p">]</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;start&#39;</span><span class="p">:</span> <span class="n">start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;end&#39;</span><span class="p">:</span> <span class="n">end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">}]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;positions are not integers, will not index file&#39;</span><span class="p">)</span>
+
+
+        
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">file_data</span><span class="p">:</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;uuid&#39;</span><span class="p">:</span> <span class="n">context</span><span class="p">[</span><span class="s1">&#39;uuid&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;positions&#39;</span><span class="p">:</span> <span class="n">file_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">es</span><span class="o">.</span><span class="n">indices</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+            <span class="n">es</span><span class="o">.</span><span class="n">indices</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">index_settings</span><span class="p">())</span>
+            <span class="n">es</span><span class="o">.</span><span class="n">indices</span><span class="o">.</span><span class="n">put_mapping</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">doc_type</span><span class="o">=</span><span class="n">context</span><span class="p">[</span><span class="s1">&#39;assembly&#39;</span><span class="p">],</span>
+                                   <span class="n">body</span><span class="o">=</span><span class="n">get_mapping</span><span class="p">(</span><span class="n">context</span><span class="p">[</span><span class="s1">&#39;assembly&#39;</span><span class="p">]))</span>
+        <span class="n">es</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">doc_type</span><span class="o">=</span><span class="n">context</span><span class="p">[</span><span class="s1">&#39;assembly&#39;</span><span class="p">],</span> <span class="n">body</span><span class="o">=</span><span class="n">doc</span><span class="p">,</span>
+                 <span class="nb">id</span><span class="o">=</span><span class="n">context</span><span class="p">[</span><span class="s1">&#39;uuid&#39;</span><span class="p">])</span></div>
+    
+
+
+<span class="nd">@view_config</span><span class="p">(</span><span class="n">route_name</span><span class="o">=</span><span class="s1">&#39;index_file&#39;</span><span class="p">,</span> <span class="n">request_method</span><span class="o">=</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="n">permission</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="index_file"><a class="viewcode-back" href="../../pydoc/encoded.peak_indexer.html#encoded.peak_indexer.index_file">[docs]</a><span class="k">def</span> <span class="nf">index_file</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">INDEX</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;snovault.elasticsearch.index&#39;</span><span class="p">]</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">datastore</span> <span class="o">=</span> <span class="s1">&#39;database&#39;</span>
+    <span class="n">dry_run</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dry_run&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">recovery</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;recovery&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">record</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;record&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">es</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">ELASTIC_SEARCH</span><span class="p">]</span>
+    <span class="n">es_peaks</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">SNP_SEARCH_ES</span><span class="p">]</span>
+
+    <span class="n">session</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">DBSESSION</span><span class="p">]()</span>
+    <span class="n">connection</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">connection</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">recovery</span><span class="p">:</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="s2">&quot;SET TRANSACTION ISOLATION LEVEL READ COMMITTED, READ ONLY;&quot;</span>
+            <span class="s2">&quot;SELECT txid_snapshot_xmin(txid_current_snapshot());&quot;</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="s2">&quot;SET TRANSACTION ISOLATION LEVEL SERIALIZABLE, READ ONLY, DEFERRABLE;&quot;</span>
+            <span class="s2">&quot;SELECT txid_snapshot_xmin(txid_current_snapshot());&quot;</span>
+        <span class="p">)</span>
+    <span class="n">xmin</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">scalar</span><span class="p">()</span>  <span class="c1"># lowest xid that is still in progress</span>
+
+    <span class="n">first_txn</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">last_xmin</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="s1">&#39;last_xmin&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">:</span>
+        <span class="n">last_xmin</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">[</span><span class="s1">&#39;last_xmin&#39;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">es_peaks</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;encoded_peaks&#39;</span><span class="p">,</span> <span class="n">doc_type</span><span class="o">=</span><span class="s1">&#39;meta&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;indexing&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">NotFoundError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">last_xmin</span> <span class="o">=</span> <span class="n">status</span><span class="p">[</span><span class="s1">&#39;_source&#39;</span><span class="p">][</span><span class="s1">&#39;xmin&#39;</span><span class="p">]</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;xmin&#39;</span><span class="p">:</span> <span class="n">xmin</span><span class="p">,</span>
+        <span class="s1">&#39;last_xmin&#39;</span><span class="p">:</span> <span class="n">last_xmin</span><span class="p">,</span>
+    <span class="p">}</span>
+
+
+    <span class="k">if</span> <span class="n">last_xmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;types&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">types</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;types&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">invalidated</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">all_uuids</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">types</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">txns</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">TransactionRecord</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
+            <span class="n">TransactionRecord</span><span class="o">.</span><span class="n">xid</span> <span class="o">&gt;=</span> <span class="n">last_xmin</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">invalidated</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">updated</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">renamed</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">max_xid</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">txn_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">txn</span> <span class="ow">in</span> <span class="n">txns</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="n">txn_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">max_xid</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_xid</span><span class="p">,</span> <span class="n">txn</span><span class="o">.</span><span class="n">xid</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">first_txn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">first_txn</span> <span class="o">=</span> <span class="n">txn</span><span class="o">.</span><span class="n">timestamp</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">first_txn</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">first_txn</span><span class="p">,</span> <span class="n">txn</span><span class="o">.</span><span class="n">timestamp</span><span class="p">)</span>
+            <span class="n">renamed</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">txn</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;renamed&#39;</span><span class="p">,</span> <span class="p">()))</span>
+            <span class="n">updated</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">txn</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;updated&#39;</span><span class="p">,</span> <span class="p">()))</span>
+
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;txn_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">txn_count</span>
+        <span class="k">if</span> <span class="n">txn_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="n">es</span><span class="o">.</span><span class="n">indices</span><span class="o">.</span><span class="n">refresh</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">INDEX</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">es</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">INDEX</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">SEARCH_MAX</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="p">{</span>
+            <span class="s1">&#39;filter&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">&#39;or&#39;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="p">{</span>
+                        <span class="s1">&#39;terms&#39;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s1">&#39;embedded_uuids&#39;</span><span class="p">:</span> <span class="n">updated</span><span class="p">,</span>
+                            <span class="s1">&#39;_cache&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                        <span class="p">},</span>
+                    <span class="p">},</span>
+                    <span class="p">{</span>
+                        <span class="s1">&#39;terms&#39;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s1">&#39;linked_uuids&#39;</span><span class="p">:</span> <span class="n">renamed</span><span class="p">,</span>
+                            <span class="s1">&#39;_cache&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                        <span class="p">},</span>
+                    <span class="p">},</span>
+                <span class="p">],</span>
+            <span class="p">},</span>
+            <span class="s1">&#39;_source&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="p">})</span>
+        <span class="k">if</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;hits&#39;</span><span class="p">][</span><span class="s1">&#39;total&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">SEARCH_MAX</span><span class="p">:</span>
+            <span class="n">invalidated</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">all_uuids</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">root</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">referencing</span> <span class="o">=</span> <span class="p">{</span><span class="n">hit</span><span class="p">[</span><span class="s1">&#39;_id&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;hits&#39;</span><span class="p">][</span><span class="s1">&#39;hits&#39;</span><span class="p">]}</span>
+            <span class="n">invalidated</span> <span class="o">=</span> <span class="n">referencing</span> <span class="o">|</span> <span class="n">updated</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="n">max_xid</span><span class="o">=</span><span class="n">max_xid</span><span class="p">,</span>
+                <span class="n">renamed</span><span class="o">=</span><span class="n">renamed</span><span class="p">,</span>
+                <span class="n">updated</span><span class="o">=</span><span class="n">updated</span><span class="p">,</span>
+                <span class="n">referencing</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">referencing</span><span class="p">),</span>
+                <span class="n">invalidated</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">invalidated</span><span class="p">),</span>
+                <span class="n">txn_count</span><span class="o">=</span><span class="n">txn_count</span><span class="p">,</span>
+                <span class="n">first_txn_timestamp</span><span class="o">=</span><span class="n">first_txn</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">dry_run</span><span class="p">:</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">uuid_current</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">uuid</span> <span class="ow">in</span> <span class="n">invalidated</span><span class="p">:</span>
+                <span class="n">uuid_current</span> <span class="o">=</span> <span class="n">uuid</span>
+                <span class="n">index_peaks</span><span class="p">(</span><span class="n">uuid</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Error indexing </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">uuid_current</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">err</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;errors&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">err</span><span class="p">]</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">invalidated</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">record</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">es_peaks</span><span class="o">.</span><span class="n">indices</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;encoded_peaks&#39;</span><span class="p">):</span>
+                <span class="n">es_peaks</span><span class="o">.</span><span class="n">indices</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;encoded_peaks&#39;</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">index_settings</span><span class="p">())</span>
+            <span class="n">es_peaks</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;encoded_peaks&#39;</span><span class="p">,</span> <span class="n">doc_type</span><span class="o">=</span><span class="s1">&#39;meta&#39;</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">result</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;indexing&#39;</span><span class="p">)</span>
+
+
+    <span class="k">return</span> <span class="n">result</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../encoded.html" >encoded</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

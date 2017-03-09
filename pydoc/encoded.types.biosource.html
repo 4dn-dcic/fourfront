@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.types.biosource module &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="encoded.types.experiment module" href="encoded.types.experiment.html" />
+    <link rel="prev" title="encoded.types.biosample module" href="encoded.types.biosample.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.experiment.html" title="encoded.types.experiment module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.biosample.html" title="encoded.types.biosample module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.types.html" accesskey="U">encoded.types package</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-encoded.types.biosource">
+<span id="encoded-types-biosource-module"></span><h1>encoded.types.biosource module<a class="headerlink" href="#module-encoded.types.biosource" title="Permalink to this headline">¶</a></h1>
+<p>Collection for the Biosource object.</p>
+<dl class="class">
+<dt id="encoded.types.biosource.Biosource">
+<em class="property">class </em><code class="descclassname">encoded.types.biosource.</code><code class="descname">Biosource</code><span class="sig-paren">(</span><em>registry</em>, <em>models</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/biosource.html#Biosource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.biosource.Biosource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="encoded.types.base.html#encoded.types.base.Item" title="encoded.types.base.Item"><code class="xref py py-class docutils literal"><span class="pre">encoded.types.base.Item</span></code></a></p>
+<p>Biosource class.</p>
+<dl class="method">
+<dt id="encoded.types.biosource.Biosource.biosource_name">
+<code class="descname">biosource_name</code><span class="sig-paren">(</span><em>request</em>, <em>biosource_type</em>, <em>individual=None</em>, <em>cell_line=None</em>, <em>cell_line_tier=None</em>, <em>tissue=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/biosource.html#Biosource.biosource_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.biosource.Biosource.biosource_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="encoded.types.biosource.Biosource.display_title">
+<code class="descname">display_title</code><span class="sig-paren">(</span><em>request</em>, <em>biosource_type</em>, <em>individual=None</em>, <em>cell_line=None</em>, <em>cell_line_tier=None</em>, <em>tissue=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/types/biosource.html#Biosource.display_title"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.types.biosource.Biosource.display_title" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.biosource.Biosource.embedded">
+<code class="descname">embedded</code><em class="property"> = ['individual', 'individual.organism']</em><a class="headerlink" href="#encoded.types.biosource.Biosource.embedded" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.biosource.Biosource.item_type">
+<code class="descname">item_type</code><em class="property"> = 'biosource'</em><a class="headerlink" href="#encoded.types.biosource.Biosource.item_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.biosource.Biosource.name_key">
+<code class="descname">name_key</code><em class="property"> = 'accession'</em><a class="headerlink" href="#encoded.types.biosource.Biosource.name_key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.types.biosource.Biosource.schema">
+<code class="descname">schema</code><em class="property"> = OrderedDict([('title', 'Biosource'), ('description', 'Schema for submitting a biosource.'), ('id', '/profiles/biosource.json'), ('$schema', 'http://json-schema.org/draft-04/schema#'), ('type', 'object'), ('required', ['biosource_type', 'award', 'lab']), ('identifyingProperties', ['uuid', 'accession', 'aliases']), ('additionalProperties', False), ('mixinProperties', [OrderedDict([('$ref', 'mixins.json#/schema_version')]), OrderedDict([('$ref', 'mixins.json#/uuid')]), OrderedDict([('$ref', 'mixins.json#/aliases')]), OrderedDict([('$ref', 'mixins.json#/status')]), OrderedDict([('$ref', 'mixins.json#/accession')]), OrderedDict([('$ref', 'mixins.json#/attribution')]), OrderedDict([('$ref', 'mixins.json#/references')]), OrderedDict([('$ref', 'mixins.json#/submitted')]), OrderedDict([('$ref', 'mixins.json#/notes')])]), ('properties', OrderedDict([('notes', {'title': 'Notes', 'description': 'DCIC internal notes.', 'type': 'string', 'exclude_from': 'submit4dn', 'elasticsearch_mapping_index_type': {'title': 'Field mapping index type', 'description': 'Defines one of three types of indexing available', 'type': 'string', 'default': 'analyzed', 'enum': ['analyzed', 'not_analyzed', 'no']}}), ('date_created', {'rdfs:subPropertyOf': 'dc:created', 'title': 'Date created', 'exclude_from': 'submit4dn', 'type': 'string', 'anyOf': [{'format': 'date-time'}, {'format': 'date'}], 'serverDefault': 'now', 'permission': 'import_items'}), ('submitted_by', {'rdfs:subPropertyOf': 'dc:creator', 'title': 'Submitted by', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'User', 'serverDefault': 'userid', 'permission': 'import_items'}), ('references', {'title': 'References', 'description': 'The publications that provide more information about the object.', 'type': 'array', 'default': [], 'uniqueItems': True, 'items': {'title': 'Reference', 'description': 'A publication that provide smore information about the object.', 'type': 'string', 'linkTo': 'Publication'}}), ('lab', {'title': 'Lab', 'description': 'Lab associated with the submission.', 'exclude_from': 'submit4dn', 'type': 'string', 'linkTo': 'Lab', 'linkSubmitsFor': True, 'default': ''}), ('award', {'title': 'Grant', 'description': 'Grant associated with the submission.', 'exclude_from': 'submit4dn', 'default': '', 'type': 'string', 'linkTo': 'Award'}), ('accession', {'title': 'Accession', 'description': 'A unique identifier to be used to reference the object.', 'internal_comment': 'Only admins are allowed to set or update this value.', 'exclude_from': 'submit4dn', 'type': 'string', 'format': 'accession', 'permission': 'import_items', 'serverDefault': 'accession', 'accessionType': 'SR'}), ('alternate_accessions', {'title': 'Alternate accessions', 'description': 'Accessions previously assigned to objects that have been merged with this object.', 'type': 'array', 'internal_comment': 'Only admins are allowed to set or update this value.', 'exclude_from': 'submit4dn', 'default': [], 'items': {'title': 'Alternate Accession', 'description': 'An accession previously assigned to an object that has been merged with this object.', 'type': 'string', 'permission': 'import_items', 'format': 'accession'}}), ('status', {'title': 'Status', 'exclude_from': 'submit4dn', 'type': 'string', 'default': 'in review by lab', 'permission': 'import_items', 'enum': ['released', 'current', 'revoked', 'deleted', 'replaced', 'in review by lab', 'in review by project', 'released to project']}), ('aliases', {'title': 'Lab aliases', 'description': 'Lab specific identifiers to reference an object.', 'type': 'array', 'comment': 'Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).', 'default': [], 'uniqueItems': True, 'items': {'uniqueKey': 'alias', 'title': 'Lab alias', 'description': 'A lab specific identifier to reference an object.', 'type': 'string', 'pattern': '^\\S+:\\S+'}}), ('uuid', {'title': 'UUID', 'type': 'string', 'format': 'uuid', 'exclude_from': 'submit4dn', 'serverDefault': 'uuid4', 'permission': 'import_items', 'requestMethod': 'POST'}), ('schema_version', {'title': 'Schema Version', 'internal_comment': 'Do not submit, value is assigned by the server. The version of the JSON schema that the server uses to validate the object. Schema version indicates generation of schema used to save version to to enable upgrade steps to work. Individual schemas should set the default.', 'type': 'string', 'exclude_from': 'submit4dn', 'pattern': '^\\d+(\\.\\d+)*$', 'requestMethod': [], 'default': '1'}), ('description', {'title': 'Description', 'description': 'A plain text description of the biosource.', 'type': 'string', 'default': ''}), ('biosource_type', {'title': 'Biosource type', 'description': 'The categorization of the biosource.', 'type': 'string', 'enum': ['primary cell', 'immortalized cell line', 'tissue', 'in vitro differentiated cells', 'induced pluripotent stem cell line', 'whole organisms', 'stem cell']}), ('individual', {'title': 'Individual', 'description': 'Source of the biological material, donor.', 'comment': 'See Individual sheet or collection for existing items', 'type': 'string', 'linkTo': 'Individual'}), ('modifications', {'title': 'Stable genomic modifications', 'description': &quot;Expression or targeting vectors stably transfected to generate Crispr'ed or other genomic modification&quot;, 'type': 'array', 'default': [], 'uniqueItems': True, 'items': OrderedDict([('title', 'Modifications'), ('description', 'A single stable genomic modification of the biosource.'), ('type', 'string'), ('linkTo', 'Modification')])}), ('cell_line', {'title': 'Cell line name', 'description': 'Ontology term for the cell line used.', 'type': 'string', 'enum': ['H1-hESC', 'GM12878', 'IMR-90', 'HFF-hTERT', 'F121-9-CASTx129', 'K562', 'RPE-hTERT', 'HEK293', 'HAP-1', 'U2OS', 'WTC-11', 'H9', 'F123-CASTx129', 'CC-2551', 'CH12-LX', 'KBM-7', '192627', 'CC-2517', 'HeLa-S3', 'HFF', 'HFFc6']}), ('cell_line_termid', {'title': 'Cell Line EFO ID', 'description': &quot;DON'T SUBMIT - CALCULATED&quot;, 'type': 'string', 'permission': 'import_items'}), ('cell_line_tier', {'title': 'Cell line tier', 'description': &quot;DON'T SUBMIT - CALCULATED&quot;, 'type': 'string', 'default': 'Unclassified', 'permission': 'import_items', 'enum': ['Tier 1', 'Tier 2', 'Unclassified']}), ('tissue', {'title': 'Tissue name', 'description': 'Anatomy (UBERON) Ontology term for the tissue used.', 'type': 'string'}), ('biosource_vendor', {'title': 'Biosource Vendor', 'description': 'The Lab or Vendor that provided the biosource.', 'type': 'string', 'linkTo': 'Vendor'}), ('url', {'title': 'URL', 'description': 'An external resource with additional information about the biosource.', 'type': 'string', 'format': 'uri'}), ('SOP_cell_line', {'title': 'SOP document for the cell line', 'description': 'Standard operation protocol for the cell line as determined by 4DN Cells Working Group', 'type': 'string', 'linkTo': 'Protocol'})])), ('facets', OrderedDict([('biosource_type', OrderedDict([('title', 'Biosource type')])), ('biosource_name', OrderedDict([('title', 'Biosource')])), ('individual.organism.name', OrderedDict([('title', 'Organism')]))]))])</em><a class="headerlink" href="#encoded.types.biosource.Biosource.schema" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="encoded.types.biosample.html"
+                        title="previous chapter">encoded.types.biosample module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="encoded.types.experiment.html"
+                        title="next chapter">encoded.types.experiment module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pydoc/encoded.types.biosource.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.experiment.html" title="encoded.types.experiment module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="encoded.types.biosample.html" title="encoded.types.biosample module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="encoded.types.html" >encoded.types package</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

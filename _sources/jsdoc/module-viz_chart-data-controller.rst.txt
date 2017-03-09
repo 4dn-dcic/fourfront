@@ -1,0 +1,206 @@
+=====================================
+Object: ``viz/chart-data-controller``
+=====================================
+
+
+
+
+.. toctree::
+   :maxdepth: 3
+   
+   module-viz_chart-data-controller.Provider
+   
+
+.. contents:: Local Navigation
+   :local:
+
+
+Description
+===========
+
+This is a utility to manage charts' experiment data in one global place and distribute to charts throughout UI.
+
+Functions
+=========
+
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.initialize:
+
+
+``initialize``
+--------------
+
+This function must be called before this component is used anywhere else.
+
+.. js:function:: initialize(requestURLBase[, updateStats][, callback][, resync])
+
+    
+    :param string requestURLBase: Where to request 'all experiments' from.
+    :param function updateStats: Callback for updating QuickInfoBar, for example, with current experiments, experiment_sets, and files counts.
+    :param function callback: Optional callback for after initializing.
+    :param number|boolean resync: How often to resync data, in ms, if window is active, for e.g. if submitters submitted new data while user is browsing.
+    :return undefined: This function must be called before this component is used anywhere else.
+    
+
+
+.. _module-viz_chart-data-controller.isInitialized:
+
+
+``isInitialized``
+-----------------
+
+Whether component has been initialized and may be used.
+
+.. js:function:: isInitialized()
+
+    
+    :return boolean: True if initialized.
+    
+
+
+.. _module-viz_chart-data-controller.registerUpdateCallback:
+
+
+``registerUpdateCallback``
+--------------------------
+
+For React components to register an "update me" function, i.e. forceUpdate,
+to be called when new experiments/filteredExperiments has finished loading from back-end.
+
+.. js:function:: registerUpdateCallback(callback, uniqueID)
+
+    
+    :param function callback: Function to be called upon loading 'experiments' or 'all experiments'. If registering from a React component, should include this.forceUpdate() or this.setState(..).
+    :param string uniqueID: A unique identifier for the registered callback, to be used for removal or overwrites.
+    :return function: A function which may be called to unregister the callback, in lieu of ChartDataController.unregisterUpdateCallback.
+    
+
+
+.. _module-viz_chart-data-controller.unregisterUpdateCallback:
+
+
+``unregisterUpdateCallback``
+----------------------------
+
+The opposite of registerUpdateCallback.
+
+.. js:function:: unregisterUpdateCallback(uniqueID)
+
+    
+    :param string uniqueID: ID given alongside initially-registered callback.
+    :return undefined: The opposite of registerUpdateCallback.
+    
+
+
+.. _module-viz_chart-data-controller.registerLoadStartCallback:
+
+
+``registerLoadStartCallback``
+-----------------------------
+
+Same as registerUpdateCallback but for when starting AJAX fetch of data.
+
+.. js:function:: registerLoadStartCallback(callback, uniqueID)
+
+    
+    :param function callback: Function to be called upon starting AJAX load.
+    :param string uniqueID: @see ChartDataController.registerUpdateCallback().
+    :return function: Function for unregistering callback which may be used in lieu of @see ChartDataController.unregisterUpdateCallback().
+    
+
+
+.. _module-viz_chart-data-controller.unregisterLoadStartCallback:
+
+
+``unregisterLoadStartCallback``
+-------------------------------
+
+The opposite of registerLoadStartCallback.
+
+.. js:function:: unregisterLoadStartCallback(uniqueID)
+
+    
+    :param string uniqueID: ID given alongside initially-registered callback.
+    :return undefined: The opposite of registerLoadStartCallback.
+    
+
+
+.. _module-viz_chart-data-controller.getState:
+
+
+``getState``
+------------
+
+Get current state. Similar to Redux's store.getState().
+
+.. js:function:: getState()
+
+    
+    :return Object: Get current state. Similar to Redux's store.getState().
+    
+
+
+.. _module-viz_chart-data-controller.setState:
+
+
+``setState``
+------------
+
+Analogous to a component's setState. Updates the private state of
+ChartDataController and notifies update callbacks if experiments or filtered
+experiments have changed.
+
+.. js:function:: setState(updatedState[, callback])
+
+    
+    :param Object updatedState: New or updated state object to save.
+    :param function callback: Optional callback function.
+    :return *: Result of callback, or undefined.
+    
+
+
+.. _module-viz_chart-data-controller.sync:
+
+
+``sync``
+--------
+
+Fetch new data from back-end regardless of expSetFilters state, e.g. for when session has changed (@see App.prototype.componentDidUpdate()).
+
+.. js:function:: sync([callback])
+
+    
+    :param function callback: Function to be called after sync complete.
+    :return undefined: Fetch new data from back-end regardless of expSetFilters state, e.g. for when session has changed (@see App.prototype.componentDidUpdate()).
+    
+
+
+
+.. _module-viz_chart-data-controller.updateStats:
+
+
+``updateStats``
+---------------
+
+Update stats in top left corner of page, if updateState param was passed in during initialization.
+
+.. js:function:: updateStats()
+
+    
+    :return undefined: Update stats in top left corner of page, if updateState param was passed in during initialization.
+    
+
+
+
+
+
+
+
+
+
+

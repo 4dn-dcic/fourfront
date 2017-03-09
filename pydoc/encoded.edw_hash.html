@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.edw_hash module &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="encoded.loadxl module" href="encoded.loadxl.html" />
+    <link rel="prev" title="encoded.batch_download module" href="encoded.batch_download.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.loadxl.html" title="encoded.loadxl module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="encoded.batch_download.html" title="encoded.batch_download module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" accesskey="U">encoded package</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-encoded.edw_hash">
+<span id="encoded-edw-hash-module"></span><h1>encoded.edw_hash module<a class="headerlink" href="#module-encoded.edw_hash" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="encoded.edw_hash.EDWHash">
+<em class="property">class </em><code class="descclassname">encoded.edw_hash.</code><code class="descname">EDWHash</code><span class="sig-paren">(</span><em>checksum=None</em>, <em>use_defaults=False</em>, <em>relaxed=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/edw_hash.html#EDWHash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.edw_hash.EDWHash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">passlib.utils.handlers.StaticHandler</span></code></p>
+<p>EDW&#8217;s password hashing scheme</p>
+<p>Cryptographic strength of the hashing function is less of a concern for
+randomly generated passwords.</p>
+<dl class="attribute">
+<dt id="encoded.edw_hash.EDWHash.checksum_chars">
+<code class="descname">checksum_chars</code><em class="property"> = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='</em><a class="headerlink" href="#encoded.edw_hash.EDWHash.checksum_chars" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.edw_hash.EDWHash.checksum_size">
+<code class="descname">checksum_size</code><em class="property"> = 64</em><a class="headerlink" href="#encoded.edw_hash.EDWHash.checksum_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.edw_hash.EDWHash.name">
+<code class="descname">name</code><em class="property"> = 'edw_hash'</em><a class="headerlink" href="#encoded.edw_hash.EDWHash.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.edw_hash.EDWHash.salt_after">
+<code class="descname">salt_after</code><em class="property"> = b'&lt;*#$*(#)!DSDFOUIHLjksdf'</em><a class="headerlink" href="#encoded.edw_hash.EDWHash.salt_after" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.edw_hash.EDWHash.salt_base">
+<code class="descname">salt_base</code><em class="property"> = b&quot;)\xff+\xfd-\xfb/\xf9!\xf7#\xf5%\xf3'\xf19\xef;\xed=\xeb?\xe91\xe73\xe55\xe37\xe1\t\xdf\x0b\xdd\r\xdb\x0f\xd9\x01\xd7\x03\xd5\x05\xd3\x07\xd1\x19\xcf\x1b\xcd\x1d\xcb\x1f\xc9\x11\xc7\x13\xc5\x15\xc3\x17\xc1i\xbfk\xbdm\xbbo\xb9a\xb7c\xb5e\xb3g\xb1y\xaf{\xad}\xab\x7f\xa9q\xa7s\xa5u\xa3w\xa1I\x9fK\x9dM\x9bO\x99A\x97C\x95E\x93G\x91Y\x8f[\x8d]\x8b_\x89Q\x87S\x85U\x83W\x81\xa9\x7f\xab}\xad{\xafy\xa1w\xa3u\xa5s\xa7q\xb9o\xbbm\xbdk\xbfi\xb1g\xb3e\xb5c\xb7a\x89_\x8b]\x8d[\x8fY\x81W\x83U\x85S\x87Q\x99O\x9bM\x9dK\x9fI\x91G\x93E\x95C\x97A\xe9?\xeb=\xed;\xef9\xe17\xe35\xe53\xe71\xf9/\xfb-\xfd+\xff)\xf1'\xf3%\xf5#\xf7!\xc9\x1f\xcb\x1d\xcd\x1b\xcf\x19\xc1\x17\xc3\x15\xc5\x13\xc7\x11\xd9\x0f\xdb\r\xdd\x0b\xdf\t\xd1\x07\xd3\x05\xd5\x03\xd7\x01)\xff+\xfd-\xfb/\xf9!\xf7#\xf5%\xf3'\xf19\xef;\xed=\xeb?\xe91\xe73\xe55\xe37\xe1\t\xdf\x0b\xdd\r\xdb\x0f\xd9\x01\xd7\x03\xd5\x05\xd3\x07\xd1\x19\xcf\x1b\xcd\x1d\xcb\x1f\xc9\x11\xc7\x13\xc5\x15\xc3\x17\xc1i\xbfk\xbdm\xbbo\xb9a\xb7c\xb5e\xb3g\xb1y\xaf{\xad}\xab\x7f\xa9q\xa7s\xa5u\xa3w\xa1I\x9fK\x9dM\x9bO\x99A\x97C\x95E\x93G\x91Y\x8f[\x8d]\x8b_\x89Q\x87S\x85U\x83W\x81\xa9\x7f\xab}\xad{\xafy\xa1w\xa3u\xa5s\xa7q\xb9o\xbbm\xbdk\xbfi\xb1g\xb3e\xb5c\xb7a\x89_\x8b]\x8d[\x8fY\x81W\x83U\x85S\x87Q\x99O\x9bM\x9dK\x9fI\x91G\x93E\x95C\x97A\xe9?\xeb=\xed;\xef9\xe17\xe35\xe53\xe71\xf9/\xfb-\xfd+\xff)\xf1'\xf3%\xf5#\xf7!\xc9\x1f\xcb\x1d\xcd\x1b\xcf\x19\xc1\x17\xc3\x15\xc5\x13\xc7\x11\xd9\x0f\xdb\r\xdd\x0b\xdf\t\xd1\x07\xd3\x05\xd5\x03\xd7\x01&quot;</em><a class="headerlink" href="#encoded.edw_hash.EDWHash.salt_base" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.edw_hash.EDWHash.salt_before">
+<code class="descname">salt_before</code><em class="property"> = b'186ED79BAEXzeusdioIsdklnw88e86cd73'</em><a class="headerlink" href="#encoded.edw_hash.EDWHash.salt_before" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="encoded.edw_hash.EDWHash.setting_kwds">
+<code class="descname">setting_kwds</code><em class="property"> = ('salt_before', 'salt_after', 'salt_base')</em><a class="headerlink" href="#encoded.edw_hash.EDWHash.setting_kwds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.edw_hash.includeme">
+<code class="descclassname">encoded.edw_hash.</code><code class="descname">includeme</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/edw_hash.html#includeme"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.edw_hash.includeme" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="encoded.batch_download.html"
+                        title="previous chapter">encoded.batch_download module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="encoded.loadxl.html"
+                        title="next chapter">encoded.loadxl module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pydoc/encoded.edw_hash.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.loadxl.html" title="encoded.loadxl module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="encoded.batch_download.html" title="encoded.batch_download module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

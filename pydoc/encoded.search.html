@@ -1,0 +1,278 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.search module &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="encoded.server_defaults module" href="encoded.server_defaults.html" />
+    <link rel="prev" title="encoded.schema_formats module" href="encoded.schema_formats.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.server_defaults.html" title="encoded.server_defaults module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="encoded.schema_formats.html" title="encoded.schema_formats module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" accesskey="U">encoded package</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-encoded.search">
+<span id="encoded-search-module"></span><h1>encoded.search module<a class="headerlink" href="#module-encoded.search" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="encoded.search.browse">
+<code class="descclassname">encoded.search.</code><code class="descname">browse</code><span class="sig-paren">(</span><em>context</em>, <em>request</em>, <em>search_type=None</em>, <em>return_generator=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#browse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.browse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simply use search results for browse view</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.search.build_type_filters">
+<code class="descclassname">encoded.search.</code><code class="descname">build_type_filters</code><span class="sig-paren">(</span><em>result</em>, <em>request</em>, <em>doc_types</em>, <em>types</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#build_type_filters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.build_type_filters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the type filters for the search. If no doc_types, default to Item</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.search.clear_filters_setup">
+<code class="descclassname">encoded.search.</code><code class="descname">clear_filters_setup</code><span class="sig-paren">(</span><em>request</em>, <em>doc_types</em>, <em>forced_type</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#clear_filters_setup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.clear_filters_setup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.search.collection_view">
+<code class="descclassname">encoded.search.</code><code class="descname">collection_view</code><span class="sig-paren">(</span><em>context</em>, <em>request</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#collection_view"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.collection_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simply use search results for collections views (e.g./biosamples/)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.search.format_facets">
+<code class="descclassname">encoded.search.</code><code class="descname">format_facets</code><span class="sig-paren">(</span><em>es_results</em>, <em>facets</em>, <em>used_filters</em>, <em>schemas</em>, <em>total</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#format_facets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.format_facets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format the facets for the final results based on the es results
+These are stored within &#8216;aggregations&#8217; of the result</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.search.format_results">
+<code class="descclassname">encoded.search.</code><code class="descname">format_results</code><span class="sig-paren">(</span><em>request</em>, <em>hits</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#format_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.format_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads results to pass onto UI</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.search.get_all_results">
+<code class="descclassname">encoded.search.</code><code class="descname">get_all_results</code><span class="sig-paren">(</span><em>request</em>, <em>origQuery</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#get_all_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.get_all_results" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.search.get_available_facets">
+<code class="descclassname">encoded.search.</code><code class="descname">get_available_facets</code><span class="sig-paren">(</span><em>context</em>, <em>request</em>, <em>search_type=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#get_available_facets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.get_available_facets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to get available facets for a content/data type; built off of search() without querying Elasticsearch.
+Unlike in search(), due to lack of ES query, does not return possible terms nor counts of experiments matching the terms.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.search.get_filtered_query">
+<code class="descclassname">encoded.search.</code><code class="descname">get_filtered_query</code><span class="sig-paren">(</span><em>prepared_terms</em>, <em>result_fields</em>, <em>principals</em>, <em>doc_types</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#get_filtered_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.get_filtered_query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.search.get_pagination">
+<code class="descclassname">encoded.search.</code><code class="descname">get_pagination</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#get_pagination"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.get_pagination" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fill <a href="#id1"><span class="problematic" id="id2">from_</span></a> and size parameters for search if given in the query string</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.search.get_search_fields">
+<code class="descclassname">encoded.search.</code><code class="descname">get_search_fields</code><span class="sig-paren">(</span><em>request</em>, <em>doc_types</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#get_search_fields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.get_search_fields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns set of columns that are being searched and highlights</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.search.includeme">
+<code class="descclassname">encoded.search.</code><code class="descname">includeme</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#includeme"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.includeme" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.search.initialize_facets">
+<code class="descclassname">encoded.search.</code><code class="descname">initialize_facets</code><span class="sig-paren">(</span><em>types</em>, <em>doc_types</em>, <em>search_audit</em>, <em>principals</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#initialize_facets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.initialize_facets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the facets used for the search. If searching across multiple
+doc_types, only use the &#8216;Data Type&#8217; facet</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.search.iter_search_results">
+<code class="descclassname">encoded.search.</code><code class="descname">iter_search_results</code><span class="sig-paren">(</span><em>context</em>, <em>request</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#iter_search_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.iter_search_results" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.search.list_result_fields">
+<code class="descclassname">encoded.search.</code><code class="descname">list_result_fields</code><span class="sig-paren">(</span><em>request</em>, <em>doc_types</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#list_result_fields"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.list_result_fields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns set of fields that are requested by user or default fields.
+These fields are used to further limit the results from the search.
+Note that you must provide the full fieldname with embeds, such as:
+&#8216;field=biosample.biosource.individual.organism.name&#8217; and not just
+&#8216;field=name&#8217;</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.search.list_visible_columns_for_schemas">
+<code class="descclassname">encoded.search.</code><code class="descname">list_visible_columns_for_schemas</code><span class="sig-paren">(</span><em>request</em>, <em>schemas</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#list_visible_columns_for_schemas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.list_visible_columns_for_schemas" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.search.normalize_query">
+<code class="descclassname">encoded.search.</code><code class="descname">normalize_query</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#normalize_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.normalize_query" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalize the query used to make the search. If no type is provided,
+use type=Item</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.search.prepare_search_term">
+<code class="descclassname">encoded.search.</code><code class="descname">prepare_search_term</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#prepare_search_term"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.prepare_search_term" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepares search terms by making a dictionary where the keys are fields
+and the values are arrays of query strings
+Ignore certain keywords, such as type, format, and field</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.search.search">
+<code class="descclassname">encoded.search.</code><code class="descname">search</code><span class="sig-paren">(</span><em>context</em>, <em>request</em>, <em>search_type=None</em>, <em>return_generator=False</em>, <em>forced_type='Search'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search view connects to ElasticSearch and returns the results</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.search.search_result_actions">
+<code class="descclassname">encoded.search.</code><code class="descname">search_result_actions</code><span class="sig-paren">(</span><em>request</em>, <em>doc_types</em>, <em>es_results</em>, <em>position=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#search_result_actions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.search_result_actions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="encoded.search.set_doc_types">
+<code class="descclassname">encoded.search.</code><code class="descname">set_doc_types</code><span class="sig-paren">(</span><em>request</em>, <em>types</em>, <em>search_type</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#set_doc_types"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.set_doc_types" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the type of documents resulting from the search; order and check for
+invalid types as well.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.search.set_facets">
+<code class="descclassname">encoded.search.</code><code class="descname">set_facets</code><span class="sig-paren">(</span><em>facets</em>, <em>used_filters</em>, <em>principals</em>, <em>doc_types</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#set_facets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.set_facets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets facets in the query using filters</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>facets</strong> &#8211; A list of tuples containing (0) field in object dot notation,  and (1) a dict or OrderedDict with title property.</li>
+<li><strong>used_filters</strong> &#8211; Dict of filters which are set for the ES query. Key is field type, e.g. &#8216;experiments_in_set.award.project&#8217;, and value is list of terms (strings).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="encoded.search.set_filters">
+<code class="descclassname">encoded.search.</code><code class="descname">set_filters</code><span class="sig-paren">(</span><em>request</em>, <em>query</em>, <em>result</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/encoded/search.html#set_filters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#encoded.search.set_filters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets filters in the query. Use only for types. Specific fields are contained
+within the query_string.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="encoded.schema_formats.html"
+                        title="previous chapter">encoded.schema_formats module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="encoded.server_defaults.html"
+                        title="next chapter">encoded.server_defaults module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/pydoc/encoded.search.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="encoded.server_defaults.html" title="encoded.server_defaults module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="encoded.schema_formats.html" title="encoded.schema_formats module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >Python API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="encoded.html" >encoded package</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

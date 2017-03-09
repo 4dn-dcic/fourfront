@@ -1,0 +1,7 @@
+encoded.server_defaults module
+==============================
+
+.. automodule:: encoded.server_defaults
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,7 @@
+encoded.tests.test_aws_deploy module
+====================================
+
+.. automodule:: encoded.tests.test_aws_deploy
+    :members:
+    :undoc-members:
+    :show-inheritance:

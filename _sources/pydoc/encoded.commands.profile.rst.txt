@@ -1,0 +1,7 @@
+encoded.commands.profile module
+===============================
+
+.. automodule:: encoded.commands.profile
+    :members:
+    :undoc-members:
+    :show-inheritance:

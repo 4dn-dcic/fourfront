@@ -1,0 +1,293 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.types.publication &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../types.html" accesskey="U">encoded.types</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.types.publication</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Create publication class and contain methods for data fetching.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">snovault</span> <span class="k">import</span> <span class="p">(</span><span class="n">collection</span><span class="p">,</span> <span class="n">load_schema</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">Item</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">html.parser</span> <span class="k">import</span> <span class="n">HTMLParser</span>
+
+<span class="kn">from</span> <span class="nn">encoded.types.experiment_set</span> <span class="k">import</span> <span class="n">invalidate_linked_items</span>
+
+<span class="c1">################################################</span>
+<span class="c1"># Outside methods for online data fetch</span>
+<span class="c1">################################################</span>
+
+
+<div class="viewcode-block" id="fetch_pubmed"><a class="viewcode-back" href="../../../pydoc/encoded.types.publication.html#encoded.types.publication.fetch_pubmed">[docs]</a><span class="k">def</span> <span class="nf">fetch_pubmed</span><span class="p">(</span><span class="n">PMID</span><span class="p">):</span>
+    <span class="s2">&quot;Takes the number part of PMID and returns title, abstract and authors&quot;</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">abstract</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">author_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">authors</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">NIHe</span> <span class="o">=</span> <span class="s2">&quot;https://eutils.ncbi.nlm.nih.gov/entrez/eutils/&quot;</span>
+    <span class="n">NIHw</span> <span class="o">=</span> <span class="s2">&quot;https://www.ncbi.nlm.nih.gov/pubmed/&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="n">NIHw</span> <span class="o">+</span> <span class="n">PMID</span>
+    <span class="n">www</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{NIH}</span><span class="s2">efetch.fcgi?db=pubmed&amp;id=</span><span class="si">{id}</span><span class="s2">&amp;rettype=medline&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">NIH</span><span class="o">=</span><span class="n">NIHe</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">PMID</span><span class="p">)</span>
+    <span class="c1"># try fetching data 5 times</span>
+    <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">www</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">return</span>
+    <span class="c1"># parse the text to get the fields</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">text</span>
+    <span class="n">full_text</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">      &#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+    <span class="n">data_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">full_text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">a</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">key_pb</span><span class="p">,</span> <span class="n">data_pb</span> <span class="ow">in</span> <span class="n">data_list</span><span class="p">:</span>
+        <span class="n">key_pb</span> <span class="o">=</span> <span class="n">key_pb</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="c1"># grab title</span>
+        <span class="k">if</span> <span class="n">key_pb</span> <span class="o">==</span> <span class="s1">&#39;TI&#39;</span><span class="p">:</span>
+            <span class="n">title</span> <span class="o">=</span> <span class="n">data_pb</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="c1"># grab the abstract</span>
+        <span class="k">if</span> <span class="n">key_pb</span> <span class="o">==</span> <span class="s1">&#39;AB&#39;</span><span class="p">:</span>
+            <span class="n">abstract</span> <span class="o">=</span> <span class="n">data_pb</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="c1"># grab the date added</span>
+        <span class="k">if</span> <span class="n">key_pb</span> <span class="o">==</span> <span class="s1">&#39;DA&#39;</span><span class="p">:</span>
+            <span class="n">date_flat</span> <span class="o">=</span> <span class="n">data_pb</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">date</span> <span class="o">=</span> <span class="n">date_flat</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;-&quot;</span><span class="o">+</span><span class="n">date_flat</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span><span class="o">+</span><span class="s2">&quot;-&quot;</span><span class="o">+</span><span class="n">date_flat</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">8</span><span class="p">]</span>
+        <span class="c1"># accumulate authors</span>
+        <span class="k">if</span> <span class="n">key_pb</span> <span class="o">==</span> <span class="s1">&#39;AU&#39;</span><span class="p">:</span>
+            <span class="n">author_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_pb</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="c1"># add consortiums to author list</span>
+        <span class="k">if</span> <span class="n">key_pb</span> <span class="o">==</span> <span class="s1">&#39;CN&#39;</span><span class="p">:</span>
+            <span class="n">author_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_pb</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="n">authors</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">author_list</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">title</span><span class="p">,</span> <span class="n">abstract</span><span class="p">,</span> <span class="n">authors</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">date</span></div>
+
+
+<div class="viewcode-block" id="BioRxivExtractor"><a class="viewcode-back" href="../../../pydoc/encoded.types.publication.html#encoded.types.publication.BioRxivExtractor">[docs]</a><span class="k">class</span> <span class="nc">BioRxivExtractor</span><span class="p">(</span><span class="n">HTMLParser</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">HTMLParser</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">abstract</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">author_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">date</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+<div class="viewcode-block" id="BioRxivExtractor.handle_starttag"><a class="viewcode-back" href="../../../pydoc/encoded.types.publication.html#encoded.types.publication.BioRxivExtractor.handle_starttag">[docs]</a>    <span class="k">def</span> <span class="nf">handle_starttag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
+        <span class="n">attr</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;meta&#39;</span><span class="p">:</span>
+            <span class="n">attr</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">k</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">}</span>
+            <span class="k">if</span> <span class="n">attr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;DC.Title&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;content&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">attr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;DC.Description&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">abstract</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;content&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">attr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;DC.Contributor&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">author_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">attr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;content&#39;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">attr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;DC.Date&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">date</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;content&#39;</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="fetch_biorxiv"><a class="viewcode-back" href="../../../pydoc/encoded.types.publication.html#encoded.types.publication.fetch_biorxiv">[docs]</a><span class="k">def</span> <span class="nf">fetch_biorxiv</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Takes Url, uses the BioRxivExtractor class and returns title abstract authors url&quot;&quot;&quot;</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">abstract</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">authors</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="c1"># try fetching data 5 times and return empty if fails</span>
+    <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">return</span>
+    <span class="n">resp</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">BioRxivExtractor</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">title</span>
+    <span class="n">abstract</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">abstract</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">date</span>
+    <span class="n">authors</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">author_list</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">title</span><span class="p">,</span> <span class="n">abstract</span><span class="p">,</span> <span class="n">authors</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">date</span></div>
+
+
+<div class="viewcode-block" id="map_doi_pmid"><a class="viewcode-back" href="../../../pydoc/encoded.types.publication.html#encoded.types.publication.map_doi_pmid">[docs]</a><span class="k">def</span> <span class="nf">map_doi_pmid</span><span class="p">(</span><span class="n">doi</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;If a doi is given, checks if it maps to pmid&quot;&quot;&quot;</span>
+    <span class="n">NIHid</span> <span class="o">=</span> <span class="s2">&quot;https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/&quot;</span>
+    <span class="n">www</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{NIH}</span><span class="s2">?ids=</span><span class="si">{id}</span><span class="s2">&amp;versions=no&amp;format=json&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">NIH</span><span class="o">=</span><span class="n">NIHid</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">doi</span><span class="p">)</span>
+    <span class="c1"># try fetching data 5 times</span>
+    <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">www</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">break</span>
+    <span class="c1"># parse the text to get the fields</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">text</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">www</span><span class="p">)</span><span class="o">.</span><span class="n">text</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">res</span><span class="p">[</span><span class="s1">&#39;records&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;pmid&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="map_doi_biox"><a class="viewcode-back" href="../../../pydoc/encoded.types.publication.html#encoded.types.publication.map_doi_biox">[docs]</a><span class="k">def</span> <span class="nf">map_doi_biox</span><span class="p">(</span><span class="n">doi</span><span class="p">):</span>
+    <span class="s2">&quot;If a doi is not mapped to pubmed, check where it goes&quot;</span>
+    <span class="n">DOIad</span> <span class="o">=</span> <span class="s2">&quot;https://doi.org/&quot;</span>
+    <span class="n">www</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{DOIad}{doi}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">DOIad</span><span class="o">=</span><span class="n">DOIad</span><span class="p">,</span> <span class="n">doi</span><span class="o">=</span><span class="n">doi</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">count</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">www</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">break</span>
+    <span class="n">landing_page</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">url</span>
+    <span class="k">if</span> <span class="s2">&quot;biorxiv&quot;</span> <span class="ow">in</span> <span class="n">landing_page</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">landing_page</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span></div>
+
+<span class="c1">################################################</span>
+<span class="c1"># Outside methods for online data fetch</span>
+<span class="c1">################################################</span>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;publications&#39;</span><span class="p">,</span>
+    <span class="n">unique_key</span><span class="o">=</span><span class="s1">&#39;publication:ID&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Publications&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Publication pages&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="Publication"><a class="viewcode-back" href="../../../pydoc/encoded.types.publication.html#encoded.types.publication.Publication">[docs]</a><span class="k">class</span> <span class="nc">Publication</span><span class="p">(</span><span class="n">Item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Publication class.&quot;&quot;&quot;</span>
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;publication&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/publication.json&#39;</span><span class="p">)</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;exp_sets_prod_in_pub&quot;</span><span class="p">,</span> <span class="s2">&quot;exp_sets_used_in_pub&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">sheets</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">abstract</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">authors</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">date</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">p_id</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;ID&#39;</span><span class="p">]</span>
+        <span class="c1"># parse if id is from pubmed</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">p_id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;PMID&#39;</span><span class="p">):</span>
+                <span class="n">pubmed_id</span> <span class="o">=</span> <span class="n">p_id</span><span class="p">[</span><span class="mi">5</span><span class="p">:]</span>
+                <span class="n">title</span><span class="p">,</span> <span class="n">abstract</span><span class="p">,</span> <span class="n">authors</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">date</span> <span class="o">=</span> <span class="n">fetch_pubmed</span><span class="p">(</span><span class="n">pubmed_id</span><span class="p">)</span>
+            <span class="c1"># if id is doi, first check if it maps to pubmed id, else see where it goes</span>
+            <span class="k">elif</span> <span class="n">p_id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;doi&#39;</span><span class="p">):</span>
+                <span class="n">doi_id</span> <span class="o">=</span> <span class="n">p_id</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
+                <span class="k">if</span> <span class="n">map_doi_pmid</span><span class="p">(</span><span class="n">doi_id</span><span class="p">):</span>
+                    <span class="n">pubmed_id</span> <span class="o">=</span> <span class="n">map_doi_pmid</span><span class="p">(</span><span class="n">doi_id</span><span class="p">)</span>
+                    <span class="n">title</span><span class="p">,</span> <span class="n">abstract</span><span class="p">,</span> <span class="n">authors</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">date</span> <span class="o">=</span> <span class="n">fetch_pubmed</span><span class="p">(</span><span class="n">pubmed_id</span><span class="p">)</span>
+                <span class="c1"># if it goes to biorxiv fetch from biorxiv</span>
+                <span class="k">elif</span> <span class="n">map_doi_biox</span><span class="p">(</span><span class="n">doi_id</span><span class="p">):</span>
+                    <span class="n">biox_url</span> <span class="o">=</span> <span class="n">map_doi_biox</span><span class="p">(</span><span class="n">doi_id</span><span class="p">)</span>
+                    <span class="n">title</span><span class="p">,</span> <span class="n">abstract</span><span class="p">,</span> <span class="n">authors</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">date</span> <span class="o">=</span> <span class="n">fetch_biorxiv</span><span class="p">(</span><span class="n">biox_url</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">pass</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">title</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">title</span>
+        <span class="k">if</span> <span class="n">abstract</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;abstract&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">abstract</span>
+        <span class="k">if</span> <span class="n">authors</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;authors&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">authors</span>
+        <span class="k">if</span> <span class="n">url</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">url</span>
+        <span class="k">if</span> <span class="n">date</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;date_published&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">date</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Publication</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_update</span><span class="p">(</span><span class="n">properties</span><span class="p">,</span> <span class="n">sheets</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;exp_sets_prod_in_pub&#39;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+            <span class="n">invalidate_linked_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;exp_sets_prod_in_pub&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;exp_sets_used_in_pub&#39;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+            <span class="n">invalidate_linked_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;exp_sets_used_in_pub&#39;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../types.html" >encoded.types</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+encoded.tests.test_link module
+==============================
+
+.. automodule:: encoded.tests.test_link
+    :members:
+    :undoc-members:
+    :show-inheritance:

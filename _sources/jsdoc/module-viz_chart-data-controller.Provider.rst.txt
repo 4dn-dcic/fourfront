@@ -1,0 +1,50 @@
+.. _module-viz_chart-data-controller.Provider:
+
+=======================
+Component: ``Provider``
+=======================
+
+
+Member Of :doc:`module-viz_chart-data-controller`
+
+
+.. toctree::
+   :maxdepth: 3
+   
+   
+
+.. contents:: Local Navigation
+   :local:
+
+
+Description
+===========
+
+Use this React component to wrap individual charts and provide them with source of experiments data via
+props.experiments and props.filteredExperiments. Also provides expSetFilters from redux store.
+
+Functions
+=========
+
+
+
+
+
+.. _module-viz_chart-data-controller.Provider.render:
+
+
+``render``
+----------
+
+Sets 'experiments' and 'filteredExperiments' props on props.children.
+
+.. js:function:: render()
+
+    
+    :return React.Component: Cloned & adjusted props.children.
+    
+
+
+
+
+

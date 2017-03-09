@@ -1,0 +1,7 @@
+encoded.commands.check_rendering module
+=======================================
+
+.. automodule:: encoded.commands.check_rendering
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,185 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.commands.aws_deploy &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" accesskey="U">encoded</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.commands.aws_deploy</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">This script will be used to manage the aws install.  We currently have two AWS environments</span>
+<span class="sd">* 4dn-web-dev - daily builds go here, actually more of a testing environment</span>
+<span class="sd">              - tied to master branch in git</span>
+<span class="sd">* 4dn-prod    - produciton releases are deployed here</span>
+<span class="sd">              - tied to the production branch in git</span>
+
+<span class="sd">This script will look for the following env variables:</span>
+<span class="sd">ENV_NAME == &#39;PROD&#39; for production tasks</span>
+<span class="sd">ENCODED_VERSION - sets the version of encode, for bug reporting purposes</span>
+<span class="sd">ADMIN_SECRET - use for production deployment first time to set password for admin</span>
+<span class="sd"># TODO: change below to use `ENV_NAME`</span>
+<span class="sd">NODE_ENV == &#39;production&#39; set by gulpfile.js to tell webpack to packages js propertly</span>
+
+<span class="sd">Basically we are going to do the following steps.</span>
+
+<span class="sd">1.  Install Nodejs</span>
+<span class="sd">2.  Setup apache</span>
+<span class="sd">3.  Bootstrap</span>
+<span class="sd">4.  Buildout</span>
+<span class="sd">5.  Secret key for sesisons</span>
+<span class="sd">6.  update pyramid config file, to have appropriate settings for aws</span>
+<span class="sd">7.  setup elastic search mapping (or re-initialize)</span>
+<span class="sd">8.  Create / Update elastic search indexes</span>
+<span class="sd">9.  Load data (dummy data for test, just admin for production)</span>
+<span class="sd">10. Setup WSGI</span>
+
+<span class="sd">The &quot;normal&quot; non environment sensitive .ebextension file looks like this:</span>
+
+<span class="sd">container_commands:</span>
+<span class="sd">  01_nodejs_install:</span>
+<span class="sd">    command: curl --silent --location https://rpm.nodesource.com/setup_4.x |</span>
+<span class="sd">                sudo bash - &amp;&amp; yum install nodejs -y</span>
+<span class="sd">  02_setup_apache:</span>
+<span class="sd">    command: cp .ebextensions/encoded-apache.conf /etc/httpd/conf.d/encoded-apache.conf</span>
+<span class="sd">  03_bootstrap:</span>
+<span class="sd">    command: &quot;source /opt/python/run/venv/bin/activate &amp;&amp; python bootstrap.py</span>
+<span class="sd">            --buildout-version 2.4.1 --setuptools-version 18.1 &gt; /var/log/deploy.log&quot;</span>
+<span class="sd">  04_buildout:</span>
+<span class="sd">    command: &quot;source /opt/python/run/venv/bin/activate &amp;&amp; bin/buildout  &gt;&gt; /var/log/deploy.log&quot;</span>
+<span class="sd">  05_secret_key:</span>
+<span class="sd">    command: cat /dev/urandom | head -c 256 | base64 &gt; session-secret.b64</span>
+<span class="sd">  06_jerry_rig_pyramid_config:</span>
+<span class="sd">    command: &quot;source /opt/python/run/venv/bin/activate &amp;&amp; python deploy/set_beanstalk_config.py</span>
+<span class="sd">                &gt;&gt; /var/log/deploy.log&quot;</span>
+<span class="sd">  07_elastic_search_mapping:</span>
+<span class="sd">    command: &quot;bin/create-mapping production.ini --app-name app  &gt;&gt; /var/log/deploy.log&quot;</span>
+<span class="sd">    leader_only: true</span>
+<span class="sd">  08_elastic_search_index:</span>
+<span class="sd">    command: &quot;bin/index-annotations production.ini --check-first --app-name app</span>
+<span class="sd">            &gt;&gt; /var/log/deploy.log&quot;</span>
+<span class="sd">    leader_only: true</span>
+<span class="sd">  09_load_dummy_data:</span>
+<span class="sd">    command: &quot;bin/load-data production.ini --app-name app  &gt;&gt; /var/log/deploy.log&quot;</span>
+<span class="sd">    leader_only: true</span>
+<span class="sd">  10_setup_wsgi_home:</span>
+<span class="sd">    command: &quot;mkdir -p /home/wsgi &amp;&amp; chown wsgi:wsgi /home/wsgi&quot;</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+
+<span class="n">virtual_env</span> <span class="o">=</span> <span class="s1">&#39;source /opt/python/run/venv/bin/activate&#39;</span>
+
+
+<div class="viewcode-block" id="is_prod"><a class="viewcode-back" href="../../../pydoc/encoded.commands.aws_deploy.html#encoded.commands.aws_deploy.is_prod">[docs]</a><span class="k">def</span> <span class="nf">is_prod</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ENV_NAME&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;PROD&#39;</span></div>
+
+
+<div class="viewcode-block" id="get_buildout_cmd"><a class="viewcode-back" href="../../../pydoc/encoded.commands.aws_deploy.html#encoded.commands.aws_deploy.get_buildout_cmd">[docs]</a><span class="k">def</span> <span class="nf">get_buildout_cmd</span><span class="p">():</span>
+    <span class="n">cfg_file</span> <span class="o">=</span> <span class="s1">&#39;buildout.cfg&#39;</span>
+    <span class="k">if</span> <span class="n">is_prod</span><span class="p">():</span>
+        <span class="n">cfg_file</span> <span class="o">=</span> <span class="s1">&#39;production.cfg&#39;</span>
+
+    <span class="k">return</span> <span class="s2">&quot;/bin/buildout -c </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cfg_file</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="run_w_venv"><a class="viewcode-back" href="../../../pydoc/encoded.commands.aws_deploy.html#encoded.commands.aws_deploy.run_w_venv">[docs]</a><span class="k">def</span> <span class="nf">run_w_venv</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">log_file</span><span class="o">=</span><span class="s1">&#39;/var/log/deploy.log&#39;</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> &amp;&amp; </span><span class="si">%s</span><span class="s2"> &gt;&gt; </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">virtual_env</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">log_file</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../pydoc/encoded.commands.aws_deploy.html#encoded.commands.aws_deploy.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="c1"># buildout</span>
+    <span class="n">buildout_cmd</span> <span class="o">=</span> <span class="n">get_buildout_cmd</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="n">my_env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">buildout_cmd</span><span class="p">)</span>
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">(</span><span class="n">buildout_cmd</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">my_env</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

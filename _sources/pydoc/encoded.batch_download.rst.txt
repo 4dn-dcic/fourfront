@@ -1,0 +1,7 @@
+encoded.batch_download module
+=============================
+
+.. automodule:: encoded.batch_download
+    :members:
+    :undoc-members:
+    :show-inheritance:

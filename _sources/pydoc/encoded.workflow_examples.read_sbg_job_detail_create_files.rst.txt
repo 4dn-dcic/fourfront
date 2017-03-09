@@ -1,0 +1,7 @@
+encoded.workflow_examples.read_sbg_job_detail_create_files module
+=================================================================
+
+.. automodule:: encoded.workflow_examples.read_sbg_job_detail_create_files
+    :members:
+    :undoc-members:
+    :show-inheritance:

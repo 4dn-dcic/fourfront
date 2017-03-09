@@ -1,0 +1,7 @@
+encoded.xlreader module
+=======================
+
+.. automodule:: encoded.xlreader
+    :members:
+    :undoc-members:
+    :show-inheritance:
