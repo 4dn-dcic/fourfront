@@ -8,6 +8,7 @@ var { expFxn, Filters, ajax, console, layout, isServerSide } = require('./../uti
 
 /** 
  * This is a utility to manage charts' experiment data in one global place and distribute to charts throughout UI.
+ * The mechanism for this is roughly diagrammed [here]{@link https://hms-dbmi.slack.com/files/alexkb/F4C8KQKMM/chartdatacontroller.png } .
  * 
  * @module {Object} viz/chart-data-controller
  */

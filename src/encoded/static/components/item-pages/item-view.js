@@ -44,7 +44,7 @@ var Detail = React.createClass({
 
                 if (keyPrefix === 'files_in_set'){
                     return (
-                        <FilesInSetTable files={item}/>
+                        <FilesInSetTable.Small files={item}/>
                     );
                 }
 

@@ -341,49 +341,125 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 /*** Files In Set Table ***/
 
+.files-in-set-table-title {
+	font-weight: 300;
+	padding-bottom: 10px;
+    margin-bottom: 2px;
+    border-bottom: 1px solid #f4f4f4;
+	margin-top: 20px;
+}
+
 .files-in-set-table {
+
 	.row {
-		padding-top: 5px;
-		padding-bottom: 5px;
-
-		> .title {
-			border-bottom: 1px solid #eee;
-		}
-
-		h6 {
-			margin: 0;
-		}
 
 		
+
+		> div {
+			padding-top: 5px;
+			padding-bottom: 5px;
+		}
+
+		h6.accession {
+			margin: 0;
+			font-size: 0.925rem;
+			font-weight: 400;
+			> a {
+				color: #777;
+				&:hover {
+					color: #000;
+				}
+			}
+		}
+
+		> .title {
+			vertical-align: middle;
+			text-align: left;
+			padding-top: 10px;
+		}
+
+		> .description {
+			padding-top: 1px;
+    		padding-bottom: 0px;
+		}
+
+		> div.divider-column {
+			padding-bottom: 0;
+			padding-top: 0;
+			> .divider {
+				border-bottom: 1px solid #f4f4f4;
+				height: 1px;
+			}
+		}
+
+		&.header-row {
+			> div {
+				font-weight: 500;
+			}
+			> div.divider-column > .divider {
+				border-bottom: 1px solid #ddd;
+			}
+			> .download-button-title {
+				> i.icon {
+					width: 32px;
+					text-align: center;
+				}
+			}
+		}
+
+		> .download-button{
+			position: relative;
+			z-index: 10;
+			> a.btn {
+				margin-bottom: -23px;
+			}
+		}
 
 	}
 }
 
-@media screen and (min-width : $screen-xs-min){
+@media screen and (min-width : $screen-md-min){
+
+	.files-in-set-table-title {
+		margin-top: 20px;
+	}
+
 	.files-in-set-table {
 		.row {
 
-			> .description {
-				min-height: 30px;
-				padding-top: 6px;
+			> div, h6 {
+				line-height: 30px;
 			}
 
+			h6.accession {
+				text-align: right;
+			}
+
+			
+
 			> .title {
-				line-height: 30px;
-				height: 30px;
-				vertical-align: middle;
-				border-bottom: none;
-				text-align: left;
+				padding-top: 5px;
+				padding-bottom: 5px;
+				text-align: right;
+			}
+
+			> .description {
+				min-height: 30px;
+				padding-top: 12px;
+				padding-bottom: 12px;
+				line-height: normal;
 			}
 
 			> .download-button {
-				height: 30px;
+				height: 40px;
+                padding-top: 3px;
+                padding-bottom: 3px;
+				> button, > a.btn {
+					height: 30px;
+					margin-bottom: 0;
+				}
 			}
 
-			h6 {
-				line-height: 30px;
-				height: 30px;
-			}
 		}
 	}
 }
