@@ -8,6 +8,7 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
+        "status": "in review by lab",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
     },
     {
@@ -19,6 +20,7 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
+        "status": "in review by lab",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
     },
     {
@@ -30,6 +32,7 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
+        "status": "in review by lab",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
     },
     {
@@ -42,6 +45,7 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e",
+        "status": "in review by lab",
         "modifications": ["431106bc-8535-4448-903e-854af460b265"]
     },
     {
@@ -52,6 +56,7 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
+        "status": "in review by lab",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
     },
     {
@@ -62,6 +67,7 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
+        "status": "in review by lab",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
     },
     {
@@ -92,6 +98,7 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
+        "status": "in review by lab",
         "biosource_vendor": "b31106bc-8535-4448-903e-854af460b21e"
     }
 ]
