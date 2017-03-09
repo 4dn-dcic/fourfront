@@ -10,7 +10,7 @@
         "award": "Test-4DN",
         "submitted_by": "wrangler@wrangler.com",
         "lab": "test-4dn-lab",
-        "status": "released",
+        "status": "in review by lab",
         "accession": "4DNBS1234567"
     },
     {
@@ -24,7 +24,7 @@
         "award": "Test-4DN",
         "submitted_by": "wrangler@wrangler.com",
         "lab": "test-4dn-lab",
-        "status": "released",
+        "status": "in review by lab",
         "accession": "4DNBS2548734"
     },
     {
@@ -37,6 +37,7 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "treatments": ["586b362f-4eb6-4a9c-8173-3ab267307e3b"],
+        "status": "in review by lab",
         "accession": "4DNBS1234678"
     },
     {
@@ -49,6 +50,7 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "treatments": ["686b362f-4eb6-4a9c-8173-3ab267307a8d"],
+        "status": "in review by lab",
         "accession": "4DNBS1234789"
     },
     {
@@ -61,6 +63,7 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "treatments": ["486b362f-4eb6-4a9c-8173-3ab267307e4b"],
+        "status": "in review by lab",
         "accession": "4DNBS1234890"
     }
 ]
