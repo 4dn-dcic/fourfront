@@ -7,6 +7,7 @@
         "files_in_set":["4DNFI0TEST01", "4DNFI0TEST02", "4DNFI0TEST03", "4DNFI0TEST04"],
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65fbb8",
         "accession": "4DNFS40DTEST",
-        "fileset_type": "calibration"
+        "fileset_type": "calibration",
+        "status": "in review by lab"
     }
 ]

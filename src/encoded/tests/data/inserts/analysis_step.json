@@ -2,6 +2,7 @@
     {
         "name": "hictool_fastq2bam",
         "version": "1",
+        "status": "in review by lab",
         "title": "hictool_fastq2bam",
         "description": "Alignment according to the GITAR pipeline",
         "cwl_pointer": "",
@@ -16,6 +17,7 @@
     {
         "name": "hictool_bam2hdf5",
         "version": "1",
+        "status": "in review by lab",
         "title": "hictool_bam2hdf5",
         "description": "Converting bam to hdf5 according to the GITAR pipeline",
         "cwl_pointer": "",
@@ -30,6 +32,7 @@
     {
         "name": "hictool_hdf52matrix",
         "version": "1",
+        "status": "in review by lab",
         "title": "hictool_hdf52matrix",
         "description": "Contact (unnormalized and normalized) matrix creation according to the GITAR pipeline",
         "cwl_pointer": "",
@@ -45,6 +48,7 @@
     {
         "name": "FastQC",
         "version": "1",
+        "status": "in review by lab",
         "title": "FastQC",
         "description": "FastQC QC for fastq files",
         "cwl_pointer": "",

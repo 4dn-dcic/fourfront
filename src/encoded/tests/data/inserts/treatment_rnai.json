@@ -2,7 +2,7 @@
     {
         "uuid": "686b362f-4eb6-4a9c-8173-3ab267307e3b",
         "aliases": ["Awesome:Treatment"],
-        "description": "RNAi treatment to change the world!",
+        "description": "RNAi treatment for rS3",
         "rnai_type":"siRNA",
         "target": "d1115d5e-40aa-43bc-b81c-32c70c9afb55",
         "target_sequence": "ATGCATGC",
@@ -11,12 +11,13 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
+        "status": "in review by lab",
         "url": "https://www.cyclingnews.com"
     },
     {
         "uuid": "686b362f-4eb6-4a9c-8173-3ab267307e4b",
         "aliases": ["Excellent:Treatment"],
-        "description": "RNAi treatment to change the your nose!",
+        "description": "RNAi treatment for rS4",
         "rnai_type":"shRNA",
         "target": "d1115d5e-40aa-43bc-b81c-32c70c9afb44",
         "target_sequence": "ATGCATGC",
@@ -25,12 +26,13 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
+        "status": "in review by lab",
         "url": "https://www.velonews.com"
     },
     {
         "uuid": "686b362f-4eb6-4a9c-8173-3ab267307a8d",
         "aliases": ["Awesome:Treatment2"],
-        "description": "RNAi treatment to change the world!",
+        "description": "RNAi treatment for rS5",
         "rnai_type":"shRNA",
         "target": "d1115d5e-40aa-43bc-b81c-32c70c9afb55",
         "target_sequence": "ATGCATGC",
@@ -39,6 +41,7 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
+        "status": "in review by lab",
         "url": "https://www.cyclingnews.com"
     }
 ]
