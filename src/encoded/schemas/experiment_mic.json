@@ -1,7 +1,7 @@
 {
-    "title": "Hi-C Experiment Variables",
-    "description": "Experimental variables specific for a Hi-C experiment.",
-    "id": "/profiles/experiment_hi_c.json",
+    "title": "Microscopy Experiments",
+    "description": "Experimental metadata fields for microsopy experiments.",
+    "id": "/profiles/experiment_mic.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "required": ["experiment_type", "award", "lab", "biosample"],
@@ -30,7 +30,7 @@
             "title" : "Experiment Type",
             "enum": [
                 "DNA-paint",
-                "DNA-FiSH"
+                "DNA-FiSH",
                 "FISH",
                 "micro-C",
                 "DNase Hi-C"

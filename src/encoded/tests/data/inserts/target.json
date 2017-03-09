@@ -27,7 +27,7 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
-<<<<<<< HEAD
+        "status": "in review by lab",
         "aliases": ["dcic:test_targ3"]
     },
     {
@@ -37,6 +37,7 @@
         "submitted_by": "wrangler@wrangler.com",
         "aliases": ["dcic:test_targ4"],
         "description": "A sample protein target",
+        "status": "in review by lab",
         "targeted_proteins": ["XPO1_HUMAN"]
     },
     {
@@ -46,10 +47,7 @@
         "submitted_by": "wrangler@wrangler.com",
         "aliases": ["dcic:test_targ5"],
         "description": "A sample RNA target",
-        "targeted_RNA": ["NM_003529.2"]
-=======
-        "aliases": ["dcic:test_targ3"],
+        "targeted_RNA": ["NM_003529.2"],
         "status": "in review by lab"
->>>>>>> master
     }
 ]

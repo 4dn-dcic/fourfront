@@ -24,45 +24,8 @@
         },
         "description": {
             "title": "Description",
-            "description": "A short description of the labeling path",
+            "description": "A short description of the labeling probe",
             "type": "string"
-        },
-        "target": {
-            "title": "Targets for labelling",
-            "description": "Protein/RNA/DNA or cellular structure targeted for labeling",
-            "type": "array",
-            "items": {
-                "title": "Targets for labelling",
-                "linkTo": "Target"
-            }
-        },
-        "labeled_probe": {
-            "title": "Probe with the label",
-            "description": "Antibodies/Primers/Chemicals that carry the label",
-            "type": "array",
-            "items": {
-                "title": "Targets for labelling",
-                "type": "Probe"
-            }
-        },
-        "labels": {
-            "title": "Labels",
-            "description": "Fluorescent labels used for ",
-            "type": "array",
-            "internal_comment": "Link to a label database through ontologies",
-            "items": {
-                "title": "Label",
-                "type": "string"
-            }
-        },
-        "other_probes": {
-            "title": "mediators of target labeling",
-            "description": "Antibodies/Primers/Chemicals used for labeling the target",
-            "type": "array",
-            "items": {
-                "title": "Targets for labelling",
-                "linkTo": "Probe"
-            }
         }
     }
 }
