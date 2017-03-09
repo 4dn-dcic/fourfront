@@ -518,11 +518,15 @@ var ProfileWorkFields = React.createClass({
                     </div>
                     <div className="col-sm-9 value">
                         <FormattedInfoBlock.List
-                             renderItem={(detail) => FormattedInfoBlock.Lab(detail, false, false, false) }
-                             details={user.submits_for}
-                             propertyName="submits_for"
-                             fallbackMsg="Not submitting for any organizations"
-                             ajaxCallback={this.updateAwardsList}
+                            renderItem={(detail) => FormattedInfoBlock.Lab(detail, false, false, false) }
+                            endpoints={user.submits_for.map(function(o){
+                                if (typeof o === 'string') return o;
+                                if (typeof o.link_id === 'string') return o.link_id.replace(/~/g,'/');
+                                if (typeof o['@id'] === 'string') return o['@id'];
+                            })}
+                            propertyName="submits_for"
+                            fallbackMsg="Not submitting for any organizations"
+                            ajaxCallback={this.updateAwardsList}
                         />
                     </div>
                 </div>

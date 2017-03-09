@@ -10,7 +10,6 @@ var { expFxn, Filters, ajax, console, layout, isServerSide } = require('./../uti
  * This is a utility to manage charts' experiment data in one global place and distribute to charts throughout UI.
  * 
  * @module {Object} viz/chart-data-controller
- * @type Object
  */
 
 
@@ -48,9 +47,10 @@ var refs = {
 /**
  * Contains "state" of ChartDataController. Some of these are deprecated and will be removed.
  * The most important ones are experiments and filteredExperiments.
- * @namespace
- * @memberof module:viz/chart-data-controller
+ * 
+ * @type {Object}
  * @private
+ * @ignore
  */
 var state = {
     experiments         : null,
@@ -186,41 +186,41 @@ function notifyLoadStartCallbacks(){
  * Holds unsubcribe callback to Redux store subscription.
  * @private
  * @ignore
- * @type null|function
+ * @type {null|function}
  */
 var reduxSubscription = null;
 
 /**
  * @private
  * @ignore
- * @type boolean
+ * @type {boolean}
  */
 var isInitialized = false;
 
 /**
  * @private
  * @ignore
- * @type number
+ * @type {number}
  */
 var lastTimeSyncCalled = 0;
 
 /**
  * @private
  * @ignore
- * @type null|string
+ * @type {null|string}
  */
 var resyncInterval = null;
 
 /**
  * @private
  * @ignore
- * @type boolean
+ * @type {boolean}
  */
 var isWindowActive = false;
 
 
 /**
- * @type Object
+ * @type {Object}
  * @alias module:viz/chart-data-controller
  */
 var ChartDataController = module.exports = {
@@ -230,7 +230,7 @@ var ChartDataController = module.exports = {
      * props.experiments and props.filteredExperiments. Also provides expSetFilters from redux store.
      * 
      * @namespace
-     * @type React.Component
+     * @type {Component}
      * @memberof module:viz/chart-data-controller
      */
     Provider : React.createClass({
