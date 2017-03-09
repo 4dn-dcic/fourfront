@@ -56,6 +56,7 @@
             "comment": "Format is colon separated lab name and lab identifier. (e.g. dcic-lab:42).",
             "default": [],
             "uniqueItems": true,
+            "clear_create": "clear",
             "items": {
                 "uniqueKey": "alias",
                 "title": "Lab alias",
@@ -285,6 +286,7 @@
             "description": "Unique identifiers from external resources.",
             "type": "array",
             "default": [],
+            "clear_create": "clear",
             "uniqueItems": true,
             "items": {
                 "title": "External identifier",
