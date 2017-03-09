@@ -16,10 +16,27 @@ var { Filters, ajax, JWT, console, isServerSide } = require('./util');
 var Alerts = require('./alerts');
 var jwt = require('jsonwebtoken');
 var { FacetCharts } = require('./facetcharts');
+var ChartDataController = require('./viz/chart-data-controller');
 var makeTitle = require('./item-pages/item').title;
 
-var dispatch_dict = {}; //used to store value for simultaneous dispatch
+/**
+ * The top-level component for this application.
+ * 
+ * @module {React.Component} app
+ */
 
+/** 
+ * Used to temporarily store Redux store values for simultaneous dispatch.
+ * 
+ * @memberof app
+ */
+var dispatch_dict = {};
+
+/**
+ * Top bar navigation & link schema definition.
+ * 
+ * @memberof app
+ */
 var portal = {
     portal_title: '4DN Data Portal',
     global_sections: [
@@ -78,10 +95,6 @@ class Timeout {
 }
 
 
-/**
- * App is the root component, mounted on document.body.
- * It lives for the entire duration the page is loaded.
- */
 var App = React.createClass({
     SLOW_REQUEST_TIME: 750,
     historyEnabled: !!(typeof window != 'undefined' && window.history && window.history.pushState),
@@ -245,13 +258,13 @@ var App = React.createClass({
         return this.refs.navigation.refs.stats;
     },
 
-    updateStats : function(counts, totals = false, callback = null){
+    updateStats : function(currentCounts, totalCounts = null, callback = null){
         var statsComponent = this.getStatsComponent();
         if (statsComponent){
-            if (!totals){
-                return statsComponent.updateCurrentCounts(counts, callback);
+            if (!totalCounts){
+                return statsComponent.updateCurrentCounts(currentCounts, callback);
             } else {
-                return statsComponent.updateTotalCounts(counts, callback);
+                return statsComponent.updateCurrentAndTotalCounts(currentCounts, totalCounts, callback);
             }
         }
         return null;
@@ -379,6 +392,9 @@ var App = React.createClass({
             }
         }
         if (this.state) {
+            if (prevState.session !== this.state.session && ChartDataController.isInitialized()){
+                ChartDataController.sync();
+            }
             for (key in this.state) {
                 if (this.state[key] !== prevState[key]) {
                     console.log('changed state: %s', key, this.state[key]);
@@ -743,11 +759,21 @@ var App = React.createClass({
             }
 
             promise.catch((err)=>{
+                // Unset these for future requests.
+                this.requestAborted = false;
+                this.requestCurrent = false;
                 this.state.slowLoad && this.setState({'slowLoad' : false});
                 if (typeof fallbackCallback == 'function'){
                     fallbackCallback(err);
                 }
-                if (err.message !== 'HTTPForbidden'){
+                // Err could be an XHR object if could not parse JSON.
+                if (
+                    typeof err.status === 'number' &&
+                    [502, 503, 504, 505, 598, 599, 444, 499, 522, 524].indexOf(err.status) > -1
+                ) { 
+                    // Bad connection
+                    Alerts.queue(Alerts.ConnectionError);
+                } else if (err.message !== 'HTTPForbidden'){
                     console.error('Error in App.navigate():', err);
                     throw err; // Bubble it up.
                 } else {
@@ -901,6 +927,7 @@ var App = React.createClass({
             title = 'Error';
         }else if(actionList.length == 1){
             // check if the desired action is allowed per user (in the context)
+
             var contextActionNames = this.listActionsFor('context').map(function(act){
                 return act.name || '';
             });

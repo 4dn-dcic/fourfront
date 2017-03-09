@@ -12,8 +12,7 @@ from snovault import (
 from snovault.calculated import calculate_properties
 
 from .base import (
-    Item,
-    add_default_embeds
+    Item
 )
 
 import datetime
@@ -96,7 +95,6 @@ class ExperimentSet(Item):
                 "experiments_in_set.filesets.files_in_set.related_files.relationship_type",
                 "experiments_in_set.filesets.files_in_set.related_files.file.uuid",
                 "experiments_in_set.digestion_enzyme"]
-    embedded = add_default_embeds(embedded, schema)
 
     def _update(self, properties, sheets=None):
         super(ExperimentSet, self)._update(properties, sheets)
@@ -123,7 +121,7 @@ class ExperimentSet(Item):
                             newest = pubdate
                             ppub = str(uuid)
         if ppub is not None:
-            ppub = '/publication/' + ppub
+            ppub = '/publications/' + ppub + '/'
         return ppub
 
     @calculated_property(schema={
@@ -148,7 +146,7 @@ class ExperimentSet(Item):
                 expsets.extend(pub.properties['exp_sets_used_in_pub'])
             for expset in expsets:
                 if str(expset) == str(self.uuid):
-                    pubs.append('/publication/' + str(uuid))
+                    pubs.append('/publications/' + str(uuid) + '/')
         return list(set(pubs))
 
 
@@ -170,7 +168,6 @@ class ExperimentSetReplicate(ExperimentSet):
         "replicate_exps.replicate_exp.accession",
         "replicate_exps.replicate_exp.uuid"
     ]
-    embedded = add_default_embeds(embedded, schema)
 
     def _update(self, properties, sheets=None):
         all_experiments = [exp['replicate_exp'] for exp in properties['replicate_exps']]

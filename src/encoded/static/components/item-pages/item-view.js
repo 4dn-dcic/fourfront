@@ -4,11 +4,10 @@ var React = require('react');
 var globals = require('./../globals');
 var Collapse = require('react-bootstrap').Collapse;
 var _ = require('underscore');
-var { ItemHeader, PartialList, ExternalReferenceLink } = require('./components');
+var { ItemHeader, PartialList, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock } = require('./components');
 var { AuditIndicators, AuditDetail, AuditMixin } = require('./../audit');
 var { console, object, DateUtility, Filters } = require('./../util');
 var itemTitle = require('./item').title;
-var FormattedInfoBlock = require('./components/FormattedInfoBlock');
 
 
 var Detail = React.createClass({
@@ -42,6 +41,13 @@ var Detail = React.createClass({
          */
         formValue : function (schemas, item, keyPrefix = '', atType = 'ExperimentSet', depth = 0) {
             if(Array.isArray(item)) {
+
+                if (keyPrefix === 'files_in_set'){
+                    return (
+                        <FilesInSetTable files={item}/>
+                    );
+                }
+
                 return (
                     <ul>
                         {   item.length === 0 ? <li><em>None</em></li>
@@ -93,6 +99,15 @@ var Detail = React.createClass({
                             </a>
                         );
                     }
+                } else if(item.slice(0,10) === '@@download'){
+                    // this is a download link. Format appropriately
+                    var split_item = item.split('/');
+                    var attach_title = decodeURIComponent(split_item[split_item.length-1]);
+                    return (
+                        <a key={item} href={item} target="_blank" download>
+                            {attach_title}
+                        </a>
+                    );
                 }
             }
             return(<span>{ item }</span>); // Fallback

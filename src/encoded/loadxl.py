@@ -7,8 +7,8 @@ import json
 import logging
 import os.path
 import boto3
-from pyramid.settings import asbool
-from snovault.storage import User
+# from pyramid.settings import asbool
+# from snovault.storage import User
 
 text = type(u'')
 
@@ -27,6 +27,7 @@ ORDER = [
     'publication',
     'publication_tracking',
     'document',
+    'image',
     'vendor',
     'construct',
     'modification',
@@ -47,7 +48,9 @@ ORDER = [
     'file_fasta',
     'file_processed',
     'file_reference',
+    'file_calibration',
     'file_set',
+    'file_set_calibration',
     'experiment_hi_c',
     'experiment_capture_c',
     'experiment_repliseq',
@@ -359,7 +362,7 @@ def pipeline_logger(item_type, phase):
             res = row.get('_response')
 
             if res is None:
-                _skip = row.get('_skip')
+                # _skip = row.get('_skip')
                 _errors = row.get('_errors')
                 if row.get('_skip'):
                     skipped += 1
@@ -370,7 +373,7 @@ def pipeline_logger(item_type, phase):
                 continue
 
             url = row.get('_url')
-            uuid = row.get('uuid')
+            # uuid = row.get('uuid')
 
             if res.status_int == 200:
                 updated += 1
@@ -446,7 +449,7 @@ def attachment(path):
             'href': 'data:%s;base64,%s' % (mime_type, b64encode(stream.read()).decode('ascii'))
         }
 
-        if mime_type in ('application/pdf', 'text/plain', 'text/tab-separated-values', 'text/html'):
+        if mime_type in ('application/pdf', "application/zip",'text/plain', 'text/tab-separated-values', 'text/html'):
             # XXX Should use chardet to detect charset for text files here.
             return attach
 
@@ -633,6 +636,7 @@ def load_all(testapp, filename, docsdir, test=False):
         pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=2)
         process(combine(source, pipeline))
 
+
 def generate_access_key(testapp, store_access_key=None,
                         server='http://localhost:8000',  email='4dndcic@gmail.com'):
 
@@ -649,23 +653,24 @@ def generate_access_key(testapp, store_access_key=None,
 
         access_key_req = {
             'user': admin['@id'],
-            'description':'key for submit4dn',
+            'description': 'key for submit4dn',
         }
         res = testapp.post_json('/access_key', access_key_req).json
         if store_access_key == 'local':
             # for local storing we always connecting to local server
             server = 'http://localhost:8000'
-        akey     = { 'default':
-                    { 'secret' : res['secret_access_key'],
-                      'key' : res['access_key_id'],
-                      'server': server,
-                    }
-                   }
+        akey = {'default':
+                {'secret': res['secret_access_key'],
+                 'key': res['access_key_id'],
+                 'server': server,
+                 }
+                }
         return json.dumps(akey)
 
-def store_keys(app, store_access_key, keys):
-        if (not keys): return
 
+def store_keys(app, store_access_key, keys):
+        if (not keys):
+            return
         # write to ~/keypairs.json
         if store_access_key == 'local':
             home_dir = os.path.expanduser('~')

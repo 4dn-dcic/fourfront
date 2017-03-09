@@ -4,10 +4,15 @@ var React = require('react');
 var _ = require('underscore');
 var d3 = require('d3');
 var vizUtil = require('./utilities');
-var Legend = require('./components/Legend');
+var { RotatedLabel } = require('./components');
 var { console, object, isServerSide, expFxn, Filters } = require('../util');
 var { highlightTerm, unhighlightTerms } = require('./../facetlist');
 
+/**
+ * Component for BarPlotChart.
+ * 
+ * @module {React.Component} viz/BarPlotChart
+ */
 
 var BarPlot = React.createClass({
 
@@ -16,7 +21,7 @@ var BarPlot = React.createClass({
         genChartData : function(
             experiments = [],
             fields = [{ 'name' : 'Biosample' , field : 'experiments_in_set.biosample.biosource_summary' }],
-            experimentsOrSets='experiments'
+            experimentsOrSets='experiments',
         ){
 
             // Add terms and total for each field.
@@ -64,7 +69,7 @@ var BarPlot = React.createClass({
 
         countFieldsTermsForExperiment : function(fields, exp){
             _.forEach(fields, function(f){ 
-                var term = object.getNestedProperty(exp, f.field.replace('experiments_in_set.',''));
+                var term = object.getNestedProperty(exp, f.field.replace('experiments_in_set.',''), true);
                 BarPlot.countFieldTermForExperiment(f, term);
             });
         },
@@ -92,15 +97,15 @@ var BarPlot = React.createClass({
                             'total' : 0,
                             'term' : term[0],
                             'terms' : {} 
-                        } 
+                        }
                     ];
                 })
                 .object()
                 .value();
 
             experiments.forEach(function(exp){
-                var topLevelFieldTerm = object.getNestedProperty(exp, field.field.replace('experiments_in_set.',''));
-                var nextLevelFieldTerm = object.getNestedProperty(exp, field.childField.field.replace('experiments_in_set.',''));
+                var topLevelFieldTerm = object.getNestedProperty(exp, field.field.replace('experiments_in_set.',''), true);
+                var nextLevelFieldTerm = object.getNestedProperty(exp, field.childField.field.replace('experiments_in_set.',''), true);
                 BarPlot.countFieldTermForExperiment(field.terms[topLevelFieldTerm], nextLevelFieldTerm);
             });
 
@@ -149,9 +154,20 @@ var BarPlot = React.createClass({
             fields,
             availWidth = 400,
             availHeight = 400,
-            styleOpts = BarPlot.getDefaultStyleOpts()
+            styleOpts = BarPlot.getDefaultStyleOpts(),
+            primaryField = null,
+            secondaryField = null
         ){
-            var topIndex = BarPlot.firstPopulatedFieldIndex(fields);
+
+            var topIndex;
+
+            if (primaryField) {
+                topIndex = _.findIndex(fields, { 'field' : primaryField });
+            }
+            if (!topIndex) {
+                topIndex = BarPlot.firstPopulatedFieldIndex(fields);
+            }
+            
             var numberOfTerms = _.keys(fields[topIndex].terms).length;
             var largestExpCountForATerm = _.reduce(fields[topIndex].terms, function(m,t){
                 return Math.max(m, typeof t === 'number' ? t : t.total);
@@ -224,7 +240,7 @@ var BarPlot = React.createClass({
                 }
             }, []).forEach(function(b){
                 if (typeof fields[b.field] === 'undefined') fields[b.field] = { 'field' : b.field, 'terms' : {}, 'name' : Filters.Field.toName(b.field, schemas) };
-                fields[b.field].terms[b.term] = { 'term' : b.term, 'name' : b.name || Filters.Term.toName(b.field, b.term), 'color' : vizUtil.colorForNode(b) };
+                fields[b.field].terms[b.term] = { 'term' : b.term, 'name' : b.name || Filters.Term.toName(b.field, b.term), 'color' : vizUtil.colorForNode(b, true) };
             });
             fields = _.values(fields);
             fields.forEach(function(f){ f.terms = _.values(f.terms); });
@@ -236,13 +252,14 @@ var BarPlot = React.createClass({
             return {
                 'gap' : 5,
                 'maxBarWidth' : 60,
-                'labelRotation' : 'auto',
+                'maxLabelWidth' : null,
+                'labelRotation' : 30,
                 'labelWidth' : 200,
                 'yAxisMaxHeight' : 100, // This will override labelWidth to set it to something that will fit at angle.
                 'offset' : {
-                    'top' : 30,
-                    'bottom' : 0,
-                    'left' : 80,
+                    'top' : 18,
+                    'bottom' : 50,
+                    'left' : 50,
                     'right' : 0
                 }
             };
@@ -260,6 +277,7 @@ var BarPlot = React.createClass({
 
     propTypes : {
         'experiments'   : React.PropTypes.array,
+        'filteredExperiments' : React.PropTypes.array,
         'fields'        : React.PropTypes.array,
         'styleOptions'  : React.PropTypes.shape({
             'gap'           : React.PropTypes.number,
@@ -305,11 +323,16 @@ var BarPlot = React.createClass({
     },
 
     shouldPerformManualTransitions : function(nextProps, pastProps){
-        return !!(!_.isEqual(pastProps.experiments, nextProps.experiments) || pastProps.height !== nextProps.height);
+        return !!(
+            !_.isEqual(pastProps.experiments, nextProps.experiments) ||
+            pastProps.height !== nextProps.height ||
+            !_.isEqual(pastProps.filteredExperiments, nextProps.filteredExperiments)
+        );
     },
 
     componentWillReceiveProps : function(nextProps){
         if (this.shouldPerformManualTransitions(nextProps, this.props)){
+            console.log('WILL DO SLOW TRANSITION');
             this.setState({ transitioning : true });
         }
     },
@@ -327,7 +350,6 @@ var BarPlot = React.createClass({
         return;
 
         // THE BELOW IF BLOCK IS NO LONGER NECESSARY AS CONVERTED TO HTML ELEMS, KEEPING FOR IF NEEDED IN FUTURE.
-        // shouldPerformManualTransitions WILL ALWAYS RETURN FALSE CURRENTLY.
         /*
         if (this.shouldPerformManualTransitions(this.props, pastProps)){
             if (typeof this.pastBars !== 'undefined'){
@@ -375,13 +397,23 @@ var BarPlot = React.createClass({
         */
     },
 
+    /** Call this function, e.g. through refs, to grab fields and terms for a/the Legend component. */
+    getLegendData : function(){
+        if (!this.barData) return null;
+        return BarPlot.barDataToLegendData(this.barData, this.props.schemas || null);
+    },
+
+    getTopLevelField : function(){
+        if (!this.barData) return null;
+        return this.barData.fields[this.barData.fieldIndex].field;
+    },
+
     renderParts : {
 
         svg: {
 
             bar : function(d, index, all, styleOpts = null, existingBars = this.pastBars){
                 var transitioning = this.state.transitioning; // Cache state.transitioning to avoid risk of race condition in ref function.
-
                 if (!styleOpts) styleOpts = this.styleOptions();
 
                 var prevBarExists = function(){ return typeof existingBars[d.term] !== 'undefined' && existingBars[d.term] !== null; };
@@ -539,7 +571,10 @@ var BarPlot = React.createClass({
                 return style;
             }
 
-            var barParts = Array.isArray(d.bars) ? d.bars.map(this.renderParts.barPart.bind(this)) : this.renderParts.barPart.call(this, d);
+            var barParts = Array.isArray(d.bars) ? 
+                d.bars.map(this.renderParts.barPart.bind(this))
+                :
+                this.renderParts.barPart.call(this, d);
 
             return (
                 <div
@@ -603,9 +638,22 @@ var BarPlot = React.createClass({
 
         bottomYAxis : function(availWidth, availHeight, currentBars, styleOpts){
             var _this = this;
+
+            var labelWidth = styleOpts.labelWidth;
+            if (typeof styleOpts.labelRotation === 'number'){
+
+                var maxWidthGivenBottomOffset = (
+                    1 / Math.abs(Math.sin((styleOpts.labelRotation / 180) * Math.PI)
+                )) * styleOpts.offset.bottom;
+
+                labelWidth = Math.min(
+                    maxWidthGivenBottomOffset,
+                    (styleOpts.labelWidth || 100000)
+                );
+
+            }
+
             
-            // We need to know label height to make use of this (to subtract from to get max labelWidth), which would be too much work (in browser calculation) given character size variance for most fonts to be performant.
-            // var maxHypotenuse = styleOpts.yAxisMaxHeight * (1/Math.cos((Math.PI * 2) / (360 / styleOpts.labelRotation)));
             return (
                 <div className="y-axis-bottom" style={{ 
                     left : styleOpts.offset.left, 
@@ -613,40 +661,25 @@ var BarPlot = React.createClass({
                     height : Math.max(styleOpts.offset.bottom - 5, 0),
                     bottom : Math.min(styleOpts.offset.bottom - 5, 0)
                 }}>
-                    { currentBars.map(function(bar){
-                        return (
-                            <div
-                                key={'count-for-' + bar.term}
-                                data-term={bar.term}
-                                className="y-axis-label no-highlight-color"
-                                style={{
-                                    transform : vizUtil.style.translate3d(bar.attr.x, 5, 0),
-                                    width : bar.attr.width,
-                                    opacity : _this.state.transitioning && (bar.removing || !bar.existing) ? 0 : ''
-                                }}
-                            >
-                            
-                                <span className={"label-text" + (styleOpts.labelRotation === 'auto' ? ' auto-rotation' : '')} style={{
-                                    width: typeof styleOpts.labelWidth === 'number' ? styleOpts.labelWidth : null,
-                                    left:  0 - (
-                                        (
-                                            typeof styleOpts.labelWidth === 'number' ? styleOpts.labelWidth : bar.attr.width
-                                        )
-                                        - ((bar.attr.width / (90 / bar.attr.width) ))
-                                    ),
-                                    transform : vizUtil.style.rotate3d(
-                                        typeof styleOpts.labelRotation === 'number' ? 
-                                            styleOpts.labelRotation : 
-                                                -(90 / (bar.attr.width * .1)), // If not set, rotate so 1 line will fit.
-                                        'z'
-                                    ), 
-                                }}>
-                                    { bar.name }
-                                </span>
-                            
-                            </div>
-                        );
-                    }) }
+                    <RotatedLabel.Axis
+                        labels={currentBars.map(function(b){ 
+                            return {
+                                name : b.name || b.term,
+                                term : b.term,
+                                x: b.attr.x,
+                                opacity : _this.state.transitioning && (b.removing || !b.existing) ? 0 : '',
+                                color : vizUtil.colorForNode(b, true, null, null, true)
+                            }; 
+                        })}
+                        labelClassName="y-axis-label no-highlight-color"
+                        y={5}
+                        extraHeight={5}
+                        placementWidth={currentBars[0].attr.width}
+                        placementHeight={styleOpts.offset.bottom}
+                        angle={styleOpts.labelRotation}
+                        maxLabelWidth={styleOpts.maxLabelWidth || 1000}
+                        isMounted={_this.state.mounted}
+                    />
                 </div>
             );
         },
@@ -704,9 +737,9 @@ var BarPlot = React.createClass({
         this.pastBars = _.clone(this.bars); // Difference between current and pastBars used to determine which bars to do D3 transitions on (if any).
         this.bars = {}; // ref to 'g' element is stored here.
 
-        var barData = BarPlot.genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
+        this.barData = BarPlot.genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
             BarPlot.genChartData( // Get counts by term per field.
-                this.props.experiments,
+                this.props.filteredExperiments || this.props.experiments,
                 this.props.fields,
                 'experiments'
             ),
@@ -715,10 +748,10 @@ var BarPlot = React.createClass({
             this.styleOptions()
         );
 
-        console.log('BARDATA', barData);
+        console.log('BARDATA', this.barData);
 
         // Bars from current dataset/filters only.
-        var currentBars = barData.bars.map((d)=>{
+        var currentBars = this.barData.bars.map((d)=>{
             // Determine whether bar existed before, for this.renderParts.bar render func.
             return _.extend(d, { 
                 'existing' : typeof this.pastBars[d.term] !== 'undefined' && this.pastBars[d.term] !== null
@@ -729,7 +762,7 @@ var BarPlot = React.createClass({
 
         // If transitioning, get D3 datums of existing bars which need to transition out and add removing=true property to inform this.renderParts.bar.
         if (this.state.transitioning){
-            var barsToRemove = _.difference(  _.keys(this.pastBars),  _.pluck(barData.bars, 'term')).map((barTerm) => {
+            var barsToRemove = _.difference(  _.keys(this.pastBars),  _.pluck(this.barData.bars, 'term')).map((barTerm) => {
                 return _.extend(this.pastBars[barTerm].__data__, { 'removing' : true });
             });
             allBars = barsToRemove.concat(currentBars);
@@ -746,20 +779,12 @@ var BarPlot = React.createClass({
                 className="bar-plot-chart chart-container"
                 key="container"
                 ref="container"
-                data-field={this.props.fields[barData.fieldIndex].field}
+                data-field={this.props.fields[this.barData.fieldIndex].field}
                 style={{ height : availHeight, width: availWidth }}
             >
-                { this.renderParts.leftAxis.call(this, availWidth, availHeight, barData, styleOpts) }
+                { this.renderParts.leftAxis.call(this, availWidth, availHeight, this.barData, styleOpts) }
                 { barComponents }
                 { this.renderParts.bottomYAxis.call(this, availWidth, availHeight, allBars, styleOpts) }
-                <Legend fields={BarPlot.barDataToLegendData(barData, this.props.schemas || null)} title={
-                    <div>
-                        <h6 className="text-400 legend-title">
-                            { Filters.Field.toName(barData.fields[barData.fieldIndex].field, this.props.schemas) }
-                            <br/><span className="text-300">divided into</span>
-                        </h6>
-                    </div>
-                } />
             </div>
         );
         /*

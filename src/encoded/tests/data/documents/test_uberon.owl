@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+  <rdf:RDF xmlns="http://purl.obolibrary.org/obo/uberon/ext.owl#"
+       xml:base="http://purl.obolibrary.org/obo/uberon/ext.owl"
+       xmlns:owl="http://www.w3.org/2002/07/owl#"
+       xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+       xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+      <owl:Ontology rdf:about="http://purl.obolibrary.org/obo/uberon/ext.owl">
+      </owl:Ontology>
+  <owl:AnnotationProperty rdf:about="http://www.w3.org/2000/01/rdf-schema#label"/>
+
+
+  <!-- http://purl.obolibrary.org/obo/UBERON_0000101 -->
+
+  <owl:Class rdf:about="http://purl.obolibrary.org/obo/UBERON_0000101">
+      <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/UBERON_0004119"/>
+      <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/UBERON_0009912"/>
+      <rdfs:subClassOf>
+          <owl:Restriction>
+              <owl:onProperty rdf:resource="http://purl.obolibrary.org/obo/BFO_0000050"/>
+              <owl:someValuesFrom rdf:resource="http://purl.obolibrary.org/obo/UBERON_0002048"/>
+          </owl:Restriction>
+      </rdfs:subClassOf>
+      <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">lobe of lung</rdfs:label>
+  </owl:Class>
+
+  <!-- http://purl.obolibrary.org/obo/UBERON_0002048 -->
+
+  <owl:Class rdf:about="http://purl.obolibrary.org/obo/UBERON_0002048">
+      <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/UBERON_0000171"/>
+      <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/UBERON_0004119"/>
+      <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/UBERON_0005178"/>
+      <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/UBERON_0015212"/>
+      <rdfs:subClassOf>
+          <owl:Restriction>
+              <owl:onProperty rdf:resource="http://purl.obolibrary.org/obo/BFO_0000050"/>
+              <owl:someValuesFrom rdf:resource="http://purl.obolibrary.org/obo/UBERON_0000170"/>
+          </owl:Restriction>
+      </rdfs:subClassOf>
+      <rdfs:subClassOf>
+          <owl:Restriction>
+              <owl:onProperty rdf:resource="http://purl.obolibrary.org/obo/RO_0002202"/>
+              <owl:someValuesFrom rdf:resource="http://purl.obolibrary.org/obo/UBERON_0000118"/>
+          </owl:Restriction>
+      </rdfs:subClassOf>
+      <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">lung</rdfs:label>
+  </owl:Class>
+</rdf:RDF>

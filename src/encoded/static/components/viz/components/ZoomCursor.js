@@ -6,6 +6,12 @@ var _ = require('underscore');
 var vizUtil = require('./../utilities');
 var { console, object, isServerSide, layout } = require('./../../util');
 
+/**
+ * Currently Unused
+ * ToDo: Refactor and make inherit from CursorComponent
+ * 
+ */
+
 /** Informed by https://github.com/CarMax/react-cursor-zoom/blob/master/src/cursor-zoom.jsx, for use on existing components (SVGs).  */
 var ZoomCursor = React.createClass({
 

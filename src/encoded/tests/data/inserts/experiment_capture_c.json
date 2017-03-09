@@ -1,7 +1,7 @@
 [
     {
         "accession":"4DNEX067AWU1",
-        "status": "released",
+        "status": "in review by lab",
         "biosample":"231111bc-8535-4448-903e-854af460b254",
         "fragmentation_method": "chemical",
         "experiment_type": "capture Hi-C",
@@ -16,7 +16,7 @@
         "notes": "sample dcic notes",
         "lab": "4dn-dcic-lab",
         "aliases": ["labsample:alias25"],
-        "description": "Capture Test",
+        "description": "Capture Expt 1",
         "ligation_temperature": 37,
         "crosslinking_temperature": 37,
         "award": "1U01CA200059-01",
@@ -26,32 +26,36 @@
         "protocol": "131106bc-8535-4448-903e-854af460b244",
         "submitted_by": "4dndcic@gmail.com",
         "documents": ["dcf15d5e-40aa-43bc-b81c-32c70c9afb01"],
-        "rna_tag": "dUTP",
+        "rna_tag": "biotin-dUTP",
         "targeted_regions": [
-            {
-                "target": "d1115d5e-40aa-43bc-b81c-32c70c9afb44",
-                "oligo_file": "4DNFI067APA1"
-            }
+          {
+              "target": "d1115d5e-40aa-43bc-b81c-32c70c9afb44",
+              "oligo_file": "4DNFI067APA1"
+          },
+          {
+              "target": "d1115d5e-40aa-43bc-b81c-32c70c9afb33",
+              "oligo_file": "4DNFI067APB1"
+          }
         ]
     },
     {
         "accession":"4DNEX067AWT1",
-        "status": "in review by project",
-        "biosample":"231111bc-8535-4448-903e-854af460b255",
+        "status": "in review by lab",
+        "biosample":"231111bc-8535-4448-903e-854af460b254",
         "fragmentation_method": "chemical",
         "experiment_type": "capture Hi-C",
         "enzyme_lot_number": "123456",
         "average_fragment_size": 100,
         "digestion_time": 30,
         "ligation_time": 30,
-        "digestion_enzyme": "MNase",
+        "digestion_enzyme": "MboI",
         "digestion_temperature": 37,
         "tagging_method": "Biotinylated ATP",
         "crosslinking_time": 30,
         "notes": "sample dcic notes",
         "lab": "4dn-dcic-lab",
         "aliases": ["labsample:alias22"],
-        "description": "Test Drive",
+        "description": "Capture Expt 2",
         "ligation_temperature": 37,
         "crosslinking_temperature": 37,
         "award": "1U01CA200059-01",
@@ -66,7 +70,7 @@
         "targeted_regions": [
             {
                 "target": "d1115d5e-40aa-43bc-b81c-32c70c9afb44",
-                "oligo_file": "4DNFI067APB1"
+                "oligo_file": "4DNFI067APA1"
             },
             {
                 "target": "d1115d5e-40aa-43bc-b81c-32c70c9afb33",

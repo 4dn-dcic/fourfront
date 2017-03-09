@@ -8,6 +8,7 @@
         "fileset_type": "sequence files",
         "files_in_set":["4DNFI067APZ1"],
         "uuid": "4d6ecff9-7c67-4096-bca8-515246767feb",
-        "accession": "4DNFS40D5WL1"
+        "accession": "4DNFS40D5WL1",
+        "status": "in review by lab"
     }
 ]

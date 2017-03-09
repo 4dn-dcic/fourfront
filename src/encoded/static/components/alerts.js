@@ -5,6 +5,10 @@ var { Alert, Fade } = require('react-bootstrap');
 var _ = require('underscore');
 var store = require('../store');
 
+/**
+ * @module {React.Component} alerts
+ */
+
 var Alerts = module.exports = React.createClass({
 
     statics : {
@@ -33,6 +37,11 @@ var Alerts = module.exports = React.createClass({
             'title'     : "No Results",
             'message'   : "Selecting this filter returned no results so it was deselected.",
             'style'     : "warning"
+        },
+        ConnectionError : {
+            "title" : "Connection Error",
+            "message" : "Check your internet connection",
+            "style" : "danger"
         }
     },
 

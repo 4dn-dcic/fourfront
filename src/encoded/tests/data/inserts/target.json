@@ -6,7 +6,8 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
-        "aliases": ["dcic:test_targ1"]
+        "aliases": ["dcic:test_targ1"],
+        "status": "in review by lab"
     },
     {
         "description": "A target of circumstance",
@@ -16,7 +17,8 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
-        "aliases": ["dcic:test_targ2"]
+        "aliases": ["dcic:test_targ2"],
+        "status": "in review by lab"
     },
     {
         "description": "A target of no regard",
@@ -25,6 +27,7 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
+<<<<<<< HEAD
         "aliases": ["dcic:test_targ3"]
     },
     {
@@ -44,5 +47,9 @@
         "aliases": ["dcic:test_targ5"],
         "description": "A sample RNA target",
         "targeted_RNA": ["NM_003529.2"]
+=======
+        "aliases": ["dcic:test_targ3"],
+        "status": "in review by lab"
+>>>>>>> master
     }
 ]
