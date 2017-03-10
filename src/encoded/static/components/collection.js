@@ -8,6 +8,7 @@ var StickyHeader = require('./StickyHeader');
 /**
  * @module collection
  */
+module.exports;
 
 /**
  * @memberof module:collection
@@ -32,10 +33,9 @@ var lookup_column = function (result, column) {
 /**
  * The primary Collection view, renders a page containing a collection.Table component.
  * 
- * @memberof module:collection
+ * @member
  * @namespace
  * @type {Component}
- * @public
  */
 var Collection = module.exports.Collection = React.createClass({
     render: function () {
@@ -141,7 +141,7 @@ var RowView = function (props) {
 /**
  * Contains most of the logic for Collection view. Is wrapped by Collection component.
  * 
- * @memberof module:collection
+ * @member
  * @namespace
  * @type {Component}
  */

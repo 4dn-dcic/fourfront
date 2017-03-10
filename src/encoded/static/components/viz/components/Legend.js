@@ -8,6 +8,12 @@ var { console, isServerSide, Filters, object } = require('./../../util');
 
 
 /**
+ * Legend components to use alongside Charts. Best to include within a UIControlsWrapper, and place next to chart, utilizing the same data.
+ * 
+ * @memberof module:viz/components
+ * @name Legend
+ * @namespace
+ * @type {Component}
  * @prop {Object[]} fields - List of objects containing at least 'field', in object dot notation. Ideally should also have 'name'.
  * @prop {boolean} includeFieldTitle - Whether to show field title at top of terms.
  * @prop {string} className - Optional className to add to Legend's outermost div container.
@@ -15,6 +21,11 @@ var { console, isServerSide, Filters, object } = require('./../../util');
  */
 var Legend = module.exports = React.createClass({
 
+    /**
+     * @memberof module:viz/components.Legend
+     * @namespace
+     * @type {Object}
+     */
     statics : {
 
         /**
