@@ -64,11 +64,27 @@ var Action = module.exports = React.createClass({
             return response;
         })
         .then(response => {
+            this.clearFields(response, this.state.schema);
             this.setState({'newContext': response});
         }, error => {
             // something went wrong with fetch context. Just use an empty object
             this.setState({'newContext': {}});
         });
+    },
+
+    // Loop through fields in new context. If schema for field has
+    // "clear_create": "clear", then clear the value
+    clearFields: function(context, schema){
+        var contextKeys = Object.keys(context);
+        for(var i=0; i<contextKeys.length; i++){
+            if(schema.properties[contextKeys[i]]){
+                var fieldSchema = schema.properties[contextKeys[i]];
+                if (fieldSchema.clear_create && fieldSchema.clear_create == "clear"){
+                    context[contextKeys[i]] = null;
+                }
+            }
+        }
+        return context;
     },
 
     contextSift: function(context, schema){
@@ -78,7 +94,7 @@ var Action = module.exports = React.createClass({
         for(var i=0; i<contextKeys.length; i++){
             if(schema.properties[contextKeys[i]]){
                 var fieldSchema = schema.properties[contextKeys[i]];
-                if (fieldSchema.exclude_from && (fieldSchema.exclude_from == 'submit4dn' || fieldSchema.exclude_from == 'edit')){
+                if (fieldSchema.exclude_from && (_.contains(fieldSchema.exclude_from,'FFedit-create') || fieldSchema.exclude_from == 'FFedit-create')){
                     continue;
                 }
                 // check to see if this field is a calculated val
@@ -369,7 +385,7 @@ var FieldPanel = React.createClass({
         var schemaVal = object.getNestedProperty(schema, ['properties', field], true);
         if (!schemaVal) return null;
         // check to see if this field should be excluded based on exclude_from status
-        if (schemaVal.exclude_from && (schemaVal.exclude_from == 'submit4dn' || schemaVal.exclude_from == 'edit')){
+        if (schemaVal.exclude_from && (_.contains(schemaVal.exclude_from,'FFedit-create') || schemaVal.exclude_from == 'FFedit-create')){
             return null;
         }
         // check to see if this field is a calculated val
@@ -876,7 +892,7 @@ var ObjectField = React.createClass({
         var schemaVal = object.getNestedProperty(schema, ['properties', field], true);
         if (!schemaVal) return null;
         // check to see if this field should be excluded based on exclude_from status
-        if (schemaVal.exclude_from && (schemaVal.exclude_from == 'submit4dn' || schemaVal.exclude_from == 'edit')){
+        if (schemaVal.exclude_from && (_.contains(schemaVal.exclude_from,'FFedit-create') || schemaVal.exclude_from == 'FFedit-create')){
             return null;
         }
         // check to see if this field is a calculated val

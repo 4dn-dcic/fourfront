@@ -1,7 +1,7 @@
 [
     {
         "uuid": "431106bc-8535-4448-903e-854af460b254",
-        "description": "Gonna cut your gene!",
+        "description": "Genetic Modification 1",
         "modification_type": "Crispr",
         "constructs": ["131106bc-8535-4448-903e-854af460b211"],
         "modified_regions": ["d1115d5e-40aa-43bc-b81c-32c70c9afb01"],
@@ -10,11 +10,12 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
+        "status": "in review by lab",
         "target_of_mod": "d1115d5e-40aa-43bc-b81c-32c70c9afb55"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b265",
-        "description": "Gonna cut your gene!",
+        "description": "Stable Tranfection of GFP construct",
         "modification_type": "Stable Transfection",
         "constructs": ["131106bc-8535-4448-903e-854af460b211"],
         "modified_regions": ["d1115d5e-40aa-43bc-b81c-32c70c9afb01", "d2215d5e-40aa-43bc-b81c-32c70c9afb01"],
@@ -22,15 +23,17 @@
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
+        "status": "in review by lab",
         "target_of_mod": "d1115d5e-40aa-43bc-b81c-32c70c9afb55"
     },
     {
         "uuid": "431106bc-8535-4448-903e-854af460b276",
-        "description": "Gonna cut your gene!",
+        "description": "Other type of modification",
         "modification_type": "Other",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
+        "status": "in review by lab",
         "constructs": ["131106bc-8535-4448-903e-854af460b211"],
         "url": "https://www.cyclingnews.com"
     }

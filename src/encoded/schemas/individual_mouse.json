@@ -37,7 +37,7 @@
         },
         "organism": {
             "default": "3413218c-3d86-498b-a0a2-9a406638e786",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "linkEnum": ["3413218c-3d86-498b-a0a2-9a406638e786"]
         },
         "mouse_strain":{

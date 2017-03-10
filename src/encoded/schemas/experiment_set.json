@@ -1,5 +1,5 @@
 {
-    "title": "Experiment set",
+    "title": "Experiment Set",
     "description": "Schema for submitting metadata for an experiment set.",
     "id": "/profiles/experiment_set.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -29,7 +29,7 @@
             "title": "Set of experiments",
             "description": "List of experiments to be associatedas a set.",
             "type": "array",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "default": [],
             "uniqueItems": true,
             "items": {
@@ -43,7 +43,7 @@
             "description": "The categorization of the set of experiments.",
             "type": "string",
             "default": "custom",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "enum" : [
               "custom",
               "replicate"

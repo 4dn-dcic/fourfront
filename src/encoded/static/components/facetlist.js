@@ -1,3 +1,5 @@
+'use strict';
+
 var React = require('react');
 var url = require('url');
 var queryString = require('query-string');
@@ -37,7 +39,7 @@ var ExpTerm = React.createClass({
             return numPassed;
         },
 
-        /* Use as a mixin (i.e. func.call(this, termKey, facetField, expsOrSets) ) in components with access to this.props.expSetFilters */
+        /** Use as a mixin (i.e. func.call(this, termKey, facetField, expsOrSets) ) in components with access to this.props.expSetFilters */
         isSelected : function(
             termKey     = (this.state.term || this.props.term || {key:null}).key,
             facetField  = (this.state.facet || this.props.facet || {field:null}).field,
@@ -89,8 +91,8 @@ var ExpTerm = React.createClass({
             /** 
              * props.expSetFilters uses standardized fieldKeys/props.facet.field while
              * experiment tables & facets do not. Props provided through props.facet 
-             * are un-standardized, so run them through standardizeFieldKey() before
-             * checking if in expSetFilters (e.g. as in ExpTerm.isSelected() ).
+             * are un-standardized, so run them through func standardizeFieldKey before
+             * checking if in expSetFilters (e.g. as in ExpTerm.isSelected ).
              */
             var termMatchExps = Filters.siftExperimentsClientSide(
                 this.props.experimentSetListJSON,
@@ -534,8 +536,7 @@ var FacetList = module.exports = React.createClass({
          * not present in facets.
          * 
          * @param {Object[]} facets - Array of complete facet objects (must have 'terms' & 'fields' properties).
-         * @param {Object} expSetFilters - Object containing facet fields and their enabled terms:
-         *     '{string} Field in item JSON hierarchy, using object dot notation : {Set} terms'.
+         * @param {Object} expSetFilters - Object containing facet fields and their enabled terms: '{string} Field in item JSON hierarchy, using object dot notation : {Set} terms'.
          * 
          * @return {Object} The filters which are ignored. Object looks like expSetFilters.
          */
@@ -738,7 +739,9 @@ var FacetList = module.exports = React.createClass({
 
     /**
      * If not using props passed in through props, and incomplete facets not available (yet) in redux store,
-     * AJAX them in, save to redux store, then fill up w/ terms. @see FacetList.getInitialState
+     * AJAX them in, save to redux store, then fill up w/ terms. 
+     * 
+     * @see FacetList.getInitialState
      * 
      * Possible ToDo : Store copy of this.(state.)facets in redux store instead of reference.
      */

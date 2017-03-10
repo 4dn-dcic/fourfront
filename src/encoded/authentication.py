@@ -167,7 +167,7 @@ class Auth0AuthenticationPolicy(CallbackAuthenticationPolicy):
         def getUserInfo(request):
             user_props = request.embed('/session-properties', as_user=email)
             user_details = request.embed('/me', as_user=email)
-            includedDetailFields = ['email', 'first_name','last_name','groups','timezone','status', 'lab', 'submits_for']
+            includedDetailFields = ['email', 'first_name','last_name','groups','timezone','status']
             user_props.update({
                 # Only include certain fields from profile
                 "details" : { p:v for p,v in user_details.items() if p in includedDetailFields},
