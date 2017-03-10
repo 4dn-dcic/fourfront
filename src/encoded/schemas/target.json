@@ -38,12 +38,12 @@
                 "type": "string"
             }
         },
-        "targeted_region": {
+        "targeted_genome_regions": {
             "title": "Targeted Genomic Regions",
-            "description": "The genome assembly, chromosome and coordinates of the region that is targeted",
+            "description": "The genome assembly, chromosome and coordinates of the regions that are targeted",
             "type": "array",
             "items": {
-                "title": "Targeted Genomic Regions",
+                "title": "Genomic Region",
                 "type": "string",
                 "linkTo": "GenomicRegion"
             }
@@ -55,7 +55,7 @@
             "items": {
                 "title": "Protein",
                 "description": "UniProt protein name",
-                "internal_comment": "Can we validate against Uniprot?",
+                "internal_comment": "Can we validate against and link to Uniprot?",
                 "type": "string"
             }
         },
@@ -65,7 +65,7 @@
             "type": "array",
             "items": {
                 "title": "RNA",
-                "description": "Gene symbol for targeted gene",
+                "description": "RefSeq accession for the targeted RNA",
                 "internal_comment": "Can we validate against RefSeq?",
                 "type": "string"
             }
