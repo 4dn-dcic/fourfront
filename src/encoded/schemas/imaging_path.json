@@ -58,6 +58,19 @@
             "description": "Antibodies/Primers/Chemicals that carry the label",
             "type": "string"
         },
+        "type_labeled_probe": {
+            "title": "Type of labeled probe",
+            "description": "General classification of the labeled probe",
+            "type": "string",
+            "enum": [
+                "Antibody",
+                "Nanobody",
+                "Aptamer",
+                "RNA",
+                "DNA primer",
+                "Small chemical"
+            ]
+        },
         "labels": {
             "title": "Labels",
             "description": "Fluorescent labels used for ",
