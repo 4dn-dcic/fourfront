@@ -1,0 +1,46 @@
+.. _module-collection.Table:
+
+====================
+Component: ``Table``
+====================
+
+
+Member Of :doc:`module-collection`
+
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 3
+   
+   
+
+
+Description
+===========
+
+Contains most of the logic for Collection view. Is wrapped by Collection component.
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
+
+
+
+
+
+
+
+
+
+
+

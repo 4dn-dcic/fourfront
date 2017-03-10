@@ -1,0 +1,49 @@
+.. _module-item-pages_item-view.Detail:
+
+=====================
+Component: ``Detail``
+=====================
+
+
+Member Of :doc:`module-item-pages_item-view`
+
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 3
+   
+   module-item-pages_item-view.Detail.statics
+   
+
+
+Description
+===========
+
+A list of properties which belong to Item shown by ItemView.
+Shows 'persistentKeys' fields & values stickied near top of list,
+'excludedKeys' never, and 'hiddenKeys' only when "See More Info" button is clicked.
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
+
+
+
+
+
+
+
+
+
+
+

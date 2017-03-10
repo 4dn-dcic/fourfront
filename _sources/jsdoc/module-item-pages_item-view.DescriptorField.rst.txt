@@ -1,0 +1,48 @@
+.. _module-item-pages_item-view.DescriptorField:
+
+==============================
+Component: ``DescriptorField``
+==============================
+
+
+Member Of :doc:`module-item-pages_item-view`
+
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 3
+   
+   
+
+
+Description
+===========
+
+Deprecated.
+Display the item field with a tooltip showing the field description from
+schema, if available.
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
+
+
+
+
+
+
+
+
+
+
+

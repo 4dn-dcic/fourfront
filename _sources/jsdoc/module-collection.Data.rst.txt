@@ -1,0 +1,58 @@
+.. _module-collection.Data:
+
+===============
+Class: ``Data``
+===============
+
+
+Member Of :doc:`module-collection`
+
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 3
+   
+   module-collection.Data.Data
+   
+
+
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
+
+Functions
+=========
+
+
+
+.. _module-collection.Data.sort:
+
+
+``sort``
+--------
+
+
+
+.. js:function:: sort()
+
+    
+    
+
+
+
+
+
+
+
+

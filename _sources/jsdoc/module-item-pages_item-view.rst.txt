@@ -1,0 +1,195 @@
+===================================
+Component: ``item-pages/item-view``
+===================================
+
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 3
+   
+   module-item-pages_item-view.Detail
+   module-item-pages_item-view.DescriptorField
+   module-item-pages_item-view.SubIPanel
+   module-item-pages_item-view.Subview
+   
+
+
+Description
+===========
+
+This Component renders out the default Item page view for Item objects/contexts which do not have a more specific
+Item page template associated with them.
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
+
+Functions
+=========
+
+
+
+
+
+.. _module-item-pages_item-view.getInitialState:
+
+
+``getInitialState``
+-------------------
+
+
+
+.. js:function:: getInitialState()
+
+    
+    
+
+
+.. _module-item-pages_item-view.handleHover:
+
+
+``handleHover``
+---------------
+
+
+
+.. js:function:: handleHover()
+
+    
+    
+
+
+.. _module-item-pages_item-view.render:
+
+
+``render``
+----------
+
+
+
+.. js:function:: render()
+
+    
+    
+
+
+.. _module-item-pages_item-view.getInitialState:
+
+
+``getInitialState``
+-------------------
+
+
+
+.. js:function:: getInitialState()
+
+    
+    
+
+
+.. _module-item-pages_item-view.handleToggle:
+
+
+``handleToggle``
+----------------
+
+
+
+.. js:function:: handleToggle()
+
+    
+    
+
+
+.. _module-item-pages_item-view.toggleLink:
+
+
+``toggleLink``
+--------------
+
+
+
+.. js:function:: toggleLink()
+
+    
+    
+
+
+.. _module-item-pages_item-view.render:
+
+
+``render``
+----------
+
+
+
+.. js:function:: render()
+
+    
+    
+
+
+.. _module-item-pages_item-view.render:
+
+
+``render``
+----------
+
+
+
+.. js:function:: render()
+
+    
+    
+
+
+.. _module-item-pages_item-view.render:
+
+
+``render``
+----------
+
+
+
+.. js:function:: render()
+
+    
+    
+
+
+.. _module-item-pages_item-view.getInitialState:
+
+
+``getInitialState``
+-------------------
+
+
+
+.. js:function:: getInitialState()
+
+    
+    :return Object: collapsed : false
+    
+
+
+
+
+
+
+
+
+
+
+

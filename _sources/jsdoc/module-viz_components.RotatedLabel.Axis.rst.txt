@@ -1,0 +1,45 @@
+.. _undefined.Axis:
+
+===================
+Component: ``Axis``
+===================
+
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 3
+   
+   
+
+
+Description
+===========
+
+An Axis component which would generate and contain multiple RotatedLabel components, data for which is provided via props.labels.
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
+
+
+
+
+
+
+
+
+
+
+

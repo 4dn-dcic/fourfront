@@ -1,0 +1,362 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Module: collection &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Class: Cell" href="module-collection.Cell.html" />
+    <link rel="prev" title="Class: Timeout" href="module-app-Timeout.Timeout.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="module-collection.Cell.html" title="Class: Cell"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="module-app-Timeout.Timeout.html" title="Class: Timeout"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">JavaScript API Reference</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-collection">
+<h1>Module: <code class="docutils literal"><span class="pre">collection</span></code><a class="headerlink" href="#module-collection" title="Permalink to this headline">¶</a></h1>
+<div class="contents local topic" id="local-navigation">
+<p class="topic-title first">Local Navigation</p>
+<ul class="simple">
+<li><a class="reference internal" href="#children" id="id3">Children</a></li>
+<li><a class="reference internal" href="#functions" id="id4">Functions</a><ul>
+<li><a class="reference internal" href="#lookup-column" id="id5"><code class="docutils literal"><span class="pre">lookup_column</span></code></a></li>
+<li><a class="reference internal" href="#render" id="id6"><code class="docutils literal"><span class="pre">render</span></code></a></li>
+<li><a class="reference internal" href="#rowview" id="id7"><code class="docutils literal"><span class="pre">RowView</span></code></a></li>
+<li><a class="reference internal" href="#getdefaultprops" id="id8"><code class="docutils literal"><span class="pre">getDefaultProps</span></code></a></li>
+<li><a class="reference internal" href="#getinitialstate" id="id9"><code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
+<li><a class="reference internal" href="#componentwillreceiveprops" id="id10"><code class="docutils literal"><span class="pre">componentWillReceiveProps</span></code></a></li>
+<li><a class="reference internal" href="#extractparams" id="id11"><code class="docutils literal"><span class="pre">extractParams</span></code></a></li>
+<li><a class="reference internal" href="#guesscolumns" id="id12"><code class="docutils literal"><span class="pre">guessColumns</span></code></a></li>
+<li><a class="reference internal" href="#extractdata" id="id13"><code class="docutils literal"><span class="pre">extractData</span></code></a></li>
+<li><a class="reference internal" href="#fetchall" id="id14"><code class="docutils literal"><span class="pre">fetchAll</span></code></a></li>
+<li><a class="reference internal" href="#id1" id="id15"><code class="docutils literal"><span class="pre">render</span></code></a></li>
+<li><a class="reference internal" href="#componentdidmount" id="id16"><code class="docutils literal"><span class="pre">componentDidMount</span></code></a></li>
+<li><a class="reference internal" href="#handleclickheader" id="id17"><code class="docutils literal"><span class="pre">handleClickHeader</span></code></a></li>
+<li><a class="reference internal" href="#handlekeyup" id="id18"><code class="docutils literal"><span class="pre">handleKeyUp</span></code></a></li>
+<li><a class="reference internal" href="#submit" id="id19"><code class="docutils literal"><span class="pre">submit</span></code></a></li>
+<li><a class="reference internal" href="#clearfilter" id="id20"><code class="docutils literal"><span class="pre">clearFilter</span></code></a></li>
+<li><a class="reference internal" href="#componentwillunmount" id="id21"><code class="docutils literal"><span class="pre">componentWillUnmount</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="children">
+<h2><a class="toc-backref" href="#id3">Children</a><a class="headerlink" href="#children" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="module-collection.Cell.html">Class: <code class="docutils literal"><span class="pre">Cell</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="module-collection.Cell.html#children">Children</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="module-collection.Cell.Cell.html">Class: <code class="docutils literal"><span class="pre">Cell</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="module-collection.Row.html">Class: <code class="docutils literal"><span class="pre">Row</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="module-collection.Row.html#children">Children</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="module-collection.Row.Row.html">Class: <code class="docutils literal"><span class="pre">Row</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="module-collection.Data.html">Class: <code class="docutils literal"><span class="pre">Data</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="module-collection.Data.html#children">Children</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="module-collection.Data.Data.html">Class: <code class="docutils literal"><span class="pre">Data</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="module-collection.Data.html#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="module-collection.Data.html#sort"><code class="docutils literal"><span class="pre">sort</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="module-collection-Collection.html">Component: <code class="docutils literal"><span class="pre">Collection</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="module-collection-Collection.html#children">Children</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="module-collection-Collection.html#description">Description</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="module-collection-Table.html">Component: <code class="docutils literal"><span class="pre">Table</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="module-collection-Table.html#children">Children</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="module-collection-Table.html#description">Description</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<p>DPROPERTIES</p>
+<p>PROPS</p>
+</div>
+<div class="section" id="functions">
+<h2><a class="toc-backref" href="#id4">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="lookup-column">
+<span id="module-collection-lookup-column"></span><h3><a class="toc-backref" href="#id5"><code class="docutils literal"><span class="pre">lookup_column</span></code></a><a class="headerlink" href="#lookup-column" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="lookup_column">
+<code class="descname">lookup_column</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#lookup_column" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="render">
+<span id="module-collection-render"></span><h3><a class="toc-backref" href="#id6"><code class="docutils literal"><span class="pre">render</span></code></a><a class="headerlink" href="#render" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt>
+<code class="descname">render</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="rowview">
+<span id="module-collection-rowview"></span><h3><a class="toc-backref" href="#id7"><code class="docutils literal"><span class="pre">RowView</span></code></a><a class="headerlink" href="#rowview" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="RowView">
+<code class="descname">RowView</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RowView" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getdefaultprops">
+<span id="module-collection-getdefaultprops"></span><h3><a class="toc-backref" href="#id8"><code class="docutils literal"><span class="pre">getDefaultProps</span></code></a><a class="headerlink" href="#getdefaultprops" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="getDefaultProps">
+<code class="descname">getDefaultProps</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getDefaultProps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getinitialstate">
+<span id="module-collection-getinitialstate"></span><h3><a class="toc-backref" href="#id9"><code class="docutils literal"><span class="pre">getInitialState</span></code></a><a class="headerlink" href="#getinitialstate" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="getInitialState">
+<code class="descname">getInitialState</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getInitialState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="componentwillreceiveprops">
+<span id="module-collection-componentwillreceiveprops"></span><h3><a class="toc-backref" href="#id10"><code class="docutils literal"><span class="pre">componentWillReceiveProps</span></code></a><a class="headerlink" href="#componentwillreceiveprops" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="componentWillReceiveProps">
+<code class="descname">componentWillReceiveProps</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#componentWillReceiveProps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="extractparams">
+<span id="module-collection-extractparams"></span><h3><a class="toc-backref" href="#id11"><code class="docutils literal"><span class="pre">extractParams</span></code></a><a class="headerlink" href="#extractparams" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="extractParams">
+<code class="descname">extractParams</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#extractParams" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="guesscolumns">
+<span id="module-collection-guesscolumns"></span><h3><a class="toc-backref" href="#id12"><code class="docutils literal"><span class="pre">guessColumns</span></code></a><a class="headerlink" href="#guesscolumns" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="guessColumns">
+<code class="descname">guessColumns</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#guessColumns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="extractdata">
+<span id="module-collection-extractdata"></span><h3><a class="toc-backref" href="#id13"><code class="docutils literal"><span class="pre">extractData</span></code></a><a class="headerlink" href="#extractdata" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="extractData">
+<code class="descname">extractData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#extractData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="fetchall">
+<span id="module-collection-fetchall"></span><h3><a class="toc-backref" href="#id14"><code class="docutils literal"><span class="pre">fetchAll</span></code></a><a class="headerlink" href="#fetchall" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="fetchAll">
+<code class="descname">fetchAll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#fetchAll" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="id1">
+<span id="id2"></span><h3><a class="toc-backref" href="#id15"><code class="docutils literal"><span class="pre">render</span></code></a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt>
+<code class="descname">render</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="componentdidmount">
+<span id="module-collection-componentdidmount"></span><h3><a class="toc-backref" href="#id16"><code class="docutils literal"><span class="pre">componentDidMount</span></code></a><a class="headerlink" href="#componentdidmount" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="componentDidMount">
+<code class="descname">componentDidMount</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#componentDidMount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="handleclickheader">
+<span id="module-collection-handleclickheader"></span><h3><a class="toc-backref" href="#id17"><code class="docutils literal"><span class="pre">handleClickHeader</span></code></a><a class="headerlink" href="#handleclickheader" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="handleClickHeader">
+<code class="descname">handleClickHeader</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#handleClickHeader" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="handlekeyup">
+<span id="module-collection-handlekeyup"></span><h3><a class="toc-backref" href="#id18"><code class="docutils literal"><span class="pre">handleKeyUp</span></code></a><a class="headerlink" href="#handlekeyup" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="handleKeyUp">
+<code class="descname">handleKeyUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#handleKeyUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="submit">
+<span id="module-collection-submit"></span><h3><a class="toc-backref" href="#id19"><code class="docutils literal"><span class="pre">submit</span></code></a><a class="headerlink" href="#submit" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt>
+<code class="descname">submit</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="clearfilter">
+<span id="module-collection-clearfilter"></span><h3><a class="toc-backref" href="#id20"><code class="docutils literal"><span class="pre">clearFilter</span></code></a><a class="headerlink" href="#clearfilter" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="clearFilter">
+<code class="descname">clearFilter</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#clearFilter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="componentwillunmount">
+<span id="module-collection-componentwillunmount"></span><h3><a class="toc-backref" href="#id21"><code class="docutils literal"><span class="pre">componentWillUnmount</span></code></a><a class="headerlink" href="#componentwillunmount" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="componentWillUnmount">
+<code class="descname">componentWillUnmount</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#componentWillUnmount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Module: <code class="docutils literal"><span class="pre">collection</span></code></a><ul>
+<li><a class="reference internal" href="#children">Children</a></li>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#lookup-column"><code class="docutils literal"><span class="pre">lookup_column</span></code></a></li>
+<li><a class="reference internal" href="#render"><code class="docutils literal"><span class="pre">render</span></code></a></li>
+<li><a class="reference internal" href="#rowview"><code class="docutils literal"><span class="pre">RowView</span></code></a></li>
+<li><a class="reference internal" href="#getdefaultprops"><code class="docutils literal"><span class="pre">getDefaultProps</span></code></a></li>
+<li><a class="reference internal" href="#getinitialstate"><code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
+<li><a class="reference internal" href="#componentwillreceiveprops"><code class="docutils literal"><span class="pre">componentWillReceiveProps</span></code></a></li>
+<li><a class="reference internal" href="#extractparams"><code class="docutils literal"><span class="pre">extractParams</span></code></a></li>
+<li><a class="reference internal" href="#guesscolumns"><code class="docutils literal"><span class="pre">guessColumns</span></code></a></li>
+<li><a class="reference internal" href="#extractdata"><code class="docutils literal"><span class="pre">extractData</span></code></a></li>
+<li><a class="reference internal" href="#fetchall"><code class="docutils literal"><span class="pre">fetchAll</span></code></a></li>
+<li><a class="reference internal" href="#id1"><code class="docutils literal"><span class="pre">render</span></code></a></li>
+<li><a class="reference internal" href="#componentdidmount"><code class="docutils literal"><span class="pre">componentDidMount</span></code></a></li>
+<li><a class="reference internal" href="#handleclickheader"><code class="docutils literal"><span class="pre">handleClickHeader</span></code></a></li>
+<li><a class="reference internal" href="#handlekeyup"><code class="docutils literal"><span class="pre">handleKeyUp</span></code></a></li>
+<li><a class="reference internal" href="#submit"><code class="docutils literal"><span class="pre">submit</span></code></a></li>
+<li><a class="reference internal" href="#clearfilter"><code class="docutils literal"><span class="pre">clearFilter</span></code></a></li>
+<li><a class="reference internal" href="#componentwillunmount"><code class="docutils literal"><span class="pre">componentWillUnmount</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="module-app-Timeout.Timeout.html"
+                        title="previous chapter">Class: <code class="docutils literal"><span class="pre">Timeout</span></code></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="module-collection.Cell.html"
+                        title="next chapter">Class: <code class="docutils literal"><span class="pre">Cell</span></code></a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/jsdoc/module-collection.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="module-collection.Cell.html" title="Class: Cell"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="module-app-Timeout.Timeout.html" title="Class: Timeout"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

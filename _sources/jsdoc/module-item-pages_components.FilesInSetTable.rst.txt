@@ -1,0 +1,50 @@
+.. _undefined.FilesInSetTable:
+
+==============================
+Component: ``FilesInSetTable``
+==============================
+
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 3
+   
+   module-item-pages_components.FilesInSetTable.statics
+   module-item-pages_components.FilesInSetTable.SubmitterLink
+   module-item-pages_components.FilesInSetTable.LabIcon
+   module-item-pages_components.FilesInSetTable.FileItemRow
+   module-item-pages_components.FilesInSetTable.Small
+   
+
+
+Description
+===========
+
+Component for displaying Files in a set.
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
+
+
+
+
+
+
+
+
+
+
+

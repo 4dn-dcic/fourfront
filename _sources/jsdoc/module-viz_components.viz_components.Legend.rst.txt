@@ -1,0 +1,45 @@
+.. _undefined.Legend:
+
+=====================
+Component: ``Legend``
+=====================
+
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 3
+   
+   
+
+
+Description
+===========
+
+Legend components to use alongside Charts. Best to include within a UIControlsWrapper, and place next to chart, utilizing the same data.
+
+DPROPERTIES 
+
+[object Object],[object Object],[object Object],[object Object]
+
+PROPS
+
+
+
+
+
+
+
+
+
+
+
+
+
+

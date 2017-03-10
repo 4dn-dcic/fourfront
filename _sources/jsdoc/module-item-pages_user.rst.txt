@@ -1,0 +1,443 @@
+==============================
+Component: ``item-pages/user``
+==============================
+
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 3
+   
+   module-item-pages_user.AccessKeyStore
+   module-item-pages_user.AccessKeyTable
+   module-item-pages_user.statics
+   
+
+
+Description
+===========
+
+User profile page/view.
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
+
+Functions
+=========
+
+
+
+.. _module-item-pages_user.getInitialState:
+
+
+``getInitialState``
+-------------------
+
+
+
+.. js:function:: getInitialState()
+
+    
+    
+
+
+.. _module-item-pages_user.renderTable:
+
+
+``renderTable``
+---------------
+
+
+
+.. js:function:: renderTable()
+
+    
+    
+
+
+.. _module-item-pages_user.render:
+
+
+``render``
+----------
+
+
+
+.. js:function:: render()
+
+    
+    
+
+
+.. _module-item-pages_user.create:
+
+
+``create``
+----------
+
+
+
+.. js:function:: create()
+
+    
+    
+
+
+.. _module-item-pages_user.doAction:
+
+
+``doAction``
+------------
+
+
+
+.. js:function:: doAction()
+
+    
+    
+
+
+.. _module-item-pages_user.onCreate:
+
+
+``onCreate``
+------------
+
+
+
+.. js:function:: onCreate()
+
+    
+    
+
+
+.. _module-item-pages_user.onResetSecret:
+
+
+``onResetSecret``
+-----------------
+
+
+
+.. js:function:: onResetSecret()
+
+    
+    
+
+
+.. _module-item-pages_user.showNewSecret:
+
+
+``showNewSecret``
+-----------------
+
+
+
+.. js:function:: showNewSecret()
+
+    
+    
+
+
+.. _module-item-pages_user.onDelete:
+
+
+``onDelete``
+------------
+
+
+
+.. js:function:: onDelete()
+
+    
+    
+
+
+.. _module-item-pages_user.onError:
+
+
+``onError``
+-----------
+
+
+
+.. js:function:: onError()
+
+    
+    
+
+
+.. _module-item-pages_user.hideModal:
+
+
+``hideModal``
+-------------
+
+
+
+.. js:function:: hideModal()
+
+    
+    
+
+
+.. _module-item-pages_user.mayEdit:
+
+
+``mayEdit``
+-----------
+
+
+
+.. js:function:: mayEdit()
+
+    
+    
+
+
+.. _module-item-pages_user.render:
+
+
+``render``
+----------
+
+
+
+.. js:function:: render()
+
+    
+    
+
+
+.. _module-item-pages_user.icon:
+
+
+``icon``
+--------
+
+
+
+.. js:function:: icon()
+
+    
+    
+
+
+.. _module-item-pages_user.render:
+
+
+``render``
+----------
+
+
+
+.. js:function:: render()
+
+    
+    
+
+
+.. _module-item-pages_user.getDefaultProps:
+
+
+``getDefaultProps``
+-------------------
+
+
+
+.. js:function:: getDefaultProps()
+
+    
+    
+
+
+.. _module-item-pages_user.getInitialState:
+
+
+``getInitialState``
+-------------------
+
+
+
+.. js:function:: getInitialState()
+
+    
+    
+
+
+.. _module-item-pages_user.componentDidMount:
+
+
+``componentDidMount``
+---------------------
+
+
+
+.. js:function:: componentDidMount()
+
+    
+    
+
+
+.. _module-item-pages_user.componentWillUnmount:
+
+
+``componentWillUnmount``
+------------------------
+
+
+
+.. js:function:: componentWillUnmount()
+
+    
+    
+
+
+.. _module-item-pages_user.getAwardsList:
+
+
+``getAwardsList``
+-----------------
+
+Get list of all awards (unique) from list of labs.
+ToDo : Migrate somewhere more static-cy.
+
+.. js:function:: getAwardsList(labDetails)
+
+    
+    :param Array.<Object> labDetails: Array of lab objects with embedded award details.
+    :return Array.<Object>: List of all unique awards in labs.
+    
+
+
+.. _module-item-pages_user.updateAwardsList:
+
+
+``updateAwardsList``
+--------------------
+
+Update state.awards_list with award details from list of lab details.
+
+.. js:function:: updateAwardsList(labDetails)
+
+    
+    :param Array.<Object> labDetails: Array of lab objects with embedded award details.
+    
+
+
+.. _module-item-pages_user.render:
+
+
+``render``
+----------
+
+
+
+.. js:function:: render()
+
+    
+    
+
+
+.. _module-item-pages_user.getInitialState:
+
+
+``getInitialState``
+-------------------
+
+
+
+.. js:function:: getInitialState()
+
+    
+    
+
+
+.. _module-item-pages_user.handleChange:
+
+
+``handleChange``
+----------------
+
+
+
+.. js:function:: handleChange()
+
+    
+    
+
+
+.. _module-item-pages_user.handleSubmit:
+
+
+``handleSubmit``
+----------------
+
+
+
+.. js:function:: handleSubmit()
+
+    
+    
+
+
+.. _module-item-pages_user.render:
+
+
+``render``
+----------
+
+
+
+.. js:function:: render()
+
+    
+    
+
+
+.. _module-item-pages_user.render:
+
+
+``render``
+----------
+
+
+
+.. js:function:: render()
+
+    
+    
+
+
+.. _module-item-pages_user.handleSubmit:
+
+
+``handleSubmit``
+----------------
+
+
+
+.. js:function:: handleSubmit()
+
+    
+    
+
+
+
+
+
+
+
+

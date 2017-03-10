@@ -1,0 +1,7 @@
+encoded.audit.experiment module
+===============================
+
+.. automodule:: encoded.audit.experiment
+    :members:
+    :undoc-members:
+    :show-inheritance:

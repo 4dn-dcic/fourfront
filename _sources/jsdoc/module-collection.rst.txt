@@ -1,0 +1,283 @@
+======================
+Module: ``collection``
+======================
+
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 3
+   
+   module-collection.Cell
+   module-collection.Row
+   module-collection.Data
+   module-collection-Collection
+   module-collection-Table
+   
+
+
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
+
+Functions
+=========
+
+
+
+.. _module-collection.lookup_column:
+
+
+``lookup_column``
+-----------------
+
+
+
+.. js:function:: lookup_column()
+
+    
+    
+
+
+.. _module-collection.render:
+
+
+``render``
+----------
+
+
+
+.. js:function:: render()
+
+    
+    
+
+
+.. _module-collection.RowView:
+
+
+``RowView``
+-----------
+
+
+
+.. js:function:: RowView()
+
+    
+    
+
+
+.. _module-collection.getDefaultProps:
+
+
+``getDefaultProps``
+-------------------
+
+
+
+.. js:function:: getDefaultProps()
+
+    
+    
+
+
+.. _module-collection.getInitialState:
+
+
+``getInitialState``
+-------------------
+
+
+
+.. js:function:: getInitialState()
+
+    
+    
+
+
+.. _module-collection.componentWillReceiveProps:
+
+
+``componentWillReceiveProps``
+-----------------------------
+
+
+
+.. js:function:: componentWillReceiveProps()
+
+    
+    
+
+
+.. _module-collection.extractParams:
+
+
+``extractParams``
+-----------------
+
+
+
+.. js:function:: extractParams()
+
+    
+    
+
+
+.. _module-collection.guessColumns:
+
+
+``guessColumns``
+----------------
+
+
+
+.. js:function:: guessColumns()
+
+    
+    
+
+
+.. _module-collection.extractData:
+
+
+``extractData``
+---------------
+
+
+
+.. js:function:: extractData()
+
+    
+    
+
+
+.. _module-collection.fetchAll:
+
+
+``fetchAll``
+------------
+
+
+
+.. js:function:: fetchAll()
+
+    
+    
+
+
+.. _module-collection.render:
+
+
+``render``
+----------
+
+
+
+.. js:function:: render()
+
+    
+    
+
+
+.. _module-collection.componentDidMount:
+
+
+``componentDidMount``
+---------------------
+
+
+
+.. js:function:: componentDidMount()
+
+    
+    
+
+
+.. _module-collection.handleClickHeader:
+
+
+``handleClickHeader``
+---------------------
+
+
+
+.. js:function:: handleClickHeader()
+
+    
+    
+
+
+.. _module-collection.handleKeyUp:
+
+
+``handleKeyUp``
+---------------
+
+
+
+.. js:function:: handleKeyUp()
+
+    
+    
+
+
+.. _module-collection.submit:
+
+
+``submit``
+----------
+
+
+
+.. js:function:: submit()
+
+    
+    
+
+
+.. _module-collection.clearFilter:
+
+
+``clearFilter``
+---------------
+
+
+
+.. js:function:: clearFilter()
+
+    
+    
+
+
+.. _module-collection.componentWillUnmount:
+
+
+``componentWillUnmount``
+------------------------
+
+
+
+.. js:function:: componentWillUnmount()
+
+    
+    
+
+
+
+
+
+
+
+

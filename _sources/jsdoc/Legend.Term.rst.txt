@@ -1,0 +1,46 @@
+.. _global.rst#Le.Term:
+
+===================
+Component: ``Term``
+===================
+
+
+Member Of :doc:`global.rst#Le`
+
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 3
+   
+   
+
+
+Description
+===========
+
+React component which represents a Term item.
+
+DPROPERTIES 
+
+[object Object],[object Object],[object Object]
+
+PROPS
+
+
+
+
+
+
+
+
+
+
+
+
+
+

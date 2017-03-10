@@ -1,0 +1,521 @@
+==================
+Component: ``app``
+==================
+
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 3
+   
+   module-app-Timeout
+   
+
+
+Description
+===========
+
+The top-level component for this application.
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
+
+Functions
+=========
+
+
+
+.. _module-app.url:
+
+
+``url``
+-------
+
+
+
+.. js:function:: url()
+
+    
+    
+
+
+.. _module-app.active:
+
+
+``active``
+----------
+
+
+
+.. js:function:: active()
+
+    
+    
+
+
+.. _module-app.render:
+
+
+``render``
+----------
+
+
+
+.. js:function:: render()
+
+    
+    
+
+
+.. _module-app.componentDidMount:
+
+
+``componentDidMount``
+---------------------
+
+
+
+.. js:function:: componentDidMount()
+
+    
+    
+
+
+.. _module-app.getDefaultProps:
+
+
+``getDefaultProps``
+-------------------
+
+
+
+.. js:function:: getDefaultProps()
+
+    
+    
+
+
+.. _module-app.getInitialState:
+
+
+``getInitialState``
+-------------------
+
+
+
+.. js:function:: getInitialState()
+
+    
+    
+
+
+.. _module-app.getChildContext:
+
+
+``getChildContext``
+-------------------
+
+
+
+.. js:function:: getChildContext()
+
+    
+    
+
+
+.. _module-app.listActionsFor:
+
+
+``listActionsFor``
+------------------
+
+
+
+.. js:function:: listActionsFor()
+
+    
+    
+
+
+.. _module-app.currentResource:
+
+
+``currentResource``
+-------------------
+
+
+
+.. js:function:: currentResource()
+
+    
+    
+
+
+.. _module-app.currentAction:
+
+
+``currentAction``
+-----------------
+
+
+
+.. js:function:: currentAction()
+
+    
+    
+
+
+.. _module-app.loadSchemas:
+
+
+``loadSchemas``
+---------------
+
+
+
+.. js:function:: loadSchemas()
+
+    
+    
+
+
+.. _module-app.getStatsComponent:
+
+
+``getStatsComponent``
+---------------------
+
+
+
+.. js:function:: getStatsComponent()
+
+    
+    
+
+
+.. _module-app.updateStats:
+
+
+``updateStats``
+---------------
+
+
+
+.. js:function:: updateStats()
+
+    
+    
+
+
+.. _module-app.handleDropdownChange:
+
+
+``handleDropdownChange``
+------------------------
+
+
+
+.. js:function:: handleDropdownChange()
+
+    
+    
+
+
+.. _module-app.handleAutocompleteChosenChange:
+
+
+``handleAutocompleteChosenChange``
+----------------------------------
+
+
+
+.. js:function:: handleAutocompleteChosenChange()
+
+    
+    
+
+
+.. _module-app.handleAutocompleteFocusChange:
+
+
+``handleAutocompleteFocusChange``
+---------------------------------
+
+
+
+.. js:function:: handleAutocompleteFocusChange()
+
+    
+    
+
+
+.. _module-app.handleAutocompleteHiddenChange:
+
+
+``handleAutocompleteHiddenChange``
+----------------------------------
+
+
+
+.. js:function:: handleAutocompleteHiddenChange()
+
+    
+    
+
+
+.. _module-app.handleLayoutClick:
+
+
+``handleLayoutClick``
+---------------------
+
+
+
+.. js:function:: handleLayoutClick()
+
+    
+    
+
+
+.. _module-app.handleKey:
+
+
+``handleKey``
+-------------
+
+
+
+.. js:function:: handleKey()
+
+    
+    
+
+
+.. _module-app.authenticateUser:
+
+
+``authenticateUser``
+--------------------
+
+
+
+.. js:function:: authenticateUser()
+
+    
+    
+
+
+.. _module-app.componentDidMount:
+
+
+``componentDidMount``
+---------------------
+
+
+
+.. js:function:: componentDidMount()
+
+    
+    
+
+
+.. _module-app.componentDidUpdate:
+
+
+``componentDidUpdate``
+----------------------
+
+
+
+.. js:function:: componentDidUpdate()
+
+    
+    
+
+
+.. _module-app.fetch:
+
+
+``fetch``
+---------
+
+
+
+.. js:function:: fetch()
+
+    
+    
+
+
+.. _module-app.updateUserInfo:
+
+
+``updateUserInfo``
+------------------
+
+
+
+.. js:function:: updateUserInfo()
+
+    
+    
+
+
+.. _module-app.onHashChange:
+
+
+``onHashChange``
+----------------
+
+
+
+.. js:function:: onHashChange()
+
+    
+    
+
+
+.. _module-app.handleClick:
+
+
+``handleClick``
+---------------
+
+
+
+.. js:function:: handleClick()
+
+    
+    
+
+
+.. _module-app.handleSubmit:
+
+
+``handleSubmit``
+----------------
+
+
+
+.. js:function:: handleSubmit()
+
+    
+    
+
+
+.. _module-app.handlePopState:
+
+
+``handlePopState``
+------------------
+
+
+
+.. js:function:: handlePopState()
+
+    
+    
+
+
+.. _module-app.confirmNavigation:
+
+
+``confirmNavigation``
+---------------------
+
+
+
+.. js:function:: confirmNavigation()
+
+    
+    
+
+
+.. _module-app.navigate:
+
+
+``navigate``
+------------
+
+
+
+.. js:function:: navigate()
+
+    
+    
+
+
+.. _module-app.receiveContextResponse:
+
+
+``receiveContextResponse``
+--------------------------
+
+
+
+.. js:function:: receiveContextResponse()
+
+    
+    
+
+
+.. _module-app.contentTypeIsJSON:
+
+
+``contentTypeIsJSON``
+---------------------
+
+
+
+.. js:function:: contentTypeIsJSON()
+
+    
+    
+
+
+.. _module-app.scrollTo:
+
+
+``scrollTo``
+------------
+
+
+
+.. js:function:: scrollTo()
+
+    
+    
+
+
+.. _module-app.render:
+
+
+``render``
+----------
+
+
+
+.. js:function:: render()
+
+    
+    
+
+
+
+
+
+
+
+

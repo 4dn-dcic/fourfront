@@ -1,0 +1,50 @@
+.. _module-viz_components.RotatedLabel:
+
+===========================
+Component: ``RotatedLabel``
+===========================
+
+
+Member Of :doc:`module-viz_components`
+
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 3
+   
+   module-viz_components.RotatedLabel.statics
+   module-viz_components.RotatedLabel.Axis
+   
+
+
+Description
+===========
+
+A label meant to be place along an X-axis. Given an angle, label text, placementHeight, and other properties, calculates 
+visible portion of label and rotates it. Handles showing full label onHover.
+Optionally adds a directional pointer icon to tail of label.
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
+
+
+
+
+
+
+
+
+
+
+

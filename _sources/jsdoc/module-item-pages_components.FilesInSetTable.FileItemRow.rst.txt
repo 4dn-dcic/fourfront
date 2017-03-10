@@ -1,0 +1,47 @@
+.. _module-item-pages_components.FilesInSetTable.FileItemRow:
+
+==========================
+Component: ``FileItemRow``
+==========================
+
+
+Member Of :doc:`module-item-pages_components.FilesInSetTable`
+
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 3
+   
+   
+
+
+Description
+===========
+
+Renders a div element with '.row' Bootstrap class, containing details about a file.
+Meant to fill a large-width area, but scales down responsively for smaller screen sizes.
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
+
+
+
+
+
+
+
+
+
+
+

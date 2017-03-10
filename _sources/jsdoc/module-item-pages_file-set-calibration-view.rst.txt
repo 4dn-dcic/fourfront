@@ -1,0 +1,59 @@
+===================================================
+Component: ``item-pages/file-set-calibration-view``
+===================================================
+
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 3
+   
+   
+
+
+Description
+===========
+
+Page view for a FileSetCalibration Item.
+Renders out a {@link module:item-pages/components.FilesInSetTable} Component.
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
+
+Functions
+=========
+
+
+
+.. _module-item-pages_file-set-calibration-view.render:
+
+
+``render``
+----------
+
+
+
+.. js:function:: render()
+
+    
+    
+
+
+
+
+
+
+
+

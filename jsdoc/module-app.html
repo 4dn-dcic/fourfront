@@ -1,0 +1,506 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Component: app &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Class: Timeout" href="module-app-Timeout.html" />
+    <link rel="prev" title="Object: statics" href="module-alerts.statics.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="module-app-Timeout.html" title="Class: Timeout"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="module-alerts.statics.html" title="Object: statics"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">JavaScript API Reference</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="component-app">
+<h1>Component: <code class="docutils literal"><span class="pre">app</span></code><a class="headerlink" href="#component-app" title="Permalink to this headline">¶</a></h1>
+<div class="contents local topic" id="local-navigation">
+<p class="topic-title first">Local Navigation</p>
+<ul class="simple">
+<li><a class="reference internal" href="#children" id="id5">Children</a></li>
+<li><a class="reference internal" href="#description" id="id6">Description</a></li>
+<li><a class="reference internal" href="#functions" id="id7">Functions</a><ul>
+<li><a class="reference internal" href="#url" id="id8"><code class="docutils literal"><span class="pre">url</span></code></a></li>
+<li><a class="reference internal" href="#active" id="id9"><code class="docutils literal"><span class="pre">active</span></code></a></li>
+<li><a class="reference internal" href="#render" id="id10"><code class="docutils literal"><span class="pre">render</span></code></a></li>
+<li><a class="reference internal" href="#componentdidmount" id="id11"><code class="docutils literal"><span class="pre">componentDidMount</span></code></a></li>
+<li><a class="reference internal" href="#getdefaultprops" id="id12"><code class="docutils literal"><span class="pre">getDefaultProps</span></code></a></li>
+<li><a class="reference internal" href="#getinitialstate" id="id13"><code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
+<li><a class="reference internal" href="#getchildcontext" id="id14"><code class="docutils literal"><span class="pre">getChildContext</span></code></a></li>
+<li><a class="reference internal" href="#listactionsfor" id="id15"><code class="docutils literal"><span class="pre">listActionsFor</span></code></a></li>
+<li><a class="reference internal" href="#currentresource" id="id16"><code class="docutils literal"><span class="pre">currentResource</span></code></a></li>
+<li><a class="reference internal" href="#currentaction" id="id17"><code class="docutils literal"><span class="pre">currentAction</span></code></a></li>
+<li><a class="reference internal" href="#loadschemas" id="id18"><code class="docutils literal"><span class="pre">loadSchemas</span></code></a></li>
+<li><a class="reference internal" href="#getstatscomponent" id="id19"><code class="docutils literal"><span class="pre">getStatsComponent</span></code></a></li>
+<li><a class="reference internal" href="#updatestats" id="id20"><code class="docutils literal"><span class="pre">updateStats</span></code></a></li>
+<li><a class="reference internal" href="#handledropdownchange" id="id21"><code class="docutils literal"><span class="pre">handleDropdownChange</span></code></a></li>
+<li><a class="reference internal" href="#handleautocompletechosenchange" id="id22"><code class="docutils literal"><span class="pre">handleAutocompleteChosenChange</span></code></a></li>
+<li><a class="reference internal" href="#handleautocompletefocuschange" id="id23"><code class="docutils literal"><span class="pre">handleAutocompleteFocusChange</span></code></a></li>
+<li><a class="reference internal" href="#handleautocompletehiddenchange" id="id24"><code class="docutils literal"><span class="pre">handleAutocompleteHiddenChange</span></code></a></li>
+<li><a class="reference internal" href="#handlelayoutclick" id="id25"><code class="docutils literal"><span class="pre">handleLayoutClick</span></code></a></li>
+<li><a class="reference internal" href="#handlekey" id="id26"><code class="docutils literal"><span class="pre">handleKey</span></code></a></li>
+<li><a class="reference internal" href="#authenticateuser" id="id27"><code class="docutils literal"><span class="pre">authenticateUser</span></code></a></li>
+<li><a class="reference internal" href="#id1" id="id28"><code class="docutils literal"><span class="pre">componentDidMount</span></code></a></li>
+<li><a class="reference internal" href="#componentdidupdate" id="id29"><code class="docutils literal"><span class="pre">componentDidUpdate</span></code></a></li>
+<li><a class="reference internal" href="#fetch" id="id30"><code class="docutils literal"><span class="pre">fetch</span></code></a></li>
+<li><a class="reference internal" href="#updateuserinfo" id="id31"><code class="docutils literal"><span class="pre">updateUserInfo</span></code></a></li>
+<li><a class="reference internal" href="#onhashchange" id="id32"><code class="docutils literal"><span class="pre">onHashChange</span></code></a></li>
+<li><a class="reference internal" href="#handleclick" id="id33"><code class="docutils literal"><span class="pre">handleClick</span></code></a></li>
+<li><a class="reference internal" href="#handlesubmit" id="id34"><code class="docutils literal"><span class="pre">handleSubmit</span></code></a></li>
+<li><a class="reference internal" href="#handlepopstate" id="id35"><code class="docutils literal"><span class="pre">handlePopState</span></code></a></li>
+<li><a class="reference internal" href="#confirmnavigation" id="id36"><code class="docutils literal"><span class="pre">confirmNavigation</span></code></a></li>
+<li><a class="reference internal" href="#navigate" id="id37"><code class="docutils literal"><span class="pre">navigate</span></code></a></li>
+<li><a class="reference internal" href="#receivecontextresponse" id="id38"><code class="docutils literal"><span class="pre">receiveContextResponse</span></code></a></li>
+<li><a class="reference internal" href="#contenttypeisjson" id="id39"><code class="docutils literal"><span class="pre">contentTypeIsJSON</span></code></a></li>
+<li><a class="reference internal" href="#scrollto" id="id40"><code class="docutils literal"><span class="pre">scrollTo</span></code></a></li>
+<li><a class="reference internal" href="#id3" id="id41"><code class="docutils literal"><span class="pre">render</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="children">
+<h2><a class="toc-backref" href="#id5">Children</a><a class="headerlink" href="#children" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="module-app-Timeout.html">Class: <code class="docutils literal"><span class="pre">Timeout</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="module-app-Timeout.html#children">Children</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="module-app-Timeout.Timeout.html">Class: <code class="docutils literal"><span class="pre">Timeout</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="description">
+<h2><a class="toc-backref" href="#id6">Description</a><a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>The top-level component for this application.</p>
+<p>DPROPERTIES</p>
+<p>PROPS</p>
+</div>
+<div class="section" id="functions">
+<h2><a class="toc-backref" href="#id7">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="url">
+<span id="module-app-url"></span><h3><a class="toc-backref" href="#id8"><code class="docutils literal"><span class="pre">url</span></code></a><a class="headerlink" href="#url" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt>
+<code class="descname">url</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="active">
+<span id="module-app-active"></span><h3><a class="toc-backref" href="#id9"><code class="docutils literal"><span class="pre">active</span></code></a><a class="headerlink" href="#active" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt>
+<code class="descname">active</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="render">
+<span id="module-app-render"></span><h3><a class="toc-backref" href="#id10"><code class="docutils literal"><span class="pre">render</span></code></a><a class="headerlink" href="#render" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt>
+<code class="descname">render</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="componentdidmount">
+<span id="module-app-componentdidmount"></span><h3><a class="toc-backref" href="#id11"><code class="docutils literal"><span class="pre">componentDidMount</span></code></a><a class="headerlink" href="#componentdidmount" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="componentDidMount">
+<code class="descname">componentDidMount</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#componentDidMount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getdefaultprops">
+<span id="module-app-getdefaultprops"></span><h3><a class="toc-backref" href="#id12"><code class="docutils literal"><span class="pre">getDefaultProps</span></code></a><a class="headerlink" href="#getdefaultprops" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="getDefaultProps">
+<code class="descname">getDefaultProps</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getDefaultProps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getinitialstate">
+<span id="module-app-getinitialstate"></span><h3><a class="toc-backref" href="#id13"><code class="docutils literal"><span class="pre">getInitialState</span></code></a><a class="headerlink" href="#getinitialstate" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="getInitialState">
+<code class="descname">getInitialState</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getInitialState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getchildcontext">
+<span id="module-app-getchildcontext"></span><h3><a class="toc-backref" href="#id14"><code class="docutils literal"><span class="pre">getChildContext</span></code></a><a class="headerlink" href="#getchildcontext" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="getChildContext">
+<code class="descname">getChildContext</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getChildContext" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="listactionsfor">
+<span id="module-app-listactionsfor"></span><h3><a class="toc-backref" href="#id15"><code class="docutils literal"><span class="pre">listActionsFor</span></code></a><a class="headerlink" href="#listactionsfor" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="listActionsFor">
+<code class="descname">listActionsFor</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#listActionsFor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="currentresource">
+<span id="module-app-currentresource"></span><h3><a class="toc-backref" href="#id16"><code class="docutils literal"><span class="pre">currentResource</span></code></a><a class="headerlink" href="#currentresource" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="currentResource">
+<code class="descname">currentResource</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#currentResource" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="currentaction">
+<span id="module-app-currentaction"></span><h3><a class="toc-backref" href="#id17"><code class="docutils literal"><span class="pre">currentAction</span></code></a><a class="headerlink" href="#currentaction" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="currentAction">
+<code class="descname">currentAction</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#currentAction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="loadschemas">
+<span id="module-app-loadschemas"></span><h3><a class="toc-backref" href="#id18"><code class="docutils literal"><span class="pre">loadSchemas</span></code></a><a class="headerlink" href="#loadschemas" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="loadSchemas">
+<code class="descname">loadSchemas</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#loadSchemas" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="getstatscomponent">
+<span id="module-app-getstatscomponent"></span><h3><a class="toc-backref" href="#id19"><code class="docutils literal"><span class="pre">getStatsComponent</span></code></a><a class="headerlink" href="#getstatscomponent" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="getStatsComponent">
+<code class="descname">getStatsComponent</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getStatsComponent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="updatestats">
+<span id="module-app-updatestats"></span><h3><a class="toc-backref" href="#id20"><code class="docutils literal"><span class="pre">updateStats</span></code></a><a class="headerlink" href="#updatestats" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="updateStats">
+<code class="descname">updateStats</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#updateStats" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="handledropdownchange">
+<span id="module-app-handledropdownchange"></span><h3><a class="toc-backref" href="#id21"><code class="docutils literal"><span class="pre">handleDropdownChange</span></code></a><a class="headerlink" href="#handledropdownchange" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="handleDropdownChange">
+<code class="descname">handleDropdownChange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#handleDropdownChange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="handleautocompletechosenchange">
+<span id="module-app-handleautocompletechosenchange"></span><h3><a class="toc-backref" href="#id22"><code class="docutils literal"><span class="pre">handleAutocompleteChosenChange</span></code></a><a class="headerlink" href="#handleautocompletechosenchange" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="handleAutocompleteChosenChange">
+<code class="descname">handleAutocompleteChosenChange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#handleAutocompleteChosenChange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="handleautocompletefocuschange">
+<span id="module-app-handleautocompletefocuschange"></span><h3><a class="toc-backref" href="#id23"><code class="docutils literal"><span class="pre">handleAutocompleteFocusChange</span></code></a><a class="headerlink" href="#handleautocompletefocuschange" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="handleAutocompleteFocusChange">
+<code class="descname">handleAutocompleteFocusChange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#handleAutocompleteFocusChange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="handleautocompletehiddenchange">
+<span id="module-app-handleautocompletehiddenchange"></span><h3><a class="toc-backref" href="#id24"><code class="docutils literal"><span class="pre">handleAutocompleteHiddenChange</span></code></a><a class="headerlink" href="#handleautocompletehiddenchange" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="handleAutocompleteHiddenChange">
+<code class="descname">handleAutocompleteHiddenChange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#handleAutocompleteHiddenChange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="handlelayoutclick">
+<span id="module-app-handlelayoutclick"></span><h3><a class="toc-backref" href="#id25"><code class="docutils literal"><span class="pre">handleLayoutClick</span></code></a><a class="headerlink" href="#handlelayoutclick" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="handleLayoutClick">
+<code class="descname">handleLayoutClick</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#handleLayoutClick" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="handlekey">
+<span id="module-app-handlekey"></span><h3><a class="toc-backref" href="#id26"><code class="docutils literal"><span class="pre">handleKey</span></code></a><a class="headerlink" href="#handlekey" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="handleKey">
+<code class="descname">handleKey</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#handleKey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="authenticateuser">
+<span id="module-app-authenticateuser"></span><h3><a class="toc-backref" href="#id27"><code class="docutils literal"><span class="pre">authenticateUser</span></code></a><a class="headerlink" href="#authenticateuser" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="authenticateUser">
+<code class="descname">authenticateUser</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#authenticateUser" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="id1">
+<span id="id2"></span><h3><a class="toc-backref" href="#id28"><code class="docutils literal"><span class="pre">componentDidMount</span></code></a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt>
+<code class="descname">componentDidMount</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="componentdidupdate">
+<span id="module-app-componentdidupdate"></span><h3><a class="toc-backref" href="#id29"><code class="docutils literal"><span class="pre">componentDidUpdate</span></code></a><a class="headerlink" href="#componentdidupdate" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="componentDidUpdate">
+<code class="descname">componentDidUpdate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#componentDidUpdate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="fetch">
+<span id="module-app-fetch"></span><h3><a class="toc-backref" href="#id30"><code class="docutils literal"><span class="pre">fetch</span></code></a><a class="headerlink" href="#fetch" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt>
+<code class="descname">fetch</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="updateuserinfo">
+<span id="module-app-updateuserinfo"></span><h3><a class="toc-backref" href="#id31"><code class="docutils literal"><span class="pre">updateUserInfo</span></code></a><a class="headerlink" href="#updateuserinfo" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="updateUserInfo">
+<code class="descname">updateUserInfo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#updateUserInfo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="onhashchange">
+<span id="module-app-onhashchange"></span><h3><a class="toc-backref" href="#id32"><code class="docutils literal"><span class="pre">onHashChange</span></code></a><a class="headerlink" href="#onhashchange" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="onHashChange">
+<code class="descname">onHashChange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#onHashChange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="handleclick">
+<span id="module-app-handleclick"></span><h3><a class="toc-backref" href="#id33"><code class="docutils literal"><span class="pre">handleClick</span></code></a><a class="headerlink" href="#handleclick" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="handleClick">
+<code class="descname">handleClick</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#handleClick" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="handlesubmit">
+<span id="module-app-handlesubmit"></span><h3><a class="toc-backref" href="#id34"><code class="docutils literal"><span class="pre">handleSubmit</span></code></a><a class="headerlink" href="#handlesubmit" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="handleSubmit">
+<code class="descname">handleSubmit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#handleSubmit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="handlepopstate">
+<span id="module-app-handlepopstate"></span><h3><a class="toc-backref" href="#id35"><code class="docutils literal"><span class="pre">handlePopState</span></code></a><a class="headerlink" href="#handlepopstate" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="handlePopState">
+<code class="descname">handlePopState</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#handlePopState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="confirmnavigation">
+<span id="module-app-confirmnavigation"></span><h3><a class="toc-backref" href="#id36"><code class="docutils literal"><span class="pre">confirmNavigation</span></code></a><a class="headerlink" href="#confirmnavigation" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="confirmNavigation">
+<code class="descname">confirmNavigation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#confirmNavigation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="navigate">
+<span id="module-app-navigate"></span><h3><a class="toc-backref" href="#id37"><code class="docutils literal"><span class="pre">navigate</span></code></a><a class="headerlink" href="#navigate" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt>
+<code class="descname">navigate</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="receivecontextresponse">
+<span id="module-app-receivecontextresponse"></span><h3><a class="toc-backref" href="#id38"><code class="docutils literal"><span class="pre">receiveContextResponse</span></code></a><a class="headerlink" href="#receivecontextresponse" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="receiveContextResponse">
+<code class="descname">receiveContextResponse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#receiveContextResponse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="contenttypeisjson">
+<span id="module-app-contenttypeisjson"></span><h3><a class="toc-backref" href="#id39"><code class="docutils literal"><span class="pre">contentTypeIsJSON</span></code></a><a class="headerlink" href="#contenttypeisjson" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="contentTypeIsJSON">
+<code class="descname">contentTypeIsJSON</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contentTypeIsJSON" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="scrollto">
+<span id="module-app-scrollto"></span><h3><a class="toc-backref" href="#id40"><code class="docutils literal"><span class="pre">scrollTo</span></code></a><a class="headerlink" href="#scrollto" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="scrollTo">
+<code class="descname">scrollTo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scrollTo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="id3">
+<span id="id4"></span><h3><a class="toc-backref" href="#id41"><code class="docutils literal"><span class="pre">render</span></code></a><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt>
+<code class="descname">render</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Component: <code class="docutils literal"><span class="pre">app</span></code></a><ul>
+<li><a class="reference internal" href="#children">Children</a></li>
+<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#url"><code class="docutils literal"><span class="pre">url</span></code></a></li>
+<li><a class="reference internal" href="#active"><code class="docutils literal"><span class="pre">active</span></code></a></li>
+<li><a class="reference internal" href="#render"><code class="docutils literal"><span class="pre">render</span></code></a></li>
+<li><a class="reference internal" href="#componentdidmount"><code class="docutils literal"><span class="pre">componentDidMount</span></code></a></li>
+<li><a class="reference internal" href="#getdefaultprops"><code class="docutils literal"><span class="pre">getDefaultProps</span></code></a></li>
+<li><a class="reference internal" href="#getinitialstate"><code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
+<li><a class="reference internal" href="#getchildcontext"><code class="docutils literal"><span class="pre">getChildContext</span></code></a></li>
+<li><a class="reference internal" href="#listactionsfor"><code class="docutils literal"><span class="pre">listActionsFor</span></code></a></li>
+<li><a class="reference internal" href="#currentresource"><code class="docutils literal"><span class="pre">currentResource</span></code></a></li>
+<li><a class="reference internal" href="#currentaction"><code class="docutils literal"><span class="pre">currentAction</span></code></a></li>
+<li><a class="reference internal" href="#loadschemas"><code class="docutils literal"><span class="pre">loadSchemas</span></code></a></li>
+<li><a class="reference internal" href="#getstatscomponent"><code class="docutils literal"><span class="pre">getStatsComponent</span></code></a></li>
+<li><a class="reference internal" href="#updatestats"><code class="docutils literal"><span class="pre">updateStats</span></code></a></li>
+<li><a class="reference internal" href="#handledropdownchange"><code class="docutils literal"><span class="pre">handleDropdownChange</span></code></a></li>
+<li><a class="reference internal" href="#handleautocompletechosenchange"><code class="docutils literal"><span class="pre">handleAutocompleteChosenChange</span></code></a></li>
+<li><a class="reference internal" href="#handleautocompletefocuschange"><code class="docutils literal"><span class="pre">handleAutocompleteFocusChange</span></code></a></li>
+<li><a class="reference internal" href="#handleautocompletehiddenchange"><code class="docutils literal"><span class="pre">handleAutocompleteHiddenChange</span></code></a></li>
+<li><a class="reference internal" href="#handlelayoutclick"><code class="docutils literal"><span class="pre">handleLayoutClick</span></code></a></li>
+<li><a class="reference internal" href="#handlekey"><code class="docutils literal"><span class="pre">handleKey</span></code></a></li>
+<li><a class="reference internal" href="#authenticateuser"><code class="docutils literal"><span class="pre">authenticateUser</span></code></a></li>
+<li><a class="reference internal" href="#id1"><code class="docutils literal"><span class="pre">componentDidMount</span></code></a></li>
+<li><a class="reference internal" href="#componentdidupdate"><code class="docutils literal"><span class="pre">componentDidUpdate</span></code></a></li>
+<li><a class="reference internal" href="#fetch"><code class="docutils literal"><span class="pre">fetch</span></code></a></li>
+<li><a class="reference internal" href="#updateuserinfo"><code class="docutils literal"><span class="pre">updateUserInfo</span></code></a></li>
+<li><a class="reference internal" href="#onhashchange"><code class="docutils literal"><span class="pre">onHashChange</span></code></a></li>
+<li><a class="reference internal" href="#handleclick"><code class="docutils literal"><span class="pre">handleClick</span></code></a></li>
+<li><a class="reference internal" href="#handlesubmit"><code class="docutils literal"><span class="pre">handleSubmit</span></code></a></li>
+<li><a class="reference internal" href="#handlepopstate"><code class="docutils literal"><span class="pre">handlePopState</span></code></a></li>
+<li><a class="reference internal" href="#confirmnavigation"><code class="docutils literal"><span class="pre">confirmNavigation</span></code></a></li>
+<li><a class="reference internal" href="#navigate"><code class="docutils literal"><span class="pre">navigate</span></code></a></li>
+<li><a class="reference internal" href="#receivecontextresponse"><code class="docutils literal"><span class="pre">receiveContextResponse</span></code></a></li>
+<li><a class="reference internal" href="#contenttypeisjson"><code class="docutils literal"><span class="pre">contentTypeIsJSON</span></code></a></li>
+<li><a class="reference internal" href="#scrollto"><code class="docutils literal"><span class="pre">scrollTo</span></code></a></li>
+<li><a class="reference internal" href="#id3"><code class="docutils literal"><span class="pre">render</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="module-alerts.statics.html"
+                        title="previous chapter">Object: <code class="docutils literal"><span class="pre">statics</span></code></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="module-app-Timeout.html"
+                        title="next chapter">Class: <code class="docutils literal"><span class="pre">Timeout</span></code></a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/jsdoc/module-app.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="module-app-Timeout.html" title="Class: Timeout"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="module-alerts.statics.html" title="Object: statics"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,46 @@
+.. _module-viz_components.Legend.Term:
+
+===================
+Component: ``Term``
+===================
+
+
+Member Of :doc:`module-viz_components.Legend`
+
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 3
+   
+   
+
+
+Description
+===========
+
+React component which represents a Term item.
+
+DPROPERTIES 
+
+[object Object],[object Object],[object Object]
+
+PROPS
+
+
+
+
+
+
+
+
+
+
+
+
+
+

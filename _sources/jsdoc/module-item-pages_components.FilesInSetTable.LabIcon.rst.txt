@@ -1,0 +1,46 @@
+.. _module-item-pages_components.FilesInSetTable.LabIcon:
+
+======================
+Component: ``LabIcon``
+======================
+
+
+Member Of :doc:`module-item-pages_components.FilesInSetTable`
+
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 3
+   
+   
+
+
+Description
+===========
+
+Renders a "users group" icon which links to submitter's lab.
+
+DPROPERTIES 
+
+[object Object],[object Object],[object Object]
+
+PROPS
+
+
+
+
+
+
+
+
+
+
+
+
+
+

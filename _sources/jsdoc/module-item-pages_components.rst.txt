@@ -1,0 +1,44 @@
+=================================
+Module: ``item-pages/components``
+=================================
+
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 3
+   
+   module-item-pages_components.FilesInSetTable
+   
+
+
+Description
+===========
+
+A directory of methods and maybe a mini-component or two for common use.
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
+
+
+
+
+
+
+
+
+
+
+

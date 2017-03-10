@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>encoded.audit.experiment &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../audit.html" accesskey="U">encoded.audit</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for encoded.audit.experiment</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">snovault</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">AuditFailure</span><span class="p">,</span>
+    <span class="n">audit_checker</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+
+
+<span class="nd">@audit_checker</span><span class="p">(</span>
+    <span class="s1">&#39;experiment_hi_c&#39;</span><span class="p">,</span>
+    <span class="n">frame</span><span class="o">=</span><span class="p">[</span>
+        <span class="s1">&#39;files&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;files.files&#39;</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<div class="viewcode-block" id="audit_experiments_have_raw_files"><a class="viewcode-back" href="../../../pydoc/encoded.audit.experiment.html#encoded.audit.experiment.audit_experiments_have_raw_files">[docs]</a><span class="k">def</span> <span class="nf">audit_experiments_have_raw_files</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">system</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    experiments should have associated raw files whose status is one of</span>
+<span class="sd">    &#39;uploaded&#39;, &#39;released&#39;, &#39;in review by project&#39;, &#39;released by project&#39;</span>
+<span class="sd">    to be release ready</span>
+
+<span class="sd">    warning is generated if files are missing and status is not &#39;released&#39;</span>
+<span class="sd">    error is generated if files are missing and status is &#39;released&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">ok_stati</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;uploaded&#39;</span><span class="p">,</span> <span class="s1">&#39;released&#39;</span><span class="p">,</span> <span class="s1">&#39;in review by project&#39;</span><span class="p">,</span> <span class="s1">&#39;released by project&#39;</span><span class="p">]</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;files&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">has_raw</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">files</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)):</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;file_classification&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;raw file&#39;</span> <span class="ow">and</span> <span class="n">f</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">ok_stati</span><span class="p">:</span>
+                <span class="n">has_raw</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">break</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_raw</span><span class="p">:</span>
+        <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;WARNING&#39;</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;released&#39;</span><span class="p">:</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;ERROR&#39;</span>
+        <span class="n">detail</span> <span class="o">=</span> <span class="s1">&#39;Experiment </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="s1">&#39;@id&#39;</span><span class="p">])</span> <span class="o">+</span> \
+                <span class="s1">&#39; - Raw files are absent!&#39;</span>
+        <span class="k">yield</span> <span class="n">AuditFailure</span><span class="p">(</span><span class="s1">&#39;missing data&#39;</span><span class="p">,</span> <span class="n">detail</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">)</span>
+    <span class="k">return</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="../../encoded.html" >encoded</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="../audit.html" >encoded.audit</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

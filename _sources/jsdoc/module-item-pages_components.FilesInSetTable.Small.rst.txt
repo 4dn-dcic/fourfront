@@ -1,0 +1,42 @@
+.. _module-item-pages_components.FilesInSetTable.Small:
+
+====================
+Component: ``Small``
+====================
+
+
+Member Of :doc:`module-item-pages_components.FilesInSetTable`
+
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 3
+   
+   
+
+
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
+
+
+
+
+
+
+
+
+
+
+

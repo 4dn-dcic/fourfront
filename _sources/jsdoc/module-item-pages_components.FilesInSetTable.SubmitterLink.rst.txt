@@ -1,0 +1,50 @@
+.. _module-item-pages_components.FilesInSetTable.SubmitterLink:
+
+============================
+Component: ``SubmitterLink``
+============================
+
+
+Member Of :doc:`module-item-pages_components.FilesInSetTable`
+
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 3
+   
+   
+
+
+Description
+===========
+
+Show the submitter's name and link to their profile.
+If passed a props.labName and props.showLabName == true,
+then will show that labName instead. Use for when hovering over the lab icon, for example.
+
+Also shows props.labName if no props.user object supplied.
+
+DPROPERTIES 
+
+[object Object]
+
+PROPS
+
+
+
+
+
+
+
+
+
+
+
+
+
+

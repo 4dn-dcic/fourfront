@@ -1,0 +1,42 @@
+.. _module-item-pages_item-view.SubIPanel:
+
+========================
+Component: ``SubIPanel``
+========================
+
+
+Member Of :doc:`module-item-pages_item-view`
+
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 3
+   
+   
+
+
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,74 @@
+.. _module-item-pages_item-view.Detail.statics:
+
+===================
+Object: ``statics``
+===================
+
+
+Member Of :doc:`module-item-pages_item-view.Detail`
+
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
+
+.. toctree::
+   :maxdepth: 3
+   
+   
+
+
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
+
+Functions
+=========
+
+
+
+.. _module-item-pages_item-view.Detail.statics.formKey:
+
+
+``formKey``
+-----------
+
+Formats the correct display for each metadata field.
+
+.. js:function:: formKey()
+
+    
+    
+
+
+.. _module-item-pages_item-view.Detail.statics.formValue:
+
+
+``formValue``
+-------------
+
+Recursively render keys/values included in a provided item.
+Wraps URLs/paths in link elements. Sub-panels for objects.
+
+.. js:function:: formValue(schemas, item)
+
+    
+    :param Object schemas: Object containing schemas for server's JSONized object output.
+    :param Object|Array|string item: Item(s) to render recursively.
+    
+
+
+
+
+
+
+
+
