@@ -3,13 +3,14 @@
 # replacing any fields with your own values. Fields which are empty or nonexistant
 # will be filled with the default values listed here.
 
+# All directories are relative to your current (project root) directory.
+
 
 project_version : 0.1
 project_author : "4DN-DCIC"
 project_name : "4D Nucleome Portal"  # Project Name
 
-documentation_directory : "./docs/"          # Where auxiliary static docs are located (needed? since using sections below)
-output_directory : "./documentation/"        # Save output here
+output_directory : "../4dn_portal_gh_pages/"         # Save output here
 
 python_project_directory : "./src/encoded"
 javascript_root_directory : "./src/encoded/static/components" # Fourfront JS directory

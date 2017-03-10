@@ -72,7 +72,6 @@ var FilesInSetTable = module.exports = React.createClass({
          * @returns {string|null} The suffix to append to "fa-" or "icon-" CSS class.
          */
         iconClassFromFileType : function(fileType){
-            console.log(fileType);
             if (typeof fileType !== 'string') return null;
             fileType = fileType.toLowerCase();
             if (fileType.indexOf('zip') > -1){
@@ -161,7 +160,7 @@ var FilesInSetTable = module.exports = React.createClass({
                 if (!lab) return this.noLab();
                 var atId = FilesInSetTable.atIdFromObject(lab);
                 if (!atId) {
-                    console.error("We need lab with link_id or @id.")
+                    console.error("We need lab with link_id or @id.");
                     return this.noLab();
                 }
                 return (
