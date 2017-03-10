@@ -34,7 +34,7 @@ module.exports = {
         "display_title": "NOT 4DN test lab",
         "link_id": "~labs~test-not-4dn-lab~"
     },
-    "email": "submitter@submitter.com",
+    "email": "4dndcic@gmail.com",
     "groups": ["submitter"],
     "status": "current",
     "timezone": "US/Pacific",
@@ -42,10 +42,7 @@ module.exports = {
     "last_name": "Submitter",
     "first_name": "Submitter",
     "submits_for": [
-        {
-            "display_title": "4DN Testing Lab",
-            "link_id": "~labs~test-4dn-lab~"
-        }
+
     ],
     "date_created": "2017-03-10T04:25:03.705122+00:00",
     "schema_version": "1",
