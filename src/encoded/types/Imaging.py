@@ -19,16 +19,3 @@ class ImagingPath(Item):
     item_type = 'imaging_path'
     schema = load_schema('encoded:schemas/imaging_path.json')
     embedded = []
-
-
-@collection(
-    name='imaging-probes',
-    properties={
-        'title': 'Imaging Probe',
-        'description': 'Mediators of target - label association',
-    })
-class ImagingProbe(Item):
-    """Imaging Probe class."""
-    item_type = 'imaging_probe'
-    schema = load_schema('encoded:schemas/imaging_probe.json')
-    embedded = []

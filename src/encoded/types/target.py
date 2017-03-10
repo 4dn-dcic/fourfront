@@ -33,15 +33,19 @@ class Target(Item):
             value += ' and '.join(targeted_genes)
             return value
         elif targeted_region:
-            value = ""
-            genomic_region = request.embed(targeted_region, '@@object')
-            value += genomic_region['genome_assembly']
-            if genomic_region['chromosome']:
-                value += ':'
-                value += genomic_region['chromosome']
-            if genomic_region['start_coordinate'] and genomic_region['end_coordinate']:
-                value += ':' + str(genomic_region['start_coordinate']) + '-' + str(genomic_region['end_coordinate'])
-            return value
+            values = []
+            # since targetted region is a list, go through each item and get summary elements
+            for each_target in targeted_region:
+                genomic_region = request.embed(each_target, '@@object')
+                value = ""
+                value += genomic_region['genome_assembly']
+                if genomic_region['chromosome']:
+                    value += ':'
+                    value += genomic_region['chromosome']
+                if genomic_region['start_coordinate'] and genomic_region['end_coordinate']:
+                    value += ':' + str(genomic_region['start_coordinate']) + '-' + str(genomic_region['end_coordinate'])
+                values.append(value)
+            return ", ".join(filter(None, values))
         return "no target"
 
     @calculated_property(schema={
