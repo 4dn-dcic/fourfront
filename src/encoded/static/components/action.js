@@ -3,7 +3,7 @@ var React = require('react');
 var globals = require('./globals');
 var _ = require('underscore');
 var { ajax, console, object, isServerSide } = require('./util');
-var getS3UploadUrl = require('./util/aws');
+var {getS3UploadUrl, uploadFile} = require('./util/aws');
 var { DropdownButton, Button, MenuItem, Panel, Table} = require('react-bootstrap');
 var makeTitle = require('./item-pages/item').title;
 var Alerts = require('./alerts');
@@ -242,12 +242,15 @@ var Action = module.exports = React.createClass({
                                 body: JSON.stringify(response['@graph'][0])
                             })
                             .then(response => {
-                                console.log(response);
                                 if (!this.context.contentTypeIsJSON(response) || !response['@graph'] || !response['@graph'][0]['upload_credentials']['upload_url'] || !this.state.file) throw response;
+                                // var upload_url = getS3UploadUrl(file, response['@graph'][0]['upload_credentials']);
                                 return response;
                             })
                             .then(response => {
-                                console.log(this.state.file);
+                                console.log('METADATA: ', response['@graph'][0]);
+                                // add a context fetch, POST with presigned URL
+                                // this code is wrong but it's the right idea
+
                                 // var upload_creds = response['@graph'][0]['upload_credentials'];
                                 // var signed_url = getS3UploadUrl(this.state.file, upload_creds);
                                 // console.log(signed_url);
@@ -257,17 +260,45 @@ var Action = module.exports = React.createClass({
                                 // });
                                 // .addEventListener('progress', function(e){
                                 //     if (firstProgressEvent) {
-                                // 		_this.total += e.total;
-                                // 	}
-                                // 	firstProgressEvent = false;
-                                // 	_this.loaded += (e.loaded - lastBytesLoaded);
-                                // 	_this.onProgress(_this.loaded / _this.total);
+                                //                 _this.total += e.total;
+                                //         }
+                                //         firstProgressEvent = false;
+                                //         _this.loaded += (e.loaded - lastBytesLoaded);
+                                //         _this.onProgress(_this.loaded / _this.total);
                                 //     console.log(_this.total);
-                                //     console.log(_this.loaded);
-                                // }, false);
+                                //     console.log(_this.loaded);                                // }, false);
+                                var upload_manager = uploadFile(this.state.file, response['@graph'][0]);
+                                console.log('TRACKER:', upload_manager);
+                                upload_manager.on('httpUploadProgress', function(evt) {
+                                    console.log("Uploaded: " + parseInt((evt.loaded * 100) / evt.total)+'%');
+                                }).send(function(err, data) {
+                                    if(err){
+                                        this.context.fetch(newID, {
+                                            method: 'PATCH',
+                                            headers: {
+                                                'Accept': 'application/json',
+                                                'Content-Type': 'application/json'
+                                            },
+                                            body: JSON.stringify({'status':'upload failed'})
+                                        })
+                                        //FF-617: catch errors on the PATCH?
+                                        alert("File upload failed for " + newID);
+                                    }else{
+                                        this.context.fetch(newID, {
+                                            method: 'PATCH',
+                                            headers: {
+                                                'Accept': 'application/json',
+                                                'Content-Type': 'application/json'
+                                            },
+                                            body: JSON.stringify({'status':'uploaded'})
+                                        })
+                                        //FF-617: catch errors on the PATCH?
+                                        alert("File uploaded successfully for " + newID);
+                                    }
+                                }.bind(this));
                             }, error => {
                                 // FF-617. Handle error
-                                console.log('file upload error');
+                                console.log('Error getting credentials');
                             });
                         }
                         if(typeof newID !== 'string'){

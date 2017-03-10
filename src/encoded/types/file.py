@@ -60,11 +60,16 @@ def external_creds(bucket, key, name=None, profile_name=None):
         token = conn.get_federation_token(name, policy=json.dumps(policy))
         # 'access_key' 'secret_key' 'expiration' 'session_token'
         credentials = token.credentials.to_dict()
+        params = {'ACL':'public-read', 'Bucket': bucket, 'Key': key}
+        presigned = boto.generate_presigned_url(ClientMethod='put_object',
+                                                Params=params)
         credentials.update({
             'upload_url': 's3://{bucket}/{key}'.format(bucket=bucket, key=key),
             'federated_user_arn': token.federated_user_arn,
             'federated_user_id': token.federated_user_id,
             'request_id': token.request_id,
+            'key': key,
+            'presigned_url': presigned
         })
     return {
         'service': 's3',
@@ -393,9 +398,8 @@ def post_upload(context, request):
     # in case we haven't uploaded a file before
     context.propsheets['external'] = creds
 
-    new_properties = None
+    new_properties = properties.copy()
     if properties['status'] == 'upload failed':
-        new_properties = properties.copy()
         new_properties['status'] = 'uploading'
 
     registry = request.registry
