@@ -7,6 +7,8 @@ var { ItemHeader, PartialList, ExternalReferenceLink, FilesInSetTable, Formatted
 
 // TODO: Rename to FileSetCalibrationView?
 /**
+ * Page view for a FileSetCalibration Item.
+ * 
  * @module {Component} item-pages/file-set-calibration-view
  */
 var FileSetCalibrationView = module.exports = React.createClass({
