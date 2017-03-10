@@ -62,6 +62,7 @@
             "title": "Cell culture related information",
             "description": "Link to biosample_cell_culture object that carries all cell culture related parameters",
             "type": "string",
+            "clear_create": "clear",
             "linkTo": "BiosampleCellCulture"
         },
         "modifications": {

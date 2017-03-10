@@ -36,7 +36,7 @@
             "type": "string",
             "pattern": "^[a-z0-9\\-]+$",
             "uniqueKey": true,
-            "exclude_from": "submit4dn"
+            "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "url": {
             "title": "URL",

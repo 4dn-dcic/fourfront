@@ -44,7 +44,7 @@
             "title": "General Classification",
             "type": "string",
             "default": "ancillary file",
-            "exclude_from": "submit4dn",            
+            "exclude_from": ["submit4dn", "FFedit-create"],            
             "enum": [
                 "ancillary file"
               ]
