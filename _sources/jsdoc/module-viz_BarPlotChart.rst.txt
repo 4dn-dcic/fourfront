@@ -4,6 +4,12 @@ Component: ``viz/BarPlotChart``
 
 
 
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
 
 .. toctree::
    :maxdepth: 3
@@ -11,9 +17,6 @@ Component: ``viz/BarPlotChart``
    module-viz_BarPlotChart.statics
    module-viz_BarPlotChart.UIControlsWrapper
    
-
-.. contents:: Local Navigation
-   :local:
 
 
 Description
@@ -24,6 +27,15 @@ Contains chart and labels only -- no controls.
 To add controls, wrap the chart in BarPlotChart.UIControlsWrapper, which will feed its state as props to BarPlotChart and has UI components
 for adjusting its state to select Charting options.
 Use BarPlotChart (or UIControlsWrapper, if is wrapping BarPlotChart) as child of ChartDataController.provider, which will feed props.experiments and props.filteredExperiments.
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
 
 Functions
 =========
@@ -132,6 +144,9 @@ generates data for chart bars, and then draws and returns chart wrapped in a div
     
     :return React.Element: - Chart markup wrapped in a div.
     
+
+
+
 
 
 

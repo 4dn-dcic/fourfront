@@ -9,6 +9,7 @@ Submodules
    encoded.audit.biosample
    encoded.audit.conditions
    encoded.audit.dataset
+   encoded.audit.experiment
    encoded.audit.gtex_data
    encoded.audit.item
    encoded.audit.ontology_data

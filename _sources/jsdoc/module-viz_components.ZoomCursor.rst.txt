@@ -1,26 +1,41 @@
 .. _module-viz_components.ZoomCursor:
 
 =========================
-Namespace: ``ZoomCursor``
+Component: ``ZoomCursor``
 =========================
 
 
 Member Of :doc:`module-viz_components`
 
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
 
 .. toctree::
    :maxdepth: 3
    
    
 
-.. contents:: Local Navigation
-   :local:
-
 
 Description
 ===========
 
 Deprecated. Magnifies an SVG component into a viewport which appears over mouse cursor.
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
+
+
+
 
 
 

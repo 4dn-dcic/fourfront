@@ -4,6 +4,12 @@ Object: ``viz/chart-data-controller``
 
 
 
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
 
 .. toctree::
    :maxdepth: 3
@@ -11,14 +17,21 @@ Object: ``viz/chart-data-controller``
    module-viz_chart-data-controller.Provider
    
 
-.. contents:: Local Navigation
-   :local:
-
 
 Description
 ===========
 
 This is a utility to manage charts' experiment data in one global place and distribute to charts throughout UI.
+The mechanism for this is roughly diagrammed [here]{@link https://hms-dbmi.slack.com/files/alexkb/F4C8KQKMM/chartdatacontroller.png } .
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
 
 Functions
 =========
@@ -194,6 +207,9 @@ Update stats in top left corner of page, if updateState param was passed in duri
     
     :return undefined: Update stats in top left corner of page, if updateState param was passed in during initialization.
     
+
+
+
 
 
 

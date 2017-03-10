@@ -7,14 +7,26 @@ Namespace: ``style``
 
 Member Of :doc:`module-viz_utilities`
 
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
 
 .. toctree::
    :maxdepth: 3
    
    
 
-.. contents:: Local Navigation
-   :local:
+
+
+DPROPERTIES 
+
+
+
+PROPS
+
 
 
 
@@ -79,6 +91,9 @@ Functions
 
     
     
+
+
+
 
 
 

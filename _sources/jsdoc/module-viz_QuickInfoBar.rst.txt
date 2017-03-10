@@ -4,14 +4,17 @@ Component: ``viz/QuickInfoBar``
 
 
 
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
 
 .. toctree::
    :maxdepth: 3
    
    
-
-.. contents:: Local Navigation
-   :local:
 
 
 Description
@@ -19,6 +22,15 @@ Description
 
 Bar shown below header on home and browse pages.
 Shows counts of selected experiment_sets, experiments, and files against those properties' total counts.
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
 
 Functions
 =========
@@ -113,6 +125,9 @@ Updates state.show if no filters are selected.
     :param Object nextProps: Next props.
     :return undefined: Updates state.show if no filters are selected.
     
+
+
+
 
 
 

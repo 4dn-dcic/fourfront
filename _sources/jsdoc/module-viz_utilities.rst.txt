@@ -4,6 +4,12 @@ Object: ``viz/utilities``
 
 
 
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
 
 .. toctree::
    :maxdepth: 3
@@ -11,14 +17,20 @@ Object: ``viz/utilities``
    module-viz_utilities.style
    
 
-.. contents:: Local Navigation
-   :local:
-
 
 Description
 ===========
 
 Utility functions for aiding with visualizations.
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
 
 Functions
 =========
@@ -144,6 +156,9 @@ Helper function for window.requestAnimationFrame. Falls back to browser-prefixed
 
     
     
+
+
+
 
 
 

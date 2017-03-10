@@ -1,26 +1,41 @@
 .. _module-viz_components.Legend:
 
-===========================
-React.Component: ``Legend``
-===========================
+=====================
+Component: ``Legend``
+=====================
 
 
 Member Of :doc:`module-viz_components`
 
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
 
 .. toctree::
    :maxdepth: 3
    
    
 
-.. contents:: Local Navigation
-   :local:
-
 
 Description
 ===========
 
 Legend components to use alongside Charts. Best to include within a UIControlsWrapper, and place next to chart, utilizing the same data.
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
+
+
+
 
 
 

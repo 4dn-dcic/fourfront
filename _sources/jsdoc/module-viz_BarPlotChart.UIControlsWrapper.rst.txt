@@ -7,14 +7,17 @@ Component: ``UIControlsWrapper``
 
 Member Of :doc:`module-viz_BarPlotChart`
 
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
 
 .. toctree::
    :maxdepth: 3
    
    
-
-.. contents:: Local Navigation
-   :local:
 
 
 Description
@@ -22,6 +25,15 @@ Description
 
 Component which wraps the BarPlotChart and provides some UI buttons and stuff.
 Passes props to BarPlotChart.
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
 
 Functions
 =========
@@ -59,6 +71,9 @@ Clones props.children, expecting a Chart React Component as the sole child, and 
     
     :return React.Component: Cloned & extended props.children.
     
+
+
+
 
 
 

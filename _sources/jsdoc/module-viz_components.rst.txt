@@ -4,22 +4,38 @@ Module: ``viz/components``
 
 
 
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
 
 .. toctree::
    :maxdepth: 3
    
    module-viz_components.Legend
    module-viz_components.ZoomCursor
+   module-viz_components.RotatedLabel
    
-
-.. contents:: Local Navigation
-   :local:
 
 
 Description
 ===========
 
 A collection of components to aid in visualization or charting.
+
+DPROPERTIES 
+
+
+
+PROPS
+
+
+
+
+
+
 
 
 

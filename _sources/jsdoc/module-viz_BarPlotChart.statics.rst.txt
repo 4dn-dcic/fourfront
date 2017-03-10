@@ -7,14 +7,26 @@ Object: ``statics``
 
 Member Of :doc:`module-viz_BarPlotChart`
 
+.. contents:: Local Navigation
+   :local:
+
+
+Children
+========
 
 .. toctree::
    :maxdepth: 3
    
    
 
-.. contents:: Local Navigation
-   :local:
+
+
+DPROPERTIES 
+
+
+
+PROPS
+
 
 
 
@@ -142,6 +154,9 @@ Deprecated. Convert barData to array of field objects to be consumed by Legend R
     
     :return Object: Default style options for chart. Should suffice most of the time.
     
+
+
+
 
 
 

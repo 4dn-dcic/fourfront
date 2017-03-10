@@ -18,6 +18,7 @@ Submodules
    encoded.tests.test_access_key
    encoded.tests.test_accession_replacement
    encoded.tests.test_audit_biosample
+   encoded.tests.test_audit_experiment
    encoded.tests.test_audit_item
    encoded.tests.test_audit_replicate
    encoded.tests.test_auditor

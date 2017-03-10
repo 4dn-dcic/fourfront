@@ -59,9 +59,34 @@
             
   <div class="section" id="object-viz-chart-data-controller">
 <h1>Object: <code class="docutils literal"><span class="pre">viz/chart-data-controller</span></code><a class="headerlink" href="#object-viz-chart-data-controller" title="Permalink to this headline">¶</a></h1>
+<div class="contents local topic" id="local-navigation">
+<p class="topic-title first">Local Navigation</p>
+<ul class="simple">
+<li><a class="reference internal" href="#children" id="id1">Children</a></li>
+<li><a class="reference internal" href="#description" id="id2">Description</a></li>
+<li><a class="reference internal" href="#functions" id="id3">Functions</a><ul>
+<li><a class="reference internal" href="#initialize" id="id4"><code class="docutils literal"><span class="pre">initialize</span></code></a></li>
+<li><a class="reference internal" href="#isinitialized" id="id5"><code class="docutils literal"><span class="pre">isInitialized</span></code></a></li>
+<li><a class="reference internal" href="#registerupdatecallback" id="id6"><code class="docutils literal"><span class="pre">registerUpdateCallback</span></code></a></li>
+<li><a class="reference internal" href="#unregisterupdatecallback" id="id7"><code class="docutils literal"><span class="pre">unregisterUpdateCallback</span></code></a></li>
+<li><a class="reference internal" href="#registerloadstartcallback" id="id8"><code class="docutils literal"><span class="pre">registerLoadStartCallback</span></code></a></li>
+<li><a class="reference internal" href="#unregisterloadstartcallback" id="id9"><code class="docutils literal"><span class="pre">unregisterLoadStartCallback</span></code></a></li>
+<li><a class="reference internal" href="#getstate" id="id10"><code class="docutils literal"><span class="pre">getState</span></code></a></li>
+<li><a class="reference internal" href="#setstate" id="id11"><code class="docutils literal"><span class="pre">setState</span></code></a></li>
+<li><a class="reference internal" href="#sync" id="id12"><code class="docutils literal"><span class="pre">sync</span></code></a></li>
+<li><a class="reference internal" href="#updatestats" id="id13"><code class="docutils literal"><span class="pre">updateStats</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="children">
+<h2><a class="toc-backref" href="#id1">Children</a><a class="headerlink" href="#children" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="module-viz_chart-data-controller.Provider.html">Component: <code class="docutils literal"><span class="pre">Provider</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="module-viz_chart-data-controller.Provider.html#children">Children</a><ul class="simple">
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="module-viz_chart-data-controller.Provider.html#description">Description</a></li>
 <li class="toctree-l2"><a class="reference internal" href="module-viz_chart-data-controller.Provider.html#functions">Functions</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="module-viz_chart-data-controller.Provider.html#render"><code class="docutils literal"><span class="pre">render</span></code></a></li>
@@ -71,33 +96,18 @@
 </li>
 </ul>
 </div>
-<div class="contents local topic" id="local-navigation">
-<p class="topic-title first">Local Navigation</p>
-<ul class="simple">
-<li><a class="reference internal" href="#description" id="id1">Description</a></li>
-<li><a class="reference internal" href="#functions" id="id2">Functions</a><ul>
-<li><a class="reference internal" href="#initialize" id="id3"><code class="docutils literal"><span class="pre">initialize</span></code></a></li>
-<li><a class="reference internal" href="#isinitialized" id="id4"><code class="docutils literal"><span class="pre">isInitialized</span></code></a></li>
-<li><a class="reference internal" href="#registerupdatecallback" id="id5"><code class="docutils literal"><span class="pre">registerUpdateCallback</span></code></a></li>
-<li><a class="reference internal" href="#unregisterupdatecallback" id="id6"><code class="docutils literal"><span class="pre">unregisterUpdateCallback</span></code></a></li>
-<li><a class="reference internal" href="#registerloadstartcallback" id="id7"><code class="docutils literal"><span class="pre">registerLoadStartCallback</span></code></a></li>
-<li><a class="reference internal" href="#unregisterloadstartcallback" id="id8"><code class="docutils literal"><span class="pre">unregisterLoadStartCallback</span></code></a></li>
-<li><a class="reference internal" href="#getstate" id="id9"><code class="docutils literal"><span class="pre">getState</span></code></a></li>
-<li><a class="reference internal" href="#setstate" id="id10"><code class="docutils literal"><span class="pre">setState</span></code></a></li>
-<li><a class="reference internal" href="#sync" id="id11"><code class="docutils literal"><span class="pre">sync</span></code></a></li>
-<li><a class="reference internal" href="#updatestats" id="id12"><code class="docutils literal"><span class="pre">updateStats</span></code></a></li>
-</ul>
-</li>
-</ul>
 </div>
 <div class="section" id="description">
-<h2><a class="toc-backref" href="#id1">Description</a><a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
-<p>This is a utility to manage charts&#8217; experiment data in one global place and distribute to charts throughout UI.</p>
+<h2><a class="toc-backref" href="#id2">Description</a><a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>This is a utility to manage charts&#8217; experiment data in one global place and distribute to charts throughout UI.
+The mechanism for this is roughly diagrammed [here]{&#64;link <a class="reference external" href="https://hms-dbmi.slack.com/files/alexkb/F4C8KQKMM/chartdatacontroller.png">https://hms-dbmi.slack.com/files/alexkb/F4C8KQKMM/chartdatacontroller.png</a> } .</p>
+<p>DPROPERTIES</p>
+<p>PROPS</p>
 </div>
 <div class="section" id="functions">
-<h2><a class="toc-backref" href="#id2">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id3">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="initialize">
-<span id="module-viz-chart-data-controller-initialize"></span><h3><a class="toc-backref" href="#id3"><code class="docutils literal"><span class="pre">initialize</span></code></a><a class="headerlink" href="#initialize" title="Permalink to this headline">¶</a></h3>
+<span id="module-viz-chart-data-controller-initialize"></span><h3><a class="toc-backref" href="#id4"><code class="docutils literal"><span class="pre">initialize</span></code></a><a class="headerlink" href="#initialize" title="Permalink to this headline">¶</a></h3>
 <p>This function must be called before this component is used anywhere else.</p>
 <dl class="function">
 <dt>
@@ -124,7 +134,7 @@
 
 </div>
 <div class="section" id="isinitialized">
-<span id="module-viz-chart-data-controller-isinitialized"></span><h3><a class="toc-backref" href="#id4"><code class="docutils literal"><span class="pre">isInitialized</span></code></a><a class="headerlink" href="#isinitialized" title="Permalink to this headline">¶</a></h3>
+<span id="module-viz-chart-data-controller-isinitialized"></span><h3><a class="toc-backref" href="#id5"><code class="docutils literal"><span class="pre">isInitialized</span></code></a><a class="headerlink" href="#isinitialized" title="Permalink to this headline">¶</a></h3>
 <p>Whether component has been initialized and may be used.</p>
 <dl class="function">
 <dt id="isInitialized">
@@ -141,7 +151,7 @@
 
 </div>
 <div class="section" id="registerupdatecallback">
-<span id="module-viz-chart-data-controller-registerupdatecallback"></span><h3><a class="toc-backref" href="#id5"><code class="docutils literal"><span class="pre">registerUpdateCallback</span></code></a><a class="headerlink" href="#registerupdatecallback" title="Permalink to this headline">¶</a></h3>
+<span id="module-viz-chart-data-controller-registerupdatecallback"></span><h3><a class="toc-backref" href="#id6"><code class="docutils literal"><span class="pre">registerUpdateCallback</span></code></a><a class="headerlink" href="#registerupdatecallback" title="Permalink to this headline">¶</a></h3>
 <p>For React components to register an &#8220;update me&#8221; function, i.e. forceUpdate,
 to be called when new experiments/filteredExperiments has finished loading from back-end.</p>
 <dl class="function">
@@ -167,7 +177,7 @@ to be called when new experiments/filteredExperiments has finished loading from 
 
 </div>
 <div class="section" id="unregisterupdatecallback">
-<span id="module-viz-chart-data-controller-unregisterupdatecallback"></span><h3><a class="toc-backref" href="#id6"><code class="docutils literal"><span class="pre">unregisterUpdateCallback</span></code></a><a class="headerlink" href="#unregisterupdatecallback" title="Permalink to this headline">¶</a></h3>
+<span id="module-viz-chart-data-controller-unregisterupdatecallback"></span><h3><a class="toc-backref" href="#id7"><code class="docutils literal"><span class="pre">unregisterUpdateCallback</span></code></a><a class="headerlink" href="#unregisterupdatecallback" title="Permalink to this headline">¶</a></h3>
 <p>The opposite of registerUpdateCallback.</p>
 <dl class="function">
 <dt id="unregisterUpdateCallback">
@@ -191,7 +201,7 @@ to be called when new experiments/filteredExperiments has finished loading from 
 
 </div>
 <div class="section" id="registerloadstartcallback">
-<span id="module-viz-chart-data-controller-registerloadstartcallback"></span><h3><a class="toc-backref" href="#id7"><code class="docutils literal"><span class="pre">registerLoadStartCallback</span></code></a><a class="headerlink" href="#registerloadstartcallback" title="Permalink to this headline">¶</a></h3>
+<span id="module-viz-chart-data-controller-registerloadstartcallback"></span><h3><a class="toc-backref" href="#id8"><code class="docutils literal"><span class="pre">registerLoadStartCallback</span></code></a><a class="headerlink" href="#registerloadstartcallback" title="Permalink to this headline">¶</a></h3>
 <p>Same as registerUpdateCallback but for when starting AJAX fetch of data.</p>
 <dl class="function">
 <dt id="registerLoadStartCallback">
@@ -216,7 +226,7 @@ to be called when new experiments/filteredExperiments has finished loading from 
 
 </div>
 <div class="section" id="unregisterloadstartcallback">
-<span id="module-viz-chart-data-controller-unregisterloadstartcallback"></span><h3><a class="toc-backref" href="#id8"><code class="docutils literal"><span class="pre">unregisterLoadStartCallback</span></code></a><a class="headerlink" href="#unregisterloadstartcallback" title="Permalink to this headline">¶</a></h3>
+<span id="module-viz-chart-data-controller-unregisterloadstartcallback"></span><h3><a class="toc-backref" href="#id9"><code class="docutils literal"><span class="pre">unregisterLoadStartCallback</span></code></a><a class="headerlink" href="#unregisterloadstartcallback" title="Permalink to this headline">¶</a></h3>
 <p>The opposite of registerLoadStartCallback.</p>
 <dl class="function">
 <dt id="unregisterLoadStartCallback">
@@ -240,7 +250,7 @@ to be called when new experiments/filteredExperiments has finished loading from 
 
 </div>
 <div class="section" id="getstate">
-<span id="module-viz-chart-data-controller-getstate"></span><h3><a class="toc-backref" href="#id9"><code class="docutils literal"><span class="pre">getState</span></code></a><a class="headerlink" href="#getstate" title="Permalink to this headline">¶</a></h3>
+<span id="module-viz-chart-data-controller-getstate"></span><h3><a class="toc-backref" href="#id10"><code class="docutils literal"><span class="pre">getState</span></code></a><a class="headerlink" href="#getstate" title="Permalink to this headline">¶</a></h3>
 <p>Get current state. Similar to Redux&#8217;s store.getState().</p>
 <dl class="function">
 <dt id="getState">
@@ -257,7 +267,7 @@ to be called when new experiments/filteredExperiments has finished loading from 
 
 </div>
 <div class="section" id="setstate">
-<span id="module-viz-chart-data-controller-setstate"></span><h3><a class="toc-backref" href="#id10"><code class="docutils literal"><span class="pre">setState</span></code></a><a class="headerlink" href="#setstate" title="Permalink to this headline">¶</a></h3>
+<span id="module-viz-chart-data-controller-setstate"></span><h3><a class="toc-backref" href="#id11"><code class="docutils literal"><span class="pre">setState</span></code></a><a class="headerlink" href="#setstate" title="Permalink to this headline">¶</a></h3>
 <p>Analogous to a component&#8217;s setState. Updates the private state of
 ChartDataController and notifies update callbacks if experiments or filtered
 experiments have changed.</p>
@@ -283,7 +293,7 @@ experiments have changed.</p>
 
 </div>
 <div class="section" id="sync">
-<span id="module-viz-chart-data-controller-sync"></span><h3><a class="toc-backref" href="#id11"><code class="docutils literal"><span class="pre">sync</span></code></a><a class="headerlink" href="#sync" title="Permalink to this headline">¶</a></h3>
+<span id="module-viz-chart-data-controller-sync"></span><h3><a class="toc-backref" href="#id12"><code class="docutils literal"><span class="pre">sync</span></code></a><a class="headerlink" href="#sync" title="Permalink to this headline">¶</a></h3>
 <p>Fetch new data from back-end regardless of expSetFilters state, e.g. for when session has changed (&#64;see App.prototype.componentDidUpdate()).</p>
 <dl class="function">
 <dt>
@@ -307,7 +317,7 @@ experiments have changed.</p>
 
 </div>
 <div class="section" id="updatestats">
-<span id="module-viz-chart-data-controller-updatestats"></span><h3><a class="toc-backref" href="#id12"><code class="docutils literal"><span class="pre">updateStats</span></code></a><a class="headerlink" href="#updatestats" title="Permalink to this headline">¶</a></h3>
+<span id="module-viz-chart-data-controller-updatestats"></span><h3><a class="toc-backref" href="#id13"><code class="docutils literal"><span class="pre">updateStats</span></code></a><a class="headerlink" href="#updatestats" title="Permalink to this headline">¶</a></h3>
 <p>Update stats in top left corner of page, if updateState param was passed in during initialization.</p>
 <dl class="function">
 <dt id="updateStats">
@@ -336,6 +346,7 @@ experiments have changed.</p>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Object: <code class="docutils literal"><span class="pre">viz/chart-data-controller</span></code></a><ul>
+<li><a class="reference internal" href="#children">Children</a></li>
 <li><a class="reference internal" href="#description">Description</a></li>
 <li><a class="reference internal" href="#functions">Functions</a><ul>
 <li><a class="reference internal" href="#initialize"><code class="docutils literal"><span class="pre">initialize</span></code></a></li>
