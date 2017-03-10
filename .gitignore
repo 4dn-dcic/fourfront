@@ -15,6 +15,7 @@ coverage.xml
 /.eggs/
 /extends/
 /node_modules/
+/documentation/
 /ontology.json
 /parts/
 /session-secret.b64

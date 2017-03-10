@@ -1,5 +1,5 @@
 {
-    "title": "Experiment set",
+    "title": "Experiment Set",
     "description": "Schema for submitting metadata for an experiment set.",
     "id": "/profiles/experiment_set.json",
     "$schema": "http://json-schema.org/draft-04/schema#",

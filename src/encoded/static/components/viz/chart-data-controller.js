@@ -1,11 +1,23 @@
 'use strict';
 
+/** @ignore */
 var React = require('react');
 var _ = require('underscore');
 var { expFxn, Filters, ajax, console, layout, isServerSide } = require('./../util');
 
 
-/** @private; @ignore */
+/** 
+ * This is a utility to manage charts' experiment data in one global place and distribute to charts throughout UI.
+ * The mechanism for this is roughly diagrammed [here]{@link https://hms-dbmi.slack.com/files/alexkb/F4C8KQKMM/chartdatacontroller.png } .
+ * 
+ * @module {Object} viz/chart-data-controller
+ */
+
+
+/**
+ * @private
+ * @ignore
+ */
 var refs = {
     store       : null,
     requestURLBase : null,//'/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all&from=0',
@@ -33,19 +45,28 @@ var refs = {
     expSetFilters : null,
 };
 
-/** @private; @ignore */
+/**
+ * Contains "state" of ChartDataController. Some of these are deprecated and will be removed.
+ * The most important ones are experiments and filteredExperiments.
+ * 
+ * @type {Object}
+ * @private
+ * @ignore
+ */
 var state = {
     experiments         : null,
     filteredExperiments : null,
     fetching            : false,
 
     // the below field definitions will likely be moved out of here eventually
+    /** @ignore */
     chartFieldsBarPlot  : [
         { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
         { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
         { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" }
         //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
     ],
+    /** @ignore */
     chartFieldsHierarchy: [
         //{ 
         //    field : 'experiments_in_set.biosample.biosource.individual.organism.name',
@@ -60,6 +81,7 @@ var state = {
         {
             title : "Digestion Enzyme",
             field : 'experiments_in_set.digestion_enzyme.name',
+            /** @ignore */
             description : function(val, id, exps, filteredExps, exp){
                 return 'Enzyme ' + val;
             }
@@ -82,10 +104,12 @@ var state = {
         //    isFacet : false,
         //}
     ],
+    /** @ignore */
     chartFieldsHierarchyRight : [
         { 
             field : 'experiments_in_set.biosample.biosource.individual.organism.name',
             title : "Primary Organism",
+            /** @ignore */
             name : function(val, id, exps, filteredExps){
                 return Filters.Term.toName('experiments_in_set.biosample.biosource.individual.organism.name', val);
             }
@@ -122,14 +146,22 @@ var state = {
 
 /** Private state & functions **/
 
-/** @private; @ignore */
+/** 
+ * @private
+ * @ignore
+ */
 var providerCallbacks = {};
-/** @private; @ignore */
+
+/** 
+ * @private
+ * @ignore
+ */
 var providerLoadStartCallbacks = {};
 
 /**
  * After load & update, call registered Update callbacks.
- * @private 
+ * @private
+ * @ignore
  */
 function notifyUpdateCallbacks(){
     console.log('Notifying update callbacks',_.keys(providerCallbacks));
@@ -140,7 +172,8 @@ function notifyUpdateCallbacks(){
 
 /**
  * Before load, call registered Load Start callbacks.
- * @private 
+ * @private
+ * @ignore
  */
 function notifyLoadStartCallbacks(){
     console.log('Notifying load start callbacks', _.keys(providerLoadStartCallbacks));
@@ -149,7 +182,9 @@ function notifyLoadStartCallbacks(){
     });
 }
 
-/** 
+
+/**
+ * Holds unsubcribe callback to Redux store subscription.
  * @private
  * @ignore
  * @type {null|function}
@@ -185,25 +220,24 @@ var resyncInterval = null;
 var isWindowActive = false;
 
 
-/** 
- * This is a utility to manage charts' experiment data in one global place and distribute to charts throughout UI.
- * 
- * @module {Object} viz/chart-data-controller
+/**
+ * @type {Object}
+ * @alias module:viz/chart-data-controller
  */
-
 var ChartDataController = module.exports = {
 
     /**
-     * Use this component to wrap individual charts and provide them with source of experiments data via
+     * Use this React component to wrap individual charts and provide them with source of experiments data via
      * props.experiments and props.filteredExperiments. Also provides expSetFilters from redux store.
      * 
-     * @namespace Provider
-     * @memberof viz/chart-data-controller
+     * @namespace
+     * @type {Component}
+     * @memberof module:viz/chart-data-controller
      */
     Provider : React.createClass({
 
         /**
-         * @memberof viz/chart-data-controller.Provider
+         * @memberof module:viz/chart-data-controller.Provider
          * @prop {string} id - Unique ID.
          * @prop {Object} children - Must be a Chart or Chart controller component.
          */
@@ -212,21 +246,31 @@ var ChartDataController = module.exports = {
             'children' : React.PropTypes.object.isRequired
         },
 
-        /** @memberof viz/chart-data-controller.Provider */
+        /**
+         * @memberof module:viz/chart-data-controller.Provider
+         * @ignore
+         */
         componentWillMount : function(){
             ChartDataController.registerUpdateCallback(()=>{
                 this.forceUpdate();
             }, this.props.id);
         },
 
-        /** @memberof viz/chart-data-controller.Provider */
+        /**
+         * @memberof module:viz/chart-data-controller.Provider
+         * @ignore
+         */
         componentWillUnmount : function(){
             ChartDataController.unregisterUpdateCallback(this.props.id);
         },
 
-        /** @memberof viz/chart-data-controller.Provider */
+        /**
+         * Sets 'experiments' and 'filteredExperiments' props on props.children.
+         * 
+         * @returns {React.Component} Cloned & adjusted props.children.
+         * @memberof module:viz/chart-data-controller.Provider
+         */
         render : function(){
-            // Set 'experiments' and 'filteredExperiments' props on props.children.
             var childChartProps = _.extend({}, this.props.children.props);
             childChartProps.experiments = state.experiments;
             childChartProps.filteredExperiments = state.filteredExperiments;
@@ -383,7 +427,16 @@ var ChartDataController = module.exports = {
      */
     getState : function(){ return state; },
 
-    /** @private */
+    /**
+     * Analogous to a component's setState. Updates the private state of
+     * ChartDataController and notifies update callbacks if experiments or filtered
+     * experiments have changed.
+     * 
+     * @param {Object} updatedState - New or updated state object to save.
+     * @param {function} [callback] - Optional callback function.
+     * @returns {*} Result of callback, or undefined.
+     * @private
+     */
     setState : function(updatedState = {}, callback = null){
         
         var expsChanged = (
@@ -414,7 +467,10 @@ var ChartDataController = module.exports = {
         ChartDataController.fetchUnfilteredAndFilteredExperiments(null, callback);
     },
 
-    /** @ignore */
+    /**
+     * @ignore
+     * @memberof module:viz/chart-data-controller
+     */
     handleUpdatedFilters : function(expSetFilters, callback){
         if (_.keys(expSetFilters).length === 0 && Array.isArray(state.experiments)){
             ChartDataController.setState({ filteredExperiments : null }, callback);
@@ -462,7 +518,10 @@ var ChartDataController = module.exports = {
     },
 
 
-    /** @ignore */
+    /**
+     * @memberof module:viz/chart-data-controller
+     * @ignore
+     */
     fetchUnfilteredAndFilteredExperiments : function(reduxStoreState = null, callback = null){
         if (!reduxStoreState || !reduxStoreState.expSetFilters || !reduxStoreState.href){
             reduxStoreState = refs.store.getState();
