@@ -169,7 +169,8 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                 ()=>{
                     if (this.props.debug) console.log("Mounted FacetCharts after initializing ChartDataController:", ChartDataController.getState());
                     this.setState(newState);
-                }
+                },
+                60 * 1000 // 1min auto-refresh
             );
         } else {
             if (this.props.debug) console.log('Mounted FacetCharts');
@@ -385,12 +386,13 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         }
 
         var height = show === 'small' ? 300 : 450;
+        if (this.state.mounted && layout.responsiveGridState() === 'xs') height = Math.min(height, 240);
 
         FacetList.unhighlightTerms();
 
         if (!this.state.mounted){
             return ( // + 30 == breadcrumbs (26) + breadcrumbs-margin-bottom (10) + description (30)
-                <div className={"facet-charts loading " + show} key="facet-charts" style={{ 'height' : height + 30 }}>
+                <div className={"facet-charts loading " + show} key="facet-charts" style={{ 'height' : height }}>
                     <i
                         className="icon icon-spin icon-circle-o-notch" 
                         style={{ 'top' : (height / 2 + 10) + 'px' }}
@@ -403,12 +405,12 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
         var chartDataState = ChartDataController.getState();
         var legendFields = (this.refs && this.refs.barplotChart && this.refs.barplotChart.getLegendData()) || null;
-
+        console.log(legendFields);
         return (
-            <div className={"facet-charts show-" + show} key="facet-charts">
-                
+            <div className={"facet-charts show-" + show} key="facet-charts" style={{ height: height }}>
+                {/*
                 <div className="row facet-chart-row-1" key="facet-chart-row-1">
-                    {/*
+                    
                     <div className={genChartColClassName(1)} key="facet-chart-row-1-chart-1" style={{ height: height }} ref="mosaicContainer">
                         <div className="row">
                             <div className="col-sm-6" style={{
@@ -460,40 +462,45 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                         </div>
                         <FetchingView display={this.state.fetching} />
                     </div>
-                    */}
+                    
                     <div className={genChartColClassName(1)} key="facet-chart-row-1-chart-1" style={{ height: height }}>
-                        <ChartDataController.Provider id="barplot1">
-                            <BarPlotChart
-                                fields={chartDataState.chartFieldsBarPlot}
-                                width={this.width(1) - 20} height={height}
-                                schemas={this.props.schemas}
-                                updatePopover={this.updatePopover}
-                                ref="barplotChart"
-                                primaryField="experiments_in_set.biosample.biosource_summary"
-                                secondaryField={null}
-
-                            />
-                        </ChartDataController.Provider>
-                        <FetchingView display={this.state.fetching} />
+                        
                     </div>
                     <div className={genChartColClassName(2)} key="facet-chart-row-1-chart-2" style={{ height: height }}>
-                        <Legend
-                            fields={legendFields}
-                            schemas={this.props.schemas}
-                            width={this.width(2) - 20}
-                            title={
-                                <div>
-                                    <h6 className="text-400 legend-title">
-                                        { this.refs && this.refs.barplotChart && typeof this.refs.barplotChart.getTopLevelField === 'function' ?
-                                            Filters.Field.toName(this.refs.barplotChart.getTopLevelField(), this.props.schemas)
-                                        : null }
-                                        <br/><span className="text-300">divided into</span>
-                                    </h6>
-                                </div>
-                            }
-                        />
+                        
                     </div>
                 </div>
+                */}
+                <ChartDataController.Provider id="barplot1">
+                    <BarPlotChart.UIControlsWrapper legend chartHeight={height}>
+                        <BarPlotChart
+                            fields={chartDataState.chartFieldsBarPlot}
+                            width={this.width(1) - 20}
+                            height={height}
+                            schemas={this.props.schemas}
+                            updatePopover={this.updatePopover}
+                            ref="barplotChart"
+                        />
+                    </BarPlotChart.UIControlsWrapper>
+                </ChartDataController.Provider>
+                <FetchingView display={this.state.fetching} />
+                {/*
+                <Legend
+                    fields={legendFields}
+                    schemas={this.props.schemas}
+                    width={this.width(2) - 20}
+                    title={
+                        <div>
+                            <h6 className="text-400 legend-title">
+                                { this.refs && this.refs.barplotChart && typeof this.refs.barplotChart.getTopLevelField === 'function' ?
+                                    Filters.Field.toName(this.refs.barplotChart.getTopLevelField(), this.props.schemas)
+                                : null }
+                                <br/><span className="text-300">divided into</span>
+                            </h6>
+                        </div>
+                    }
+                />
+                */}
                 <ChartDetailCursor
                     containingElement={(this.refs && this.refs.mosaicContainer) || null}
                     verticalAlign="center" /* cursor position */

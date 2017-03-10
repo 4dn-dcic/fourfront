@@ -3,9 +3,9 @@ branch-defaults:
     environment: 4dn-web-prod
     group_suffix: null
   master:
-    environment: 4dn-web-prod
+    environment: 4dnweb-prod
   production:
-    environment: 4dnweb-dev
+    environment: 4dn-web-dev
 global:
   application_name: 4dn-web
   default_ec2_keyname: 4dn-encode

@@ -8,7 +8,8 @@
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
         "uuid": "d1115d5e-40aa-43bc-b81c-32c70c9afb01",
-        "aliases": ["dcic:test_reg1"]
+        "aliases": ["dcic:test_reg1"],
+        "status": "in review by lab"
     },
     {
         "genome_assembly": "GRCh38",
@@ -18,6 +19,7 @@
         "submitted_by": "wrangler@wrangler.com",
         "location_description": "Region A - 3 Mb from 5Mb to 8 Mb from end",
         "uuid": "d2215d5e-40aa-43bc-b81c-32c70c9afb01",
-        "aliases": ["dcic:test_reg2"]
+        "aliases": ["dcic:test_reg2"],
+        "status": "in review by lab"
     }
 ]

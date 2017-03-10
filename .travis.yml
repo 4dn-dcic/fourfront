@@ -47,6 +47,7 @@ before_install:
 - nvm install 4
 - node --version
 - npm config set python /usr/bin/python2.7
+- env
 install:
 - python bootstrap.py --buildout-version 2.4.1 --setuptools-version 18.1
 - bin/buildout || (echo "Retrying buildout" && bin/buildout )
@@ -123,6 +124,7 @@ after_success:
           python deploy/deploy_beanstalk.py
         fi
         if [ "$TRAVIS_BRANCH" = "production" ]; then
+           if ["$TRAVIS
           echo "Job succeeded! PUBLISHING to PROD environment..."
           git config --global user.email "travis@builder.com"
           git config --global user.name "Travis"
