@@ -39,7 +39,7 @@ var lookup_column = function (result, column) {
 
     globals.content_views.register(Collection, 'Collection');
 
-
+    /** @ignore */
     class Cell {
         constructor(value, sortable) {
             this.value = value;
@@ -47,7 +47,7 @@ var lookup_column = function (result, column) {
         }
     }
 
-
+    /** @ignore */
     class Row {
         constructor(item, cells, text) {
             this.item = item;
@@ -56,7 +56,7 @@ var lookup_column = function (result, column) {
         }
     }
 
-
+    /** @ignore */
     class Data {
         constructor(rows) {
             this.rows = rows;

@@ -16,7 +16,13 @@ var propTypes = {
     })).isRequired
 };
 
-
+/**
+ * Component for displaying Files in a set.
+ * 
+ * @memberof module:item-pages/components
+ * @namespace FilesInSetTable
+ * @type {Component}
+ */
 var FilesInSetTable = module.exports = React.createClass({
 
     /**
@@ -24,11 +30,13 @@ var FilesInSetTable = module.exports = React.createClass({
      * 
      * @memberof module:item-pages/components.FilesInSetTable
      * @namespace
+     * @type {Object}
      */
     statics : {
 
         /**
          * Convert a link_id, if one exists on param 'object', to an '@id' link.
+         * 
          * @param {Object} object - Must have a 'link_id' or '@id' property. Else will return null.
          * @returns {string|null} The Item's '@id'.
          */
@@ -68,6 +76,7 @@ var FilesInSetTable = module.exports = React.createClass({
 
         /**
          * Converts a file-type or mime-type string into a FontAwesome icon className suffix.
+         * 
          * @param {string} fileType - MIMEType to get icon className suffix for.
          * @returns {string|null} The suffix to append to "fa-" or "icon-" CSS class.
          */
@@ -138,12 +147,14 @@ var FilesInSetTable = module.exports = React.createClass({
         }),
 
         /**
+         * Renders a "users group" icon which links to submitter's lab.
+         * 
          * @memberof module:item-pages/components.FilesInSetTable
          * @namespace
          * @type {Component}
          * @prop {Object} lab - Lab object.
          * @prop {function} onMouseEnter - Callback for cursor entering icon.
-         * @prop {function} onMouseLeave - Callback for cursor leaving icon.
+         * @property {function} onMouseLeave - Callback for cursor leaving icon.
          */
         LabIcon : React.createClass({
 
