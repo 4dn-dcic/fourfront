@@ -304,8 +304,6 @@ var Facet = React.createClass({
         var schemaProperty = Filters.Field.getSchemaProperty(facet.field, this.props.schemas);
         var description = schemaProperty && schemaProperty.description;
 
-        console.log('SCHEMASPROPERTY', schemaProperty);
-
         if (this.isStatic()){ 
             // Only one term
             return (
