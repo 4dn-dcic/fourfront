@@ -16,10 +16,12 @@ var propTypes = {
     })).isRequired
 };
 
+
 var FilesInSetTable = module.exports = React.createClass({
 
     /**
      * Static functions which help to render or parse File objects.
+     * 
      * @memberof module:item-pages/components.FilesInSetTable
      * @namespace
      */
@@ -28,11 +30,11 @@ var FilesInSetTable = module.exports = React.createClass({
         /**
          * Convert a link_id, if one exists on param 'object', to an '@id' link.
          * @param {Object} object - Must have a 'link_id' or '@id' property. Else will return null.
-         * @returns {string|null} The File Item's '@id'.
+         * @returns {string|null} The Item's '@id'.
          */
         atIdFromObject : function(object){
             return (
-                object &&
+                object && typeof object === 'object' &&
                     ((object.link_id && object.link_id.replace(/~/g, "/")) || object['@id']) 
                 ) || null;
         },
@@ -96,18 +98,149 @@ var FilesInSetTable = module.exports = React.createClass({
             }
         },
 
-        submitterLink : function(userObject){
-            var atId = FilesInSetTable.atIdFromObject(userObject);
-            var title = userObject.display_title || userObject.title || "Submitter";
-            if (!atId && title === 'Submitter') return null;
-            else if (!atId) return title;
-            
-            return (
-                <span>
-                    <a href={atId}>{ title }</a>
-                </span>
-            );
-        },
+        /**
+         * Show the submitter's name and link to their profile.
+         * If passed a props.labName and props.showLabName == true,
+         * then will show that labName instead. Use for when hovering over the lab icon, for example.
+         * 
+         * Also shows props.labName if no props.user object supplied.
+         * 
+         * @memberof module:item-pages/components.FilesInSetTable
+         * @namespace
+         * @type {Component}
+         * @prop {Object} user
+         */
+        SubmitterLink : React.createClass({
+
+            render : function(){
+                var user = this.props.user;
+                var labName = this.props.labName;
+                
+                if (labName && (this.props.showLabName || !user)){
+                    return (
+                        <span>
+                            <small>Lab: </small>{ labName }
+                        </span>)
+                    ;
+                }
+
+                var atId = FilesInSetTable.atIdFromObject(user);
+                var title = user.display_title || user.title || (typeof user === 'string' ? user : null) || "Submitter";
+                if (!atId && title === 'Submitter') return null;
+                else if (!atId) return title;
+                
+                return (
+                    <span>
+                        <a href={atId}>{ title }</a>
+                    </span>
+                );
+            }
+
+        }),
+
+        /**
+         * @memberof module:item-pages/components.FilesInSetTable
+         * @namespace
+         * @type {Component}
+         * @prop {Object} lab - Lab object.
+         * @prop {function} onMouseEnter - Callback for cursor entering icon.
+         * @prop {function} onMouseLeave - Callback for cursor leaving icon.
+         */
+        LabIcon : React.createClass({
+
+            noLab : function(){
+                return (
+                    <span className="lab-icon no-lab">
+                        <i className="icon icon-users"/>
+                    </span>
+                );
+            },
+
+            render : function(){
+                var lab = this.props.lab;
+                if (!lab) return this.noLab();
+                var atId = FilesInSetTable.atIdFromObject(lab);
+                if (!atId) {
+                    console.error("We need lab with link_id or @id.")
+                    return this.noLab();
+                }
+                return (
+                    <a 
+                        href={atId}
+                        className="lab-icon"
+                        onMouseEnter={this.props.onMouseEnter}
+                        onMouseLeave={this.props.onMouseLeave}
+                    >
+                        <i className="icon icon-users"/>
+                    </a>
+                );
+            },
+
+        }),
+
+        /**
+         * Renders a div element with '.row' Bootstrap class, containing details about a file.
+         * Meant to fill a large-width area, but scales down responsively for smaller screen sizes.
+         * 
+         * @memberof module:item-pages/components.FilesInSetTable
+         * @namespace
+         * @type {Component}
+         */
+        FileItemRow : React.createClass({
+
+            getInitialState : function(){
+                return {
+                    'showLabName' : false
+                };
+            },
+
+            render : function(){
+                var file = this.props.file;
+                var atId = FilesInSetTable.atIdFromObject(file);
+                var title = file.display_title || file.accession;
+                var downloadHref = FilesInSetTable.attachmentDownloadLinkFromFile(file);
+                var iconClass = FilesInSetTable.iconClassFromFileType(file && file.attachment && file.attachment.type);
+                return (
+                    <div className="row" key={atId || title}>
+                        <div className="col-xs-9 col-md-2 col-lg-2 title">
+                            <h6 className="accession">
+                                { atId ? <a href={atId}>{ title }</a> : title }
+                            </h6>
+                        </div>
+
+                        <div className="col-xs-3 col-md-1 text-right download-button pull-right">
+                            <Button bsSize="small" href={ downloadHref } download disabled={!downloadHref}>
+                                <i className={"icon icon-" + (iconClass || 'download')}/>
+                            </Button>
+                        </div>
+
+                        <div className="col-xs-12 col-md-5 col-lg-6 description">
+                            { file.description }
+                        </div>
+
+                        <div className="col-xs-1 col-md-1 lab">
+                            <FilesInSetTable.LabIcon
+                                lab={file && file.lab}
+                                onMouseEnter={ ()=> this.setState({ showLabName : true }) }
+                                onMouseLeave={ ()=> this.setState({ showLabName : false }) }
+                            />
+                        </div>
+
+                        <div className="col-xs-11 col-md-3 col-lg-2 submitter">
+                            <FilesInSetTable.SubmitterLink 
+                                user={file && file.submitted_by}
+                                labName={file && file.lab && file.lab.display_title}
+                                showLabName={this.state.showLabName}
+                            />
+                        </div>
+                        
+                        <div className="col-xs-12 col-md-12 divider-column">
+                            <div className="divider"/>
+                        </div>
+                    </div>
+                );
+            }
+        }),
 
         /**
          * @memberof module:item-pages/components.FilesInSetTable
@@ -157,19 +290,23 @@ var FilesInSetTable = module.exports = React.createClass({
     header : function(){
         return (
             <div className="row hidden-xs hidden-sm header-row">
-                <div className="col-xs-9 col-md-3 col-lg-2 title">
+                <div className="col-xs-9 col-md-2 col-lg-2 title">
                     Accession
                 </div>
 
-                <div className="col-xs-3 col-md-2 text-right download-button-title pull-right">
+                <div className="col-xs-3 col-md-1 text-right download-button-title pull-right">
                     <i className={"icon icon-download"}/>
                 </div>
 
-                <div className="col-xs-12 col-md-4 col-lg-5 description">
+                <div className="col-xs-12 col-md-5 col-lg-6  description">
                     Description
                 </div>
 
-                <div className="col-xs-12 col-md-3 col-lg-3 submitter">
+                <div className="col-xs-1 col-md-1 lab">
+                    &nbsp;
+                </div>
+
+                <div className="col-xs-12 col-md-3 col-lg-2 submitter">
                     Submitter
                 </div>
                 
@@ -184,41 +321,7 @@ var FilesInSetTable = module.exports = React.createClass({
         return (
             <div className="files-in-set-table">
                 { this.header() }
-                { 
-                    this.props.files.map(function(file, i){
-                        var atId = FilesInSetTable.atIdFromObject(file);
-                        var title = file.display_title || file.accession;
-                        var downloadHref = FilesInSetTable.attachmentDownloadLinkFromFile(file);
-                        var iconClass = FilesInSetTable.iconClassFromFileType(file && file.attachment && file.attachment.type);
-                        return (
-                            <div className="row" key={atId || title || i}>
-                                <div className="col-xs-9 col-md-3 col-lg-2 title">
-                                    <h6 className="text-500 accession">
-                                        { atId ? <a href={atId}>{ title }</a> : title }
-                                    </h6>
-                                </div>
-
-                                <div className="col-xs-3 col-md-2 text-right download-button pull-right">
-                                    <Button bsSize="small" href={ downloadHref } download disabled={!downloadHref}>
-                                        <i className={"icon icon-" + (iconClass || 'download')}/>
-                                    </Button>
-                                </div>
-
-                                <div className="col-xs-12 col-md-4 col-lg-5 description">
-                                    { file.description }
-                                </div>
-
-                                <div className="col-xs-12 col-md-3 col-lg-3 submitter">
-                                    { FilesInSetTable.submitterLink(file && file.submitted_by) }
-                                </div>
-                                
-                                <div className="col-xs-12 col-md-12 divider-column">
-                                    <div className="divider"/>
-                                </div>
-                            </div>
-                        );
-                    })
-                }
+                { this.props.files.map((file, i)=> <FilesInSetTable.FileItemRow file={file} />) }
             </div>
         );
     }

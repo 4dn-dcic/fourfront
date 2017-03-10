@@ -6,11 +6,21 @@ var _ = require('underscore');
 var store = require('../store');
 
 /**
- * @module {React.Component} alerts
+ * A Component and utility (via Component's 'statics' property & functions) to 
+ * queue and dequeue alerts from appearing at top of pages. Alerts, once queued, will persist until they are closed by
+ * the end user, which is the same functionality as calling Alerts.deQueue(alert) from anywhere in application, supplying the same
+ * title for alert that was queued.
+ * 
+ * @module {Component} alerts
  */
 
 var Alerts = module.exports = React.createClass({
 
+    /**
+     * @memberof module:alerts
+     * @namespace
+     * @type {Object}
+     */
     statics : {
         queue : function(alert, callback){
             var currentAlerts = store.getState().alerts;

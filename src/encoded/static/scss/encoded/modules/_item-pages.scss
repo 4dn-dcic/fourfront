@@ -383,6 +383,29 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
     		padding-bottom: 0px;
 		}
 
+		> .lab {
+			text-align: right;
+			.lab-icon {
+				&.no-lab {
+					opacity: 0.125;
+				}
+			}
+			a.lab-icon {
+				color: #555;
+				transition: color .5s;
+				&:hover {
+					color : #000;
+				}
+			}
+		}
+
+		> .submitter {
+			small {
+				line-height: 1rem;
+				color: #777;
+			}
+		}
+
 		> div.divider-column {
 			padding-bottom: 0;
 			padding-top: 0;

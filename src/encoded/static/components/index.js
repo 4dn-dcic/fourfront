@@ -2,6 +2,11 @@
 
 // Require all components to ensure javascript load ordering
 
+/**
+ * @file
+ * @alias module:app
+ */
+
 require('./lib');
 require('./util');
 require('./app');

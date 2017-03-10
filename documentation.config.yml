@@ -12,7 +12,7 @@ documentation_directory : "./docs/"          # Where auxiliary static docs are l
 output_directory : "./documentation/"        # Save output here
 
 python_project_directory : "./src/encoded"
-javascript_root_directory : "./src/encoded/static/components/viz" # Fourfront JS directory
+javascript_root_directory : "./src/encoded/static/components" # Fourfront JS directory
 
 # Define what each section in nav-menu contains.
 sections : [

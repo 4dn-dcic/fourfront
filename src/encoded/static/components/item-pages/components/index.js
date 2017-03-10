@@ -3,7 +3,7 @@
 /**
  * A directory of methods and maybe a mini-component or two for common use.
  * 
- * @module
+ * @module item-pages/components
  */
 
 

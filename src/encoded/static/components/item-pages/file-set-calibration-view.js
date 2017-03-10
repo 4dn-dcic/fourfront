@@ -6,7 +6,9 @@ var globals = require('./../globals');
 var { ItemHeader, PartialList, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } = require('./components');
 
 // TODO: Rename to FileSetCalibrationView?
-
+/**
+ * @module {Component} item-pages/file-set-calibration-view
+ */
 var FileSetCalibrationView = module.exports = React.createClass({
 
     render : function(){

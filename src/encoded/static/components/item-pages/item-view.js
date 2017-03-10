@@ -9,11 +9,33 @@ var { AuditIndicators, AuditDetail, AuditMixin } = require('./../audit');
 var { console, object, DateUtility, Filters } = require('./../util');
 var itemTitle = require('./item').title;
 
+/**
+ * This Component renders out the default Item page view for Item objects/contexts which do not have a more specific
+ * Item page template associated with them.
+ * 
+ * @module {Component} item-pages/item-view
+ */
 
+/**
+ * A list of properties which belong to Item shown by ItemView.
+ * Shows 'persistentKeys' fields & values stickied near top of list,
+ * 'excludedKeys' never, and 'hiddenKeys' only when "See More Info" button is clicked.
+ * 
+ * @memberof module:item-pages/item-view
+ * @namespace
+ * @type {Component}
+ */
 var Detail = React.createClass({
 
+    /**
+     * @namespace
+     * @memberof module:item-pages/item-view.Detail
+     * @type {Object}
+     */
     statics: {
-        // Formats the correct display for each metadata field
+        /**
+         * Formats the correct display for each metadata field.
+         */
         formKey : function(tips, key){
             var tooltip = '';
             var title = null;
@@ -37,7 +59,7 @@ var Detail = React.createClass({
          * Wraps URLs/paths in link elements. Sub-panels for objects.
          *
          * @param {Object} schemas - Object containing schemas for server's JSONized object output.
-         * @param {*|*[]} item - Item(s) to render recursively.
+         * @param {Object|Array|string} item - Item(s) to render recursively.
          */
         formValue : function (schemas, item, keyPrefix = '', atType = 'ExperimentSet', depth = 0) {
             if(Array.isArray(item)) {
@@ -119,6 +141,7 @@ var Detail = React.createClass({
         context : React.PropTypes.object.isRequired,
     },
 
+    /** @ignore */
     getDefaultProps : function(){
         return {
             'excludedKeys' : [
@@ -149,6 +172,7 @@ var Detail = React.createClass({
         };
     },
 
+    /** @ignore */
     shouldComponentUpdate : function(nextProps){
         if (this.props.context !== nextProps.context) return true;
         if (this.props.schemas !== nextProps.schemas) return true;
@@ -156,6 +180,7 @@ var Detail = React.createClass({
         return false;
     },
 
+    /** @ignore */
     render : function(){
         var context = this.props.context;
         var sortKeys = _.difference(_.keys(context).sort(), this.props.excludedKeys.sort());
@@ -189,13 +214,22 @@ var Detail = React.createClass({
 });
 
 
-
+/** 
+ * @alias module:item-pages/item-view
+ */
 var ItemView = module.exports = React.createClass({
 
     statics : {
 
-        // Display the item field with a tooltip showing the field description from
-        // schema, if available
+
+        /**
+         * Display the item field with a tooltip showing the field description from
+         * schema, if available.
+         * 
+         * @memberof module:item-pages/item-view
+         * @namespace
+         * @type {Component}
+         */
         DescriptorField : React.createClass({
 
             propTypes: {
@@ -238,6 +272,11 @@ var ItemView = module.exports = React.createClass({
             }
         }),
 
+        /**
+         * @memberof module:item-pages/item-view
+         * @namespace
+         * @type {Component}
+         */
         SubIPanel : React.createClass({
             getInitialState: function() {
                 return {isOpen: false};
@@ -276,6 +315,11 @@ var ItemView = module.exports = React.createClass({
             }
         }),
 
+        /**
+         * @memberof module:item-pages/item-view
+         * @namespace
+         * @type {Component}
+         */
         Subview : React.createClass({
             render: function(){
                 var schemas = this.props.schemas;
@@ -300,6 +344,13 @@ var ItemView = module.exports = React.createClass({
         }),
 
         Detail : Detail,
+
+        /**
+         * Renders page title appropriately for a provided props.context.
+         * 
+         * @memberof module:item-pages/item-view
+         * @type {Component}
+         */
         Title : React.createClass({
             render : function(){
                 var title = globals.listing_titles.lookup(this.props.context)({context: this.props.context});
@@ -313,23 +364,27 @@ var ItemView = module.exports = React.createClass({
 
     },
 
+    /** @returns {Object} collapsed : false */
     getInitialState : function(){
         return {
             'collapsed' : true
         };
     },
 
+    /** @ignore */
     componentDidMount : function(){
         FormattedInfoBlock.onMountMaybeFetch.call(this, 'lab', this.props.context.lab);
         FormattedInfoBlock.onMountMaybeFetch.call(this, 'award', this.props.context.award);
     },
 
+    /** @ignore */
     topRightHeaderSection : function(){
         var r = [];
         // TODO: EDIT ACTIONS
         return r;
     },
 
+    /** @ignore */
     render: function() {
         var schemas = this.props.schemas || {};
         var context = this.props.context;
