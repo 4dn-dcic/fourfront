@@ -123,7 +123,7 @@ after_success:
           python deploy/deploy_beanstalk.py
         fi
         if [ "$TRAVIS_BRANCH" = "production" ]; then
-           if ["$TRAVIS_COMMIT_MSG = "Your Tibanna triggered build has started.  Have a nice day! :)"]; then
+           if ["$TRAVIS_COMMIT_MSG" = "Your Tibanna triggered build has started.  Have a nice day! :)"]; then
                   echo "Job succeeded! PUBLISHING to 4dn-web-dev environment..."
                   git config --global user.email "travis@builder.com"
                   git config --global user.name "Travis"
