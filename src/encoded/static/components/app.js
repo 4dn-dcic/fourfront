@@ -22,20 +22,20 @@ var makeTitle = require('./item-pages/item').title;
 /**
  * The top-level component for this application.
  * 
- * @module {React.Component} app
+ * @module {Component} app
  */
 
 /** 
  * Used to temporarily store Redux store values for simultaneous dispatch.
  * 
- * @memberof app
+ * @memberof module:app
  */
 var dispatch_dict = {};
 
 /**
  * Top bar navigation & link schema definition.
  * 
- * @memberof app
+ * @memberof module:app
  */
 var portal = {
     portal_title: '4DN Data Portal',
@@ -88,13 +88,20 @@ var Title = React.createClass({
     }
 });
 
+/**
+ * Creates a promise which completes after a delay, performing no network request.
+ * Used to perform a promise.race to see if this timeout or a network requests completes first, which 
+ * then allows us to set app.state.slow and render a loading icon until long-running network request completes.
+ */
 class Timeout {
     constructor(timeout) {
         this.promise = new Promise(resolve => setTimeout(resolve.bind(undefined, this), timeout));
     }
 }
 
-
+/**
+ * @alias module:app
+ */
 var App = React.createClass({
     SLOW_REQUEST_TIME: 750,
     historyEnabled: !!(typeof window != 'undefined' && window.history && window.history.pushState),

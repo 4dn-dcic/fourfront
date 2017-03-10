@@ -121,7 +121,8 @@ class FileSetCalibration(FileSet):
     embedded = ['files_in_set.submitted_by',
                 'files_in_set.accession',
                 'files_in_set.description',
-                'files_in_set.attachment'
+                'files_in_set.attachment',
+                'files_in_set.lab'
                 ]
 
 

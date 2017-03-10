@@ -1,4 +1,4 @@
-TODO: document beanstalk deployment
+# Beanstalk Deployment
 
 ## Beanstalk deployment through travis
 
