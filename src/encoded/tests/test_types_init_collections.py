@@ -91,7 +91,7 @@ def test_calculated_target_summaries(testapp, targets):
         if name == 'target_w_genes':
             assert summary == 'eeny and meeny'
             assert short == 'eeny and meeny'
-        if name == 'target_w_region' in targets:
+        if name == 'target_w_regions' in targets:
             assert summary == 'GRCh38:X:1-3'
             assert short == 'no target'
         if name == 'target_w_desc':
