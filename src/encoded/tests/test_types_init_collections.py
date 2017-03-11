@@ -59,7 +59,7 @@ def target_w_genes(testapp, lab, award):
 @pytest.fixture
 def target_w_region(testapp, genomic_region_w_chrloc, lab, award):
     item = {
-        "targeted_region": [genomic_region_w_chrloc['@id']],
+        "targeted_regions": [genomic_region_w_chrloc['@id']],
         'award': award['@id'],
         'lab': lab['@id'],
     }
