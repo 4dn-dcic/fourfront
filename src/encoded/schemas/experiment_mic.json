@@ -31,9 +31,7 @@
             "enum": [
                 "DNA-paint",
                 "DNA-FiSH",
-                "FISH",
-                "micro-C",
-                "DNase Hi-C"
+                "FISH"
             ]
         }
     },

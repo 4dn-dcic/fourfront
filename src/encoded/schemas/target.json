@@ -50,7 +50,7 @@
         },
         "targeted_proteins": {
             "title": "Targeted Proteins",
-            "description": "Use UniProt Protein names (e.g. H31_HUMAN)",
+            "description": "Use UniProt Protein IDs or accession (e.g. H31_HUMAN)",
             "type": "array",
             "items": {
                 "title": "Protein",
