@@ -335,13 +335,18 @@ var User = module.exports.User = React.createClass({
 
                     </div>
 
-                    { typeof user.access_keys !== 'undefined' && typeof user.submits_for !== 'undefined' ?
+                    { 
+                        typeof user.access_keys !== 'undefined' &&
+                        Array.isArray(user.submits_for) &&
+                        user.submits_for.length > 0 ?
+                        
                         <div className="access-keys-container">
                             <h3 className="text-300">Access Keys</h3>
                             <div className="data-display">
                                 <AccessKeyTable user={user} access_keys={user.access_keys} />
                             </div>
                         </div>
+                        
                     : '' }
 
                 </div>
@@ -415,6 +420,9 @@ var ProfileWorkFields = React.createClass({
 
         if (!this.state.details_lab){
             this.isLabFetched = FormattedInfoBlock.onMountMaybeFetch.call(this, 'lab', this.props.user.lab, (detail) => this.updateAwardsList([detail]) );
+            if (!this.isLabFetched){
+                this.updateAwardsList([this.props.user.lab]);
+            }
         }
 
         if (typeof this.props.user.lab == 'string' && !this.state.details_lab){
@@ -436,13 +444,21 @@ var ProfileWorkFields = React.createClass({
     getAwardsList : function(labDetails){
         // Awards are embedded within labs, so we get full details.
         var awardsList = [];
+
+        function addAwardToList(award){
+            if (awardsList.indexOf(labDetails[i].awards[j]) === -1){
+                awardsList.push(labDetails[i].awards[j]);
+            }
+        }
+
         for (var i = 0; i < labDetails.length; i++){
             if (typeof labDetails[i].awards !== 'undefined' && Array.isArray(labDetails[i].awards)){
                 for (var j = 0; j < labDetails[i].awards.length; j++){
-                    if (awardsList.indexOf(labDetails[i].awards[j]) === -1) awardsList.push(labDetails[i].awards[j]);
+                    addAwardToList(labDetails[i].awards[j]);
                 }
             }
         }
+        
         return awardsList;
     },
 
@@ -506,32 +522,17 @@ var ProfileWorkFields = React.createClass({
                         <label htmlFor="submits_for">Submits For</label>
                     </div>
                     <div className="col-sm-9 value">
-                        <ul className="formatted-info-panel-list loaded transitioned" id="submits_for">
-                            {submits_for ?
-                                submits_for.map(function(submit_val){
-                                    return (
-                                        <li className="submits_for-item" key={submit_val.link_id}>
-                                            <div className="formatted-info-panel no-icon no-label no-details loaded transitioned lab">
-                                                <div className="row loaded">
-                                                    <div className="details-col col-sm-12">
-                                                        <h5 class="block-title">
-                                                            <a href={submit_val.link_id.replace(/~/g, "/")}>
-                                                                {submit_val.display_title}
-                                                            </a>
-                                                        </h5>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    );
-                                })
-                                :
-                                <span className="not-set">
-                                    Not submitting for any organizations
-                                </span>
-                            }
-                        </ul>
-
+                        <FormattedInfoBlock.List
+                            renderItem={(detail) => FormattedInfoBlock.Lab(detail, false, false, false) }
+                            endpoints={user.submits_for.map(function(o){
+                                if (typeof o === 'string') return o;
+                                if (typeof o.link_id === 'string') return o.link_id.replace(/~/g,'/');
+                                if (typeof o['@id'] === 'string') return o['@id'];
+                            })}
+                            propertyName="submits_for"
+                            fallbackMsg="Not submitting for any organizations"
+                            ajaxCallback={this.updateAwardsList}
+                        />
                     </div>
                 </div>
                 <div className="row field-entry awards">

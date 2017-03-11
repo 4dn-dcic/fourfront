@@ -1,7 +1,7 @@
 [
     {
         "accession":"4DNEX067AXE1",
-        "status": "released",
+        "status": "in review by lab",
         "experiment_type": "repliseq",
         "biosample":"231111bc-8535-4448-903e-854af460b254",
         "fragment_size_range": "200-500",
@@ -23,7 +23,7 @@
     },
     {
         "accession":"4DNEX34DAX2S",
-        "status": "released",
+        "status": "in review by lab",
         "experiment_type": "repliseq",
         "biosample":"231111bc-8535-4448-903e-854af460b254",
         "fragment_size_range": "200-500",
@@ -35,7 +35,7 @@
         "cell_cycle_phase": "G1",
         "notes": "sample rep notes",
         "lab": "test-4dn-lab",
-        "description": "Repli Test",
+        "description": "Repli Test 2",
         "award": "1U01CA200059-01",
         "uuid": "75041e2f-3e43-4388-8aaa-e861f209c553",
         "protocol": "131106bc-8535-4448-903e-854af460b244",
@@ -44,7 +44,7 @@
     },
     {
         "accession":"4DNEX42CAX15",
-        "status": "released",
+        "status": "in review by lab",
         "experiment_type": "repliseq",
         "biosample":"231111bc-8535-4448-903e-854af460b242",
         "fragment_size_range": "200-500",
@@ -57,7 +57,7 @@
         "stage_fraction": "late S phase - fraction 2",
         "notes": "sample rep notes",
         "lab": "test-4dn-lab",
-        "description": "Repli Test",
+        "description": "Repli Test 3",
         "award": "1U01CA200059-01",
         "uuid": "75041e2f-3e43-4388-8aaa-e861f209c551",
         "protocol": "131106bc-8535-4448-903e-854af460b244",

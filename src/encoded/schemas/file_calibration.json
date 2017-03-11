@@ -31,7 +31,7 @@
             "title": "File format",
             "type": "string",
             "default": "other",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "enum": [
                 "other"
             ]
@@ -40,7 +40,7 @@
             "title": "File type",
             "description": "The type of file based on the information in the file.",
             "default": "calibration file",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "enum": [
                 "calibration file"
             ]
@@ -49,13 +49,22 @@
             "title": "General Classification",
             "type": "string",
             "default": "Microscopy",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "enum": [
                 "Microscopy"
               ]
         },
         "related_files": {
-            "exclude_from": "submit4dn"
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
+        "file_format_specifications": {
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
+        "quality_metric": {
+          "exclude_from": ["submit4dn", "FFedit-create"]
+        },
+        "dbxrefs": {
+          "exclude_from": ["submit4dn", "FFedit-create"]
         }
     },
     "file_format_file_extension": {

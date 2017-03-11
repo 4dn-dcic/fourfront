@@ -33,8 +33,18 @@ var commonDefaultProps = {
  */
 var RotatedLabel = module.exports = React.createClass({
 
+    /**
+     * @memberof module:viz/components.RotatedLabel
+     * @namespace
+     * @type {Object}
+     */
     statics : {
 
+        /**
+         * @param {number} height - Available height.
+         * @param {number} angle - Angle to rotate.
+         * @returns {number} Length of hypotenuse.
+         */
         maxHypotenuse : function(height, angle){
             return Math.floor((
                 1 / Math.abs(Math.sin((angle / 180) * Math.PI)
@@ -49,6 +59,12 @@ var RotatedLabel = module.exports = React.createClass({
             );
         },
 
+        /**
+         * An Axis component which would generate and contain multiple RotatedLabel components, data for which is provided via props.labels.
+         * @memberof module:viz/components.RotatedLabel
+         * @namespace
+         * @type {Component}
+        */
         Axis : React.createClass({
 
             getDefaultProps : function(){

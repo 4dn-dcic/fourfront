@@ -4,16 +4,38 @@ var React = require('react');
 var globals = require('./../globals');
 var Collapse = require('react-bootstrap').Collapse;
 var _ = require('underscore');
-var { ItemHeader, PartialList, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock } = require('./components');
+var { ItemHeader, PartialList, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } = require('./components');
 var { AuditIndicators, AuditDetail, AuditMixin } = require('./../audit');
 var { console, object, DateUtility, Filters } = require('./../util');
 var itemTitle = require('./item').title;
 
+/**
+ * This Component renders out the default Item page view for Item objects/contexts which do not have a more specific
+ * Item page template associated with them.
+ * 
+ * @module {Component} item-pages/item-view
+ */
 
+/**
+ * A list of properties which belong to Item shown by ItemView.
+ * Shows 'persistentKeys' fields & values stickied near top of list,
+ * 'excludedKeys' never, and 'hiddenKeys' only when "See More Info" button is clicked.
+ * 
+ * @memberof module:item-pages/item-view
+ * @namespace
+ * @type {Component}
+ */
 var Detail = React.createClass({
 
+    /**
+     * @namespace
+     * @memberof module:item-pages/item-view.Detail
+     * @type {Object}
+     */
     statics: {
-        // Formats the correct display for each metadata field
+        /**
+         * Formats the correct display for each metadata field.
+         */
         formKey : function(tips, key){
             var tooltip = '';
             var title = null;
@@ -37,14 +59,14 @@ var Detail = React.createClass({
          * Wraps URLs/paths in link elements. Sub-panels for objects.
          *
          * @param {Object} schemas - Object containing schemas for server's JSONized object output.
-         * @param {*|*[]} item - Item(s) to render recursively.
+         * @param {Object|Array|string} item - Item(s) to render recursively.
          */
         formValue : function (schemas, item, keyPrefix = '', atType = 'ExperimentSet', depth = 0) {
             if(Array.isArray(item)) {
 
                 if (keyPrefix === 'files_in_set'){
                     return (
-                        <FilesInSetTable files={item}/>
+                        <FilesInSetTable.Small files={item}/>
                     );
                 }
 
@@ -119,6 +141,7 @@ var Detail = React.createClass({
         context : React.PropTypes.object.isRequired,
     },
 
+    /** @ignore */
     getDefaultProps : function(){
         return {
             'excludedKeys' : [
@@ -149,6 +172,7 @@ var Detail = React.createClass({
         };
     },
 
+    /** @ignore */
     shouldComponentUpdate : function(nextProps){
         if (this.props.context !== nextProps.context) return true;
         if (this.props.schemas !== nextProps.schemas) return true;
@@ -156,6 +180,7 @@ var Detail = React.createClass({
         return false;
     },
 
+    /** @ignore */
     render : function(){
         var context = this.props.context;
         var sortKeys = _.difference(_.keys(context).sort(), this.props.excludedKeys.sort());
@@ -189,13 +214,22 @@ var Detail = React.createClass({
 });
 
 
-
+/** 
+ * @alias module:item-pages/item-view
+ */
 var ItemView = module.exports = React.createClass({
 
     statics : {
 
-        // Display the item field with a tooltip showing the field description from
-        // schema, if available
+
+        /**
+         * Display the item field with a tooltip showing the field description from
+         * schema, if available.
+         * 
+         * @memberof module:item-pages/item-view
+         * @namespace
+         * @type {Component}
+         */
         DescriptorField : React.createClass({
 
             propTypes: {
@@ -238,6 +272,11 @@ var ItemView = module.exports = React.createClass({
             }
         }),
 
+        /**
+         * @memberof module:item-pages/item-view
+         * @namespace
+         * @type {Component}
+         */
         SubIPanel : React.createClass({
             getInitialState: function() {
                 return {isOpen: false};
@@ -276,6 +315,11 @@ var ItemView = module.exports = React.createClass({
             }
         }),
 
+        /**
+         * @memberof module:item-pages/item-view
+         * @namespace
+         * @type {Component}
+         */
         Subview : React.createClass({
             render: function(){
                 var schemas = this.props.schemas;
@@ -300,6 +344,13 @@ var ItemView = module.exports = React.createClass({
         }),
 
         Detail : Detail,
+
+        /**
+         * Renders page title appropriately for a provided props.context.
+         * 
+         * @memberof module:item-pages/item-view
+         * @type {Component}
+         */
         Title : React.createClass({
             render : function(){
                 var title = globals.listing_titles.lookup(this.props.context)({context: this.props.context});
@@ -313,95 +364,31 @@ var ItemView = module.exports = React.createClass({
 
     },
 
+    /** @returns {Object} collapsed : false */
     getInitialState : function(){
         return {
             'collapsed' : true
         };
     },
 
+    /** @ignore */
     componentDidMount : function(){
         FormattedInfoBlock.onMountMaybeFetch.call(this, 'lab', this.props.context.lab);
         FormattedInfoBlock.onMountMaybeFetch.call(this, 'award', this.props.context.award);
     },
 
+    /** @ignore */
     topRightHeaderSection : function(){
         var r = [];
         // TODO: EDIT ACTIONS
         return r;
     },
 
-    aliases : function(){
-        if (!this.props.context || !Array.isArray(this.props.context.aliases)) return null;
-        var aliases = this.props.context.aliases.length > 0 ? this.props.context.aliases : [<em>None</em>];
-        return (
-            <div>
-                <h4 className="text-500">Aliases</h4>
-                <div>
-                    <ul>
-                    { aliases.map(function(alias, i){
-                        return (
-                            <li key={i}>{ alias }</li>
-                        );
-                    }) }
-                    </ul>
-                </div>
-            </div>
-        );
-    },
-
-    alternateAccessions : function(){
-        if (!this.props.context || !Array.isArray(this.props.context.alternate_accessions)) return null;
-        var alternateAccessions = this.props.context.alternate_accessions.length > 0 ? this.props.context.alternate_accessions : [<em>None</em>];
-        return (
-            <div>
-                <h4 className="text-500">Alternate Accessions</h4>
-                <div>
-                    <ul>
-                    { alternateAccessions.map(function(alias, i){
-                        return (
-                            <li key={i}>{ alias }</li>
-                        );
-                    }) }
-                    </ul>
-                </div>
-            </div>
-        );
-    },
-
-    externalReferences : function(schemas){
-        if (!this.props.context || !Array.isArray(this.props.context.external_references)) return null;
-        var externalRefs = this.props.context.external_references.length > 0 ? this.props.context.external_references : [<em>None</em>];
-        return (
-            <div>
-                <h4 className="text-500">External References</h4>
-                <div>
-                    <ul>
-                    { externalRefs.map(function(extRef, i){
-                        return (
-                            <li key={i}>
-                                { typeof extRef.ref === 'string' ?
-                                    <ExternalReferenceLink uri={extRef.uri || null} children={extRef.ref} />
-                                    :
-                                    extRef
-                                }
-
-                            </li>
-                        );
-                    }) }
-                    </ul>
-                </div>
-            </div>
-        );
-    },
-
+    /** @ignore */
     render: function() {
         var schemas = this.props.schemas || {};
         var context = this.props.context;
         var itemClass = globals.itemClass(this.props.context, 'view-detail item-page-container');
-
-        var externalReferences  = this.externalReferences(schemas),
-            aliases             = this.aliases(),
-            alternateAccessions = this.alternateAccessions();
 
         return (
             <div className={itemClass}>
@@ -428,21 +415,29 @@ var ItemView = module.exports = React.createClass({
                             />
                         </div>
 
+                        <h5 className="item-page-detail-toggle-button btn btn-info btn-block" onClick={()=>{
+                            this.setState({ collapsed : !this.state.collapsed });
+                        }}>{ this.state.collapsed ? "See more information" : "Hide" }</h5>
+
                     </div>
 
 
                     <div className="col-xs-12 col-md-4 item-info-area section">
 
-                        <hr/>
-
-                        <h5 className="item-page-detail-toggle-button btn btn-default btn-block" onClick={()=>{
-                            this.setState({ collapsed : !this.state.collapsed });
-                        }}>{ this.state.collapsed ? "See more information" : "Hide" }</h5>
-
                         { typeof context.lab !== 'undefined' || typeof context.award !== 'undefined' ?
                         <hr/>
                         : null }
 
+                        { typeof context.submitted_by !== 'undefined' ?
+                        <div className>
+                            { FormattedInfoBlock.User(
+                                this.state && typeof this.state.details_submitted_by !== 'undefined' ?
+                                this.state.details_submitted_by : context.submitted_by
+                            ) }
+                        </div>
+                        : null }
+
+                        { typeof context.lab !== 'undefined' ? <hr/> : null }
                         { typeof context.lab !== 'undefined' ?
                         <div className>
                             { FormattedInfoBlock.Lab(
@@ -452,6 +447,7 @@ var ItemView = module.exports = React.createClass({
                         </div>
                         : null }
 
+                        { typeof context.award !== 'undefined' ? <hr/> : null }
                         { typeof context.award !== 'undefined' ?
                         <div className>
                             { FormattedInfoBlock.Award(
@@ -465,27 +461,7 @@ var ItemView = module.exports = React.createClass({
 
                 </div>
 
-                <div className="row">
-
-                    { externalReferences ?
-                    <div className="col-xs-12 col-md-4">
-                        { externalReferences }
-                    </div>
-                    : null }
-
-                    { aliases ?
-                    <div className="col-xs-12 col-md-4">
-                        { aliases }
-                    </div>
-                    : null }
-
-                    { alternateAccessions ?
-                    <div className="col-xs-12 col-md-4">
-                        { alternateAccessions }
-                    </div>
-                    : null }
-
-                </div>
+                <ItemFooterRow context={context} schemas={schemas} />
 
 
             </div>

@@ -1,5 +1,6 @@
 'use strict';
 
+/** @ignore */
 var React = require('react');
 var _ = require('underscore');
 var url = require('url');
@@ -10,9 +11,16 @@ var ActiveFiltersBar = require('./components/ActiveFiltersBar');
 var MosaicChart = require('./MosaicChart');
 var ChartDataController = require('./chart-data-controller');
 
+/**
+ * Bar shown below header on home and browse pages.
+ * Shows counts of selected experiment_sets, experiments, and files against those properties' total counts.
+ * 
+ * @module {Component} viz/QuickInfoBar
+ */
 
+/** @alias module:viz/QuickInfoBar  */
 var QuickInfoBar = module.exports = React.createClass({
-
+    /** @ignore */
     getDefaultProps : function(){
         return {
             'offset' : {},
@@ -22,6 +30,9 @@ var QuickInfoBar = module.exports = React.createClass({
         };
     },
 
+    /**
+     * @returns {Object.<number, boolean, string>} Initial State
+     */
     getInitialState : function(){
         return {
             'count_experiments'     : null,
@@ -34,11 +45,12 @@ var QuickInfoBar = module.exports = React.createClass({
             'show'                  : false
         };
     },
-
+    /** @ignore */
     componentDidMount : function(){
         this.setState({'mounted' : true});
     },
 
+    /** @ignore */
     shouldComponentUpdate : function(newProps, newState){
         if (this.state.count_experiments !== newState.count_experiments) return true;
         if (this.state.count_experiment_sets !== newState.count_experiment_sets) return true;
@@ -87,6 +99,7 @@ var QuickInfoBar = module.exports = React.createClass({
         return true;
     },
 
+    /** Check if component is visible or not. */
     isInvisible : function(props = this.props, state = this.state){
         if (
             !state.mounted ||
@@ -114,12 +127,19 @@ var QuickInfoBar = module.exports = React.createClass({
         return false;
     },
 
+    /**
+     * Updates state.show if no filters are selected.
+     * 
+     * @param {Object} nextProps - Next props.
+     * @returns {undefined}
+     */
     componentWillReceiveProps : function(nextProps){
         if (!(nextProps.expSetFilters && _.keys(nextProps.expSetFilters).length > 0) && this.state.show){
             this.setState({ 'show' : false });
         }
     },
 
+    /** @ignore */
     className: function(){
         var cn = "explanation";
         if (typeof this.props.className === 'string') cn += ' ' + this.props.className;
@@ -127,15 +147,28 @@ var QuickInfoBar = module.exports = React.createClass({
         return cn;
     },
 
+    /** @ignore */
     renderStats : function(){
         var areAnyFiltersSet = (this.props.expSetFilters && _.keys(this.props.expSetFilters).length > 0);
         var stats;
         //if (this.props.showCurrent || this.state.showCurrent){
         if (this.state.count_experiment_sets || this.state.count_experiments || this.state.count_files) {
             stats = {
-                'experiment_sets' : this.state.count_experiment_sets,
-                'experiments' : this.state.count_experiments,
-                'files' : this.state.count_files
+                'experiment_sets' : (
+                    <span>
+                        { this.state.count_experiment_sets }<small> / { (this.state.count_experiment_sets_total || 0) }</small>
+                    </span>
+                ),
+                'experiments' : (
+                    <span>
+                        { this.state.count_experiments }<small> / {this.state.count_experiments_total || 0}</small>
+                    </span>
+                ),
+                'files' : (
+                    <span>
+                        { this.state.count_files }<small> / {this.state.count_files_total || 0}</small>
+                    </span>
+                ),
             };
         } else {
             stats = {
@@ -192,6 +225,7 @@ var QuickInfoBar = module.exports = React.createClass({
         );
     },
 
+    /** @ignore */
     renderHoverBar : function(){
         if (this.state.show === 'activeFilters') {
             return (
@@ -244,6 +278,7 @@ var QuickInfoBar = module.exports = React.createClass({
         }
     },
 
+    /** @ignore */
     render : function(){
         return(
             <div id={this.props.id} className={this.className()}>
@@ -252,9 +287,13 @@ var QuickInfoBar = module.exports = React.createClass({
         );
     },
 
+    /** @ignore */
     statics : {
+
+        /** @ignore */
         Stat : React.createClass({
 
+            /** @ignore */
             getDefaultProps : function(){
                 return {
                     'value' : 0,
@@ -264,6 +303,7 @@ var QuickInfoBar = module.exports = React.createClass({
                 };
             },
 
+            /** @ignore */
             render : function(){
                 return (
                     <div className={"stat stat-" + this.props.classNameID} title={this.props.longLabel}>

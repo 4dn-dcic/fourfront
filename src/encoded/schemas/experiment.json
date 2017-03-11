@@ -124,7 +124,7 @@
             "title": "Sets of Metadata on Data files",
             "description": "Information about a set of data files associated with the experiment.",
             "type": "array",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "items": {
                 "title": "Fileset",
                 "description": "Metadata on a set of files.",
@@ -136,7 +136,7 @@
             "title": "Quality Metric Flags",
             "description": "Flags and associated info for flagging experiments with possible issues",
             "type": "array",
-            "exclude_from": "submit4dn",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "items": {
                 "title": "Flag",
                 "description": "A flag for this experiment with link to associated QC info.",
