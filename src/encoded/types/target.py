@@ -27,15 +27,15 @@ class Target(Item):
         "description": "Summary of target information, either specific genes or genomic coordinates.",
         "type": "string",
     })
-    def target_summary(self, request, targeted_genes=None, targeted_region=None):
+    def target_summary(self, request, targeted_genes=None, targeted_regions=None):
         if targeted_genes:
             value = ""
             value += ' and '.join(targeted_genes)
             return value
-        elif targeted_region:
+        elif targeted_regions:
             values = []
             # since targetted region is a list, go through each item and get summary elements
-            for each_target in targeted_region:
+            for each_target in targeted_regions:
                 genomic_region = request.embed(each_target, '@@object')
                 value = ""
                 value += genomic_region['genome_assembly']
