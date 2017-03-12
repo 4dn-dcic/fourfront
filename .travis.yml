@@ -124,11 +124,12 @@ after_success:
           python deploy/deploy_beanstalk.py
         fi
         if [ "$TRAVIS_BRANCH" = "production" ]; then
-           if [ "$TRAVIS_COMMIT_MSG" = "Deploy" ]; then
+           if [[ "$TRAVIS_COMMIT_MSG" == "Deploy" ]]; then
                   echo "Job succeeded! PUBLISHING to 4dn-web-dev environment..."
                   git config --global user.email "travis@builder.com"
                   git config --global user.name "Travis"
-                  eb use 4dn-web-dev
+                  eb use 4dn-web-dev --debug --verbose
+                  eb deploy
                   python deploy/deploy_beanstalk.py
                 fi
           fi
