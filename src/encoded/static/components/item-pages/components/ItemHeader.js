@@ -7,9 +7,27 @@ var querystring = require('querystring');
 var { console, DateUtility } = require('./../../util');
 var { FlexibleDescriptionBox } = require('./../../experiment-common');
 
+
 var ItemHeader = module.exports = {
 
+    /**
+     * Use as first child within an ItemHeader component. Its props.children will be included in the top-right area.
+     * Top right area also includes action buttions such as edit button or link, view json button, Item status, etc.
+     * 
+     * @memberof module:item-pages/components.ItemHeader
+     * @namespace
+     * @type {Component}
+     * @prop {Component|Element|string} children - Child React element or component, or string, to render in top-right area.
+     * @prop {string} href - URL of current item for view JSON button.
+     */
     TopRow : React.createClass({
+        /**
+         * Renders Item status and color indicator.
+         * 
+         * @memberof module:item-pages/components.ItemHeader.TopRow
+         * @private
+         * @instance
+         */
         parsedStatus : function(){
             if (!('status' in this.props.context)) return <div></div>;
             /*  Removed icon in lieu of color indicator for status
@@ -35,6 +53,14 @@ var ItemHeader = module.exports = {
                 </div>
             );
         },
+        /**
+         * Renders view JSON button.
+         * 
+         * @memberof module:item-pages/components.ItemHeader.TopRow
+         * @private
+         * @instance
+         * @returns {!Element} <span> element, or null if no props.href.
+         */
         viewJSONButton : function(){
             if (!this.props.href) return null;
 
@@ -54,6 +80,13 @@ var ItemHeader = module.exports = {
                 </div>
             );
         },
+        /**
+         * Renders Item actions for admins and submitter.
+         * 
+         * @memberof module:item-pages/components.ItemHeader.TopRow
+         * @private
+         * @instance
+         */
         itemActions : function(){
             if (!Array.isArray(this.props.context.actions) || this.props.context.actions.length === 0) return null;
             return this.props.context.actions.map(function(action, i){
@@ -64,6 +97,13 @@ var ItemHeader = module.exports = {
                 );
             });
         },
+        /**
+         * Wraps props.children in a <div> element.
+         * 
+         * @memberof module:item-pages/components.ItemHeader.TopRow
+         * @private
+         * @instance
+         */
         wrapChildren : function(){
             if (!this.props.children) return null;
             return React.Children.map(this.props.children, (child,i) =>
@@ -76,6 +116,14 @@ var ItemHeader = module.exports = {
                 </div>
             );
         },
+        /**
+         * Render function.
+         * 
+         * @memberof module:item-pages/components.ItemHeader.TopRow
+         * @private
+         * @instance
+         * @returns {Element} Div element with .row Bootstrap class and items in top-right section.
+         */
         render : function(){
             return (
                 <div className="row clearfix top-row">
@@ -93,6 +141,14 @@ var ItemHeader = module.exports = {
         }
     }),
 
+    /**
+     * Renders a styled FlexibleDescriptionBox component containing props.context.description.
+     * 
+     * @memberof module:item-pages/components.ItemHeader
+     * @namespace
+     * @type {Component}
+     * @prop {Object} context - Same as the props.context passed to parent ItemHeader component.
+     */
     MiddleRow : React.createClass({
         render : function(){
             var isTextShort = false;
@@ -116,6 +172,14 @@ var ItemHeader = module.exports = {
         }
     }),
 
+    /**
+     * Renders props.context.date_created in bottom-right and props.children in bottom-left areas.
+     * 
+     * @memberof module:item-pages/components.ItemHeader
+     * @namespace
+     * @type {Component}
+     * @prop {Object} context - Same as the props.context passed to parent ItemHeader component.
+     */
     BottomRow : React.createClass({
         parsedCreationDate: function(){
             if (!('date_created' in this.props.context)) return <span><i></i></span>;
@@ -136,6 +200,16 @@ var ItemHeader = module.exports = {
         }
     }),
 
+    /**
+     * Use this to wrap ItemHeader.TopRow, .MiddleRow, and .BottomRow to create a complete ItemHeader.
+     * Passes own props.context and props.href down to children.
+     * 
+     * @memberof module:item-pages/components.ItemHeader
+     * @namespace
+     * @type {Component}
+     * @prop {Object} context - Same as the props.context passed to parent ItemHeader component.
+     * @prop {string} href - Location from Redux store or '@id' of current Item. Used for View JSON button.
+     */
     Wrapper : React.createClass({
         adjustChildren : function(){
             if (!this.props.context) return this.props.children;

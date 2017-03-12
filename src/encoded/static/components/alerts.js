@@ -16,12 +16,18 @@ var store = require('../store');
 
 var Alerts = module.exports = React.createClass({
 
-    /**
-     * @memberof module:alerts
-     * @namespace
-     * @type {Object}
-     */
     statics : {
+
+        /**
+         * Open an alert box.
+         * 
+         * More specifically, saves a new alert to Redux store 'alerts' field.
+         * 
+         * @memberof module:alerts
+         * @static
+         * @public
+         * @param {Object} alert - Object with 'title', 'message', and 'style' properties. Used for alert message element at top of page.
+         */
         queue : function(alert, callback){
             var currentAlerts = store.getState().alerts;
             if (_.pluck(currentAlerts, 'title').indexOf(alert.title) > -1) return null; // Same alert is already set.
@@ -29,6 +35,15 @@ var Alerts = module.exports = React.createClass({
                 type: { 'alerts' : currentAlerts.concat([alert]) }
             });
         },
+
+        /**
+         * Close an alert box.
+         * 
+         * @memberof module:alerts
+         * @static
+         * @public
+         * @param {Object} alert - Object with at least 'title'.
+         */
         deQueue : function(alert, callback){
             var currentAlerts = store.getState().alerts;
             currentAlerts = currentAlerts.filter(function(a){ return a.title != alert.title; });
@@ -61,6 +76,14 @@ var Alerts = module.exports = React.createClass({
         };
     },
 
+    /**
+     * Renders out Bootstrap Alerts for any queued alerts.
+     * 
+     * @memberof module:alerts
+     * @private
+     * @instance
+     * @returns {Element} A <div> element.
+     */
     render : function(){
         if (this.props.alerts.length === 0) return null;
 

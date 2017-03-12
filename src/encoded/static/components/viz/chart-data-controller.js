@@ -8,7 +8,9 @@ var { expFxn, Filters, ajax, console, layout, isServerSide } = require('./../uti
 
 /** 
  * This is a utility to manage charts' experiment data in one global place and distribute to charts throughout UI.
- * The mechanism for this is roughly diagrammed [here]{@link https://hms-dbmi.slack.com/files/alexkb/F4C8KQKMM/chartdatacontroller.png } .
+ * The mechanism for this is roughly diagrammed here:
+ * 
+ * .. image:: https://hms-dbmi.slack.com/files/alexkb/F4C8KQKMM/chartdatacontroller.png
  * 
  * @module {Object} viz/chart-data-controller
  */
@@ -228,27 +230,32 @@ var ChartDataController = module.exports = {
 
     /**
      * Use this React component to wrap individual charts and provide them with source of experiments data via
-     * props.experiments and props.filteredExperiments. Also provides expSetFilters from redux store.
+     * their props.experiments and props.filteredExperiments. Also provides props.expSetFilters from redux store.
      * 
      * @namespace
      * @type {Component}
      * @memberof module:viz/chart-data-controller
+     * 
+     * @prop {string} id - Unique ID.
+     * @prop {Object} children - Must be a Chart or Chart controller component.
      */
     Provider : React.createClass({
 
-        /**
-         * @memberof module:viz/chart-data-controller.Provider
-         * @prop {string} id - Unique ID.
-         * @prop {Object} children - Must be a Chart or Chart controller component.
-         */
+        /** @ignore */
         propTypes : {
             'id' : React.PropTypes.string.isRequired,
             'children' : React.PropTypes.object.isRequired
         },
 
         /**
+         * Registers a callback function, which itself calls this.forceUpdate(), with module-viz_chart-data-controller_
+         * using ChartDataController.registerUpdateCallback(cb, this.props.id).
+         * 
          * @memberof module:viz/chart-data-controller.Provider
-         * @ignore
+         * @private
+         * @instance
+         * @this module:viz/chart-data-controller.Provider
+         * @returns {undefined} Nothing
          */
         componentWillMount : function(){
             ChartDataController.registerUpdateCallback(()=>{
@@ -257,8 +264,13 @@ var ChartDataController = module.exports = {
         },
 
         /**
+         * Unregisters itself using ChartDataController.unregisterUpdateCallback(this.props.id).
+         * 
          * @memberof module:viz/chart-data-controller.Provider
-         * @ignore
+         * @private
+         * @instance
+         * @this module:viz/chart-data-controller.Provider
+         * @returns {undefined} Nothing
          */
         componentWillUnmount : function(){
             ChartDataController.unregisterUpdateCallback(this.props.id);
@@ -267,8 +279,10 @@ var ChartDataController = module.exports = {
         /**
          * Sets 'experiments' and 'filteredExperiments' props on props.children.
          * 
-         * @returns {React.Component} Cloned & adjusted props.children.
+         * @returns {Component} Cloned & adjusted props.children.
          * @memberof module:viz/chart-data-controller.Provider
+         * @private
+         * @instance
          */
         render : function(){
             var childChartProps = _.extend({}, this.props.children.props);
@@ -285,6 +299,8 @@ var ChartDataController = module.exports = {
     /** 
      * This function must be called before this component is used anywhere else.
      * 
+     * @public
+     * @static
      * @param {string} requestURLBase - Where to request 'all experiments' from.
      * @param {function} [updateStats] - Callback for updating QuickInfoBar, for example, with current experiments, experiment_sets, and files counts.
      * @param {function} [callback] - Optional callback for after initializing.
@@ -361,6 +377,9 @@ var ChartDataController = module.exports = {
 
     /**
      * Whether component has been initialized and may be used.
+     * 
+     * @public
+     * @static
      * @returns {boolean} True if initialized.
      */
     isInitialized : function(){
@@ -371,6 +390,8 @@ var ChartDataController = module.exports = {
      * For React components to register an "update me" function, i.e. forceUpdate,
      * to be called when new experiments/filteredExperiments has finished loading from back-end.
      * 
+     * @public
+     * @static
      * @param {function} callback - Function to be called upon loading 'experiments' or 'all experiments'. If registering from a React component, should include this.forceUpdate() or this.setState(..).
      * @param {string}   uniqueID - A unique identifier for the registered callback, to be used for removal or overwrites.
      * @returns {function}   A function which may be called to unregister the callback, in lieu of ChartDataController.unregisterUpdateCallback.
@@ -387,6 +408,9 @@ var ChartDataController = module.exports = {
 
     /**
      * The opposite of registerUpdateCallback.
+     * 
+     * @public
+     * @static
      * @param {string} uniqueID - ID given alongside initially-registered callback.
      * @returns {undefined}
      */
@@ -398,6 +422,8 @@ var ChartDataController = module.exports = {
     /**
      * Same as registerUpdateCallback but for when starting AJAX fetch of data.
      *
+     * @public
+     * @static
      * @param {function} callback - Function to be called upon starting AJAX load.
      * @param {string} uniqueID - @see ChartDataController.registerUpdateCallback().
      * @returns {function} Function for unregistering callback which may be used in lieu of @see ChartDataController.unregisterUpdateCallback().
@@ -413,6 +439,9 @@ var ChartDataController = module.exports = {
 
     /**
      * The opposite of registerLoadStartCallback.
+     * 
+     * @public
+     * @static
      * @param {string} uniqueID - ID given alongside initially-registered callback.
      * @returns {undefined}
      */
@@ -423,6 +452,9 @@ var ChartDataController = module.exports = {
 
     /** 
      * Get current state. Similar to Redux's store.getState().
+     * 
+     * @public
+     * @static
      * @returns {Object}
      */
     getState : function(){ return state; },
@@ -432,10 +464,11 @@ var ChartDataController = module.exports = {
      * ChartDataController and notifies update callbacks if experiments or filtered
      * experiments have changed.
      * 
+     * @private
+     * @static
      * @param {Object} updatedState - New or updated state object to save.
      * @param {function} [callback] - Optional callback function.
      * @returns {*} Result of callback, or undefined.
-     * @private
      */
     setState : function(updatedState = {}, callback = null){
         
@@ -458,6 +491,8 @@ var ChartDataController = module.exports = {
     /**
      * Fetch new data from back-end regardless of expSetFilters state, e.g. for when session has changed (@see App.prototype.componentDidUpdate()).
      * 
+     * @public
+     * @static
      * @param {function} [callback] - Function to be called after sync complete.
      * @returns {undefined}
      */
@@ -468,8 +503,15 @@ var ChartDataController = module.exports = {
     },
 
     /**
-     * @ignore
+     * Internally used to either fetch new filtered experiments or clear them, according to state of expSetFilters from Redux store.
+     * Called by listener to Redux store.
+     * 
+     * @static
+     * @private
      * @memberof module:viz/chart-data-controller
+     * @param {Object} expSetFilters - (Newly-updated) Experiment Set Filters in Redux store.
+     * @param {function} callback - Callback function to call after updating state.
+     * @returns {undefined} Nothing
      */
     handleUpdatedFilters : function(expSetFilters, callback){
         if (_.keys(expSetFilters).length === 0 && Array.isArray(state.experiments)){
@@ -480,8 +522,12 @@ var ChartDataController = module.exports = {
     },
 
     /**
-     * Update stats in top left corner of page, if updateState param was passed in during initialization.
-     * @returns {undefined}
+     * Called internally by setState to update stats in top left corner of page, if updateState param was passed in during initialization.
+     * 
+     * @private
+     * @static
+     * @ignore
+     * @returns {undefined} Nothing
      */
     updateStats : function(){
         if (typeof refs.updateStats !== 'function'){
@@ -519,8 +565,15 @@ var ChartDataController = module.exports = {
 
 
     /**
+     * Used internally to fetch both all & filtered experiments then calls ChartDataController.setState({ experiments, filteredExperiments }, callback).
+     * Called by ChartDataController.sync() internally.
+     * 
      * @memberof module:viz/chart-data-controller
-     * @ignore
+     * @private
+     * @static
+     * @param {Object} [reduxStoreState] - Current Redux store state to get expSetFilters and current href from. If not provided, gets it from store.getState().
+     * @param {function} [callback] - Optional callback function to call after setting updated state.
+     * @returns {undefined} Nothing
      */
     fetchUnfilteredAndFilteredExperiments : function(reduxStoreState = null, callback = null){
         if (!reduxStoreState || !reduxStoreState.expSetFilters || !reduxStoreState.href){
@@ -567,7 +620,16 @@ var ChartDataController = module.exports = {
 
     },
 
-    /** @ignore */
+    /**
+     * Like ChartDataController.fetchUnfilteredAndFilteredExperiments(), but only to get all experiments.
+     * Not actually used, but could be, for something.
+     * 
+     * @memberof module:viz/chart-data-controller
+     * @private
+     * @static
+     * @param {function} [callback] - Optional callback function.
+     * @returns {undefined} Nothing
+     */
     fetchAndSetUnfilteredExperiments : function(callback = null){
         notifyLoadStartCallbacks();
         ajax.load(
@@ -580,7 +642,15 @@ var ChartDataController = module.exports = {
         );
     },
 
-    /** @ignore */
+    /**
+     * Like ChartDataController.fetchUnfilteredAndFilteredExperiments(), but only to get filtered/selected experiments according to expSetFilters from Redux store.
+     * 
+     * @memberof module:viz/chart-data-controller
+     * @private
+     * @static
+     * @param {function} [callback] - Optional callback function.
+     * @returns {undefined} Nothing
+     */
     fetchAndSetFilteredExperiments : function(callback = null){
         notifyLoadStartCallbacks();
         ajax.load(
@@ -599,7 +669,13 @@ var ChartDataController = module.exports = {
     },
 
     /**
-     * @ignore
+     * Internally used to help form query part of URL.
+     * Adds 'field=<field.name.1>&...<field.name.n>' for each field required for chart(s).
+     * 
+     * @private
+     * @static
+     * @param {string[]} [fields] - Fields to fetch from back-end search result(s).
+     * @returns {string} Part of URL query.
      */
     getFieldsRequiredURLQueryPart : function(fields = refs.fieldsToFetch){
         return fields.map(function(fieldToIncludeInResult){
@@ -608,7 +684,14 @@ var ChartDataController = module.exports = {
     },
 
     /**
-     * @ignore
+     * Internally used to generate a URL from current href and expSetFilters from Redux store to fetch filtered/selected experiments from back-end.
+     * If no 'search'-compatible href is set in Redux store, '/browse/' is used.
+     * 
+     * @private
+     * @static
+     * @param {Object} [expSetFilters] - Current Experiment Set Filters in Redux store.
+     * @param {string} [href] - Current href from Redux store.
+     * @returns {string} URL for fetching filtered experiments/sets from back-end.
      */
     getFilteredContextHref : function(expSetFilters, href){
         if (!expSetFilters || !href){

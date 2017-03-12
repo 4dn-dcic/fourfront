@@ -7,6 +7,22 @@ var { console } = require('./../../util');
 var PartialList = module.exports = React.createClass({
 
     statics : {
+
+        /**
+         * Bootstrap 'Row' component which may be used in PartialList's props.collapsible or props.persistent.
+         * Renders two row columns: one for props.label and one for props.value or props.children.
+         * 
+         * @memberof module:item-pages/components.PartialList
+         * @namespace
+         * @prop {Component|Element|string} label - Label to use in left column.
+         * @prop {Component|Element|string} value - Value to use in right column.
+         * @prop {string} className - Classname to add to '.row.list-item'.
+         * @prop {number} colSm - Grid size (1-12) of label column at *small* screen sizes.
+         * @prop {number} colMd - Grid size (1-12) of label column at *medium* screen sizes.
+         * @prop {number} colLg - Grid size (1-12) of label column at *large* screen sizes.
+         * @prop {Component|Element|string} title - Alias for props.label.
+         * @prop {Component|Element|string} children - Alias for props.value.
+         */
         Row : React.createClass({
 
             getDefaultProps : function(){

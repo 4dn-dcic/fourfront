@@ -17,9 +17,10 @@ var { EditableField, FieldSet } = require('./../forms');
 
 
 /**
- * User profile page/view.
+ * Contains the User profile page view as well as Impersonate User form.
+ * Only the User view is exported.
  * 
- * @module {Component} item-pages/user
+ * @module item-pages/user
  */
 
 
@@ -223,15 +224,30 @@ var AccessKeyTable = React.createClass({
 });
 
 /**
- * @alias module:item-pages/user
+ * Draws a User Profile page.
+ * 
+ * @memberof module:item-pages/user
+ * @namespace
+ * @public
+ * @type {Component}
+ * @prop {Object} context - Context value for user, e.g. from Redux store. AKA user object.
+ * @prop {Object} schemas - Object of schemas, e.g. passed from app state.
  */
 var User = module.exports.User = React.createClass({
 
-    /**
-     * @memberof module:item-pages/user
-     * @namespace
-     */
     statics : {
+
+        /**
+         * Generate a URL to get Gravatar image from Gravatar service.
+         * 
+         * @memberof module:item-pages/user.User
+         * @static
+         * @public
+         * @param {string} email - User's email address.
+         * @param {number} size - Width & height of image square.
+         * @param {string} [defaultImg='retro'] Style of Gravatar image.
+         * @returns {string} A URL.
+         */
         buildGravatarURL : function(email, size=null, defaultImg='retro'){
             var md5 = require('js-md5');
             if (defaultImg === 'kanye'){
@@ -242,6 +258,19 @@ var User = module.exports.User = React.createClass({
             if (size) url += '&s=' + size;
             return url;
         },
+
+        /**
+         * Generate an <img> element with provided size, className, and Gravatar src.
+         * 
+         * @memberof module:item-pages/user.User
+         * @static
+         * @public
+         * @param {string} email - User's email address.
+         * @param {number} size - Width & height of image square.
+         * @param {string} className - ClassName of <img> element.
+         * @param {string} [defaultImg='retro'] Style of Gravatar image.
+         * @returns {Element} A React Image (<img>) element.
+         */
         gravatar : function(email, size=null, className=null, defaultImg='retro'){
             return (
                 <img
@@ -253,6 +282,7 @@ var User = module.exports.User = React.createClass({
         },
     },
 
+    /** @ignore */
     propTypes : {
         'context' : React.PropTypes.shape({
             '@id' : React.PropTypes.string.isRequired,
@@ -283,16 +313,19 @@ var User = module.exports.User = React.createClass({
         })
     },
 
+    /** @ignore */
     contextTypes : {
         listActionsFor : React.PropTypes.func
     },
 
+    /** @ignore */
     mayEdit : function(){
         return this.context.listActionsFor('context').filter(function(action){
             return action.name && action.name === 'edit';
         }).length > 0 ? true : false;
     },
 
+    /** @ignore */
     render: function() {
 
         var user = this.props.context;
@@ -386,13 +419,22 @@ var User = module.exports.User = React.createClass({
 
 globals.content_views.register(User, 'User');
 
-
+/**
+ * Renders out the contact fields for user, which are editable.
+ * Shows Gravatar and User's first and last name at top.
+ * 
+ * @private
+ * @namespace
+ * @memberof module:item-pages/user
+ */
 var ProfileContactFields = React.createClass({
 
+    /** @ignore */
     icon : function(iconName){
         return <i className={"visible-lg-inline icon icon-fw icon-" + iconName }></i>;
     },
 
+    /** @ignore */
     render: function(){
         var user = this.props.user;
 
@@ -429,9 +471,17 @@ var ProfileContactFields = React.createClass({
 });
 
 
-
+/**
+ * Renders out the lab and awards fields for user, which are not editable.
+ * Uses AJAX to fetch details for fields which are not embedded.
+ * 
+ * @private
+ * @namespace
+ * @memberof module:item-pages/user
+ */
 var ProfileWorkFields = React.createClass({
 
+    /** @ignore */
     getDefaultProps : function(){
         return {
             containerClassName : 'panel user-work-info shadow-border'
@@ -467,6 +517,8 @@ var ProfileWorkFields = React.createClass({
      * Get list of all awards (unique) from list of labs.
      * ToDo : Migrate somewhere more static-cy.
      *
+     * @memberof module:item-pages/user.ProfileWorkFields
+     * @instance
      * @param {Object[]} labDetails - Array of lab objects with embedded award details.
      * @return {Object[]} List of all unique awards in labs.
      */
@@ -494,7 +546,10 @@ var ProfileWorkFields = React.createClass({
     /**
      * Update state.awards_list with award details from list of lab details.
      *
+     * @memberof module:item-pages/user.ProfileWorkFields
+     * @instance
      * @param {Object[]} labDetails - Array of lab objects with embedded award details.
+     * @returns {undefined} Nothing.
      */
     updateAwardsList : function(labDetails){
         var currentAwardsList = (this.state.awards_list || []).slice(0);
@@ -514,6 +569,7 @@ var ProfileWorkFields = React.createClass({
         }
     },
 
+    /** @ignore */
     render : function(){
         var user = this.props.user;
         if (user.submits_for && user.submits_for.length > 0){
@@ -586,7 +642,12 @@ var ProfileWorkFields = React.createClass({
 
 });
 
-
+/**
+ * @memberof module:item-pages/user
+ * @private
+ * @namespace
+ * @type {Component}
+ */
 var BasicForm = React.createClass({
     getInitialState: function() {
         return({
@@ -618,6 +679,12 @@ var BasicForm = React.createClass({
     }
 });
 
+/**
+ * @memberof module:item-pages/user
+ * @private
+ * @namespace
+ * @type {Component}
+ */
 var ImpersonateUserForm = React.createClass({
     contextTypes: {
         navigate: React.PropTypes.func,

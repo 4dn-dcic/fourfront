@@ -16,27 +16,17 @@ var propTypes = {
     })).isRequired
 };
 
-/**
- * Component for displaying Files in a set.
- * 
- * @memberof module:item-pages/components
- * @namespace FilesInSetTable
- * @type {Component}
- */
+
 var FilesInSetTable = module.exports = React.createClass({
 
-    /**
-     * Static functions which help to render or parse File objects.
-     * 
-     * @memberof module:item-pages/components.FilesInSetTable
-     * @namespace
-     * @type {Static}
-     */
     statics : {
 
         /**
          * Convert a link_id, if one exists on param 'object', to an '@id' link.
          * 
+         * @memberof module:item-pages/components.FilesInSetTable
+         * @static
+         * @public
          * @param {Object} object - Must have a 'link_id' or '@id' property. Else will return null.
          * @returns {string|null} The Item's '@id'.
          */
@@ -50,6 +40,8 @@ var FilesInSetTable = module.exports = React.createClass({
         /** 
          * Generate a download link for a file attachment from a fileObject, which should represent a (partial) JSON of a file Item.
          * 
+         * @static
+         * @public
          * @param {Object} fileObject - Object must have a link_id or an @id property, as well as an 'attachment' property containing 'href'.
          * @returns {string} URL to download file attachment from.
          */
@@ -77,6 +69,8 @@ var FilesInSetTable = module.exports = React.createClass({
         /**
          * Converts a file-type or mime-type string into a FontAwesome icon className suffix.
          * 
+         * @static
+         * @public
          * @param {string} fileType - MIMEType to get icon className suffix for.
          * @returns {string|null} The suffix to append to "fa-" or "icon-" CSS class.
          */
@@ -123,6 +117,7 @@ var FilesInSetTable = module.exports = React.createClass({
          */
         SubmitterLink : React.createClass({
 
+            /** @ignore */
             render : function(){
                 var user = this.props.user;
                 var labName = this.props.labName;
@@ -256,14 +251,17 @@ var FilesInSetTable = module.exports = React.createClass({
         }),
 
         /**
+         * Small version of the full-width FilesInSetTable. Used for default item view page SubIPanels.
          * @memberof module:item-pages/components.FilesInSetTable
          * @namespace
          * @type {Component}
          */
         Small : React.createClass({
 
+            /** @ignore */
             propTypes : propTypes,
 
+            /** @ignore */
             render : function(){
                 return (
                     <div className="files-in-set-table">
@@ -298,8 +296,17 @@ var FilesInSetTable = module.exports = React.createClass({
 
     },
 
+    /** @ignore */
     propTypes : propTypes,
 
+    /**
+     * Renders heading with titles for table on medium and large width screens.
+     * 
+     * @memberof module:item-pages/components.FilesInSetTable
+     * @private
+     * @instance
+     * @returns {Element} <div> element
+    */
     header : function(){
         return (
             <div className="row hidden-xs hidden-sm header-row">
@@ -330,6 +337,7 @@ var FilesInSetTable = module.exports = React.createClass({
         );
     },
 
+    /** @ignore */
     render : function(){
         return (
             <div className="files-in-set-table">
