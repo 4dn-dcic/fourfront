@@ -1,0 +1,120 @@
+.. _undefined.Row:
+
+==================
+Namespace: ``Row``
+==================
+
+
+
+
+Bootstrap 'Row' component which may be used in PartialList's props.collapsible or props.persistent.
+Renders two row columns: one for props.label and one for props.value or props.children.
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+Props
+=====
+
+
+
+
+``label``
+---------
+
+Type: **Component** | **Element** | **string**
+
+.. js:property:: label
+
+Label to use in left column.
+
+
+
+``value``
+---------
+
+Type: **Component** | **Element** | **string**
+
+.. js:property:: value
+
+Value to use in right column.
+
+
+
+``className``
+-------------
+
+Type: **string**
+
+.. js:property:: className
+
+Classname to add to '.row.list-item'.
+
+
+
+``colSm``
+---------
+
+Type: **number**
+
+.. js:property:: colSm
+
+Grid size (1-12) of label column at *small* screen sizes.
+
+
+
+``colMd``
+---------
+
+Type: **number**
+
+.. js:property:: colMd
+
+Grid size (1-12) of label column at *medium* screen sizes.
+
+
+
+``colLg``
+---------
+
+Type: **number**
+
+.. js:property:: colLg
+
+Grid size (1-12) of label column at *large* screen sizes.
+
+
+
+``title``
+---------
+
+Type: **Component** | **Element** | **string**
+
+.. js:property:: title
+
+Alias for props.label.
+
+
+
+``children``
+------------
+
+Type: **Component** | **Element** | **string**
+
+.. js:property:: children
+
+Alias for props.value.
+
+
+
+
+
+
+
+
+
+
+

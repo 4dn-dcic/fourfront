@@ -1,0 +1,86 @@
+.. _module-item-pages_components.PartialList:
+
+==========================
+Component: ``PartialList``
+==========================
+
+
+Member Of :doc:`module-item-pages_components`
+
+
+Renders a list using elements along the Bootstrap grid.
+Takes two lists as props: 'persistent' and 'collapsible'. 
+Persistent items are always visible, while collapsible are only shown if props.open is true.
+
+
+.. contents:: Local Navigation
+   :local:
+
+1 Children
+==========
+
+.. toctree::
+   :maxdepth: 3
+   
+   module-item-pages_components.PartialList.Row
+   
+
+
+Props
+=====
+
+
+
+
+``persistent``
+--------------
+
+Type: **Array.<Component>** | **Array.<Element>** | **Array.<string>**
+
+.. js:property:: persistent
+
+React elements or components to always render.
+
+
+
+``collapsible``
+---------------
+
+Type: **Array.<Component>** | **Array.<Element>** | **Array.<string>**
+
+.. js:property:: collapsible
+
+React elements or components to render conditionally.
+
+
+
+``open``
+--------
+
+Type: **boolean**
+
+.. js:property:: open
+
+Show collapsed items or not.
+
+
+
+``className``
+-------------
+
+Type: **string**
+
+.. js:property:: className
+
+Class name for outermost element.
+
+
+
+
+
+
+
+
+
+
+

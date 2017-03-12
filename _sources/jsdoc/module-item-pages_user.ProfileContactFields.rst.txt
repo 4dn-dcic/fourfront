@@ -1,0 +1,32 @@
+.. _module-item-pages_user.ProfileContactFields:
+
+===================================
+Namespace: ``ProfileContactFields``
+===================================
+
+
+Member Of :doc:`module-item-pages_user`
+
+
+Renders out the contact fields for user, which are editable.
+Shows Gravatar and User's first and last name at top.
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

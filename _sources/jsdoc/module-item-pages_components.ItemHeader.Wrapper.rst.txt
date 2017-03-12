@@ -1,0 +1,54 @@
+.. _undefined.Wrapper:
+
+======================
+Component: ``Wrapper``
+======================
+
+
+
+
+Use this to wrap ItemHeader.TopRow, .MiddleRow, and .BottomRow to create a complete ItemHeader.
+Passes own props.context and props.href down to children.
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+Props
+=====
+
+
+
+
+``context``
+-----------
+
+Type: **Object**
+
+.. js:property:: context
+
+Same as the props.context passed to parent ItemHeader component.
+
+
+
+``href``
+--------
+
+Type: **string**
+
+.. js:property:: href
+
+Location from Redux store or '@id' of current Item. Used for View JSON button.
+
+
+
+
+
+
+
+
+
+
+

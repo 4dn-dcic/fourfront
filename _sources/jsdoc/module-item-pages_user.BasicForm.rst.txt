@@ -1,0 +1,31 @@
+.. _module-item-pages_user.BasicForm:
+
+========================
+Component: ``BasicForm``
+========================
+
+
+Member Of :doc:`module-item-pages_user`
+
+
+
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

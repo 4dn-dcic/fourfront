@@ -1,0 +1,72 @@
+.. _module-item-pages_user.ProfileWorkFields:
+
+================================
+Namespace: ``ProfileWorkFields``
+================================
+
+
+Member Of :doc:`module-item-pages_user`
+
+
+Renders out the lab and awards fields for user, which are not editable.
+Uses AJAX to fetch details for fields which are not embedded.
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+
+
+
+Functions
+=========
+
+
+
+.. _module-item-pages_user.ProfileWorkFields.getAwardsList:
+
+
+Instance  ``getAwardsList``
+---------------------------
+
+Get list of all awards (unique) from list of labs.
+ToDo : Migrate somewhere more static-cy.
+
+.. js:function:: getAwardsList(labDetails)
+
+    
+    :param Array.<Object> labDetails: Array of lab objects with embedded award details.
+    :returns Array.<Object>: List of all unique awards in labs.
+    
+
+user.js:525
+
+
+
+.. _module-item-pages_user.ProfileWorkFields.updateAwardsList:
+
+
+Instance  ``updateAwardsList``
+------------------------------
+
+Update state.awards_list with award details from list of lab details.
+
+.. js:function:: updateAwardsList(labDetails)
+
+    
+    :param Array.<Object> labDetails: Array of lab objects with embedded award details.
+    :returns undefined: Nothing.
+    
+
+user.js:554
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,49 @@
+.. _module-item-pages_components.module.exports.ItemHeader:
+
+=====================================
+Object: ``module.exports.ItemHeader``
+=====================================
+
+
+Member Of :doc:`module-item-pages_components`
+
+
+Common partial components for header shown on Item pages.
+Includes title, description, date created, status, action buttons, [...].
+
+Use by combining the components here together within an ItemHeader.wrapper.
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Examples
+========
+
+.. code-block:: javascript
+
+   <ItemHeader.Wrapper className="exp-set-header-area" context={this.props.context} href={this.props.href}>
+       <ItemHeader.TopRow>
+           <span data-tip="Experiment Type" className="inline-block">
+               { this.props.context.experimentset_type }
+           </span>
+       </ItemHeader.TopRow>
+       <ItemHeader.MiddleRow />
+       <ItemHeader.BottomRow />
+   </ItemHeader.Wrapper>
+

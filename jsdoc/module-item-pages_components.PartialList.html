@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Component: PartialList &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Namespace: Row" href="module-item-pages_components.PartialList.Row.html" />
+    <link rel="prev" title="Component: Wrapper" href="module-item-pages_components.ItemHeader.Wrapper.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="module-item-pages_components.PartialList.Row.html" title="Namespace: Row"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="module-item-pages_components.ItemHeader.Wrapper.html" title="Component: Wrapper"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="module-item-pages_components.html" accesskey="U">Module: <code class="docutils literal"><span class="pre">item-pages/components</span></code></a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="component-partiallist">
+<span id="module-item-pages-components-partiallist"></span><h1>Component: <code class="docutils literal"><span class="pre">PartialList</span></code><a class="headerlink" href="#component-partiallist" title="Permalink to this headline">¶</a></h1>
+<p>Member Of <a class="reference internal" href="module-item-pages_components.html"><span class="doc">Module: item-pages/components</span></a></p>
+<p>Renders a list using elements along the Bootstrap grid.
+Takes two lists as props: &#8216;persistent&#8217; and &#8216;collapsible&#8217;.
+Persistent items are always visible, while collapsible are only shown if props.open is true.</p>
+<div class="contents local topic" id="local-navigation">
+<p class="topic-title first">Local Navigation</p>
+<ul class="simple">
+<li><a class="reference internal" href="#children" id="id1">1 Children</a></li>
+<li><a class="reference internal" href="#props" id="id2">Props</a><ul>
+<li><a class="reference internal" href="#persistent" id="id3"><code class="docutils literal"><span class="pre">persistent</span></code></a></li>
+<li><a class="reference internal" href="#collapsible" id="id4"><code class="docutils literal"><span class="pre">collapsible</span></code></a></li>
+<li><a class="reference internal" href="#open" id="id5"><code class="docutils literal"><span class="pre">open</span></code></a></li>
+<li><a class="reference internal" href="#classname" id="id6"><code class="docutils literal"><span class="pre">className</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="children">
+<h2><a class="toc-backref" href="#id1">1 Children</a><a class="headerlink" href="#children" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="module-item-pages_components.PartialList.Row.html">Namespace: <code class="docutils literal"><span class="pre">Row</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="module-item-pages_components.PartialList.Row.html#props">Props</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="module-item-pages_components.PartialList.Row.html#label"><code class="docutils literal"><span class="pre">label</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-item-pages_components.PartialList.Row.html#value"><code class="docutils literal"><span class="pre">value</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-item-pages_components.PartialList.Row.html#classname"><code class="docutils literal"><span class="pre">className</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-item-pages_components.PartialList.Row.html#colsm"><code class="docutils literal"><span class="pre">colSm</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-item-pages_components.PartialList.Row.html#colmd"><code class="docutils literal"><span class="pre">colMd</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-item-pages_components.PartialList.Row.html#collg"><code class="docutils literal"><span class="pre">colLg</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-item-pages_components.PartialList.Row.html#title"><code class="docutils literal"><span class="pre">title</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-item-pages_components.PartialList.Row.html#children"><code class="docutils literal"><span class="pre">children</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="props">
+<h2><a class="toc-backref" href="#id2">Props</a><a class="headerlink" href="#props" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="persistent">
+<h3><a class="toc-backref" href="#id3"><code class="docutils literal"><span class="pre">persistent</span></code></a><a class="headerlink" href="#persistent" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>Array.&lt;Component&gt;</strong> | <strong>Array.&lt;Element&gt;</strong> | <strong>Array.&lt;string&gt;</strong></p>
+<p>React elements or components to always render.</p>
+</div>
+<div class="section" id="collapsible">
+<h3><a class="toc-backref" href="#id4"><code class="docutils literal"><span class="pre">collapsible</span></code></a><a class="headerlink" href="#collapsible" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>Array.&lt;Component&gt;</strong> | <strong>Array.&lt;Element&gt;</strong> | <strong>Array.&lt;string&gt;</strong></p>
+<p>React elements or components to render conditionally.</p>
+</div>
+<div class="section" id="open">
+<h3><a class="toc-backref" href="#id5"><code class="docutils literal"><span class="pre">open</span></code></a><a class="headerlink" href="#open" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>boolean</strong></p>
+<p>Show collapsed items or not.</p>
+</div>
+<div class="section" id="classname">
+<h3><a class="toc-backref" href="#id6"><code class="docutils literal"><span class="pre">className</span></code></a><a class="headerlink" href="#classname" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>string</strong></p>
+<p>Class name for outermost element.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Component: <code class="docutils literal"><span class="pre">PartialList</span></code></a><ul>
+<li><a class="reference internal" href="#children">1 Children</a></li>
+<li><a class="reference internal" href="#props">Props</a><ul>
+<li><a class="reference internal" href="#persistent"><code class="docutils literal"><span class="pre">persistent</span></code></a></li>
+<li><a class="reference internal" href="#collapsible"><code class="docutils literal"><span class="pre">collapsible</span></code></a></li>
+<li><a class="reference internal" href="#open"><code class="docutils literal"><span class="pre">open</span></code></a></li>
+<li><a class="reference internal" href="#classname"><code class="docutils literal"><span class="pre">className</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="module-item-pages_components.ItemHeader.Wrapper.html"
+                        title="previous chapter">Component: <code class="docutils literal"><span class="pre">Wrapper</span></code></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="module-item-pages_components.PartialList.Row.html"
+                        title="next chapter">Namespace: <code class="docutils literal"><span class="pre">Row</span></code></a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/jsdoc/module-item-pages_components.PartialList.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="module-item-pages_components.PartialList.Row.html" title="Namespace: Row"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="module-item-pages_components.ItemHeader.Wrapper.html" title="Component: Wrapper"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="module-item-pages_components.html" >Module: <code class="docutils literal"><span class="pre">item-pages/components</span></code></a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

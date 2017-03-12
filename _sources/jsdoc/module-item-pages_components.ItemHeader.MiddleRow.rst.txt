@@ -1,0 +1,42 @@
+.. _undefined.MiddleRow:
+
+========================
+Component: ``MiddleRow``
+========================
+
+
+
+
+Renders a styled FlexibleDescriptionBox component containing props.context.description.
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+Props
+=====
+
+
+
+
+``context``
+-----------
+
+Type: **Object**
+
+.. js:property:: context
+
+Same as the props.context passed to parent ItemHeader component.
+
+
+
+
+
+
+
+
+
+
+

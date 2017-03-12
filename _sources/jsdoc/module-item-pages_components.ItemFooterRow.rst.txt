@@ -1,0 +1,44 @@
+.. _module-item-pages_components.ItemFooterRow:
+
+============================
+Component: ``ItemFooterRow``
+============================
+
+
+Member Of :doc:`module-item-pages_components`
+
+
+Component for showing Aliases, External References, etc.
+Shown at bottom of Item pages.
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+Props
+=====
+
+
+
+
+``context``
+-----------
+
+Type: **Object**
+
+.. js:property:: context
+
+JSON representation of current Item object. Should be available through Redux store's context.
+
+
+
+
+
+
+
+
+
+
+

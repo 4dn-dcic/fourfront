@@ -1,0 +1,142 @@
+.. _undefined.TopRow:
+
+=====================
+Component: ``TopRow``
+=====================
+
+
+
+
+Use as first child within an ItemHeader component. Its props.children will be included in the top-right area.
+Top right area also includes action buttions such as edit button or link, view json button, Item status, etc.
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+Props
+=====
+
+
+
+
+``children``
+------------
+
+Type: **Component** | **Element** | **string**
+
+.. js:property:: children
+
+Child React element or component, or string, to render in top-right area.
+
+
+
+``href``
+--------
+
+Type: **string**
+
+.. js:property:: href
+
+URL of current item for view JSON button.
+
+Functions
+=========
+
+
+
+.. _module-item-pages_components.ItemHeader.TopRow.parsedStatus:
+
+
+Instance Private ``parsedStatus``
+---------------------------------
+
+Renders Item status and color indicator.
+
+.. js:function:: parsedStatus()
+
+    
+    
+
+ItemHeader.js:31
+
+
+
+.. _module-item-pages_components.ItemHeader.TopRow.viewJSONButton:
+
+
+Instance Private ``viewJSONButton``
+-----------------------------------
+
+Renders view JSON button.
+
+.. js:function:: viewJSONButton()
+
+    
+    :returns Element: <span> element, or null if no props.href.
+    
+
+ItemHeader.js:64
+
+
+
+.. _module-item-pages_components.ItemHeader.TopRow.itemActions:
+
+
+Instance Private ``itemActions``
+--------------------------------
+
+Renders Item actions for admins and submitter.
+
+.. js:function:: itemActions()
+
+    
+    
+
+ItemHeader.js:90
+
+
+
+.. _module-item-pages_components.ItemHeader.TopRow.wrapChildren:
+
+
+Instance Private ``wrapChildren``
+---------------------------------
+
+Wraps props.children in a <div> element.
+
+.. js:function:: wrapChildren()
+
+    
+    
+
+ItemHeader.js:107
+
+
+
+.. _module-item-pages_components.ItemHeader.TopRow.render:
+
+
+Instance Private ``render``
+---------------------------
+
+Render function.
+
+.. js:function:: render()
+
+    
+    :returns Element: Div element with .row Bootstrap class and items in top-right section.
+    
+
+ItemHeader.js:127
+
+
+
+
+
+
+
+
+
