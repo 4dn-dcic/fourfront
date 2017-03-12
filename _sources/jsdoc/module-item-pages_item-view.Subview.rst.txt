@@ -7,25 +7,14 @@ Component: ``Subview``
 
 Member Of :doc:`module-item-pages_item-view`
 
+
+Renders a panel <div> element containing a list.
+
+
 .. contents:: Local Navigation
    :local:
 
 
-Children
-========
-
-.. toctree::
-   :maxdepth: 3
-   
-   
-
-
-
-DPROPERTIES 
-
-
-
-PROPS
 
 
 

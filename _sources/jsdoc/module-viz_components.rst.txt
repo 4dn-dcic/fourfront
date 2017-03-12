@@ -4,12 +4,15 @@ Module: ``viz/components``
 
 
 
+
+A collection of components to aid in visualization or charting.
+
+
 .. contents:: Local Navigation
    :local:
 
-
-Children
-========
+3 Children
+==========
 
 .. toctree::
    :maxdepth: 3
@@ -20,22 +23,48 @@ Children
    
 
 
-Description
-===========
-
-A collection of components to aid in visualization or charting.
-
-DPROPERTIES 
-
-
-
-PROPS
 
 
 
 
 
 
+
+
+Members
+=======
+
+
+.. _module-viz_components.ActiveFiltersBar:
+
+``ActiveFiltersBar``
+
+
+
+
+
+
+.. _module-viz_components.SVGFilters:
+
+``SVGFilters``
+
+
+
+
+
+
+.. _module-viz_components.FetchingView:
+
+``FetchingView``
+
+
+
+
+
+
+.. _module-viz_components.CursorComponent:
+
+``CursorComponent``
 
 
 

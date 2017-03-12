@@ -7,31 +7,30 @@ Class: ``Timeout``
 
 Member Of :doc:`module-app-Timeout`
 
+
+
+
+
 .. contents:: Local Navigation
    :local:
 
 
-Children
-========
-
-.. toctree::
-   :maxdepth: 3
-   
-   
-
-
-
-DPROPERTIES 
-
-
-
-PROPS
 
 
 
 
 
 
+
+
+
+Members
+=======
+
+
+.. _module-app-Timeout.Timeout.promise:
+
+``promise``
 
 
 

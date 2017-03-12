@@ -64,15 +64,83 @@
 <div class="contents local topic" id="local-navigation">
 <p class="topic-title first">Local Navigation</p>
 <ul class="simple">
-<li><a class="reference internal" href="#children" id="id1">Children</a></li>
+<li><a class="reference internal" href="#functions" id="id1">Functions</a><ul>
+<li><a class="reference internal" href="#instance-private-getinitialstate" id="id2">Instance Private <code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
+<li><a class="reference internal" href="#instance-private-handletoggle" id="id3">Instance Private <code class="docutils literal"><span class="pre">handleToggle</span></code></a></li>
+<li><a class="reference internal" href="#instance-private-togglelink" id="id4">Instance Private <code class="docutils literal"><span class="pre">toggleLink</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
-<div class="section" id="children">
-<h2><a class="toc-backref" href="#id1">Children</a><a class="headerlink" href="#children" title="Permalink to this headline">¶</a></h2>
-<div class="toctree-wrapper compound">
+<div class="section" id="functions">
+<h2><a class="toc-backref" href="#id1">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="instance-private-getinitialstate">
+<span id="module-item-pages-item-view-subipanel-getinitialstate"></span><h3><a class="toc-backref" href="#id2">Instance Private <code class="docutils literal"><span class="pre">getInitialState</span></code></a><a class="headerlink" href="#instance-private-getinitialstate" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="getInitialState">
+<code class="descname">getInitialState</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getInitialState" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns Object:</th><td class="field-body">&#8216;isOpen&#8217; : false</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>item-view.js:304</p>
 </div>
-<p>DPROPERTIES</p>
-<p>PROPS</p>
+<div class="section" id="instance-private-handletoggle">
+<span id="module-item-pages-item-view-subipanel-handletoggle"></span><h3><a class="toc-backref" href="#id3">Instance Private <code class="docutils literal"><span class="pre">handleToggle</span></code></a><a class="headerlink" href="#instance-private-handletoggle" title="Permalink to this headline">¶</a></h3>
+<p>Handler for rendered title element. Toggles visiblity of ItemView.Subview.</p>
+<dl class="function">
+<dt id="handleToggle">
+<code class="descname">handleToggle</code><span class="sig-paren">(</span><em>e</em><span class="sig-paren">)</span><a class="headerlink" href="#handleToggle" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>e</strong> (<em>MouseEvent</em>) &#8211; Mouse click event. Its preventDefault() method is called.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns Object:</th><td class="field-body"><p class="first last">&#8216;isOpen&#8217; : false</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>item-view.js:317</p>
+</div>
+<div class="section" id="instance-private-togglelink">
+<span id="module-item-pages-item-view-subipanel-togglelink"></span><h3><a class="toc-backref" href="#id4">Instance Private <code class="docutils literal"><span class="pre">toggleLink</span></code></a><a class="headerlink" href="#instance-private-togglelink" title="Permalink to this headline">¶</a></h3>
+<p>Renders title for the ItemView.Subview.</p>
+<dl class="function">
+<dt id="toggleLink">
+<code class="descname">toggleLink</code><span class="sig-paren">(</span><em>title</em>, <em>isOpen</em><span class="sig-paren">)</span><a class="headerlink" href="#toggleLink" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>title</strong> (<em>string</em>) &#8211; Title of panel, e.g. display_title of object for which SubIPanel is being used.</li>
+<li><strong>isOpen</strong> (<em>boolean</em>) &#8211; Whether state.isOpen is true or not. Used for if plus or minus icon.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns Element:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">&lt;span&gt; element.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>item-view.js:334</p>
+</div>
 </div>
 </div>
 
@@ -85,7 +153,12 @@
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Component: <code class="docutils literal"><span class="pre">SubIPanel</span></code></a><ul>
-<li><a class="reference internal" href="#children">Children</a></li>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#instance-private-getinitialstate">Instance Private <code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
+<li><a class="reference internal" href="#instance-private-handletoggle">Instance Private <code class="docutils literal"><span class="pre">handleToggle</span></code></a></li>
+<li><a class="reference internal" href="#instance-private-togglelink">Instance Private <code class="docutils literal"><span class="pre">toggleLink</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

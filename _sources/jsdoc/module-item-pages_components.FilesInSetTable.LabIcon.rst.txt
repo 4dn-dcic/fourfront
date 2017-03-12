@@ -1,38 +1,56 @@
-.. _module-item-pages_components.FilesInSetTable.LabIcon:
+.. _undefined.LabIcon:
 
 ======================
 Component: ``LabIcon``
 ======================
 
 
-Member Of :doc:`module-item-pages_components.FilesInSetTable`
+
+
+Renders a "users group" icon which links to submitter's lab.
+
 
 .. contents:: Local Navigation
    :local:
 
 
-Children
-========
 
-.. toctree::
-   :maxdepth: 3
-   
-   
-
-
-Description
-===========
-
-Renders a "users group" icon which links to submitter's lab.
-
-DPROPERTIES 
-
-[object Object],[object Object],[object Object]
-
-PROPS
+Props
+=====
 
 
 
+
+``lab``
+-------
+
+Type: **Object**
+
+.. js:property:: lab
+
+Lab object.
+
+
+
+``onMouseEnter``
+----------------
+
+Type: **function**
+
+.. js:property:: onMouseEnter
+
+Callback for cursor entering icon.
+
+
+
+``onMouseLeave``
+----------------
+
+Type: **function**
+
+.. js:property:: onMouseLeave
+
+Callback for cursor leaving icon.
 
 
 

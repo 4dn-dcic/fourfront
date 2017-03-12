@@ -59,38 +59,27 @@
             
   <div class="section" id="component-viz-quickinfobar">
 <h1>Component: <code class="docutils literal"><span class="pre">viz/QuickInfoBar</span></code><a class="headerlink" href="#component-viz-quickinfobar" title="Permalink to this headline">¶</a></h1>
+<p>Bar shown below header on home and browse pages.
+Shows counts of selected experiment_sets, experiments, and files against those properties&#8217; total counts.</p>
 <div class="contents local topic" id="local-navigation">
 <p class="topic-title first">Local Navigation</p>
 <ul class="simple">
-<li><a class="reference internal" href="#children" id="id1">Children</a></li>
-<li><a class="reference internal" href="#description" id="id2">Description</a></li>
-<li><a class="reference internal" href="#functions" id="id3">Functions</a><ul>
-<li><a class="reference internal" href="#getinitialstate" id="id4"><code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
-<li><a class="reference internal" href="#updatecurrentandtotalcounts" id="id5"><code class="docutils literal"><span class="pre">updateCurrentAndTotalCounts</span></code></a></li>
-<li><a class="reference internal" href="#updatecurrentcounts" id="id6"><code class="docutils literal"><span class="pre">updateCurrentCounts</span></code></a></li>
-<li><a class="reference internal" href="#updatetotalcounts" id="id7"><code class="docutils literal"><span class="pre">updateTotalCounts</span></code></a></li>
-<li><a class="reference internal" href="#isinvisible" id="id8"><code class="docutils literal"><span class="pre">isInvisible</span></code></a></li>
-<li><a class="reference internal" href="#componentwillreceiveprops" id="id9"><code class="docutils literal"><span class="pre">componentWillReceiveProps</span></code></a></li>
+<li><a class="reference internal" href="#functions" id="id25">Functions</a><ul>
+<li><a class="reference internal" href="#inner-getinitialstate" id="id26">Inner  <code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
+<li><a class="reference internal" href="#inner-updatecurrentandtotalcounts" id="id27">Inner  <code class="docutils literal"><span class="pre">updateCurrentAndTotalCounts</span></code></a></li>
+<li><a class="reference internal" href="#inner-updatecurrentcounts" id="id28">Inner  <code class="docutils literal"><span class="pre">updateCurrentCounts</span></code></a></li>
+<li><a class="reference internal" href="#inner-updatetotalcounts" id="id29">Inner  <code class="docutils literal"><span class="pre">updateTotalCounts</span></code></a></li>
+<li><a class="reference internal" href="#inner-isinvisible" id="id30">Inner  <code class="docutils literal"><span class="pre">isInvisible</span></code></a></li>
+<li><a class="reference internal" href="#inner-componentwillreceiveprops" id="id31">Inner  <code class="docutils literal"><span class="pre">componentWillReceiveProps</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#members" id="id32">Members</a></li>
 </ul>
 </div>
-<div class="section" id="children">
-<h2><a class="toc-backref" href="#id1">Children</a><a class="headerlink" href="#children" title="Permalink to this headline">¶</a></h2>
-<div class="toctree-wrapper compound">
-</div>
-</div>
-<div class="section" id="description">
-<h2><a class="toc-backref" href="#id2">Description</a><a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
-<p>Bar shown below header on home and browse pages.
-Shows counts of selected experiment_sets, experiments, and files against those properties&#8217; total counts.</p>
-<p>DPROPERTIES</p>
-<p>PROPS</p>
-</div>
 <div class="section" id="functions">
-<h2><a class="toc-backref" href="#id3">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="getinitialstate">
-<span id="module-viz-quickinfobar-getinitialstate"></span><h3><a class="toc-backref" href="#id4"><code class="docutils literal"><span class="pre">getInitialState</span></code></a><a class="headerlink" href="#getinitialstate" title="Permalink to this headline">¶</a></h3>
+<h2><a class="toc-backref" href="#id25">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="inner-getinitialstate">
+<span id="module-viz-quickinfobar-getinitialstate"></span><h3><a class="toc-backref" href="#id26">Inner  <code class="docutils literal"><span class="pre">getInitialState</span></code></a><a class="headerlink" href="#inner-getinitialstate" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="getInitialState">
 <code class="descname">getInitialState</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getInitialState" title="Permalink to this definition">¶</a></dt>
@@ -98,49 +87,54 @@ Shows counts of selected experiment_sets, experiments, and files against those p
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Return Object.&lt;number, boolean, string&gt;:</th></tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Returns Object.&lt;number, boolean, string&gt;:</th></tr>
 <tr class="field-odd field"><td>&#160;</td><td class="field-body">Initial State</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
+<p>QuickInfoBar.js:36</p>
 </div>
-<div class="section" id="updatecurrentandtotalcounts">
-<span id="module-viz-quickinfobar-updatecurrentandtotalcounts"></span><h3><a class="toc-backref" href="#id5"><code class="docutils literal"><span class="pre">updateCurrentAndTotalCounts</span></code></a><a class="headerlink" href="#updatecurrentandtotalcounts" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-updatecurrentandtotalcounts">
+<span id="module-viz-quickinfobar-updatecurrentandtotalcounts"></span><h3><a class="toc-backref" href="#id27">Inner  <code class="docutils literal"><span class="pre">updateCurrentAndTotalCounts</span></code></a><a class="headerlink" href="#inner-updatecurrentandtotalcounts" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="updateCurrentAndTotalCounts">
 <code class="descname">updateCurrentAndTotalCounts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#updateCurrentAndTotalCounts" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>QuickInfoBar.js:72</p>
 </div>
-<div class="section" id="updatecurrentcounts">
-<span id="module-viz-quickinfobar-updatecurrentcounts"></span><h3><a class="toc-backref" href="#id6"><code class="docutils literal"><span class="pre">updateCurrentCounts</span></code></a><a class="headerlink" href="#updatecurrentcounts" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-updatecurrentcounts">
+<span id="module-viz-quickinfobar-updatecurrentcounts"></span><h3><a class="toc-backref" href="#id28">Inner  <code class="docutils literal"><span class="pre">updateCurrentCounts</span></code></a><a class="headerlink" href="#inner-updatecurrentcounts" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="updateCurrentCounts">
 <code class="descname">updateCurrentCounts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#updateCurrentCounts" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>QuickInfoBar.js:84</p>
 </div>
-<div class="section" id="updatetotalcounts">
-<span id="module-viz-quickinfobar-updatetotalcounts"></span><h3><a class="toc-backref" href="#id7"><code class="docutils literal"><span class="pre">updateTotalCounts</span></code></a><a class="headerlink" href="#updatetotalcounts" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-updatetotalcounts">
+<span id="module-viz-quickinfobar-updatetotalcounts"></span><h3><a class="toc-backref" href="#id29">Inner  <code class="docutils literal"><span class="pre">updateTotalCounts</span></code></a><a class="headerlink" href="#inner-updatetotalcounts" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="updateTotalCounts">
 <code class="descname">updateTotalCounts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#updateTotalCounts" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>QuickInfoBar.js:93</p>
 </div>
-<div class="section" id="isinvisible">
-<span id="module-viz-quickinfobar-isinvisible"></span><h3><a class="toc-backref" href="#id8"><code class="docutils literal"><span class="pre">isInvisible</span></code></a><a class="headerlink" href="#isinvisible" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-isinvisible">
+<span id="module-viz-quickinfobar-isinvisible"></span><h3><a class="toc-backref" href="#id30">Inner  <code class="docutils literal"><span class="pre">isInvisible</span></code></a><a class="headerlink" href="#inner-isinvisible" title="Permalink to this headline">¶</a></h3>
 <p>Check if component is visible or not.</p>
 <dl class="function">
 <dt id="isInvisible">
 <code class="descname">isInvisible</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isInvisible" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>QuickInfoBar.js:103</p>
 </div>
-<div class="section" id="componentwillreceiveprops">
-<span id="module-viz-quickinfobar-componentwillreceiveprops"></span><h3><a class="toc-backref" href="#id9"><code class="docutils literal"><span class="pre">componentWillReceiveProps</span></code></a><a class="headerlink" href="#componentwillreceiveprops" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-componentwillreceiveprops">
+<span id="module-viz-quickinfobar-componentwillreceiveprops"></span><h3><a class="toc-backref" href="#id31">Inner  <code class="docutils literal"><span class="pre">componentWillReceiveProps</span></code></a><a class="headerlink" href="#inner-componentwillreceiveprops" title="Permalink to this headline">¶</a></h3>
 <p>Updates state.show if no filters are selected.</p>
 <dl class="function">
 <dt id="componentWillReceiveProps">
@@ -154,7 +148,7 @@ Shows counts of selected experiment_sets, experiments, and files against those p
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Return undefined:</th></tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns undefined:</th></tr>
 <tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">Updates state.show if no filters are selected.</p>
 </td>
 </tr>
@@ -162,7 +156,53 @@ Shows counts of selected experiment_sets, experiments, and files against those p
 </table>
 </dd></dl>
 
+<p>QuickInfoBar.js:136</p>
 </div>
+</div>
+<div class="section" id="members">
+<h2><a class="toc-backref" href="#id32">Members</a><a class="headerlink" href="#members" title="Permalink to this headline">¶</a></h2>
+<p id="module-viz-quickinfobar-offset"><code class="docutils literal"><span class="pre">offset</span></code></p>
+<p id="module-viz-quickinfobar-id"><code class="docutils literal"><span class="pre">id</span></code></p>
+<p id="module-viz-quickinfobar-classname"><code class="docutils literal"><span class="pre">className</span></code></p>
+<p id="module-viz-quickinfobar-showcurrent"><code class="docutils literal"><span class="pre">showCurrent</span></code></p>
+<p id="module-viz-quickinfobar-count-experiments"><code class="docutils literal"><span class="pre">count_experiments</span></code></p>
+<p id="module-viz-quickinfobar-count-experiment-sets"><code class="docutils literal"><span class="pre">count_experiment_sets</span></code></p>
+<p id="module-viz-quickinfobar-count-files"><code class="docutils literal"><span class="pre">count_files</span></code></p>
+<p id="module-viz-quickinfobar-count-experiments-total"><code class="docutils literal"><span class="pre">count_experiments_total</span></code></p>
+<p id="module-viz-quickinfobar-count-experiment-sets-total"><code class="docutils literal"><span class="pre">count_experiment_sets_total</span></code></p>
+<p id="module-viz-quickinfobar-count-files-total"><code class="docutils literal"><span class="pre">count_files_total</span></code></p>
+<p id="module-viz-quickinfobar-mounted"><code class="docutils literal"><span class="pre">mounted</span></code></p>
+<p id="module-viz-quickinfobar-show"><code class="docutils literal"><span class="pre">show</span></code></p>
+<p id="id1"><code class="docutils literal"><span class="pre">mounted</span></code></p>
+<p id="id2"><code class="docutils literal"><span class="pre">count_experiments</span></code></p>
+<p id="id3"><code class="docutils literal"><span class="pre">count_experiment_sets</span></code></p>
+<p id="id4"><code class="docutils literal"><span class="pre">count_files</span></code></p>
+<p id="id5"><code class="docutils literal"><span class="pre">count_experiments_total</span></code></p>
+<p id="id6"><code class="docutils literal"><span class="pre">count_experiment_sets_total</span></code></p>
+<p id="id7"><code class="docutils literal"><span class="pre">count_files_total</span></code></p>
+<p id="id8"><code class="docutils literal"><span class="pre">count_experiments</span></code></p>
+<p id="id9"><code class="docutils literal"><span class="pre">count_experiment_sets</span></code></p>
+<p id="id10"><code class="docutils literal"><span class="pre">count_files</span></code></p>
+<p id="id11"><code class="docutils literal"><span class="pre">count_experiments_total</span></code></p>
+<p id="id12"><code class="docutils literal"><span class="pre">count_experiment_sets_total</span></code></p>
+<p id="id13"><code class="docutils literal"><span class="pre">count_files_total</span></code></p>
+<p id="id14"><code class="docutils literal"><span class="pre">show</span></code></p>
+<p id="module-viz-quickinfobar-cn"><code class="docutils literal"><span class="pre">cn</span></code></p>
+<p id="id15"><code class="docutils literal"><span class="pre">cn</span></code></p>
+<p id="module-viz-quickinfobar-stats"><code class="docutils literal"><span class="pre">stats</span></code></p>
+<p id="id16"><code class="docutils literal"><span class="pre">stats</span></code></p>
+<p id="id17"><code class="docutils literal"><span class="pre">className</span></code></p>
+<p id="id18"><code class="docutils literal"><span class="pre">className</span></code></p>
+<p id="id19"><code class="docutils literal"><span class="pre">className</span></code></p>
+<p id="id20"><code class="docutils literal"><span class="pre">show</span></code></p>
+<p id="id21"><code class="docutils literal"><span class="pre">show</span></code></p>
+<p id="module-viz-quickinfobar-opacity"><code class="docutils literal"><span class="pre">opacity</span></code></p>
+<p id="id22"><code class="docutils literal"><span class="pre">show</span></code></p>
+<p id="id23"><code class="docutils literal"><span class="pre">opacity</span></code></p>
+<p id="module-viz-quickinfobar-value"><code class="docutils literal"><span class="pre">value</span></code></p>
+<p id="module-viz-quickinfobar-label"><code class="docutils literal"><span class="pre">label</span></code></p>
+<p id="module-viz-quickinfobar-classnameid"><code class="docutils literal"><span class="pre">classNameID</span></code></p>
+<p id="id24"><code class="docutils literal"><span class="pre">id</span></code></p>
 </div>
 </div>
 
@@ -175,17 +215,16 @@ Shows counts of selected experiment_sets, experiments, and files against those p
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Component: <code class="docutils literal"><span class="pre">viz/QuickInfoBar</span></code></a><ul>
-<li><a class="reference internal" href="#children">Children</a></li>
-<li><a class="reference internal" href="#description">Description</a></li>
 <li><a class="reference internal" href="#functions">Functions</a><ul>
-<li><a class="reference internal" href="#getinitialstate"><code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
-<li><a class="reference internal" href="#updatecurrentandtotalcounts"><code class="docutils literal"><span class="pre">updateCurrentAndTotalCounts</span></code></a></li>
-<li><a class="reference internal" href="#updatecurrentcounts"><code class="docutils literal"><span class="pre">updateCurrentCounts</span></code></a></li>
-<li><a class="reference internal" href="#updatetotalcounts"><code class="docutils literal"><span class="pre">updateTotalCounts</span></code></a></li>
-<li><a class="reference internal" href="#isinvisible"><code class="docutils literal"><span class="pre">isInvisible</span></code></a></li>
-<li><a class="reference internal" href="#componentwillreceiveprops"><code class="docutils literal"><span class="pre">componentWillReceiveProps</span></code></a></li>
+<li><a class="reference internal" href="#inner-getinitialstate">Inner  <code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
+<li><a class="reference internal" href="#inner-updatecurrentandtotalcounts">Inner  <code class="docutils literal"><span class="pre">updateCurrentAndTotalCounts</span></code></a></li>
+<li><a class="reference internal" href="#inner-updatecurrentcounts">Inner  <code class="docutils literal"><span class="pre">updateCurrentCounts</span></code></a></li>
+<li><a class="reference internal" href="#inner-updatetotalcounts">Inner  <code class="docutils literal"><span class="pre">updateTotalCounts</span></code></a></li>
+<li><a class="reference internal" href="#inner-isinvisible">Inner  <code class="docutils literal"><span class="pre">isInvisible</span></code></a></li>
+<li><a class="reference internal" href="#inner-componentwillreceiveprops">Inner  <code class="docutils literal"><span class="pre">componentWillReceiveProps</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#members">Members</a></li>
 </ul>
 </li>
 </ul>

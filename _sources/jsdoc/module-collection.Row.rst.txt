@@ -7,12 +7,15 @@ Class: ``Row``
 
 Member Of :doc:`module-collection`
 
+
+
+
+
 .. contents:: Local Navigation
    :local:
 
-
-Children
-========
+1 Children
+==========
 
 .. toctree::
    :maxdepth: 3
@@ -20,13 +23,6 @@ Children
    module-collection.Row.Row
    
 
-
-
-DPROPERTIES 
-
-
-
-PROPS
 
 
 

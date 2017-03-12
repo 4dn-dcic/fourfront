@@ -29,7 +29,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Component: SubIPanel" href="module-item-pages_item-view.SubIPanel.html" />
-    <link rel="prev" title="Object: statics" href="module-item-pages_item-view.Detail.statics.html" /> 
+    <link rel="prev" title="Component: Detail" href="module-item-pages_item-view.Detail.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -45,7 +45,7 @@
           <a href="module-item-pages_item-view.SubIPanel.html" title="Component: SubIPanel"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="module-item-pages_item-view.Detail.statics.html" title="Object: statics"
+          <a href="module-item-pages_item-view.Detail.html" title="Component: Detail"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li>
@@ -61,25 +61,59 @@
   <div class="section" id="component-descriptorfield">
 <span id="module-item-pages-item-view-descriptorfield"></span><h1>Component: <code class="docutils literal"><span class="pre">DescriptorField</span></code><a class="headerlink" href="#component-descriptorfield" title="Permalink to this headline">¶</a></h1>
 <p>Member Of <a class="reference internal" href="module-item-pages_item-view.html"><span class="doc">Component: item-pages/item-view</span></a></p>
-<div class="contents local topic" id="local-navigation">
-<p class="topic-title first">Local Navigation</p>
-<ul class="simple">
-<li><a class="reference internal" href="#children" id="id1">Children</a></li>
-<li><a class="reference internal" href="#description" id="id2">Description</a></li>
-</ul>
-</div>
-<div class="section" id="children">
-<h2><a class="toc-backref" href="#id1">Children</a><a class="headerlink" href="#children" title="Permalink to this headline">¶</a></h2>
-<div class="toctree-wrapper compound">
-</div>
-</div>
-<div class="section" id="description">
-<h2><a class="toc-backref" href="#id2">Description</a><a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
 <p>Deprecated.
 Display the item field with a tooltip showing the field description from
 schema, if available.</p>
-<p>DPROPERTIES</p>
-<p>PROPS</p>
+<div class="contents local topic" id="local-navigation">
+<p class="topic-title first">Local Navigation</p>
+<ul class="simple">
+<li><a class="reference internal" href="#functions" id="id1">Functions</a><ul>
+<li><a class="reference internal" href="#instance-private-getinitialstate" id="id2">Instance Private <code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
+<li><a class="reference internal" href="#instance-private-handlehover" id="id3">Instance Private <code class="docutils literal"><span class="pre">handleHover</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="functions">
+<h2><a class="toc-backref" href="#id1">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="instance-private-getinitialstate">
+<span id="module-item-pages-item-view-descriptorfield-getinitialstate"></span><h3><a class="toc-backref" href="#id2">Instance Private <code class="docutils literal"><span class="pre">getInitialState</span></code></a><a class="headerlink" href="#instance-private-getinitialstate" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="getInitialState">
+<code class="descname">getInitialState</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getInitialState" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns Object:</th><td class="field-body">State object with &#8216;active&#8217; : false.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>item-view.js:248</p>
+</div>
+<div class="section" id="instance-private-handlehover">
+<span id="module-item-pages-item-view-descriptorfield-handlehover"></span><h3><a class="toc-backref" href="#id3">Instance Private <code class="docutils literal"><span class="pre">handleHover</span></code></a><a class="headerlink" href="#instance-private-handlehover" title="Permalink to this headline">¶</a></h3>
+<p>An onHover callback for outer &lt;div&gt; element.</p>
+<dl class="function">
+<dt id="handleHover">
+<code class="descname">handleHover</code><span class="sig-paren">(</span><em>b</em><span class="sig-paren">)</span><a class="headerlink" href="#handleHover" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>b</strong> (<em>boolean</em>) &#8211; Sets state.active to this value.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>item-view.js:261</p>
+</div>
 </div>
 </div>
 
@@ -92,15 +126,18 @@ schema, if available.</p>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Component: <code class="docutils literal"><span class="pre">DescriptorField</span></code></a><ul>
-<li><a class="reference internal" href="#children">Children</a></li>
-<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#instance-private-getinitialstate">Instance Private <code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
+<li><a class="reference internal" href="#instance-private-handlehover">Instance Private <code class="docutils literal"><span class="pre">handleHover</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="module-item-pages_item-view.Detail.statics.html"
-                        title="previous chapter">Object: <code class="docutils literal"><span class="pre">statics</span></code></a></p>
+  <p class="topless"><a href="module-item-pages_item-view.Detail.html"
+                        title="previous chapter">Component: <code class="docutils literal"><span class="pre">Detail</span></code></a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="module-item-pages_item-view.SubIPanel.html"
                         title="next chapter">Component: <code class="docutils literal"><span class="pre">SubIPanel</span></code></a></p>
@@ -138,7 +175,7 @@ schema, if available.</p>
           <a href="module-item-pages_item-view.SubIPanel.html" title="Component: SubIPanel"
              >next</a> |</li>
         <li class="right" >
-          <a href="module-item-pages_item-view.Detail.statics.html" title="Object: statics"
+          <a href="module-item-pages_item-view.Detail.html" title="Component: Detail"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li>

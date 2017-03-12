@@ -1,31 +1,19 @@
-.. _module-item-pages_components.FilesInSetTable.Small:
+.. _undefined.Small:
 
 ====================
 Component: ``Small``
 ====================
 
 
-Member Of :doc:`module-item-pages_components.FilesInSetTable`
+
+
+Small version of the full-width FilesInSetTable. Used for default item view page SubIPanels.
+
 
 .. contents:: Local Navigation
    :local:
 
 
-Children
-========
-
-.. toctree::
-   :maxdepth: 3
-   
-   
-
-
-
-DPROPERTIES 
-
-
-
-PROPS
 
 
 

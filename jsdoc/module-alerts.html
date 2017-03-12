@@ -28,7 +28,7 @@
     <script type="text/javascript" src="../_static/sidebar.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Object: statics" href="module-alerts.statics.html" />
+    <link rel="next" title="Component: app" href="module-app.html" />
     <link rel="prev" title="JavaScript API Reference" href="index.html" /> 
   </head>
   <body role="document">
@@ -42,7 +42,7 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="module-alerts.statics.html" title="Object: statics"
+          <a href="module-app.html" title="Component: app"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="JavaScript API Reference"
@@ -59,63 +59,108 @@
             
   <div class="section" id="component-alerts">
 <h1>Component: <code class="docutils literal"><span class="pre">alerts</span></code><a class="headerlink" href="#component-alerts" title="Permalink to this headline">¶</a></h1>
-<div class="contents local topic" id="local-navigation">
-<p class="topic-title first">Local Navigation</p>
-<ul class="simple">
-<li><a class="reference internal" href="#children" id="id1">Children</a></li>
-<li><a class="reference internal" href="#description" id="id2">Description</a></li>
-<li><a class="reference internal" href="#functions" id="id3">Functions</a><ul>
-<li><a class="reference internal" href="#getinitialstate" id="id4"><code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
-<li><a class="reference internal" href="#render" id="id5"><code class="docutils literal"><span class="pre">render</span></code></a></li>
-</ul>
-</li>
-</ul>
-</div>
-<div class="section" id="children">
-<h2><a class="toc-backref" href="#id1">Children</a><a class="headerlink" href="#children" title="Permalink to this headline">¶</a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="module-alerts.statics.html">Object: <code class="docutils literal"><span class="pre">statics</span></code></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module-alerts.statics.html#children">Children</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="module-alerts.statics.html#functions">Functions</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="module-alerts.statics.html#queue"><code class="docutils literal"><span class="pre">queue</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="module-alerts.statics.html#dequeue"><code class="docutils literal"><span class="pre">deQueue</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</div>
-</div>
-<div class="section" id="description">
-<h2><a class="toc-backref" href="#id2">Description</a><a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
 <p>A Component and utility (via Component&#8217;s &#8216;statics&#8217; property &amp; functions) to
 queue and dequeue alerts from appearing at top of pages. Alerts, once queued, will persist until they are closed by
 the end user, which is the same functionality as calling Alerts.deQueue(alert) from anywhere in application, supplying the same
 title for alert that was queued.</p>
-<p>DPROPERTIES</p>
-<p>PROPS</p>
+<div class="contents local topic" id="local-navigation">
+<p class="topic-title first">Local Navigation</p>
+<ul class="simple">
+<li><a class="reference internal" href="#functions" id="id5">Functions</a><ul>
+<li><a class="reference internal" href="#static-public-queue" id="id6">Static Public <code class="docutils literal"><span class="pre">queue</span></code></a></li>
+<li><a class="reference internal" href="#static-public-dequeue" id="id7">Static Public <code class="docutils literal"><span class="pre">deQueue</span></code></a></li>
+<li><a class="reference internal" href="#inner-getinitialstate" id="id8">Inner  <code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
+<li><a class="reference internal" href="#instance-private-render" id="id9">Instance Private <code class="docutils literal"><span class="pre">render</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#members" id="id10">Members</a></li>
+</ul>
 </div>
 <div class="section" id="functions">
-<h2><a class="toc-backref" href="#id3">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="getinitialstate">
-<span id="module-alerts-getinitialstate"></span><h3><a class="toc-backref" href="#id4"><code class="docutils literal"><span class="pre">getInitialState</span></code></a><a class="headerlink" href="#getinitialstate" title="Permalink to this headline">¶</a></h3>
+<h2><a class="toc-backref" href="#id5">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="static-public-queue">
+<span id="module-alerts-queue"></span><h3><a class="toc-backref" href="#id6">Static Public <code class="docutils literal"><span class="pre">queue</span></code></a><a class="headerlink" href="#static-public-queue" title="Permalink to this headline">¶</a></h3>
+<p>Open an alert box.</p>
+<p>More specifically, saves a new alert to Redux store &#8216;alerts&#8217; field.</p>
+<dl class="function">
+<dt id="queue">
+<code class="descname">queue</code><span class="sig-paren">(</span><em>alert</em><span class="sig-paren">)</span><a class="headerlink" href="#queue" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>alert</strong> (<em>Object</em>) &#8211; Object with &#8216;title&#8217;, &#8216;message&#8217;, and &#8216;style&#8217; properties. Used for alert message element at top of page.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>alerts.js:31</p>
+</div>
+<div class="section" id="static-public-dequeue">
+<span id="module-alerts-dequeue"></span><h3><a class="toc-backref" href="#id7">Static Public <code class="docutils literal"><span class="pre">deQueue</span></code></a><a class="headerlink" href="#static-public-dequeue" title="Permalink to this headline">¶</a></h3>
+<p>Close an alert box.</p>
+<dl class="function">
+<dt id="deQueue">
+<code class="descname">deQueue</code><span class="sig-paren">(</span><em>alert</em><span class="sig-paren">)</span><a class="headerlink" href="#deQueue" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>alert</strong> (<em>Object</em>) &#8211; Object with at least &#8216;title&#8217;.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>alerts.js:47</p>
+</div>
+<div class="section" id="inner-getinitialstate">
+<span id="module-alerts-getinitialstate"></span><h3><a class="toc-backref" href="#id8">Inner  <code class="docutils literal"><span class="pre">getInitialState</span></code></a><a class="headerlink" href="#inner-getinitialstate" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="getInitialState">
 <code class="descname">getInitialState</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getInitialState" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>alerts.js:73</p>
 </div>
-<div class="section" id="render">
-<span id="module-alerts-render"></span><h3><a class="toc-backref" href="#id5"><code class="docutils literal"><span class="pre">render</span></code></a><a class="headerlink" href="#render" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="instance-private-render">
+<span id="module-alerts-render"></span><h3><a class="toc-backref" href="#id9">Instance Private <code class="docutils literal"><span class="pre">render</span></code></a><a class="headerlink" href="#instance-private-render" title="Permalink to this headline">¶</a></h3>
+<p>Renders out Bootstrap Alerts for any queued alerts.</p>
 <dl class="function">
-<dt>
-<code class="descname">render</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
-<dd></dd></dl>
+<dt id="render">
+<code class="descname">render</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#render" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Returns Element:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">A &lt;div&gt; element.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
+<p>alerts.js:87</p>
 </div>
+</div>
+<div class="section" id="members">
+<h2><a class="toc-backref" href="#id10">Members</a><a class="headerlink" href="#members" title="Permalink to this headline">¶</a></h2>
+<p id="module-alerts-alerts"><code class="docutils literal"><span class="pre">Alerts</span></code></p>
+<p id="module-alerts-statics"><code class="docutils literal"><span class="pre">statics</span></code></p>
+<p id="module-alerts-type"><code class="docutils literal"><span class="pre">type</span></code></p>
+<p id="module-alerts-currentalerts"><code class="docutils literal"><span class="pre">currentAlerts</span></code></p>
+<p id="id1"><code class="docutils literal"><span class="pre">type</span></code></p>
+<p id="module-alerts-dismissing"><code class="docutils literal"><span class="pre">dismissing</span></code></p>
+<p id="id2"><code class="docutils literal"><span class="pre">dismissing</span></code></p>
+<p id="id3"><code class="docutils literal"><span class="pre">dismissing</span></code></p>
+<p id="id4"><code class="docutils literal"><span class="pre">type</span></code></p>
 </div>
 </div>
 
@@ -128,13 +173,14 @@ title for alert that was queued.</p>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Component: <code class="docutils literal"><span class="pre">alerts</span></code></a><ul>
-<li><a class="reference internal" href="#children">Children</a></li>
-<li><a class="reference internal" href="#description">Description</a></li>
 <li><a class="reference internal" href="#functions">Functions</a><ul>
-<li><a class="reference internal" href="#getinitialstate"><code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
-<li><a class="reference internal" href="#render"><code class="docutils literal"><span class="pre">render</span></code></a></li>
+<li><a class="reference internal" href="#static-public-queue">Static Public <code class="docutils literal"><span class="pre">queue</span></code></a></li>
+<li><a class="reference internal" href="#static-public-dequeue">Static Public <code class="docutils literal"><span class="pre">deQueue</span></code></a></li>
+<li><a class="reference internal" href="#inner-getinitialstate">Inner  <code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
+<li><a class="reference internal" href="#instance-private-render">Instance Private <code class="docutils literal"><span class="pre">render</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#members">Members</a></li>
 </ul>
 </li>
 </ul>
@@ -143,8 +189,8 @@ title for alert that was queued.</p>
   <p class="topless"><a href="index.html"
                         title="previous chapter">JavaScript API Reference</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="module-alerts.statics.html"
-                        title="next chapter">Object: <code class="docutils literal"><span class="pre">statics</span></code></a></p>
+  <p class="topless"><a href="module-app.html"
+                        title="next chapter">Component: <code class="docutils literal"><span class="pre">app</span></code></a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -176,7 +222,7 @@ title for alert that was queued.</p>
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="module-alerts.statics.html" title="Object: statics"
+          <a href="module-app.html" title="Component: app"
              >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="JavaScript API Reference"

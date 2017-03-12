@@ -7,30 +7,77 @@ Component: ``SubIPanel``
 
 Member Of :doc:`module-item-pages_item-view`
 
+
+
+
+
 .. contents:: Local Navigation
    :local:
 
 
-Children
-========
-
-.. toctree::
-   :maxdepth: 3
-   
-   
-
-
-
-DPROPERTIES 
-
-
-
-PROPS
 
 
 
 
+Functions
+=========
 
+
+
+.. _module-item-pages_item-view.SubIPanel.getInitialState:
+
+
+Instance Private ``getInitialState``
+------------------------------------
+
+
+
+.. js:function:: getInitialState()
+
+    
+    :returns Object: 'isOpen' : false
+    
+
+item-view.js:304
+
+
+
+.. _module-item-pages_item-view.SubIPanel.handleToggle:
+
+
+Instance Private ``handleToggle``
+---------------------------------
+
+Handler for rendered title element. Toggles visiblity of ItemView.Subview.
+
+.. js:function:: handleToggle(e)
+
+    
+    :param MouseEvent e: Mouse click event. Its preventDefault() method is called.
+    :returns Object: 'isOpen' : false
+    
+
+item-view.js:317
+
+
+
+.. _module-item-pages_item-view.SubIPanel.toggleLink:
+
+
+Instance Private ``toggleLink``
+-------------------------------
+
+Renders title for the ItemView.Subview.
+
+.. js:function:: toggleLink(title, isOpen)
+
+    
+    :param string title: Title of panel, e.g. display_title of object for which SubIPanel is being used.
+    :param boolean isOpen: Whether state.isOpen is true or not. Used for if plus or minus icon.
+    :returns Element: <span> element.
+    
+
+item-view.js:334
 
 
 

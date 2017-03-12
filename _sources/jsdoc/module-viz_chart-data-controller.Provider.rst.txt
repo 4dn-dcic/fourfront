@@ -7,54 +7,100 @@ Component: ``Provider``
 
 Member Of :doc:`module-viz_chart-data-controller`
 
+
+Use this React component to wrap individual charts and provide them with source of experiments data via
+their props.experiments and props.filteredExperiments. Also provides props.expSetFilters from redux store.
+
+
 .. contents:: Local Navigation
    :local:
 
 
-Children
-========
 
-.. toctree::
-   :maxdepth: 3
-   
-   
-
-
-Description
-===========
-
-Use this React component to wrap individual charts and provide them with source of experiments data via
-props.experiments and props.filteredExperiments. Also provides expSetFilters from redux store.
-
-DPROPERTIES 
+Props
+=====
 
 
 
-PROPS
+
+``id``
+------
+
+Type: **string**
+
+.. js:property:: id
+
+Unique ID.
 
 
 
+``children``
+------------
+
+Type: **Object**
+
+.. js:property:: children
+
+Must be a Chart or Chart controller component.
 
 Functions
 =========
 
 
 
+.. _module-viz_chart-data-controller.Provider.componentWillMount:
+
+
+Instance Private ``componentWillMount``
+---------------------------------------
+
+Registers a callback function, which itself calls this.forceUpdate(), with module-viz_chart-data-controller_
+using ChartDataController.registerUpdateCallback(cb, this.props.id).
+
+.. js:function:: componentWillMount()
+
+    
+    :returns undefined: Nothing
+    
+
+chart-data-controller.js:260
+
+
+
+.. _module-viz_chart-data-controller.Provider.componentWillUnmount:
+
+
+Instance Private ``componentWillUnmount``
+-----------------------------------------
+
+Unregisters itself using ChartDataController.unregisterUpdateCallback(this.props.id).
+
+.. js:function:: componentWillUnmount()
+
+    
+    :returns undefined: Nothing
+    
+
+chart-data-controller.js:275
+
 
 
 .. _module-viz_chart-data-controller.Provider.render:
 
 
-``render``
-----------
+Instance Private ``render``
+---------------------------
 
 Sets 'experiments' and 'filteredExperiments' props on props.children.
 
 .. js:function:: render()
 
     
-    :return React.Component: Cloned & adjusted props.children.
+    :returns Component: Cloned & adjusted props.children.
     
+
+chart-data-controller.js:287
+
 
 
 

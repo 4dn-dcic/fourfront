@@ -61,43 +61,33 @@
   <div class="section" id="component-uicontrolswrapper">
 <span id="module-viz-barplotchart-uicontrolswrapper"></span><h1>Component: <code class="docutils literal"><span class="pre">UIControlsWrapper</span></code><a class="headerlink" href="#component-uicontrolswrapper" title="Permalink to this headline">¶</a></h1>
 <p>Member Of <a class="reference internal" href="module-viz_BarPlotChart.html"><span class="doc">Component: viz/BarPlotChart</span></a></p>
+<p>Component which wraps the BarPlotChart and provides some UI buttons and stuff.
+Passes props to BarPlotChart.</p>
 <div class="contents local topic" id="local-navigation">
 <p class="topic-title first">Local Navigation</p>
 <ul class="simple">
-<li><a class="reference internal" href="#children" id="id1">Children</a></li>
-<li><a class="reference internal" href="#description" id="id2">Description</a></li>
-<li><a class="reference internal" href="#functions" id="id3">Functions</a><ul>
-<li><a class="reference internal" href="#getdefaultprops" id="id4"><code class="docutils literal"><span class="pre">getDefaultProps</span></code></a></li>
-<li><a class="reference internal" href="#adjustedchildchart" id="id5"><code class="docutils literal"><span class="pre">adjustedChildChart</span></code></a></li>
+<li><a class="reference internal" href="#functions" id="id1">Functions</a><ul>
+<li><a class="reference internal" href="#static-getdefaultprops" id="id2">Static  <code class="docutils literal"><span class="pre">getDefaultProps</span></code></a></li>
+<li><a class="reference internal" href="#static-adjustedchildchart" id="id3">Static  <code class="docutils literal"><span class="pre">adjustedChildChart</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#members" id="id4">Members</a></li>
 </ul>
 </div>
-<div class="section" id="children">
-<h2><a class="toc-backref" href="#id1">Children</a><a class="headerlink" href="#children" title="Permalink to this headline">¶</a></h2>
-<div class="toctree-wrapper compound">
-</div>
-</div>
-<div class="section" id="description">
-<h2><a class="toc-backref" href="#id2">Description</a><a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
-<p>Component which wraps the BarPlotChart and provides some UI buttons and stuff.
-Passes props to BarPlotChart.</p>
-<p>DPROPERTIES</p>
-<p>PROPS</p>
-</div>
 <div class="section" id="functions">
-<h2><a class="toc-backref" href="#id3">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="getdefaultprops">
-<span id="module-viz-barplotchart-uicontrolswrapper-getdefaultprops"></span><h3><a class="toc-backref" href="#id4"><code class="docutils literal"><span class="pre">getDefaultProps</span></code></a><a class="headerlink" href="#getdefaultprops" title="Permalink to this headline">¶</a></h3>
+<h2><a class="toc-backref" href="#id1">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="static-getdefaultprops">
+<span id="module-viz-barplotchart-uicontrolswrapper-getdefaultprops"></span><h3><a class="toc-backref" href="#id2">Static  <code class="docutils literal"><span class="pre">getDefaultProps</span></code></a><a class="headerlink" href="#static-getdefaultprops" title="Permalink to this headline">¶</a></h3>
 <p>Default props for the UIControlsWrapper.</p>
 <dl class="function">
 <dt id="getDefaultProps">
 <code class="descname">getDefaultProps</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getDefaultProps" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>BarPlotChart.js:54</p>
 </div>
-<div class="section" id="adjustedchildchart">
-<span id="module-viz-barplotchart-uicontrolswrapper-adjustedchildchart"></span><h3><a class="toc-backref" href="#id5"><code class="docutils literal"><span class="pre">adjustedChildChart</span></code></a><a class="headerlink" href="#adjustedchildchart" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="static-adjustedchildchart">
+<span id="module-viz-barplotchart-uicontrolswrapper-adjustedchildchart"></span><h3><a class="toc-backref" href="#id3">Static  <code class="docutils literal"><span class="pre">adjustedChildChart</span></code></a><a class="headerlink" href="#static-adjustedchildchart" title="Permalink to this headline">¶</a></h3>
 <p>Clones props.children, expecting a Chart React Component as the sole child, and extends Chart props with &#8216;fields&#8217;, &#8216;showType&#8217;, and &#8216;aggregateType&#8217;.</p>
 <dl class="function">
 <dt id="adjustedChildChart">
@@ -106,14 +96,18 @@ Passes props to BarPlotChart.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Return React.Component:</th></tr>
+<tr class="field-odd field"><th class="field-name" colspan="2">Returns React.Component:</th></tr>
 <tr class="field-odd field"><td>&#160;</td><td class="field-body">Cloned &amp; extended props.children.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
+<p>BarPlotChart.js:138</p>
 </div>
+</div>
+<div class="section" id="members">
+<h2><a class="toc-backref" href="#id4">Members</a><a class="headerlink" href="#members" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
@@ -126,13 +120,12 @@ Passes props to BarPlotChart.</p>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Component: <code class="docutils literal"><span class="pre">UIControlsWrapper</span></code></a><ul>
-<li><a class="reference internal" href="#children">Children</a></li>
-<li><a class="reference internal" href="#description">Description</a></li>
 <li><a class="reference internal" href="#functions">Functions</a><ul>
-<li><a class="reference internal" href="#getdefaultprops"><code class="docutils literal"><span class="pre">getDefaultProps</span></code></a></li>
-<li><a class="reference internal" href="#adjustedchildchart"><code class="docutils literal"><span class="pre">adjustedChildChart</span></code></a></li>
+<li><a class="reference internal" href="#static-getdefaultprops">Static  <code class="docutils literal"><span class="pre">getDefaultProps</span></code></a></li>
+<li><a class="reference internal" href="#static-adjustedchildchart">Static  <code class="docutils literal"><span class="pre">adjustedChildChart</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#members">Members</a></li>
 </ul>
 </li>
 </ul>

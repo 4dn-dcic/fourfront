@@ -7,31 +7,48 @@ Class: ``Data``
 
 Member Of :doc:`module-collection.Data`
 
+
+
+
+
 .. contents:: Local Navigation
    :local:
 
 
-Children
-========
-
-.. toctree::
-   :maxdepth: 3
-   
-   
-
-
-
-DPROPERTIES 
-
-
-
-PROPS
 
 
 
 
 
 
+
+
+
+Members
+=======
+
+
+.. _module-collection.Data.Data.rows:
+
+``rows``
+
+
+
+
+
+
+.. _module-collection.Data.Data.sortedOn:
+
+``sortedOn``
+
+
+
+
+
+
+.. _module-collection.Data.Data.reversed:
+
+``reversed``
 
 
 

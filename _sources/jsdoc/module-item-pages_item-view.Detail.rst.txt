@@ -7,37 +7,62 @@ Component: ``Detail``
 
 Member Of :doc:`module-item-pages_item-view`
 
-.. contents:: Local Navigation
-   :local:
-
-
-Children
-========
-
-.. toctree::
-   :maxdepth: 3
-   
-   module-item-pages_item-view.Detail.statics
-   
-
-
-Description
-===========
 
 A list of properties which belong to Item shown by ItemView.
 Shows 'persistentKeys' fields & values stickied near top of list,
 'excludedKeys' never, and 'hiddenKeys' only when "See More Info" button is clicked.
 
-DPROPERTIES 
+
+.. contents:: Local Navigation
+   :local:
 
 
 
-PROPS
 
 
 
+Functions
+=========
 
 
+
+.. _module-item-pages_item-view.Detail.formKey:
+
+
+Static  ``formKey``
+-------------------
+
+Formats the correct display for each metadata field.
+
+.. js:function:: formKey(tips, key)
+
+    
+    :param Object tips: Mapping of field property names (1 level deep) to schema properties.
+    :param Object key: Key to use to get 'description' for tooltip from the 'tips' param.
+    :returns Element: <div> element with a tooltip and info-circle icon.
+    
+
+item-view.js:41
+
+
+
+.. _module-item-pages_item-view.Detail.formValue:
+
+
+Static  ``formValue``
+---------------------
+
+Recursively render keys/values included in a provided item.
+Wraps URLs/paths in link elements. Sub-panels for objects.
+
+.. js:function:: formValue(schemas, item)
+
+    
+    :param Object schemas: Object containing schemas for server's JSONized object output.
+    :param Object|Array|string item: Item(s) to render recursively.
+    
+
+item-view.js:72
 
 
 

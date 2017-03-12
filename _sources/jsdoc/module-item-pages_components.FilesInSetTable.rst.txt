@@ -1,22 +1,25 @@
-.. _undefined.FilesInSetTable:
+.. _module-item-pages_components.FilesInSetTable:
 
 ==============================
 Component: ``FilesInSetTable``
 ==============================
 
 
+Member Of :doc:`module-item-pages_components`
+
+
+Component for displaying Files from a list.
+
 
 .. contents:: Local Navigation
    :local:
 
-
-Children
-========
+4 Children
+==========
 
 .. toctree::
    :maxdepth: 3
    
-   module-item-pages_components.FilesInSetTable.statics
    module-item-pages_components.FilesInSetTable.SubmitterLink
    module-item-pages_components.FilesInSetTable.LabIcon
    module-item-pages_components.FilesInSetTable.FileItemRow
@@ -24,21 +27,60 @@ Children
    
 
 
-Description
-===========
-
-Component for displaying Files in a set.
-
-DPROPERTIES 
-
-
-
-PROPS
+Props
+=====
 
 
 
 
+``files``
+---------
 
+Type: **Array.<Object>**
+
+.. js:property:: files
+
+List of file objects, e.g. a FileCalbirationSet's 'files_in_set' property.
+
+Functions
+=========
+
+
+
+.. _undefined.atIdFromObject:
+
+
+Static Public ``atIdFromObject``
+--------------------------------
+
+Convert a link_id, if one exists on param 'object', to an '@id' link.
+
+.. js:function:: atIdFromObject(object)
+
+    
+    :param Object object: Must have a 'link_id' or '@id' property. Else will return null.
+    :returns string|null: The Item's '@id'.
+    
+
+FilesInSetTable.js:33
+
+
+
+.. _undefined.header:
+
+
+Instance Private ``header``
+---------------------------
+
+Renders heading with titles for table on medium and large width screens.
+
+.. js:function:: header()
+
+    
+    :returns Element: <div> element
+    
+
+FilesInSetTable.js:310
 
 
 

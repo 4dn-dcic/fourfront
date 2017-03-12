@@ -29,7 +29,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Class: Timeout" href="module-app-Timeout.html" />
-    <link rel="prev" title="Object: statics" href="module-alerts.statics.html" /> 
+    <link rel="prev" title="Component: alerts" href="module-alerts.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -45,7 +45,7 @@
           <a href="module-app-Timeout.html" title="Class: Timeout"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="module-alerts.statics.html" title="Object: statics"
+          <a href="module-alerts.html" title="Component: alerts"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">JavaScript API Reference</a> &#187;</li> 
@@ -59,56 +59,57 @@
             
   <div class="section" id="component-app">
 <h1>Component: <code class="docutils literal"><span class="pre">app</span></code><a class="headerlink" href="#component-app" title="Permalink to this headline">¶</a></h1>
+<p>The top-level component for this application.</p>
 <div class="contents local topic" id="local-navigation">
 <p class="topic-title first">Local Navigation</p>
 <ul class="simple">
-<li><a class="reference internal" href="#children" id="id5">Children</a></li>
-<li><a class="reference internal" href="#description" id="id6">Description</a></li>
-<li><a class="reference internal" href="#functions" id="id7">Functions</a><ul>
-<li><a class="reference internal" href="#url" id="id8"><code class="docutils literal"><span class="pre">url</span></code></a></li>
-<li><a class="reference internal" href="#active" id="id9"><code class="docutils literal"><span class="pre">active</span></code></a></li>
-<li><a class="reference internal" href="#render" id="id10"><code class="docutils literal"><span class="pre">render</span></code></a></li>
-<li><a class="reference internal" href="#componentdidmount" id="id11"><code class="docutils literal"><span class="pre">componentDidMount</span></code></a></li>
-<li><a class="reference internal" href="#getdefaultprops" id="id12"><code class="docutils literal"><span class="pre">getDefaultProps</span></code></a></li>
-<li><a class="reference internal" href="#getinitialstate" id="id13"><code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
-<li><a class="reference internal" href="#getchildcontext" id="id14"><code class="docutils literal"><span class="pre">getChildContext</span></code></a></li>
-<li><a class="reference internal" href="#listactionsfor" id="id15"><code class="docutils literal"><span class="pre">listActionsFor</span></code></a></li>
-<li><a class="reference internal" href="#currentresource" id="id16"><code class="docutils literal"><span class="pre">currentResource</span></code></a></li>
-<li><a class="reference internal" href="#currentaction" id="id17"><code class="docutils literal"><span class="pre">currentAction</span></code></a></li>
-<li><a class="reference internal" href="#loadschemas" id="id18"><code class="docutils literal"><span class="pre">loadSchemas</span></code></a></li>
-<li><a class="reference internal" href="#getstatscomponent" id="id19"><code class="docutils literal"><span class="pre">getStatsComponent</span></code></a></li>
-<li><a class="reference internal" href="#updatestats" id="id20"><code class="docutils literal"><span class="pre">updateStats</span></code></a></li>
-<li><a class="reference internal" href="#handledropdownchange" id="id21"><code class="docutils literal"><span class="pre">handleDropdownChange</span></code></a></li>
-<li><a class="reference internal" href="#handleautocompletechosenchange" id="id22"><code class="docutils literal"><span class="pre">handleAutocompleteChosenChange</span></code></a></li>
-<li><a class="reference internal" href="#handleautocompletefocuschange" id="id23"><code class="docutils literal"><span class="pre">handleAutocompleteFocusChange</span></code></a></li>
-<li><a class="reference internal" href="#handleautocompletehiddenchange" id="id24"><code class="docutils literal"><span class="pre">handleAutocompleteHiddenChange</span></code></a></li>
-<li><a class="reference internal" href="#handlelayoutclick" id="id25"><code class="docutils literal"><span class="pre">handleLayoutClick</span></code></a></li>
-<li><a class="reference internal" href="#handlekey" id="id26"><code class="docutils literal"><span class="pre">handleKey</span></code></a></li>
-<li><a class="reference internal" href="#authenticateuser" id="id27"><code class="docutils literal"><span class="pre">authenticateUser</span></code></a></li>
-<li><a class="reference internal" href="#id1" id="id28"><code class="docutils literal"><span class="pre">componentDidMount</span></code></a></li>
-<li><a class="reference internal" href="#componentdidupdate" id="id29"><code class="docutils literal"><span class="pre">componentDidUpdate</span></code></a></li>
-<li><a class="reference internal" href="#fetch" id="id30"><code class="docutils literal"><span class="pre">fetch</span></code></a></li>
-<li><a class="reference internal" href="#updateuserinfo" id="id31"><code class="docutils literal"><span class="pre">updateUserInfo</span></code></a></li>
-<li><a class="reference internal" href="#onhashchange" id="id32"><code class="docutils literal"><span class="pre">onHashChange</span></code></a></li>
-<li><a class="reference internal" href="#handleclick" id="id33"><code class="docutils literal"><span class="pre">handleClick</span></code></a></li>
-<li><a class="reference internal" href="#handlesubmit" id="id34"><code class="docutils literal"><span class="pre">handleSubmit</span></code></a></li>
-<li><a class="reference internal" href="#handlepopstate" id="id35"><code class="docutils literal"><span class="pre">handlePopState</span></code></a></li>
-<li><a class="reference internal" href="#confirmnavigation" id="id36"><code class="docutils literal"><span class="pre">confirmNavigation</span></code></a></li>
-<li><a class="reference internal" href="#navigate" id="id37"><code class="docutils literal"><span class="pre">navigate</span></code></a></li>
-<li><a class="reference internal" href="#receivecontextresponse" id="id38"><code class="docutils literal"><span class="pre">receiveContextResponse</span></code></a></li>
-<li><a class="reference internal" href="#contenttypeisjson" id="id39"><code class="docutils literal"><span class="pre">contentTypeIsJSON</span></code></a></li>
-<li><a class="reference internal" href="#scrollto" id="id40"><code class="docutils literal"><span class="pre">scrollTo</span></code></a></li>
-<li><a class="reference internal" href="#id3" id="id41"><code class="docutils literal"><span class="pre">render</span></code></a></li>
+<li><a class="reference internal" href="#children" id="id97">1 Children</a></li>
+<li><a class="reference internal" href="#functions" id="id98">Functions</a><ul>
+<li><a class="reference internal" href="#inner-url" id="id99">Inner  <code class="docutils literal"><span class="pre">url</span></code></a></li>
+<li><a class="reference internal" href="#inner-active" id="id100">Inner  <code class="docutils literal"><span class="pre">active</span></code></a></li>
+<li><a class="reference internal" href="#inner-render" id="id101">Inner  <code class="docutils literal"><span class="pre">render</span></code></a></li>
+<li><a class="reference internal" href="#inner-componentdidmount" id="id102">Inner  <code class="docutils literal"><span class="pre">componentDidMount</span></code></a></li>
+<li><a class="reference internal" href="#inner-getdefaultprops" id="id103">Inner  <code class="docutils literal"><span class="pre">getDefaultProps</span></code></a></li>
+<li><a class="reference internal" href="#inner-getinitialstate" id="id104">Inner  <code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
+<li><a class="reference internal" href="#inner-getchildcontext" id="id105">Inner  <code class="docutils literal"><span class="pre">getChildContext</span></code></a></li>
+<li><a class="reference internal" href="#inner-listactionsfor" id="id106">Inner  <code class="docutils literal"><span class="pre">listActionsFor</span></code></a></li>
+<li><a class="reference internal" href="#inner-currentresource" id="id107">Inner  <code class="docutils literal"><span class="pre">currentResource</span></code></a></li>
+<li><a class="reference internal" href="#inner-currentaction" id="id108">Inner  <code class="docutils literal"><span class="pre">currentAction</span></code></a></li>
+<li><a class="reference internal" href="#inner-loadschemas" id="id109">Inner  <code class="docutils literal"><span class="pre">loadSchemas</span></code></a></li>
+<li><a class="reference internal" href="#inner-getstatscomponent" id="id110">Inner  <code class="docutils literal"><span class="pre">getStatsComponent</span></code></a></li>
+<li><a class="reference internal" href="#inner-updatestats" id="id111">Inner  <code class="docutils literal"><span class="pre">updateStats</span></code></a></li>
+<li><a class="reference internal" href="#inner-handledropdownchange" id="id112">Inner  <code class="docutils literal"><span class="pre">handleDropdownChange</span></code></a></li>
+<li><a class="reference internal" href="#inner-handleautocompletechosenchange" id="id113">Inner  <code class="docutils literal"><span class="pre">handleAutocompleteChosenChange</span></code></a></li>
+<li><a class="reference internal" href="#inner-handleautocompletefocuschange" id="id114">Inner  <code class="docutils literal"><span class="pre">handleAutocompleteFocusChange</span></code></a></li>
+<li><a class="reference internal" href="#inner-handleautocompletehiddenchange" id="id115">Inner  <code class="docutils literal"><span class="pre">handleAutocompleteHiddenChange</span></code></a></li>
+<li><a class="reference internal" href="#inner-handlelayoutclick" id="id116">Inner  <code class="docutils literal"><span class="pre">handleLayoutClick</span></code></a></li>
+<li><a class="reference internal" href="#inner-handlekey" id="id117">Inner  <code class="docutils literal"><span class="pre">handleKey</span></code></a></li>
+<li><a class="reference internal" href="#inner-authenticateuser" id="id118">Inner  <code class="docutils literal"><span class="pre">authenticateUser</span></code></a></li>
+<li><a class="reference internal" href="#id1" id="id119">Inner  <code class="docutils literal"><span class="pre">componentDidMount</span></code></a></li>
+<li><a class="reference internal" href="#inner-componentdidupdate" id="id120">Inner  <code class="docutils literal"><span class="pre">componentDidUpdate</span></code></a></li>
+<li><a class="reference internal" href="#inner-fetch" id="id121">Inner  <code class="docutils literal"><span class="pre">fetch</span></code></a></li>
+<li><a class="reference internal" href="#inner-updateuserinfo" id="id122">Inner  <code class="docutils literal"><span class="pre">updateUserInfo</span></code></a></li>
+<li><a class="reference internal" href="#inner-onhashchange" id="id123">Inner  <code class="docutils literal"><span class="pre">onHashChange</span></code></a></li>
+<li><a class="reference internal" href="#inner-handleclick" id="id124">Inner  <code class="docutils literal"><span class="pre">handleClick</span></code></a></li>
+<li><a class="reference internal" href="#inner-handlesubmit" id="id125">Inner  <code class="docutils literal"><span class="pre">handleSubmit</span></code></a></li>
+<li><a class="reference internal" href="#inner-handlepopstate" id="id126">Inner  <code class="docutils literal"><span class="pre">handlePopState</span></code></a></li>
+<li><a class="reference internal" href="#inner-confirmnavigation" id="id127">Inner  <code class="docutils literal"><span class="pre">confirmNavigation</span></code></a></li>
+<li><a class="reference internal" href="#inner-navigate" id="id128">Inner  <code class="docutils literal"><span class="pre">navigate</span></code></a></li>
+<li><a class="reference internal" href="#inner-receivecontextresponse" id="id129">Inner  <code class="docutils literal"><span class="pre">receiveContextResponse</span></code></a></li>
+<li><a class="reference internal" href="#inner-contenttypeisjson" id="id130">Inner  <code class="docutils literal"><span class="pre">contentTypeIsJSON</span></code></a></li>
+<li><a class="reference internal" href="#inner-scrollto" id="id131">Inner  <code class="docutils literal"><span class="pre">scrollTo</span></code></a></li>
+<li><a class="reference internal" href="#id3" id="id132">Inner  <code class="docutils literal"><span class="pre">render</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#members" id="id133">Members</a></li>
 </ul>
 </div>
 <div class="section" id="children">
-<h2><a class="toc-backref" href="#id5">Children</a><a class="headerlink" href="#children" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id97">1 Children</a><a class="headerlink" href="#children" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="module-app-Timeout.html">Class: <code class="docutils literal"><span class="pre">Timeout</span></code></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module-app-Timeout.html#children">Children</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="module-app-Timeout.html#children">1 Children</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="module-app-Timeout.Timeout.html">Class: <code class="docutils literal"><span class="pre">Timeout</span></code></a></li>
 </ul>
 </li>
@@ -117,286 +118,494 @@
 </ul>
 </div>
 </div>
-<div class="section" id="description">
-<h2><a class="toc-backref" href="#id6">Description</a><a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
-<p>The top-level component for this application.</p>
-<p>DPROPERTIES</p>
-<p>PROPS</p>
-</div>
 <div class="section" id="functions">
-<h2><a class="toc-backref" href="#id7">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="url">
-<span id="module-app-url"></span><h3><a class="toc-backref" href="#id8"><code class="docutils literal"><span class="pre">url</span></code></a><a class="headerlink" href="#url" title="Permalink to this headline">¶</a></h3>
+<h2><a class="toc-backref" href="#id98">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="inner-url">
+<span id="module-app-url"></span><h3><a class="toc-backref" href="#id99">Inner  <code class="docutils literal"><span class="pre">url</span></code></a><a class="headerlink" href="#inner-url" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
-<dt>
-<code class="descname">url</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dt id="url">
+<code class="descname">url</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#url" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:49</p>
 </div>
-<div class="section" id="active">
-<span id="module-app-active"></span><h3><a class="toc-backref" href="#id9"><code class="docutils literal"><span class="pre">active</span></code></a><a class="headerlink" href="#active" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-active">
+<span id="module-app-active"></span><h3><a class="toc-backref" href="#id100">Inner  <code class="docutils literal"><span class="pre">active</span></code></a><a class="headerlink" href="#inner-active" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
-<dt>
-<code class="descname">active</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dt id="active">
+<code class="descname">active</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#active" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:56</p>
 </div>
-<div class="section" id="render">
-<span id="module-app-render"></span><h3><a class="toc-backref" href="#id10"><code class="docutils literal"><span class="pre">render</span></code></a><a class="headerlink" href="#render" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-render">
+<span id="module-app-render"></span><h3><a class="toc-backref" href="#id101">Inner  <code class="docutils literal"><span class="pre">render</span></code></a><a class="headerlink" href="#inner-render" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
-<dt>
-<code class="descname">render</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dt id="render">
+<code class="descname">render</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#render" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:81</p>
 </div>
-<div class="section" id="componentdidmount">
-<span id="module-app-componentdidmount"></span><h3><a class="toc-backref" href="#id11"><code class="docutils literal"><span class="pre">componentDidMount</span></code></a><a class="headerlink" href="#componentdidmount" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-componentdidmount">
+<span id="module-app-componentdidmount"></span><h3><a class="toc-backref" href="#id102">Inner  <code class="docutils literal"><span class="pre">componentDidMount</span></code></a><a class="headerlink" href="#inner-componentdidmount" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="componentDidMount">
 <code class="descname">componentDidMount</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#componentDidMount" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:84</p>
 </div>
-<div class="section" id="getdefaultprops">
-<span id="module-app-getdefaultprops"></span><h3><a class="toc-backref" href="#id12"><code class="docutils literal"><span class="pre">getDefaultProps</span></code></a><a class="headerlink" href="#getdefaultprops" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-getdefaultprops">
+<span id="module-app-getdefaultprops"></span><h3><a class="toc-backref" href="#id103">Inner  <code class="docutils literal"><span class="pre">getDefaultProps</span></code></a><a class="headerlink" href="#inner-getdefaultprops" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="getDefaultProps">
 <code class="descname">getDefaultProps</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getDefaultProps" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:119</p>
 </div>
-<div class="section" id="getinitialstate">
-<span id="module-app-getinitialstate"></span><h3><a class="toc-backref" href="#id13"><code class="docutils literal"><span class="pre">getInitialState</span></code></a><a class="headerlink" href="#getinitialstate" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-getinitialstate">
+<span id="module-app-getinitialstate"></span><h3><a class="toc-backref" href="#id104">Inner  <code class="docutils literal"><span class="pre">getInitialState</span></code></a><a class="headerlink" href="#inner-getinitialstate" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="getInitialState">
 <code class="descname">getInitialState</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getInitialState" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:125</p>
 </div>
-<div class="section" id="getchildcontext">
-<span id="module-app-getchildcontext"></span><h3><a class="toc-backref" href="#id14"><code class="docutils literal"><span class="pre">getChildContext</span></code></a><a class="headerlink" href="#getchildcontext" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-getchildcontext">
+<span id="module-app-getchildcontext"></span><h3><a class="toc-backref" href="#id105">Inner  <code class="docutils literal"><span class="pre">getChildContext</span></code></a><a class="headerlink" href="#inner-getchildcontext" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="getChildContext">
 <code class="descname">getChildContext</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getChildContext" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:180</p>
 </div>
-<div class="section" id="listactionsfor">
-<span id="module-app-listactionsfor"></span><h3><a class="toc-backref" href="#id15"><code class="docutils literal"><span class="pre">listActionsFor</span></code></a><a class="headerlink" href="#listactionsfor" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-listactionsfor">
+<span id="module-app-listactionsfor"></span><h3><a class="toc-backref" href="#id106">Inner  <code class="docutils literal"><span class="pre">listActionsFor</span></code></a><a class="headerlink" href="#inner-listactionsfor" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="listActionsFor">
 <code class="descname">listActionsFor</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#listActionsFor" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:198</p>
 </div>
-<div class="section" id="currentresource">
-<span id="module-app-currentresource"></span><h3><a class="toc-backref" href="#id16"><code class="docutils literal"><span class="pre">currentResource</span></code></a><a class="headerlink" href="#currentresource" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-currentresource">
+<span id="module-app-currentresource"></span><h3><a class="toc-backref" href="#id107">Inner  <code class="docutils literal"><span class="pre">currentResource</span></code></a><a class="headerlink" href="#inner-currentresource" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="currentResource">
 <code class="descname">currentResource</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#currentResource" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:229</p>
 </div>
-<div class="section" id="currentaction">
-<span id="module-app-currentaction"></span><h3><a class="toc-backref" href="#id17"><code class="docutils literal"><span class="pre">currentAction</span></code></a><a class="headerlink" href="#currentaction" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-currentaction">
+<span id="module-app-currentaction"></span><h3><a class="toc-backref" href="#id108">Inner  <code class="docutils literal"><span class="pre">currentAction</span></code></a><a class="headerlink" href="#inner-currentaction" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="currentAction">
 <code class="descname">currentAction</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#currentAction" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:233</p>
 </div>
-<div class="section" id="loadschemas">
-<span id="module-app-loadschemas"></span><h3><a class="toc-backref" href="#id18"><code class="docutils literal"><span class="pre">loadSchemas</span></code></a><a class="headerlink" href="#loadschemas" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-loadschemas">
+<span id="module-app-loadschemas"></span><h3><a class="toc-backref" href="#id109">Inner  <code class="docutils literal"><span class="pre">loadSchemas</span></code></a><a class="headerlink" href="#inner-loadschemas" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="loadSchemas">
 <code class="descname">loadSchemas</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#loadSchemas" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:243</p>
 </div>
-<div class="section" id="getstatscomponent">
-<span id="module-app-getstatscomponent"></span><h3><a class="toc-backref" href="#id19"><code class="docutils literal"><span class="pre">getStatsComponent</span></code></a><a class="headerlink" href="#getstatscomponent" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-getstatscomponent">
+<span id="module-app-getstatscomponent"></span><h3><a class="toc-backref" href="#id110">Inner  <code class="docutils literal"><span class="pre">getStatsComponent</span></code></a><a class="headerlink" href="#inner-getstatscomponent" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="getStatsComponent">
 <code class="descname">getStatsComponent</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getStatsComponent" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:264</p>
 </div>
-<div class="section" id="updatestats">
-<span id="module-app-updatestats"></span><h3><a class="toc-backref" href="#id20"><code class="docutils literal"><span class="pre">updateStats</span></code></a><a class="headerlink" href="#updatestats" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-updatestats">
+<span id="module-app-updatestats"></span><h3><a class="toc-backref" href="#id111">Inner  <code class="docutils literal"><span class="pre">updateStats</span></code></a><a class="headerlink" href="#inner-updatestats" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="updateStats">
 <code class="descname">updateStats</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#updateStats" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:271</p>
 </div>
-<div class="section" id="handledropdownchange">
-<span id="module-app-handledropdownchange"></span><h3><a class="toc-backref" href="#id21"><code class="docutils literal"><span class="pre">handleDropdownChange</span></code></a><a class="headerlink" href="#handledropdownchange" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-handledropdownchange">
+<span id="module-app-handledropdownchange"></span><h3><a class="toc-backref" href="#id112">Inner  <code class="docutils literal"><span class="pre">handleDropdownChange</span></code></a><a class="headerlink" href="#inner-handledropdownchange" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="handleDropdownChange">
 <code class="descname">handleDropdownChange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#handleDropdownChange" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:284</p>
 </div>
-<div class="section" id="handleautocompletechosenchange">
-<span id="module-app-handleautocompletechosenchange"></span><h3><a class="toc-backref" href="#id22"><code class="docutils literal"><span class="pre">handleAutocompleteChosenChange</span></code></a><a class="headerlink" href="#handleautocompletechosenchange" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-handleautocompletechosenchange">
+<span id="module-app-handleautocompletechosenchange"></span><h3><a class="toc-backref" href="#id113">Inner  <code class="docutils literal"><span class="pre">handleAutocompleteChosenChange</span></code></a><a class="headerlink" href="#inner-handleautocompletechosenchange" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="handleAutocompleteChosenChange">
 <code class="descname">handleAutocompleteChosenChange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#handleAutocompleteChosenChange" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:290</p>
 </div>
-<div class="section" id="handleautocompletefocuschange">
-<span id="module-app-handleautocompletefocuschange"></span><h3><a class="toc-backref" href="#id23"><code class="docutils literal"><span class="pre">handleAutocompleteFocusChange</span></code></a><a class="headerlink" href="#handleautocompletefocuschange" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-handleautocompletefocuschange">
+<span id="module-app-handleautocompletefocuschange"></span><h3><a class="toc-backref" href="#id114">Inner  <code class="docutils literal"><span class="pre">handleAutocompleteFocusChange</span></code></a><a class="headerlink" href="#inner-handleautocompletefocuschange" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="handleAutocompleteFocusChange">
 <code class="descname">handleAutocompleteFocusChange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#handleAutocompleteFocusChange" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:294</p>
 </div>
-<div class="section" id="handleautocompletehiddenchange">
-<span id="module-app-handleautocompletehiddenchange"></span><h3><a class="toc-backref" href="#id24"><code class="docutils literal"><span class="pre">handleAutocompleteHiddenChange</span></code></a><a class="headerlink" href="#handleautocompletehiddenchange" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-handleautocompletehiddenchange">
+<span id="module-app-handleautocompletehiddenchange"></span><h3><a class="toc-backref" href="#id115">Inner  <code class="docutils literal"><span class="pre">handleAutocompleteHiddenChange</span></code></a><a class="headerlink" href="#inner-handleautocompletehiddenchange" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="handleAutocompleteHiddenChange">
 <code class="descname">handleAutocompleteHiddenChange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#handleAutocompleteHiddenChange" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:298</p>
 </div>
-<div class="section" id="handlelayoutclick">
-<span id="module-app-handlelayoutclick"></span><h3><a class="toc-backref" href="#id25"><code class="docutils literal"><span class="pre">handleLayoutClick</span></code></a><a class="headerlink" href="#handlelayoutclick" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-handlelayoutclick">
+<span id="module-app-handlelayoutclick"></span><h3><a class="toc-backref" href="#id116">Inner  <code class="docutils literal"><span class="pre">handleLayoutClick</span></code></a><a class="headerlink" href="#inner-handlelayoutclick" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="handleLayoutClick">
 <code class="descname">handleLayoutClick</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#handleLayoutClick" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:303</p>
 </div>
-<div class="section" id="handlekey">
-<span id="module-app-handlekey"></span><h3><a class="toc-backref" href="#id26"><code class="docutils literal"><span class="pre">handleKey</span></code></a><a class="headerlink" href="#handlekey" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-handlekey">
+<span id="module-app-handlekey"></span><h3><a class="toc-backref" href="#id117">Inner  <code class="docutils literal"><span class="pre">handleKey</span></code></a><a class="headerlink" href="#inner-handlekey" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="handleKey">
 <code class="descname">handleKey</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#handleKey" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:310</p>
 </div>
-<div class="section" id="authenticateuser">
-<span id="module-app-authenticateuser"></span><h3><a class="toc-backref" href="#id27"><code class="docutils literal"><span class="pre">authenticateUser</span></code></a><a class="headerlink" href="#authenticateuser" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-authenticateuser">
+<span id="module-app-authenticateuser"></span><h3><a class="toc-backref" href="#id118">Inner  <code class="docutils literal"><span class="pre">authenticateUser</span></code></a><a class="headerlink" href="#inner-authenticateuser" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="authenticateUser">
 <code class="descname">authenticateUser</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#authenticateUser" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:324</p>
 </div>
 <div class="section" id="id1">
-<span id="id2"></span><h3><a class="toc-backref" href="#id28"><code class="docutils literal"><span class="pre">componentDidMount</span></code></a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<span id="id2"></span><h3><a class="toc-backref" href="#id119">Inner  <code class="docutils literal"><span class="pre">componentDidMount</span></code></a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt>
 <code class="descname">componentDidMount</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
 <dd></dd></dl>
 
+<p>app.js:356</p>
 </div>
-<div class="section" id="componentdidupdate">
-<span id="module-app-componentdidupdate"></span><h3><a class="toc-backref" href="#id29"><code class="docutils literal"><span class="pre">componentDidUpdate</span></code></a><a class="headerlink" href="#componentdidupdate" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-componentdidupdate">
+<span id="module-app-componentdidupdate"></span><h3><a class="toc-backref" href="#id120">Inner  <code class="docutils literal"><span class="pre">componentDidUpdate</span></code></a><a class="headerlink" href="#inner-componentdidupdate" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="componentDidUpdate">
 <code class="descname">componentDidUpdate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#componentDidUpdate" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:395</p>
 </div>
-<div class="section" id="fetch">
-<span id="module-app-fetch"></span><h3><a class="toc-backref" href="#id30"><code class="docutils literal"><span class="pre">fetch</span></code></a><a class="headerlink" href="#fetch" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-fetch">
+<span id="module-app-fetch"></span><h3><a class="toc-backref" href="#id121">Inner  <code class="docutils literal"><span class="pre">fetch</span></code></a><a class="headerlink" href="#inner-fetch" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
-<dt>
-<code class="descname">fetch</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dt id="fetch">
+<code class="descname">fetch</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#fetch" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:421</p>
 </div>
-<div class="section" id="updateuserinfo">
-<span id="module-app-updateuserinfo"></span><h3><a class="toc-backref" href="#id31"><code class="docutils literal"><span class="pre">updateUserInfo</span></code></a><a class="headerlink" href="#updateuserinfo" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-updateuserinfo">
+<span id="module-app-updateuserinfo"></span><h3><a class="toc-backref" href="#id122">Inner  <code class="docutils literal"><span class="pre">updateUserInfo</span></code></a><a class="headerlink" href="#inner-updateuserinfo" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="updateUserInfo">
 <code class="descname">updateUserInfo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#updateUserInfo" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:439</p>
 </div>
-<div class="section" id="onhashchange">
-<span id="module-app-onhashchange"></span><h3><a class="toc-backref" href="#id32"><code class="docutils literal"><span class="pre">onHashChange</span></code></a><a class="headerlink" href="#onhashchange" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-onhashchange">
+<span id="module-app-onhashchange"></span><h3><a class="toc-backref" href="#id123">Inner  <code class="docutils literal"><span class="pre">onHashChange</span></code></a><a class="headerlink" href="#inner-onhashchange" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="onHashChange">
 <code class="descname">onHashChange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#onHashChange" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:461</p>
 </div>
-<div class="section" id="handleclick">
-<span id="module-app-handleclick"></span><h3><a class="toc-backref" href="#id33"><code class="docutils literal"><span class="pre">handleClick</span></code></a><a class="headerlink" href="#handleclick" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-handleclick">
+<span id="module-app-handleclick"></span><h3><a class="toc-backref" href="#id124">Inner  <code class="docutils literal"><span class="pre">handleClick</span></code></a><a class="headerlink" href="#inner-handleclick" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="handleClick">
 <code class="descname">handleClick</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#handleClick" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:468</p>
 </div>
-<div class="section" id="handlesubmit">
-<span id="module-app-handlesubmit"></span><h3><a class="toc-backref" href="#id34"><code class="docutils literal"><span class="pre">handleSubmit</span></code></a><a class="headerlink" href="#handlesubmit" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-handlesubmit">
+<span id="module-app-handlesubmit"></span><h3><a class="toc-backref" href="#id125">Inner  <code class="docutils literal"><span class="pre">handleSubmit</span></code></a><a class="headerlink" href="#inner-handlesubmit" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="handleSubmit">
 <code class="descname">handleSubmit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#handleSubmit" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:525</p>
 </div>
-<div class="section" id="handlepopstate">
-<span id="module-app-handlepopstate"></span><h3><a class="toc-backref" href="#id35"><code class="docutils literal"><span class="pre">handlePopState</span></code></a><a class="headerlink" href="#handlepopstate" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-handlepopstate">
+<span id="module-app-handlepopstate"></span><h3><a class="toc-backref" href="#id126">Inner  <code class="docutils literal"><span class="pre">handlePopState</span></code></a><a class="headerlink" href="#inner-handlepopstate" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="handlePopState">
 <code class="descname">handlePopState</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#handlePopState" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:558</p>
 </div>
-<div class="section" id="confirmnavigation">
-<span id="module-app-confirmnavigation"></span><h3><a class="toc-backref" href="#id36"><code class="docutils literal"><span class="pre">confirmNavigation</span></code></a><a class="headerlink" href="#confirmnavigation" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-confirmnavigation">
+<span id="module-app-confirmnavigation"></span><h3><a class="toc-backref" href="#id127">Inner  <code class="docutils literal"><span class="pre">confirmNavigation</span></code></a><a class="headerlink" href="#inner-confirmnavigation" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="confirmNavigation">
 <code class="descname">confirmNavigation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#confirmNavigation" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:595</p>
 </div>
-<div class="section" id="navigate">
-<span id="module-app-navigate"></span><h3><a class="toc-backref" href="#id37"><code class="docutils literal"><span class="pre">navigate</span></code></a><a class="headerlink" href="#navigate" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-navigate">
+<span id="module-app-navigate"></span><h3><a class="toc-backref" href="#id128">Inner  <code class="docutils literal"><span class="pre">navigate</span></code></a><a class="headerlink" href="#inner-navigate" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
-<dt>
-<code class="descname">navigate</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dt id="navigate">
+<code class="descname">navigate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navigate" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:605</p>
 </div>
-<div class="section" id="receivecontextresponse">
-<span id="module-app-receivecontextresponse"></span><h3><a class="toc-backref" href="#id38"><code class="docutils literal"><span class="pre">receiveContextResponse</span></code></a><a class="headerlink" href="#receivecontextresponse" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-receivecontextresponse">
+<span id="module-app-receivecontextresponse"></span><h3><a class="toc-backref" href="#id129">Inner  <code class="docutils literal"><span class="pre">receiveContextResponse</span></code></a><a class="headerlink" href="#inner-receivecontextresponse" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="receiveContextResponse">
 <code class="descname">receiveContextResponse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#receiveContextResponse" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:814</p>
 </div>
-<div class="section" id="contenttypeisjson">
-<span id="module-app-contenttypeisjson"></span><h3><a class="toc-backref" href="#id39"><code class="docutils literal"><span class="pre">contentTypeIsJSON</span></code></a><a class="headerlink" href="#contenttypeisjson" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-contenttypeisjson">
+<span id="module-app-contenttypeisjson"></span><h3><a class="toc-backref" href="#id130">Inner  <code class="docutils literal"><span class="pre">contentTypeIsJSON</span></code></a><a class="headerlink" href="#inner-contenttypeisjson" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="contentTypeIsJSON">
 <code class="descname">contentTypeIsJSON</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#contentTypeIsJSON" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:842</p>
 </div>
-<div class="section" id="scrollto">
-<span id="module-app-scrollto"></span><h3><a class="toc-backref" href="#id40"><code class="docutils literal"><span class="pre">scrollTo</span></code></a><a class="headerlink" href="#scrollto" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="inner-scrollto">
+<span id="module-app-scrollto"></span><h3><a class="toc-backref" href="#id131">Inner  <code class="docutils literal"><span class="pre">scrollTo</span></code></a><a class="headerlink" href="#inner-scrollto" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="scrollTo">
 <code class="descname">scrollTo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#scrollTo" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<p>app.js:852</p>
 </div>
 <div class="section" id="id3">
-<span id="id4"></span><h3><a class="toc-backref" href="#id41"><code class="docutils literal"><span class="pre">render</span></code></a><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<span id="id4"></span><h3><a class="toc-backref" href="#id132">Inner  <code class="docutils literal"><span class="pre">render</span></code></a><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt>
 <code class="descname">render</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
 <dd></dd></dl>
 
+<p>app.js:861</p>
 </div>
+</div>
+<div class="section" id="members">
+<h2><a class="toc-backref" href="#id133">Members</a><a class="headerlink" href="#members" title="Permalink to this headline">¶</a></h2>
+<p id="module-app-react"><code class="docutils literal"><span class="pre">React</span></code></p>
+<p id="module-app-jsonscriptescape"><code class="docutils literal"><span class="pre">jsonScriptEscape</span></code></p>
+<p id="module-app-globals"><code class="docutils literal"><span class="pre">globals</span></code></p>
+<p id="module-app-errorpage"><code class="docutils literal"><span class="pre">ErrorPage</span></code></p>
+<p id="module-app-navigation"><code class="docutils literal"><span class="pre">Navigation</span></code></p>
+<p id="module-app-action"><code class="docutils literal"><span class="pre">Action</span></code></p>
+<p id="module-app-footer"><code class="docutils literal"><span class="pre">Footer</span></code></p>
+<p id="id5"><code class="docutils literal"><span class="pre">url</span></code></p>
+<p id="module-app"><code class="docutils literal"><span class="pre">_</span></code></p>
+<p id="module-app-store"><code class="docutils literal"><span class="pre">store</span></code></p>
+<p id="module-app-browse"><code class="docutils literal"><span class="pre">browse</span></code></p>
+<p id="module-app-origin"><code class="docutils literal"><span class="pre">origin</span></code></p>
+<p id="module-app-serialize"><code class="docutils literal"><span class="pre">serialize</span></code></p>
+<p id="module-app-filters"><code class="docutils literal"><span class="pre">Filters</span></code></p>
+<p id="module-app-ajax"><code class="docutils literal"><span class="pre">ajax</span></code></p>
+<p id="module-app-jwt"><code class="docutils literal"><span class="pre">JWT</span></code></p>
+<p id="module-app-console"><code class="docutils literal"><span class="pre">console</span></code></p>
+<p id="module-app-isserverside"><code class="docutils literal"><span class="pre">isServerSide</span></code></p>
+<p id="module-app-alerts"><code class="docutils literal"><span class="pre">Alerts</span></code></p>
+<p id="id6"><code class="docutils literal"><span class="pre">jwt</span></code></p>
+<p id="module-app-facetcharts"><code class="docutils literal"><span class="pre">FacetCharts</span></code></p>
+<p id="module-app-chartdatacontroller"><code class="docutils literal"><span class="pre">ChartDataController</span></code></p>
+<p id="module-app-maketitle"><code class="docutils literal"><span class="pre">makeTitle</span></code></p>
+<p id="module-app-reacttooltip"><code class="docutils literal"><span class="pre">ReactTooltip</span></code></p>
+<p id="module-app-dispatch-dict"><code class="docutils literal"><span class="pre">dispatch_dict</span></code></p>
+<p>Used to temporarily store Redux store values for simultaneous dispatch.</p>
+<p id="module-app-portal"><code class="docutils literal"><span class="pre">portal</span></code></p>
+<p>Top bar navigation &amp; link schema definition.</p>
+<p id="module-app-id"><code class="docutils literal"><span class="pre">id</span></code></p>
+<p id="module-app-sid"><code class="docutils literal"><span class="pre">sid</span></code></p>
+<p id="module-app-title"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id7"><code class="docutils literal"><span class="pre">id</span></code></p>
+<p id="id8"><code class="docutils literal"><span class="pre">sid</span></code></p>
+<p id="id9"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="module-app-children"><code class="docutils literal"><span class="pre">children</span></code></p>
+<p id="id10"><code class="docutils literal"><span class="pre">id</span></code></p>
+<p id="id11"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id12"><code class="docutils literal"><span class="pre">url</span></code></p>
+<p id="id13"><code class="docutils literal"><span class="pre">children</span></code></p>
+<p id="id14"><code class="docutils literal"><span class="pre">id</span></code></p>
+<p id="id15"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id16"><code class="docutils literal"><span class="pre">url</span></code></p>
+<p id="id17"><code class="docutils literal"><span class="pre">id</span></code></p>
+<p id="id18"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id19"><code class="docutils literal"><span class="pre">url</span></code></p>
+<p id="id20"><code class="docutils literal"><span class="pre">id</span></code></p>
+<p id="id21"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id22"><code class="docutils literal"><span class="pre">url</span></code></p>
+<p id="id23"><code class="docutils literal"><span class="pre">id</span></code></p>
+<p id="id24"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id25"><code class="docutils literal"><span class="pre">url</span></code></p>
+<p id="id26"><code class="docutils literal"><span class="pre">id</span></code></p>
+<p id="id27"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id28"><code class="docutils literal"><span class="pre">url</span></code></p>
+<p id="id29"><code class="docutils literal"><span class="pre">id</span></code></p>
+<p id="id30"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id31"><code class="docutils literal"><span class="pre">url</span></code></p>
+<p id="id32"><code class="docutils literal"><span class="pre">id</span></code></p>
+<p id="id33"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id34"><code class="docutils literal"><span class="pre">url</span></code></p>
+<p id="id35"><code class="docutils literal"><span class="pre">Title</span></code></p>
+<p id="module-app-slow-request-time"><code class="docutils literal"><span class="pre">SLOW_REQUEST_TIME</span></code></p>
+<p id="module-app-historyenabled"><code class="docutils literal"><span class="pre">historyEnabled</span></code></p>
+<p id="module-app-proptypes"><code class="docutils literal"><span class="pre">propTypes</span></code></p>
+<dl class="docutils">
+<dt>Session-related props &#8216;sessionMayBeSet&#8217; is meant to provided by server-side only, then scraped and re-provided</dt>
+<dd>by client-side render in browser.js via &#64;see App.getRendersPropValues(documentElement, [propNamesToGet]) to match server-side render.
+Similarly as to how is done for the redux store.</dd>
+</dl>
+<p id="module-app-sessionmaybeset"><code class="docutils literal"><span class="pre">sessionMayBeSet</span></code></p>
+<p id="module-app-session"><code class="docutils literal"><span class="pre">session</span></code></p>
+<p id="id36"><code class="docutils literal"><span class="pre">session</span></code></p>
+<p id="id37"><code class="docutils literal"><span class="pre">session</span></code></p>
+<p id="id38"><code class="docutils literal"><span class="pre">session</span></code></p>
+<p id="module-app-user-actions"><code class="docutils literal"><span class="pre">user_actions</span></code></p>
+<p id="module-app-errors"><code class="docutils literal"><span class="pre">errors</span></code></p>
+<p id="module-app-dropdowncomponent"><code class="docutils literal"><span class="pre">dropdownComponent</span></code></p>
+<p id="module-app-content"><code class="docutils literal"><span class="pre">content</span></code></p>
+<p id="id39"><code class="docutils literal"><span class="pre">session</span></code></p>
+<p id="id40"><code class="docutils literal"><span class="pre">user_actions</span></code></p>
+<p id="module-app-schemas"><code class="docutils literal"><span class="pre">schemas</span></code></p>
+<p id="module-app-childcontexttypes"><code class="docutils literal"><span class="pre">childContextTypes</span></code></p>
+<p id="id41"><code class="docutils literal"><span class="pre">dropdownComponent</span></code></p>
+<p id="id42"><code class="docutils literal"><span class="pre">listActionsFor</span></code></p>
+<p id="id43"><code class="docutils literal"><span class="pre">currentResource</span></code></p>
+<p id="module-app-location-href"><code class="docutils literal"><span class="pre">location_href</span></code></p>
+<p id="module-app-ondropdownchange"><code class="docutils literal"><span class="pre">onDropdownChange</span></code></p>
+<p id="id44"><code class="docutils literal"><span class="pre">portal</span></code></p>
+<p id="module-app-hidepublicaudits"><code class="docutils literal"><span class="pre">hidePublicAudits</span></code></p>
+<p id="id45"><code class="docutils literal"><span class="pre">fetch</span></code></p>
+<p id="id46"><code class="docutils literal"><span class="pre">session</span></code></p>
+<p id="id47"><code class="docutils literal"><span class="pre">navigate</span></code></p>
+<p id="id48"><code class="docutils literal"><span class="pre">contentTypeIsJSON</span></code></p>
+<p id="id49"><code class="docutils literal"><span class="pre">updateUserInfo</span></code></p>
+<p id="id50"><code class="docutils literal"><span class="pre">schemas</span></code></p>
+<p id="module-app-context"><code class="docutils literal"><span class="pre">context</span></code></p>
+<p id="module-app-name"><code class="docutils literal"><span class="pre">name</span></code></p>
+<p id="id51"><code class="docutils literal"><span class="pre">schemas</span></code></p>
+<p id="id52"><code class="docutils literal"><span class="pre">dropdownComponent</span></code></p>
+<p id="module-app-autocompletetermchosen"><code class="docutils literal"><span class="pre">autocompleteTermChosen</span></code></p>
+<p id="module-app-autocompletefocused"><code class="docutils literal"><span class="pre">autocompleteFocused</span></code></p>
+<p id="module-app-autocompletehidden"><code class="docutils literal"><span class="pre">autocompleteHidden</span></code></p>
+<p id="id53"><code class="docutils literal"><span class="pre">dropdownComponent</span></code></p>
+<p id="module-app-method"><code class="docutils literal"><span class="pre">method</span></code></p>
+<p id="module-app-headers"><code class="docutils literal"><span class="pre">headers</span></code></p>
+<p id="module-app-body"><code class="docutils literal"><span class="pre">body</span></code></p>
+<p id="module-app-id-token"><code class="docutils literal"><span class="pre">id_token</span></code></p>
+<p id="module-app-query-href"><code class="docutils literal"><span class="pre">query_href</span></code></p>
+<p id="id54"><code class="docutils literal"><span class="pre">query_href</span></code></p>
+<p id="module-app-type"><code class="docutils literal"><span class="pre">type</span></code></p>
+<p id="module-app-options"><code class="docutils literal"><span class="pre">options</span></code></p>
+<p id="module-app-credentials"><code class="docutils literal"><span class="pre">credentials</span></code></p>
+<p id="module-app-useractions"><code class="docutils literal"><span class="pre">userActions</span></code></p>
+<p id="id55"><code class="docutils literal"><span class="pre">session</span></code></p>
+<p id="id56"><code class="docutils literal"><span class="pre">type</span></code></p>
+<p id="module-app-target"><code class="docutils literal"><span class="pre">target</span></code></p>
+<p id="module-app-href"><code class="docutils literal"><span class="pre">href</span></code></p>
+<p id="module-app-search"><code class="docutils literal"><span class="pre">search</span></code></p>
+<p id="id57"><code class="docutils literal"><span class="pre">href</span></code></p>
+<p id="id58"><code class="docutils literal"><span class="pre">type</span></code></p>
+<p id="module-app-replace"><code class="docutils literal"><span class="pre">replace</span></code></p>
+<p id="module-app-targethref"><code class="docutils literal"><span class="pre">targetHref</span></code></p>
+<p id="module-app-fragment"><code class="docutils literal"><span class="pre">fragment</span></code></p>
+<p id="id59"><code class="docutils literal"><span class="pre">fragment</span></code></p>
+<p id="id60"><code class="docutils literal"><span class="pre">targetHref</span></code></p>
+<p id="id61"><code class="docutils literal"><span class="pre">href</span></code></p>
+<p id="id62"><code class="docutils literal"><span class="pre">type</span></code></p>
+<p id="id63"><code class="docutils literal"><span class="pre">headers</span></code></p>
+<p id="module-app-cache"><code class="docutils literal"><span class="pre">cache</span></code></p>
+<p id="module-app-slowload"><code class="docutils literal"><span class="pre">slowLoad</span></code></p>
+<p id="module-app-jwtheader"><code class="docutils literal"><span class="pre">jwtHeader</span></code></p>
+<p id="module-app-callback"><code class="docutils literal"><span class="pre">callback</span></code></p>
+<p id="id64"><code class="docutils literal"><span class="pre">slowLoad</span></code></p>
+<p id="module-app-promise"><code class="docutils literal"><span class="pre">promise</span></code></p>
+<p id="id65"><code class="docutils literal"><span class="pre">slowLoad</span></code></p>
+<p id="id66"><code class="docutils literal"><span class="pre">type</span></code></p>
+<p id="module-app-isjson"><code class="docutils literal"><span class="pre">isJson</span></code></p>
+<p id="id67"><code class="docutils literal"><span class="pre">context</span></code></p>
+<p id="module-app-appclass"><code class="docutils literal"><span class="pre">appClass</span></code></p>
+<p id="module-app-canonical"><code class="docutils literal"><span class="pre">canonical</span></code></p>
+<p id="id68"><code class="docutils literal"><span class="pre">canonical</span></code></p>
+<p id="module-app-status"><code class="docutils literal"><span class="pre">status</span></code></p>
+<p id="id69"><code class="docutils literal"><span class="pre">status</span></code></p>
+<p id="id70"><code class="docutils literal"><span class="pre">status</span></code></p>
+<p id="id71"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id72"><code class="docutils literal"><span class="pre">content</span></code></p>
+<p id="id73"><code class="docutils literal"><span class="pre">content</span></code></p>
+<p id="id74"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id75"><code class="docutils literal"><span class="pre">content</span></code></p>
+<p id="id76"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="module-app-contentview"><code class="docutils literal"><span class="pre">ContentView</span></code></p>
+<p id="id77"><code class="docutils literal"><span class="pre">content</span></code></p>
+<p id="id78"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id79"><code class="docutils literal"><span class="pre">context</span></code></p>
+<p id="id80"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id81"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id82"><code class="docutils literal"><span class="pre">content</span></code></p>
+<p id="id83"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id84"><code class="docutils literal"><span class="pre">content</span></code></p>
+<p id="id85"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id86"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id87"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id88"><code class="docutils literal"><span class="pre">content</span></code></p>
+<p id="id89"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="module-app-http-data-4dnucleome-org"><code class="docutils literal"><span class="pre">&quot;http://data.4dnucleome.org/&quot;</span></code></p>
+<p id="module-app-base"><code class="docutils literal"><span class="pre">base</span></code></p>
+<p id="id90"><code class="docutils literal"><span class="pre">canonical</span></code></p>
+<p id="module-app-html"><code class="docutils literal"><span class="pre">__html</span></code></p>
+<p id="id91"><code class="docutils literal"><span class="pre">__html</span></code></p>
+<p id="id92"><code class="docutils literal"><span class="pre">__html</span></code></p>
+<p id="id93"><code class="docutils literal"><span class="pre">__html</span></code></p>
+<p id="id94"><code class="docutils literal"><span class="pre">__html</span></code></p>
+<p id="module-app-statics"><code class="docutils literal"><span class="pre">statics</span></code></p>
+<p id="module-app-script-props"><code class="docutils literal"><span class="pre">script_props</span></code></p>
+<p id="id95"><code class="docutils literal"><span class="pre">script_props</span></code></p>
+<p id="module-app-elem-value"><code class="docutils literal"><span class="pre">elem_value</span></code></p>
+<p id="id96"><code class="docutils literal"><span class="pre">href</span></code></p>
 </div>
 </div>
 
@@ -409,52 +618,52 @@
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Component: <code class="docutils literal"><span class="pre">app</span></code></a><ul>
-<li><a class="reference internal" href="#children">Children</a></li>
-<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#children">1 Children</a></li>
 <li><a class="reference internal" href="#functions">Functions</a><ul>
-<li><a class="reference internal" href="#url"><code class="docutils literal"><span class="pre">url</span></code></a></li>
-<li><a class="reference internal" href="#active"><code class="docutils literal"><span class="pre">active</span></code></a></li>
-<li><a class="reference internal" href="#render"><code class="docutils literal"><span class="pre">render</span></code></a></li>
-<li><a class="reference internal" href="#componentdidmount"><code class="docutils literal"><span class="pre">componentDidMount</span></code></a></li>
-<li><a class="reference internal" href="#getdefaultprops"><code class="docutils literal"><span class="pre">getDefaultProps</span></code></a></li>
-<li><a class="reference internal" href="#getinitialstate"><code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
-<li><a class="reference internal" href="#getchildcontext"><code class="docutils literal"><span class="pre">getChildContext</span></code></a></li>
-<li><a class="reference internal" href="#listactionsfor"><code class="docutils literal"><span class="pre">listActionsFor</span></code></a></li>
-<li><a class="reference internal" href="#currentresource"><code class="docutils literal"><span class="pre">currentResource</span></code></a></li>
-<li><a class="reference internal" href="#currentaction"><code class="docutils literal"><span class="pre">currentAction</span></code></a></li>
-<li><a class="reference internal" href="#loadschemas"><code class="docutils literal"><span class="pre">loadSchemas</span></code></a></li>
-<li><a class="reference internal" href="#getstatscomponent"><code class="docutils literal"><span class="pre">getStatsComponent</span></code></a></li>
-<li><a class="reference internal" href="#updatestats"><code class="docutils literal"><span class="pre">updateStats</span></code></a></li>
-<li><a class="reference internal" href="#handledropdownchange"><code class="docutils literal"><span class="pre">handleDropdownChange</span></code></a></li>
-<li><a class="reference internal" href="#handleautocompletechosenchange"><code class="docutils literal"><span class="pre">handleAutocompleteChosenChange</span></code></a></li>
-<li><a class="reference internal" href="#handleautocompletefocuschange"><code class="docutils literal"><span class="pre">handleAutocompleteFocusChange</span></code></a></li>
-<li><a class="reference internal" href="#handleautocompletehiddenchange"><code class="docutils literal"><span class="pre">handleAutocompleteHiddenChange</span></code></a></li>
-<li><a class="reference internal" href="#handlelayoutclick"><code class="docutils literal"><span class="pre">handleLayoutClick</span></code></a></li>
-<li><a class="reference internal" href="#handlekey"><code class="docutils literal"><span class="pre">handleKey</span></code></a></li>
-<li><a class="reference internal" href="#authenticateuser"><code class="docutils literal"><span class="pre">authenticateUser</span></code></a></li>
-<li><a class="reference internal" href="#id1"><code class="docutils literal"><span class="pre">componentDidMount</span></code></a></li>
-<li><a class="reference internal" href="#componentdidupdate"><code class="docutils literal"><span class="pre">componentDidUpdate</span></code></a></li>
-<li><a class="reference internal" href="#fetch"><code class="docutils literal"><span class="pre">fetch</span></code></a></li>
-<li><a class="reference internal" href="#updateuserinfo"><code class="docutils literal"><span class="pre">updateUserInfo</span></code></a></li>
-<li><a class="reference internal" href="#onhashchange"><code class="docutils literal"><span class="pre">onHashChange</span></code></a></li>
-<li><a class="reference internal" href="#handleclick"><code class="docutils literal"><span class="pre">handleClick</span></code></a></li>
-<li><a class="reference internal" href="#handlesubmit"><code class="docutils literal"><span class="pre">handleSubmit</span></code></a></li>
-<li><a class="reference internal" href="#handlepopstate"><code class="docutils literal"><span class="pre">handlePopState</span></code></a></li>
-<li><a class="reference internal" href="#confirmnavigation"><code class="docutils literal"><span class="pre">confirmNavigation</span></code></a></li>
-<li><a class="reference internal" href="#navigate"><code class="docutils literal"><span class="pre">navigate</span></code></a></li>
-<li><a class="reference internal" href="#receivecontextresponse"><code class="docutils literal"><span class="pre">receiveContextResponse</span></code></a></li>
-<li><a class="reference internal" href="#contenttypeisjson"><code class="docutils literal"><span class="pre">contentTypeIsJSON</span></code></a></li>
-<li><a class="reference internal" href="#scrollto"><code class="docutils literal"><span class="pre">scrollTo</span></code></a></li>
-<li><a class="reference internal" href="#id3"><code class="docutils literal"><span class="pre">render</span></code></a></li>
+<li><a class="reference internal" href="#inner-url">Inner  <code class="docutils literal"><span class="pre">url</span></code></a></li>
+<li><a class="reference internal" href="#inner-active">Inner  <code class="docutils literal"><span class="pre">active</span></code></a></li>
+<li><a class="reference internal" href="#inner-render">Inner  <code class="docutils literal"><span class="pre">render</span></code></a></li>
+<li><a class="reference internal" href="#inner-componentdidmount">Inner  <code class="docutils literal"><span class="pre">componentDidMount</span></code></a></li>
+<li><a class="reference internal" href="#inner-getdefaultprops">Inner  <code class="docutils literal"><span class="pre">getDefaultProps</span></code></a></li>
+<li><a class="reference internal" href="#inner-getinitialstate">Inner  <code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
+<li><a class="reference internal" href="#inner-getchildcontext">Inner  <code class="docutils literal"><span class="pre">getChildContext</span></code></a></li>
+<li><a class="reference internal" href="#inner-listactionsfor">Inner  <code class="docutils literal"><span class="pre">listActionsFor</span></code></a></li>
+<li><a class="reference internal" href="#inner-currentresource">Inner  <code class="docutils literal"><span class="pre">currentResource</span></code></a></li>
+<li><a class="reference internal" href="#inner-currentaction">Inner  <code class="docutils literal"><span class="pre">currentAction</span></code></a></li>
+<li><a class="reference internal" href="#inner-loadschemas">Inner  <code class="docutils literal"><span class="pre">loadSchemas</span></code></a></li>
+<li><a class="reference internal" href="#inner-getstatscomponent">Inner  <code class="docutils literal"><span class="pre">getStatsComponent</span></code></a></li>
+<li><a class="reference internal" href="#inner-updatestats">Inner  <code class="docutils literal"><span class="pre">updateStats</span></code></a></li>
+<li><a class="reference internal" href="#inner-handledropdownchange">Inner  <code class="docutils literal"><span class="pre">handleDropdownChange</span></code></a></li>
+<li><a class="reference internal" href="#inner-handleautocompletechosenchange">Inner  <code class="docutils literal"><span class="pre">handleAutocompleteChosenChange</span></code></a></li>
+<li><a class="reference internal" href="#inner-handleautocompletefocuschange">Inner  <code class="docutils literal"><span class="pre">handleAutocompleteFocusChange</span></code></a></li>
+<li><a class="reference internal" href="#inner-handleautocompletehiddenchange">Inner  <code class="docutils literal"><span class="pre">handleAutocompleteHiddenChange</span></code></a></li>
+<li><a class="reference internal" href="#inner-handlelayoutclick">Inner  <code class="docutils literal"><span class="pre">handleLayoutClick</span></code></a></li>
+<li><a class="reference internal" href="#inner-handlekey">Inner  <code class="docutils literal"><span class="pre">handleKey</span></code></a></li>
+<li><a class="reference internal" href="#inner-authenticateuser">Inner  <code class="docutils literal"><span class="pre">authenticateUser</span></code></a></li>
+<li><a class="reference internal" href="#id1">Inner  <code class="docutils literal"><span class="pre">componentDidMount</span></code></a></li>
+<li><a class="reference internal" href="#inner-componentdidupdate">Inner  <code class="docutils literal"><span class="pre">componentDidUpdate</span></code></a></li>
+<li><a class="reference internal" href="#inner-fetch">Inner  <code class="docutils literal"><span class="pre">fetch</span></code></a></li>
+<li><a class="reference internal" href="#inner-updateuserinfo">Inner  <code class="docutils literal"><span class="pre">updateUserInfo</span></code></a></li>
+<li><a class="reference internal" href="#inner-onhashchange">Inner  <code class="docutils literal"><span class="pre">onHashChange</span></code></a></li>
+<li><a class="reference internal" href="#inner-handleclick">Inner  <code class="docutils literal"><span class="pre">handleClick</span></code></a></li>
+<li><a class="reference internal" href="#inner-handlesubmit">Inner  <code class="docutils literal"><span class="pre">handleSubmit</span></code></a></li>
+<li><a class="reference internal" href="#inner-handlepopstate">Inner  <code class="docutils literal"><span class="pre">handlePopState</span></code></a></li>
+<li><a class="reference internal" href="#inner-confirmnavigation">Inner  <code class="docutils literal"><span class="pre">confirmNavigation</span></code></a></li>
+<li><a class="reference internal" href="#inner-navigate">Inner  <code class="docutils literal"><span class="pre">navigate</span></code></a></li>
+<li><a class="reference internal" href="#inner-receivecontextresponse">Inner  <code class="docutils literal"><span class="pre">receiveContextResponse</span></code></a></li>
+<li><a class="reference internal" href="#inner-contenttypeisjson">Inner  <code class="docutils literal"><span class="pre">contentTypeIsJSON</span></code></a></li>
+<li><a class="reference internal" href="#inner-scrollto">Inner  <code class="docutils literal"><span class="pre">scrollTo</span></code></a></li>
+<li><a class="reference internal" href="#id3">Inner  <code class="docutils literal"><span class="pre">render</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#members">Members</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="module-alerts.statics.html"
-                        title="previous chapter">Object: <code class="docutils literal"><span class="pre">statics</span></code></a></p>
+  <p class="topless"><a href="module-alerts.html"
+                        title="previous chapter">Component: <code class="docutils literal"><span class="pre">alerts</span></code></a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="module-app-Timeout.html"
                         title="next chapter">Class: <code class="docutils literal"><span class="pre">Timeout</span></code></a></p>
@@ -492,7 +701,7 @@
           <a href="module-app-Timeout.html" title="Class: Timeout"
              >next</a> |</li>
         <li class="right" >
-          <a href="module-alerts.statics.html" title="Object: statics"
+          <a href="module-alerts.html" title="Component: alerts"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li> 

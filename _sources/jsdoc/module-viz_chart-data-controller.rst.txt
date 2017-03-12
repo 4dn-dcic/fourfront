@@ -4,12 +4,18 @@ Object: ``viz/chart-data-controller``
 
 
 
+
+This is a utility to manage charts' experiment data in one global place and distribute to charts throughout UI.
+The mechanism for this is roughly diagrammed here:
+
+.. image:: https://hms-dbmi.slack.com/files/alexkb/F4C8KQKMM/chartdatacontroller.png
+
+
 .. contents:: Local Navigation
    :local:
 
-
-Children
-========
+1 Children
+==========
 
 .. toctree::
    :maxdepth: 3
@@ -17,18 +23,6 @@ Children
    module-viz_chart-data-controller.Provider
    
 
-
-Description
-===========
-
-This is a utility to manage charts' experiment data in one global place and distribute to charts throughout UI.
-The mechanism for this is roughly diagrammed [here]{@link https://hms-dbmi.slack.com/files/alexkb/F4C8KQKMM/chartdatacontroller.png } .
-
-DPROPERTIES 
-
-
-
-PROPS
 
 
 
@@ -45,8 +39,8 @@ Functions
 .. _module-viz_chart-data-controller.initialize:
 
 
-``initialize``
---------------
+Static Public ``initialize``
+----------------------------
 
 This function must be called before this component is used anywhere else.
 
@@ -57,30 +51,36 @@ This function must be called before this component is used anywhere else.
     :param function updateStats: Callback for updating QuickInfoBar, for example, with current experiments, experiment_sets, and files counts.
     :param function callback: Optional callback for after initializing.
     :param number|boolean resync: How often to resync data, in ms, if window is active, for e.g. if submitters submitted new data while user is browsing.
-    :return undefined: This function must be called before this component is used anywhere else.
+    :returns undefined: This function must be called before this component is used anywhere else.
     
+
+chart-data-controller.js:310
+
 
 
 .. _module-viz_chart-data-controller.isInitialized:
 
 
-``isInitialized``
------------------
+Static Public ``isInitialized``
+-------------------------------
 
 Whether component has been initialized and may be used.
 
 .. js:function:: isInitialized()
 
     
-    :return boolean: True if initialized.
+    :returns boolean: True if initialized.
     
+
+chart-data-controller.js:385
+
 
 
 .. _module-viz_chart-data-controller.registerUpdateCallback:
 
 
-``registerUpdateCallback``
---------------------------
+Static Public ``registerUpdateCallback``
+----------------------------------------
 
 For React components to register an "update me" function, i.e. forceUpdate,
 to be called when new experiments/filteredExperiments has finished loading from back-end.
@@ -90,15 +90,18 @@ to be called when new experiments/filteredExperiments has finished loading from 
     
     :param function callback: Function to be called upon loading 'experiments' or 'all experiments'. If registering from a React component, should include this.forceUpdate() or this.setState(..).
     :param string uniqueID: A unique identifier for the registered callback, to be used for removal or overwrites.
-    :return function: A function which may be called to unregister the callback, in lieu of ChartDataController.unregisterUpdateCallback.
+    :returns function: A function which may be called to unregister the callback, in lieu of ChartDataController.unregisterUpdateCallback.
     
+
+chart-data-controller.js:399
+
 
 
 .. _module-viz_chart-data-controller.unregisterUpdateCallback:
 
 
-``unregisterUpdateCallback``
-----------------------------
+Static Public ``unregisterUpdateCallback``
+------------------------------------------
 
 The opposite of registerUpdateCallback.
 
@@ -106,15 +109,18 @@ The opposite of registerUpdateCallback.
 
     
     :param string uniqueID: ID given alongside initially-registered callback.
-    :return undefined: The opposite of registerUpdateCallback.
+    :returns undefined: The opposite of registerUpdateCallback.
     
+
+chart-data-controller.js:417
+
 
 
 .. _module-viz_chart-data-controller.registerLoadStartCallback:
 
 
-``registerLoadStartCallback``
------------------------------
+Static Public ``registerLoadStartCallback``
+-------------------------------------------
 
 Same as registerUpdateCallback but for when starting AJAX fetch of data.
 
@@ -123,15 +129,18 @@ Same as registerUpdateCallback but for when starting AJAX fetch of data.
     
     :param function callback: Function to be called upon starting AJAX load.
     :param string uniqueID: @see ChartDataController.registerUpdateCallback().
-    :return function: Function for unregistering callback which may be used in lieu of @see ChartDataController.unregisterUpdateCallback().
+    :returns function: Function for unregistering callback which may be used in lieu of @see ChartDataController.unregisterUpdateCallback().
     
+
+chart-data-controller.js:431
+
 
 
 .. _module-viz_chart-data-controller.unregisterLoadStartCallback:
 
 
-``unregisterLoadStartCallback``
--------------------------------
+Static Public ``unregisterLoadStartCallback``
+---------------------------------------------
 
 The opposite of registerLoadStartCallback.
 
@@ -139,30 +148,36 @@ The opposite of registerLoadStartCallback.
 
     
     :param string uniqueID: ID given alongside initially-registered callback.
-    :return undefined: The opposite of registerLoadStartCallback.
+    :returns undefined: The opposite of registerLoadStartCallback.
     
+
+chart-data-controller.js:448
+
 
 
 .. _module-viz_chart-data-controller.getState:
 
 
-``getState``
-------------
+Static Public ``getState``
+--------------------------
 
 Get current state. Similar to Redux's store.getState().
 
 .. js:function:: getState()
 
     
-    :return Object: Get current state. Similar to Redux's store.getState().
+    :returns Object: Get current state. Similar to Redux's store.getState().
     
+
+chart-data-controller.js:460
+
 
 
 .. _module-viz_chart-data-controller.setState:
 
 
-``setState``
-------------
+Static Private ``setState``
+---------------------------
 
 Analogous to a component's setState. Updates the private state of
 ChartDataController and notifies update callbacks if experiments or filtered
@@ -173,15 +188,18 @@ experiments have changed.
     
     :param Object updatedState: New or updated state object to save.
     :param function callback: Optional callback function.
-    :return *: Result of callback, or undefined.
+    :returns *: Result of callback, or undefined.
     
+
+chart-data-controller.js:473
+
 
 
 .. _module-viz_chart-data-controller.sync:
 
 
-``sync``
---------
+Static Public ``sync``
+----------------------
 
 Fetch new data from back-end regardless of expSetFilters state, e.g. for when session has changed (@see App.prototype.componentDidUpdate()).
 
@@ -189,29 +207,532 @@ Fetch new data from back-end regardless of expSetFilters state, e.g. for when se
 
     
     :param function callback: Function to be called after sync complete.
-    :return undefined: Fetch new data from back-end regardless of expSetFilters state, e.g. for when session has changed (@see App.prototype.componentDidUpdate()).
+    :returns undefined: Fetch new data from back-end regardless of expSetFilters state, e.g. for when session has changed (@see App.prototype.componentDidUpdate()).
     
 
+chart-data-controller.js:499
 
 
-.. _module-viz_chart-data-controller.updateStats:
+
+.. _module-viz_chart-data-controller.handleUpdatedFilters:
 
 
-``updateStats``
----------------
+Static Private ``handleUpdatedFilters``
+---------------------------------------
 
-Update stats in top left corner of page, if updateState param was passed in during initialization.
+Internally used to either fetch new filtered experiments or clear them, according to state of expSetFilters from Redux store.
+Called by listener to Redux store.
 
-.. js:function:: updateStats()
+.. js:function:: handleUpdatedFilters(expSetFilters, callback)
 
     
-    :return undefined: Update stats in top left corner of page, if updateState param was passed in during initialization.
+    :param Object expSetFilters: (Newly-updated) Experiment Set Filters in Redux store.
+    :param function callback: Callback function to call after updating state.
+    :returns undefined: Nothing
     
 
+chart-data-controller.js:516
 
 
 
 
+.. _module-viz_chart-data-controller.fetchUnfilteredAndFilteredExperiments:
+
+
+Static Private ``fetchUnfilteredAndFilteredExperiments``
+--------------------------------------------------------
+
+Used internally to fetch both all & filtered experiments then calls ChartDataController.setState({ experiments, filteredExperiments }, callback).
+Called by ChartDataController.sync() internally.
+
+.. js:function:: fetchUnfilteredAndFilteredExperiments([reduxStoreState][, callback])
+
+    
+    :param Object reduxStoreState: Current Redux store state to get expSetFilters and current href from. If not provided, gets it from store.getState().
+    :param function callback: Optional callback function to call after setting updated state.
+    :returns undefined: Nothing
+    
+
+chart-data-controller.js:578
+
+
+
+.. _module-viz_chart-data-controller.fetchAndSetUnfilteredExperiments:
+
+
+Static Private ``fetchAndSetUnfilteredExperiments``
+---------------------------------------------------
+
+Like ChartDataController.fetchUnfilteredAndFilteredExperiments(), but only to get all experiments.
+Not actually used, but could be, for something.
+
+.. js:function:: fetchAndSetUnfilteredExperiments([callback])
+
+    
+    :param function callback: Optional callback function.
+    :returns undefined: Nothing
+    
+
+chart-data-controller.js:633
+
+
+
+.. _module-viz_chart-data-controller.fetchAndSetFilteredExperiments:
+
+
+Static Private ``fetchAndSetFilteredExperiments``
+-------------------------------------------------
+
+Like ChartDataController.fetchUnfilteredAndFilteredExperiments(), but only to get filtered/selected experiments according to expSetFilters from Redux store.
+
+.. js:function:: fetchAndSetFilteredExperiments([callback])
+
+    
+    :param function callback: Optional callback function.
+    :returns undefined: Nothing
+    
+
+chart-data-controller.js:654
+
+
+
+.. _module-viz_chart-data-controller.getFieldsRequiredURLQueryPart:
+
+
+Static Private ``getFieldsRequiredURLQueryPart``
+------------------------------------------------
+
+Internally used to help form query part of URL.
+Adds 'field=<field.name.1>&...<field.name.n>' for each field required for chart(s).
+
+.. js:function:: getFieldsRequiredURLQueryPart([fields])
+
+    
+    :param Array.<string> fields: Fields to fetch from back-end search result(s).
+    :returns string: Part of URL query.
+    
+
+chart-data-controller.js:680
+
+
+
+.. _module-viz_chart-data-controller.getFilteredContextHref:
+
+
+Static Private ``getFilteredContextHref``
+-----------------------------------------
+
+Internally used to generate a URL from current href and expSetFilters from Redux store to fetch filtered/selected experiments from back-end.
+If no 'search'-compatible href is set in Redux store, '/browse/' is used.
+
+.. js:function:: getFilteredContextHref([expSetFilters][, href])
+
+    
+    :param Object expSetFilters: Current Experiment Set Filters in Redux store.
+    :param string href: Current href from Redux store.
+    :returns string: URL for fetching filtered experiments/sets from back-end.
+    
+
+chart-data-controller.js:696
+
+
+
+
+Members
+=======
+
+
+
+
+.. _module-viz_chart-data-controller.title:
+
+``title``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.title:
+
+``title``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.title:
+
+``title``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.title:
+
+``title``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.title:
+
+``title``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.title:
+
+``title``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.aggregatefield:
+
+``aggregatefield``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.isFacet:
+
+``isFacet``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.size:
+
+``size``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.title:
+
+``title``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.title:
+
+``title``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.title:
+
+``title``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.title:
+
+``title``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.aggregatefield:
+
+``aggregatefield``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.isFacet:
+
+``isFacet``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.size:
+
+``size``
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.resync:
+
+``resync``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.filteredExperiments:
+
+``filteredExperiments``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.experiment_sets:
+
+``experiment_sets``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.experiments:
+
+``experiments``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.files:
+
+``files``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.current:
+
+``current``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.current:
+
+``current``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.total:
+
+``total``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.reduxStoreState:
+
+``reduxStoreState``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.experiments:
+
+``experiments``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.filteredExperiments:
+
+``filteredExperiments``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.experiments:
+
+``experiments``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.filteredExperiments:
+
+``filteredExperiments``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.experiments:
+
+``experiments``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.filteredExperiments:
+
+``filteredExperiments``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.expSetFilters:
+
+``expSetFilters``
+
+
+
+
+
+
+.. _module-viz_chart-data-controller.href:
+
+``href``
 
 
 

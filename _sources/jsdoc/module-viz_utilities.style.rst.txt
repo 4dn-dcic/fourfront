@@ -7,25 +7,14 @@ Namespace: ``style``
 
 Member Of :doc:`module-viz_utilities`
 
+
+
+
+
 .. contents:: Local Navigation
    :local:
 
 
-Children
-========
-
-.. toctree::
-   :maxdepth: 3
-   
-   
-
-
-
-DPROPERTIES 
-
-
-
-PROPS
 
 
 
@@ -38,8 +27,8 @@ Functions
 .. _module-viz_utilities.style.translate3d:
 
 
-``translate3d``
----------------
+Static  ``translate3d``
+-----------------------
 
 
 
@@ -48,12 +37,15 @@ Functions
     
     
 
+utilities.js:239
+
+
 
 .. _module-viz_utilities.style.translate:
 
 
-``translate``
--------------
+Static  ``translate``
+---------------------
 
 
 
@@ -62,12 +54,15 @@ Functions
     
     
 
+utilities.js:244
+
+
 
 .. _module-viz_utilities.style.rotate3d:
 
 
-``rotate3d``
-------------
+Static  ``rotate3d``
+--------------------
 
 
 
@@ -78,12 +73,15 @@ Functions
     :param string|Array.<string>|Object axes: Axes around which to rotate.
     
 
+utilities.js:253
+
+
 
 .. _module-viz_utilities.style.scale3d:
 
 
-``scale3d``
------------
+Static  ``scale3d``
+-------------------
 
 
 
@@ -91,6 +89,9 @@ Functions
 
     
     
+
+utilities.js:259
+
 
 
 

@@ -28,7 +28,7 @@
     <script type="text/javascript" src="../_static/sidebar.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Component: ZoomCursor" href="module-viz_components.ZoomCursor.html" />
+    <link rel="next" title="Component: Field" href="module-viz_components.Legend.Field.html" />
     <link rel="prev" title="Module: viz/components" href="module-viz_components.html" /> 
   </head>
   <body role="document">
@@ -42,7 +42,7 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="module-viz_components.ZoomCursor.html" title="Component: ZoomCursor"
+          <a href="module-viz_components.Legend.Field.html" title="Component: Field"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="module-viz_components.html" title="Module: viz/components"
@@ -61,23 +61,171 @@
   <div class="section" id="component-legend">
 <span id="module-viz-components-legend"></span><h1>Component: <code class="docutils literal"><span class="pre">Legend</span></code><a class="headerlink" href="#component-legend" title="Permalink to this headline">¶</a></h1>
 <p>Member Of <a class="reference internal" href="module-viz_components.html"><span class="doc">Module: viz/components</span></a></p>
+<p>Legend components to use alongside Charts. Best to include within a UIControlsWrapper, and place next to chart, utilizing the same data.</p>
 <div class="contents local topic" id="local-navigation">
 <p class="topic-title first">Local Navigation</p>
 <ul class="simple">
-<li><a class="reference internal" href="#children" id="id1">Children</a></li>
-<li><a class="reference internal" href="#description" id="id2">Description</a></li>
+<li><a class="reference internal" href="#children" id="id1">2 Children</a></li>
+<li><a class="reference internal" href="#props" id="id2">Props</a><ul>
+<li><a class="reference internal" href="#fields" id="id3"><code class="docutils literal"><span class="pre">fields</span></code></a></li>
+<li><a class="reference internal" href="#includefieldtitle" id="id4"><code class="docutils literal"><span class="pre">includeFieldTitle</span></code></a></li>
+<li><a class="reference internal" href="#classname" id="id5"><code class="docutils literal"><span class="pre">className</span></code></a></li>
+<li><a class="reference internal" href="#width" id="id6"><code class="docutils literal"><span class="pre">width</span></code></a></li>
+<li><a class="reference internal" href="#title" id="id7"><code class="docutils literal"><span class="pre">title</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#functions" id="id8">Functions</a><ul>
+<li><a class="reference internal" href="#static-experimentsandfieldstolegenddata" id="id9">Static  <code class="docutils literal"><span class="pre">experimentsAndFieldsToLegendData</span></code></a></li>
+<li><a class="reference internal" href="#static-experimentsandfieldtolegenddataitem" id="id10">Static  <code class="docutils literal"><span class="pre">experimentsAndFieldToLegendDataItem</span></code></a></li>
+<li><a class="reference internal" href="#static-parsefieldnames" id="id11">Static  <code class="docutils literal"><span class="pre">parseFieldNames</span></code></a></li>
+<li><a class="reference internal" href="#instance-private-getdefaultprops" id="id12">Instance Private <code class="docutils literal"><span class="pre">getDefaultProps</span></code></a></li>
+<li><a class="reference internal" href="#instance-private-render" id="id13">Instance Private <code class="docutils literal"><span class="pre">render</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
 <div class="section" id="children">
-<h2><a class="toc-backref" href="#id1">Children</a><a class="headerlink" href="#children" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id1">2 Children</a><a class="headerlink" href="#children" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="module-viz_components.Legend.Field.html">Component: <code class="docutils literal"><span class="pre">Field</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="module-viz_components.Legend.Field.html#props">Props</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="module-viz_components.Legend.Field.html#field"><code class="docutils literal"><span class="pre">field</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-viz_components.Legend.Field.html#includefieldtitle"><code class="docutils literal"><span class="pre">includeFieldTitle</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-viz_components.Legend.Field.html#terms"><code class="docutils literal"><span class="pre">terms</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="module-viz_components.Legend.Field.html#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="module-viz_components.Legend.Field.html#instance-private-getdefaultprops">Instance Private <code class="docutils literal"><span class="pre">getDefaultProps</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-viz_components.Legend.Field.html#instance-private-render">Instance Private <code class="docutils literal"><span class="pre">render</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="module-viz_components.Legend.Term.html">Component: <code class="docutils literal"><span class="pre">Term</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="module-viz_components.Legend.Term.html#props">Props</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="module-viz_components.Legend.Term.html#field"><code class="docutils literal"><span class="pre">field</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-viz_components.Legend.Term.html#term"><code class="docutils literal"><span class="pre">term</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-viz_components.Legend.Term.html#color"><code class="docutils literal"><span class="pre">color</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="module-viz_components.Legend.Term.html#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="module-viz_components.Legend.Term.html#instance-private-render">Instance Private <code class="docutils literal"><span class="pre">render</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 </div>
 </div>
-<div class="section" id="description">
-<h2><a class="toc-backref" href="#id2">Description</a><a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
-<p>Legend components to use alongside Charts. Best to include within a UIControlsWrapper, and place next to chart, utilizing the same data.</p>
-<p>DPROPERTIES</p>
-<p>PROPS</p>
+<div class="section" id="props">
+<h2><a class="toc-backref" href="#id2">Props</a><a class="headerlink" href="#props" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="fields">
+<h3><a class="toc-backref" href="#id3"><code class="docutils literal"><span class="pre">fields</span></code></a><a class="headerlink" href="#fields" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>Array.&lt;Object&gt;</strong></p>
+<p>List of objects containing at least &#8216;field&#8217;, in object dot notation. Ideally should also have &#8216;name&#8217;.</p>
+</div>
+<div class="section" id="includefieldtitle">
+<h3><a class="toc-backref" href="#id4"><code class="docutils literal"><span class="pre">includeFieldTitle</span></code></a><a class="headerlink" href="#includefieldtitle" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>boolean</strong></p>
+<p>Whether to show field title at top of terms.</p>
+</div>
+<div class="section" id="classname">
+<h3><a class="toc-backref" href="#id5"><code class="docutils literal"><span class="pre">className</span></code></a><a class="headerlink" href="#classname" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>string</strong></p>
+<p>Optional className to add to Legend&#8217;s outermost div container.</p>
+</div>
+<div class="section" id="width">
+<h3><a class="toc-backref" href="#id6"><code class="docutils literal"><span class="pre">width</span></code></a><a class="headerlink" href="#width" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>number</strong></p>
+<p>How wide should the legend container element (&lt;div&gt;) be.</p>
+</div>
+<div class="section" id="title">
+<h3><a class="toc-backref" href="#id7"><code class="docutils literal"><span class="pre">title</span></code></a><a class="headerlink" href="#title" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>string</strong> | <strong>Element</strong> | <strong>Component</strong></p>
+<p>Optional title to display at top of fields.</p>
+</div>
+</div>
+<div class="section" id="functions">
+<h2><a class="toc-backref" href="#id8">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="static-experimentsandfieldstolegenddata">
+<span id="undefined-experimentsandfieldstolegenddata"></span><h3><a class="toc-backref" href="#id9">Static  <code class="docutils literal"><span class="pre">experimentsAndFieldsToLegendData</span></code></a><a class="headerlink" href="#static-experimentsandfieldstolegenddata" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="experimentsAndFieldsToLegendData">
+<code class="descname">experimentsAndFieldsToLegendData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#experimentsAndFieldsToLegendData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Legend.js:95</p>
+</div>
+<div class="section" id="static-experimentsandfieldtolegenddataitem">
+<span id="undefined-experimentsandfieldtolegenddataitem"></span><h3><a class="toc-backref" href="#id10">Static  <code class="docutils literal"><span class="pre">experimentsAndFieldToLegendDataItem</span></code></a><a class="headerlink" href="#static-experimentsandfieldtolegenddataitem" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="experimentsAndFieldToLegendDataItem">
+<code class="descname">experimentsAndFieldToLegendDataItem</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#experimentsAndFieldToLegendDataItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Legend.js:105</p>
+</div>
+<div class="section" id="static-parsefieldnames">
+<span id="undefined-parsefieldnames"></span><h3><a class="toc-backref" href="#id11">Static  <code class="docutils literal"><span class="pre">parseFieldNames</span></code></a><a class="headerlink" href="#static-parsefieldnames" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="parseFieldNames">
+<code class="descname">parseFieldNames</code><span class="sig-paren">(</span><em>fields</em>, <em>schemas</em><span class="sig-paren">)</span><a class="headerlink" href="#parseFieldNames" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>fields</strong> (<em>Array.&lt;Object&gt;</em>) &#8211; List of field objects, each containing at least a title, name, or field.</li>
+<li><strong>schemas</strong> (<em>Object</em>) &#8211; Schemas object passed down from app.state.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns Array.&lt;Object&gt;:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">Modified field objects.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Legend.js:147</p>
+</div>
+<div class="section" id="instance-private-getdefaultprops">
+<span id="undefined-getdefaultprops"></span><h3><a class="toc-backref" href="#id12">Instance Private <code class="docutils literal"><span class="pre">getDefaultProps</span></code></a><a class="headerlink" href="#instance-private-getdefaultprops" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="getDefaultProps">
+<code class="descname">getDefaultProps</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getDefaultProps" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns String:</th><td class="field-body">Default props: <cite>{ &#8216;position&#8217; : &#8216;absolute&#8217;, &#8216;fields&#8217; : [], &#8216;className&#8217; : string, &#8216;width&#8217; : null, &#8216;title&#8217; : null, &#8216;id&#8217; : null }</cite></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Legend.js:166</p>
+</div>
+<div class="section" id="instance-private-render">
+<span id="undefined-render"></span><h3><a class="toc-backref" href="#id13">Instance Private <code class="docutils literal"><span class="pre">render</span></code></a><a class="headerlink" href="#instance-private-render" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="render">
+<code class="descname">render</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#render" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Returns Element:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">Div element containing props.title and list of <a class="reference external" href="mailto:{&#37;&#52;&#48;link">{<span>&#64;</span>link</a> module:viz/components.Legend.Field} components.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Legend.js:183</p>
+</div>
 </div>
 </div>
 
@@ -90,8 +238,23 @@
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Component: <code class="docutils literal"><span class="pre">Legend</span></code></a><ul>
-<li><a class="reference internal" href="#children">Children</a></li>
-<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#children">2 Children</a></li>
+<li><a class="reference internal" href="#props">Props</a><ul>
+<li><a class="reference internal" href="#fields"><code class="docutils literal"><span class="pre">fields</span></code></a></li>
+<li><a class="reference internal" href="#includefieldtitle"><code class="docutils literal"><span class="pre">includeFieldTitle</span></code></a></li>
+<li><a class="reference internal" href="#classname"><code class="docutils literal"><span class="pre">className</span></code></a></li>
+<li><a class="reference internal" href="#width"><code class="docutils literal"><span class="pre">width</span></code></a></li>
+<li><a class="reference internal" href="#title"><code class="docutils literal"><span class="pre">title</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#static-experimentsandfieldstolegenddata">Static  <code class="docutils literal"><span class="pre">experimentsAndFieldsToLegendData</span></code></a></li>
+<li><a class="reference internal" href="#static-experimentsandfieldtolegenddataitem">Static  <code class="docutils literal"><span class="pre">experimentsAndFieldToLegendDataItem</span></code></a></li>
+<li><a class="reference internal" href="#static-parsefieldnames">Static  <code class="docutils literal"><span class="pre">parseFieldNames</span></code></a></li>
+<li><a class="reference internal" href="#instance-private-getdefaultprops">Instance Private <code class="docutils literal"><span class="pre">getDefaultProps</span></code></a></li>
+<li><a class="reference internal" href="#instance-private-render">Instance Private <code class="docutils literal"><span class="pre">render</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -100,8 +263,8 @@
   <p class="topless"><a href="module-viz_components.html"
                         title="previous chapter">Module: <code class="docutils literal"><span class="pre">viz/components</span></code></a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="module-viz_components.ZoomCursor.html"
-                        title="next chapter">Component: <code class="docutils literal"><span class="pre">ZoomCursor</span></code></a></p>
+  <p class="topless"><a href="module-viz_components.Legend.Field.html"
+                        title="next chapter">Component: <code class="docutils literal"><span class="pre">Field</span></code></a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -133,7 +296,7 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="module-viz_components.ZoomCursor.html" title="Component: ZoomCursor"
+          <a href="module-viz_components.Legend.Field.html" title="Component: Field"
              >next</a> |</li>
         <li class="right" >
           <a href="module-viz_components.html" title="Module: viz/components"

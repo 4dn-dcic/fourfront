@@ -4,12 +4,19 @@ Component: ``viz/BarPlotChart``
 
 
 
+
+Component for BarPlotChart. 
+Contains chart and labels only -- no controls.
+To add controls, wrap the chart in BarPlotChart.UIControlsWrapper, which will feed its state as props to BarPlotChart and has UI components
+for adjusting its state to select Charting options.
+Use BarPlotChart (or UIControlsWrapper, if is wrapping BarPlotChart) as child of ChartDataController.provider, which will feed props.experiments and props.filteredExperiments.
+
+
 .. contents:: Local Navigation
    :local:
 
-
-Children
-========
+2 Children
+==========
 
 .. toctree::
    :maxdepth: 3
@@ -18,21 +25,6 @@ Children
    module-viz_BarPlotChart.UIControlsWrapper
    
 
-
-Description
-===========
-
-Component for BarPlotChart. 
-Contains chart and labels only -- no controls.
-To add controls, wrap the chart in BarPlotChart.UIControlsWrapper, which will feed its state as props to BarPlotChart and has UI components
-for adjusting its state to select Charting options.
-Use BarPlotChart (or UIControlsWrapper, if is wrapping BarPlotChart) as child of ChartDataController.provider, which will feed props.experiments and props.filteredExperiments.
-
-DPROPERTIES 
-
-
-
-PROPS
 
 
 
@@ -49,31 +41,37 @@ Functions
 .. _module-viz_BarPlotChart.width:
 
 
-``width``
----------
+Inner  ``width``
+----------------
 
 
 
 .. js:function:: width()
 
     
-    :return width(): props.width or width of refs.container, if mounted.
+    :returns width(): props.width or width of refs.container, if mounted.
     
+
+BarPlotChart.js:869
+
 
 
 .. _module-viz_BarPlotChart.height:
 
 
-``height``
-----------
+Inner  ``height``
+-----------------
 
 
 
 .. js:function:: height()
 
     
-    :return height(): props.height or height of refs.container, if mounted.
+    :returns height(): props.height or height of refs.container, if mounted.
     
+
+BarPlotChart.js:881
+
 
 
 
@@ -82,8 +80,8 @@ Functions
 .. _module-viz_BarPlotChart.getLegendData:
 
 
-``getLegendData``
------------------
+Inner  ``getLegendData``
+------------------------
 
 Call this function, e.g. through refs, to grab fields and terms for a/the Legend component.
 Internally, runs BarPlotChart.barDataToLegendData().
@@ -91,30 +89,36 @@ Internally, runs BarPlotChart.barDataToLegendData().
 .. js:function:: getLegendData()
 
     
-    :return Array|null: List of fields containing terms. For use by legend component.
+    :returns Array|null: List of fields containing terms. For use by legend component.
     
+
+BarPlotChart.js:975
+
 
 
 .. _module-viz_BarPlotChart.getTopLevelField:
 
 
-``getTopLevelField``
---------------------
+Inner  ``getTopLevelField``
+---------------------------
 
 Get the for-bar-filled field object used for the X axis.
 
 .. js:function:: getTopLevelField()
 
     
-    :return Object: Top-level field containing terms.
+    :returns Object: Top-level field containing terms.
     
+
+BarPlotChart.js:985
+
 
 
 .. _module-viz_BarPlotChart.renderAllExperimentsSilhouette:
 
 
-``renderAllExperimentsSilhouette``
-----------------------------------
+Inner  ``renderAllExperimentsSilhouette``
+-----------------------------------------
 
 Used to help generate "highlighted" selected bars against the output of this: the "all experiments" bars silhoutte.
 Used conditionally in BarPlotChart.render to render clones of the BarChart behind the primary bars,
@@ -126,15 +130,18 @@ using 'all experiments' data instead of the 'filtered' or 'selected' experiments
     :param number width: Width of available chart drawing area.
     :param number height: Height of available chart drawing area.
     :param Object styleOpts: Style options for the chart, including gap between bars, maximum bar width, etc.
-    :return Object: "All Experiments" bars silhouttes, wrapped in an object also containing barData for all experiments.
+    :returns Object: "All Experiments" bars silhouttes, wrapped in an object also containing barData for all experiments.
     
+
+BarPlotChart.js:1321
+
 
 
 .. _module-viz_BarPlotChart.render:
 
 
-``render``
-----------
+Inner  ``render``
+-----------------
 
 Parses props.experiments and/or props.filterExperiments, depending on props.showType, aggregates experiments into fields,
 generates data for chart bars, and then draws and returns chart wrapped in a div React element.
@@ -142,8 +149,1334 @@ generates data for chart bars, and then draws and returns chart wrapped in a div
 .. js:function:: render()
 
     
-    :return React.Element: - Chart markup wrapped in a div.
+    :returns React.Element: - Chart markup wrapped in a div.
     
+
+BarPlotChart.js:1366
+
+
+
+
+Members
+=======
+
+
+.. _module-viz_BarPlotChart.titleMap:
+
+``titleMap``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.availableFields1:
+
+``availableFields1``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.title:
+
+``title``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.title:
+
+``title``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.title:
+
+``title``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.availableFields2:
+
+``availableFields2``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.title:
+
+``title``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.title:
+
+``title``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.legend:
+
+``legend``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.chartHeight:
+
+``chartHeight``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.fields:
+
+``fields``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.title:
+
+``title``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.title:
+
+``title``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.aggregateType:
+
+``aggregateType``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.showState:
+
+``showState``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.showState:
+
+``showState``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.title:
+
+``title``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.fields:
+
+``fields``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.showType:
+
+``showType``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.aggregateType:
+
+``aggregateType``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.aggregateType:
+
+``aggregateType``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.showState:
+
+``showState``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.newFields:
+
+``newFields``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.fields:
+
+``fields``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.newFields:
+
+``newFields``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.newFields:
+
+``newFields``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.fields:
+
+``fields``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.title:
+
+``title``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.subtitle:
+
+``subtitle``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.key:
+
+``key``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.height:
+
+``height``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.width:
+
+``width``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.width:
+
+``width``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.top:
+
+``top``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.display:
+
+``display``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.height:
+
+``height``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.minHeight:
+
+``minHeight``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.title:
+
+``title``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.name:
+
+``name``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.fields:
+
+``fields``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.fields:
+
+``fields``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.terms:
+
+``terms``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.total:
+
+``total``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.topIndex:
+
+``topIndex``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.nextIndex:
+
+``nextIndex``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.topIndex:
+
+``topIndex``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.nextIndex:
+
+``nextIndex``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.term:
+
+``term``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.term:
+
+``term``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.term:
+
+``term``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.term:
+
+``term``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.fieldIndex:
+
+``fieldIndex``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.aggrValue:
+
+``aggrValue``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.topLevelFieldTerm:
+
+``topLevelFieldTerm``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.nextLevelFieldTerm:
+
+``nextLevelFieldTerm``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.topLevelFieldTerm:
+
+``topLevelFieldTerm``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.fields[undefined]:
+
+``fields[undefined]``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.numberOfTerms:
+
+``numberOfTerms``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.topIndex:
+
+``topIndex``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.termCount:
+
+``termCount``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.height:
+
+``height``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.fields:
+
+``fields``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.gap:
+
+``gap``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.maxBarWidth:
+
+``maxBarWidth``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.maxLabelWidth:
+
+``maxLabelWidth``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.labelRotation:
+
+``labelRotation``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.labelWidth:
+
+``labelWidth``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.yAxisMaxHeight:
+
+``yAxisMaxHeight``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.offset:
+
+``offset``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.mounted:
+
+``mounted``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.mounted:
+
+``mounted``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.propTypes:
+
+``propTypes``
+
+
+
+
+experiments
+~~~~~~~~~~~
+List of all experiments, with at least fields needed to aggregate by embedded.
+
+
+filteredExperiments
+~~~~~~~~~~~~~~~~~~~
+List of selected experiments, with at least fields needed to aggregate by embedded.
+
+
+fields
+~~~~~~
+List of at least one field objects, each containing at least 'field' property in object-dot-notation.
+
+
+fields.field
+~~~~~~~~~~~~
+Field, in <code>object.dot.notation</code>.
+
+
+fields.name
+~~~~~~~~~~~
+Name of field.
+
+
+
+
+.. _module-viz_BarPlotChart.gap:
+
+``gap``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.maxBarWidth:
+
+``maxBarWidth``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.labelRotation:
+
+``labelRotation``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.labelWidth:
+
+``labelWidth``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.offset:
+
+``offset``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.top:
+
+``top``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.bottom:
+
+``bottom``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.left:
+
+``left``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.right:
+
+``right``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.experiments:
+
+``experiments``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.fields:
+
+``fields``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.useOnlyPopulatedFields:
+
+``useOnlyPopulatedFields``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.showType:
+
+``showType``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.aggregateType:
+
+``aggregateType``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.styleOptions:
+
+``styleOptions``
+
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.styleOpts:
+
+``styleOpts``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.prevBarData:
+
+``prevBarData``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.xyCoords:
+
+``xyCoords``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.xyCoords:
+
+``xyCoords``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.fill:
+
+``fill``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.styleOpts:
+
+``styleOpts``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.prevBarData:
+
+``prevBarData``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.color:
+
+``color``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.height:
+
+``height``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.width:
+
+``width``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.backgroundColor:
+
+``backgroundColor``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.labelWidth:
+
+``labelWidth``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.left:
+
+``left``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.right:
+
+``right``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.height:
+
+``height``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.bottom:
+
+``bottom``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.name:
+
+``name``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.term:
+
+``term``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.x:
+
+``x``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.opacity:
+
+``opacity``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.color:
+
+``color``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.position:
+
+``position``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.left:
+
+``left``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.right:
+
+``right``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.bottom:
+
+``bottom``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.width:
+
+``width``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.right:
+
+``right``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.height:
+
+``height``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.width:
+
+``width``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.top:
+
+``top``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.styleOpts:
+
+``styleOpts``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.component:
+
+``component``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.width:
+
+``width``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.height:
+
+``height``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.data:
+
+``data``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.allExpsBarDataContainer:
+
+``allExpsBarDataContainer``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.existing:
+
+``existing``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.removing:
+
+``removing``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.allBars:
+
+``allBars``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.allBars:
+
+``allBars``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.term:
+
+``term``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.width:
+
+``width``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.x:
+
+``x``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.height:
+
+``height``
+
+
+
+
+
+
+.. _module-viz_BarPlotChart.width:
+
+``width``
 
 
 

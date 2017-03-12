@@ -1,40 +1,77 @@
-.. _module-viz_components.Legend.Term:
+.. _undefined.Term:
 
 ===================
 Component: ``Term``
 ===================
 
 
-Member Of :doc:`module-viz_components.Legend`
+
+
+React component which represents a Term item.
+
 
 .. contents:: Local Navigation
    :local:
 
 
-Children
-========
 
-.. toctree::
-   :maxdepth: 3
-   
-   
-
-
-Description
-===========
-
-React component which represents a Term item.
-
-DPROPERTIES 
-
-[object Object],[object Object],[object Object]
-
-PROPS
+Props
+=====
 
 
 
 
+``field``
+---------
 
+Type: **string**
+
+.. js:property:: field
+
+Name of field to which this term belongs, in object-dot-notation.
+
+
+
+``term``
+--------
+
+Type: **string**
+
+.. js:property:: term
+
+Name of term.
+
+
+
+``color``
+---------
+
+Type: **string** | **Object**
+
+.. js:property:: color
+
+Color to show next to term, should be string or RGBColor object.
+
+Functions
+=========
+
+
+
+.. _module-viz_components.Legend.Term.render:
+
+
+Instance Private ``render``
+---------------------------
+
+
+
+.. js:function:: render()
+
+    
+    :returns Element: A div element containing term name & color patch.
+    
+
+Legend.js:74
 
 
 

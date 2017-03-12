@@ -7,25 +7,14 @@ Object: ``statics``
 
 Member Of :doc:`module-viz_BarPlotChart`
 
+
+
+
+
 .. contents:: Local Navigation
    :local:
 
 
-Children
-========
-
-.. toctree::
-   :maxdepth: 3
-   
-   
-
-
-
-DPROPERTIES 
-
-
-
-PROPS
 
 
 
@@ -38,8 +27,8 @@ Functions
 .. _module-viz_BarPlotChart.statics.genChartData:
 
 
-``genChartData``
-----------------
+Static  ``genChartData``
+------------------------
 
 Entrypoint for aggregation. 
 First, counts up terms per field from experiments for field in supplied 'fields' param array. Count is adjusted depending on if aggregating experiments, experiment_sets, or files.
@@ -56,8 +45,11 @@ second field with multiple terms to use as the secondary field.
     :param string aggregate: What to aggregate. Can be 'experiments', 'experiment_sets', or 'files'.
     :param string experimentsOrSets: Deprecated. Whether chart is fed experiments or experiment_sets.
     :param boolean useOnlyPopulatedFields: If true, will try to only select fields which have multiple terms to visualize.
-    :return Array: - Array of fields, now containing term counts per field. One field (either the first or first populated) will have a childField with partitioned terms.
+    :returns Array: - Array of fields, now containing term counts per field. One field (either the first or first populated) will have a childField with partitioned terms.
     
+
+BarPlotChart.js:414
+
 
 
 
@@ -66,8 +58,8 @@ second field with multiple terms to use as the secondary field.
 .. _module-viz_BarPlotChart.statics.countFieldTerm:
 
 
-``countFieldTerm``
-------------------
+Static  ``countFieldTerm``
+--------------------------
 
 
 
@@ -78,15 +70,18 @@ second field with multiple terms to use as the secondary field.
     :param string|Array.<string> term: A string or array of strings denoting terms.
     :param boolean updateTotal: Whether to update fieldObj.total property as well.
     :param number countIncrease: Amount to increase count for term by.
-    :return undefined: 
+    :returns undefined: 
     
+
+BarPlotChart.js:521
+
 
 
 .. _module-viz_BarPlotChart.statics.getTermsForFieldsFromExperiment:
 
 
-``getTermsForFieldsFromExperiment``
------------------------------------
+Static  ``getTermsForFieldsFromExperiment``
+-------------------------------------------
 
 
 
@@ -95,8 +90,11 @@ second field with multiple terms to use as the secondary field.
     
     :param Array fields: List of field objects.
     :param Object exp: Experiment to get terms (field values) from to pair with fields.
-    :return Array: Array of pairs containing field key (index 0) and term (index 1)
+    :returns Array: Array of pairs containing field key (index 0) and term (index 1)
     
+
+BarPlotChart.js:556
+
 
 
 
@@ -104,8 +102,8 @@ second field with multiple terms to use as the secondary field.
 .. _module-viz_BarPlotChart.statics.genChartBarDims:
 
 
-``genChartBarDims``
--------------------
+Static  ``genChartBarDims``
+---------------------------
 
 Return an object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally.
 
@@ -120,15 +118,18 @@ Return an object containing bar dimensions for first field which has more than 1
     :param Object styleOpts: Style settings for chart which may contain chart offsets (for axes).
     :param boolean useOnlyPopulatedFields: Determine which fields to show via checking for which fields have multiple terms present.
     :param number maxValue: Maximum y-axis value. Overrides height of bars.
-    :return Object: Object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally.
+    :returns Object: Object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally.
     
+
+BarPlotChart.js:693
+
 
 
 .. _module-viz_BarPlotChart.statics.barDataToLegendData:
 
 
-``barDataToLegendData``
------------------------
+Static  ``barDataToLegendData``
+-------------------------------
 
 Deprecated. Convert barData to array of field objects to be consumed by Legend React component.
 
@@ -137,23 +138,29 @@ Deprecated. Convert barData to array of field objects to be consumed by Legend R
     
     :param Object barData: Data representing bars and their subdivisions.
     :param Object schemas: Schemas to get field names from.
-    :return Array: - Fields with terms and colors for those terms.
+    :returns Array: - Fields with terms and colors for those terms.
     
+
+BarPlotChart.js:777
+
 
 
 .. _module-viz_BarPlotChart.statics.getDefaultStyleOpts:
 
 
-``getDefaultStyleOpts``
------------------------
+Static  ``getDefaultStyleOpts``
+-------------------------------
 
 
 
 .. js:function:: getDefaultStyleOpts()
 
     
-    :return Object: Default style options for chart. Should suffice most of the time.
+    :returns Object: Default style options for chart. Should suffice most of the time.
     
+
+BarPlotChart.js:797
+
 
 
 

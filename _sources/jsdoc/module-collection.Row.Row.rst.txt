@@ -7,31 +7,48 @@ Class: ``Row``
 
 Member Of :doc:`module-collection.Row`
 
+
+
+
+
 .. contents:: Local Navigation
    :local:
 
 
-Children
-========
-
-.. toctree::
-   :maxdepth: 3
-   
-   
-
-
-
-DPROPERTIES 
-
-
-
-PROPS
 
 
 
 
 
 
+
+
+
+Members
+=======
+
+
+.. _module-collection.Row.Row.item:
+
+``item``
+
+
+
+
+
+
+.. _module-collection.Row.Row.cells:
+
+``cells``
+
+
+
+
+
+
+.. _module-collection.Row.Row.text:
+
+``text``
 
 
 

@@ -7,34 +7,175 @@ Component: ``Legend``
 
 Member Of :doc:`module-viz_components`
 
+
+Legend components to use alongside Charts. Best to include within a UIControlsWrapper, and place next to chart, utilizing the same data.
+
+
 .. contents:: Local Navigation
    :local:
 
-
-Children
-========
+2 Children
+==========
 
 .. toctree::
    :maxdepth: 3
    
+   module-viz_components.Legend.Field
+   module-viz_components.Legend.Term
    
 
 
-Description
-===========
-
-Legend components to use alongside Charts. Best to include within a UIControlsWrapper, and place next to chart, utilizing the same data.
-
-DPROPERTIES 
-
-
-
-PROPS
+Props
+=====
 
 
 
 
+``fields``
+----------
 
+Type: **Array.<Object>**
+
+.. js:property:: fields
+
+List of objects containing at least 'field', in object dot notation. Ideally should also have 'name'.
+
+
+
+``includeFieldTitle``
+---------------------
+
+Type: **boolean**
+
+.. js:property:: includeFieldTitle
+
+Whether to show field title at top of terms.
+
+
+
+``className``
+-------------
+
+Type: **string**
+
+.. js:property:: className
+
+Optional className to add to Legend's outermost div container.
+
+
+
+``width``
+---------
+
+Type: **number**
+
+.. js:property:: width
+
+How wide should the legend container element (<div>) be.
+
+
+
+``title``
+---------
+
+Type: **string** | **Element** | **Component**
+
+.. js:property:: title
+
+Optional title to display at top of fields.
+
+Functions
+=========
+
+
+
+.. _undefined.experimentsAndFieldsToLegendData:
+
+
+Static  ``experimentsAndFieldsToLegendData``
+--------------------------------------------
+
+
+
+.. js:function:: experimentsAndFieldsToLegendData()
+
+    
+    
+
+Legend.js:95
+
+
+
+.. _undefined.experimentsAndFieldToLegendDataItem:
+
+
+Static  ``experimentsAndFieldToLegendDataItem``
+-----------------------------------------------
+
+
+
+.. js:function:: experimentsAndFieldToLegendDataItem()
+
+    
+    
+
+Legend.js:105
+
+
+
+.. _undefined.parseFieldNames:
+
+
+Static  ``parseFieldNames``
+---------------------------
+
+
+
+.. js:function:: parseFieldNames(fields, schemas)
+
+    
+    :param Array.<Object> fields: List of field objects, each containing at least a title, name, or field.
+    :param Object schemas: Schemas object passed down from app.state.
+    :returns Array.<Object>: Modified field objects.
+    
+
+Legend.js:147
+
+
+
+.. _undefined.getDefaultProps:
+
+
+Instance Private ``getDefaultProps``
+------------------------------------
+
+
+
+.. js:function:: getDefaultProps()
+
+    
+    :returns String: Default props: `{ 'position' : 'absolute', 'fields' : [], 'className' : string, 'width' : null, 'title' : null, 'id' : null }`
+    
+
+Legend.js:166
+
+
+
+.. _undefined.render:
+
+
+Instance Private ``render``
+---------------------------
+
+
+
+.. js:function:: render()
+
+    
+    :returns Element: Div element containing props.title and list of {@link module:viz/components.Legend.Field} components.
+    
+
+Legend.js:183
 
 
 

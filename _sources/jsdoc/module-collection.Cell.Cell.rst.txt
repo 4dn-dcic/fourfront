@@ -7,31 +7,39 @@ Class: ``Cell``
 
 Member Of :doc:`module-collection.Cell`
 
+
+
+
+
 .. contents:: Local Navigation
    :local:
 
 
-Children
-========
-
-.. toctree::
-   :maxdepth: 3
-   
-   
-
-
-
-DPROPERTIES 
-
-
-
-PROPS
 
 
 
 
 
 
+
+
+
+Members
+=======
+
+
+.. _module-collection.Cell.Cell.value:
+
+``value``
+
+
+
+
+
+
+.. _module-collection.Cell.Cell.sortable:
+
+``sortable``
 
 
 

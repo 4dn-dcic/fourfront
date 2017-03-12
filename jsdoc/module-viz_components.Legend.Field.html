@@ -27,7 +27,9 @@
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="../_static/sidebar.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Component: Term" href="module-viz_components.Legend.Term.html" />
+    <link rel="prev" title="Component: Legend" href="module-viz_components.Legend.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -39,7 +41,16 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li> 
+        <li class="right" >
+          <a href="module-viz_components.Legend.Term.html" title="Component: Term"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="module-viz_components.Legend.html" title="Component: Legend"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="module-viz_components.html" >Module: <code class="docutils literal"><span class="pre">viz/components</span></code></a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="module-viz_components.Legend.html" accesskey="U">Component: <code class="docutils literal"><span class="pre">Legend</span></code></a> &#187;</li> 
       </ul>
     </div>  
 
@@ -49,26 +60,79 @@
           <div class="body" role="main">
             
   <div class="section" id="component-field">
-<span id="module-viz-components-legend-field"></span><h1>Component: <code class="docutils literal"><span class="pre">Field</span></code><a class="headerlink" href="#component-field" title="Permalink to this headline">¶</a></h1>
-<p>Member Of <span class="xref doc">module-viz_components.Legend</span></p>
+<span id="undefined-field"></span><h1>Component: <code class="docutils literal"><span class="pre">Field</span></code><a class="headerlink" href="#component-field" title="Permalink to this headline">¶</a></h1>
+<p>React component which represents a &#8220;Field&#8221;, which might have multiple terms.</p>
 <div class="contents local topic" id="local-navigation">
 <p class="topic-title first">Local Navigation</p>
 <ul class="simple">
-<li><a class="reference internal" href="#children" id="id1">Children</a></li>
-<li><a class="reference internal" href="#description" id="id2">Description</a></li>
+<li><a class="reference internal" href="#props" id="id1">Props</a><ul>
+<li><a class="reference internal" href="#field" id="id2"><code class="docutils literal"><span class="pre">field</span></code></a></li>
+<li><a class="reference internal" href="#includefieldtitle" id="id3"><code class="docutils literal"><span class="pre">includeFieldTitle</span></code></a></li>
+<li><a class="reference internal" href="#terms" id="id4"><code class="docutils literal"><span class="pre">terms</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#functions" id="id5">Functions</a><ul>
+<li><a class="reference internal" href="#instance-private-getdefaultprops" id="id6">Instance Private <code class="docutils literal"><span class="pre">getDefaultProps</span></code></a></li>
+<li><a class="reference internal" href="#instance-private-render" id="id7">Instance Private <code class="docutils literal"><span class="pre">render</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
-<div class="section" id="children">
-<h2><a class="toc-backref" href="#id1">Children</a><a class="headerlink" href="#children" title="Permalink to this headline">¶</a></h2>
-<div class="toctree-wrapper compound">
+<div class="section" id="props">
+<h2><a class="toc-backref" href="#id1">Props</a><a class="headerlink" href="#props" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="field">
+<h3><a class="toc-backref" href="#id2"><code class="docutils literal"><span class="pre">field</span></code></a><a class="headerlink" href="#field" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>string</strong></p>
+<p>Field name, in object-dot-notation.</p>
+</div>
+<div class="section" id="includefieldtitle">
+<h3><a class="toc-backref" href="#id3"><code class="docutils literal"><span class="pre">includeFieldTitle</span></code></a><a class="headerlink" href="#includefieldtitle" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>boolean</strong></p>
+<p>Whether field title should be included at the top of list of terms.</p>
+</div>
+<div class="section" id="terms">
+<h3><a class="toc-backref" href="#id4"><code class="docutils literal"><span class="pre">terms</span></code></a><a class="headerlink" href="#terms" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>Array.&lt;Object&gt;</strong></p>
+<p>Terms which belong to this field, in the form of objects.</p>
 </div>
 </div>
-<div class="section" id="description">
-<h2><a class="toc-backref" href="#id2">Description</a><a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
-<p>React component which represents a &#8220;Field&#8221;, which might have multiple terms.</p>
-<p>DPROPERTIES</p>
-<p>[object Object],[object Object],[object Object]</p>
-<p>PROPS</p>
+<div class="section" id="functions">
+<h2><a class="toc-backref" href="#id5">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="instance-private-getdefaultprops">
+<span id="module-viz-components-legend-field-getdefaultprops"></span><h3><a class="toc-backref" href="#id6">Instance Private <code class="docutils literal"><span class="pre">getDefaultProps</span></code></a><a class="headerlink" href="#instance-private-getdefaultprops" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="getDefaultProps">
+<code class="descname">getDefaultProps</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getDefaultProps" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns Object:</th><td class="field-body">&#8216;includeFieldTitle&#8217; : true</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Legend.js:32</p>
+</div>
+<div class="section" id="instance-private-render">
+<span id="module-viz-components-legend-field-render"></span><h3><a class="toc-backref" href="#id7">Instance Private <code class="docutils literal"><span class="pre">render</span></code></a><a class="headerlink" href="#instance-private-render" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="render">
+<code class="descname">render</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#render" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Returns Element:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">Div element containing props.title, .name, or .field if supplied along with props.includeFieldTitle == true, and list of terms &amp; their colors.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Legend.js:42</p>
+</div>
 </div>
 </div>
 
@@ -81,12 +145,27 @@
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Component: <code class="docutils literal"><span class="pre">Field</span></code></a><ul>
-<li><a class="reference internal" href="#children">Children</a></li>
-<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#props">Props</a><ul>
+<li><a class="reference internal" href="#field"><code class="docutils literal"><span class="pre">field</span></code></a></li>
+<li><a class="reference internal" href="#includefieldtitle"><code class="docutils literal"><span class="pre">includeFieldTitle</span></code></a></li>
+<li><a class="reference internal" href="#terms"><code class="docutils literal"><span class="pre">terms</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#instance-private-getdefaultprops">Instance Private <code class="docutils literal"><span class="pre">getDefaultProps</span></code></a></li>
+<li><a class="reference internal" href="#instance-private-render">Instance Private <code class="docutils literal"><span class="pre">render</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="module-viz_components.Legend.html"
+                        title="previous chapter">Component: <code class="docutils literal"><span class="pre">Legend</span></code></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="module-viz_components.Legend.Term.html"
+                        title="next chapter">Component: <code class="docutils literal"><span class="pre">Term</span></code></a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -117,7 +196,16 @@
         <li class="right" >
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li> 
+        <li class="right" >
+          <a href="module-viz_components.Legend.Term.html" title="Component: Term"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="module-viz_components.Legend.html" title="Component: Legend"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="module-viz_components.html" >Module: <code class="docutils literal"><span class="pre">viz/components</span></code></a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="module-viz_components.Legend.html" >Component: <code class="docutils literal"><span class="pre">Legend</span></code></a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

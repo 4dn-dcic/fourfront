@@ -1,35 +1,32 @@
-==============================
-Component: ``item-pages/user``
-==============================
+===========================
+Module: ``item-pages/user``
+===========================
 
+
+
+
+Contains the User profile page view as well as Impersonate User form.
+Only the User view is exported.
 
 
 .. contents:: Local Navigation
    :local:
 
-
-Children
-========
+7 Children
+==========
 
 .. toctree::
    :maxdepth: 3
    
    module-item-pages_user.AccessKeyStore
    module-item-pages_user.AccessKeyTable
-   module-item-pages_user.statics
+   module-item-pages_user.User
+   module-item-pages_user.ProfileContactFields
+   module-item-pages_user.ProfileWorkFields
+   module-item-pages_user.BasicForm
+   module-item-pages_user.ImpersonateUserForm
    
 
-
-Description
-===========
-
-User profile page/view.
-
-DPROPERTIES 
-
-
-
-PROPS
 
 
 
@@ -42,8 +39,8 @@ Functions
 .. _module-item-pages_user.getInitialState:
 
 
-``getInitialState``
--------------------
+Inner  ``getInitialState``
+--------------------------
 
 
 
@@ -52,12 +49,15 @@ Functions
     
     
 
+user.js:74
+
+
 
 .. _module-item-pages_user.renderTable:
 
 
-``renderTable``
----------------
+Inner  ``renderTable``
+----------------------
 
 
 
@@ -66,12 +66,15 @@ Functions
     
     
 
+user.js:82
+
+
 
 .. _module-item-pages_user.render:
 
 
-``render``
-----------
+Inner  ``render``
+-----------------
 
 
 
@@ -80,12 +83,15 @@ Functions
     
     
 
+user.js:132
+
+
 
 .. _module-item-pages_user.create:
 
 
-``create``
-----------
+Inner  ``create``
+-----------------
 
 
 
@@ -94,12 +100,15 @@ Functions
     
     
 
+user.js:146
+
+
 
 .. _module-item-pages_user.doAction:
 
 
-``doAction``
-------------
+Inner  ``doAction``
+-------------------
 
 
 
@@ -108,12 +117,15 @@ Functions
     
     
 
+user.js:162
+
+
 
 .. _module-item-pages_user.onCreate:
 
 
-``onCreate``
-------------
+Inner  ``onCreate``
+-------------------
 
 
 
@@ -122,12 +134,15 @@ Functions
     
     
 
+user.js:167
+
+
 
 .. _module-item-pages_user.onResetSecret:
 
 
-``onResetSecret``
------------------
+Inner  ``onResetSecret``
+------------------------
 
 
 
@@ -136,12 +151,15 @@ Functions
     
     
 
+user.js:170
+
+
 
 .. _module-item-pages_user.showNewSecret:
 
 
-``showNewSecret``
------------------
+Inner  ``showNewSecret``
+------------------------
 
 
 
@@ -150,12 +168,15 @@ Functions
     
     
 
+user.js:173
+
+
 
 .. _module-item-pages_user.onDelete:
 
 
-``onDelete``
-------------
+Inner  ``onDelete``
+-------------------
 
 
 
@@ -164,12 +185,15 @@ Functions
     
     
 
+user.js:197
+
+
 
 .. _module-item-pages_user.onError:
 
 
-``onError``
------------
+Inner  ``onError``
+------------------
 
 
 
@@ -178,12 +202,15 @@ Functions
     
     
 
+user.js:207
+
+
 
 .. _module-item-pages_user.hideModal:
 
 
-``hideModal``
--------------
+Inner  ``hideModal``
+--------------------
 
 
 
@@ -192,82 +219,20 @@ Functions
     
     
 
-
-.. _module-item-pages_user.mayEdit:
-
-
-``mayEdit``
------------
+user.js:221
 
 
 
-.. js:function:: mayEdit()
-
-    
-    
-
-
-.. _module-item-pages_user.render:
-
-
-``render``
-----------
 
 
 
-.. js:function:: render()
-
-    
-    
-
-
-.. _module-item-pages_user.icon:
-
-
-``icon``
---------
-
-
-
-.. js:function:: icon()
-
-    
-    
-
-
-.. _module-item-pages_user.render:
-
-
-``render``
-----------
-
-
-
-.. js:function:: render()
-
-    
-    
-
-
-.. _module-item-pages_user.getDefaultProps:
-
-
-``getDefaultProps``
--------------------
-
-
-
-.. js:function:: getDefaultProps()
-
-    
-    
 
 
 .. _module-item-pages_user.getInitialState:
 
 
-``getInitialState``
--------------------
+Inner  ``getInitialState``
+--------------------------
 
 
 
@@ -276,12 +241,15 @@ Functions
     
     
 
+user.js:491
+
+
 
 .. _module-item-pages_user.componentDidMount:
 
 
-``componentDidMount``
----------------------
+Inner  ``componentDidMount``
+----------------------------
 
 
 
@@ -290,12 +258,15 @@ Functions
     
     
 
+user.js:498
+
+
 
 .. _module-item-pages_user.componentWillUnmount:
 
 
-``componentWillUnmount``
-------------------------
+Inner  ``componentWillUnmount``
+-------------------------------
 
 
 
@@ -304,58 +275,16 @@ Functions
     
     
 
-
-.. _module-item-pages_user.getAwardsList:
-
-
-``getAwardsList``
------------------
-
-Get list of all awards (unique) from list of labs.
-ToDo : Migrate somewhere more static-cy.
-
-.. js:function:: getAwardsList(labDetails)
-
-    
-    :param Array.<Object> labDetails: Array of lab objects with embedded award details.
-    :return Array.<Object>: List of all unique awards in labs.
-    
+user.js:514
 
 
-.. _module-item-pages_user.updateAwardsList:
-
-
-``updateAwardsList``
---------------------
-
-Update state.awards_list with award details from list of lab details.
-
-.. js:function:: updateAwardsList(labDetails)
-
-    
-    :param Array.<Object> labDetails: Array of lab objects with embedded award details.
-    
-
-
-.. _module-item-pages_user.render:
-
-
-``render``
-----------
-
-
-
-.. js:function:: render()
-
-    
-    
 
 
 .. _module-item-pages_user.getInitialState:
 
 
-``getInitialState``
--------------------
+Inner  ``getInitialState``
+--------------------------
 
 
 
@@ -364,12 +293,15 @@ Update state.awards_list with award details from list of lab details.
     
     
 
+user.js:652
+
+
 
 .. _module-item-pages_user.handleChange:
 
 
-``handleChange``
-----------------
+Inner  ``handleChange``
+-----------------------
 
 
 
@@ -378,12 +310,15 @@ Update state.awards_list with award details from list of lab details.
     
     
 
+user.js:658
+
+
 
 .. _module-item-pages_user.handleSubmit:
 
 
-``handleSubmit``
-----------------
+Inner  ``handleSubmit``
+-----------------------
 
 
 
@@ -392,12 +327,15 @@ Update state.awards_list with award details from list of lab details.
     
     
 
+user.js:662
+
+
 
 .. _module-item-pages_user.render:
 
 
-``render``
-----------
+Inner  ``render``
+-----------------
 
 
 
@@ -406,12 +344,15 @@ Update state.awards_list with award details from list of lab details.
     
     
 
+user.js:671
+
+
 
 .. _module-item-pages_user.render:
 
 
-``render``
-----------
+Inner  ``render``
+-----------------
 
 
 
@@ -419,13 +360,16 @@ Update state.awards_list with award details from list of lab details.
 
     
     
+
+user.js:694
+
 
 
 .. _module-item-pages_user.handleSubmit:
 
 
-``handleSubmit``
-----------------
+Inner  ``handleSubmit``
+-----------------------
 
 
 
@@ -433,6 +377,498 @@ Update state.awards_list with award details from list of lab details.
 
     
     
+
+user.js:704
+
+
+
+
+Members
+=======
+
+
+.. _module-item-pages_user.method:
+
+``method``
+
+
+
+
+
+
+.. _module-item-pages_user.propTypes:
+
+``propTypes``
+
+
+
+
+
+
+.. _module-item-pages_user."@id":
+
+``"@id"``
+
+
+
+
+
+
+.. _module-item-pages_user.access_keys:
+
+``access_keys``
+
+
+
+
+
+
+.. _module-item-pages_user.email:
+
+``email``
+
+
+
+
+
+
+.. _module-item-pages_user.first_name:
+
+``first_name``
+
+
+
+
+
+
+.. _module-item-pages_user.last_name:
+
+``last_name``
+
+
+
+
+
+
+.. _module-item-pages_user.groups:
+
+``groups``
+
+
+
+
+
+
+.. _module-item-pages_user.status:
+
+``status``
+
+
+
+
+
+
+.. _module-item-pages_user.timezone:
+
+``timezone``
+
+
+
+
+
+
+.. _module-item-pages_user.job_title:
+
+``job_title``
+
+
+
+
+
+
+.. _module-item-pages_user.submits_for:
+
+``submits_for``
+
+
+
+
+
+
+.. _module-item-pages_user.contextTypes:
+
+``contextTypes``
+
+
+
+
+
+
+.. _module-item-pages_user.access_keys:
+
+``access_keys``
+
+
+
+
+
+
+.. _module-item-pages_user.modal:
+
+``modal``
+
+
+
+
+
+
+.. _module-item-pages_user.modal:
+
+``modal``
+
+
+
+
+
+
+.. _module-item-pages_user.modal:
+
+``modal``
+
+
+
+
+
+
+.. _module-item-pages_user.modal:
+
+``modal``
+
+
+
+
+
+
+.. _module-item-pages_user.User:
+
+``User``
+
+
+
+
+
+
+.. _module-item-pages_user.statics:
+
+``statics``
+
+
+
+
+
+
+.. _module-item-pages_user.defaultImg:
+
+``defaultImg``
+
+
+
+
+
+
+.. _module-item-pages_user.url:
+
+``url``
+
+
+
+
+
+
+.. _module-item-pages_user.url:
+
+``url``
+
+
+
+
+
+
+
+.. _module-item-pages_user."@id":
+
+``"@id"``
+
+
+
+
+
+
+.. _module-item-pages_user.access_keys:
+
+``access_keys``
+
+
+
+
+
+
+.. _module-item-pages_user.email:
+
+``email``
+
+
+
+
+
+
+.. _module-item-pages_user.first_name:
+
+``first_name``
+
+
+
+
+
+
+.. _module-item-pages_user.last_name:
+
+``last_name``
+
+
+
+
+
+
+.. _module-item-pages_user.title:
+
+``title``
+
+
+
+
+
+
+.. _module-item-pages_user.groups:
+
+``groups``
+
+
+
+
+
+
+.. _module-item-pages_user.lab:
+
+``lab``
+
+
+
+
+
+
+.. _module-item-pages_user.status:
+
+``status``
+
+
+
+
+
+
+.. _module-item-pages_user.timezone:
+
+``timezone``
+
+
+
+
+
+
+.. _module-item-pages_user.job_title:
+
+``job_title``
+
+
+
+
+
+
+.. _module-item-pages_user.User:
+
+``User``
+
+
+
+
+
+
+.. _module-item-pages_user.required:
+
+``required``
+
+
+
+
+
+
+.. _module-item-pages_user.properties:
+
+``properties``
+
+
+
+
+
+
+.. _module-item-pages_user.first_name:
+
+``first_name``
+
+
+
+
+
+
+.. _module-item-pages_user.last_name:
+
+``last_name``
+
+
+
+
+
+
+.. _module-item-pages_user.email:
+
+``email``
+
+
+
+
+
+
+.. _module-item-pages_user.phone1:
+
+``phone1``
+
+
+
+
+
+
+.. _module-item-pages_user.fax:
+
+``fax``
+
+
+
+
+
+
+.. _module-item-pages_user.skype:
+
+``skype``
+
+
+
+
+
+
+
+.. _module-item-pages_user.id:
+
+``id``
+
+
+
+
+
+
+.. _module-item-pages_user.containerClassName:
+
+``containerClassName``
+
+
+
+
+
+
+.. _module-item-pages_user.details_lab:
+
+``details_lab``
+
+
+
+
+
+
+.. _module-item-pages_user.awards_list:
+
+``awards_list``
+
+
+
+
+
+
+.. _module-item-pages_user.awards_list:
+
+``awards_list``
+
+
+
+
+
+
+.. _module-item-pages_user.value:
+
+``value``
+
+
+
+
+
+
+.. _module-item-pages_user.value:
+
+``value``
+
+
+
+
+
+
+.. _module-item-pages_user.value:
+
+``value``
+
+
+
+
+
+
+.. _module-item-pages_user.contextTypes:
+
+``contextTypes``
+
+
+
+
+
+
+.. _module-item-pages_user.marginTop:
+
+``marginTop``
+
+
+
+
+
+
+.. _module-item-pages_user.userid:
+
+``userid``
 
 
 

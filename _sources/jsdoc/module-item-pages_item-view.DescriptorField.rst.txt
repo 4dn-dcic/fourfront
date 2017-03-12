@@ -7,36 +7,58 @@ Component: ``DescriptorField``
 
 Member Of :doc:`module-item-pages_item-view`
 
-.. contents:: Local Navigation
-   :local:
-
-
-Children
-========
-
-.. toctree::
-   :maxdepth: 3
-   
-   
-
-
-Description
-===========
 
 Deprecated.
 Display the item field with a tooltip showing the field description from
 schema, if available.
 
-DPROPERTIES 
+
+.. contents:: Local Navigation
+   :local:
 
 
 
-PROPS
 
 
 
+Functions
+=========
 
 
+
+.. _module-item-pages_item-view.DescriptorField.getInitialState:
+
+
+Instance Private ``getInitialState``
+------------------------------------
+
+
+
+.. js:function:: getInitialState()
+
+    
+    :returns Object: State object with 'active' : false.
+    
+
+item-view.js:248
+
+
+
+.. _module-item-pages_item-view.DescriptorField.handleHover:
+
+
+Instance Private ``handleHover``
+--------------------------------
+
+An onHover callback for outer <div> element.
+
+.. js:function:: handleHover(b)
+
+    
+    :param boolean b: Sets state.active to this value.
+    
+
+item-view.js:261
 
 
 

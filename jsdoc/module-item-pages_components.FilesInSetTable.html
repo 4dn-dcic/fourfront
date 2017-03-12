@@ -28,8 +28,8 @@
     <script type="text/javascript" src="../_static/sidebar.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Object: statics" href="module-item-pages_components.FilesInSetTable.statics.html" />
-    <link rel="prev" title="Module: item-pages/components" href="module-item-pages_components.html" /> 
+    <link rel="next" title="Component: SubmitterLink" href="module-item-pages_components.FilesInSetTable.SubmitterLink.html" />
+    <link rel="prev" title="Namespace: Row" href="module-item-pages_components.PartialList.Row.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -42,10 +42,10 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="module-item-pages_components.FilesInSetTable.statics.html" title="Object: statics"
+          <a href="module-item-pages_components.FilesInSetTable.SubmitterLink.html" title="Component: SubmitterLink"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="module-item-pages_components.html" title="Module: item-pages/components"
+          <a href="module-item-pages_components.PartialList.Row.html" title="Namespace: Row"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li>
@@ -59,66 +59,106 @@
           <div class="body" role="main">
             
   <div class="section" id="component-filesinsettable">
-<span id="undefined-filesinsettable"></span><h1>Component: <code class="docutils literal"><span class="pre">FilesInSetTable</span></code><a class="headerlink" href="#component-filesinsettable" title="Permalink to this headline">¶</a></h1>
+<span id="module-item-pages-components-filesinsettable"></span><h1>Component: <code class="docutils literal"><span class="pre">FilesInSetTable</span></code><a class="headerlink" href="#component-filesinsettable" title="Permalink to this headline">¶</a></h1>
+<p>Member Of <a class="reference internal" href="module-item-pages_components.html"><span class="doc">Module: item-pages/components</span></a></p>
+<p>Component for displaying Files from a list.</p>
 <div class="contents local topic" id="local-navigation">
 <p class="topic-title first">Local Navigation</p>
 <ul class="simple">
-<li><a class="reference internal" href="#children" id="id1">Children</a></li>
-<li><a class="reference internal" href="#description" id="id2">Description</a></li>
+<li><a class="reference internal" href="#children" id="id1">4 Children</a></li>
+<li><a class="reference internal" href="#props" id="id2">Props</a><ul>
+<li><a class="reference internal" href="#files" id="id3"><code class="docutils literal"><span class="pre">files</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#functions" id="id4">Functions</a><ul>
+<li><a class="reference internal" href="#static-public-atidfromobject" id="id5">Static Public <code class="docutils literal"><span class="pre">atIdFromObject</span></code></a></li>
+<li><a class="reference internal" href="#instance-private-header" id="id6">Instance Private <code class="docutils literal"><span class="pre">header</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
 <div class="section" id="children">
-<h2><a class="toc-backref" href="#id1">Children</a><a class="headerlink" href="#children" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id1">4 Children</a><a class="headerlink" href="#children" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.statics.html">Object: <code class="docutils literal"><span class="pre">statics</span></code></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.statics.html#children">Children</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.statics.html#description">Description</a></li>
-<li class="toctree-l2"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.statics.html#functions">Functions</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.statics.html#atidfromobject"><code class="docutils literal"><span class="pre">atIdFromObject</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.statics.html#attachmentdownloadlinkfromfile"><code class="docutils literal"><span class="pre">attachmentDownloadLinkFromFile</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.statics.html#iconclassfromfiletype"><code class="docutils literal"><span class="pre">iconClassFromFileType</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.SubmitterLink.html">Component: <code class="docutils literal"><span class="pre">SubmitterLink</span></code></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.SubmitterLink.html#children">Children</a><ul class="simple">
+<li class="toctree-l2"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.SubmitterLink.html#props">Props</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.SubmitterLink.html#user"><code class="docutils literal"><span class="pre">user</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.SubmitterLink.html#user-display-title"><code class="docutils literal"><span class="pre">user.display_title</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.SubmitterLink.html#labname"><code class="docutils literal"><span class="pre">labName</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.SubmitterLink.html#showlabname"><code class="docutils literal"><span class="pre">showLabName</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.SubmitterLink.html#description">Description</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.LabIcon.html">Component: <code class="docutils literal"><span class="pre">LabIcon</span></code></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.LabIcon.html#children">Children</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.LabIcon.html#description">Description</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.FileItemRow.html">Component: <code class="docutils literal"><span class="pre">FileItemRow</span></code></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.FileItemRow.html#children">Children</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.FileItemRow.html#description">Description</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.Small.html">Component: <code class="docutils literal"><span class="pre">Small</span></code></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.Small.html#children">Children</a><ul class="simple">
+<li class="toctree-l2"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.LabIcon.html#props">Props</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.LabIcon.html#lab"><code class="docutils literal"><span class="pre">lab</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.LabIcon.html#onmouseenter"><code class="docutils literal"><span class="pre">onMouseEnter</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.LabIcon.html#onmouseleave"><code class="docutils literal"><span class="pre">onMouseLeave</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.FileItemRow.html">Component: <code class="docutils literal"><span class="pre">FileItemRow</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="module-item-pages_components.FilesInSetTable.Small.html">Component: <code class="docutils literal"><span class="pre">Small</span></code></a></li>
 </ul>
 </div>
 </div>
-<div class="section" id="description">
-<h2><a class="toc-backref" href="#id2">Description</a><a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
-<p>Component for displaying Files in a set.</p>
-<p>DPROPERTIES</p>
-<p>PROPS</p>
+<div class="section" id="props">
+<h2><a class="toc-backref" href="#id2">Props</a><a class="headerlink" href="#props" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="files">
+<h3><a class="toc-backref" href="#id3"><code class="docutils literal"><span class="pre">files</span></code></a><a class="headerlink" href="#files" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>Array.&lt;Object&gt;</strong></p>
+<p>List of file objects, e.g. a FileCalbirationSet&#8217;s &#8216;files_in_set&#8217; property.</p>
+</div>
+</div>
+<div class="section" id="functions">
+<h2><a class="toc-backref" href="#id4">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="static-public-atidfromobject">
+<span id="undefined-atidfromobject"></span><h3><a class="toc-backref" href="#id5">Static Public <code class="docutils literal"><span class="pre">atIdFromObject</span></code></a><a class="headerlink" href="#static-public-atidfromobject" title="Permalink to this headline">¶</a></h3>
+<p>Convert a link_id, if one exists on param &#8216;object&#8217;, to an <a class="reference external" href="mailto:'&#37;&#52;&#48;id">'<span>&#64;</span>id</a>&#8216; link.</p>
+<dl class="function">
+<dt id="atIdFromObject">
+<code class="descname">atIdFromObject</code><span class="sig-paren">(</span><em>object</em><span class="sig-paren">)</span><a class="headerlink" href="#atIdFromObject" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>object</strong> (<em>Object</em>) &#8211; Must have a &#8216;link_id&#8217; or <a class="reference external" href="mailto:'&#37;&#52;&#48;id">'<span>&#64;</span>id</a>&#8216; property. Else will return null.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns string|null:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">The Item&#8217;s <a class="reference external" href="mailto:'&#37;&#52;&#48;id">'<span>&#64;</span>id</a>&#8216;.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>FilesInSetTable.js:33</p>
+</div>
+<div class="section" id="instance-private-header">
+<span id="undefined-header"></span><h3><a class="toc-backref" href="#id6">Instance Private <code class="docutils literal"><span class="pre">header</span></code></a><a class="headerlink" href="#instance-private-header" title="Permalink to this headline">¶</a></h3>
+<p>Renders heading with titles for table on medium and large width screens.</p>
+<dl class="function">
+<dt id="header">
+<code class="descname">header</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#header" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Returns Element:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">&lt;div&gt; element</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>FilesInSetTable.js:310</p>
+</div>
 </div>
 </div>
 
@@ -131,18 +171,26 @@
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Component: <code class="docutils literal"><span class="pre">FilesInSetTable</span></code></a><ul>
-<li><a class="reference internal" href="#children">Children</a></li>
-<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#children">4 Children</a></li>
+<li><a class="reference internal" href="#props">Props</a><ul>
+<li><a class="reference internal" href="#files"><code class="docutils literal"><span class="pre">files</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#static-public-atidfromobject">Static Public <code class="docutils literal"><span class="pre">atIdFromObject</span></code></a></li>
+<li><a class="reference internal" href="#instance-private-header">Instance Private <code class="docutils literal"><span class="pre">header</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="module-item-pages_components.html"
-                        title="previous chapter">Module: <code class="docutils literal"><span class="pre">item-pages/components</span></code></a></p>
+  <p class="topless"><a href="module-item-pages_components.PartialList.Row.html"
+                        title="previous chapter">Namespace: <code class="docutils literal"><span class="pre">Row</span></code></a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="module-item-pages_components.FilesInSetTable.statics.html"
-                        title="next chapter">Object: <code class="docutils literal"><span class="pre">statics</span></code></a></p>
+  <p class="topless"><a href="module-item-pages_components.FilesInSetTable.SubmitterLink.html"
+                        title="next chapter">Component: <code class="docutils literal"><span class="pre">SubmitterLink</span></code></a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -174,10 +222,10 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="module-item-pages_components.FilesInSetTable.statics.html" title="Object: statics"
+          <a href="module-item-pages_components.FilesInSetTable.SubmitterLink.html" title="Component: SubmitterLink"
              >next</a> |</li>
         <li class="right" >
-          <a href="module-item-pages_components.html" title="Module: item-pages/components"
+          <a href="module-item-pages_components.PartialList.Row.html" title="Namespace: Row"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li>

@@ -1,40 +1,95 @@
-.. _module-viz_components.Legend.Field:
+.. _undefined.Field:
 
 ====================
 Component: ``Field``
 ====================
 
 
-Member Of :doc:`module-viz_components.Legend`
+
+
+React component which represents a "Field", which might have multiple terms.
+
 
 .. contents:: Local Navigation
    :local:
 
 
-Children
-========
 
-.. toctree::
-   :maxdepth: 3
-   
-   
-
-
-Description
-===========
-
-React component which represents a "Field", which might have multiple terms.
-
-DPROPERTIES 
-
-[object Object],[object Object],[object Object]
-
-PROPS
+Props
+=====
 
 
 
 
+``field``
+---------
 
+Type: **string**
+
+.. js:property:: field
+
+Field name, in object-dot-notation.
+
+
+
+``includeFieldTitle``
+---------------------
+
+Type: **boolean**
+
+.. js:property:: includeFieldTitle
+
+Whether field title should be included at the top of list of terms.
+
+
+
+``terms``
+---------
+
+Type: **Array.<Object>**
+
+.. js:property:: terms
+
+Terms which belong to this field, in the form of objects.
+
+Functions
+=========
+
+
+
+.. _module-viz_components.Legend.Field.getDefaultProps:
+
+
+Instance Private ``getDefaultProps``
+------------------------------------
+
+
+
+.. js:function:: getDefaultProps()
+
+    
+    :returns Object: 'includeFieldTitle' : true
+    
+
+Legend.js:32
+
+
+
+.. _module-viz_components.Legend.Field.render:
+
+
+Instance Private ``render``
+---------------------------
+
+
+
+.. js:function:: render()
+
+    
+    :returns Element: Div element containing props.title, .name, or .field if supplied along with props.includeFieldTitle == true, and list of terms & their colors.
+    
+
+Legend.js:42
 
 
 

@@ -4,33 +4,17 @@ Component: ``alerts``
 
 
 
-.. contents:: Local Navigation
-   :local:
-
-
-Children
-========
-
-.. toctree::
-   :maxdepth: 3
-   
-   module-alerts.statics
-   
-
-
-Description
-===========
 
 A Component and utility (via Component's 'statics' property & functions) to 
 queue and dequeue alerts from appearing at top of pages. Alerts, once queued, will persist until they are closed by
 the end user, which is the same functionality as calling Alerts.deQueue(alert) from anywhere in application, supplying the same
 title for alert that was queued.
 
-DPROPERTIES 
+
+.. contents:: Local Navigation
+   :local:
 
 
-
-PROPS
 
 
 
@@ -40,11 +24,49 @@ Functions
 
 
 
+.. _module-alerts.queue:
+
+
+Static Public ``queue``
+-----------------------
+
+Open an alert box.
+
+More specifically, saves a new alert to Redux store 'alerts' field.
+
+.. js:function:: queue(alert)
+
+    
+    :param Object alert: Object with 'title', 'message', and 'style' properties. Used for alert message element at top of page.
+    
+
+alerts.js:31
+
+
+
+.. _module-alerts.deQueue:
+
+
+Static Public ``deQueue``
+-------------------------
+
+Close an alert box.
+
+.. js:function:: deQueue(alert)
+
+    
+    :param Object alert: Object with at least 'title'.
+    
+
+alerts.js:47
+
+
+
 .. _module-alerts.getInitialState:
 
 
-``getInitialState``
--------------------
+Inner  ``getInitialState``
+--------------------------
 
 
 
@@ -53,19 +75,108 @@ Functions
     
     
 
+alerts.js:73
+
+
 
 .. _module-alerts.render:
 
 
-``render``
-----------
+Instance Private ``render``
+---------------------------
 
-
+Renders out Bootstrap Alerts for any queued alerts.
 
 .. js:function:: render()
 
     
+    :returns Element: A <div> element.
     
+
+alerts.js:87
+
+
+
+
+Members
+=======
+
+
+.. _module-alerts.Alerts:
+
+``Alerts``
+
+
+
+
+
+
+.. _module-alerts.statics:
+
+``statics``
+
+
+
+
+
+
+.. _module-alerts.type:
+
+``type``
+
+
+
+
+
+
+.. _module-alerts.currentAlerts:
+
+``currentAlerts``
+
+
+
+
+
+
+.. _module-alerts.type:
+
+``type``
+
+
+
+
+
+
+.. _module-alerts.dismissing:
+
+``dismissing``
+
+
+
+
+
+
+.. _module-alerts.dismissing:
+
+``dismissing``
+
+
+
+
+
+
+.. _module-alerts.dismissing:
+
+``dismissing``
+
+
+
+
+
+
+.. _module-alerts.type:
+
+``type``
 
 
 

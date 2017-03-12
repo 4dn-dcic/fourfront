@@ -7,38 +7,149 @@ Component: ``RotatedLabel``
 
 Member Of :doc:`module-viz_components`
 
-.. contents:: Local Navigation
-   :local:
-
-
-Children
-========
-
-.. toctree::
-   :maxdepth: 3
-   
-   module-viz_components.RotatedLabel.statics
-   module-viz_components.RotatedLabel.Axis
-   
-
-
-Description
-===========
 
 A label meant to be place along an X-axis. Given an angle, label text, placementHeight, and other properties, calculates 
 visible portion of label and rotates it. Handles showing full label onHover.
 Optionally adds a directional pointer icon to tail of label.
 
-DPROPERTIES 
+
+.. contents:: Local Navigation
+   :local:
+
+1 Children
+==========
+
+.. toctree::
+   :maxdepth: 3
+   
+   module-viz_components.RotatedLabel.Axis
+   
+
+
+Props
+=====
 
 
 
-PROPS
+
+``angle``
+---------
+
+Type: **number**
+
+.. js:property:: angle
+
+Angle of label rotation. Defaults to 30.
 
 
 
+``placementWidth``
+------------------
+
+Type: **number**
+
+.. js:property:: placementWidth
+
+How wide along the X axis is the object to be labeled. Defaults to 60.
 
 
+
+``placementHeight``
+-------------------
+
+Type: **number**
+
+.. js:property:: placementHeight
+
+How much height, +~10px, is available for the label(s). Defaults to 50.
+
+
+
+``isMounted``
+-------------
+
+Type: **boolean**
+
+.. js:property:: isMounted
+
+Pass true if we are not server-side and/or if parent component is mounted. Will not render anything unless this is true. Defaults to false.
+
+
+
+``lineHeight``
+--------------
+
+Type: **number**
+
+.. js:property:: lineHeight
+
+Line height of label, in px. Defaults to 14. Recommended to leave 14px as CSS stylesheet is set up for this value.
+
+
+
+``deRotateAppend``
+------------------
+
+Type: **boolean**
+
+.. js:property:: deRotateAppend
+
+If true, caret or other appendage will be de-rotated from props.angle. Defaults to 14.
+
+
+
+``append``
+----------
+
+Type: **Element** | **Component** | **string**
+
+.. js:property:: append
+
+A React Element or Component to append at tail of label, centered at bottom of X axis placement. Defaults to an upwards-pointing caret.
+
+Functions
+=========
+
+
+
+.. _undefined.maxHypotenuse:
+
+
+Static  ``maxHypotenuse``
+-------------------------
+
+
+
+.. js:function:: maxHypotenuse(height, angle)
+
+    
+    :param number height: Available height.
+    :param number angle: Angle to rotate.
+    :returns number: Length of hypotenuse.
+    
+
+RotatedLabel.js:50
+
+
+
+.. _undefined.maxTextHeight:
+
+
+Static  ``maxTextHeight``
+-------------------------
+
+
+
+.. js:function:: maxTextHeight([placementWidth][, lineHeight][, extraHeight])
+
+    
+    :param number placementWidth: Available width.
+    :param number lineHeight: Line height, in px.
+    :param number extraHeight: Extra height to give.
+    :returns number: Maximum hypotenuse length.
+    
+
+RotatedLabel.js:64
 
 
 

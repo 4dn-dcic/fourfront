@@ -28,7 +28,7 @@
     <script type="text/javascript" src="../_static/sidebar.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Object: statics" href="module-item-pages_item-view.Detail.statics.html" />
+    <link rel="next" title="Component: DescriptorField" href="module-item-pages_item-view.DescriptorField.html" />
     <link rel="prev" title="Component: item-pages/item-view" href="module-item-pages_item-view.html" /> 
   </head>
   <body role="document">
@@ -42,7 +42,7 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="module-item-pages_item-view.Detail.statics.html" title="Object: statics"
+          <a href="module-item-pages_item-view.DescriptorField.html" title="Component: DescriptorField"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="module-item-pages_item-view.html" title="Component: item-pages/item-view"
@@ -61,38 +61,70 @@
   <div class="section" id="component-detail">
 <span id="module-item-pages-item-view-detail"></span><h1>Component: <code class="docutils literal"><span class="pre">Detail</span></code><a class="headerlink" href="#component-detail" title="Permalink to this headline">¶</a></h1>
 <p>Member Of <a class="reference internal" href="module-item-pages_item-view.html"><span class="doc">Component: item-pages/item-view</span></a></p>
-<div class="contents local topic" id="local-navigation">
-<p class="topic-title first">Local Navigation</p>
-<ul class="simple">
-<li><a class="reference internal" href="#children" id="id1">Children</a></li>
-<li><a class="reference internal" href="#description" id="id2">Description</a></li>
-</ul>
-</div>
-<div class="section" id="children">
-<h2><a class="toc-backref" href="#id1">Children</a><a class="headerlink" href="#children" title="Permalink to this headline">¶</a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="module-item-pages_item-view.Detail.statics.html">Object: <code class="docutils literal"><span class="pre">statics</span></code></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module-item-pages_item-view.Detail.statics.html#children">Children</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="module-item-pages_item-view.Detail.statics.html#functions">Functions</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="module-item-pages_item-view.Detail.statics.html#formkey"><code class="docutils literal"><span class="pre">formKey</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="module-item-pages_item-view.Detail.statics.html#formvalue"><code class="docutils literal"><span class="pre">formValue</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</div>
-</div>
-<div class="section" id="description">
-<h2><a class="toc-backref" href="#id2">Description</a><a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
 <p>A list of properties which belong to Item shown by ItemView.
 Shows &#8216;persistentKeys&#8217; fields &amp; values stickied near top of list,
 &#8216;excludedKeys&#8217; never, and &#8216;hiddenKeys&#8217; only when &#8220;See More Info&#8221; button is clicked.</p>
-<p>DPROPERTIES</p>
-<p>PROPS</p>
+<div class="contents local topic" id="local-navigation">
+<p class="topic-title first">Local Navigation</p>
+<ul class="simple">
+<li><a class="reference internal" href="#functions" id="id1">Functions</a><ul>
+<li><a class="reference internal" href="#static-formkey" id="id2">Static  <code class="docutils literal"><span class="pre">formKey</span></code></a></li>
+<li><a class="reference internal" href="#static-formvalue" id="id3">Static  <code class="docutils literal"><span class="pre">formValue</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="functions">
+<h2><a class="toc-backref" href="#id1">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="static-formkey">
+<span id="module-item-pages-item-view-detail-formkey"></span><h3><a class="toc-backref" href="#id2">Static  <code class="docutils literal"><span class="pre">formKey</span></code></a><a class="headerlink" href="#static-formkey" title="Permalink to this headline">¶</a></h3>
+<p>Formats the correct display for each metadata field.</p>
+<dl class="function">
+<dt id="formKey">
+<code class="descname">formKey</code><span class="sig-paren">(</span><em>tips</em>, <em>key</em><span class="sig-paren">)</span><a class="headerlink" href="#formKey" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>tips</strong> (<em>Object</em>) &#8211; Mapping of field property names (1 level deep) to schema properties.</li>
+<li><strong>key</strong> (<em>Object</em>) &#8211; Key to use to get &#8216;description&#8217; for tooltip from the &#8216;tips&#8217; param.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns Element:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">&lt;div&gt; element with a tooltip and info-circle icon.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>item-view.js:41</p>
+</div>
+<div class="section" id="static-formvalue">
+<span id="module-item-pages-item-view-detail-formvalue"></span><h3><a class="toc-backref" href="#id3">Static  <code class="docutils literal"><span class="pre">formValue</span></code></a><a class="headerlink" href="#static-formvalue" title="Permalink to this headline">¶</a></h3>
+<p>Recursively render keys/values included in a provided item.
+Wraps URLs/paths in link elements. Sub-panels for objects.</p>
+<dl class="function">
+<dt id="formValue">
+<code class="descname">formValue</code><span class="sig-paren">(</span><em>schemas</em>, <em>item</em><span class="sig-paren">)</span><a class="headerlink" href="#formValue" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>schemas</strong> (<em>Object</em>) &#8211; Object containing schemas for server&#8217;s JSONized object output.</li>
+<li><strong>item</strong> (<em>Object|Array|string</em>) &#8211; Item(s) to render recursively.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>item-view.js:72</p>
+</div>
 </div>
 </div>
 
@@ -105,8 +137,11 @@ Shows &#8216;persistentKeys&#8217; fields &amp; values stickied near top of list
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Component: <code class="docutils literal"><span class="pre">Detail</span></code></a><ul>
-<li><a class="reference internal" href="#children">Children</a></li>
-<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#static-formkey">Static  <code class="docutils literal"><span class="pre">formKey</span></code></a></li>
+<li><a class="reference internal" href="#static-formvalue">Static  <code class="docutils literal"><span class="pre">formValue</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -115,8 +150,8 @@ Shows &#8216;persistentKeys&#8217; fields &amp; values stickied near top of list
   <p class="topless"><a href="module-item-pages_item-view.html"
                         title="previous chapter">Component: <code class="docutils literal"><span class="pre">item-pages/item-view</span></code></a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="module-item-pages_item-view.Detail.statics.html"
-                        title="next chapter">Object: <code class="docutils literal"><span class="pre">statics</span></code></a></p>
+  <p class="topless"><a href="module-item-pages_item-view.DescriptorField.html"
+                        title="next chapter">Component: <code class="docutils literal"><span class="pre">DescriptorField</span></code></a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -148,7 +183,7 @@ Shows &#8216;persistentKeys&#8217; fields &amp; values stickied near top of list
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="module-item-pages_item-view.Detail.statics.html" title="Object: statics"
+          <a href="module-item-pages_item-view.DescriptorField.html" title="Component: DescriptorField"
              >next</a> |</li>
         <li class="right" >
           <a href="module-item-pages_item-view.html" title="Component: item-pages/item-view"

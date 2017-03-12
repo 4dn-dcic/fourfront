@@ -4,30 +4,15 @@ Component: ``viz/QuickInfoBar``
 
 
 
-.. contents:: Local Navigation
-   :local:
-
-
-Children
-========
-
-.. toctree::
-   :maxdepth: 3
-   
-   
-
-
-Description
-===========
 
 Bar shown below header on home and browse pages.
 Shows counts of selected experiment_sets, experiments, and files against those properties' total counts.
 
-DPROPERTIES 
+
+.. contents:: Local Navigation
+   :local:
 
 
-
-PROPS
 
 
 
@@ -41,16 +26,19 @@ Functions
 .. _module-viz_QuickInfoBar.getInitialState:
 
 
-``getInitialState``
--------------------
+Inner  ``getInitialState``
+--------------------------
 
 
 
 .. js:function:: getInitialState()
 
     
-    :return Object.<number, boolean, string>: Initial State
+    :returns Object.<number, boolean, string>: Initial State
     
+
+QuickInfoBar.js:36
+
 
 
 
@@ -58,8 +46,8 @@ Functions
 .. _module-viz_QuickInfoBar.updateCurrentAndTotalCounts:
 
 
-``updateCurrentAndTotalCounts``
--------------------------------
+Inner  ``updateCurrentAndTotalCounts``
+--------------------------------------
 
 
 
@@ -68,12 +56,15 @@ Functions
     
     
 
+QuickInfoBar.js:72
+
+
 
 .. _module-viz_QuickInfoBar.updateCurrentCounts:
 
 
-``updateCurrentCounts``
------------------------
+Inner  ``updateCurrentCounts``
+------------------------------
 
 
 
@@ -82,12 +73,15 @@ Functions
     
     
 
+QuickInfoBar.js:84
+
+
 
 .. _module-viz_QuickInfoBar.updateTotalCounts:
 
 
-``updateTotalCounts``
----------------------
+Inner  ``updateTotalCounts``
+----------------------------
 
 
 
@@ -96,12 +90,15 @@ Functions
     
     
 
+QuickInfoBar.js:93
+
+
 
 .. _module-viz_QuickInfoBar.isInvisible:
 
 
-``isInvisible``
----------------
+Inner  ``isInvisible``
+----------------------
 
 Check if component is visible or not.
 
@@ -110,12 +107,15 @@ Check if component is visible or not.
     
     
 
+QuickInfoBar.js:103
+
+
 
 .. _module-viz_QuickInfoBar.componentWillReceiveProps:
 
 
-``componentWillReceiveProps``
------------------------------
+Inner  ``componentWillReceiveProps``
+------------------------------------
 
 Updates state.show if no filters are selected.
 
@@ -123,14 +123,397 @@ Updates state.show if no filters are selected.
 
     
     :param Object nextProps: Next props.
-    :return undefined: Updates state.show if no filters are selected.
+    :returns undefined: Updates state.show if no filters are selected.
     
 
+QuickInfoBar.js:136
 
 
 
 
 
+
+
+
+
+
+Members
+=======
+
+
+.. _module-viz_QuickInfoBar.offset:
+
+``offset``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.id:
+
+``id``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.className:
+
+``className``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.showCurrent:
+
+``showCurrent``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.count_experiments:
+
+``count_experiments``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.count_experiment_sets:
+
+``count_experiment_sets``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.count_files:
+
+``count_files``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.count_experiments_total:
+
+``count_experiments_total``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.count_experiment_sets_total:
+
+``count_experiment_sets_total``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.count_files_total:
+
+``count_files_total``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.mounted:
+
+``mounted``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.show:
+
+``show``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.mounted:
+
+``mounted``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.count_experiments:
+
+``count_experiments``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.count_experiment_sets:
+
+``count_experiment_sets``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.count_files:
+
+``count_files``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.count_experiments_total:
+
+``count_experiments_total``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.count_experiment_sets_total:
+
+``count_experiment_sets_total``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.count_files_total:
+
+``count_files_total``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.count_experiments:
+
+``count_experiments``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.count_experiment_sets:
+
+``count_experiment_sets``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.count_files:
+
+``count_files``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.count_experiments_total:
+
+``count_experiments_total``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.count_experiment_sets_total:
+
+``count_experiment_sets_total``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.count_files_total:
+
+``count_files_total``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.show:
+
+``show``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.cn:
+
+``cn``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.cn:
+
+``cn``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.stats:
+
+``stats``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.stats:
+
+``stats``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.className:
+
+``className``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.className:
+
+``className``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.className:
+
+``className``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.show:
+
+``show``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.show:
+
+``show``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.opacity:
+
+``opacity``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.show:
+
+``show``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.opacity:
+
+``opacity``
+
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.value:
+
+``value``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.label:
+
+``label``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.classNameID:
+
+``classNameID``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.id:
+
+``id``
 
 
 

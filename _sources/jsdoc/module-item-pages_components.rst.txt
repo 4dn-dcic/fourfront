@@ -4,30 +4,25 @@ Module: ``item-pages/components``
 
 
 
+
+A directory of methods and maybe a mini-component or two for common use.
+
+
 .. contents:: Local Navigation
    :local:
 
-
-Children
-========
+4 Children
+==========
 
 .. toctree::
    :maxdepth: 3
    
+   module-item-pages_components.ItemHeader
+   module-item-pages_components.PartialList
    module-item-pages_components.FilesInSetTable
+   module-item-pages_components.ItemFooterRow
    
 
-
-Description
-===========
-
-A directory of methods and maybe a mini-component or two for common use.
-
-DPROPERTIES 
-
-
-
-PROPS
 
 
 

@@ -4,12 +4,15 @@ Component: ``app``
 
 
 
+
+The top-level component for this application.
+
+
 .. contents:: Local Navigation
    :local:
 
-
-Children
-========
+1 Children
+==========
 
 .. toctree::
    :maxdepth: 3
@@ -17,17 +20,6 @@ Children
    module-app-Timeout
    
 
-
-Description
-===========
-
-The top-level component for this application.
-
-DPROPERTIES 
-
-
-
-PROPS
 
 
 
@@ -40,8 +32,8 @@ Functions
 .. _module-app.url:
 
 
-``url``
--------
+Inner  ``url``
+--------------
 
 
 
@@ -50,12 +42,15 @@ Functions
     
     
 
+app.js:49
+
+
 
 .. _module-app.active:
 
 
-``active``
-----------
+Inner  ``active``
+-----------------
 
 
 
@@ -64,12 +59,15 @@ Functions
     
     
 
+app.js:56
+
+
 
 .. _module-app.render:
 
 
-``render``
-----------
+Inner  ``render``
+-----------------
 
 
 
@@ -78,12 +76,15 @@ Functions
     
     
 
+app.js:81
+
+
 
 .. _module-app.componentDidMount:
 
 
-``componentDidMount``
----------------------
+Inner  ``componentDidMount``
+----------------------------
 
 
 
@@ -92,12 +93,15 @@ Functions
     
     
 
+app.js:84
+
+
 
 .. _module-app.getDefaultProps:
 
 
-``getDefaultProps``
--------------------
+Inner  ``getDefaultProps``
+--------------------------
 
 
 
@@ -106,12 +110,15 @@ Functions
     
     
 
+app.js:119
+
+
 
 .. _module-app.getInitialState:
 
 
-``getInitialState``
--------------------
+Inner  ``getInitialState``
+--------------------------
 
 
 
@@ -120,12 +127,15 @@ Functions
     
     
 
+app.js:125
+
+
 
 .. _module-app.getChildContext:
 
 
-``getChildContext``
--------------------
+Inner  ``getChildContext``
+--------------------------
 
 
 
@@ -134,12 +144,15 @@ Functions
     
     
 
+app.js:180
+
+
 
 .. _module-app.listActionsFor:
 
 
-``listActionsFor``
-------------------
+Inner  ``listActionsFor``
+-------------------------
 
 
 
@@ -148,12 +161,15 @@ Functions
     
     
 
+app.js:198
+
+
 
 .. _module-app.currentResource:
 
 
-``currentResource``
--------------------
+Inner  ``currentResource``
+--------------------------
 
 
 
@@ -162,12 +178,15 @@ Functions
     
     
 
+app.js:229
+
+
 
 .. _module-app.currentAction:
 
 
-``currentAction``
------------------
+Inner  ``currentAction``
+------------------------
 
 
 
@@ -176,12 +195,15 @@ Functions
     
     
 
+app.js:233
+
+
 
 .. _module-app.loadSchemas:
 
 
-``loadSchemas``
----------------
+Inner  ``loadSchemas``
+----------------------
 
 
 
@@ -190,12 +212,15 @@ Functions
     
     
 
+app.js:243
+
+
 
 .. _module-app.getStatsComponent:
 
 
-``getStatsComponent``
----------------------
+Inner  ``getStatsComponent``
+----------------------------
 
 
 
@@ -204,12 +229,15 @@ Functions
     
     
 
+app.js:264
+
+
 
 .. _module-app.updateStats:
 
 
-``updateStats``
----------------
+Inner  ``updateStats``
+----------------------
 
 
 
@@ -218,12 +246,15 @@ Functions
     
     
 
+app.js:271
+
+
 
 .. _module-app.handleDropdownChange:
 
 
-``handleDropdownChange``
-------------------------
+Inner  ``handleDropdownChange``
+-------------------------------
 
 
 
@@ -232,12 +263,15 @@ Functions
     
     
 
+app.js:284
+
+
 
 .. _module-app.handleAutocompleteChosenChange:
 
 
-``handleAutocompleteChosenChange``
-----------------------------------
+Inner  ``handleAutocompleteChosenChange``
+-----------------------------------------
 
 
 
@@ -246,12 +280,15 @@ Functions
     
     
 
+app.js:290
+
+
 
 .. _module-app.handleAutocompleteFocusChange:
 
 
-``handleAutocompleteFocusChange``
----------------------------------
+Inner  ``handleAutocompleteFocusChange``
+----------------------------------------
 
 
 
@@ -260,12 +297,15 @@ Functions
     
     
 
+app.js:294
+
+
 
 .. _module-app.handleAutocompleteHiddenChange:
 
 
-``handleAutocompleteHiddenChange``
-----------------------------------
+Inner  ``handleAutocompleteHiddenChange``
+-----------------------------------------
 
 
 
@@ -274,12 +314,15 @@ Functions
     
     
 
+app.js:298
+
+
 
 .. _module-app.handleLayoutClick:
 
 
-``handleLayoutClick``
----------------------
+Inner  ``handleLayoutClick``
+----------------------------
 
 
 
@@ -288,12 +331,15 @@ Functions
     
     
 
+app.js:303
+
+
 
 .. _module-app.handleKey:
 
 
-``handleKey``
--------------
+Inner  ``handleKey``
+--------------------
 
 
 
@@ -302,12 +348,15 @@ Functions
     
     
 
+app.js:310
+
+
 
 .. _module-app.authenticateUser:
 
 
-``authenticateUser``
---------------------
+Inner  ``authenticateUser``
+---------------------------
 
 
 
@@ -316,12 +365,15 @@ Functions
     
     
 
+app.js:324
+
+
 
 .. _module-app.componentDidMount:
 
 
-``componentDidMount``
----------------------
+Inner  ``componentDidMount``
+----------------------------
 
 
 
@@ -330,12 +382,15 @@ Functions
     
     
 
+app.js:356
+
+
 
 .. _module-app.componentDidUpdate:
 
 
-``componentDidUpdate``
-----------------------
+Inner  ``componentDidUpdate``
+-----------------------------
 
 
 
@@ -344,12 +399,15 @@ Functions
     
     
 
+app.js:395
+
+
 
 .. _module-app.fetch:
 
 
-``fetch``
----------
+Inner  ``fetch``
+----------------
 
 
 
@@ -358,12 +416,15 @@ Functions
     
     
 
+app.js:421
+
+
 
 .. _module-app.updateUserInfo:
 
 
-``updateUserInfo``
-------------------
+Inner  ``updateUserInfo``
+-------------------------
 
 
 
@@ -372,12 +433,15 @@ Functions
     
     
 
+app.js:439
+
+
 
 .. _module-app.onHashChange:
 
 
-``onHashChange``
-----------------
+Inner  ``onHashChange``
+-----------------------
 
 
 
@@ -386,12 +450,15 @@ Functions
     
     
 
+app.js:461
+
+
 
 .. _module-app.handleClick:
 
 
-``handleClick``
----------------
+Inner  ``handleClick``
+----------------------
 
 
 
@@ -400,12 +467,15 @@ Functions
     
     
 
+app.js:468
+
+
 
 .. _module-app.handleSubmit:
 
 
-``handleSubmit``
-----------------
+Inner  ``handleSubmit``
+-----------------------
 
 
 
@@ -414,12 +484,15 @@ Functions
     
     
 
+app.js:525
+
+
 
 .. _module-app.handlePopState:
 
 
-``handlePopState``
-------------------
+Inner  ``handlePopState``
+-------------------------
 
 
 
@@ -428,12 +501,15 @@ Functions
     
     
 
+app.js:558
+
+
 
 .. _module-app.confirmNavigation:
 
 
-``confirmNavigation``
----------------------
+Inner  ``confirmNavigation``
+----------------------------
 
 
 
@@ -442,12 +518,15 @@ Functions
     
     
 
+app.js:595
+
+
 
 .. _module-app.navigate:
 
 
-``navigate``
-------------
+Inner  ``navigate``
+-------------------
 
 
 
@@ -456,12 +535,15 @@ Functions
     
     
 
+app.js:605
+
+
 
 .. _module-app.receiveContextResponse:
 
 
-``receiveContextResponse``
---------------------------
+Inner  ``receiveContextResponse``
+---------------------------------
 
 
 
@@ -470,12 +552,15 @@ Functions
     
     
 
+app.js:814
+
+
 
 .. _module-app.contentTypeIsJSON:
 
 
-``contentTypeIsJSON``
----------------------
+Inner  ``contentTypeIsJSON``
+----------------------------
 
 
 
@@ -484,12 +569,15 @@ Functions
     
     
 
+app.js:842
+
+
 
 .. _module-app.scrollTo:
 
 
-``scrollTo``
-------------
+Inner  ``scrollTo``
+-------------------
 
 
 
@@ -498,12 +586,15 @@ Functions
     
     
 
+app.js:852
+
+
 
 .. _module-app.render:
 
 
-``render``
-----------
+Inner  ``render``
+-----------------
 
 
 
@@ -511,6 +602,1542 @@ Functions
 
     
     
+
+app.js:861
+
+
+
+
+Members
+=======
+
+
+.. _module-app.React:
+
+``React``
+
+
+
+
+
+
+.. _module-app.jsonScriptEscape:
+
+``jsonScriptEscape``
+
+
+
+
+
+
+.. _module-app.globals:
+
+``globals``
+
+
+
+
+
+
+.. _module-app.ErrorPage:
+
+``ErrorPage``
+
+
+
+
+
+
+.. _module-app.Navigation:
+
+``Navigation``
+
+
+
+
+
+
+.. _module-app.Action:
+
+``Action``
+
+
+
+
+
+
+.. _module-app.Footer:
+
+``Footer``
+
+
+
+
+
+
+.. _module-app.url:
+
+``url``
+
+
+
+
+
+
+.. _module-app._:
+
+``_``
+
+
+
+
+
+
+.. _module-app.store:
+
+``store``
+
+
+
+
+
+
+.. _module-app.browse:
+
+``browse``
+
+
+
+
+
+
+.. _module-app.origin:
+
+``origin``
+
+
+
+
+
+
+.. _module-app.serialize:
+
+``serialize``
+
+
+
+
+
+
+.. _module-app.Filters:
+
+``Filters``
+
+
+
+
+
+
+.. _module-app.ajax:
+
+``ajax``
+
+
+
+
+
+
+.. _module-app.JWT:
+
+``JWT``
+
+
+
+
+
+
+.. _module-app.console:
+
+``console``
+
+
+
+
+
+
+.. _module-app.isServerSide:
+
+``isServerSide``
+
+
+
+
+
+
+.. _module-app.Alerts:
+
+``Alerts``
+
+
+
+
+
+
+.. _module-app.jwt:
+
+``jwt``
+
+
+
+
+
+
+.. _module-app.FacetCharts:
+
+``FacetCharts``
+
+
+
+
+
+
+.. _module-app.ChartDataController:
+
+``ChartDataController``
+
+
+
+
+
+
+.. _module-app.makeTitle:
+
+``makeTitle``
+
+
+
+
+
+
+.. _module-app.ReactTooltip:
+
+``ReactTooltip``
+
+
+
+
+
+
+.. _module-app.dispatch_dict:
+
+``dispatch_dict``
+
+Used to temporarily store Redux store values for simultaneous dispatch.
+
+
+
+
+.. _module-app.portal:
+
+``portal``
+
+Top bar navigation & link schema definition.
+
+
+
+
+.. _module-app.id:
+
+``id``
+
+
+
+
+
+
+.. _module-app.sid:
+
+``sid``
+
+
+
+
+
+
+.. _module-app.title:
+
+``title``
+
+
+
+
+
+
+.. _module-app.id:
+
+``id``
+
+
+
+
+
+
+.. _module-app.sid:
+
+``sid``
+
+
+
+
+
+
+.. _module-app.title:
+
+``title``
+
+
+
+
+
+
+.. _module-app.children:
+
+``children``
+
+
+
+
+
+
+.. _module-app.id:
+
+``id``
+
+
+
+
+
+
+.. _module-app.title:
+
+``title``
+
+
+
+
+
+
+.. _module-app.url:
+
+``url``
+
+
+
+
+
+
+.. _module-app.children:
+
+``children``
+
+
+
+
+
+
+.. _module-app.id:
+
+``id``
+
+
+
+
+
+
+.. _module-app.title:
+
+``title``
+
+
+
+
+
+
+.. _module-app.url:
+
+``url``
+
+
+
+
+
+
+.. _module-app.id:
+
+``id``
+
+
+
+
+
+
+.. _module-app.title:
+
+``title``
+
+
+
+
+
+
+.. _module-app.url:
+
+``url``
+
+
+
+
+
+
+.. _module-app.id:
+
+``id``
+
+
+
+
+
+
+.. _module-app.title:
+
+``title``
+
+
+
+
+
+
+.. _module-app.url:
+
+``url``
+
+
+
+
+
+
+.. _module-app.id:
+
+``id``
+
+
+
+
+
+
+.. _module-app.title:
+
+``title``
+
+
+
+
+
+
+.. _module-app.url:
+
+``url``
+
+
+
+
+
+
+.. _module-app.id:
+
+``id``
+
+
+
+
+
+
+.. _module-app.title:
+
+``title``
+
+
+
+
+
+
+.. _module-app.url:
+
+``url``
+
+
+
+
+
+
+.. _module-app.id:
+
+``id``
+
+
+
+
+
+
+.. _module-app.title:
+
+``title``
+
+
+
+
+
+
+.. _module-app.url:
+
+``url``
+
+
+
+
+
+
+.. _module-app.id:
+
+``id``
+
+
+
+
+
+
+.. _module-app.title:
+
+``title``
+
+
+
+
+
+
+.. _module-app.url:
+
+``url``
+
+
+
+
+
+
+.. _module-app.Title:
+
+``Title``
+
+
+
+
+
+
+.. _module-app.SLOW_REQUEST_TIME:
+
+``SLOW_REQUEST_TIME``
+
+
+
+
+
+
+.. _module-app.historyEnabled:
+
+``historyEnabled``
+
+
+
+
+
+
+.. _module-app.propTypes:
+
+``propTypes``
+
+Session-related props 'sessionMayBeSet' is meant to provided by server-side only, then scraped and re-provided
+ by client-side render in browser.js via @see App.getRendersPropValues(documentElement, [propNamesToGet]) to match server-side render.
+ Similarly as to how is done for the redux store.
+
+
+
+
+.. _module-app.sessionMayBeSet:
+
+``sessionMayBeSet``
+
+
+
+
+
+
+.. _module-app.session:
+
+``session``
+
+
+
+
+
+
+.. _module-app.session:
+
+``session``
+
+
+
+
+
+
+.. _module-app.session:
+
+``session``
+
+
+
+
+
+
+.. _module-app.session:
+
+``session``
+
+
+
+
+
+
+.. _module-app.user_actions:
+
+``user_actions``
+
+
+
+
+
+
+.. _module-app.errors:
+
+``errors``
+
+
+
+
+
+
+.. _module-app.dropdownComponent:
+
+``dropdownComponent``
+
+
+
+
+
+
+.. _module-app.content:
+
+``content``
+
+
+
+
+
+
+.. _module-app.session:
+
+``session``
+
+
+
+
+
+
+.. _module-app.user_actions:
+
+``user_actions``
+
+
+
+
+
+
+.. _module-app.schemas:
+
+``schemas``
+
+
+
+
+
+
+.. _module-app.childContextTypes:
+
+``childContextTypes``
+
+
+
+
+
+
+.. _module-app.dropdownComponent:
+
+``dropdownComponent``
+
+
+
+
+
+
+.. _module-app.listActionsFor:
+
+``listActionsFor``
+
+
+
+
+
+
+.. _module-app.currentResource:
+
+``currentResource``
+
+
+
+
+
+
+.. _module-app.location_href:
+
+``location_href``
+
+
+
+
+
+
+.. _module-app.onDropdownChange:
+
+``onDropdownChange``
+
+
+
+
+
+
+.. _module-app.portal:
+
+``portal``
+
+
+
+
+
+
+.. _module-app.hidePublicAudits:
+
+``hidePublicAudits``
+
+
+
+
+
+
+.. _module-app.fetch:
+
+``fetch``
+
+
+
+
+
+
+.. _module-app.session:
+
+``session``
+
+
+
+
+
+
+.. _module-app.navigate:
+
+``navigate``
+
+
+
+
+
+
+.. _module-app.contentTypeIsJSON:
+
+``contentTypeIsJSON``
+
+
+
+
+
+
+.. _module-app.updateUserInfo:
+
+``updateUserInfo``
+
+
+
+
+
+
+.. _module-app.schemas:
+
+``schemas``
+
+
+
+
+
+
+.. _module-app.context:
+
+``context``
+
+
+
+
+
+
+.. _module-app.name:
+
+``name``
+
+
+
+
+
+
+.. _module-app.schemas:
+
+``schemas``
+
+
+
+
+
+
+.. _module-app.dropdownComponent:
+
+``dropdownComponent``
+
+
+
+
+
+
+.. _module-app.autocompleteTermChosen:
+
+``autocompleteTermChosen``
+
+
+
+
+
+
+.. _module-app.autocompleteFocused:
+
+``autocompleteFocused``
+
+
+
+
+
+
+.. _module-app.autocompleteHidden:
+
+``autocompleteHidden``
+
+
+
+
+
+
+.. _module-app.dropdownComponent:
+
+``dropdownComponent``
+
+
+
+
+
+
+.. _module-app.method:
+
+``method``
+
+
+
+
+
+
+.. _module-app.headers:
+
+``headers``
+
+
+
+
+
+
+.. _module-app.body:
+
+``body``
+
+
+
+
+
+
+.. _module-app.id_token:
+
+``id_token``
+
+
+
+
+
+
+.. _module-app.query_href:
+
+``query_href``
+
+
+
+
+
+
+.. _module-app.query_href:
+
+``query_href``
+
+
+
+
+
+
+.. _module-app.type:
+
+``type``
+
+
+
+
+
+
+.. _module-app.options:
+
+``options``
+
+
+
+
+
+
+.. _module-app.credentials:
+
+``credentials``
+
+
+
+
+
+
+.. _module-app.userActions:
+
+``userActions``
+
+
+
+
+
+
+.. _module-app.session:
+
+``session``
+
+
+
+
+
+
+.. _module-app.type:
+
+``type``
+
+
+
+
+
+
+.. _module-app.target:
+
+``target``
+
+
+
+
+
+
+.. _module-app.href:
+
+``href``
+
+
+
+
+
+
+.. _module-app.search:
+
+``search``
+
+
+
+
+
+
+.. _module-app.href:
+
+``href``
+
+
+
+
+
+
+.. _module-app.type:
+
+``type``
+
+
+
+
+
+
+.. _module-app.replace:
+
+``replace``
+
+
+
+
+
+
+.. _module-app.targetHref:
+
+``targetHref``
+
+
+
+
+
+
+.. _module-app.fragment:
+
+``fragment``
+
+
+
+
+
+
+.. _module-app.fragment:
+
+``fragment``
+
+
+
+
+
+
+.. _module-app.targetHref:
+
+``targetHref``
+
+
+
+
+
+
+.. _module-app.href:
+
+``href``
+
+
+
+
+
+
+.. _module-app.type:
+
+``type``
+
+
+
+
+
+
+.. _module-app.headers:
+
+``headers``
+
+
+
+
+
+
+.. _module-app.cache:
+
+``cache``
+
+
+
+
+
+
+.. _module-app.slowLoad:
+
+``slowLoad``
+
+
+
+
+
+
+.. _module-app.jwtHeader:
+
+``jwtHeader``
+
+
+
+
+
+
+.. _module-app.callback:
+
+``callback``
+
+
+
+
+
+
+.. _module-app.slowLoad:
+
+``slowLoad``
+
+
+
+
+
+
+.. _module-app.promise:
+
+``promise``
+
+
+
+
+
+
+.. _module-app.slowLoad:
+
+``slowLoad``
+
+
+
+
+
+
+.. _module-app.type:
+
+``type``
+
+
+
+
+
+
+.. _module-app.isJson:
+
+``isJson``
+
+
+
+
+
+
+.. _module-app.context:
+
+``context``
+
+
+
+
+
+
+.. _module-app.appClass:
+
+``appClass``
+
+
+
+
+
+
+.. _module-app.canonical:
+
+``canonical``
+
+
+
+
+
+
+.. _module-app.canonical:
+
+``canonical``
+
+
+
+
+
+
+.. _module-app.status:
+
+``status``
+
+
+
+
+
+
+.. _module-app.status:
+
+``status``
+
+
+
+
+
+
+.. _module-app.status:
+
+``status``
+
+
+
+
+
+
+.. _module-app.title:
+
+``title``
+
+
+
+
+
+
+.. _module-app.content:
+
+``content``
+
+
+
+
+
+
+.. _module-app.content:
+
+``content``
+
+
+
+
+
+
+.. _module-app.title:
+
+``title``
+
+
+
+
+
+
+.. _module-app.content:
+
+``content``
+
+
+
+
+
+
+.. _module-app.title:
+
+``title``
+
+
+
+
+
+
+.. _module-app.ContentView:
+
+``ContentView``
+
+
+
+
+
+
+.. _module-app.content:
+
+``content``
+
+
+
+
+
+
+.. _module-app.title:
+
+``title``
+
+
+
+
+
+
+.. _module-app.context:
+
+``context``
+
+
+
+
+
+
+.. _module-app.title:
+
+``title``
+
+
+
+
+
+
+.. _module-app.title:
+
+``title``
+
+
+
+
+
+
+.. _module-app.content:
+
+``content``
+
+
+
+
+
+
+.. _module-app.title:
+
+``title``
+
+
+
+
+
+
+.. _module-app.content:
+
+``content``
+
+
+
+
+
+
+.. _module-app.title:
+
+``title``
+
+
+
+
+
+
+.. _module-app.title:
+
+``title``
+
+
+
+
+
+
+.. _module-app.title:
+
+``title``
+
+
+
+
+
+
+.. _module-app.content:
+
+``content``
+
+
+
+
+
+
+.. _module-app.title:
+
+``title``
+
+
+
+
+
+
+.. _module-app."http://data.4dnucleome.org/":
+
+``"http://data.4dnucleome.org/"``
+
+
+
+
+
+
+.. _module-app.base:
+
+``base``
+
+
+
+
+
+
+.. _module-app.canonical:
+
+``canonical``
+
+
+
+
+
+
+.. _module-app.__html:
+
+``__html``
+
+
+
+
+
+
+.. _module-app.__html:
+
+``__html``
+
+
+
+
+
+
+.. _module-app.__html:
+
+``__html``
+
+
+
+
+
+
+.. _module-app.__html:
+
+``__html``
+
+
+
+
+
+
+.. _module-app.__html:
+
+``__html``
+
+
+
+
+
+
+.. _module-app.statics:
+
+``statics``
+
+
+
+
+
+
+.. _module-app.script_props:
+
+``script_props``
+
+
+
+
+
+
+.. _module-app.script_props:
+
+``script_props``
+
+
+
+
+
+
+.. _module-app.elem_value:
+
+``elem_value``
+
+
+
+
+
+
+.. _module-app.href:
+
+``href``
 
 
 

@@ -4,12 +4,15 @@ Module: ``collection``
 
 
 
+
+
+
+
 .. contents:: Local Navigation
    :local:
 
-
-Children
-========
+5 Children
+==========
 
 .. toctree::
    :maxdepth: 3
@@ -23,13 +26,6 @@ Children
 
 
 
-DPROPERTIES 
-
-
-
-PROPS
-
-
 
 
 Functions
@@ -40,8 +36,8 @@ Functions
 .. _module-collection.lookup_column:
 
 
-``lookup_column``
------------------
+Static Private ``lookup_column``
+--------------------------------
 
 
 
@@ -50,12 +46,15 @@ Functions
     
     
 
+collection.js:18
+
+
 
 .. _module-collection.render:
 
 
-``render``
-----------
+Inner  ``render``
+-----------------
 
 
 
@@ -64,12 +63,15 @@ Functions
     
     
 
+collection.js:41
+
+
 
 .. _module-collection.RowView:
 
 
-``RowView``
------------
+Static Private ``RowView``
+--------------------------
 
 
 
@@ -78,12 +80,15 @@ Functions
     
     
 
+collection.js:115
+
+
 
 .. _module-collection.getDefaultProps:
 
 
-``getDefaultProps``
--------------------
+Inner  ``getDefaultProps``
+--------------------------
 
 
 
@@ -92,12 +97,15 @@ Functions
     
     
 
+collection.js:156
+
+
 
 .. _module-collection.getInitialState:
 
 
-``getInitialState``
--------------------
+Inner  ``getInitialState``
+--------------------------
 
 
 
@@ -106,12 +114,15 @@ Functions
     
     
 
+collection.js:163
+
+
 
 .. _module-collection.componentWillReceiveProps:
 
 
-``componentWillReceiveProps``
------------------------------
+Inner  ``componentWillReceiveProps``
+------------------------------------
 
 
 
@@ -120,12 +131,15 @@ Functions
     
     
 
+collection.js:171
+
+
 
 .. _module-collection.extractParams:
 
 
-``extractParams``
------------------
+Inner  ``extractParams``
+------------------------
 
 
 
@@ -134,12 +148,15 @@ Functions
     
     
 
+collection.js:192
+
+
 
 .. _module-collection.guessColumns:
 
 
-``guessColumns``
-----------------
+Inner  ``guessColumns``
+-----------------------
 
 
 
@@ -148,12 +165,15 @@ Functions
     
     
 
+collection.js:209
+
+
 
 .. _module-collection.extractData:
 
 
-``extractData``
----------------
+Inner  ``extractData``
+----------------------
 
 
 
@@ -162,12 +182,15 @@ Functions
     
     
 
+collection.js:231
+
+
 
 .. _module-collection.fetchAll:
 
 
-``fetchAll``
-------------
+Inner  ``fetchAll``
+-------------------
 
 
 
@@ -176,12 +199,15 @@ Functions
     
     
 
+collection.js:278
+
+
 
 .. _module-collection.render:
 
 
-``render``
-----------
+Inner  ``render``
+-----------------
 
 
 
@@ -190,12 +216,15 @@ Functions
     
     
 
+collection.js:306
+
+
 
 .. _module-collection.componentDidMount:
 
 
-``componentDidMount``
----------------------
+Inner  ``componentDidMount``
+----------------------------
 
 
 
@@ -204,12 +233,15 @@ Functions
     
     
 
+collection.js:410
+
+
 
 .. _module-collection.handleClickHeader:
 
 
-``handleClickHeader``
----------------------
+Inner  ``handleClickHeader``
+----------------------------
 
 
 
@@ -218,12 +250,15 @@ Functions
     
     
 
+collection.js:419
+
+
 
 .. _module-collection.handleKeyUp:
 
 
-``handleKeyUp``
----------------
+Inner  ``handleKeyUp``
+----------------------
 
 
 
@@ -232,12 +267,15 @@ Functions
     
     
 
+collection.js:441
+
+
 
 .. _module-collection.submit:
 
 
-``submit``
-----------
+Inner  ``submit``
+-----------------
 
 
 
@@ -246,12 +284,15 @@ Functions
     
     
 
+collection.js:454
+
+
 
 .. _module-collection.clearFilter:
 
 
-``clearFilter``
----------------
+Inner  ``clearFilter``
+----------------------
 
 
 
@@ -260,12 +301,15 @@ Functions
     
     
 
+collection.js:468
+
+
 
 .. _module-collection.componentWillUnmount:
 
 
-``componentWillUnmount``
-------------------------
+Inner  ``componentWillUnmount``
+-------------------------------
 
 
 
@@ -273,6 +317,451 @@ Functions
 
     
     
+
+collection.js:473
+
+
+
+
+Members
+=======
+
+
+.. _module-collection.value:
+
+``value``
+
+
+
+
+
+
+.. _module-collection.value:
+
+``value``
+
+
+
+
+
+
+.. _module-collection.Collection:
+
+``Collection``
+
+
+
+
+
+
+.. _module-collection.reverse:
+
+``reverse``
+
+
+
+
+
+
+.. _module-collection.Table:
+
+``Table``
+
+
+
+
+
+
+.. _module-collection.contextTypes:
+
+``contextTypes``
+
+
+
+
+
+
+.. _module-collection.defaultSortOn:
+
+``defaultSortOn``
+
+
+
+
+
+
+.. _module-collection.showControls:
+
+``showControls``
+
+
+
+
+
+
+.. _module-collection.updateData:
+
+``updateData``
+
+
+
+
+
+
+.. _module-collection.communicating:
+
+``communicating``
+
+
+
+
+
+
+.. _module-collection.updateData:
+
+``updateData``
+
+
+
+
+
+
+.. _module-collection.sorton:
+
+``sorton``
+
+
+
+
+
+
+.. _module-collection.columns:
+
+``columns``
+
+
+
+
+
+
+.. _module-collection.columns:
+
+``columns``
+
+
+
+
+
+
+.. _module-collection.factory:
+
+``factory``
+
+
+
+
+
+
+.. _module-collection.value:
+
+``value``
+
+
+
+
+
+
+.. _module-collection.context:
+
+``context``
+
+
+
+
+
+
+.. _module-collection.value:
+
+``value``
+
+
+
+
+
+
+.. _module-collection.value:
+
+``value``
+
+
+
+
+
+
+.. _module-collection.value:
+
+``value``
+
+
+
+
+
+
+.. _module-collection.value:
+
+``value``
+
+
+
+
+
+
+.. _module-collection.factory:
+
+``factory``
+
+
+
+
+
+
+.. _module-collection.value:
+
+``value``
+
+
+
+
+
+
+.. _module-collection.context:
+
+``context``
+
+
+
+
+
+
+.. _module-collection.value:
+
+``value``
+
+
+
+
+
+
+.. _module-collection.data:
+
+``data``
+
+
+
+
+
+
+.. _module-collection.communicating:
+
+``communicating``
+
+
+
+
+
+
+.. _module-collection.request:
+
+``request``
+
+
+
+
+
+
+.. _module-collection.headers:
+
+``headers``
+
+
+
+
+
+
+.. _module-collection.context:
+
+``context``
+
+
+
+
+
+
+.. _module-collection.communicating:
+
+``communicating``
+
+
+
+
+
+
+.. _module-collection.allRequest:
+
+``allRequest``
+
+
+
+
+
+
+.. _module-collection.communicating:
+
+``communicating``
+
+
+
+
+
+
+.. _module-collection.className:
+
+``className``
+
+
+
+
+
+
+.. _module-collection.matching:
+
+``matching``
+
+
+
+
+
+
+.. _module-collection.row:
+
+``row``
+
+
+
+
+
+
+.. _module-collection.row:
+
+``row``
+
+
+
+
+
+
+.. _module-collection.hidden:
+
+``hidden``
+
+
+
+
+
+
+.. _module-collection.table_class:
+
+``table_class``
+
+
+
+
+
+
+.. _module-collection.loading_or_total:
+
+``loading_or_total``
+
+
+
+
+
+
+.. _module-collection.loading_or_total:
+
+``loading_or_total``
+
+
+
+
+
+
+.. _module-collection.data:
+
+``data``
+
+
+
+
+
+
+.. _module-collection.communicating:
+
+``communicating``
+
+
+
+
+
+
+.. _module-collection.mounted:
+
+``mounted``
+
+
+
+
+
+
+.. _module-collection.target:
+
+``target``
+
+
+
+
+
+
+.. _module-collection.reversed:
+
+``reversed``
+
+
+
+
+
+
+.. _module-collection.hasEvent:
+
+``hasEvent``
+
+
+
+
+
+
+.. _module-collection.bubbles:
+
+``bubbles``
+
+
+
+
+
+
+.. _module-collection.cancelable:
+
+``cancelable``
 
 
 

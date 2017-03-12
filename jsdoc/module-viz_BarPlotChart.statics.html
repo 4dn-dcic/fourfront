@@ -64,29 +64,21 @@
 <div class="contents local topic" id="local-navigation">
 <p class="topic-title first">Local Navigation</p>
 <ul class="simple">
-<li><a class="reference internal" href="#children" id="id1">Children</a></li>
-<li><a class="reference internal" href="#functions" id="id2">Functions</a><ul>
-<li><a class="reference internal" href="#genchartdata" id="id3"><code class="docutils literal"><span class="pre">genChartData</span></code></a></li>
-<li><a class="reference internal" href="#countfieldterm" id="id4"><code class="docutils literal"><span class="pre">countFieldTerm</span></code></a></li>
-<li><a class="reference internal" href="#gettermsforfieldsfromexperiment" id="id5"><code class="docutils literal"><span class="pre">getTermsForFieldsFromExperiment</span></code></a></li>
-<li><a class="reference internal" href="#genchartbardims" id="id6"><code class="docutils literal"><span class="pre">genChartBarDims</span></code></a></li>
-<li><a class="reference internal" href="#bardatatolegenddata" id="id7"><code class="docutils literal"><span class="pre">barDataToLegendData</span></code></a></li>
-<li><a class="reference internal" href="#getdefaultstyleopts" id="id8"><code class="docutils literal"><span class="pre">getDefaultStyleOpts</span></code></a></li>
+<li><a class="reference internal" href="#functions" id="id1">Functions</a><ul>
+<li><a class="reference internal" href="#static-genchartdata" id="id2">Static  <code class="docutils literal"><span class="pre">genChartData</span></code></a></li>
+<li><a class="reference internal" href="#static-countfieldterm" id="id3">Static  <code class="docutils literal"><span class="pre">countFieldTerm</span></code></a></li>
+<li><a class="reference internal" href="#static-gettermsforfieldsfromexperiment" id="id4">Static  <code class="docutils literal"><span class="pre">getTermsForFieldsFromExperiment</span></code></a></li>
+<li><a class="reference internal" href="#static-genchartbardims" id="id5">Static  <code class="docutils literal"><span class="pre">genChartBarDims</span></code></a></li>
+<li><a class="reference internal" href="#static-bardatatolegenddata" id="id6">Static  <code class="docutils literal"><span class="pre">barDataToLegendData</span></code></a></li>
+<li><a class="reference internal" href="#static-getdefaultstyleopts" id="id7">Static  <code class="docutils literal"><span class="pre">getDefaultStyleOpts</span></code></a></li>
 </ul>
 </li>
 </ul>
 </div>
-<div class="section" id="children">
-<h2><a class="toc-backref" href="#id1">Children</a><a class="headerlink" href="#children" title="Permalink to this headline">¶</a></h2>
-<div class="toctree-wrapper compound">
-</div>
-<p>DPROPERTIES</p>
-<p>PROPS</p>
-</div>
 <div class="section" id="functions">
-<h2><a class="toc-backref" href="#id2">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="genchartdata">
-<span id="module-viz-barplotchart-statics-genchartdata"></span><h3><a class="toc-backref" href="#id3"><code class="docutils literal"><span class="pre">genChartData</span></code></a><a class="headerlink" href="#genchartdata" title="Permalink to this headline">¶</a></h3>
+<h2><a class="toc-backref" href="#id1">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="static-genchartdata">
+<span id="module-viz-barplotchart-statics-genchartdata"></span><h3><a class="toc-backref" href="#id2">Static  <code class="docutils literal"><span class="pre">genChartData</span></code></a><a class="headerlink" href="#static-genchartdata" title="Permalink to this headline">¶</a></h3>
 <p>Entrypoint for aggregation.
 First, counts up terms per field from experiments for field in supplied &#8216;fields&#8217; param array. Count is adjusted depending on if aggregating experiments, experiment_sets, or files.
 Secondly, partitions one field as a child of another. If param &#8216;useOnlyPopulatedFields&#8217; is false (default), then will use
@@ -109,7 +101,7 @@ second field with multiple terms to use as the secondary field.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return Array:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-even field"><th class="field-name">Returns Array:</th><td class="field-body"><ul class="first last simple">
 <li>Array of fields, now containing term counts per field. One field (either the first or first populated) will have a childField with partitioned terms.</li>
 </ul>
 </td>
@@ -118,9 +110,10 @@ second field with multiple terms to use as the secondary field.</p>
 </table>
 </dd></dl>
 
+<p>BarPlotChart.js:414</p>
 </div>
-<div class="section" id="countfieldterm">
-<span id="module-viz-barplotchart-statics-countfieldterm"></span><h3><a class="toc-backref" href="#id4"><code class="docutils literal"><span class="pre">countFieldTerm</span></code></a><a class="headerlink" href="#countfieldterm" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="static-countfieldterm">
+<span id="module-viz-barplotchart-statics-countfieldterm"></span><h3><a class="toc-backref" href="#id3">Static  <code class="docutils literal"><span class="pre">countFieldTerm</span></code></a><a class="headerlink" href="#static-countfieldterm" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="countFieldTerm">
 <code class="descname">countFieldTerm</code><span class="sig-paren">(</span><em>fieldObj, term[, updateTotal][, countIncrease]</em><span class="sig-paren">)</span><a class="headerlink" href="#countFieldTerm" title="Permalink to this definition">¶</a></dt>
@@ -136,16 +129,17 @@ second field with multiple terms to use as the secondary field.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Return undefined:</th></tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns undefined:</th></tr>
 <tr class="field-even field"><td>&#160;</td><td class="field-body"></td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
+<p>BarPlotChart.js:521</p>
 </div>
-<div class="section" id="gettermsforfieldsfromexperiment">
-<span id="module-viz-barplotchart-statics-gettermsforfieldsfromexperiment"></span><h3><a class="toc-backref" href="#id5"><code class="docutils literal"><span class="pre">getTermsForFieldsFromExperiment</span></code></a><a class="headerlink" href="#gettermsforfieldsfromexperiment" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="static-gettermsforfieldsfromexperiment">
+<span id="module-viz-barplotchart-statics-gettermsforfieldsfromexperiment"></span><h3><a class="toc-backref" href="#id4">Static  <code class="docutils literal"><span class="pre">getTermsForFieldsFromExperiment</span></code></a><a class="headerlink" href="#static-gettermsforfieldsfromexperiment" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="getTermsForFieldsFromExperiment">
 <code class="descname">getTermsForFieldsFromExperiment</code><span class="sig-paren">(</span><em>fields</em>, <em>exp</em><span class="sig-paren">)</span><a class="headerlink" href="#getTermsForFieldsFromExperiment" title="Permalink to this definition">¶</a></dt>
@@ -159,16 +153,17 @@ second field with multiple terms to use as the secondary field.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return Array:</th><td class="field-body"><p class="first last">Array of pairs containing field key (index 0) and term (index 1)</p>
+<tr class="field-even field"><th class="field-name">Returns Array:</th><td class="field-body"><p class="first last">Array of pairs containing field key (index 0) and term (index 1)</p>
 </td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
+<p>BarPlotChart.js:556</p>
 </div>
-<div class="section" id="genchartbardims">
-<span id="module-viz-barplotchart-statics-genchartbardims"></span><h3><a class="toc-backref" href="#id6"><code class="docutils literal"><span class="pre">genChartBarDims</span></code></a><a class="headerlink" href="#genchartbardims" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="static-genchartbardims">
+<span id="module-viz-barplotchart-statics-genchartbardims"></span><h3><a class="toc-backref" href="#id5">Static  <code class="docutils literal"><span class="pre">genChartBarDims</span></code></a><a class="headerlink" href="#static-genchartbardims" title="Permalink to this headline">¶</a></h3>
 <p>Return an object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally.</p>
 <dl class="function">
 <dt id="genChartBarDims">
@@ -189,16 +184,17 @@ second field with multiple terms to use as the secondary field.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return Object:</th><td class="field-body"><p class="first last">Object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally.</p>
+<tr class="field-even field"><th class="field-name">Returns Object:</th><td class="field-body"><p class="first last">Object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally.</p>
 </td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
+<p>BarPlotChart.js:693</p>
 </div>
-<div class="section" id="bardatatolegenddata">
-<span id="module-viz-barplotchart-statics-bardatatolegenddata"></span><h3><a class="toc-backref" href="#id7"><code class="docutils literal"><span class="pre">barDataToLegendData</span></code></a><a class="headerlink" href="#bardatatolegenddata" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="static-bardatatolegenddata">
+<span id="module-viz-barplotchart-statics-bardatatolegenddata"></span><h3><a class="toc-backref" href="#id6">Static  <code class="docutils literal"><span class="pre">barDataToLegendData</span></code></a><a class="headerlink" href="#static-bardatatolegenddata" title="Permalink to this headline">¶</a></h3>
 <p>Deprecated. Convert barData to array of field objects to be consumed by Legend React component.</p>
 <dl class="function">
 <dt id="barDataToLegendData">
@@ -213,7 +209,7 @@ second field with multiple terms to use as the secondary field.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return Array:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-even field"><th class="field-name">Returns Array:</th><td class="field-body"><ul class="first last simple">
 <li>Fields with terms and colors for those terms.</li>
 </ul>
 </td>
@@ -222,9 +218,10 @@ second field with multiple terms to use as the secondary field.</p>
 </table>
 </dd></dl>
 
+<p>BarPlotChart.js:777</p>
 </div>
-<div class="section" id="getdefaultstyleopts">
-<span id="module-viz-barplotchart-statics-getdefaultstyleopts"></span><h3><a class="toc-backref" href="#id8"><code class="docutils literal"><span class="pre">getDefaultStyleOpts</span></code></a><a class="headerlink" href="#getdefaultstyleopts" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="static-getdefaultstyleopts">
+<span id="module-viz-barplotchart-statics-getdefaultstyleopts"></span><h3><a class="toc-backref" href="#id7">Static  <code class="docutils literal"><span class="pre">getDefaultStyleOpts</span></code></a><a class="headerlink" href="#static-getdefaultstyleopts" title="Permalink to this headline">¶</a></h3>
 <dl class="function">
 <dt id="getDefaultStyleOpts">
 <code class="descname">getDefaultStyleOpts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getDefaultStyleOpts" title="Permalink to this definition">¶</a></dt>
@@ -232,12 +229,13 @@ second field with multiple terms to use as the secondary field.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return Object:</th><td class="field-body">Default style options for chart. Should suffice most of the time.</td>
+<tr class="field-odd field"><th class="field-name">Returns Object:</th><td class="field-body">Default style options for chart. Should suffice most of the time.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
+<p>BarPlotChart.js:797</p>
 </div>
 </div>
 </div>
@@ -251,14 +249,13 @@ second field with multiple terms to use as the secondary field.</p>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Object: <code class="docutils literal"><span class="pre">statics</span></code></a><ul>
-<li><a class="reference internal" href="#children">Children</a></li>
 <li><a class="reference internal" href="#functions">Functions</a><ul>
-<li><a class="reference internal" href="#genchartdata"><code class="docutils literal"><span class="pre">genChartData</span></code></a></li>
-<li><a class="reference internal" href="#countfieldterm"><code class="docutils literal"><span class="pre">countFieldTerm</span></code></a></li>
-<li><a class="reference internal" href="#gettermsforfieldsfromexperiment"><code class="docutils literal"><span class="pre">getTermsForFieldsFromExperiment</span></code></a></li>
-<li><a class="reference internal" href="#genchartbardims"><code class="docutils literal"><span class="pre">genChartBarDims</span></code></a></li>
-<li><a class="reference internal" href="#bardatatolegenddata"><code class="docutils literal"><span class="pre">barDataToLegendData</span></code></a></li>
-<li><a class="reference internal" href="#getdefaultstyleopts"><code class="docutils literal"><span class="pre">getDefaultStyleOpts</span></code></a></li>
+<li><a class="reference internal" href="#static-genchartdata">Static  <code class="docutils literal"><span class="pre">genChartData</span></code></a></li>
+<li><a class="reference internal" href="#static-countfieldterm">Static  <code class="docutils literal"><span class="pre">countFieldTerm</span></code></a></li>
+<li><a class="reference internal" href="#static-gettermsforfieldsfromexperiment">Static  <code class="docutils literal"><span class="pre">getTermsForFieldsFromExperiment</span></code></a></li>
+<li><a class="reference internal" href="#static-genchartbardims">Static  <code class="docutils literal"><span class="pre">genChartBarDims</span></code></a></li>
+<li><a class="reference internal" href="#static-bardatatolegenddata">Static  <code class="docutils literal"><span class="pre">barDataToLegendData</span></code></a></li>
+<li><a class="reference internal" href="#static-getdefaultstyleopts">Static  <code class="docutils literal"><span class="pre">getDefaultStyleOpts</span></code></a></li>
 </ul>
 </li>
 </ul>

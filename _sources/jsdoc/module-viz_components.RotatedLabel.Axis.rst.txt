@@ -6,34 +6,72 @@ Component: ``Axis``
 
 
 
+
+An Axis component which would generate and contain multiple RotatedLabel components, data for which is provided via props.labels.
+
+
 .. contents:: Local Navigation
    :local:
 
 
-Children
-========
 
-.. toctree::
-   :maxdepth: 3
-   
-   
-
-
-Description
-===========
-
-An Axis component which would generate and contain multiple RotatedLabel components, data for which is provided via props.labels.
-
-DPROPERTIES 
-
-
-
-PROPS
+Props
+=====
 
 
 
 
+``labels``
+----------
 
+Type: **Array.<Object>**
+
+.. js:property:: labels
+
+List of label objects containing 'name' and maybe 'term'.
+
+
+
+``labelClassName``
+------------------
+
+Type: **string**
+
+.. js:property:: labelClassName
+
+Class name to give to rendered label <div> elements.
+
+
+
+``className``
+-------------
+
+Type: **string**
+
+.. js:property:: className
+
+Outer <div> element class name, in addition to 'rotated-label-axis'.
+
+Functions
+=========
+
+
+
+.. _module-viz_components.RotatedLabel.Axis.getDefaultProps:
+
+
+Instance Private ``getDefaultProps``
+------------------------------------
+
+
+
+.. js:function:: getDefaultProps()
+
+    
+    :returns Object: Common default props.
+    
+
+RotatedLabel.js:89
 
 
 

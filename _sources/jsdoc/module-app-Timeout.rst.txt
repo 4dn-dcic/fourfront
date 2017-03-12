@@ -7,12 +7,15 @@ Class: ``Timeout``
 
 Member Of :doc:`module-app`
 
+
+
+
+
 .. contents:: Local Navigation
    :local:
 
-
-Children
-========
+1 Children
+==========
 
 .. toctree::
    :maxdepth: 3
@@ -20,13 +23,6 @@ Children
    module-app-Timeout.Timeout
    
 
-
-
-DPROPERTIES 
-
-
-
-PROPS
 
 
 

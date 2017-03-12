@@ -1,27 +1,11 @@
-.. _module-item-pages_components.FilesInSetTable.SubmitterLink:
+.. _undefined.SubmitterLink:
 
 ============================
 Component: ``SubmitterLink``
 ============================
 
 
-Member Of :doc:`module-item-pages_components.FilesInSetTable`
 
-.. contents:: Local Navigation
-   :local:
-
-
-Children
-========
-
-.. toctree::
-   :maxdepth: 3
-   
-   
-
-
-Description
-===========
 
 Show the submitter's name and link to their profile.
 If passed a props.labName and props.showLabName == true,
@@ -29,14 +13,59 @@ then will show that labName instead. Use for when hovering over the lab icon, fo
 
 Also shows props.labName if no props.user object supplied.
 
-DPROPERTIES 
 
-[object Object]
-
-PROPS
+.. contents:: Local Navigation
+   :local:
 
 
 
+Props
+=====
+
+
+
+
+``user``
+--------
+
+Type: **Object**
+
+.. js:property:: user
+
+User object.
+
+
+
+``user.display_title``
+----------------------
+
+Type: **Object**
+
+.. js:property:: user.display_title
+
+User's name to display.
+
+
+
+``labName``
+-----------
+
+Type: **string**
+
+.. js:property:: labName
+
+Name of Lab to show if props.showLabName is true.
+
+
+
+``showLabName``
+---------------
+
+Type: **boolean**
+
+.. js:property:: showLabName
+
+Show lab name instead of props.user.display_title if true.
 
 
 

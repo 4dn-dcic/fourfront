@@ -59,59 +59,63 @@
             
   <div class="section" id="object-viz-chart-data-controller">
 <h1>Object: <code class="docutils literal"><span class="pre">viz/chart-data-controller</span></code><a class="headerlink" href="#object-viz-chart-data-controller" title="Permalink to this headline">¶</a></h1>
+<p>This is a utility to manage charts&#8217; experiment data in one global place and distribute to charts throughout UI.
+The mechanism for this is roughly diagrammed here:</p>
+<img alt="https://hms-dbmi.slack.com/files/alexkb/F4C8KQKMM/chartdatacontroller.png" src="https://hms-dbmi.slack.com/files/alexkb/F4C8KQKMM/chartdatacontroller.png" />
 <div class="contents local topic" id="local-navigation">
 <p class="topic-title first">Local Navigation</p>
 <ul class="simple">
-<li><a class="reference internal" href="#children" id="id1">Children</a></li>
-<li><a class="reference internal" href="#description" id="id2">Description</a></li>
-<li><a class="reference internal" href="#functions" id="id3">Functions</a><ul>
-<li><a class="reference internal" href="#initialize" id="id4"><code class="docutils literal"><span class="pre">initialize</span></code></a></li>
-<li><a class="reference internal" href="#isinitialized" id="id5"><code class="docutils literal"><span class="pre">isInitialized</span></code></a></li>
-<li><a class="reference internal" href="#registerupdatecallback" id="id6"><code class="docutils literal"><span class="pre">registerUpdateCallback</span></code></a></li>
-<li><a class="reference internal" href="#unregisterupdatecallback" id="id7"><code class="docutils literal"><span class="pre">unregisterUpdateCallback</span></code></a></li>
-<li><a class="reference internal" href="#registerloadstartcallback" id="id8"><code class="docutils literal"><span class="pre">registerLoadStartCallback</span></code></a></li>
-<li><a class="reference internal" href="#unregisterloadstartcallback" id="id9"><code class="docutils literal"><span class="pre">unregisterLoadStartCallback</span></code></a></li>
-<li><a class="reference internal" href="#getstate" id="id10"><code class="docutils literal"><span class="pre">getState</span></code></a></li>
-<li><a class="reference internal" href="#setstate" id="id11"><code class="docutils literal"><span class="pre">setState</span></code></a></li>
-<li><a class="reference internal" href="#sync" id="id12"><code class="docutils literal"><span class="pre">sync</span></code></a></li>
-<li><a class="reference internal" href="#updatestats" id="id13"><code class="docutils literal"><span class="pre">updateStats</span></code></a></li>
+<li><a class="reference internal" href="#children" id="id29">1 Children</a></li>
+<li><a class="reference internal" href="#functions" id="id30">Functions</a><ul>
+<li><a class="reference internal" href="#static-public-initialize" id="id31">Static Public <code class="docutils literal"><span class="pre">initialize</span></code></a></li>
+<li><a class="reference internal" href="#static-public-isinitialized" id="id32">Static Public <code class="docutils literal"><span class="pre">isInitialized</span></code></a></li>
+<li><a class="reference internal" href="#static-public-registerupdatecallback" id="id33">Static Public <code class="docutils literal"><span class="pre">registerUpdateCallback</span></code></a></li>
+<li><a class="reference internal" href="#static-public-unregisterupdatecallback" id="id34">Static Public <code class="docutils literal"><span class="pre">unregisterUpdateCallback</span></code></a></li>
+<li><a class="reference internal" href="#static-public-registerloadstartcallback" id="id35">Static Public <code class="docutils literal"><span class="pre">registerLoadStartCallback</span></code></a></li>
+<li><a class="reference internal" href="#static-public-unregisterloadstartcallback" id="id36">Static Public <code class="docutils literal"><span class="pre">unregisterLoadStartCallback</span></code></a></li>
+<li><a class="reference internal" href="#static-public-getstate" id="id37">Static Public <code class="docutils literal"><span class="pre">getState</span></code></a></li>
+<li><a class="reference internal" href="#static-private-setstate" id="id38">Static Private <code class="docutils literal"><span class="pre">setState</span></code></a></li>
+<li><a class="reference internal" href="#static-public-sync" id="id39">Static Public <code class="docutils literal"><span class="pre">sync</span></code></a></li>
+<li><a class="reference internal" href="#static-private-handleupdatedfilters" id="id40">Static Private <code class="docutils literal"><span class="pre">handleUpdatedFilters</span></code></a></li>
+<li><a class="reference internal" href="#static-private-fetchunfilteredandfilteredexperiments" id="id41">Static Private <code class="docutils literal"><span class="pre">fetchUnfilteredAndFilteredExperiments</span></code></a></li>
+<li><a class="reference internal" href="#static-private-fetchandsetunfilteredexperiments" id="id42">Static Private <code class="docutils literal"><span class="pre">fetchAndSetUnfilteredExperiments</span></code></a></li>
+<li><a class="reference internal" href="#static-private-fetchandsetfilteredexperiments" id="id43">Static Private <code class="docutils literal"><span class="pre">fetchAndSetFilteredExperiments</span></code></a></li>
+<li><a class="reference internal" href="#static-private-getfieldsrequiredurlquerypart" id="id44">Static Private <code class="docutils literal"><span class="pre">getFieldsRequiredURLQueryPart</span></code></a></li>
+<li><a class="reference internal" href="#static-private-getfilteredcontexthref" id="id45">Static Private <code class="docutils literal"><span class="pre">getFilteredContextHref</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#members" id="id46">Members</a></li>
 </ul>
 </div>
 <div class="section" id="children">
-<h2><a class="toc-backref" href="#id1">Children</a><a class="headerlink" href="#children" title="Permalink to this headline">¶</a></h2>
+<h2><a class="toc-backref" href="#id29">1 Children</a><a class="headerlink" href="#children" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="module-viz_chart-data-controller.Provider.html">Component: <code class="docutils literal"><span class="pre">Provider</span></code></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module-viz_chart-data-controller.Provider.html#children">Children</a><ul class="simple">
+<li class="toctree-l2"><a class="reference internal" href="module-viz_chart-data-controller.Provider.html#props">Props</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="module-viz_chart-data-controller.Provider.html#id"><code class="docutils literal"><span class="pre">id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-viz_chart-data-controller.Provider.html#children"><code class="docutils literal"><span class="pre">children</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="module-viz_chart-data-controller.Provider.html#description">Description</a></li>
 <li class="toctree-l2"><a class="reference internal" href="module-viz_chart-data-controller.Provider.html#functions">Functions</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="module-viz_chart-data-controller.Provider.html#render"><code class="docutils literal"><span class="pre">render</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-viz_chart-data-controller.Provider.html#instance-private-componentwillmount">Instance Private <code class="docutils literal"><span class="pre">componentWillMount</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-viz_chart-data-controller.Provider.html#instance-private-componentwillunmount">Instance Private <code class="docutils literal"><span class="pre">componentWillUnmount</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="module-viz_chart-data-controller.Provider.html#instance-private-render">Instance Private <code class="docutils literal"><span class="pre">render</span></code></a></li>
 </ul>
 </li>
 </ul>
 </li>
 </ul>
 </div>
-</div>
-<div class="section" id="description">
-<h2><a class="toc-backref" href="#id2">Description</a><a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
-<p>This is a utility to manage charts&#8217; experiment data in one global place and distribute to charts throughout UI.
-The mechanism for this is roughly diagrammed [here]{&#64;link <a class="reference external" href="https://hms-dbmi.slack.com/files/alexkb/F4C8KQKMM/chartdatacontroller.png">https://hms-dbmi.slack.com/files/alexkb/F4C8KQKMM/chartdatacontroller.png</a> } .</p>
-<p>DPROPERTIES</p>
-<p>PROPS</p>
 </div>
 <div class="section" id="functions">
-<h2><a class="toc-backref" href="#id3">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="initialize">
-<span id="module-viz-chart-data-controller-initialize"></span><h3><a class="toc-backref" href="#id4"><code class="docutils literal"><span class="pre">initialize</span></code></a><a class="headerlink" href="#initialize" title="Permalink to this headline">¶</a></h3>
+<h2><a class="toc-backref" href="#id30">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="static-public-initialize">
+<span id="module-viz-chart-data-controller-initialize"></span><h3><a class="toc-backref" href="#id31">Static Public <code class="docutils literal"><span class="pre">initialize</span></code></a><a class="headerlink" href="#static-public-initialize" title="Permalink to this headline">¶</a></h3>
 <p>This function must be called before this component is used anywhere else.</p>
 <dl class="function">
-<dt>
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>requestURLBase[, updateStats][, callback][, resync]</em><span class="sig-paren">)</span></dt>
+<dt id="initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>requestURLBase[, updateStats][, callback][, resync]</em><span class="sig-paren">)</span><a class="headerlink" href="#initialize" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -124,7 +128,7 @@ The mechanism for this is roughly diagrammed [here]{&#64;link <a class="referenc
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Return undefined:</th></tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns undefined:</th></tr>
 <tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">This function must be called before this component is used anywhere else.</p>
 </td>
 </tr>
@@ -132,9 +136,10 @@ The mechanism for this is roughly diagrammed [here]{&#64;link <a class="referenc
 </table>
 </dd></dl>
 
+<p>chart-data-controller.js:310</p>
 </div>
-<div class="section" id="isinitialized">
-<span id="module-viz-chart-data-controller-isinitialized"></span><h3><a class="toc-backref" href="#id5"><code class="docutils literal"><span class="pre">isInitialized</span></code></a><a class="headerlink" href="#isinitialized" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="static-public-isinitialized">
+<span id="module-viz-chart-data-controller-isinitialized"></span><h3><a class="toc-backref" href="#id32">Static Public <code class="docutils literal"><span class="pre">isInitialized</span></code></a><a class="headerlink" href="#static-public-isinitialized" title="Permalink to this headline">¶</a></h3>
 <p>Whether component has been initialized and may be used.</p>
 <dl class="function">
 <dt id="isInitialized">
@@ -143,15 +148,17 @@ The mechanism for this is roughly diagrammed [here]{&#64;link <a class="referenc
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return boolean:</th><td class="field-body">True if initialized.</td>
+<tr class="field-odd field"><th class="field-name" colspan="2">Returns boolean:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">True if initialized.</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
+<p>chart-data-controller.js:385</p>
 </div>
-<div class="section" id="registerupdatecallback">
-<span id="module-viz-chart-data-controller-registerupdatecallback"></span><h3><a class="toc-backref" href="#id6"><code class="docutils literal"><span class="pre">registerUpdateCallback</span></code></a><a class="headerlink" href="#registerupdatecallback" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="static-public-registerupdatecallback">
+<span id="module-viz-chart-data-controller-registerupdatecallback"></span><h3><a class="toc-backref" href="#id33">Static Public <code class="docutils literal"><span class="pre">registerUpdateCallback</span></code></a><a class="headerlink" href="#static-public-registerupdatecallback" title="Permalink to this headline">¶</a></h3>
 <p>For React components to register an &#8220;update me&#8221; function, i.e. forceUpdate,
 to be called when new experiments/filteredExperiments has finished loading from back-end.</p>
 <dl class="function">
@@ -167,7 +174,7 @@ to be called when new experiments/filteredExperiments has finished loading from 
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Return function:</th></tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns function:</th></tr>
 <tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">A function which may be called to unregister the callback, in lieu of ChartDataController.unregisterUpdateCallback.</p>
 </td>
 </tr>
@@ -175,9 +182,10 @@ to be called when new experiments/filteredExperiments has finished loading from 
 </table>
 </dd></dl>
 
+<p>chart-data-controller.js:399</p>
 </div>
-<div class="section" id="unregisterupdatecallback">
-<span id="module-viz-chart-data-controller-unregisterupdatecallback"></span><h3><a class="toc-backref" href="#id7"><code class="docutils literal"><span class="pre">unregisterUpdateCallback</span></code></a><a class="headerlink" href="#unregisterupdatecallback" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="static-public-unregisterupdatecallback">
+<span id="module-viz-chart-data-controller-unregisterupdatecallback"></span><h3><a class="toc-backref" href="#id34">Static Public <code class="docutils literal"><span class="pre">unregisterUpdateCallback</span></code></a><a class="headerlink" href="#static-public-unregisterupdatecallback" title="Permalink to this headline">¶</a></h3>
 <p>The opposite of registerUpdateCallback.</p>
 <dl class="function">
 <dt id="unregisterUpdateCallback">
@@ -191,7 +199,7 @@ to be called when new experiments/filteredExperiments has finished loading from 
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Return undefined:</th></tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns undefined:</th></tr>
 <tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">The opposite of registerUpdateCallback.</p>
 </td>
 </tr>
@@ -199,9 +207,10 @@ to be called when new experiments/filteredExperiments has finished loading from 
 </table>
 </dd></dl>
 
+<p>chart-data-controller.js:417</p>
 </div>
-<div class="section" id="registerloadstartcallback">
-<span id="module-viz-chart-data-controller-registerloadstartcallback"></span><h3><a class="toc-backref" href="#id8"><code class="docutils literal"><span class="pre">registerLoadStartCallback</span></code></a><a class="headerlink" href="#registerloadstartcallback" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="static-public-registerloadstartcallback">
+<span id="module-viz-chart-data-controller-registerloadstartcallback"></span><h3><a class="toc-backref" href="#id35">Static Public <code class="docutils literal"><span class="pre">registerLoadStartCallback</span></code></a><a class="headerlink" href="#static-public-registerloadstartcallback" title="Permalink to this headline">¶</a></h3>
 <p>Same as registerUpdateCallback but for when starting AJAX fetch of data.</p>
 <dl class="function">
 <dt id="registerLoadStartCallback">
@@ -216,7 +225,7 @@ to be called when new experiments/filteredExperiments has finished loading from 
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Return function:</th></tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns function:</th></tr>
 <tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">Function for unregistering callback which may be used in lieu of &#64;see ChartDataController.unregisterUpdateCallback().</p>
 </td>
 </tr>
@@ -224,9 +233,10 @@ to be called when new experiments/filteredExperiments has finished loading from 
 </table>
 </dd></dl>
 
+<p>chart-data-controller.js:431</p>
 </div>
-<div class="section" id="unregisterloadstartcallback">
-<span id="module-viz-chart-data-controller-unregisterloadstartcallback"></span><h3><a class="toc-backref" href="#id9"><code class="docutils literal"><span class="pre">unregisterLoadStartCallback</span></code></a><a class="headerlink" href="#unregisterloadstartcallback" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="static-public-unregisterloadstartcallback">
+<span id="module-viz-chart-data-controller-unregisterloadstartcallback"></span><h3><a class="toc-backref" href="#id36">Static Public <code class="docutils literal"><span class="pre">unregisterLoadStartCallback</span></code></a><a class="headerlink" href="#static-public-unregisterloadstartcallback" title="Permalink to this headline">¶</a></h3>
 <p>The opposite of registerLoadStartCallback.</p>
 <dl class="function">
 <dt id="unregisterLoadStartCallback">
@@ -240,7 +250,7 @@ to be called when new experiments/filteredExperiments has finished loading from 
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Return undefined:</th></tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns undefined:</th></tr>
 <tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">The opposite of registerLoadStartCallback.</p>
 </td>
 </tr>
@@ -248,9 +258,10 @@ to be called when new experiments/filteredExperiments has finished loading from 
 </table>
 </dd></dl>
 
+<p>chart-data-controller.js:448</p>
 </div>
-<div class="section" id="getstate">
-<span id="module-viz-chart-data-controller-getstate"></span><h3><a class="toc-backref" href="#id10"><code class="docutils literal"><span class="pre">getState</span></code></a><a class="headerlink" href="#getstate" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="static-public-getstate">
+<span id="module-viz-chart-data-controller-getstate"></span><h3><a class="toc-backref" href="#id37">Static Public <code class="docutils literal"><span class="pre">getState</span></code></a><a class="headerlink" href="#static-public-getstate" title="Permalink to this headline">¶</a></h3>
 <p>Get current state. Similar to Redux&#8217;s store.getState().</p>
 <dl class="function">
 <dt id="getState">
@@ -259,15 +270,16 @@ to be called when new experiments/filteredExperiments has finished loading from 
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Return Object:</th><td class="field-body">Get current state. Similar to Redux&#8217;s store.getState().</td>
+<tr class="field-odd field"><th class="field-name">Returns Object:</th><td class="field-body">Get current state. Similar to Redux&#8217;s store.getState().</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
+<p>chart-data-controller.js:460</p>
 </div>
-<div class="section" id="setstate">
-<span id="module-viz-chart-data-controller-setstate"></span><h3><a class="toc-backref" href="#id11"><code class="docutils literal"><span class="pre">setState</span></code></a><a class="headerlink" href="#setstate" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="static-private-setstate">
+<span id="module-viz-chart-data-controller-setstate"></span><h3><a class="toc-backref" href="#id38">Static Private <code class="docutils literal"><span class="pre">setState</span></code></a><a class="headerlink" href="#static-private-setstate" title="Permalink to this headline">¶</a></h3>
 <p>Analogous to a component&#8217;s setState. Updates the private state of
 ChartDataController and notifies update callbacks if experiments or filtered
 experiments have changed.</p>
@@ -284,20 +296,21 @@ experiments have changed.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return *:</th><td class="field-body"><p class="first last">Result of callback, or undefined.</p>
+<tr class="field-even field"><th class="field-name">Returns *:</th><td class="field-body"><p class="first last">Result of callback, or undefined.</p>
 </td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
+<p>chart-data-controller.js:473</p>
 </div>
-<div class="section" id="sync">
-<span id="module-viz-chart-data-controller-sync"></span><h3><a class="toc-backref" href="#id12"><code class="docutils literal"><span class="pre">sync</span></code></a><a class="headerlink" href="#sync" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="static-public-sync">
+<span id="module-viz-chart-data-controller-sync"></span><h3><a class="toc-backref" href="#id39">Static Public <code class="docutils literal"><span class="pre">sync</span></code></a><a class="headerlink" href="#static-public-sync" title="Permalink to this headline">¶</a></h3>
 <p>Fetch new data from back-end regardless of expSetFilters state, e.g. for when session has changed (&#64;see App.prototype.componentDidUpdate()).</p>
 <dl class="function">
-<dt>
-<code class="descname">sync</code><span class="sig-paren">(</span><span class="optional">[</span><em>callback</em><span class="optional">]</span><span class="sig-paren">)</span></dt>
+<dt id="sync">
+<code class="descname">sync</code><span class="sig-paren">(</span><span class="optional">[</span><em>callback</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#sync" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -307,7 +320,7 @@ experiments have changed.</p>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Return undefined:</th></tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns undefined:</th></tr>
 <tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">Fetch new data from back-end regardless of expSetFilters state, e.g. for when session has changed (&#64;see App.prototype.componentDidUpdate()).</p>
 </td>
 </tr>
@@ -315,25 +328,210 @@ experiments have changed.</p>
 </table>
 </dd></dl>
 
+<p>chart-data-controller.js:499</p>
 </div>
-<div class="section" id="updatestats">
-<span id="module-viz-chart-data-controller-updatestats"></span><h3><a class="toc-backref" href="#id13"><code class="docutils literal"><span class="pre">updateStats</span></code></a><a class="headerlink" href="#updatestats" title="Permalink to this headline">¶</a></h3>
-<p>Update stats in top left corner of page, if updateState param was passed in during initialization.</p>
+<div class="section" id="static-private-handleupdatedfilters">
+<span id="module-viz-chart-data-controller-handleupdatedfilters"></span><h3><a class="toc-backref" href="#id40">Static Private <code class="docutils literal"><span class="pre">handleUpdatedFilters</span></code></a><a class="headerlink" href="#static-private-handleupdatedfilters" title="Permalink to this headline">¶</a></h3>
+<p>Internally used to either fetch new filtered experiments or clear them, according to state of expSetFilters from Redux store.
+Called by listener to Redux store.</p>
 <dl class="function">
-<dt id="updateStats">
-<code class="descname">updateStats</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#updateStats" title="Permalink to this definition">¶</a></dt>
+<dt id="handleUpdatedFilters">
+<code class="descname">handleUpdatedFilters</code><span class="sig-paren">(</span><em>expSetFilters</em>, <em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#handleUpdatedFilters" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Return undefined:</th></tr>
-<tr class="field-odd field"><td>&#160;</td><td class="field-body">Update stats in top left corner of page, if updateState param was passed in during initialization.</td>
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>expSetFilters</strong> (<em>Object</em>) &#8211; (Newly-updated) Experiment Set Filters in Redux store.</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; Callback function to call after updating state.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns undefined:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">Nothing</p>
+</td>
 </tr>
 </tbody>
 </table>
 </dd></dl>
 
+<p>chart-data-controller.js:516</p>
 </div>
+<div class="section" id="static-private-fetchunfilteredandfilteredexperiments">
+<span id="module-viz-chart-data-controller-fetchunfilteredandfilteredexperiments"></span><h3><a class="toc-backref" href="#id41">Static Private <code class="docutils literal"><span class="pre">fetchUnfilteredAndFilteredExperiments</span></code></a><a class="headerlink" href="#static-private-fetchunfilteredandfilteredexperiments" title="Permalink to this headline">¶</a></h3>
+<p>Used internally to fetch both all &amp; filtered experiments then calls ChartDataController.setState({ experiments, filteredExperiments }, callback).
+Called by ChartDataController.sync() internally.</p>
+<dl class="function">
+<dt id="fetchUnfilteredAndFilteredExperiments">
+<code class="descname">fetchUnfilteredAndFilteredExperiments</code><span class="sig-paren">(</span><em>[reduxStoreState][, callback]</em><span class="sig-paren">)</span><a class="headerlink" href="#fetchUnfilteredAndFilteredExperiments" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>reduxStoreState</strong> (<em>Object</em>) &#8211; Current Redux store state to get expSetFilters and current href from. If not provided, gets it from store.getState().</li>
+<li><strong>callback</strong> (<em>function</em>) &#8211; Optional callback function to call after setting updated state.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns undefined:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">Nothing</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>chart-data-controller.js:578</p>
+</div>
+<div class="section" id="static-private-fetchandsetunfilteredexperiments">
+<span id="module-viz-chart-data-controller-fetchandsetunfilteredexperiments"></span><h3><a class="toc-backref" href="#id42">Static Private <code class="docutils literal"><span class="pre">fetchAndSetUnfilteredExperiments</span></code></a><a class="headerlink" href="#static-private-fetchandsetunfilteredexperiments" title="Permalink to this headline">¶</a></h3>
+<p>Like ChartDataController.fetchUnfilteredAndFilteredExperiments(), but only to get all experiments.
+Not actually used, but could be, for something.</p>
+<dl class="function">
+<dt id="fetchAndSetUnfilteredExperiments">
+<code class="descname">fetchAndSetUnfilteredExperiments</code><span class="sig-paren">(</span><span class="optional">[</span><em>callback</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#fetchAndSetUnfilteredExperiments" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>callback</strong> (<em>function</em>) &#8211; Optional callback function.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns undefined:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">Nothing</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>chart-data-controller.js:633</p>
+</div>
+<div class="section" id="static-private-fetchandsetfilteredexperiments">
+<span id="module-viz-chart-data-controller-fetchandsetfilteredexperiments"></span><h3><a class="toc-backref" href="#id43">Static Private <code class="docutils literal"><span class="pre">fetchAndSetFilteredExperiments</span></code></a><a class="headerlink" href="#static-private-fetchandsetfilteredexperiments" title="Permalink to this headline">¶</a></h3>
+<p>Like ChartDataController.fetchUnfilteredAndFilteredExperiments(), but only to get filtered/selected experiments according to expSetFilters from Redux store.</p>
+<dl class="function">
+<dt id="fetchAndSetFilteredExperiments">
+<code class="descname">fetchAndSetFilteredExperiments</code><span class="sig-paren">(</span><span class="optional">[</span><em>callback</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#fetchAndSetFilteredExperiments" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>callback</strong> (<em>function</em>) &#8211; Optional callback function.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns undefined:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">Nothing</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>chart-data-controller.js:654</p>
+</div>
+<div class="section" id="static-private-getfieldsrequiredurlquerypart">
+<span id="module-viz-chart-data-controller-getfieldsrequiredurlquerypart"></span><h3><a class="toc-backref" href="#id44">Static Private <code class="docutils literal"><span class="pre">getFieldsRequiredURLQueryPart</span></code></a><a class="headerlink" href="#static-private-getfieldsrequiredurlquerypart" title="Permalink to this headline">¶</a></h3>
+<p>Internally used to help form query part of URL.
+Adds &#8216;field=&lt;field.name.1&gt;&amp;...&lt;field.name.n&gt;&#8217; for each field required for chart(s).</p>
+<dl class="function">
+<dt id="getFieldsRequiredURLQueryPart">
+<code class="descname">getFieldsRequiredURLQueryPart</code><span class="sig-paren">(</span><span class="optional">[</span><em>fields</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#getFieldsRequiredURLQueryPart" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>fields</strong> (<em>Array.&lt;string&gt;</em>) &#8211; Fields to fetch from back-end search result(s).</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns string:</th><td class="field-body"><p class="first last">Part of URL query.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>chart-data-controller.js:680</p>
+</div>
+<div class="section" id="static-private-getfilteredcontexthref">
+<span id="module-viz-chart-data-controller-getfilteredcontexthref"></span><h3><a class="toc-backref" href="#id45">Static Private <code class="docutils literal"><span class="pre">getFilteredContextHref</span></code></a><a class="headerlink" href="#static-private-getfilteredcontexthref" title="Permalink to this headline">¶</a></h3>
+<p>Internally used to generate a URL from current href and expSetFilters from Redux store to fetch filtered/selected experiments from back-end.
+If no &#8216;search&#8217;-compatible href is set in Redux store, &#8216;/browse/&#8217; is used.</p>
+<dl class="function">
+<dt id="getFilteredContextHref">
+<code class="descname">getFilteredContextHref</code><span class="sig-paren">(</span><em>[expSetFilters][, href]</em><span class="sig-paren">)</span><a class="headerlink" href="#getFilteredContextHref" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>expSetFilters</strong> (<em>Object</em>) &#8211; Current Experiment Set Filters in Redux store.</li>
+<li><strong>href</strong> (<em>string</em>) &#8211; Current href from Redux store.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns string:</th><td class="field-body"><p class="first last">URL for fetching filtered experiments/sets from back-end.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>chart-data-controller.js:696</p>
+</div>
+</div>
+<div class="section" id="members">
+<h2><a class="toc-backref" href="#id46">Members</a><a class="headerlink" href="#members" title="Permalink to this headline">¶</a></h2>
+<p id="module-viz-chart-data-controller-title"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="module-viz-chart-data-controller-field"><code class="docutils literal"><span class="pre">field</span></code></p>
+<p id="id1"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id2"><code class="docutils literal"><span class="pre">field</span></code></p>
+<p id="id3"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id4"><code class="docutils literal"><span class="pre">field</span></code></p>
+<p id="id5"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id6"><code class="docutils literal"><span class="pre">field</span></code></p>
+<p id="id7"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id8"><code class="docutils literal"><span class="pre">field</span></code></p>
+<p id="id9"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="module-viz-chart-data-controller-aggregatefield"><code class="docutils literal"><span class="pre">aggregatefield</span></code></p>
+<p id="id10"><code class="docutils literal"><span class="pre">field</span></code></p>
+<p id="module-viz-chart-data-controller-isfacet"><code class="docutils literal"><span class="pre">isFacet</span></code></p>
+<p id="module-viz-chart-data-controller-size"><code class="docutils literal"><span class="pre">size</span></code></p>
+<p id="id11"><code class="docutils literal"><span class="pre">field</span></code></p>
+<p id="id12"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id13"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id14"><code class="docutils literal"><span class="pre">field</span></code></p>
+<p id="id15"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id16"><code class="docutils literal"><span class="pre">field</span></code></p>
+<p id="id17"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="id18"><code class="docutils literal"><span class="pre">aggregatefield</span></code></p>
+<p id="id19"><code class="docutils literal"><span class="pre">field</span></code></p>
+<p id="id20"><code class="docutils literal"><span class="pre">isFacet</span></code></p>
+<p id="id21"><code class="docutils literal"><span class="pre">size</span></code></p>
+<p id="module-viz-chart-data-controller-resync"><code class="docutils literal"><span class="pre">resync</span></code></p>
+<p id="module-viz-chart-data-controller-filteredexperiments"><code class="docutils literal"><span class="pre">filteredExperiments</span></code></p>
+<p id="module-viz-chart-data-controller-experiment-sets"><code class="docutils literal"><span class="pre">experiment_sets</span></code></p>
+<p id="module-viz-chart-data-controller-experiments"><code class="docutils literal"><span class="pre">experiments</span></code></p>
+<p id="module-viz-chart-data-controller-files"><code class="docutils literal"><span class="pre">files</span></code></p>
+<p id="module-viz-chart-data-controller-current"><code class="docutils literal"><span class="pre">current</span></code></p>
+<p id="id22"><code class="docutils literal"><span class="pre">current</span></code></p>
+<p id="module-viz-chart-data-controller-total"><code class="docutils literal"><span class="pre">total</span></code></p>
+<p id="module-viz-chart-data-controller-reduxstorestate"><code class="docutils literal"><span class="pre">reduxStoreState</span></code></p>
+<p id="id23"><code class="docutils literal"><span class="pre">experiments</span></code></p>
+<p id="id24"><code class="docutils literal"><span class="pre">filteredExperiments</span></code></p>
+<p id="id25"><code class="docutils literal"><span class="pre">experiments</span></code></p>
+<p id="id26"><code class="docutils literal"><span class="pre">filteredExperiments</span></code></p>
+<p id="id27"><code class="docutils literal"><span class="pre">experiments</span></code></p>
+<p id="id28"><code class="docutils literal"><span class="pre">filteredExperiments</span></code></p>
+<p id="module-viz-chart-data-controller-expsetfilters"><code class="docutils literal"><span class="pre">expSetFilters</span></code></p>
+<p id="module-viz-chart-data-controller-href"><code class="docutils literal"><span class="pre">href</span></code></p>
 </div>
 </div>
 
@@ -346,21 +544,26 @@ experiments have changed.</p>
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Object: <code class="docutils literal"><span class="pre">viz/chart-data-controller</span></code></a><ul>
-<li><a class="reference internal" href="#children">Children</a></li>
-<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#children">1 Children</a></li>
 <li><a class="reference internal" href="#functions">Functions</a><ul>
-<li><a class="reference internal" href="#initialize"><code class="docutils literal"><span class="pre">initialize</span></code></a></li>
-<li><a class="reference internal" href="#isinitialized"><code class="docutils literal"><span class="pre">isInitialized</span></code></a></li>
-<li><a class="reference internal" href="#registerupdatecallback"><code class="docutils literal"><span class="pre">registerUpdateCallback</span></code></a></li>
-<li><a class="reference internal" href="#unregisterupdatecallback"><code class="docutils literal"><span class="pre">unregisterUpdateCallback</span></code></a></li>
-<li><a class="reference internal" href="#registerloadstartcallback"><code class="docutils literal"><span class="pre">registerLoadStartCallback</span></code></a></li>
-<li><a class="reference internal" href="#unregisterloadstartcallback"><code class="docutils literal"><span class="pre">unregisterLoadStartCallback</span></code></a></li>
-<li><a class="reference internal" href="#getstate"><code class="docutils literal"><span class="pre">getState</span></code></a></li>
-<li><a class="reference internal" href="#setstate"><code class="docutils literal"><span class="pre">setState</span></code></a></li>
-<li><a class="reference internal" href="#sync"><code class="docutils literal"><span class="pre">sync</span></code></a></li>
-<li><a class="reference internal" href="#updatestats"><code class="docutils literal"><span class="pre">updateStats</span></code></a></li>
+<li><a class="reference internal" href="#static-public-initialize">Static Public <code class="docutils literal"><span class="pre">initialize</span></code></a></li>
+<li><a class="reference internal" href="#static-public-isinitialized">Static Public <code class="docutils literal"><span class="pre">isInitialized</span></code></a></li>
+<li><a class="reference internal" href="#static-public-registerupdatecallback">Static Public <code class="docutils literal"><span class="pre">registerUpdateCallback</span></code></a></li>
+<li><a class="reference internal" href="#static-public-unregisterupdatecallback">Static Public <code class="docutils literal"><span class="pre">unregisterUpdateCallback</span></code></a></li>
+<li><a class="reference internal" href="#static-public-registerloadstartcallback">Static Public <code class="docutils literal"><span class="pre">registerLoadStartCallback</span></code></a></li>
+<li><a class="reference internal" href="#static-public-unregisterloadstartcallback">Static Public <code class="docutils literal"><span class="pre">unregisterLoadStartCallback</span></code></a></li>
+<li><a class="reference internal" href="#static-public-getstate">Static Public <code class="docutils literal"><span class="pre">getState</span></code></a></li>
+<li><a class="reference internal" href="#static-private-setstate">Static Private <code class="docutils literal"><span class="pre">setState</span></code></a></li>
+<li><a class="reference internal" href="#static-public-sync">Static Public <code class="docutils literal"><span class="pre">sync</span></code></a></li>
+<li><a class="reference internal" href="#static-private-handleupdatedfilters">Static Private <code class="docutils literal"><span class="pre">handleUpdatedFilters</span></code></a></li>
+<li><a class="reference internal" href="#static-private-fetchunfilteredandfilteredexperiments">Static Private <code class="docutils literal"><span class="pre">fetchUnfilteredAndFilteredExperiments</span></code></a></li>
+<li><a class="reference internal" href="#static-private-fetchandsetunfilteredexperiments">Static Private <code class="docutils literal"><span class="pre">fetchAndSetUnfilteredExperiments</span></code></a></li>
+<li><a class="reference internal" href="#static-private-fetchandsetfilteredexperiments">Static Private <code class="docutils literal"><span class="pre">fetchAndSetFilteredExperiments</span></code></a></li>
+<li><a class="reference internal" href="#static-private-getfieldsrequiredurlquerypart">Static Private <code class="docutils literal"><span class="pre">getFieldsRequiredURLQueryPart</span></code></a></li>
+<li><a class="reference internal" href="#static-private-getfilteredcontexthref">Static Private <code class="docutils literal"><span class="pre">getFilteredContextHref</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#members">Members</a></li>
 </ul>
 </li>
 </ul>
