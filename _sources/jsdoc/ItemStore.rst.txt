@@ -1,0 +1,151 @@
+====================
+Class: ``ItemStore``
+====================
+
+
+
+
+
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+
+
+
+Functions
+=========
+
+
+
+.. _ItemStore.create:
+
+
+Instance  ``create``
+--------------------
+
+
+
+.. js:function:: create()
+
+    
+    
+
+store.js:23
+
+
+
+.. _ItemStore.update:
+
+
+Instance  ``update``
+--------------------
+
+
+
+.. js:function:: update()
+
+    
+    
+
+store.js:35
+
+
+
+.. _ItemStore.delete:
+
+
+Instance  ``delete``
+--------------------
+
+
+
+.. js:function:: delete()
+
+    
+    
+
+store.js:47
+
+
+
+.. _ItemStore.fetch:
+
+
+Instance  ``fetch``
+-------------------
+
+
+
+.. js:function:: fetch()
+
+    
+    
+
+store.js:59
+
+
+
+.. _ItemStore.dispatch:
+
+
+Instance  ``dispatch``
+----------------------
+
+
+
+.. js:function:: dispatch()
+
+    
+    
+
+store.js:77
+
+
+
+
+Members
+=======
+
+
+.. _ItemStore._fetch:
+
+``_fetch``
+
+
+
+
+
+
+.. _ItemStore._items:
+
+``_items``
+
+
+
+
+
+
+.. _ItemStore._listeners:
+
+``_listeners``
+
+
+
+
+
+
+.. _ItemStore._items:
+
+``_items``
+
+
+
+
+
+
+
+

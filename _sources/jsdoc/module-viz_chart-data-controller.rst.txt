@@ -8,7 +8,7 @@ Object: ``viz/chart-data-controller``
 This is a utility to manage charts' experiment data in one global place and distribute to charts throughout UI.
 The mechanism for this is roughly diagrammed here:
 
-.. image:: https://hms-dbmi.slack.com/files/alexkb/F4C8KQKMM/chartdatacontroller.png
+.. image:: https://files.slack.com/files-pri/T0723UERE-F4C8KQKMM/chartdatacontroller.png
 
 
 .. contents:: Local Navigation

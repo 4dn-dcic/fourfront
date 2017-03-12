@@ -1,0 +1,31 @@
+.. _module-lib_store.ItemStore:
+
+====================
+Class: ``ItemStore``
+====================
+
+
+Member Of :doc:`module-lib_store`
+
+
+Store for a collection of items persisted via the backend REST API
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

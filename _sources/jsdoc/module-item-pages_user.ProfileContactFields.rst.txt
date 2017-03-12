@@ -1,7 +1,7 @@
 .. _module-item-pages_user.ProfileContactFields:
 
 ===================================
-Namespace: ``ProfileContactFields``
+Component: ``ProfileContactFields``
 ===================================
 
 

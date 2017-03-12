@@ -1,0 +1,98 @@
+.. _module-item-pages_user.UserView:
+
+=======================
+Component: ``UserView``
+=======================
+
+
+Member Of :doc:`module-item-pages_user`
+
+
+Draws a User Profile page.
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+Props
+=====
+
+
+
+
+``context``
+-----------
+
+Type: **Object**
+
+.. js:property:: context
+
+Context value for user, e.g. from Redux store. AKA user object.
+
+
+
+``schemas``
+-----------
+
+Type: **Object**
+
+.. js:property:: schemas
+
+Object of schemas, e.g. passed from app state.
+
+Functions
+=========
+
+
+
+.. _module-item-pages_user.UserView.buildGravatarURL:
+
+
+Static Public ``buildGravatarURL``
+----------------------------------
+
+Generate a URL to get Gravatar image from Gravatar service.
+
+.. js:function:: buildGravatarURL(email, size[, defaultImg])
+
+    
+    :param string email: User's email address.
+    :param number size: Width & height of image square.
+    :param string defaultImg: Style of Gravatar image.
+    :returns string: A URL.
+    
+
+user.js:267
+
+
+
+.. _module-item-pages_user.UserView.gravatar:
+
+
+Static Public ``gravatar``
+--------------------------
+
+Generate an <img> element with provided size, className, and Gravatar src.
+
+.. js:function:: gravatar(email, size, className[, defaultImg])
+
+    
+    :param string email: User's email address.
+    :param number size: Width & height of image square.
+    :param string className: ClassName of <img> element.
+    :param string defaultImg: Style of Gravatar image.
+    :returns Element: A React Image (<img>) element.
+    
+
+user.js:290
+
+
+
+
+
+
+
+
+

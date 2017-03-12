@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Component: UserView &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Component: ProfileContactFields" href="module-item-pages_user.ProfileContactFields.html" />
+    <link rel="prev" title="Component: AccessKeyTable" href="module-item-pages_user.AccessKeyTable.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="module-item-pages_user.ProfileContactFields.html" title="Component: ProfileContactFields"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="module-item-pages_user.AccessKeyTable.html" title="Component: AccessKeyTable"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="module-item-pages_user.html" accesskey="U">Module: <code class="docutils literal"><span class="pre">item-pages/user</span></code></a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="component-userview">
+<span id="module-item-pages-user-userview"></span><h1>Component: <code class="docutils literal"><span class="pre">UserView</span></code><a class="headerlink" href="#component-userview" title="Permalink to this headline">¶</a></h1>
+<p>Member Of <a class="reference internal" href="module-item-pages_user.html"><span class="doc">Module: item-pages/user</span></a></p>
+<p>Draws a User Profile page.</p>
+<div class="contents local topic" id="local-navigation">
+<p class="topic-title first">Local Navigation</p>
+<ul class="simple">
+<li><a class="reference internal" href="#props" id="id1">Props</a><ul>
+<li><a class="reference internal" href="#context" id="id2"><code class="docutils literal"><span class="pre">context</span></code></a></li>
+<li><a class="reference internal" href="#schemas" id="id3"><code class="docutils literal"><span class="pre">schemas</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#functions" id="id4">Functions</a><ul>
+<li><a class="reference internal" href="#static-public-buildgravatarurl" id="id5">Static Public <code class="docutils literal"><span class="pre">buildGravatarURL</span></code></a></li>
+<li><a class="reference internal" href="#static-public-gravatar" id="id6">Static Public <code class="docutils literal"><span class="pre">gravatar</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="props">
+<h2><a class="toc-backref" href="#id1">Props</a><a class="headerlink" href="#props" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="context">
+<h3><a class="toc-backref" href="#id2"><code class="docutils literal"><span class="pre">context</span></code></a><a class="headerlink" href="#context" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>Object</strong></p>
+<p>Context value for user, e.g. from Redux store. AKA user object.</p>
+</div>
+<div class="section" id="schemas">
+<h3><a class="toc-backref" href="#id3"><code class="docutils literal"><span class="pre">schemas</span></code></a><a class="headerlink" href="#schemas" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>Object</strong></p>
+<p>Object of schemas, e.g. passed from app state.</p>
+</div>
+</div>
+<div class="section" id="functions">
+<h2><a class="toc-backref" href="#id4">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="static-public-buildgravatarurl">
+<span id="module-item-pages-user-userview-buildgravatarurl"></span><h3><a class="toc-backref" href="#id5">Static Public <code class="docutils literal"><span class="pre">buildGravatarURL</span></code></a><a class="headerlink" href="#static-public-buildgravatarurl" title="Permalink to this headline">¶</a></h3>
+<p>Generate a URL to get Gravatar image from Gravatar service.</p>
+<dl class="function">
+<dt id="buildGravatarURL">
+<code class="descname">buildGravatarURL</code><span class="sig-paren">(</span><em>email</em>, <em>size</em><span class="optional">[</span>, <em>defaultImg</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#buildGravatarURL" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>email</strong> (<em>string</em>) &#8211; User&#8217;s email address.</li>
+<li><strong>size</strong> (<em>number</em>) &#8211; Width &amp; height of image square.</li>
+<li><strong>defaultImg</strong> (<em>string</em>) &#8211; Style of Gravatar image.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns string:</th><td class="field-body"><p class="first last">A URL.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>user.js:267</p>
+</div>
+<div class="section" id="static-public-gravatar">
+<span id="module-item-pages-user-userview-gravatar"></span><h3><a class="toc-backref" href="#id6">Static Public <code class="docutils literal"><span class="pre">gravatar</span></code></a><a class="headerlink" href="#static-public-gravatar" title="Permalink to this headline">¶</a></h3>
+<p>Generate an &lt;img&gt; element with provided size, className, and Gravatar src.</p>
+<dl class="function">
+<dt id="gravatar">
+<code class="descname">gravatar</code><span class="sig-paren">(</span><em>email</em>, <em>size</em>, <em>className</em><span class="optional">[</span>, <em>defaultImg</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#gravatar" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>email</strong> (<em>string</em>) &#8211; User&#8217;s email address.</li>
+<li><strong>size</strong> (<em>number</em>) &#8211; Width &amp; height of image square.</li>
+<li><strong>className</strong> (<em>string</em>) &#8211; ClassName of &lt;img&gt; element.</li>
+<li><strong>defaultImg</strong> (<em>string</em>) &#8211; Style of Gravatar image.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns Element:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">A React Image (&lt;img&gt;) element.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>user.js:290</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Component: <code class="docutils literal"><span class="pre">UserView</span></code></a><ul>
+<li><a class="reference internal" href="#props">Props</a><ul>
+<li><a class="reference internal" href="#context"><code class="docutils literal"><span class="pre">context</span></code></a></li>
+<li><a class="reference internal" href="#schemas"><code class="docutils literal"><span class="pre">schemas</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#static-public-buildgravatarurl">Static Public <code class="docutils literal"><span class="pre">buildGravatarURL</span></code></a></li>
+<li><a class="reference internal" href="#static-public-gravatar">Static Public <code class="docutils literal"><span class="pre">gravatar</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="module-item-pages_user.AccessKeyTable.html"
+                        title="previous chapter">Component: <code class="docutils literal"><span class="pre">AccessKeyTable</span></code></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="module-item-pages_user.ProfileContactFields.html"
+                        title="next chapter">Component: <code class="docutils literal"><span class="pre">ProfileContactFields</span></code></a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/jsdoc/module-item-pages_user.UserView.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="module-item-pages_user.ProfileContactFields.html" title="Component: ProfileContactFields"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="module-item-pages_user.AccessKeyTable.html" title="Component: AccessKeyTable"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="module-item-pages_user.html" >Module: <code class="docutils literal"><span class="pre">item-pages/user</span></code></a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

@@ -14,8 +14,20 @@ Shows counts of selected experiment_sets, experiments, and files against those p
 
 
 
+Props
+=====
 
 
+
+
+``href``
+--------
+
+Type: **string**
+
+.. js:property:: href
+
+Current location/href passed down from Redux store. Used for determining whether to display QuickInfoBar or not.
 
 Functions
 =========
@@ -26,10 +38,18 @@ Functions
 .. _module-viz_QuickInfoBar.getInitialState:
 
 
-Inner  ``getInitialState``
---------------------------
+Instance Private ``getInitialState``
+------------------------------------
 
+Returns an object containing counts for filtered & total experiments, experiment_sets, and files.
+Counts are set to null by default, and instance's updateCurrentAndTotalCounts method must be called
+each time stats are updated from some high-level component.
 
+Currently this is done by having refs...updateCurrentAndTotalCounts being accessible
+through refs.navigation on app component/module, which makes an 'updateStats' instance function available,
+which is provided to ChartDataController.
+
+Additionally holds {boolean|string} 'show' property, describing what is shown in bottom part; and a {boolean} 'mounted' property.
 
 .. js:function:: getInitialState()
 
@@ -37,85 +57,98 @@ Inner  ``getInitialState``
     :returns Object.<number, boolean, string>: Initial State
     
 
-QuickInfoBar.js:36
-
-
+QuickInfoBar.js:49
 
 
 
 .. _module-viz_QuickInfoBar.updateCurrentAndTotalCounts:
 
 
-Inner  ``updateCurrentAndTotalCounts``
---------------------------------------
+Instance Public ``updateCurrentAndTotalCounts``
+-----------------------------------------------
 
+Publically accessible when QuickInfoBar Component instance has a 'ref' prop set by parent component.
+Use to update stats when expSetFilters change.
 
+Currently this is done through ChartDataController, to which an 'updateStats' callback,
+itself defined in app Component, is provided on initialization.
 
-.. js:function:: updateCurrentAndTotalCounts()
+.. js:function:: updateCurrentAndTotalCounts(current, total[, callback])
 
     
+    :param Object current: Object containing current counts of 'experiments', 'experiment_sets', and 'files'.
+    :param Object total: Same as 'current' param, but containing total counts.
+    :param function callback: Optional callback function.
+    :returns boolean: true
     
 
-QuickInfoBar.js:72
+QuickInfoBar.js:76
 
 
 
 .. _module-viz_QuickInfoBar.updateCurrentCounts:
 
 
-Inner  ``updateCurrentCounts``
-------------------------------
+Instance Public ``updateCurrentCounts``
+---------------------------------------
 
+Same as updateCurrentAndTotalCounts(), but only for current counts.
 
-
-.. js:function:: updateCurrentCounts()
+.. js:function:: updateCurrentCounts(newCounts[, callback])
 
     
+    :param Object newCounts: Object containing current counts of 'experiments', 'experiment_sets', and 'files'.
+    :param function callback: Optional callback function.
+    :returns boolean: true
     
 
-QuickInfoBar.js:84
+QuickInfoBar.js:97
 
 
 
 .. _module-viz_QuickInfoBar.updateTotalCounts:
 
 
-Inner  ``updateTotalCounts``
-----------------------------
+Instance Public ``updateTotalCounts``
+-------------------------------------
 
+Same as updateCurrentAndTotalCounts(), but only for total counts.
 
-
-.. js:function:: updateTotalCounts()
+.. js:function:: updateTotalCounts(newCounts[, callback])
 
     
+    :param Object newCounts: Object containing current counts of 'experiments', 'experiment_sets', and 'files'.
+    :param function callback: Optional callback function.
+    :returns boolean: true
     
 
-QuickInfoBar.js:93
+QuickInfoBar.js:115
 
 
 
 .. _module-viz_QuickInfoBar.isInvisible:
 
 
-Inner  ``isInvisible``
-----------------------
+Instance Public ``isInvisible``
+-------------------------------
 
-Check if component is visible or not.
+Check if QuickInfoBar instance is currently invisible, i.e. according to props.href.
 
 .. js:function:: isInvisible()
 
     
+    :returns boolean: True if counts are null or on a 'href' is not of a page for which searching or summary is applicable.
     
 
-QuickInfoBar.js:103
+QuickInfoBar.js:131
 
 
 
 .. _module-viz_QuickInfoBar.componentWillReceiveProps:
 
 
-Inner  ``componentWillReceiveProps``
-------------------------------------
+Instance Private ``componentWillReceiveProps``
+----------------------------------------------
 
 Updates state.show if no filters are selected.
 
@@ -126,7 +159,25 @@ Updates state.show if no filters are selected.
     :returns undefined: Updates state.show if no filters are selected.
     
 
-QuickInfoBar.js:136
+QuickInfoBar.js:166
+
+
+
+.. _module-viz_QuickInfoBar.componentDidMount:
+
+
+Instance Private ``componentDidMount``
+--------------------------------------
+
+Sets state's 'mounted' property to true.
+
+.. js:function:: componentDidMount()
+
+    
+    
+
+QuickInfoBar.js:178
+
 
 
 
@@ -249,15 +300,6 @@ Members
 
 
 
-.. _module-viz_QuickInfoBar.mounted:
-
-``mounted``
-
-
-
-
-
-
 .. _module-viz_QuickInfoBar.count_experiments:
 
 ``count_experiments``
@@ -369,6 +411,15 @@ Members
 .. _module-viz_QuickInfoBar.show:
 
 ``show``
+
+
+
+
+
+
+.. _module-viz_QuickInfoBar.mounted:
+
+``mounted``
 
 
 

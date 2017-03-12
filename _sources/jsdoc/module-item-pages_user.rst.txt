@@ -20,7 +20,7 @@ Only the User view is exported.
    
    module-item-pages_user.AccessKeyStore
    module-item-pages_user.AccessKeyTable
-   module-item-pages_user.User
+   module-item-pages_user.UserView
    module-item-pages_user.ProfileContactFields
    module-item-pages_user.ProfileWorkFields
    module-item-pages_user.BasicForm
@@ -36,349 +36,26 @@ Functions
 
 
 
-.. _module-item-pages_user.getInitialState:
 
 
-Inner  ``getInitialState``
---------------------------
 
 
 
-.. js:function:: getInitialState()
 
-    
-    
 
-user.js:74
 
 
 
-.. _module-item-pages_user.renderTable:
 
 
-Inner  ``renderTable``
-----------------------
 
 
 
-.. js:function:: renderTable()
 
-    
-    
 
-user.js:82
 
 
 
-.. _module-item-pages_user.render:
-
-
-Inner  ``render``
------------------
-
-
-
-.. js:function:: render()
-
-    
-    
-
-user.js:132
-
-
-
-.. _module-item-pages_user.create:
-
-
-Inner  ``create``
------------------
-
-
-
-.. js:function:: create()
-
-    
-    
-
-user.js:146
-
-
-
-.. _module-item-pages_user.doAction:
-
-
-Inner  ``doAction``
--------------------
-
-
-
-.. js:function:: doAction()
-
-    
-    
-
-user.js:162
-
-
-
-.. _module-item-pages_user.onCreate:
-
-
-Inner  ``onCreate``
--------------------
-
-
-
-.. js:function:: onCreate()
-
-    
-    
-
-user.js:167
-
-
-
-.. _module-item-pages_user.onResetSecret:
-
-
-Inner  ``onResetSecret``
-------------------------
-
-
-
-.. js:function:: onResetSecret()
-
-    
-    
-
-user.js:170
-
-
-
-.. _module-item-pages_user.showNewSecret:
-
-
-Inner  ``showNewSecret``
-------------------------
-
-
-
-.. js:function:: showNewSecret()
-
-    
-    
-
-user.js:173
-
-
-
-.. _module-item-pages_user.onDelete:
-
-
-Inner  ``onDelete``
--------------------
-
-
-
-.. js:function:: onDelete()
-
-    
-    
-
-user.js:197
-
-
-
-.. _module-item-pages_user.onError:
-
-
-Inner  ``onError``
-------------------
-
-
-
-.. js:function:: onError()
-
-    
-    
-
-user.js:207
-
-
-
-.. _module-item-pages_user.hideModal:
-
-
-Inner  ``hideModal``
---------------------
-
-
-
-.. js:function:: hideModal()
-
-    
-    
-
-user.js:221
-
-
-
-
-
-
-
-
-.. _module-item-pages_user.getInitialState:
-
-
-Inner  ``getInitialState``
---------------------------
-
-
-
-.. js:function:: getInitialState()
-
-    
-    
-
-user.js:491
-
-
-
-.. _module-item-pages_user.componentDidMount:
-
-
-Inner  ``componentDidMount``
-----------------------------
-
-
-
-.. js:function:: componentDidMount()
-
-    
-    
-
-user.js:498
-
-
-
-.. _module-item-pages_user.componentWillUnmount:
-
-
-Inner  ``componentWillUnmount``
--------------------------------
-
-
-
-.. js:function:: componentWillUnmount()
-
-    
-    
-
-user.js:514
-
-
-
-
-.. _module-item-pages_user.getInitialState:
-
-
-Inner  ``getInitialState``
---------------------------
-
-
-
-.. js:function:: getInitialState()
-
-    
-    
-
-user.js:652
-
-
-
-.. _module-item-pages_user.handleChange:
-
-
-Inner  ``handleChange``
------------------------
-
-
-
-.. js:function:: handleChange()
-
-    
-    
-
-user.js:658
-
-
-
-.. _module-item-pages_user.handleSubmit:
-
-
-Inner  ``handleSubmit``
------------------------
-
-
-
-.. js:function:: handleSubmit()
-
-    
-    
-
-user.js:662
-
-
-
-.. _module-item-pages_user.render:
-
-
-Inner  ``render``
------------------
-
-
-
-.. js:function:: render()
-
-    
-    
-
-user.js:671
-
-
-
-.. _module-item-pages_user.render:
-
-
-Inner  ``render``
------------------
-
-
-
-.. js:function:: render()
-
-    
-    
-
-user.js:694
-
-
-
-.. _module-item-pages_user.handleSubmit:
-
-
-Inner  ``handleSubmit``
------------------------
-
-
-
-.. js:function:: handleSubmit()
-
-    
-    
-
-user.js:704
 
 
 
@@ -387,18 +64,145 @@ Members
 =======
 
 
+.. _module-item-pages_user.React:
+
+``React``
+
+
+
+
+
+
+.. _module-item-pages_user._:
+
+``_``
+
+
+
+
+
+
+.. _module-item-pages_user.Modal:
+
+``Modal``
+
+
+
+
+
+
+.. _module-item-pages_user.Alert:
+
+``Alert``
+
+
+
+
+
+
+.. _module-item-pages_user.jwt:
+
+``jwt``
+
+
+
+
+
+
+.. _module-item-pages_user.ItemStore:
+
+``ItemStore``
+
+
+
+
+
+
+.. _module-item-pages_user.globals:
+
+``globals``
+
+
+
+
+
+
+.. _module-item-pages_user.store:
+
+``store``
+
+
+
+
+
+
+.. _module-item-pages_user.ajax:
+
+``ajax``
+
+
+
+
+
+
+.. _module-item-pages_user.JWT:
+
+``JWT``
+
+
+
+
+
+
+.. _module-item-pages_user.console:
+
+``console``
+
+
+
+
+
+
+.. _module-item-pages_user.DateUtility:
+
+``DateUtility``
+
+
+
+
+
+
+.. _module-item-pages_user.FormattedInfoBlock:
+
+``FormattedInfoBlock``
+
+
+
+
+
+
+.. _module-item-pages_user.EditableField:
+
+``EditableField``
+
+
+
+
+
+
+.. _module-item-pages_user.FieldSet:
+
+``FieldSet``
+
+
+
+
+
+
 .. _module-item-pages_user.method:
 
 ``method``
 
-
-
-
-
-
-.. _module-item-pages_user.propTypes:
-
-``propTypes``
 
 
 
@@ -495,14 +299,6 @@ Members
 
 
 
-.. _module-item-pages_user.contextTypes:
-
-``contextTypes``
-
-
-
-
-
 
 .. _module-item-pages_user.access_keys:
 
@@ -549,9 +345,9 @@ Members
 
 
 
-.. _module-item-pages_user.User:
+.. _module-item-pages_user.UserView:
 
-``User``
+``UserView``
 
 
 
@@ -843,14 +639,6 @@ Members
 
 ``value``
 
-
-
-
-
-
-.. _module-item-pages_user.contextTypes:
-
-``contextTypes``
 
 
 

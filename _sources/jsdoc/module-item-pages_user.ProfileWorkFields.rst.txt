@@ -1,7 +1,7 @@
 .. _module-item-pages_user.ProfileWorkFields:
 
 ================================
-Namespace: ``ProfileWorkFields``
+Component: ``ProfileWorkFields``
 ================================
 
 
@@ -25,11 +25,28 @@ Functions
 
 
 
+.. _module-item-pages_user.ProfileWorkFields.componentDidMount:
+
+
+Instance Private ``componentDidMount``
+--------------------------------------
+
+If Lab details are not embedded, fetches them.
+
+.. js:function:: componentDidMount()
+
+    
+    
+
+user.js:525
+
+
+
 .. _module-item-pages_user.ProfileWorkFields.getAwardsList:
 
 
-Instance  ``getAwardsList``
----------------------------
+Instance Private ``getAwardsList``
+----------------------------------
 
 Get list of all awards (unique) from list of labs.
 ToDo : Migrate somewhere more static-cy.
@@ -41,15 +58,15 @@ ToDo : Migrate somewhere more static-cy.
     :returns Array.<Object>: List of all unique awards in labs.
     
 
-user.js:525
+user.js:554
 
 
 
 .. _module-item-pages_user.ProfileWorkFields.updateAwardsList:
 
 
-Instance  ``updateAwardsList``
-------------------------------
+Instance Private ``updateAwardsList``
+-------------------------------------
 
 Update state.awards_list with award details from list of lab details.
 
@@ -60,7 +77,7 @@ Update state.awards_list with award details from list of lab details.
     :returns undefined: Nothing.
     
 
-user.js:554
+user.js:584
 
 
 

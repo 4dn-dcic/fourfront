@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Object: ItemHeader &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    <title>Class: ItemStore &#8212; 4D Nucleome Portal 1.0 documentation</title>
     
     <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -28,8 +28,8 @@
     <script type="text/javascript" src="../_static/sidebar.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Python API Reference" href="../pydoc/modules.html" />
-    <link rel="prev" title="Component: ItemFooterRow" href="module-item-pages_components.ItemFooterRow.html" /> 
+    <link rel="next" title="Component: viz/BarPlotChart" href="module-viz_BarPlotChart.html" />
+    <link rel="prev" title="Class: ItemStore" href="module-lib_store.ItemStore.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -42,13 +42,15 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../pydoc/modules.html" title="Python API Reference"
+          <a href="module-viz_BarPlotChart.html" title="Component: viz/BarPlotChart"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="module-item-pages_components.ItemFooterRow.html" title="Component: ItemFooterRow"
+          <a href="module-lib_store.ItemStore.html" title="Class: ItemStore"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">JavaScript API Reference</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="module-lib_store.html" >Module: <code class="docutils literal"><span class="pre">lib/store</span></code></a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="module-lib_store.ItemStore.html" accesskey="U">Class: <code class="docutils literal"><span class="pre">ItemStore</span></code></a> &#187;</li> 
       </ul>
     </div>  
 
@@ -57,30 +59,20 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="object-itemheader">
-<h1>Object: <code class="docutils literal"><span class="pre">ItemHeader</span></code><a class="headerlink" href="#object-itemheader" title="Permalink to this headline">¶</a></h1>
-<p>Common partial components for header shown on Item pages.
-Includes title, description, date created, status, action buttons, [...].</p>
-<p>Use by combining the components here together within an ItemHeader.wrapper.</p>
+  <div class="section" id="class-itemstore">
+<span id="module-lib-store-itemstore-itemstore"></span><h1>Class: <code class="docutils literal"><span class="pre">ItemStore</span></code><a class="headerlink" href="#class-itemstore" title="Permalink to this headline">¶</a></h1>
+<p>Member Of <a class="reference internal" href="module-lib_store.ItemStore.html"><span class="doc">Class: ItemStore</span></a></p>
 <div class="contents local topic" id="local-navigation">
 <p class="topic-title first">Local Navigation</p>
 <ul class="simple">
-<li><a class="reference internal" href="#examples" id="id1">Examples</a></li>
+<li><a class="reference internal" href="#members" id="id1">Members</a></li>
 </ul>
 </div>
-<div class="section" id="examples">
-<h2><a class="toc-backref" href="#id1">Examples</a><a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-javascript"><div class="highlight"><pre><span></span>&lt;ItemHeader.Wrapper className=&quot;exp-set-header-area&quot; context={this.props.context} href={this.props.href}&gt;
-    &lt;ItemHeader.TopRow&gt;
-        &lt;span data-tip=&quot;Experiment Type&quot; className=&quot;inline-block&quot;&gt;
-            { this.props.context.experimentset_type }
-        &lt;/span&gt;
-    &lt;/ItemHeader.TopRow&gt;
-    &lt;ItemHeader.MiddleRow /&gt;
-    &lt;ItemHeader.BottomRow /&gt;
-&lt;/ItemHeader.Wrapper&gt;
-</pre></div>
-</div>
+<div class="section" id="members">
+<h2><a class="toc-backref" href="#id1">Members</a><a class="headerlink" href="#members" title="Permalink to this headline">¶</a></h2>
+<p id="module-lib-store-itemstore-itemstore-fetch"><code class="docutils literal"><span class="pre">_fetch</span></code></p>
+<p id="module-lib-store-itemstore-itemstore-items"><code class="docutils literal"><span class="pre">_items</span></code></p>
+<p id="module-lib-store-itemstore-itemstore-listeners"><code class="docutils literal"><span class="pre">_listeners</span></code></p>
 </div>
 </div>
 
@@ -92,22 +84,22 @@ Includes title, description, date created, status, action buttons, [...].</p>
         <div class="sphinxsidebarwrapper">
   <h3><a href="../index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Object: <code class="docutils literal"><span class="pre">ItemHeader</span></code></a><ul>
-<li><a class="reference internal" href="#examples">Examples</a></li>
+<li><a class="reference internal" href="#">Class: <code class="docutils literal"><span class="pre">ItemStore</span></code></a><ul>
+<li><a class="reference internal" href="#members">Members</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="module-item-pages_components.ItemFooterRow.html"
-                        title="previous chapter">Component: <code class="docutils literal"><span class="pre">ItemFooterRow</span></code></a></p>
+  <p class="topless"><a href="module-lib_store.ItemStore.html"
+                        title="previous chapter">Class: <code class="docutils literal"><span class="pre">ItemStore</span></code></a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="../pydoc/modules.html"
-                        title="next chapter">Python API Reference</a></p>
+  <p class="topless"><a href="module-viz_BarPlotChart.html"
+                        title="next chapter">Component: <code class="docutils literal"><span class="pre">viz/BarPlotChart</span></code></a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="../_sources/jsdoc/ItemHeader.rst.txt"
+      <li><a href="../_sources/jsdoc/module-lib_store.ItemStore.ItemStore.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -135,13 +127,15 @@ Includes title, description, date created, status, action buttons, [...].</p>
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="../pydoc/modules.html" title="Python API Reference"
+          <a href="module-viz_BarPlotChart.html" title="Component: viz/BarPlotChart"
              >next</a> |</li>
         <li class="right" >
-          <a href="module-item-pages_components.ItemFooterRow.html" title="Component: ItemFooterRow"
+          <a href="module-lib_store.ItemStore.html" title="Class: ItemStore"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li> 
+          <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="module-lib_store.html" >Module: <code class="docutils literal"><span class="pre">lib/store</span></code></a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="module-lib_store.ItemStore.html" >Class: <code class="docutils literal"><span class="pre">ItemStore</span></code></a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

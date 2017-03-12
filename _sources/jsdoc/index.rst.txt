@@ -18,11 +18,10 @@ JavaScript API Reference
    module-item-pages_file-set-calibration-view
    module-item-pages_item-view
    module-item-pages_user
+   module-lib_store
    module-viz_BarPlotChart
    module-viz_QuickInfoBar
    module-viz_chart-data-controller
    module-viz_components
    module-viz_utilities
-   global.rst#ItemS
-   global.rst#ItemS
    

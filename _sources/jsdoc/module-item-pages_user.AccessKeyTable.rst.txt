@@ -20,7 +20,26 @@ experiments and other data.
 
 
 
+Functions
+=========
 
+
+
+.. _module-item-pages_user.AccessKeyTable.create:
+
+
+Instance Private ``create``
+---------------------------
+
+Add new access key for user via AJAX.
+
+.. js:function:: create(e)
+
+    
+    :param MouseEvent e: Click event.
+    
+
+user.js:158
 
 
 

@@ -1,0 +1,181 @@
+.. _module-lib_store.ItemStore:
+
+====================
+Class: ``ItemStore``
+====================
+
+
+Member Of :doc:`module-lib_store`
+
+
+
+
+
+.. contents:: Local Navigation
+   :local:
+
+1 Children
+==========
+
+.. toctree::
+   :maxdepth: 3
+   
+   module-lib_store.ItemStore.ItemStore
+   
+
+
+
+
+
+Functions
+=========
+
+
+
+.. _module-lib_store.ItemStore.create:
+
+
+Instance  ``create``
+--------------------
+
+
+
+.. js:function:: create()
+
+    
+    
+
+store.js:34
+
+
+
+.. _module-lib_store.ItemStore.update:
+
+
+Instance  ``update``
+--------------------
+
+
+
+.. js:function:: update()
+
+    
+    
+
+store.js:50
+
+
+
+.. _module-lib_store.ItemStore.delete:
+
+
+Instance  ``delete``
+--------------------
+
+
+
+.. js:function:: delete()
+
+    
+    
+
+store.js:66
+
+
+
+.. _module-lib_store.ItemStore.fetch:
+
+
+Instance  ``fetch``
+-------------------
+
+
+
+.. js:function:: fetch()
+
+    
+    
+
+store.js:82
+
+
+
+.. _module-lib_store.ItemStore.dispatch:
+
+
+Instance  ``dispatch``
+----------------------
+
+
+
+.. js:function:: dispatch()
+
+    
+    
+
+store.js:103
+
+
+
+
+Members
+=======
+
+
+.. _module-lib_store.ItemStore.create:
+
+``create``
+
+Create an item
+
+
+
+
+.. _module-lib_store.ItemStore.update:
+
+``update``
+
+Update an item
+
+
+
+
+.. _module-lib_store.ItemStore.delete:
+
+``delete``
+
+Delete an item (set its status to deleted)
+
+
+
+
+.. _module-lib_store.ItemStore._items:
+
+``_items``
+
+
+
+
+
+
+.. _module-lib_store.ItemStore.fetch:
+
+``fetch``
+
+Call the backend
+
+
+
+
+.. _module-lib_store.ItemStore.dispatch:
+
+``dispatch``
+
+Notify listening views of actions and update their state
+(should we update state optimistically?)
+
+
+
+
+
+

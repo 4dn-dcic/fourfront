@@ -19,7 +19,28 @@ Member Of :doc:`module-item-pages_user`
 
 
 
+Functions
+=========
 
+
+
+.. _module-item-pages_user.ImpersonateUserForm.handleSubmit:
+
+
+Instance Private ``handleSubmit``
+---------------------------------
+
+Handler for Impersonate User submit button/action.
+Performs AJAX request to '/impersonate-user' endpoint then saves returned JWT
+as own and in order to pretend to be impersonated user.
+
+.. js:function:: handleSubmit(data)
+
+    
+    :param Object data: User ID or email address.
+    
+
+user.js:752
 
 
 
