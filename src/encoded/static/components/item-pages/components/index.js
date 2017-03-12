@@ -13,10 +13,11 @@ module.exports.PartialList = require('./PartialList');
 module.exports.ExternalReferenceLink = require('./ExternalReferenceLink');
 
 /**
- * Component for displaying Files in a set.
+ * Component for displaying Files from a list.
  * 
  * @namespace
  * @type {Component}
+ * @prop {Object[]} files - List of file objects, e.g. a FileCalbirationSet's 'files_in_set' property.
  */
 module.exports.FilesInSetTable = require('./FilesInSetTable');
 module.exports.ItemFooterRow = require('./ItemFooterRow');

@@ -4,7 +4,11 @@ var vizUtil = require('./../utilities');
 var { highlightTerm, unhighlightTerms } = require('./../../facetlist');
 var { console, isServerSide, Filters, layout } = require('./../../util');
 
-// If keep in RotatedLabel.statics, RotatedLabel doesn't exist at time that getDefaultProps() is hit.
+/**
+ * If keep in RotatedLabel.statics, RotatedLabel doesn't exist at time that getDefaultProps() is hit.
+ * @memberof viz/components.RotatedLabel
+ * @type {Object}
+ */
 var commonDefaultProps = {
     'angle'             : 30,
     'placementWidth'    : 60,

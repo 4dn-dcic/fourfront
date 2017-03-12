@@ -7,12 +7,6 @@ var { highlightTerm, unhighlightTerms } = require('./../../facetlist');
 var { console, isServerSide, Filters, object } = require('./../../util');
 
 
-/**
- * @prop {Object[]} fields - List of objects containing at least 'field', in object dot notation. Ideally should also have 'name'.
- * @prop {boolean} includeFieldTitle - Whether to show field title at top of terms.
- * @prop {string} className - Optional className to add to Legend's outermost div container.
- * @prop {string|Element|Component} title - Optional title to display at top of fields.
- */
 var Legend = module.exports = React.createClass({
 
     statics : {
@@ -77,12 +71,20 @@ var Legend = module.exports = React.createClass({
             }
         }),
 
+        /**
+         * @memberof module:viz/components.Legend
+         * @static
+         */
         experimentsAndFieldsToLegendData : function(experiments, fields, schemas = null){
             return fields.map(function(field){
                 return Legend.experimentsAndFieldToLegendDataItem(experiments, field, schemas);
             });
         },
 
+        /**
+         * @memberof module:viz/components.Legend
+         * @static
+         */
         experimentsAndFieldToLegendDataItem : function(experiments, field, schemas = null){
 
             var legendFieldItem = {
@@ -118,6 +120,10 @@ var Legend = module.exports = React.createClass({
             
         },
 
+        /**
+         * @memberof module:viz/components.Legend
+         * @static
+         */
         parseFieldNames : function(fields, schemas){
             return fields.map(function(field){
                 if (!field.title && !field.name) {
@@ -131,6 +137,12 @@ var Legend = module.exports = React.createClass({
 
     },
 
+    /**
+     * @memberof module:viz/components.Legend
+     * @private
+     * @instance
+     * @returns {{ 'position' : string, 'fields' : Object[], 'className' : string, 'width' : null, 'title' : null, 'id' : null }}
+     */
     getDefaultProps : function(){
         return {
             'position' : 'absolute',
@@ -142,6 +154,11 @@ var Legend = module.exports = React.createClass({
         };
     },
 
+    /**
+     * @memberof module:viz/components.Legend
+     * @private
+     * @instance
+     */
     render : function(){
         if (!this.props.fields) return null;
         return (
