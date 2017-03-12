@@ -116,19 +116,21 @@ after_success:
       if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
         bin/aws s3 cp --recursive s3://encoded-4dn-conf-prod/.aws /home/travis/.aws
         if [ "$TRAVIS_BRANCH" = "master" ]; then
-          echo "Job succeeded! PUBLISHING to prod environment..."
+          echo "Job succeeded! PUBLISHING to 4dnweb-prod environment..."
           git config --global user.email "travis@builder.com"
           git config --global user.name "Travis"
           eb use 4dnweb-prod --debug --verbose
           python deploy/deploy_beanstalk.py
         fi
         if [ "$TRAVIS_BRANCH" = "production" ]; then
-          echo "Job succeeded! PUBLISHING to PROD environment..."
-          git config --global user.email "travis@builder.com"
-          git config --global user.name "Travis"
-          eb use 4dn-web-dev
-          python deploy/deploy_beanstalk.py
-        fi
+           if ["$TRAVIS_COMMIT_MSG" = "Your Tibanna triggered build has started.  Have a nice day! :)"]; then
+                  echo "Job succeeded! PUBLISHING to 4dn-web-dev environment..."
+                  git config --global user.email "travis@builder.com"
+                  git config --global user.name "Travis"
+                  eb use 4dn-web-dev
+                  python deploy/deploy_beanstalk.py
+                fi
+          fi
       fi
      fi
     fi

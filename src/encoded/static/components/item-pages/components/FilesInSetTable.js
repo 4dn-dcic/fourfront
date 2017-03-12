@@ -30,7 +30,7 @@ var FilesInSetTable = module.exports = React.createClass({
      * 
      * @memberof module:item-pages/components.FilesInSetTable
      * @namespace
-     * @type {Object}
+     * @type {Static}
      */
     statics : {
 
@@ -116,7 +116,10 @@ var FilesInSetTable = module.exports = React.createClass({
          * @memberof module:item-pages/components.FilesInSetTable
          * @namespace
          * @type {Component}
-         * @prop {Object} user
+         * @prop {Object} user - User object.
+         * @prop {Object} user.display_title - User's name to display.
+         * @prop {string} labName - Name of Lab to show if props.showLabName is true.
+         * @prop {boolean} [showLabName=false] - Show lab name instead of props.user.display_title if true.
          */
         SubmitterLink : React.createClass({
 

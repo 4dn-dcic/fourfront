@@ -15,7 +15,17 @@ module.exports.SVGFilters = require('./SVGFilters');
 module.exports.FetchingView = require('./FetchingView');
 
 /**
- * @alias module:viz/components.Legend
+ * Legend components to use alongside Charts. Best to include within a UIControlsWrapper, and place next to chart, utilizing the same data.
+ * 
+ * @member
+ * @namespace
+ * @type {Component}
+ * @prop {Object[]} fields - List of objects containing at least 'field', in object dot notation. Ideally should also have 'name'.
+ * @prop {boolean} includeFieldTitle - Whether to show field title at top of terms.
+ * @prop {string} className - Optional className to add to Legend's outermost div container.
+ * @prop {number} width - How wide should the legend container element (<div>) be.
+ * @prop {string|Element|Component} title - Optional title to display at top of fields.
+>>>>>>> temp
  */
 module.exports.Legend = require('./Legend');
 
