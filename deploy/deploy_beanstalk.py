@@ -93,8 +93,10 @@ if __name__ == "__main__":
     if args.prod:
         print("args production")
         # only deploy if commint message has tibanna-deploy in it
-        commit = os.environ.get("TRAVIS_COMMIT_MESSGAGE", "")
-        print("commit message", commit)
+        msg = os.environ.get("TRAVIS_COMMIT_MESSAGE", "")
+        print("commit message", msg)
+        if not msg:
+            print("I don't have a message")
         import pprint
         pprint.pprint(os.environ)
         if "tibanna-deploy" in commit:
