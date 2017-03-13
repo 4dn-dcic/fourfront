@@ -124,6 +124,7 @@ after_success:
           python deploy/deploy_beanstalk.py
         fi
         if [ "$TRAVIS_BRANCH" = "production" ]; then
+           MSG_NO_WHITESPACE="$(echo -e "${TRAVIS_COMMIT_MSG}" | tr -d '[:space:]')"
            if [[ "$TRAVIS_COMMIT_MSG" == "Deploy" ]]; then
                   echo "Job succeeded! PUBLISHING to 4dn-web-dev environment..."
                   git config --global user.email "travis@builder.com"
