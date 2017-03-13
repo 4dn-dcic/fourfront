@@ -27,7 +27,7 @@ var { EditableField, FieldSet } = require('./../forms');
  * Extends ItemStore to help manage collection of Access Keys from back-end.
  * 
  * @memberof module:item-pages/user
- * @extends {ItemStore}
+ * @extends module:lib/store.ItemStore
  * @private
  */
 class AccessKeyStore extends ItemStore {
@@ -239,6 +239,50 @@ var AccessKeyTable = React.createClass({
     },
 });
 
+
+/**
+ * Generate a URL to get Gravatar image from Gravatar service.
+ * 
+ * @static
+ * @public
+ * @param {string} email - User's email address.
+ * @param {number} size - Width & height of image square.
+ * @param {string} [defaultImg='retro'] Style of Gravatar image.
+ * @returns {string} A URL.
+ */
+var buildGravatarURL = module.exports.buildGravatarURL = function(email, size=null, defaultImg='retro'){
+    var md5 = require('js-md5');
+    if (defaultImg === 'kanye'){
+        defaultImg = 'https://media.giphy.com/media/PcFPiuGZVqK2I/giphy.gif';
+    }
+    var url = 'https://www.gravatar.com/avatar/' + md5(email);
+    url += "?d=" + defaultImg;
+    if (size) url += '&s=' + size;
+    return url;
+};
+
+/**
+ * Generate an <img> element with provided size, className, and Gravatar src.
+ * 
+ * @static
+ * @public
+ * @param {string} email - User's email address.
+ * @param {number} size - Width & height of image square.
+ * @param {string} className - ClassName of <img> element.
+ * @param {string} [defaultImg='retro'] Style of Gravatar image.
+ * @returns {Element} A React Image (<img>) element.
+ */
+var gravatar = module.exports.gravatar = function(email, size=null, className=null, defaultImg='retro'){
+    return (
+        <img
+            src={ buildGravatarURL(email, size, defaultImg)}
+            className={'gravatar' + (className ? ' ' + className : '')}
+            title="Obtained via Gravatar"
+        />
+    );
+};
+
+
 /**
  * Draws a User Profile page.
  * 
@@ -250,53 +294,6 @@ var AccessKeyTable = React.createClass({
  * @memberof module:item-pages/user
  */
 var UserView = module.exports.UserView = React.createClass({
-
-    statics : {
-
-        /**
-         * Generate a URL to get Gravatar image from Gravatar service.
-         * 
-         * @memberof module:item-pages/user.UserView
-         * @static
-         * @public
-         * @param {string} email - User's email address.
-         * @param {number} size - Width & height of image square.
-         * @param {string} [defaultImg='retro'] Style of Gravatar image.
-         * @returns {string} A URL.
-         */
-        buildGravatarURL : function(email, size=null, defaultImg='retro'){
-            var md5 = require('js-md5');
-            if (defaultImg === 'kanye'){
-                defaultImg = 'https://media.giphy.com/media/PcFPiuGZVqK2I/giphy.gif';
-            }
-            var url = 'https://www.gravatar.com/avatar/' + md5(email);
-            url += "?d=" + defaultImg;
-            if (size) url += '&s=' + size;
-            return url;
-        },
-
-        /**
-         * Generate an <img> element with provided size, className, and Gravatar src.
-         * 
-         * @memberof module:item-pages/user.UserView
-         * @static
-         * @public
-         * @param {string} email - User's email address.
-         * @param {number} size - Width & height of image square.
-         * @param {string} className - ClassName of <img> element.
-         * @param {string} [defaultImg='retro'] Style of Gravatar image.
-         * @returns {Element} A React Image (<img>) element.
-         */
-        gravatar : function(email, size=null, className=null, defaultImg='retro'){
-            return (
-                <img
-                    src={ User.buildGravatarURL(email, size, defaultImg)}
-                    className={'gravatar' + (className ? ' ' + className : '')}
-                    title="Obtained via Gravatar"
-                />
-            );
-        },
-    },
 
     /** @ignore */
     propTypes : {
@@ -373,7 +370,7 @@ var UserView = module.exports.UserView = React.createClass({
                                 <div className="user-title-row-container">
                                     <div className="row title-row">
                                         <div className="col-sm-3 gravatar-container">
-                                            { User.gravatar(user.email, 70) }
+                                            { gravatar(user.email, 70) }
                                         </div>
                                         <div className="col-sm-9 user-title-col">
                                             <h1 className="user-title">

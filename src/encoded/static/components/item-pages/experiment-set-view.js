@@ -6,7 +6,7 @@ var Panel = require('react-bootstrap').Panel;
 var { ExperimentsTable } = require('./../experiments-table');
 var _ = require('underscore');
 var { DescriptorField, Detail } = require('./item-view');
-var { ItemHeader, FormattedInfoBlock } = require('./components');
+var { ItemHeader, FormattedInfoBlock, ItemFooterRow } = require('./components');
 var FacetList = require('./../facetlist');
 var { ajax, console, DateUtility, object } = require('./../util');
 
@@ -261,6 +261,8 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                     </div>
 
                 </div>
+
+                <ItemFooterRow context={this.props.context} schemas={this.props.schemas} />
 
             </div>
         );
