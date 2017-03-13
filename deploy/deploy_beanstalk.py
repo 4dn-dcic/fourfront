@@ -86,13 +86,17 @@ if __name__ == "__main__":
     print(branch)
 
     if not args.prod:
+        print("not production")
         ver = get_git_version()
         update_version(ver)
         deploy()
     if args.prod:
+        print("args production")
         # only deploy if commint message has tibanna-deploy in it
         commit = os.environ.get("TRAVIS_COMMIT_MESSGAGE", "")
-        print(commit)
+        print("commit message", commit)
+        import pprint
+        pprint.pprint(os.environ)
         if "tibanna-deploy" in commit:
             deploy()
     assert 0 == 1
