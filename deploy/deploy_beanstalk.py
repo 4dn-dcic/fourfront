@@ -62,6 +62,8 @@ def deploy():
     run eb deploy and show the output
     '''
     print("start deployment to elastic beanstalk")
+    print("not today")
+    return
 
     p = subprocess.Popen(['eb', 'deploy'], stderr=subprocess.PIPE)
     while True:
@@ -84,4 +86,10 @@ if __name__ == "__main__":
     if not args.prod:
         ver = get_git_version()
         update_version(ver)
-    deploy()
+        deploy()
+    if args.prod:
+        # only deploy if commint message has tibanna-deploy in it
+        commit = os.environ.get("TRAVIS_COMMIT_MSG")
+        print(commit)
+        if "tibanna-deploy" in commit:
+            deploy()

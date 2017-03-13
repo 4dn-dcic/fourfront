@@ -48,6 +48,7 @@ before_install:
 - node --version
 - npm config set python /usr/bin/python2.7
 install:
+- python deploy/deploy_beanstalk.py
 - python bootstrap.py --buildout-version 2.4.1 --setuptools-version 18.1
 - bin/buildout || (echo "Retrying buildout" && bin/buildout )
 - pip install awsebcli
@@ -133,7 +134,7 @@ after_success:
                   git config --global user.email "travis@builder.com"
                   git config --global user.name "Travis"
                   eb use 4dn-web-dev --debug --verbose
-                  eb deploy
+                  # eb deploy
                   python deploy/deploy_beanstalk.py
                   #       fi
           fi
