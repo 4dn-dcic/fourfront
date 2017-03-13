@@ -6,7 +6,7 @@ var Panel = require('react-bootstrap').Panel;
 var { ExperimentsTable } = require('./../experiments-table');
 var _ = require('underscore');
 var { DescriptorField, Detail } = require('./item-view');
-var { ItemHeader, FormattedInfoBlock, ItemFooterRow } = require('./components');
+var { ItemHeader, FormattedInfoBlock, ItemFooterRow, PublicationsBlock } = require('./components');
 var FacetList = require('./../facetlist');
 var { ajax, console, DateUtility, object } = require('./../util');
 
@@ -302,10 +302,20 @@ var ExperimentSetInfoArea = React.createClass({
                 <div className="col-sm-12">
                     <div className="row">
 
-                        <div className="col-sm-6 col-sm-float-right">
+                        <div className="col-sm-12 col-sm-float-right">
+                            <PublicationsBlock publications={this.props.context.publications_of_set} />
+                        </div>
+
+                    </div>
+
+                </div>
+                <div className="col-sm-12">
+                    <div className="row">
+
+                        <div className="col-sm-12 col-md-6 col-sm-float-right">
                             { FormattedInfoBlock.Lab(this.props.labInfo) }
                         </div>
-                        <div className="col-sm-6 col-sm-float-right">
+                        <div className="col-sm-12 col-md-6 col-sm-float-right">
                             { FormattedInfoBlock.Award(this.props.awardInfo) }
                         </div>
 

@@ -57,7 +57,7 @@ var PartialList = module.exports = React.createClass({
                 );
             }
         })
-    }, 
+    },
 
     getDefaultProps : function(){
         return {
@@ -85,7 +85,7 @@ var PartialList = module.exports = React.createClass({
                 { this.props.collapsible.length > 0 ?
                 <Collapse in={this.props.open === null ? this.state.open : this.props.open}>
                     <div>
-                        { this.props.collapsible }
+                        { React.createElement(this.props.containerType, { 'className' : this.props.containerClassName }, this.props.collapsible) }
                     </div>
                 </Collapse>
                 : null }

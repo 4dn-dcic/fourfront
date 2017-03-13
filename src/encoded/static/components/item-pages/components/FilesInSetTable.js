@@ -3,6 +3,7 @@
 var React = require('react');
 var { Button } = require('react-bootstrap');
 var url = require('url');
+var { object } = require('./../../util');
 
 /** These props are shared between FilesInSetTable and FilesInSetTable.Small */
 var propTypes = {
@@ -21,22 +22,6 @@ var FilesInSetTable = module.exports = React.createClass({
 
     statics : {
 
-        /**
-         * Convert a link_id, if one exists on param 'object', to an '@id' link.
-         * 
-         * @memberof module:item-pages/components.FilesInSetTable
-         * @static
-         * @public
-         * @param {Object} object - Must have a 'link_id' or '@id' property. Else will return null.
-         * @returns {string|null} The Item's '@id'.
-         */
-        atIdFromObject : function(object){
-            return (
-                object && typeof object === 'object' &&
-                    ((object.link_id && object.link_id.replace(/~/g, "/")) || object['@id']) 
-                ) || null;
-        },
-
         /** 
          * Generate a download link for a file attachment from a fileObject, which should represent a (partial) JSON of a file Item.
          * 
@@ -47,7 +32,7 @@ var FilesInSetTable = module.exports = React.createClass({
          */
         attachmentDownloadLinkFromFile : function(fileObject){
             var downloadLinkExists = true;
-            var atId = FilesInSetTable.atIdFromObject(fileObject);
+            var atId = object.atIdFromObject(fileObject);
             var downloadHref = (fileObject && fileObject.attachment && fileObject.attachment.href) || null;
             if (!downloadHref) return null;
 
@@ -130,7 +115,7 @@ var FilesInSetTable = module.exports = React.createClass({
                     ;
                 }
 
-                var atId = FilesInSetTable.atIdFromObject(user);
+                var atId = object.atIdFromObject(user);
                 var title = user.display_title || user.title || (typeof user === 'string' ? user : null) || "Submitter";
                 if (!atId && title === 'Submitter') return null;
                 else if (!atId) return title;
@@ -167,7 +152,7 @@ var FilesInSetTable = module.exports = React.createClass({
             render : function(){
                 var lab = this.props.lab;
                 if (!lab) return this.noLab();
-                var atId = FilesInSetTable.atIdFromObject(lab);
+                var atId = object.atIdFromObject(lab);
                 if (!atId) {
                     console.error("We need lab with link_id or @id.");
                     return this.noLab();
@@ -204,7 +189,7 @@ var FilesInSetTable = module.exports = React.createClass({
 
             render : function(){
                 var file = this.props.file;
-                var atId = FilesInSetTable.atIdFromObject(file);
+                var atId = object.atIdFromObject(file);
                 var title = file.display_title || file.accession;
                 var downloadHref = FilesInSetTable.attachmentDownloadLinkFromFile(file);
                 var iconClass = FilesInSetTable.iconClassFromFileType(file && file.attachment && file.attachment.type);
@@ -267,7 +252,7 @@ var FilesInSetTable = module.exports = React.createClass({
                     <div className="files-in-set-table">
                         { 
                             this.props.files.map(function(file, i){
-                                var atId = FilesInSetTable.atIdFromObject(file);
+                                var atId = object.atIdFromObject(file);
                                 var title = file.display_title || file.accession;
                                 var downloadHref = FilesInSetTable.attachmentDownloadLinkFromFile(file);
                                 return (

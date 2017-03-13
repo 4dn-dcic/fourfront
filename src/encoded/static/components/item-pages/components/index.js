@@ -65,3 +65,12 @@ module.exports.FilesInSetTable = require('./FilesInSetTable');
  * @prop {Object} context - JSON representation of current Item object. Should be available through Redux store's context.
  */
 module.exports.ItemFooterRow = require('./ItemFooterRow');
+
+/**
+ * Shows publications for current Item. Currently, only ExperimentSet seems to have a 
+ * 
+ * @namespace
+ * @type {Component}
+ * @prop {Object[]|null} publications - JSON representation of publications. Should be available through context.publications_of_set for at least ExperimentSet objects.
+ */
+module.exports.PublicationsBlock = require('./PublicationsBlock');

@@ -266,7 +266,7 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 .item-page-container {
     .info-area {
-	    margin-top: 24px;
+	    margin-top: 45px;
     }
     .item-info-area {
         margin-bottom: 20px;
@@ -492,7 +492,20 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 /*********** Formatted Info Panel/Block *****************/
 
+// Mixin for top-left label. To be re-used in other areas.4s
 
+@mixin small-block-label(){
+	font-weight: 500;
+	color: #646464;
+	margin-bottom: 7px;
+	margin-top: 0px;
+
+	&:after {
+		content : "\f105";
+		font-family: "FontAwesome";
+		padding-left: 6px;
+	}
+}
 
 .formatted-info-panel {
 	padding : 0 10px 12px;
@@ -514,15 +527,8 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	}
 
 	> h6 {
-		margin : 0 0 7px /* -3px -> */ -8px;
-		font-weight: 500;
-		color: #646464;
-
-		&:after {
-			content : "\f105";
-			font-family: "FontAwesome";
-			padding-left: 6px;
-		}
+		margin-left : -10px;
+		@include small-block-label();
 
 	}
 
@@ -602,6 +608,17 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	&.loaded.transitioned > .row {
 		opacity : 1;
 		transition: opacity .5s;
+	}
+
+}
+
+/************** Publications Block ****************/
+
+.publications-block {
+	margin-bottom: 17px;
+
+	h6.publication-label {
+		@include small-block-label();
 	}
 
 }

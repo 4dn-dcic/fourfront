@@ -127,10 +127,10 @@ var ItemHeader = module.exports = {
         render : function(){
             return (
                 <div className="row clearfix top-row">
-                    <h3 className="col-sm-6 item-label-title">
+                    <h3 className="col-sm-4 item-label-title">
                         { /* PLACEHOLDER / TEMP-EMPTY */ }
                     </h3>
-                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra text-capitalize item-header-indicators clearfix">
+                    <h5 className="col-sm-8 text-right text-left-xs item-label-extra text-capitalize item-header-indicators clearfix">
                         { this.viewJSONButton() }
                         { this.itemActions() }
                         { this.wrapChildren() }
