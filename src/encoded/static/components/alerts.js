@@ -27,6 +27,7 @@ var Alerts = module.exports = React.createClass({
          * @static
          * @public
          * @param {Object} alert - Object with 'title', 'message', and 'style' properties. Used for alert message element at top of page.
+         * @returns {undefined} Nothing
          */
         queue : function(alert, callback){
             var currentAlerts = store.getState().alerts;
@@ -43,8 +44,9 @@ var Alerts = module.exports = React.createClass({
          * @static
          * @public
          * @param {Object} alert - Object with at least 'title'.
+         * @returns {undefined} Nothing
          */
-        deQueue : function(alert, callback){
+        deQueue : function(alert){
             var currentAlerts = store.getState().alerts;
             currentAlerts = currentAlerts.filter(function(a){ return a.title != alert.title; });
             store.dispatch({

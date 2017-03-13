@@ -14,6 +14,7 @@ module.exports;
  * @memberof module:collection
  * @type {function}
  * @private
+ * @returns {string} Value
  */
 var lookup_column = function (result, column) {
     var value = result;
