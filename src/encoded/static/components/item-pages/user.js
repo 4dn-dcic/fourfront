@@ -3,7 +3,6 @@
 
 'use strict';
 
-/** @ignore */
 var React = require('react');
 var _ = require('underscore');
 var { Modal, Alert } = require('react-bootstrap');
@@ -50,6 +49,7 @@ class AccessKeyStore extends ItemStore {
  */
 var AccessKeyTable = React.createClass({
 
+    /** @ignore */
     propTypes : {
         access_keys : React.PropTypes.array.isRequired,
         user : React.PropTypes.shape({
@@ -66,11 +66,13 @@ var AccessKeyTable = React.createClass({
         })
     },
 
+    /** @ignore */
     contextTypes: {
         fetch: React.PropTypes.func,
         session: React.PropTypes.bool
     },
 
+    /** @ignore */
     getInitialState: function() {
         var access_keys = this.props.access_keys;
         this.store = new AccessKeyStore(access_keys, this, 'access_keys');
@@ -79,6 +81,7 @@ var AccessKeyTable = React.createClass({
         };
     },
 
+    /** @ignore */
     renderTable : function(){
         if (!this.state.access_keys || !this.state.access_keys.length){
             return (
@@ -129,6 +132,7 @@ var AccessKeyTable = React.createClass({
 
     },
 
+    /** @ignore */
     render: function() {
         return (
             <div className="access-keys-table-container clearfix">
@@ -143,6 +147,14 @@ var AccessKeyTable = React.createClass({
         );
     },
 
+    /**
+     * Add new access key for user via AJAX.
+     * 
+     * @memberof module:item-pages/user.AccessKeyTable
+     * @private
+     * @instance
+     * @param {MouseEvent} e - Click event.
+     */
     create: function(e) {
         e.preventDefault();
         var item = {};
@@ -159,17 +171,21 @@ var AccessKeyTable = React.createClass({
         this.store.create('/access-keys/', item);
     },
 
+    /** @ignore */
     doAction: function(action, arg, e) {
         e.preventDefault();
         this.store[action](arg);
     },
 
+    /** @ignore */
     onCreate: function(response) {
         this.showNewSecret('Your secret key has been created.', response);
     },
+    /** @ignore */
     onResetSecret: function(response) {
         this.showNewSecret('Your secret key has been reset.', response);
     },
+    /** @ignore */
     showNewSecret: function(title, response) {
         this.setState({modal:
             <Modal show={true} onHide={this.hideModal}>
@@ -193,7 +209,7 @@ var AccessKeyTable = React.createClass({
             </Modal>
         });
     },
-
+    /** @ignore */
     onDelete: function(item) {
         this.setState({modal:
             <Modal show={true} onHide={this.hideModal}>
@@ -203,7 +219,7 @@ var AccessKeyTable = React.createClass({
             </Modal>
         });
     },
-
+    /** @ignore */
     onError: function(error) {
         var View = globals.content_views.lookup(error);
         this.setState({modal:
@@ -217,7 +233,7 @@ var AccessKeyTable = React.createClass({
             </Modal>
         });
     },
-
+    /** @ignore */
     hideModal: function() {
         this.setState({modal: null});
     },
@@ -226,21 +242,21 @@ var AccessKeyTable = React.createClass({
 /**
  * Draws a User Profile page.
  * 
- * @memberof module:item-pages/user
- * @namespace
  * @public
+ * @namespace
  * @type {Component}
  * @prop {Object} context - Context value for user, e.g. from Redux store. AKA user object.
  * @prop {Object} schemas - Object of schemas, e.g. passed from app state.
+ * @memberof module:item-pages/user
  */
-var User = module.exports.User = React.createClass({
+var UserView = module.exports.UserView = React.createClass({
 
     statics : {
 
         /**
          * Generate a URL to get Gravatar image from Gravatar service.
          * 
-         * @memberof module:item-pages/user.User
+         * @memberof module:item-pages/user.UserView
          * @static
          * @public
          * @param {string} email - User's email address.
@@ -262,7 +278,7 @@ var User = module.exports.User = React.createClass({
         /**
          * Generate an <img> element with provided size, className, and Gravatar src.
          * 
-         * @memberof module:item-pages/user.User
+         * @memberof module:item-pages/user.UserView
          * @static
          * @public
          * @param {string} email - User's email address.
@@ -417,7 +433,8 @@ var User = module.exports.User = React.createClass({
     }
 });
 
-globals.content_views.register(User, 'User');
+globals.content_views.register(UserView, 'User');
+
 
 /**
  * Renders out the contact fields for user, which are editable.
@@ -425,6 +442,7 @@ globals.content_views.register(User, 'User');
  * 
  * @private
  * @namespace
+ * @type {Component}
  * @memberof module:item-pages/user
  */
 var ProfileContactFields = React.createClass({
@@ -477,6 +495,7 @@ var ProfileContactFields = React.createClass({
  * 
  * @private
  * @namespace
+ * @type {Component}
  * @memberof module:item-pages/user
  */
 var ProfileWorkFields = React.createClass({
@@ -488,6 +507,7 @@ var ProfileWorkFields = React.createClass({
         };
     },
 
+    /** @ignore */
     getInitialState : function(){
         return {
             details_lab : null,        // Use FormattedInfoBlock.ajaxPropertyDetails.call(this, args...) to set.
@@ -495,6 +515,13 @@ var ProfileWorkFields = React.createClass({
         };
     },
 
+    /**
+     * If Lab details are not embedded, fetches them.
+     * 
+     * @memberof module:item-pages/user.ProfileWorkFields
+     * @private
+     * @instance
+     */
     componentDidMount : function(){
 
         if (!this.state.details_lab){
@@ -511,6 +538,7 @@ var ProfileWorkFields = React.createClass({
         }
     },
 
+    /** @ignore */
     componentWillUnmount : function(){ delete this.isLabFetched; },
 
     /**
@@ -518,6 +546,7 @@ var ProfileWorkFields = React.createClass({
      * ToDo : Migrate somewhere more static-cy.
      *
      * @memberof module:item-pages/user.ProfileWorkFields
+     * @private
      * @instance
      * @param {Object[]} labDetails - Array of lab objects with embedded award details.
      * @return {Object[]} List of all unique awards in labs.
@@ -547,6 +576,7 @@ var ProfileWorkFields = React.createClass({
      * Update state.awards_list with award details from list of lab details.
      *
      * @memberof module:item-pages/user.ProfileWorkFields
+     * @private
      * @instance
      * @param {Object[]} labDetails - Array of lab objects with embedded award details.
      * @returns {undefined} Nothing.
@@ -649,16 +679,20 @@ var ProfileWorkFields = React.createClass({
  * @type {Component}
  */
 var BasicForm = React.createClass({
+
+    /** @ignore */
     getInitialState: function() {
         return({
             value: ''
         })
     },
 
+    /** @ignore */
     handleChange: function(e) {
         this.setState({ value: e.target.value });
     },
 
+    /** @ignore */
     handleSubmit: function(e){
         e.preventDefault();
         if(this.state.value.length == 0){
@@ -668,6 +702,7 @@ var BasicForm = React.createClass({
         this.setState({ value: '' });
     },
 
+    /** @ignore */
     render: function() {
         return(
             <form onSubmit={this.handleSubmit}>
@@ -686,11 +721,14 @@ var BasicForm = React.createClass({
  * @type {Component}
  */
 var ImpersonateUserForm = React.createClass({
+
+    /** @ignore */
     contextTypes: {
         navigate: React.PropTypes.func,
         updateUserInfo: React.PropTypes.func
     },
 
+    /** @ignore */
     render: function() {
         var form = <BasicForm submitImpersonate={this.handleSubmit} />;
         return (
@@ -701,6 +739,16 @@ var ImpersonateUserForm = React.createClass({
         );
     },
 
+    /**
+     * Handler for Impersonate User submit button/action.
+     * Performs AJAX request to '/impersonate-user' endpoint then saves returned JWT
+     * as own and in order to pretend to be impersonated user.
+     * 
+     * @memberof module:item-pages/user.ImpersonateUserForm
+     * @private
+     * @instance
+     * @param {Object} data - User ID or email address.
+     */
     handleSubmit: function(data) {
         var url = "/impersonate-user";
         var jsonData = JSON.stringify({'userid':data});

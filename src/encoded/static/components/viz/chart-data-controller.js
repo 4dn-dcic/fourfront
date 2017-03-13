@@ -10,7 +10,7 @@ var { expFxn, Filters, ajax, console, layout, isServerSide } = require('./../uti
  * This is a utility to manage charts' experiment data in one global place and distribute to charts throughout UI.
  * The mechanism for this is roughly diagrammed here:
  * 
- * .. image:: https://hms-dbmi.slack.com/files/alexkb/F4C8KQKMM/chartdatacontroller.png
+ * .. image:: https://files.slack.com/files-pri/T0723UERE-F4C8KQKMM/chartdatacontroller.png
  * 
  * @module {Object} viz/chart-data-controller
  */
@@ -464,7 +464,6 @@ var ChartDataController = module.exports = {
      * ChartDataController and notifies update callbacks if experiments or filtered
      * experiments have changed.
      * 
-     * @private
      * @static
      * @param {Object} updatedState - New or updated state object to save.
      * @param {function} [callback] - Optional callback function.
@@ -507,7 +506,6 @@ var ChartDataController = module.exports = {
      * Called by listener to Redux store.
      * 
      * @static
-     * @private
      * @memberof module:viz/chart-data-controller
      * @param {Object} expSetFilters - (Newly-updated) Experiment Set Filters in Redux store.
      * @param {function} callback - Callback function to call after updating state.
@@ -524,7 +522,6 @@ var ChartDataController = module.exports = {
     /**
      * Called internally by setState to update stats in top left corner of page, if updateState param was passed in during initialization.
      * 
-     * @private
      * @static
      * @ignore
      * @returns {undefined} Nothing
@@ -672,7 +669,6 @@ var ChartDataController = module.exports = {
      * Internally used to help form query part of URL.
      * Adds 'field=<field.name.1>&...<field.name.n>' for each field required for chart(s).
      * 
-     * @private
      * @static
      * @param {string[]} [fields] - Fields to fetch from back-end search result(s).
      * @returns {string} Part of URL query.
@@ -687,7 +683,6 @@ var ChartDataController = module.exports = {
      * Internally used to generate a URL from current href and expSetFilters from Redux store to fetch filtered/selected experiments from back-end.
      * If no 'search'-compatible href is set in Redux store, '/browse/' is used.
      * 
-     * @private
      * @static
      * @param {Object} [expSetFilters] - Current Experiment Set Filters in Redux store.
      * @param {string} [href] - Current href from Redux store.

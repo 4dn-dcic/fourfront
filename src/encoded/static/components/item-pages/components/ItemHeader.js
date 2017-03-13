@@ -59,7 +59,7 @@ var ItemHeader = module.exports = {
          * @memberof module:item-pages/components.ItemHeader.TopRow
          * @private
          * @instance
-         * @returns {!Element} <span> element, or null if no props.href.
+         * @returns {Element|null} <span> element, or null if no props.href.
          */
         viewJSONButton : function(){
             if (!this.props.href) return null;

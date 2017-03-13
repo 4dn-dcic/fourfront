@@ -16,6 +16,7 @@ var ChartDataController = require('./chart-data-controller');
  * Shows counts of selected experiment_sets, experiments, and files against those properties' total counts.
  * 
  * @module {Component} viz/QuickInfoBar
+ * @prop {string} href - Current location/href passed down from Redux store. Used for determining whether to display QuickInfoBar or not.
  */
 
 /** @alias module:viz/QuickInfoBar  */
@@ -31,6 +32,18 @@ var QuickInfoBar = module.exports = React.createClass({
     },
 
     /**
+     * Returns an object containing counts for filtered & total experiments, experiment_sets, and files.
+     * Counts are set to null by default, and instance's updateCurrentAndTotalCounts method must be called
+     * each time stats are updated from some high-level component.
+     * 
+     * Currently this is done by having refs...updateCurrentAndTotalCounts being accessible
+     * through refs.navigation on app component/module, which makes an 'updateStats' instance function available,
+     * which is provided to ChartDataController.
+     * 
+     * Additionally holds {boolean|string} 'show' property, describing what is shown in bottom part; and a {boolean} 'mounted' property.
+     * 
+     * @private
+     * @instance
      * @returns {Object.<number, boolean, string>} Initial State
      */
     getInitialState : function(){
@@ -45,31 +58,22 @@ var QuickInfoBar = module.exports = React.createClass({
             'show'                  : false
         };
     },
-    /** @ignore */
-    componentDidMount : function(){
-        this.setState({'mounted' : true});
-    },
 
-    /** @ignore */
-    shouldComponentUpdate : function(newProps, newState){
-        if (this.state.count_experiments !== newState.count_experiments) return true;
-        if (this.state.count_experiment_sets !== newState.count_experiment_sets) return true;
-        if (this.state.count_files !== newState.count_files) return true;
-        
-        if (!this.state.count_experiments_total     && this.state.count_experiments_total !== newState.count_experiments_total) return true;
-        if (!this.state.count_experiment_sets_total && this.state.count_experiment_sets_total !== newState.count_experiment_sets_total) return true;
-        if (!this.state.count_files_total           && this.state.count_files_total !== newState.count_files_total) return true;
-
-        if (this.state.mounted !== newState.mounted) return true;
-        if (this.state.show !== newState.show) return true;
-        if (this.props.showCurrent !== newProps.showCurrent) return true;
-        if (this.props.expSetFilters !== newProps.expSetFilters) return true;
-        if (this.isInvisible(this.props, this.state) != this.isInvisible(newProps, newState)) return true;
-
-        return false;
-    },
-
-    updateCurrentAndTotalCounts : function(current, total, callback){
+    /**
+     * Publically accessible when QuickInfoBar Component instance has a 'ref' prop set by parent component.
+     * Use to update stats when expSetFilters change.
+     * 
+     * Currently this is done through ChartDataController, to which an 'updateStats' callback,
+     * itself defined in app Component, is provided on initialization.
+     * 
+     * @public
+     * @instance
+     * @param {Object} current - Object containing current counts of 'experiments', 'experiment_sets', and 'files'.
+     * @param {Object} total - Same as 'current' param, but containing total counts.
+     * @param {function} [callback] Optional callback function.
+     * @returns {boolean} true
+     */
+    updateCurrentAndTotalCounts : function(current, total, callback = null){
         this.setState({
             'count_experiments' : current.experiments,
             'count_experiment_sets' : current.experiment_sets,
@@ -81,6 +85,15 @@ var QuickInfoBar = module.exports = React.createClass({
         return true;
     },
 
+    /**
+     * Same as updateCurrentAndTotalCounts(), but only for current counts.
+     * 
+     * @public
+     * @instance
+     * @param {Object} newCounts - Object containing current counts of 'experiments', 'experiment_sets', and 'files'.
+     * @param {function} [callback] Optional callback function.
+     * @returns {boolean} true
+     */
     updateCurrentCounts : function(newCounts, callback){
         this.setState({
             'count_experiments' : newCounts.experiments,
@@ -90,6 +103,15 @@ var QuickInfoBar = module.exports = React.createClass({
         return true;
     },
 
+    /**
+     * Same as updateCurrentAndTotalCounts(), but only for total counts.
+     * 
+     * @public
+     * @instance
+     * @param {Object} newCounts - Object containing current counts of 'experiments', 'experiment_sets', and 'files'.
+     * @param {function} [callback] Optional callback function.
+     * @returns {boolean} true
+     */
     updateTotalCounts : function(newCounts, callback){
         this.setState({
             'count_experiments_total' : newCounts.experiments,
@@ -99,7 +121,13 @@ var QuickInfoBar = module.exports = React.createClass({
         return true;
     },
 
-    /** Check if component is visible or not. */
+    /**
+     * Check if QuickInfoBar instance is currently invisible, i.e. according to props.href.
+     * 
+     * @public
+     * @instance
+     * @returns {boolean} True if counts are null or on a 'href' is not of a page for which searching or summary is applicable.
+     */
     isInvisible : function(props = this.props, state = this.state){
         if (
             !state.mounted ||
@@ -130,6 +158,8 @@ var QuickInfoBar = module.exports = React.createClass({
     /**
      * Updates state.show if no filters are selected.
      * 
+     * @private
+     * @instance
      * @param {Object} nextProps - Next props.
      * @returns {undefined}
      */
@@ -137,6 +167,35 @@ var QuickInfoBar = module.exports = React.createClass({
         if (!(nextProps.expSetFilters && _.keys(nextProps.expSetFilters).length > 0) && this.state.show){
             this.setState({ 'show' : false });
         }
+    },
+
+    /**
+     * Sets state's 'mounted' property to true.
+     * 
+     * @private
+     * @instance
+     */
+    componentDidMount : function(){
+        this.setState({'mounted' : true});
+    },
+
+    /** @ignore */
+    shouldComponentUpdate : function(newProps, newState){
+        if (this.state.count_experiments !== newState.count_experiments) return true;
+        if (this.state.count_experiment_sets !== newState.count_experiment_sets) return true;
+        if (this.state.count_files !== newState.count_files) return true;
+        
+        if (!this.state.count_experiments_total     && this.state.count_experiments_total !== newState.count_experiments_total) return true;
+        if (!this.state.count_experiment_sets_total && this.state.count_experiment_sets_total !== newState.count_experiment_sets_total) return true;
+        if (!this.state.count_files_total           && this.state.count_files_total !== newState.count_files_total) return true;
+
+        if (this.state.mounted !== newState.mounted) return true;
+        if (this.state.show !== newState.show) return true;
+        if (this.props.showCurrent !== newProps.showCurrent) return true;
+        if (this.props.expSetFilters !== newProps.expSetFilters) return true;
+        if (this.isInvisible(this.props, this.state) != this.isInvisible(newProps, newState)) return true;
+
+        return false;
     },
 
     /** @ignore */
