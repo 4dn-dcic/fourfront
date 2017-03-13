@@ -51,6 +51,7 @@ var PublicationsBlock = module.exports = React.createClass({
                     persistent={pubsToElements(this.props.publications.slice(0,3))}
                     collapsible={pubsToElements(this.props.publications.slice(3)) }
                     containerType="ul"
+                    open={this.state && this.state.open}
                 />
             );
         }
