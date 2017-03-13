@@ -97,8 +97,5 @@ if __name__ == "__main__":
         print("commit message", msg)
         if not msg:
             print("I don't have a message")
-        import pprint
-        pprint.pprint(os.environ)
-        if "tibanna-deploy" in commit:
+        if "tibanna-deploy" in msg:
             deploy()
-    assert 0 == 1
