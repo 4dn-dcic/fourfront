@@ -224,11 +224,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
                     <div className="col-sm-7 col-md-8 col-lg-9">
 
-                        <ExperimentSetInfoArea
-                            labInfo={ this.state.details_lab }
-                            awardInfo={ this.state.details_award }
-                            {...this.props}
-                        />
+                        <PublicationsBlock publications={this.props.context.publications_of_set} />
 
                         <div className="exp-table-section">
                             { this.props.context.experiments_in_set && this.props.context.experiments_in_set.length ? 
@@ -257,6 +253,12 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                                 />
                             </div>
                         </div>
+
+                        <ExperimentSetLabAwardInfo
+                            labInfo={ this.state.details_lab }
+                            awardInfo={ this.state.details_award }
+                            {...this.props}
+                        />
 
                     </div>
 
@@ -294,21 +296,11 @@ var ExperimentSetHeader = React.createClass({
 });
 
 
-var ExperimentSetInfoArea = React.createClass({
+var ExperimentSetLabAwardInfo = React.createClass({
 
     render : function(){
         return (
             <div className="row info-area">
-                <div className="col-sm-12">
-                    <div className="row">
-
-                        <div className="col-sm-12 col-sm-float-right">
-                            <PublicationsBlock publications={this.props.context.publications_of_set} />
-                        </div>
-
-                    </div>
-
-                </div>
                 <div className="col-sm-12">
                     <div className="row">
 

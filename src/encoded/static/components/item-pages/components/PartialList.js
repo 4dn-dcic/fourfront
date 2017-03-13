@@ -78,7 +78,7 @@ var PartialList = module.exports = React.createClass({
     render : function(){
         //console.log('render partial list',this.props.open, this.props.collapsible);
         return (
-            <div className={this.props.className}>
+            <div className={"expandable-list " + (this.props.className || '')}>
 
                 { React.createElement(this.props.containerType, { 'className' : this.props.containerClassName }, this.props.persistent || this.props.children) }
 
