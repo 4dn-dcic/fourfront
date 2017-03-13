@@ -158,7 +158,7 @@ var Detail = React.createClass({
                 'aliases', 'dbxrefs', 'date_created', 'lab', 'award', 'description',
                 'status', 'external_references', '@id', 'link_id', 'display_title'
             ],
-            'persistentKeys' : [
+            'stickyKeys' : [
                 // Experiment
                 'experiment_type', 'experiment_summary', 'experiment_sets', 'files', 'filesets',
                 'protocol', 'biosample', 'digestion_enzyme', 'digestion_temperature',
@@ -176,6 +176,9 @@ var Detail = React.createClass({
                 // Document
                 'attachment'
             ],
+            'alwaysCollapsibleKeys' : [
+                '@type', 'accession', 'schema_version', 'uuid'
+            ],
             'open' : null
         };
     },
@@ -187,24 +190,26 @@ var Detail = React.createClass({
         var tips = object.tipsFromSchema(this.props.schemas, context);
 
         // Sort applicable persistent keys by original persistent keys sort order.
-        var persistentKeysObj = _.object(
-            _.intersection(sortKeys, this.props.persistentKeys.slice(0).sort()).map(function(key){
+        var stickyKeysObj = _.object(
+            _.intersection(sortKeys, this.props.stickyKeys.slice(0).sort()).map(function(key){
                 return [key, true];
             })
         );
-        var orderedPersistentKeys = [];
-        this.props.persistentKeys.forEach(function (key) {
-            if (persistentKeysObj[key] === true) orderedPersistentKeys.push(key);
+        var orderedStickyKeys = [];
+        this.props.stickyKeys.forEach(function (key) {
+            if (stickyKeysObj[key] === true) orderedStickyKeys.push(key);
         });
 
-        var extraKeys = _.difference(sortKeys, this.props.persistentKeys.slice(0).sort());
+        var extraKeys = _.difference(sortKeys, this.props.stickyKeys.slice(0).sort());
+        var collapsibleKeys = _.intersection(extraKeys.sort(), this.props.alwaysCollapsibleKeys.slice(0).sort());
+        extraKeys = _.difference(extraKeys, collapsibleKeys);
 
         return (
             <PartialList
-                persistent={ orderedPersistentKeys.map((key,i) =>
+                persistent={ orderedStickyKeys.concat(extraKeys).map((key,i) =>
                     <PartialList.Row key={key} label={Detail.formKey(tips,key)}>{ Detail.formValue(this.props.schemas,context[key], key, context['@type'][0]) }</PartialList.Row>
                 )}
-                collapsible={ extraKeys.map((key,i) =>
+                collapsible={ collapsibleKeys.map((key,i) =>
                     <PartialList.Row key={key} label={Detail.formKey(tips,key)}>{ Detail.formValue(this.props.schemas,context[key], key, context['@type'][0]) }</PartialList.Row>
                 )}
                 open={this.props.open}
