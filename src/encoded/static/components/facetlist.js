@@ -7,6 +7,7 @@ var _ = require('underscore');
 var store = require('../store');
 var { ajax, console, object, isServerSide, Filters } = require('./util');
 var vizUtil = require('./viz/utilities');
+var ReactTooltip = require('react-tooltip');
 
 /**
  * Component to render out the FacetList for the Browse and ExperimentSet views.
@@ -800,7 +801,9 @@ var FacetList = module.exports = React.createClass({
                     this.ignoredFilters = FacetList.findIgnoredFiltersByMissingFacets(facets, this.props.expSetFilters);
                 }
                 if (Array.isArray(facets) && facets.length > 0){
-                    this.setState({ 'facets' : facets, 'facetsLoaded' : true });
+                    this.setState({ 'facets' : facets, 'facetsLoaded' : true }, function(){
+                        ReactTooltip.rebuild();
+                    });
                 }
             });
         } // else @see getInitialState
