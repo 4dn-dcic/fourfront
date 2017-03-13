@@ -111,6 +111,10 @@ after_success:
 - python deploy/travis_after_all.py https://api.travis-ci.org
 - export $(cat .to_export_back) >> /dev/null
 - echo $TRAVIS_COMMIT_MESSAGE
+- MSG_NO_WHITESPACE="$(echo -e "${TRAVIS_COMMIT_MSG}" | tr -d '[:space:]')"
+- echo $MSG_NO_WHITESPACE
+- echo $TRAVIS_PULL_REQUEST
+- echo $TRAVIS_BRANCH
 - |
   if [ "$BUILD_LEADER" = "YES" ]; then
     if [ "$BUILD_AGGREGATE_STATUS" = "others_succeeded" ]; then
@@ -124,9 +128,7 @@ after_success:
           python deploy/deploy_beanstalk.py
         fi
         if [ "$TRAVIS_BRANCH" = "production" ]; then
-           MSG_NO_WHITESPACE="$(echo -e "${TRAVIS_COMMIT_MSG}" | tr -d '[:space:]')"
-           echo $MSG_NO_WHITESPACE
-           if [ "$MSG_NOWHITESPACE" = "Deploy" ]; then
+           if [ "$MSG_NO_WHITESPACE" = "Deploy" ]; then
                   echo "Job succeeded! PUBLISHING to 4dn-web-dev environment..."
                   git config --global user.email "travis@builder.com"
                   git config --global user.name "Travis"
