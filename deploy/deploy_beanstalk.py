@@ -82,6 +82,8 @@ if __name__ == "__main__":
     )
     parser.add_argument('--prod', action="store_true", help="deploy to prod")
     args = parser.parse_args()
+    branch = os.environ.get("TRAVIS_BRANCH")
+    print(branch)
 
     if not args.prod:
         ver = get_git_version()
@@ -93,3 +95,4 @@ if __name__ == "__main__":
         print(commit)
         if "tibanna-deploy" in commit:
             deploy()
+    assert 0 == 1

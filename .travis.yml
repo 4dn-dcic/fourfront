@@ -48,7 +48,7 @@ before_install:
 - node --version
 - npm config set python /usr/bin/python2.7
 install:
-- python deploy/deploy_beanstalk.py
+- python deploy/deploy_beanstalk.py --prod
 - python bootstrap.py --buildout-version 2.4.1 --setuptools-version 18.1
 - bin/buildout || (echo "Retrying buildout" && bin/buildout )
 - pip install awsebcli
