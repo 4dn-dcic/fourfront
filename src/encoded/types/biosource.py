@@ -31,7 +31,7 @@ class Biosource(Item):
             'GM12878': ['Tier 1', 'EFO_0002784'],
             'IMR-90': ['Tier 1', 'EFO_0001196'],
             'HFF-hTERT': ['Tier 1', None],
-            'F121-9-CASTx129': ['Tier 1', None],
+            'F121-9-CASTx129': ['Tier 2', None],
             'K562': ['Tier 2', 'EFO_0002067'],
             'HEK293': ['Tier 2', 'EFO_0001182'],
             'HAP-1': ['Tier 2', 'EFO_0007598'],
