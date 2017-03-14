@@ -50,11 +50,11 @@ var BannerEntry = module.exports = React.createClass({
                     if(data.total){
                         this.setState({
                             count: data.total
-                        })
+                        });
                     }else{
                         this.setState({
                             count: null
-                        })
+                        });
                     }
                 }
             });
