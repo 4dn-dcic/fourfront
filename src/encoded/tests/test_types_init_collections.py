@@ -3,16 +3,6 @@ pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
 @pytest.fixture
-def basic_genomic_region(testapp, lab, award):
-    item = {
-        "genome_assembly": "GRCh38",
-        'award': award['@id'],
-        'lab': lab['@id'],
-    }
-    return testapp.post_json('/genomic_region', item).json['@graph'][0]
-
-
-@pytest.fixture
 def genomic_region_w_chrloc(testapp, lab, award):
     item = {
         "genome_assembly": "GRCh38",
