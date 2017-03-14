@@ -65,6 +65,7 @@
     "marked": "^0.3.6",
     "moment": "^2.15.2",
     "query-string": "^4.1.0",
+    "rc-progress": "^2.0.6",
     "react": "^15.3.2",
     "react-bootstrap": "^0.30.7",
     "react-cookie": "^0.4.8",

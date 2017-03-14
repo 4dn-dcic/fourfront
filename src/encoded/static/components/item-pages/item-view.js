@@ -12,7 +12,7 @@ var itemTitle = require('./item').title;
 /**
  * This Component renders out the default Item page view for Item objects/contexts which do not have a more specific
  * Item page template associated with them.
- * 
+ *
  * @module {Component} item-pages/item-view
  */
 
@@ -20,7 +20,7 @@ var itemTitle = require('./item').title;
  * A list of properties which belong to Item shown by ItemView.
  * Shows 'persistentKeys' fields & values stickied near top of list,
  * 'excludedKeys' never, and 'hiddenKeys' only when "See More Info" button is clicked.
- * 
+ *
  * @memberof module:item-pages/item-view
  * @namespace
  * @type {Component}
@@ -214,7 +214,7 @@ var Detail = React.createClass({
 });
 
 
-/** 
+/**
  * @alias module:item-pages/item-view
  */
 var ItemView = module.exports = React.createClass({
@@ -225,7 +225,7 @@ var ItemView = module.exports = React.createClass({
         /**
          * Display the item field with a tooltip showing the field description from
          * schema, if available.
-         * 
+         *
          * @memberof module:item-pages/item-view
          * @namespace
          * @type {Component}
@@ -347,7 +347,7 @@ var ItemView = module.exports = React.createClass({
 
         /**
          * Renders page title appropriately for a provided props.context.
-         * 
+         *
          * @memberof module:item-pages/item-view
          * @type {Component}
          */

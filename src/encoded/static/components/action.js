@@ -3,12 +3,12 @@ var React = require('react');
 var globals = require('./globals');
 var _ = require('underscore');
 var { ajax, console, object, isServerSide } = require('./util');
-var {getS3UploadUrl, uploadFile} = require('./util/aws');
+var {getS3UploadUrl, s3UploadFile} = require('./util/aws');
 var { DropdownButton, Button, MenuItem, Panel, Table} = require('react-bootstrap');
 var makeTitle = require('./item-pages/item').title;
 var Alerts = require('./alerts');
 var d3 = require('d3');
-var ReactS3Uploader = require('react-s3-uploader');
+var store = require('../store');
 
 // Master component used for user actions: create and edit
 // create is considered default mode, but by simply switching the behavior
@@ -64,7 +64,7 @@ var Action = module.exports = React.createClass({
             return response;
         })
         .then(response => {
-            this.clearFields(response, this.state.schema);
+            response = this.clearFields(response, this.state.thisSchema);
             this.setState({'newContext': response});
         }, error => {
             // something went wrong with fetch context. Just use an empty object
@@ -80,7 +80,7 @@ var Action = module.exports = React.createClass({
             if(schema.properties[contextKeys[i]]){
                 var fieldSchema = schema.properties[contextKeys[i]];
                 if (fieldSchema.clear_create && fieldSchema.clear_create == "clear"){
-                    context[contextKeys[i]] = null;
+                    delete context[contextKeys[i]];
                 }
             }
         }
@@ -258,70 +258,65 @@ var Action = module.exports = React.createClass({
                                 body: JSON.stringify(response['@graph'][0])
                             })
                             .then(response => {
-                                if (!this.context.contentTypeIsJSON(response) || !response['@graph'] || !response['@graph'][0]['upload_credentials']['upload_url'] || !this.state.file) throw response;
-                                // var upload_url = getS3UploadUrl(file, response['@graph'][0]['upload_credentials']);
+                                console.log('RESPONSE:', response);
+                                if (!this.context.contentTypeIsJSON(response) || !response['@graph'] || !response['@graph'][0]['upload_credentials'] || !this.state.file) throw response;
                                 return response;
                             })
                             .then(response => {
-                                console.log('METADATA: ', response['@graph'][0]);
-                                // add a context fetch, POST with presigned URL
-                                // this code is wrong but it's the right idea
-
-                                // var upload_creds = response['@graph'][0]['upload_credentials'];
-                                // var signed_url = getS3UploadUrl(this.state.file, upload_creds);
-                                // console.log(signed_url);
-                                // this.context.fetch(signed_url, {
-                                //     method: 'PUT',
-                                //     data: this.state.file
-                                // });
-                                // .addEventListener('progress', function(e){
-                                //     if (firstProgressEvent) {
-                                //                 _this.total += e.total;
-                                //         }
-                                //         firstProgressEvent = false;
-                                //         _this.loaded += (e.loaded - lastBytesLoaded);
-                                //         _this.onProgress(_this.loaded / _this.total);
-                                //     console.log(_this.total);
-                                //     console.log(_this.loaded);                                // }, false);
-                                var upload_manager = uploadFile(this.state.file, response['@graph'][0]);
-                                console.log('TRACKER:', upload_manager);
-                                upload_manager.on('httpUploadProgress', function(evt) {
-                                    console.log("Uploaded: " + parseInt((evt.loaded * 100) / evt.total)+'%');
-                                }).send(function(err, data) {
-                                    if(err){
-                                        this.context.fetch(newID, {
-                                            method: 'PATCH',
-                                            headers: {
-                                                'Accept': 'application/json',
-                                                'Content-Type': 'application/json'
-                                            },
-                                            body: JSON.stringify({'status':'upload failed'})
-                                        })
-                                        //FF-617: catch errors on the PATCH?
-                                        alert("File upload failed for " + newID);
-                                    }else{
-                                        this.context.fetch(newID, {
-                                            method: 'PATCH',
-                                            headers: {
-                                                'Accept': 'application/json',
-                                                'Content-Type': 'application/json'
-                                            },
-                                            body: JSON.stringify({'status':'uploaded'})
-                                        })
-                                        //FF-617: catch errors on the PATCH?
-                                        alert("File uploaded successfully for " + newID);
-                                    }
-                                }.bind(this));
+                                var creds = response['@graph'][0]['upload_credentials'];
+                                var upload_info = {
+                                    'id': response['@graph'][0]['@id'],
+                                    'display_title': response['@graph'][0]['display_title'],
+                                    'total_size': this.state.file.size,
+                                    'percent_done': 0
+                                };
+                                var upload_manager = s3UploadFile(this.state.file, creds);
+                                console.log('UPLOAD_MANAGER:', upload_manager);
+                                upload_manager.on('httpUploadProgress',
+                                    function(evt) {
+                                        console.log("Uploaded: " + parseInt((evt.loaded * 100) / evt.total));
+                                        var percentage = Math.round((evt.loaded * 100) / evt.total);
+                                        upload_info.percent_done = percentage;
+                                        this.props.updateUploads(creds.key, upload_info);
+                                    }.bind(this))
+                                    .send(function(err, data) {
+                                        if(err){
+                                            this.context.fetch(newID, {
+                                                method: 'PATCH',
+                                                headers: {
+                                                    'Accept': 'application/json',
+                                                    'Content-Type': 'application/json'
+                                                },
+                                                body: JSON.stringify({'status':'upload failed'})
+                                            });
+                                            //FF-617: catch errors on the PATCH?
+                                            alert("File upload failed for " + newID);
+                                        }else{
+                                            this.context.fetch(newID, {
+                                                method: 'PATCH',
+                                                headers: {
+                                                    'Accept': 'application/json',
+                                                    'Content-Type': 'application/json'
+                                                },
+                                                body: JSON.stringify({'status':'uploaded'})
+                                            });
+                                            //FF-617: catch errors on the PATCH?
+                                            alert("File uploaded successfully for " + newID);
+                                        }
+                                    }.bind(this));
+                                alert('Success! Navigating to the uploads page.');
+                                this.context.navigate('/uploads');
                             }, error => {
                                 // FF-617. Handle error
                                 console.log('Error getting credentials');
                             });
+                        }else{
+                            if(typeof newID !== 'string'){
+                                newID = '/';
+                            }
+                            alert('Success! Navigating to the new object page.');
+                            this.context.navigate(newID);
                         }
-                        if(typeof newID !== 'string'){
-                            newID = '/';
-                        }
-                        alert('Success! Navigating to the new object page.');
-                        this.context.navigate(newID);
                     }
                 }, error => {
                     stateToSet.validated = 0;
@@ -419,8 +414,18 @@ var FieldPanel = React.createClass({
         // set a required flag if this field is required
         var required = _.contains(this.props.reqFields, field);
         // handle a linkTo object on the the top level
+
+        // check if any schema-specific adjustments need to made:
         if(fieldSchema.linkTo){
             fieldType = 'linked object';
+        } else if (fieldSchema.attachment && fieldSchema.attachment === true){
+            fieldType = 'attachment';
+        } else if (fieldSchema.s3Upload && fieldSchema.s3Upload === true){
+            fieldType = 'file upload';
+            // format tip for files specifically
+            // if(fieldSchema.file_format_file_extension && this.props.context[file_format_file_extension]){
+            //     fieldTip = "Must be " + this.props.context[file_format_file_extension];
+            // }
         }
         // @id of the whole object, may be useful down the line
         var masterID = this.props.baseContext['@id'] || this.props.baseContext.link_id.replace(/~/g, "/");
@@ -519,8 +524,8 @@ var BuildField = React.createClass({
             case 'attachment' : return (
                 <AttachmentInput {...inputProps} field={this.props.label} modifyNewContext={this.props.modifyNewContext}/>
             );
-            case 's3_file_upload' : return (
-                <TestUploader {...inputProps} masterID={this.props.masterID} field={this.props.label} modifyNewContext={this.props.modifyNewContext} modifyFile={this.props.modifyFile}/>
+            case 'file upload' : return (
+                <S3FileInput {...inputProps} masterID={this.props.masterID} field={this.props.label} modifyNewContext={this.props.modifyNewContext} modifyFile={this.props.modifyFile} schema={this.props.schema}/>
             );
         }
         // Fallback
@@ -564,34 +569,34 @@ var BuildField = React.createClass({
     },
 
     render: function(){
-        // check if any schema-specific adjustments need to made:
-        var field_case = this.props.fieldType;
-        if (this.props.schema.attachment && this.props.schema.attachment === true){
-            field_case = 'attachment';
-        } else if (this.props.schema.s3Upload && this.props.schema.s3Upload === true){
-            field_case = 's3_file_upload';
-        }
         var isArray = this.props.isArray || false;
         // array entries don't need dt/dd rows
         if(isArray){
             return(
                 <div>
-                    {this.displayField(field_case)}
+                    {this.displayField(this.props.fieldType)}
                 </div>
             );
         }
+        var field_title = this.props.label;
+        if(this.props.schema.title && this.props.schema.title.length > 0){
+            field_title = this.props.schema.title;
+        }
+
         return(
             <dl className="key-value row extra-footspace">
                 <dt className="col-sm-3">
-                        <span>{this.props.label}</span>
+                        <span style={{'display':'inlineBlock', 'width':'80px'}}>
+                            {field_title}
+                        </span>
                         <a href="#" className="cancel-button" onClick={this.deleteField} title="Delete">
                             <i className="icon icon-times-circle-o icon-fw"></i>
                         </a>
                 </dt>
                 <dd className="col-sm-9">
-                    {this.displayField(field_case)}
+                    {this.displayField(this.props.fieldType)}
                     <div className="display-tip">{this.props.fieldTip}</div>
-                    {this.displayMessage(field_case)}
+                    {this.displayMessage(this.props.fieldType)}
                 </dd>
 
             </dl>
@@ -1003,81 +1008,31 @@ var AttachmentInput = React.createClass({
     }
 });
 
-var TestUploader = React.createClass({
-    contextTypes: {
-        contentTypeIsJSON: React.PropTypes.func,
-        fetch: React.PropTypes.func
-    },
-
-    acceptedTypes: function(){
-        var types = [
-            "application/pdf",
-            "application/zip",
-            "text/plain",
-            "text/tab-separated-values",
-            "image/jpeg",
-            "image/tiff",
-            "image/gif",
-            "text/html",
-            "image/png",
-            "image/svs",
-            "text/autosql"
-        ];
-        return(types.toString());
-    },
-
+/* Input for an s3 file upload. If file_format_file_extension is defined in the
+schema, will enforce that a file of that type is used. Context value set is
+local value of the filename. Also updates this.state.file for the overall component.
+*/
+var S3FileInput = React.createClass({
     handleChange: function(e){
+        // var req_type = this.props.schema.file_format_file_extension || null;
+        var req_type = null;
         var file = e.target.files[0];
         var filename = file.name ? file.name : "unknown";
-        this.props.modifyNewContext(this.props.field, filename);
-        this.props.modifyFile(file);
+        if(req_type && filename.indexOf(req_type) !== -1){
+            this.props.modifyNewContext(this.props.field, filename);
+            this.props.modifyFile(file);
+        }else if(req_type){
+            this.refs.fileInput.value = '';
+            alert('File must be of type: ' + req_type);
+        }else{
+            this.props.modifyNewContext(this.props.field, filename);
+            this.props.modifyFile(file);
+        }
     },
 
     render: function(){
         return(
-            <input id={this.props.field} type='file' onChange={this.handleChange} ref="fileInput" accept={this.acceptedTypes()}/>
+            <input id={this.props.field} type='file' onChange={this.handleChange} ref="fileInput"/>
         );
     }
 });
-
-// var TestUploader = React.createClass({
-//     getSignedUrl: function(file, callback){
-//         var fileName = file.name || null;
-//         var fileType =  file.type || null;
-//         if(fileName && fileType){
-//             var signedUrl = getS3UploadUrl(fileName, fileType);
-//             if (signedUrl){
-//                 var data = {'signedUrl':signedUrl};
-//                 callback(data);
-//             }else{
-//                 return;
-//             }
-//         }else{
-//             console.log('File name and type not available!');
-//             return;
-//         }
-//
-//     },
-//
-//     onError: function(){
-//         console.log('S3 upload errored!');
-//     },
-//
-//     onFinish: function(){
-//         console.log('S3 upload complete!');
-//     },
-//
-//     render: function(){
-//         return (
-//             <ReactS3Uploader
-//                 className="s3Uploader"
-//                 getSignedUrl={this.getSignedUrl}
-//                 accept="image/*"
-//                 uploadRequestHeaders={{
-//                     'x-amz-acl': 'public-read'
-//                 }}
-//                 contentDisposition="auto"
-//                 />
-//         );
-//     }
-// });
