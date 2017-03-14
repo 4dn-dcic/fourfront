@@ -8,7 +8,14 @@ var globals = require('./../../globals');
 var announcements_data = require('../../../data/announcements_data');
 var Collapse = require('react-bootstrap').Collapse;
 
-
+/**
+ * A single Announcement block/view.
+ * 
+ * @namespace
+ * @type {Component}
+ * @memberof module:static-pages/components.Announcements
+ * @private
+ */
 var Announcement = React.createClass({
     getInitialState: function() {
         return {
@@ -69,16 +76,14 @@ var Announcement = React.createClass({
 
 var Announcements = module.exports = React.createClass({
     render : function(){
-        var announcements = announcements_data.map(function(announce) {
-            return (
-                <Announcement key={announce.title} content={announce} icon={announcements_data.length > 3 ? true : false} />
-            );
-        });
         return (
-            <div>
-                <h3 className="fourDN-header">Announcements</h3>
-                {announcements}
-            </div>
+            <div className={this.props.className} id={this.props.id}>{
+                announcements_data.map(function(announce){
+                    return (
+                        <Announcement key={announce.title} content={announce} icon={announcements_data.length > 3 ? true : false} />
+                    );
+                })
+            }</div>
         );
     }
 });

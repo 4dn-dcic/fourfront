@@ -245,6 +245,7 @@ var AccessKeyTable = React.createClass({
  * 
  * @static
  * @public
+ * @memberof module:item-pages/user
  * @param {string} email - User's email address.
  * @param {number} size - Width & height of image square.
  * @param {string} [defaultImg='retro'] Style of Gravatar image.
@@ -266,6 +267,7 @@ var buildGravatarURL = module.exports.buildGravatarURL = function(email, size=nu
  * 
  * @static
  * @public
+ * @memberof module:item-pages/user
  * @param {string} email - User's email address.
  * @param {number} size - Width & height of image square.
  * @param {string} className - ClassName of <img> element.

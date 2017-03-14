@@ -6,7 +6,15 @@
  * @module item-pages/components
  */
 
-/** @alias FormattedInfoBlock */
+/** 
+ * Formats a lab, award, or potentially other object to appear in a small rectangle that can be included in a sidebar.
+ * Also offers mix-in functions to help AJAX in the required details to the parent component's state.
+ * 
+ * Also contains FormattedInfoBlock.List which is meant to display a list of FormattedInfoBlocks, and potentially AJAX in details for them.
+ * 
+ * @namespace
+ * @type {Component}
+ */
 module.exports.FormattedInfoBlock = require('./FormattedInfoBlock');
 
 /**
@@ -37,14 +45,22 @@ module.exports.ItemHeader = require('./ItemHeader');
  * 
  * @namespace
  * @type {Component}
- * @prop {Component[]|Element[]|string[]} persistent - React elements or components to always render. 
- * @prop {Component[]|Element[]|string[]} collapsible - React elements or components to render conditionally.
- * @prop {boolean} open - Show collapsed items or not.
- * @prop {string} className - Class name for outermost element.
+ * @prop {Component[]|Element[]|string[]} persistent    - React elements or components to always render. 
+ * @prop {Component[]|Element[]|string[]} collapsible   - React elements or components to render conditionally.
+ * @prop {boolean} open          - Show collapsed items or not.
+ * @prop {string}  className     - Class name for outermost element.
+ * @prop {string}  containerType - Type of element to use as container for the two lists. Defaults to 'div'.
  */
 module.exports.PartialList = require('./PartialList');
 
-/** @alias ExternalReferenceLink */
+/**
+ * Used in Component module:item-pages/components.ItemFooterRow to display an external reference link.
+ * 
+ * @namespace
+ * @type {Component}
+ * @prop {Component[]|Element[]|string[]} children - Inner contents or title of link.
+ * @prop {string} uri - The href for the link.
+ */
 module.exports.ExternalReferenceLink = require('./ExternalReferenceLink');
 
 /**
@@ -67,7 +83,8 @@ module.exports.FilesInSetTable = require('./FilesInSetTable');
 module.exports.ItemFooterRow = require('./ItemFooterRow');
 
 /**
- * Shows publications for current Item. Currently, only ExperimentSet seems to have a 
+ * Shows publications for current Item.
+ * Currently, only ExperimentSet seems to have publications so this is present only on Component module:item-pages/experiment-set-view .
  * 
  * @namespace
  * @type {Component}

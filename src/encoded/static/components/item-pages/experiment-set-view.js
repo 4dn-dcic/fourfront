@@ -11,9 +11,23 @@ var FacetList = require('./../facetlist');
 var { ajax, console, DateUtility, object } = require('./../util');
 
 /**
- * Entire ExperimentSet page view.
+ * Contains the ExperimentSetView component, which renders out the ExperimentSet view/page.
+ *
+ * @module item-pages/experiment-set-view
  */
 
+
+/**
+ * ExperimentSet Item view/page.
+ * 
+ * @memberof module:item-pages/experiment-set-view
+ * @namespace
+ * @type {Component}
+ * @prop {Object} schemas - state.schemas passed down from app Component.
+ * @prop {Object} context - JSON representation of current ExperimentSet item.
+ * @prop {Object} expSetFilters - Currently-set expSetFilters from Redux store. Used for FacetList.
+ * @prop {Object[]} expIncompleteFacets - Facets to aggregate counts for and display in the form of objects containing at least a title and field property.
+ */
 var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
     propTypes : {

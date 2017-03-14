@@ -13,6 +13,8 @@
  * @member
  * @namespace
  * @type {Component}
+ * @prop {string} className - Outer <div> element's className
+ * @prop {string} id - Outer <div> element's id attribute.
  */
 module.exports.Announcements = require('./Announcements');
 
@@ -24,7 +26,7 @@ module.exports.Announcements = require('./Announcements');
  * @namespace
  * @type {Component}
  * @example
- * <caption>Previous usage on static-pages/home.js</caption>
+ * <caption>Previous usage in View module:static-pages/home</caption>
  * render : function(){
  * ...
  * var experiment4DNBanner = <BannerEntry session={this.props.session} text='experiments' defaultFilter="4DN" destination="/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all" fetchLoc='/search/?type=Experiment&award.project=4DN&format=json'/>;

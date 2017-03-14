@@ -32,6 +32,7 @@ var HomePage = module.exports = React.createClass({
      * Render old subheading
      * 
      * @deprecated
+     * @inner
      * @memberof module:static-pages/home
      * @returns {Element} H4 React Element with quick summary: "The portal currently hosts X from the 4DN network and Y from other sources over Z."
      */
@@ -48,6 +49,14 @@ var HomePage = module.exports = React.createClass({
         );
     },
 
+    /**
+     * Render old homepage banner.
+     * 
+     * @deprecated
+     * @inner
+     * @memberof module:static-pages/home
+     * @returns {Element} A React <div> element.
+     */
     banner : function(){
         return (
             <div className="fourDN-banner text-left">
@@ -57,43 +66,49 @@ var HomePage = module.exports = React.createClass({
         );
     },
 
+    /**
+     * The render function. Renders homepage contents.
+     * 
+     * @inner
+     * @memberof module:static-pages/home
+     * @returns {Element} A React <div> element.
+     */
     render: function() {
         var c = this.props.context.content; // Content
        
         return (
-            <div>
+            <div className="home-content-area">
                 <div className="row">
+
                     <div className="col-md-6 col-xs-12">
-                        <h3 className="fourDN-header">Welcome</h3>
-                        <div className="fourDN-content text-justify" dangerouslySetInnerHTML={{__html: c.description}}></div>
-                    </div>
-                    <div className="col-md-6 col-xs-12">
-                        <Announcements/>
+                        <h2 className="fourDN-header">Welcome</h2>
+                        <div className="fourDN-content text-justify" dangerouslySetInnerHTML={{__html: c.description}}/>
                     </div>
 
-                    <div className="col-xs-12 col-sm-12 col-md-6 homepage-links-row">
-                        
-                        <h4 className="fourDN-header">Links</h4>
-                        <div className="links-wrapper">
-                            <div className="link-block">
-                                    <a href="http://www.4dnucleome.org/" target="_blank">Main Portal</a>
-                            </div>
-                            <div className="link-block">
-                                <a href="http://dcic.4dnucleome.org/" target="_blank">DCIC</a>
-                            </div>
-                            <div className="link-block">
-                                <a href="https://commonfund.nih.gov/4Dnucleome/index" target="_blank">Common Fund</a>
-                            </div>
-                            <div className="link-block">
-                                <a href="https://commonfund.nih.gov/4Dnucleome/FundedResearch" target="_blank">Centers and Labs</a>
-                            </div>
-                        </div>
+                    <div className="col-md-6 col-xs-12">
+                        <h2 className="fourDN-header">Announcements</h2>
+                        <Announcements/>
                     </div>
 
                 </div>
 
-                <div className="row">
-                    
+                <div className="homepage-links-row">
+                    <h4 className="fourDN-header">Links</h4>
+                    <div className="links-wrapper clearfix">
+                        <div className="link-block">
+                                <a href="http://www.4dnucleome.org/" target="_blank">Main Portal</a>
+                        </div>
+                        <div className="link-block">
+                            <a href="http://dcic.4dnucleome.org/" target="_blank">4DN DCIC</a>
+                        </div>
+                        <div className="link-block">
+                            <a href="https://commonfund.nih.gov/4Dnucleome/index" target="_blank">NIH Common Fund</a>
+                        </div>
+                        <div className="link-block">
+                            <a href="https://commonfund.nih.gov/4Dnucleome/FundedResearch" target="_blank">Centers and Labs</a>
+                        </div>
+                    </div>
+                    <br/>
                 </div>
 
             </div>
