@@ -264,6 +264,7 @@ var Action = module.exports = React.createClass({
                             })
                             .then(response => {
                                 var creds = response['@graph'][0]['upload_credentials'];
+                                var file_title = response['@graph'][0]['filename'] ? response['@graph'][0]['filename'] : response['@graph'][0]['display_title'];
                                 var upload_info = {
                                     'id': response['@graph'][0]['@id'],
                                     'display_title': response['@graph'][0]['display_title'],
