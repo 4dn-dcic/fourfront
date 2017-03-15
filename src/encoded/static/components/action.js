@@ -267,12 +267,13 @@ var Action = module.exports = React.createClass({
                                 var file_title = response['@graph'][0]['filename'] ? response['@graph'][0]['filename'] : response['@graph'][0]['display_title'];
                                 var upload_info = {
                                     'id': response['@graph'][0]['@id'],
-                                    'display_title': response['@graph'][0]['display_title'],
+                                    'display_title': file_title,
                                     'total_size': this.state.file.size,
                                     'percent_done': 0
                                 };
                                 var upload_manager = s3UploadFile(this.state.file, creds);
                                 console.log('UPLOAD_MANAGER:', upload_manager);
+                                //FF-617 move all this to app state?
                                 upload_manager.on('httpUploadProgress',
                                     function(evt) {
                                         console.log("Uploaded: " + parseInt((evt.loaded * 100) / evt.total));
@@ -1016,19 +1017,12 @@ local value of the filename. Also updates this.state.file for the overall compon
 var S3FileInput = React.createClass({
     handleChange: function(e){
         // var req_type = this.props.schema.file_format_file_extension || null;
+        // WHAT SHOULD FILENAME BE? HOW DO I GET ACCESSION AND @ID?
         var req_type = null;
         var file = e.target.files[0];
         var filename = file.name ? file.name : "unknown";
-        if(req_type && filename.indexOf(req_type) !== -1){
-            this.props.modifyNewContext(this.props.field, filename);
-            this.props.modifyFile(file);
-        }else if(req_type){
-            this.refs.fileInput.value = '';
-            alert('File must be of type: ' + req_type);
-        }else{
-            this.props.modifyNewContext(this.props.field, filename);
-            this.props.modifyFile(file);
-        }
+        this.props.modifyNewContext(this.props.field, filename);
+        this.props.modifyFile(file);
     },
 
     render: function(){
