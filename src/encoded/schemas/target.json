@@ -29,11 +29,10 @@
         },
         "targeted_genes": {
             "title": "Targeted Genes",
-            "description": "The genes that are specifically targeted - can also be derived from genomic region info",
+            "description": "Please use NCBI Gene ID (e.g. 853133)",
             "type": "array",
             "items": {
                 "title": "Gene",
-                "description": "Gene symbol for targeted gene",
                 "internal_comment": "will want to have validation against authority gene name databases, and link to the external resource",
                 "type": "string"
             }
@@ -54,7 +53,6 @@
             "type": "array",
             "items": {
                 "title": "Protein",
-                "description": "UniProt protein name",
                 "internal_comment": "Can we validate against and link to Uniprot?",
                 "type": "string"
             }
