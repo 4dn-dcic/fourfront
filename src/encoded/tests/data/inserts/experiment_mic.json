@@ -4,6 +4,7 @@
         "status": "in review by lab",
         "biosample":"123111bc-8535-4448-903e-854af460b123",
         "experiment_type": "DNA-paint",
+        "microscopy_technique": "STED",
         "lab": "4dn-dcic-lab",
         "aliases": ["labsample:expmic1"],
         "description": "Test Microscopy Experiment",

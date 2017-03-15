@@ -33,9 +33,20 @@
                 "DNA-FiSH",
                 "FISH",
                 "Immunoflourescence",
-                "STORM",
+                "Fluorescence",
+                "Cryo-EM"
+            ]
+        },
+        "microscopy_technique": {
+            "title" : "Microscopy Technique",
+            "enum": [
+                "Widefield",
+                "SIM",
+                "CLSM",
                 "STED",
-                "Light Sheet"
+                "STORM",
+                "Ligth sheet",
+                "EM"
             ]
         }
     },
