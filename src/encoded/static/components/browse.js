@@ -624,6 +624,7 @@ var ResultTable = browse.ResultTable = React.createClass({
         if (this.state.sortReverse !== nextState.sortReverse) return true;
         if (this.state.overflowingRight !== nextState.overflowingRight) return true;
         if (this.props.searchBase !== nextProps.searchBase) return true;
+        if (this.props.schemas !== nextProps.schemas) return true;
         return false;
     },
 
@@ -935,6 +936,7 @@ var ResultTable = browse.ResultTable = React.createClass({
                             href={this.props.href}
                             navigate={this.props.navigate}
                             useAjax={true}
+                            schemas={this.props.schemas}
                         />
                     </div>
                     :
@@ -1096,6 +1098,7 @@ var ControlsAndResults = browse.ControlsAndResults = React.createClass({
                     href={this.props.href}
                     navigate={this.props.navigate}
                     useAjax={this.props.useAjax}
+                    schemas={this.props.schemas}
                 />
 
             </div>
@@ -1124,7 +1127,8 @@ var Browse = browse.Browse = React.createClass({
         if (this.props.expSetFilters !== nextProps.expSetFilters) return true;
         if (this.props.session !== nextProps.session) return true;
         if (this.props.href !== nextProps.href) return true;
-        return false; // We don't care about props.schemas or props.expIncomplete props (other views might), so we can skip re-render.
+        if (this.props.schemas !== nextProps.schemas) return true;
+        return false; // We don't care about props.expIncomplete props (other views might), so we can skip re-render.
     },
 
     componentWillMount: function() {
@@ -1171,6 +1175,7 @@ var Browse = browse.Browse = React.createClass({
                     onChange={this.context.navigate}
                     navigate={this.props.navigate || this.context.navigate}
                     useAjax={true}
+                    schemas={this.props.schemas}
                 />
 
             </div>

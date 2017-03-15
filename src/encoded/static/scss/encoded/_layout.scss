@@ -243,6 +243,11 @@ h1.page-title + .page-subtitle {
 	font-family: consolas, monospace;
 }
 
+/** This is especially useful for elements with data-tip attribute (for React Tooltip) so that tip is positioned at center. **/
+.inline-block {
+	display: inline-block;
+}
+
 @media screen and (max-width: $screen-xs-max){
 
 	.text-left-xs {
@@ -352,6 +357,12 @@ h1.page-title + .page-subtitle {
 	}
 }
 
+
+/**************** React Tooltips (NPM: react-tooltip) overwrite of styling *********************/
+
+body .__react_component_tooltip {
+	padding: 6px 15px;
+}
 
 
 /* *********************************************************

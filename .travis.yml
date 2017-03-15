@@ -110,25 +110,29 @@ after_success:
 - if test -n "$UNIT"; then python-codacy-coverage -r coverage.xml; fi
 - python deploy/travis_after_all.py https://api.travis-ci.org
 - export $(cat .to_export_back) >> /dev/null
+- echo $TRAVIS_COMMIT_MESSAGE
 - |
   if [ "$BUILD_LEADER" = "YES" ]; then
     if [ "$BUILD_AGGREGATE_STATUS" = "others_succeeded" ]; then
       if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
         bin/aws s3 cp --recursive s3://encoded-4dn-conf-prod/.aws /home/travis/.aws
         if [ "$TRAVIS_BRANCH" = "master" ]; then
-          echo "Job succeeded! PUBLISHING to prod environment..."
+          echo "Job succeeded! PUBLISHING to 4dnweb-prod environment..."
           git config --global user.email "travis@builder.com"
           git config --global user.name "Travis"
           eb use 4dnweb-prod --debug --verbose
           python deploy/deploy_beanstalk.py
         fi
         if [ "$TRAVIS_BRANCH" = "production" ]; then
-          echo "Job succeeded! PUBLISHING to PROD environment..."
-          git config --global user.email "travis@builder.com"
-          git config --global user.name "Travis"
-          eb use 4dn-web-dev
-          python deploy/deploy_beanstalk.py
-        fi
+           if [[ "$TRAVIS_COMMIT_MSG" == "Deploy" ]]; then
+                  echo "Job succeeded! PUBLISHING to 4dn-web-dev environment..."
+                  git config --global user.email "travis@builder.com"
+                  git config --global user.name "Travis"
+                  eb use 4dn-web-dev --debug --verbose
+                  eb deploy
+                  python deploy/deploy_beanstalk.py
+                fi
+          fi
       fi
      fi
     fi
