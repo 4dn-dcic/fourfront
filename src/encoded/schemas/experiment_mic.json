@@ -58,7 +58,7 @@
             "items": {
                 "title": "Imaging Path",
                 "type": "string",
-                "linkTo": "ImangingPath"
+                "linkTo": "ImagingPath"
             }
         }
     },
