@@ -1,4 +1,5 @@
-"""Imaging related objects."""
+"""Imaging related objects.
+"""
 from snovault import (
     collection,
     load_schema,
