@@ -3,6 +3,7 @@
 
 'use strict';
 
+/** @ignore */
 var React = require('react');
 var _ = require('underscore');
 var { Modal, Alert } = require('react-bootstrap');
@@ -15,6 +16,21 @@ var FormattedInfoBlock = require('./components/FormattedInfoBlock');
 var { EditableField, FieldSet } = require('./../forms');
 
 
+/**
+ * Contains the User profile page view as well as Impersonate User form.
+ * Only the User view is exported.
+ * 
+ * @module item-pages/user
+ */
+
+
+/**
+ * Extends ItemStore to help manage collection of Access Keys from back-end.
+ * 
+ * @memberof module:item-pages/user
+ * @extends module:lib/store.ItemStore
+ * @private
+ */
 class AccessKeyStore extends ItemStore {
     resetSecret(id) {
         this.fetch(id + 'reset-secret', {
@@ -23,9 +39,18 @@ class AccessKeyStore extends ItemStore {
     }
 }
 
-
+/**
+ * Component which fetches, saves, and show access keys that user may use to submit
+ * experiments and other data.
+ * 
+ * @memberof module:item-pages/user
+ * @namespace
+ * @type {Component}
+ * @private
+ */
 var AccessKeyTable = React.createClass({
 
+    /** @ignore */
     propTypes : {
         access_keys : React.PropTypes.array.isRequired,
         user : React.PropTypes.shape({
@@ -42,11 +67,13 @@ var AccessKeyTable = React.createClass({
         })
     },
 
+    /** @ignore */
     contextTypes: {
         fetch: React.PropTypes.func,
         session: React.PropTypes.bool
     },
 
+    /** @ignore */
     getInitialState: function() {
         var access_keys = this.props.access_keys;
         this.store = new AccessKeyStore(access_keys, this, 'access_keys');
@@ -55,6 +82,7 @@ var AccessKeyTable = React.createClass({
         };
     },
 
+    /** @ignore */
     renderTable : function(){
         if (!this.state.access_keys || !this.state.access_keys.length){
             return (
@@ -105,6 +133,7 @@ var AccessKeyTable = React.createClass({
 
     },
 
+    /** @ignore */
     render: function() {
         return (
             <div className="access-keys-table-container clearfix">
@@ -119,6 +148,14 @@ var AccessKeyTable = React.createClass({
         );
     },
 
+    /**
+     * Add new access key for user via AJAX.
+     * 
+     * @memberof module:item-pages/user.AccessKeyTable
+     * @private
+     * @instance
+     * @param {MouseEvent} e - Click event.
+     */
     create: function(e) {
         e.preventDefault();
         var item = {};
@@ -135,17 +172,21 @@ var AccessKeyTable = React.createClass({
         this.store.create('/access-keys/', item);
     },
 
+    /** @ignore */
     doAction: function(action, arg, e) {
         e.preventDefault();
         this.store[action](arg);
     },
 
+    /** @ignore */
     onCreate: function(response) {
         this.showNewSecret('Your secret key has been created.', response);
     },
+    /** @ignore */
     onResetSecret: function(response) {
         this.showNewSecret('Your secret key has been reset.', response);
     },
+    /** @ignore */
     showNewSecret: function(title, response) {
         this.setState({modal:
             <Modal show={true} onHide={this.hideModal}>
@@ -169,7 +210,7 @@ var AccessKeyTable = React.createClass({
             </Modal>
         });
     },
-
+    /** @ignore */
     onDelete: function(item) {
         this.setState({modal:
             <Modal show={true} onHide={this.hideModal}>
@@ -179,7 +220,7 @@ var AccessKeyTable = React.createClass({
             </Modal>
         });
     },
-
+    /** @ignore */
     onError: function(error) {
         var View = globals.content_views.lookup(error);
         this.setState({modal:
@@ -193,37 +234,69 @@ var AccessKeyTable = React.createClass({
             </Modal>
         });
     },
-
+    /** @ignore */
     hideModal: function() {
         this.setState({modal: null});
     },
 });
 
 
-var User = module.exports.User = React.createClass({
+/**
+ * Generate a URL to get Gravatar image from Gravatar service.
+ * 
+ * @static
+ * @public
+ * @param {string} email - User's email address.
+ * @param {number} size - Width & height of image square.
+ * @param {string} [defaultImg='retro'] Style of Gravatar image.
+ * @returns {string} A URL.
+ */
+var buildGravatarURL = module.exports.buildGravatarURL = function(email, size=null, defaultImg='retro'){
+    var md5 = require('js-md5');
+    if (defaultImg === 'kanye'){
+        defaultImg = 'https://media.giphy.com/media/PcFPiuGZVqK2I/giphy.gif';
+    }
+    var url = 'https://www.gravatar.com/avatar/' + md5(email);
+    url += "?d=" + defaultImg;
+    if (size) url += '&s=' + size;
+    return url;
+};
 
-    statics : {
-        buildGravatarURL : function(email, size=null, defaultImg='retro'){
-            var md5 = require('js-md5');
-            if (defaultImg === 'kanye'){
-                defaultImg = 'https://media.giphy.com/media/PcFPiuGZVqK2I/giphy.gif';
-            }
-            var url = 'https://www.gravatar.com/avatar/' + md5(email);
-            url += "?d=" + defaultImg;
-            if (size) url += '&s=' + size;
-            return url;
-        },
-        gravatar : function(email, size=null, className=null, defaultImg='retro'){
-            return (
-                <img
-                    src={ User.buildGravatarURL(email, size, defaultImg)}
-                    className={'gravatar' + (className ? ' ' + className : '')}
-                    title="Obtained via Gravatar"
-                />
-            );
-        }
-    },
+/**
+ * Generate an <img> element with provided size, className, and Gravatar src.
+ * 
+ * @static
+ * @public
+ * @param {string} email - User's email address.
+ * @param {number} size - Width & height of image square.
+ * @param {string} className - ClassName of <img> element.
+ * @param {string} [defaultImg='retro'] Style of Gravatar image.
+ * @returns {Element} A React Image (<img>) element.
+ */
+var gravatar = module.exports.gravatar = function(email, size=null, className=null, defaultImg='retro'){
+    return (
+        <img
+            src={ buildGravatarURL(email, size, defaultImg)}
+            className={'gravatar' + (className ? ' ' + className : '')}
+            title="Obtained via Gravatar"
+        />
+    );
+};
 
+
+/**
+ * Draws a User Profile page.
+ * 
+ * @public
+ * @namespace
+ * @type {Component}
+ * @prop {Object} context - Context value for user, e.g. from Redux store. AKA user object.
+ * @prop {Object} schemas - Object of schemas, e.g. passed from app state.
+ * @memberof module:item-pages/user
+ */
+var UserView = module.exports.UserView = React.createClass({
+
+    /** @ignore */
     propTypes : {
         'context' : React.PropTypes.shape({
             '@id' : React.PropTypes.string.isRequired,
@@ -254,16 +327,19 @@ var User = module.exports.User = React.createClass({
         })
     },
 
+    /** @ignore */
     contextTypes : {
         listActionsFor : React.PropTypes.func
     },
 
+    /** @ignore */
     mayEdit : function(){
         return this.context.listActionsFor('context').filter(function(action){
             return action.name && action.name === 'edit';
         }).length > 0 ? true : false;
     },
 
+    /** @ignore */
     render: function() {
 
         var user = this.props.context;
@@ -295,7 +371,7 @@ var User = module.exports.User = React.createClass({
                                 <div className="user-title-row-container">
                                     <div className="row title-row">
                                         <div className="col-sm-3 gravatar-container">
-                                            { User.gravatar(user.email, 70) }
+                                            { gravatar(user.email, 70) }
                                         </div>
                                         <div className="col-sm-9 user-title-col">
                                             <h1 className="user-title">
@@ -346,7 +422,7 @@ var User = module.exports.User = React.createClass({
                                 <AccessKeyTable user={user} access_keys={user.access_keys} />
                             </div>
                         </div>
-                        
+
                     : '' }
 
                 </div>
@@ -355,15 +431,26 @@ var User = module.exports.User = React.createClass({
     }
 });
 
-globals.content_views.register(User, 'User');
+globals.content_views.register(UserView, 'User');
 
 
+/**
+ * Renders out the contact fields for user, which are editable.
+ * Shows Gravatar and User's first and last name at top.
+ * 
+ * @private
+ * @namespace
+ * @type {Component}
+ * @memberof module:item-pages/user
+ */
 var ProfileContactFields = React.createClass({
 
+    /** @ignore */
     icon : function(iconName){
         return <i className={"visible-lg-inline icon icon-fw icon-" + iconName }></i>;
     },
 
+    /** @ignore */
     render: function(){
         var user = this.props.user;
 
@@ -400,15 +487,25 @@ var ProfileContactFields = React.createClass({
 });
 
 
-
+/**
+ * Renders out the lab and awards fields for user, which are not editable.
+ * Uses AJAX to fetch details for fields which are not embedded.
+ * 
+ * @private
+ * @namespace
+ * @type {Component}
+ * @memberof module:item-pages/user
+ */
 var ProfileWorkFields = React.createClass({
 
+    /** @ignore */
     getDefaultProps : function(){
         return {
             containerClassName : 'panel user-work-info shadow-border'
         };
     },
 
+    /** @ignore */
     getInitialState : function(){
         return {
             details_lab : null,        // Use FormattedInfoBlock.ajaxPropertyDetails.call(this, args...) to set.
@@ -416,6 +513,13 @@ var ProfileWorkFields = React.createClass({
         };
     },
 
+    /**
+     * If Lab details are not embedded, fetches them.
+     * 
+     * @memberof module:item-pages/user.ProfileWorkFields
+     * @private
+     * @instance
+     */
     componentDidMount : function(){
 
         if (!this.state.details_lab){
@@ -432,12 +536,16 @@ var ProfileWorkFields = React.createClass({
         }
     },
 
+    /** @ignore */
     componentWillUnmount : function(){ delete this.isLabFetched; },
 
     /**
      * Get list of all awards (unique) from list of labs.
      * ToDo : Migrate somewhere more static-cy.
      *
+     * @memberof module:item-pages/user.ProfileWorkFields
+     * @private
+     * @instance
      * @param {Object[]} labDetails - Array of lab objects with embedded award details.
      * @return {Object[]} List of all unique awards in labs.
      */
@@ -465,7 +573,11 @@ var ProfileWorkFields = React.createClass({
     /**
      * Update state.awards_list with award details from list of lab details.
      *
+     * @memberof module:item-pages/user.ProfileWorkFields
+     * @private
+     * @instance
      * @param {Object[]} labDetails - Array of lab objects with embedded award details.
+     * @returns {undefined} Nothing.
      */
     updateAwardsList : function(labDetails){
         var currentAwardsList = (this.state.awards_list || []).slice(0);
@@ -485,6 +597,7 @@ var ProfileWorkFields = React.createClass({
         }
     },
 
+    /** @ignore */
     render : function(){
         var user = this.props.user;
         if (user.submits_for && user.submits_for.length > 0){
@@ -524,11 +637,11 @@ var ProfileWorkFields = React.createClass({
                     <div className="col-sm-9 value">
                         <FormattedInfoBlock.List
                             renderItem={(detail) => FormattedInfoBlock.Lab(detail, false, false, false) }
-                            endpoints={user.submits_for.map(function(o){
+                            endpoints={(user && user.submits_for && user.submits_for.map(function(o){
                                 if (typeof o === 'string') return o;
                                 if (typeof o.link_id === 'string') return o.link_id.replace(/~/g,'/');
                                 if (typeof o['@id'] === 'string') return o['@id'];
-                            })}
+                            })) || []}
                             propertyName="submits_for"
                             fallbackMsg="Not submitting for any organizations"
                             ajaxCallback={this.updateAwardsList}
@@ -557,18 +670,27 @@ var ProfileWorkFields = React.createClass({
 
 });
 
-
+/**
+ * @memberof module:item-pages/user
+ * @private
+ * @namespace
+ * @type {Component}
+ */
 var BasicForm = React.createClass({
+
+    /** @ignore */
     getInitialState: function() {
         return({
             value: ''
         })
     },
 
+    /** @ignore */
     handleChange: function(e) {
         this.setState({ value: e.target.value });
     },
 
+    /** @ignore */
     handleSubmit: function(e){
         e.preventDefault();
         if(this.state.value.length == 0){
@@ -578,6 +700,7 @@ var BasicForm = React.createClass({
         this.setState({ value: '' });
     },
 
+    /** @ignore */
     render: function() {
         return(
             <form onSubmit={this.handleSubmit}>
@@ -589,12 +712,21 @@ var BasicForm = React.createClass({
     }
 });
 
+/**
+ * @memberof module:item-pages/user
+ * @private
+ * @namespace
+ * @type {Component}
+ */
 var ImpersonateUserForm = React.createClass({
+
+    /** @ignore */
     contextTypes: {
         navigate: React.PropTypes.func,
         updateUserInfo: React.PropTypes.func
     },
 
+    /** @ignore */
     render: function() {
         var form = <BasicForm submitImpersonate={this.handleSubmit} />;
         return (
@@ -605,6 +737,16 @@ var ImpersonateUserForm = React.createClass({
         );
     },
 
+    /**
+     * Handler for Impersonate User submit button/action.
+     * Performs AJAX request to '/impersonate-user' endpoint then saves returned JWT
+     * as own and in order to pretend to be impersonated user.
+     * 
+     * @memberof module:item-pages/user.ImpersonateUserForm
+     * @private
+     * @instance
+     * @param {Object} data - User ID or email address.
+     */
     handleSubmit: function(data) {
         var url = "/impersonate-user";
         var jsonData = JSON.stringify({'userid':data});
