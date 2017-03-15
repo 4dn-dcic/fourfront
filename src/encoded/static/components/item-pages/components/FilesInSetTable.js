@@ -17,7 +17,13 @@ var propTypes = {
     })).isRequired
 };
 
-
+/**
+ * Component for displaying Files in a set.
+ * 
+ * @memberof module:item-pages/components
+ * @namespace FilesInSetTable
+ * @type {Component}
+ */
 var FilesInSetTable = module.exports = React.createClass({
 
     statics : {

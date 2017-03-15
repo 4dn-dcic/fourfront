@@ -54,7 +54,7 @@ var Detail = React.createClass({
             
             return (
                 <div className="tooltip-info-container">
-                    <span data-tip={tooltip}>{ title || key } <i className="icon icon-info-circle"/></span>
+                    <span>{ title || key } <i data-tip={tooltip} className="icon icon-info-circle"/></span>
                 </div>
             );
 
