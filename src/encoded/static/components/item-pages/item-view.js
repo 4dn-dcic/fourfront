@@ -27,14 +27,16 @@ var itemTitle = require('./item').title;
  */
 var Detail = React.createClass({
 
-    /**
-     * @namespace
-     * @memberof module:item-pages/item-view.Detail
-     * @type {Object}
-     */
     statics: {
+
         /**
          * Formats the correct display for each metadata field.
+         * 
+         * @memberof module:item-pages/item-view.Detail
+         * @static
+         * @param {Object} tips - Mapping of field property names (1 level deep) to schema properties.
+         * @param {Object} key - Key to use to get 'description' for tooltip from the 'tips' param.
+         * @returns {Element} <div> element with a tooltip and info-circle icon.
          */
         formKey : function(tips, key){
             var tooltip = '';
@@ -62,6 +64,8 @@ var Detail = React.createClass({
          * Recursively render keys/values included in a provided item.
          * Wraps URLs/paths in link elements. Sub-panels for objects.
          *
+         * @memberof module:item-pages/item-view.Detail
+         * @static
          * @param {Object} schemas - Object containing schemas for server's JSONized object output.
          * @param {Object|Array|string} item - Item(s) to render recursively.
          */
@@ -154,7 +158,7 @@ var Detail = React.createClass({
                 'aliases', 'dbxrefs', 'date_created', 'lab', 'award', 'description',
                 'status', 'external_references', '@id', 'link_id', 'display_title'
             ],
-            'persistentKeys' : [
+            'stickyKeys' : [
                 // Experiment
                 'experiment_type', 'experiment_summary', 'experiment_sets', 'files', 'filesets',
                 'protocol', 'biosample', 'digestion_enzyme', 'digestion_temperature',
@@ -172,6 +176,9 @@ var Detail = React.createClass({
                 // Document
                 'attachment'
             ],
+            'alwaysCollapsibleKeys' : [
+                '@type', 'accession', 'schema_version', 'uuid'
+            ],
             'open' : null
         };
     },
@@ -183,24 +190,26 @@ var Detail = React.createClass({
         var tips = object.tipsFromSchema(this.props.schemas, context);
 
         // Sort applicable persistent keys by original persistent keys sort order.
-        var persistentKeysObj = _.object(
-            _.intersection(sortKeys, this.props.persistentKeys.slice(0).sort()).map(function(key){
+        var stickyKeysObj = _.object(
+            _.intersection(sortKeys, this.props.stickyKeys.slice(0).sort()).map(function(key){
                 return [key, true];
             })
         );
-        var orderedPersistentKeys = [];
-        this.props.persistentKeys.forEach(function (key) {
-            if (persistentKeysObj[key] === true) orderedPersistentKeys.push(key);
+        var orderedStickyKeys = [];
+        this.props.stickyKeys.forEach(function (key) {
+            if (stickyKeysObj[key] === true) orderedStickyKeys.push(key);
         });
 
-        var extraKeys = _.difference(sortKeys, this.props.persistentKeys.slice(0).sort());
+        var extraKeys = _.difference(sortKeys, this.props.stickyKeys.slice(0).sort());
+        var collapsibleKeys = _.intersection(extraKeys.sort(), this.props.alwaysCollapsibleKeys.slice(0).sort());
+        extraKeys = _.difference(extraKeys, collapsibleKeys);
 
         return (
             <PartialList
-                persistent={ orderedPersistentKeys.map((key,i) =>
+                persistent={ orderedStickyKeys.concat(extraKeys).map((key,i) =>
                     <PartialList.Row key={key} label={Detail.formKey(tips,key)}>{ Detail.formValue(this.props.schemas,context[key], key, context['@type'][0]) }</PartialList.Row>
                 )}
-                collapsible={ extraKeys.map((key,i) =>
+                collapsible={ collapsibleKeys.map((key,i) =>
                     <PartialList.Row key={key} label={Detail.formKey(tips,key)}>{ Detail.formValue(this.props.schemas,context[key], key, context['@type'][0]) }</PartialList.Row>
                 )}
                 open={this.props.open}
@@ -235,16 +244,30 @@ var ItemView = module.exports = React.createClass({
                 description: React.PropTypes.string.isRequired
             },
             
+            /**
+             * @memberof module:item-pages/item-view.DescriptorField
+             * @private
+             * @instance
+             * @returns {Object} State object with 'active' : false.
+             */
             getInitialState: function() {
                 return {
                     active: false
                 };
             },
-
+            /** 
+             * An onHover callback for outer <div> element.
+             * 
+             * @memberof module:item-pages/item-view.DescriptorField
+             * @private
+             * @instance
+             * @param {boolean} b - Sets state.active to this value.
+             */
             handleHover: function(b) {
                 this.setState({active: b});
             },
 
+            /** @ignore */
             render: function() {
                 var { field, description, title } = this.props;
                 var active = this.state.active;
@@ -277,9 +300,25 @@ var ItemView = module.exports = React.createClass({
          * @type {Component}
          */
         SubIPanel : React.createClass({
+            /** 
+             * @memberof module:item-pages/item-view.SubIPanel
+             * @private
+             * @instance
+             * @returns {Object} 'isOpen' : false
+             */
             getInitialState: function() {
                 return {isOpen: false};
             },
+
+            /**
+             * Handler for rendered title element. Toggles visiblity of ItemView.Subview.
+             * 
+             * @memberof module:item-pages/item-view.SubIPanel
+             * @private
+             * @instance
+             * @param {MouseEvent} e - Mouse click event. Its preventDefault() method is called.
+             * @returns {Object} 'isOpen' : false
+             */
             handleToggle: function (e) {
                 e.preventDefault();
                 this.setState({
@@ -287,6 +326,16 @@ var ItemView = module.exports = React.createClass({
                 });
             },
 
+            /**
+             * Renders title for the ItemView.Subview.
+             * 
+             * @memberof module:item-pages/item-view.SubIPanel
+             * @private
+             * @instance
+             * @param {string} title - Title of panel, e.g. display_title of object for which SubIPanel is being used.
+             * @param {boolean} isOpen - Whether state.isOpen is true or not. Used for if plus or minus icon. 
+             * @returns {Element} <span> element.
+             */
             toggleLink : function(title = this.props.title, isOpen = this.state.isOpen){
                 var iconType = isOpen ? 'icon-minus' : 'icon-plus';
                 return (
@@ -299,6 +348,7 @@ var ItemView = module.exports = React.createClass({
                 );
             },
 
+            /** @ignore */
             render: function() {
                 var schemas = this.props.schemas;
                 var item = this.props.content;
@@ -315,11 +365,14 @@ var ItemView = module.exports = React.createClass({
         }),
 
         /**
+         * Renders a panel <div> element containing a list.
+         * 
          * @memberof module:item-pages/item-view
          * @namespace
          * @type {Component}
          */
         Subview : React.createClass({
+            /** @ignore */
             render: function(){
                 var schemas = this.props.schemas;
                 var item = this.props.content;
@@ -351,6 +404,7 @@ var ItemView = module.exports = React.createClass({
          * @type {Component}
          */
         Title : React.createClass({
+            /** @ignore */
             render : function(){
                 var title = globals.listing_titles.lookup(this.props.context)({context: this.props.context});
                 return (
@@ -363,7 +417,12 @@ var ItemView = module.exports = React.createClass({
 
     },
 
-    /** @returns {Object} collapsed : false */
+    /**
+     * @memberof module:item-pages/item-view
+     * @private
+     * @instance
+     * @returns {Object} collapsed : false
+     */
     getInitialState : function(){
         return {
             'collapsed' : true
