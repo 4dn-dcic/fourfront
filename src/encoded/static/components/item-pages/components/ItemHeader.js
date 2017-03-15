@@ -6,9 +6,56 @@ var url = require('url');
 var querystring = require('querystring');
 var { console, DateUtility } = require('./../../util');
 var { FlexibleDescriptionBox } = require('./../../experiment-common');
+var ItemPageTitle = require('./ItemPageTitle');
 
 
 var ItemHeader = module.exports = {
+
+    /**** Helper Static Functions ****/
+
+    /**
+     * Returns the leaf type from the Item's types array. 
+     * 
+     * @public
+     * @static
+     * @throws {Error} Throws error if no types array ('@type') or it is empty.
+     * @param {Object} context - JSON representation of current Item.
+     * @returns {string} Most specific type's name.
+     */
+    itemType : function(context){
+        if (!Array.isArray(context['@type']) || context['@type'].length < 1) throw new Error("No @type on Item object (context).");
+        return context['@type'][context['@type'].length - 1];
+    },
+
+    /**
+     * Returns ItemHeader.itemType() if it is different from the Item base type.
+     * 
+     * @public
+     * @static
+     * @param {Object} context - JSON representation of current Item.
+     * @returns {string} The more detailed type name.
+     */
+    moreDetailedItemType : function(context){
+        var specificType = ItemHeader.itemType(context);
+        var baseType = ItemPageTitle.getBaseItemType(context);
+        if (specificType !== baseType) return specificType;
+        return null;
+    },
+
+    /**
+     * Returns ItemHeader.itemType() if it is different from the Item base type.
+     * 
+     * @public
+     * @static
+     * @param {Object} context - JSON representation of current Item.
+     * @returns {string} The more detailed type name.
+     */
+    moreDetailedItemTypeInfo : function(context){
+        var detailType = ItemHeader.moreDetailedItemType(context);
+    },
+
+    /**** Components ****/
+
 
     /**
      * Use as first child within an ItemHeader component. Its props.children will be included in the top-right area.
@@ -127,9 +174,14 @@ var ItemHeader = module.exports = {
         render : function(){
             return (
                 <div className="row clearfix top-row">
-                    <h3 className="col-sm-4 item-label-title">
-                        { /* PLACEHOLDER / TEMP-EMPTY */ }
-                    </h3>
+                    <h4 className="col-sm-4 item-label-title">
+                        { !ItemPageTitle.isDisplayTitleAccession(this.props.context) ? 
+                            <span>
+                                <span className="accession-label">Accession </span>
+                                <span className="accession">{ this.props.context.accession }</span>
+                            </span>
+                        : null }
+                    </h4>
                     <h5 className="col-sm-8 text-right text-left-xs item-label-extra text-capitalize item-header-indicators clearfix">
                         { this.viewJSONButton() }
                         { this.itemActions() }

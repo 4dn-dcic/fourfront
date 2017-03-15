@@ -2,20 +2,40 @@
 Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 ************************************************************/
 
+.item-page-container {
+	/** Override margin-bottom for margin pages so accession and title are close to each other **/
+	h1.page-title {
+		margin-bottom: 2px;
+	}
+}
 
 @media screen and (min-width: $screen-md-min){
 	/* Nudge accession #, etc. closer to title on wide desktop views */
+	/*
 	.item-view-header {
 		margin-top: -27px;
 	}
+	*/
 	
 }
 
-.item-label-title {
-	margin-bottom: 9px;
+.item-label-title { /* Is some form of header elem, e.g. h3 or h4 */
 	font-family: 'Work Sans', sans-serif;
 	font-weight: 300;
-	margin-top: 0;
+	height: 36px;
+	/* line-height: 36px; */
+	margin: 0;
+
+	.accession-label {
+		font-size: 1rem;
+		font-weight: 400;
+		color: #888;
+	}
+
+	.accession {
+		font-weight: 500;
+		font-size: 1.1625rem;
+	}
 }
 
 .item-label-extra {

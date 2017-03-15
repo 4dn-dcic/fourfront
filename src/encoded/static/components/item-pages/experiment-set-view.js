@@ -6,7 +6,7 @@ var Panel = require('react-bootstrap').Panel;
 var { ExperimentsTable } = require('./../experiments-table');
 var _ = require('underscore');
 var { DescriptorField, Detail } = require('./item-view');
-var { ItemHeader, FormattedInfoBlock, ItemFooterRow, PublicationsBlock } = require('./components');
+var { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemFooterRow, PublicationsBlock } = require('./components');
 var FacetList = require('./../facetlist');
 var { ajax, console, DateUtility, object } = require('./../util');
 
@@ -212,8 +212,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         return (
             <div className={itemClass}>
 
-                <h1 className="page-title">Experiment Set <span className="subtitle prominent">{ title }</span></h1>
-
+                <ItemPageTitle context={this.props.context} />
                 <ExperimentSetHeader {...this.props} />
 
                 <div className="row">
@@ -290,11 +289,18 @@ globals.panel_views.register(ExperimentSetView, 'ExperimentSet');
 globals.panel_views.register(ExperimentSetView, 'ExperimentSetReplicate');
 
 
-
+/**
+ * Renders ItemHeader parts wrapped in ItemHeader.Wrapper, with appropriate values.
+ * 
+ * @memberof module:item-pages/experiment-set-view
+ * @private
+ * @prop {Object} context - Same context prop as available on parent component.
+ * @prop {string} href - Current page href, passed down from app or Redux store.
+ */
 var ExperimentSetHeader = React.createClass({
 
     render: function() {
-        console.log('render ExperimentSetHeader')
+        console.log('render ExperimentSetHeader');
         return (
             <ItemHeader.Wrapper className="exp-set-header-area" context={this.props.context} href={this.props.href}>
                 <ItemHeader.TopRow>
