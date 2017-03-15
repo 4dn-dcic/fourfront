@@ -3,6 +3,7 @@
 
 'use strict';
 
+/** @ignore */
 var React = require('react');
 var _ = require('underscore');
 var { Modal, Alert } = require('react-bootstrap');
