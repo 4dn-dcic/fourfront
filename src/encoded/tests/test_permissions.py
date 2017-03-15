@@ -400,7 +400,8 @@ def test_submitter_can_view_ownitem(ind_human_item, submitter_testapp, wrangler_
         submitter_testapp.get(res.json['@graph'][0]['@id'], status=200)
 
 
-def test_submitter_cannot_view_ownitem_replaced(ind_human_item, submitter_testapp, wrangler_testapp):
+def test_submitter_cannot_view_ownitem_replaced(ind_human_item, submitter_testapp,
+                                                wrangler_testapp):
     res = submitter_testapp.post_json('/individual_human', ind_human_item, status=201)
     wrangler_testapp.patch_json(res.json['@graph'][0]['@id'], {"status": "replaced"}, status=200)
     submitter_testapp.get(res.json['@graph'][0]['@id'], status=404)

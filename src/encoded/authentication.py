@@ -23,7 +23,8 @@ from pyramid.security import (
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
-    HTTPFound
+    HTTPFound,
+    HTTPNotFound
 )
 from pyramid.view import (
     view_config,
@@ -231,6 +232,21 @@ def get_jwt(request):
     return token
 
 
+
+from pyramid.view import notfound_view_config
+import json
+@notfound_view_config(request_method=['GET'])
+def enusre_user_info_on_not_found_requests(exc, request):
+
+    # exc should be the 404 response
+    if hasattr(request, '_auth0_authenticated'):
+        # at this point we have lost our user info headers lets rebuild them
+        auth = Auth0AuthenticationPolicy()
+        email = auth.unauthenticated_userid(request)
+        exc.headers['X-User-Info'] = json.dumps(request.user_info)
+    return exc
+
+
 @view_config(route_name='login', request_method='POST',
              permission=NO_PERMISSION_REQUIRED)
 def login(request):
@@ -264,6 +280,7 @@ def logout(request):
 
     return {}
 
+
 @view_config(route_name='me', request_method='GET', permission=NO_PERMISSION_REQUIRED)
 def me(request):
     '''Alias /users/<uuid-of-current-user>'''
@@ -280,6 +297,7 @@ def me(request):
     request.response.status_code = 307 # Prevent from creating 301 redirects which are then cached permanently by browser
     properties = request.embed('/users/' + userid, as_user=userid)
     return properties
+
 
 @view_config(route_name='session-properties', request_method='GET',
              permission=NO_PERMISSION_REQUIRED)

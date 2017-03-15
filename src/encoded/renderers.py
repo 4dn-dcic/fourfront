@@ -131,7 +131,11 @@ def security_tween_factory(handler, registry):
 
 
         if request.method in ('GET', 'HEAD'):
+            #try:
             return handler(request)
+            #except Exception as e:
+            #    import pdb; pdb.set_trace()
+            #    print(e)
 
         if request.content_type != 'application/json':
             detail = "%s is not 'application/json'" % request.content_type

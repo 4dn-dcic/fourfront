@@ -141,11 +141,30 @@ def test_login_logout(testapp, anontestapp, headers,
 
     # Log out
     res = anontestapp.get('/logout?redirect=false', status=200)
-    #no more cookies
+    # no more cookies
     assert 'auth.userid' not in res.json
     assert 'id_token' not in res.json
     assert 'user_actions' not in res.json
 
+
+def test_404_keeps_auth_info(testapp, anontestapp, headers,
+                             auth0_4dn_user_profile,
+                             auth0_4dn_user_token):
+
+    # Create a user with the persona email
+    url = '/users/'
+    email = auth0_4dn_user_profile['email']
+    item = {
+        'email': email,
+        'first_name': 'Auth0',
+        'last_name': 'Test User',
+    }
+    testapp.post_json(url, item, status=201)
+
+    # Log in
+    res = anontestapp.get('/not_found_url', headers=headers, status=404)
+
+    assert res.headers['X-User-Info']
 
 
 def test_login_logout_redirect(testapp, anontestapp, headers,
