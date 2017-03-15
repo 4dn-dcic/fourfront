@@ -302,12 +302,8 @@ var ExperimentSetHeader = React.createClass({
     render: function() {
         console.log('render ExperimentSetHeader');
         return (
-            <ItemHeader.Wrapper className="exp-set-header-area" context={this.props.context} href={this.props.href}>
-                <ItemHeader.TopRow>
-                    <span data-tip="Experiment Type" className="inline-block">
-                        { this.props.context.experimentset_type }
-                    </span>
-                </ItemHeader.TopRow>
+            <ItemHeader.Wrapper className="exp-set-header-area" context={this.props.context} href={this.props.href} schemas={this.props.schemas}>
+                <ItemHeader.TopRow />
                 <ItemHeader.MiddleRow />
                 <ItemHeader.BottomRow />
             </ItemHeader.Wrapper>

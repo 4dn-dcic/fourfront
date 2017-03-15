@@ -404,8 +404,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         console.log('SCHEMAS AT RENDER', this.props.schemas);
 
         var chartDataState = ChartDataController.getState();
-        var legendFields = (this.refs && this.refs.barplotChart && this.refs.barplotChart.getLegendData()) || null;
-        console.log(legendFields);
+
         return (
             <div className={"facet-charts show-" + show} key="facet-charts" style={{ height: height }}>
                 {/*

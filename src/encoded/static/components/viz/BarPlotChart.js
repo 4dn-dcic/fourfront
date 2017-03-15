@@ -301,11 +301,11 @@ var BarPlot = React.createClass({
                         </div>
 
                         <div className="row">
-                            <div className="col-md-9">
+                            <div className="col-sm-9">
                                 { this.adjustedChildChart() }
                             </div>
-                            <div className="col-md-3 chart-aside" style={{ height : this.props.chartHeight }}>
-                                <div className="legend-container" style={{ minHeight : windowGridSize !== 'xs' ? 
+                            <div className="col-sm-3 chart-aside" style={{ height : this.props.chartHeight }}>
+                                <div className="legend-container" style={{ height : windowGridSize !== 'xs' ? 
                                     this.props.chartHeight - 49 : null
                                 }}>
                                     <DropdownButton

@@ -435,7 +435,7 @@ var ItemView = module.exports = React.createClass({
             <div className={itemClass}>
 
                 <ItemPageTitle context={context} />
-                <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href}>
+                <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
                     <ItemHeader.TopRow>{ this.topRightHeaderSection() || null }</ItemHeader.TopRow>
                     <ItemHeader.MiddleRow />
                     <ItemHeader.BottomRow />

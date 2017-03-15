@@ -4,7 +4,7 @@ var React = require('react');
 var _ = require('underscore');
 var url = require('url');
 var querystring = require('querystring');
-var { console, DateUtility } = require('./../../util');
+var { console, DateUtility, Filters } = require('./../../util');
 var { FlexibleDescriptionBox } = require('./../../experiment-common');
 var ItemPageTitle = require('./ItemPageTitle');
 
@@ -24,11 +24,11 @@ var ItemHeader = module.exports = {
      */
     itemType : function(context){
         if (!Array.isArray(context['@type']) || context['@type'].length < 1) throw new Error("No @type on Item object (context).");
-        return context['@type'][context['@type'].length - 1];
+        return context['@type'][0];
     },
 
     /**
-     * Returns ItemHeader.itemType() if it is different from the Item base type.
+     * Returns ItemHeader.itemType() only if it is different from the Item base type.
      * 
      * @public
      * @static
@@ -43,18 +43,29 @@ var ItemHeader = module.exports = {
     },
 
     /**
-     * Returns ItemHeader.itemType() if it is different from the Item base type.
+     * Returns schema for the specific type of Item we're on.
      * 
      * @public
      * @static
-     * @param {Object} context - JSON representation of current Item.
-     * @returns {string} The more detailed type name.
+     * @param {string} itemType - The type for which to get schema.
+     * @param {Object} [schemas] - Mapping of schemas, by type.
+     * @returns {Object} Schema for itemType.
      */
-    moreDetailedItemTypeInfo : function(context){
-        var detailType = ItemHeader.moreDetailedItemType(context);
+    getSchemaForItemType : function(itemType, schemas = null){
+        console.log(itemType);
+        if (typeof itemType !== 'string') return null;
+        if (!schemas){
+            schemas = (Filters.getSchemas && Filters.getSchemas()) || null;
+        }
+        if (!schemas) return null;
+        return schemas[itemType] || null;
     },
 
-    /**** Components ****/
+
+
+    /**************
+     * Components *
+     **************/
 
 
     /**
@@ -144,6 +155,31 @@ var ItemHeader = module.exports = {
                 );
             });
         },
+
+        /**
+         * Wraps props.children in a <div> element.
+         * 
+         * @memberof module:item-pages/components.ItemHeader.TopRow
+         * @private
+         * @instance
+         */
+        itemTypeInfo : function(){
+            return ItemHeader.getSchemaForItemType(
+                ItemHeader.moreDetailedItemType(this.props.context),
+                this.props.schemas || null
+            );
+        },
+
+        typeInfoLabel : function(typeInfo = null){
+            if (!typeInfo) typeInfo = this.itemTypeInfo();
+            if (!typeInfo || !typeInfo.title) return null;
+            return (
+                <div className="expset-indicator right type-info" data-tip={ typeInfo.description }>
+                    { typeInfo.title }
+                </div>
+            );
+        },
+
         /**
          * Wraps props.children in a <div> element.
          * 
@@ -172,12 +208,17 @@ var ItemHeader = module.exports = {
          * @returns {Element} Div element with .row Bootstrap class and items in top-right section.
          */
         render : function(){
+            var typeInfo = ItemHeader.getSchemaForItemType(ItemHeader.itemType(this.props.context), this.props.schemas || null);
+            var accessionTooltip = (typeInfo && typeInfo.properties.accession && typeInfo.properties.accession.description) || null;
+            if (accessionTooltip){
+                accessionTooltip = <i className="icon icon-info-circle inline-block" data-tip={accessionTooltip} style={{ marginRight : 5 }} />;
+            }
             return (
                 <div className="row clearfix top-row">
                     <h4 className="col-sm-4 item-label-title">
-                        { !ItemPageTitle.isDisplayTitleAccession(this.props.context) ? 
+                        { !ItemPageTitle.isDisplayTitleAccession(this.props.context) && this.props.context.accession ? 
                             <span>
-                                <span className="accession-label">Accession </span>
+                                <span className="accession-label">Accession { accessionTooltip }</span>
                                 <span className="accession">{ this.props.context.accession }</span>
                             </span>
                         : null }
@@ -186,6 +227,7 @@ var ItemHeader = module.exports = {
                         { this.viewJSONButton() }
                         { this.itemActions() }
                         { this.wrapChildren() }
+                        { this.typeInfoLabel() }
                         { this.parsedStatus() }
                     </h5>
                 </div>
@@ -261,6 +303,7 @@ var ItemHeader = module.exports = {
      * @type {Component}
      * @prop {Object} context - Same as the props.context passed to parent ItemHeader component.
      * @prop {string} href - Location from Redux store or '@id' of current Item. Used for View JSON button.
+     * @prop {Object} schemas - Pass from app.state. Used for tooltips and such.
      */
     Wrapper : React.createClass({
         adjustChildren : function(){
@@ -268,7 +311,11 @@ var ItemHeader = module.exports = {
             return React.Children.map(this.props.children, (child)=>{
                 if (typeof child.props.context !== 'undefined' && typeof child.props.href === 'string') return child;
                 else {
-                    return React.cloneElement(child, { context : this.props.context, href : this.props.href }, child.props.children);
+                    return React.cloneElement(child, {
+                        context : this.props.context,
+                        href : this.props.href,
+                        schemas : this.props.schemas || (Filters.getSchemas && Filters.getSchemas()) || null
+                    }, child.props.children);
                 }
             });
         },

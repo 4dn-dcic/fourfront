@@ -29,7 +29,7 @@ var FileSetCalibrationView = module.exports = React.createClass({
                     {context['@type'][0]} <span className="subtitle prominent">{ title }</span>
                 </h1>
 
-                <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href}>
+                <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={schemas}>
                     <ItemHeader.TopRow />
                     <ItemHeader.MiddleRow />
                     <ItemHeader.BottomRow />
