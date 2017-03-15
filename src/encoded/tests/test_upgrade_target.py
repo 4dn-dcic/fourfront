@@ -21,8 +21,9 @@ def target_2(target_1):
     return item
 
 
-def test_target_convert_targeted_region_to_targeted_genome_regions(testapp, target_2, basic_genomic_region):
-    migrator = testapp.registry['migrator']
-    value = migrator.upgrade('target', 'target_2', target_version='2')
+def test_target_convert_targeted_region_to_targeted_genome_regions(
+        app, target_2, basic_genomic_region):
+    migrator = app.registry['upgrader']
+    value = migrator.upgrade('target', target_2, current_version='1', target_version='2')
     assert value['schema_version'] == '2'
     assert value['targeted_genome_regions'][0] == basic_genomic_region['@id']
