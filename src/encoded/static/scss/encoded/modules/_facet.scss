@@ -128,6 +128,15 @@
         font-weight: 500;
         line-height: inherit;
         @include font-size(0.925);
+
+        > i.icon-info-circle {
+            margin-left: 6px;
+            opacity: 0.25;
+            transition: opacity .5s;
+            &:hover {
+                opacity: 0.75;
+            }
+        }
     }
 
     &.static {

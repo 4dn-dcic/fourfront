@@ -5,6 +5,8 @@ var _ = require('underscore');
 var { console, layout, isServerSide } = require('./util');
 var vizUtil = require('./viz/utilities');
 
+// TODO: Move into item-pages/components
+
 var FlexibleDescriptionBox = module.exports.FlexibleDescriptionBox = React.createClass({
 
     statics : {

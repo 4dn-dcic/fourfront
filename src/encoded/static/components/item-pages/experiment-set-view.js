@@ -6,7 +6,7 @@ var Panel = require('react-bootstrap').Panel;
 var { ExperimentsTable } = require('./../experiments-table');
 var _ = require('underscore');
 var { DescriptorField, Detail } = require('./item-view');
-var { ItemHeader, FormattedInfoBlock } = require('./components');
+var { ItemHeader, FormattedInfoBlock, ItemFooterRow, PublicationsBlock } = require('./components');
 var FacetList = require('./../facetlist');
 var { ajax, console, DateUtility, object } = require('./../util');
 
@@ -217,17 +217,14 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                             expIncompleteFacets={ this.props.expIncompleteFacets }
                             className="with-header-bg"
                             useAjax={false}
+                            schemas={this.props.schemas}
                         />
                         : <div>&nbsp;</div> }
                     </div>
 
                     <div className="col-sm-7 col-md-8 col-lg-9">
 
-                        <ExperimentSetInfoArea
-                            labInfo={ this.state.details_lab }
-                            awardInfo={ this.state.details_award }
-                            {...this.props}
-                        />
+                        <PublicationsBlock publications={this.props.context.publications_of_set} />
 
                         <div className="exp-table-section">
                             { this.props.context.experiments_in_set && this.props.context.experiments_in_set.length ? 
@@ -257,9 +254,17 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                             </div>
                         </div>
 
+                        <ExperimentSetLabAwardInfo
+                            labInfo={ this.state.details_lab }
+                            awardInfo={ this.state.details_award }
+                            {...this.props}
+                        />
+
                     </div>
 
                 </div>
+
+                <ItemFooterRow context={this.props.context} schemas={this.props.schemas} />
 
             </div>
         );
@@ -278,7 +283,11 @@ var ExperimentSetHeader = React.createClass({
         console.log('render ExperimentSetHeader')
         return (
             <ItemHeader.Wrapper className="exp-set-header-area" context={this.props.context} href={this.props.href}>
-                <ItemHeader.TopRow>{ this.props.context.experimentset_type }</ItemHeader.TopRow>
+                <ItemHeader.TopRow>
+                    <span data-tip="Experiment Type" className="inline-block">
+                        { this.props.context.experimentset_type }
+                    </span>
+                </ItemHeader.TopRow>
                 <ItemHeader.MiddleRow />
                 <ItemHeader.BottomRow />
             </ItemHeader.Wrapper>
@@ -287,7 +296,7 @@ var ExperimentSetHeader = React.createClass({
 });
 
 
-var ExperimentSetInfoArea = React.createClass({
+var ExperimentSetLabAwardInfo = React.createClass({
 
     render : function(){
         return (
@@ -295,10 +304,10 @@ var ExperimentSetInfoArea = React.createClass({
                 <div className="col-sm-12">
                     <div className="row">
 
-                        <div className="col-sm-6 col-sm-float-right">
+                        <div className="col-sm-12 col-md-6 col-sm-float-right">
                             { FormattedInfoBlock.Lab(this.props.labInfo) }
                         </div>
-                        <div className="col-sm-6 col-sm-float-right">
+                        <div className="col-sm-12 col-md-6 col-sm-float-right">
                             { FormattedInfoBlock.Award(this.props.awardInfo) }
                         </div>
 
