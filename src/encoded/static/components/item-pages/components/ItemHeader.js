@@ -29,7 +29,7 @@ var ItemHeader = module.exports = {
                 <div
                     className="expset-indicator expset-status right"
                     data-status={ this.props.context.status.toLowerCase() }
-                    title="Review Status"
+                    data-tip="Current Status"
                 >
                     { this.props.context.status }
                 </div>
@@ -120,8 +120,8 @@ var ItemHeader = module.exports = {
         parsedCreationDate: function(){
             if (!('date_created' in this.props.context)) return <span><i></i></span>;
             return (
-                <span>
-                    <i className="icon sbt-calendar"></i>&nbsp; Added{' '}
+                <span data-tip="Date Created" className="inline-block">
+                    <i className="icon sbt-calendar"></i>&nbsp;&nbsp; 
                     <DateUtility.LocalizedTime timestamp={this.props.context.date_created} formatType='date-time-md' dateTimeSeparator=" at " />
                 </span>
             );

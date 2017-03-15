@@ -6,17 +6,20 @@
  * @module item-pages/components
  */
 
-
+/** @alias FormattedInfoBlock */
 module.exports.FormattedInfoBlock = require('./FormattedInfoBlock');
+
+/** @alias ItemHeader */
 module.exports.ItemHeader = require('./ItemHeader');
+
+/** @alias PartialList */
 module.exports.PartialList = require('./PartialList');
+
+/** @alias ExternalReferenceLink */
 module.exports.ExternalReferenceLink = require('./ExternalReferenceLink');
 
-/**
- * Component for displaying Files in a set.
- * 
- * @namespace
- * @type {Component}
- */
+/** @alias FilesInSetTable */
 module.exports.FilesInSetTable = require('./FilesInSetTable');
+
+/** @alias ItemFooterRow */
 module.exports.ItemFooterRow = require('./ItemFooterRow');

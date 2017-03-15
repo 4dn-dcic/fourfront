@@ -217,6 +217,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                             expIncompleteFacets={ this.props.expIncompleteFacets }
                             className="with-header-bg"
                             useAjax={false}
+                            schemas={this.props.schemas}
                         />
                         : <div>&nbsp;</div> }
                     </div>
@@ -278,7 +279,11 @@ var ExperimentSetHeader = React.createClass({
         console.log('render ExperimentSetHeader')
         return (
             <ItemHeader.Wrapper className="exp-set-header-area" context={this.props.context} href={this.props.href}>
-                <ItemHeader.TopRow>{ this.props.context.experimentset_type }</ItemHeader.TopRow>
+                <ItemHeader.TopRow>
+                    <span data-tip="Experiment Type" className="inline-block">
+                        { this.props.context.experimentset_type }
+                    </span>
+                </ItemHeader.TopRow>
                 <ItemHeader.MiddleRow />
                 <ItemHeader.BottomRow />
             </ItemHeader.Wrapper>

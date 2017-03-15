@@ -15,10 +15,7 @@ module.exports.SVGFilters = require('./SVGFilters');
 module.exports.FetchingView = require('./FetchingView');
 
 /**
- * Legend components to use alongside Charts. Best to include within a UIControlsWrapper, and place next to chart, utilizing the same data.
- * 
- * @namespace
- * @type {Component}
+ * @alias module:viz/components.Legend
  */
 module.exports.Legend = require('./Legend');
 

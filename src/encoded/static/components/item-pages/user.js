@@ -3,6 +3,7 @@
 
 'use strict';
 
+/** @ignore */
 var React = require('react');
 var _ = require('underscore');
 var { Modal, Alert } = require('react-bootstrap');
@@ -15,6 +16,20 @@ var FormattedInfoBlock = require('./components/FormattedInfoBlock');
 var { EditableField, FieldSet } = require('./../forms');
 
 
+/**
+ * User profile page/view.
+ * 
+ * @module {Component} item-pages/user
+ */
+
+
+/**
+ * Extends ItemStore to help manage collection of Access Keys from back-end.
+ * 
+ * @memberof module:item-pages/user
+ * @extends {ItemStore}
+ * @private
+ */
 class AccessKeyStore extends ItemStore {
     resetSecret(id) {
         this.fetch(id + 'reset-secret', {
@@ -23,7 +38,15 @@ class AccessKeyStore extends ItemStore {
     }
 }
 
-
+/**
+ * Component which fetches, saves, and show access keys that user may use to submit
+ * experiments and other data.
+ * 
+ * @memberof module:item-pages/user
+ * @namespace
+ * @type {Component}
+ * @private
+ */
 var AccessKeyTable = React.createClass({
 
     propTypes : {
@@ -199,9 +222,15 @@ var AccessKeyTable = React.createClass({
     },
 });
 
-
+/**
+ * @alias module:item-pages/user
+ */
 var User = module.exports.User = React.createClass({
 
+    /**
+     * @memberof module:item-pages/user
+     * @namespace
+     */
     statics : {
         buildGravatarURL : function(email, size=null, defaultImg='retro'){
             var md5 = require('js-md5');
@@ -221,7 +250,7 @@ var User = module.exports.User = React.createClass({
                     title="Obtained via Gravatar"
                 />
             );
-        }
+        },
     },
 
     propTypes : {
@@ -346,7 +375,7 @@ var User = module.exports.User = React.createClass({
                                 <AccessKeyTable user={user} access_keys={user.access_keys} />
                             </div>
                         </div>
-                        
+
                     : '' }
 
                 </div>

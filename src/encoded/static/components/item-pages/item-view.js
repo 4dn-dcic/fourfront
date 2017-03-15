@@ -49,9 +49,13 @@ var Detail = React.createClass({
                 }
             }
 
-            return(
-                <ItemView.DescriptorField field={key} description={tooltip} title={title}/>
+            
+            return (
+                <div className="tooltip-info-container">
+                    <span>{ title || key } <i data-tip={tooltip} className="icon icon-info-circle"/></span>
+                </div>
             );
+
         },
 
         /**
@@ -173,14 +177,6 @@ var Detail = React.createClass({
     },
 
     /** @ignore */
-    shouldComponentUpdate : function(nextProps){
-        if (this.props.context !== nextProps.context) return true;
-        if (this.props.schemas !== nextProps.schemas) return true;
-        if (this.props.open !== nextProps.open) return true;
-        return false;
-    },
-
-    /** @ignore */
     render : function(){
         var context = this.props.context;
         var sortKeys = _.difference(_.keys(context).sort(), this.props.excludedKeys.sort());
@@ -223,11 +219,13 @@ var ItemView = module.exports = React.createClass({
 
 
         /**
+         * Deprecated.
          * Display the item field with a tooltip showing the field description from
          * schema, if available.
          * 
          * @memberof module:item-pages/item-view
          * @namespace
+         * @deprecated
          * @type {Component}
          */
         DescriptorField : React.createClass({
@@ -236,6 +234,7 @@ var ItemView = module.exports = React.createClass({
                 field: React.PropTypes.string.isRequired,
                 description: React.PropTypes.string.isRequired
             },
+            
             getInitialState: function() {
                 return {
                     active: false
@@ -429,7 +428,7 @@ var ItemView = module.exports = React.createClass({
                         : null }
 
                         { typeof context.submitted_by !== 'undefined' ?
-                        <div className>
+                        <div>
                             { FormattedInfoBlock.User(
                                 this.state && typeof this.state.details_submitted_by !== 'undefined' ?
                                 this.state.details_submitted_by : context.submitted_by
@@ -462,7 +461,6 @@ var ItemView = module.exports = React.createClass({
                 </div>
 
                 <ItemFooterRow context={context} schemas={schemas} />
-
 
             </div>
         );
