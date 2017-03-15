@@ -97,6 +97,11 @@ class ExperimentSet(Item):
                 "experiments_in_set.digestion_enzyme"]
 
     def _update(self, properties, sheets=None):
+        if 'date_released' not in properties:
+            status = properties.get('status', None)
+            if status == 'released':
+                release_date = datetime.datetime.now().strftime("%Y-%m-%d")
+                properties['date_released'] = release_date
         super(ExperimentSet, self)._update(properties, sheets)
         if 'experiments_in_set' in properties:
             invalidate_linked_items(self, 'experiments_in_set')
