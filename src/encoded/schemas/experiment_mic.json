@@ -31,7 +31,11 @@
             "enum": [
                 "DNA-paint",
                 "DNA-FiSH",
-                "FISH"
+                "FISH",
+                "Immunoflourescence",
+                "STORM",
+                "STED",
+                "Light Sheet"
             ]
         }
     },
