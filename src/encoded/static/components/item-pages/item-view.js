@@ -39,7 +39,7 @@ var Detail = React.createClass({
          * @returns {Element} <div> element with a tooltip and info-circle icon.
          */
         formKey : function(tips, key){
-            var tooltip = '';
+            var tooltip = null;
             var title = null;
             if (tips[key]){
                 var info = tips[key];
@@ -50,11 +50,12 @@ var Detail = React.createClass({
                     title = info.title;
                 }
             }
-
             
             return (
                 <div className="tooltip-info-container">
-                    <span>{ title || key } <i data-tip={tooltip} className="icon icon-info-circle"/></span>
+                    <span>{ title || key } { tooltip !== null ?
+                        <i data-tip={tooltip} className="icon icon-info-circle"/>
+                    : null }</span>
                 </div>
             );
 
