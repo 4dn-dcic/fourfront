@@ -1,4 +1,4 @@
-"""Modifications types file."""
+"""Targets types file."""
 from snovault import (
     calculated_property,
     collection,
