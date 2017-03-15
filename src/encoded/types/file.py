@@ -8,9 +8,11 @@ from snovault import (
     abstract_collection,
 )
 from snovault.schema_utils import schema_validator
+from snovault.validators import validate_item_content_post
 from snovault.attachment import ItemWithAttachment
 from .base import (
-    Item
+    Item,
+    collection_add
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -265,6 +267,9 @@ class File(Item):
             sheets['external'] = cls.build_external_creds(registry, uuid, properties)
         return super(File, cls).create(registry, uuid, properties, sheets)
 
+    class Collection(Item.Collection):
+        pass
+
 
 @collection(
     name='files-fastq',
@@ -465,3 +470,33 @@ def download(context, request):
 
     # 307 redirect specifies to keep original method
     raise HTTPTemporaryRedirect(location=location)
+
+# validator for filename field
+def validate_file_filename(context, request):
+    data = request.json
+    if 'filename' not in data or 'file_format' not in data:
+        return
+    filename = data['filename']
+    file_format = data['file_format']
+    valid_schema = context.type_info.schema
+    file_extensions = valid_schema['file_format_file_extension'][file_format]
+    if not isinstance(file_extensions, list):
+        file_extensions = [file_extensions]
+    found_match = False
+    for extension in file_extensions:
+        if filename[-len(extension):] == extension:
+            found_match = True
+            break
+    if not found_match:
+        file_extensions_msg = ["'"+ext+"'" for ext in file_extensions]
+        file_extensions_msg = ', '.join(file_extensions_msg)
+        request.errors.add('body', None, 'Filename extension does not '
+         'agree with specified file format. Valid extension(s):  ' + file_extensions_msg)
+    else:
+        request.validated.update({})
+
+
+@view_config(context=File.Collection, permission='add', request_method='POST',
+             validators=[validate_item_content_post,validate_file_filename])
+def file_add(context, request, render=None):
+    return collection_add(context, request, render)

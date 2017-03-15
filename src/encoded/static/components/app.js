@@ -323,11 +323,14 @@ var App = React.createClass({
     },
 
     /* Handle updating of info used on the /uploads page. Contains relevant
-    upload key, percentage done, and the link_id + display title for the
-    corresponding file*/
-    updateUploads: function(upload_key, upload_info){
-        var new_uploads = this.state.uploads;
-        new_uploads[upload_key] = upload_info;
+    item context and AWS UploadManager*/
+    updateUploads: function(key, upload_info, del_key=false){
+        var new_uploads = _.extend({}, this.state.uploads);
+        if (del_key){
+            delete new_uploads[key]
+        }else{
+            new_uploads[key] = upload_info;
+        }
         this.setState({'uploads': new_uploads});
     },
 

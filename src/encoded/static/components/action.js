@@ -140,23 +140,41 @@ var Action = module.exports = React.createClass({
         this.setState({'file':file});
     },
 
-    generatePostButton: function(){
+    generateValidationButton: function(){
+        var style={'width':'160px'};
         if(this.state.validated == 1){
             return(
-                <Button bsStyle="success" onClick={this.realPostNewContext}>
-                    {this.props.edit ? 'Edit object' : 'Create object'}
+                <Button bsStyle="info" style={style} disabled>
+                    {'Validated!'}
                 </Button>
             );
         }else if (this.state.validated == 0){
             return(
-                <Button bsStyle="warning" onClick={this.testPostNewContext}>
+                <Button bsStyle="info" style={style} onClick={this.testPostNewContext}>
                     {'Test object validity'}
                 </Button>
             );
         }else{
             return(
-                <Button bsStyle="danger" onClick={this.testPostNewContext}>
-                    {'Failed user permissions'}
+                <Button bsStyle="danger" style={style} onClick={this.testPostNewContext}>
+                    {'Failed permissions'}
+                </Button>
+            );
+        }
+    },
+
+    generatePostButton: function(){
+        var style={'marginLeft':'30px','width':'160px'};
+        if(this.state.validated == 1){
+            return(
+                <Button bsStyle="success" style={style} onClick={this.realPostNewContext}>
+                    {this.props.edit ? 'Edit object' : 'Create object'}
+                </Button>
+            );
+        }else{
+            return(
+                <Button bsStyle="success" style={style} disabled>
+                    {this.props.edit ? 'Edit object' : 'Create object'}
                 </Button>
             );
         }
@@ -248,7 +266,6 @@ var Action = module.exports = React.createClass({
                         var newID = response['@graph'][0]['@id'];
                         // handle file upload if this is a file
                         if(_.contains(response['@graph'][0]['@type'],'File')){
-                            // FF-617. What should the body be?
                             this.context.fetch(newID + 'upload', {
                                 method: 'POST',
                                 headers: {
@@ -265,52 +282,22 @@ var Action = module.exports = React.createClass({
                             .then(response => {
                                 var creds = response['@graph'][0]['upload_credentials'];
                                 var file_title = response['@graph'][0]['filename'] ? response['@graph'][0]['filename'] : response['@graph'][0]['display_title'];
-                                var upload_info = {
-                                    'id': response['@graph'][0]['@id'],
-                                    'display_title': file_title,
-                                    'total_size': this.state.file.size,
-                                    'percent_done': 0
-                                };
                                 var upload_manager = s3UploadFile(this.state.file, creds);
-                                console.log('UPLOAD_MANAGER:', upload_manager);
-                                //FF-617 move all this to app state?
-                                upload_manager.on('httpUploadProgress',
-                                    function(evt) {
-                                        console.log("Uploaded: " + parseInt((evt.loaded * 100) / evt.total));
-                                        var percentage = Math.round((evt.loaded * 100) / evt.total);
-                                        upload_info.percent_done = percentage;
-                                        this.props.updateUploads(creds.key, upload_info);
-                                    }.bind(this))
-                                    .send(function(err, data) {
-                                        if(err){
-                                            this.context.fetch(newID, {
-                                                method: 'PATCH',
-                                                headers: {
-                                                    'Accept': 'application/json',
-                                                    'Content-Type': 'application/json'
-                                                },
-                                                body: JSON.stringify({'status':'upload failed'})
-                                            });
-                                            //FF-617: catch errors on the PATCH?
-                                            alert("File upload failed for " + newID);
-                                        }else{
-                                            this.context.fetch(newID, {
-                                                method: 'PATCH',
-                                                headers: {
-                                                    'Accept': 'application/json',
-                                                    'Content-Type': 'application/json'
-                                                },
-                                                body: JSON.stringify({'status':'uploaded'})
-                                            });
-                                            //FF-617: catch errors on the PATCH?
-                                            alert("File uploaded successfully for " + newID);
-                                        }
-                                    }.bind(this));
+                                var upload_info = {
+                                    'context': response['@graph'][0],
+                                    'manager': upload_manager
+                                };
+                                // Passes upload_manager to uploads.js through app.js
+                                this.props.updateUploads(newID, upload_info);
                                 alert('Success! Navigating to the uploads page.');
                                 this.context.navigate('/uploads');
                             }, error => {
-                                // FF-617. Handle error
                                 console.log('Error getting credentials');
+                                alert('File upload failed! Please try again using edit.')
+                                if(typeof newID !== 'string'){
+                                    newID = '/';
+                                }
+                                this.context.navigate(newID);
                             });
                         }else{
                             if(typeof newID !== 'string'){
@@ -368,7 +355,10 @@ var Action = module.exports = React.createClass({
                 <h2>{this.props.edit ? editTitle : createTitle}</h2>
                 <h4 style={{'color':'#808080', 'paddingBottom': '10px'}}>Add, edit, and remove field values. Submit at the bottom of the form.</h4>
                 <FieldPanel thisType={thisType} context={context} baseContext={baseContext} schema={schema} modifyNewContext={this.modifyNewContext} modifyFile={this.modifyFile} reqFields={reqFields}/>
-                <div>{this.generatePostButton()}</div>
+                <div>
+                    {this.generateValidationButton()}
+                    {this.generatePostButton()}
+                </div>
             </div>
         );
     }
