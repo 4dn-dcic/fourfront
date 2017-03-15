@@ -8,11 +8,22 @@ var ExternalReferenceLink = require('./ExternalReferenceLink');
  * Produces a Bootstrap row div element with 3 columns containing External References, Aliases, & Alternate Accessions.
  * Use at the bottom of Item pages.
  */
-
 var ItemFooterRow = module.exports = React.createClass({
 
+    /**
+     * Render list of aliases for this item, wrapped in a <div>.
+     * Only show if (a) any aliases exist AND (b) current user has edit access (e.g. submitter, admin).
+     * 
+     * @memberof module:item-pages/components.ItemFooterRow
+     * @instance
+     * @private
+     * @returns {Element|null} Div React element containing aliases list or null.
+     */
     aliases : function(){
         if (!this.props.context || !Array.isArray(this.props.context.aliases)) return null;
+        if (!Array.isArray(this.props.context.actions)) return null;
+        if (!_.find(this.props.context.actions, { 'name' : 'edit' })) return null; // No 'Edit' action for this Item.
+        
         var aliases = this.props.context.aliases.length > 0 ? this.props.context.aliases : [<em>None</em>];
         return (
             <div>

@@ -1,0 +1,94 @@
+{
+    "title": "Imaging Path",
+    "description": "Schema for submitting a imaging path from taget to the label.",
+    "id": "/profiles/imaging_path.json",
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "required": ["award", "lab"],
+    "identifyingProperties": ["uuid", "aliases"],
+    "additionalProperties": false,
+    "mixinProperties": [
+        { "$ref": "mixins.json#/schema_version" },
+        { "$ref": "mixins.json#/uuid" },
+        { "$ref": "mixins.json#/aliases" },
+        { "$ref": "mixins.json#/notes" },
+        { "$ref": "mixins.json#/status"} ,
+        { "$ref": "mixins.json#/submitted" },
+        { "$ref": "mixins.json#/attribution" },
+        { "$ref": "mixins.json#/references" },
+        { "$ref": "mixins.json#/dbxrefs" }
+    ],
+    "properties": {
+        "schema_version": {
+            "default": "1"
+        },
+        "description": {
+            "title": "Description",
+            "description": "A short description of the labeling path",
+            "type": "string"
+        },
+        "channel_number": {
+            "title": "Label Channel Number",
+            "description": "imaging channel, ch0,ch1...",
+            "type": "string",
+            "enum":[
+                "ch0",
+                "ch1",
+                "ch2",
+                "ch3",
+                "ch4",
+                "ch5",
+                "ch6",
+                "ch7",
+                "ch8"
+            ]
+        },
+        "target": {
+            "title": "Targets of labelling",
+            "description": "Protein/RNA/DNA or cellular structure targeted for labeling",
+            "type": "array",
+            "items": {
+                "title": "Target of labelling",
+                "type": "string",
+                "linkTo": "Target"
+            }
+        },
+        "labeled_probe": {
+            "title": "Probe with the label",
+            "description": "Antibodies/Primers/Chemicals that carry the label",
+            "type": "string"
+        },
+        "type_labeled_probe": {
+            "title": "Type of labeled probe",
+            "description": "General classification of the labeled probe",
+            "type": "string",
+            "enum": [
+                "Antibody",
+                "Nanobody",
+                "Aptamer",
+                "RNA",
+                "DNA primer",
+                "Small chemical"
+            ]
+        },
+        "labels": {
+            "title": "Labels",
+            "description": "Fluorescent labels used for ",
+            "type": "array",
+            "internal_comment": "Link to a label database through ontologies",
+            "items": {
+                "title": "Label",
+                "type": "string"
+            }
+        },
+        "other_probes": {
+            "title": "mediators of target labeling",
+            "description": "Antibodies/Primers/Chemicals used for labeling the target",
+            "type": "array",
+            "items": {
+                "title": "Targets for labelling",
+                "type": "string"
+            }
+        }
+    }
+}
