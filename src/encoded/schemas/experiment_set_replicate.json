@@ -1,6 +1,6 @@
 {
-    "title": "Set of Replicate Experiments",
-    "description": "Schema for submitting metadata for an experiment set.",
+    "title": "Replicate Experiments",
+    "description": "A set of replicate experiments.",
     "id": "/profiles/experiment_set_replicate.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
