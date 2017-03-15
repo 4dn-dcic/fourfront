@@ -139,6 +139,15 @@ def test_experiment_set_update_wont_add_release_date_if_status_not_released(
     assert 'date_released' not in res.json['@graph'][0]
 
 
+def test_replicate_experiment_set_update_adds_release_date_if_released(
+        testapp, replicate_experiment_set):
+    assert 'date_released' not in replicate_experiment_set
+    res = testapp.patch_json(replicate_experiment_set['@id'],
+                             {'status': 'released'}, status=200)
+    release_date = res.json['@graph'][0]['date_released']
+    assert release_date == datetime.datetime.now().strftime("%Y-%m-%d")
+
+
 # test for experiment_set_replicate _update function
 def test_experiment_set_replicate_update_adds_experiments_in_set(testapp, experiment, replicate_experiment_set):
     assert not replicate_experiment_set['experiments_in_set']
