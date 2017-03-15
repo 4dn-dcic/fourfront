@@ -50,6 +50,16 @@
                 "Ligth sheet",
                 "EM"
             ]
+        },
+        "imaging_paths": {
+            "title": "Imaging Paths",
+            "description": "Target to label connections used in microscopy",
+            "type":  "array",
+            "items": {
+                "title": "Imaging Path",
+                "type": "string",
+                "linkTo": "ImangingPath"
+            }
         }
     },
     "facets": {
