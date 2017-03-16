@@ -9,7 +9,7 @@
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa0",
         "status": "uploaded",
-        "filename": "test_file1"
+        "filename": "test_file1.fastq.gz"
     },
     {
         "accession":"4DNFI067APT1",
@@ -21,7 +21,7 @@
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa1",
         "status": "uploaded",
-        "filename": "test_file1"
+        "filename": "test_file1.fastq.gz"
     },
     {
         "accession":"4DNFI067APV1",
@@ -33,7 +33,7 @@
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa2",
         "status": "uploaded",
-        "filename": "test_file1"
+        "filename": "test_file1.fastq.gz"
     },
     {
         "accession":"4DNFI067APY1",
@@ -45,7 +45,7 @@
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa3",
         "status": "uploaded",
-        "filename": "test_file1"
+        "filename": "test_file1.fastq.gz"
     },
     {
         "accession":"4DNFI067APZ1",
@@ -57,7 +57,7 @@
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa4",
         "status": "uploaded",
-        "filename": "test_file1"
+        "filename": "test_file1.fastq.gz"
     },
     {
         "accession":"4DNFI067APW1",
@@ -68,7 +68,7 @@
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa5",
         "status": "released",
-        "filename": "test_file2"
+        "filename": "test_file2.fastq.gz"
     },
     {
         "accession":"4DNFI067APX1",
@@ -79,7 +79,7 @@
         "file_format":"fastq",
         "uuid": "46e82a90-49e5-4c33-afab-9ec90d65faa6",
         "status": "upload failed",
-        "filename": "test_file3"
+        "filename": "test_file3.fastq.gz"
     },
     {
         "accession":"4DNFI067AFHV",
@@ -148,5 +148,3 @@
         "filename": "4DNFIN232JJ5.fastq.gz"
     }
 ]
-
-

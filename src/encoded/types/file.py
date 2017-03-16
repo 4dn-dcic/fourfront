@@ -222,7 +222,7 @@ class File(Item):
         accession = accession or external_accession
         file_extension = self.schema['file_format_file_extension'][file_format]
         filename = '{}{}'.format(accession, file_extension)
-        return request.resource_path(self, '@@download', filename)
+        return request.resource_path(self) + '@@download/' + filename
 
     @calculated_property(condition=show_upload_credentials, schema={
         "type": "object",
@@ -442,6 +442,7 @@ def download(context, request):
     external = context.propsheets.get('external', {})
     if not external:
         profile_name = request.registry.settings.get('file_upload_profile_name')
+        bucket = request.registry.settings['file_upload_bucket']
         sheets['external'] = external_creds(bucket, key, name, profile_name)
     elif external.get('service') == 's3':
         conn = boto.connect_s3()
@@ -484,7 +485,10 @@ def validate_file_filename(context, request):
         file_extensions = [file_extensions]
     found_match = False
     for extension in file_extensions:
-        if filename[-len(extension):] == extension:
+        if extension == "":
+            found_match = True
+            break
+        elif filename[-len(extension):] == extension:
             found_match = True
             break
     if not found_match:

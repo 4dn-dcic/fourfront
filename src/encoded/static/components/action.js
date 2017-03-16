@@ -12,7 +12,7 @@ var store = require('../store');
 
 // Master component used for user actions: create and edit
 // create is considered default mode, but by simply switching the behavior
-// from POST to PATCH, this can be used for editing by providing a value
+// from POST to PUT, this can be used for editing by providing a value
 // of true to the edit prop.
 // This component initiates and hold the new context and coordinated
 // submission/validation
@@ -237,8 +237,10 @@ var Action = module.exports = React.createClass({
                 var actionMethod = 'POST';
                 // see if this is not a test and we're editing
                 if(!test && this.props.edit){
-                    actionMethod = 'PATCH';
+                    actionMethod = 'PUT';
                     destination = this.state.newContext['@id'];
+                    finalizedContext.uuid = this.state.newContext.uuid;
+                    finalizedContext.accession = this.state.newContext.accession;
                 }
                 this.context.fetch(destination, {
                     method: actionMethod,
@@ -435,10 +437,6 @@ var FieldPanel = React.createClass({
             fieldType = 'attachment';
         } else if (fieldSchema.s3Upload && fieldSchema.s3Upload === true){
             fieldType = 'file upload';
-            // format tip for files specifically
-            // if(fieldSchema.file_format_file_extension && this.props.context[file_format_file_extension]){
-            //     fieldTip = "Must be " + this.props.context[file_format_file_extension];
-            // }
         }
         // @id of the whole object, may be useful down the line
         var masterID = this.props.baseContext['@id'] || this.props.baseContext.link_id.replace(/~/g, "/");
@@ -1021,9 +1019,8 @@ var AttachmentInput = React.createClass({
     }
 });
 
-/* Input for an s3 file upload. If file_format_file_extension is defined in the
-schema, will enforce that a file of that type is used. Context value set is
-local value of the filename. Also updates this.state.file for the overall component.
+/* Input for an s3 file upload. Context value set is local value of the filename.
+Also updates this.state.file for the overall component.
 */
 var S3FileInput = React.createClass({
     handleChange: function(e){
