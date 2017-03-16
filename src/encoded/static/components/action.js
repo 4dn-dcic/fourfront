@@ -253,20 +253,47 @@ var Action = module.exports = React.createClass({
                     return response;
                 })
                 .then(response => {
+                    if(!test && !this.props.edit){
+                        destination = response['@graph'][0]['@id'];
+                    }
                     if(test){
                         console.log('OBJECT SUCCESSFULLY TESTED!');
                         stateToSet.validated = 1;
                         this.setState(stateToSet);
-                    }else if(this.props.edit){
-                        console.log('OBJECT SUCCESSFULLY PATCHED!');
-                        alert('Success! Navigating to the patched object page.');
-                        this.context.navigate(destination);
-                    }else{
-                        console.log('OBJECT SUCCESSFULLY POSTED!');
-                        var newID = response['@graph'][0]['@id'];
+                    }else if(this.state.file && _.contains(response['@graph'][0]['@type'],'File')){
                         // handle file upload if this is a file
-                        if(_.contains(response['@graph'][0]['@type'],'File')){
-                            this.context.fetch(newID + 'upload', {
+                        if(this.props.edit){
+                            this.context.fetch(destination + 'upload', {
+                                method: 'GET',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json'
+                                }
+                            })
+                            .then(response => {
+                                if (!this.context.contentTypeIsJSON(response) || !response['@graph'] || !response['@graph'][0]['upload_credentials'] || !this.state.file) throw response;
+                                return response;
+                            })
+                            .then(response => {
+                                var creds = response['@graph'][0]['upload_credentials'];
+                                finalizedContext['upload_credentials'] = creds;
+                                finalizedContext['@id'] = destination;
+                                var upload_manager = s3UploadFile(this.state.file, creds);
+                                var upload_info = {
+                                    'context': finalizedContext,
+                                    'manager': upload_manager
+                                };
+                                // Passes upload_manager to uploads.js through app.js
+                                this.props.updateUploads(destination, upload_info);
+                                alert('Success! Navigating to the uploads page.');
+                                this.context.navigate('/uploads');
+                            }, error => {
+                                console.log('Error getting credentials');
+                                alert('File upload failed! Please try again using edit.')
+                                this.context.navigate(destination);
+                            });
+                        }else{
+                            this.context.fetch(destination + 'upload', {
                                 method: 'POST',
                                 headers: {
                                     'Accept': 'application/json',
@@ -275,37 +302,29 @@ var Action = module.exports = React.createClass({
                                 body: JSON.stringify(response['@graph'][0])
                             })
                             .then(response => {
-                                console.log('RESPONSE:', response);
                                 if (!this.context.contentTypeIsJSON(response) || !response['@graph'] || !response['@graph'][0]['upload_credentials'] || !this.state.file) throw response;
                                 return response;
                             })
                             .then(response => {
                                 var creds = response['@graph'][0]['upload_credentials'];
-                                var file_title = response['@graph'][0]['filename'] ? response['@graph'][0]['filename'] : response['@graph'][0]['display_title'];
                                 var upload_manager = s3UploadFile(this.state.file, creds);
                                 var upload_info = {
                                     'context': response['@graph'][0],
                                     'manager': upload_manager
                                 };
                                 // Passes upload_manager to uploads.js through app.js
-                                this.props.updateUploads(newID, upload_info);
+                                this.props.updateUploads(destination, upload_info);
                                 alert('Success! Navigating to the uploads page.');
                                 this.context.navigate('/uploads');
                             }, error => {
                                 console.log('Error getting credentials');
                                 alert('File upload failed! Please try again using edit.')
-                                if(typeof newID !== 'string'){
-                                    newID = '/';
-                                }
-                                this.context.navigate(newID);
+                                this.context.navigate(destination);
                             });
-                        }else{
-                            if(typeof newID !== 'string'){
-                                newID = '/';
-                            }
-                            alert('Success! Navigating to the new object page.');
-                            this.context.navigate(newID);
                         }
+                    }else{
+                        console.log('ACTION SUCCESSFUL!');
+                        this.context.navigate(destination);
                     }
                 }, error => {
                     stateToSet.validated = 0;
