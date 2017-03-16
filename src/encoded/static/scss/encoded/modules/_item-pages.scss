@@ -25,16 +25,25 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 	height: 36px;
 	/* line-height: 36px; */
 	margin: 0;
+	padding-left: 13px;
 
+	> span:not(:last-child){
+		padding-right: 5px;
+		margin-right: 5px;
+		border-right: 1px solid #ccc;
+	}
+
+	/*
 	.accession-label {
 		font-size: 1rem;
 		font-weight: 400;
 		color: #888;
 	}
+	*/
 
 	.accession {
 		font-weight: 500;
-		font-size: 1.1625rem;
+		font-size: 1.15rem;
 	}
 }
 

@@ -52,7 +52,6 @@ var ItemHeader = module.exports = {
      * @returns {Object} Schema for itemType.
      */
     getSchemaForItemType : function(itemType, schemas = null){
-        console.log(itemType);
         if (typeof itemType !== 'string') return null;
         if (!schemas){
             schemas = (Filters.getSchemas && Filters.getSchemas()) || null;
@@ -148,9 +147,12 @@ var ItemHeader = module.exports = {
         itemActions : function(){
             if (!Array.isArray(this.props.context.actions) || this.props.context.actions.length === 0) return null;
             return this.props.context.actions.map(function(action, i){
+                var title = action.title;
+                // Temp quickfix "Create" -> "Clone"
+                if (title === 'Create') title = "Clone";
                 return (
                     <div className="expset-indicator right action-button" data-action={action.name || null} key={action.name || i}>
-                        <a href={action.href}>{ action.title }</a>
+                        <a href={action.href}>{ title }</a>
                     </div>
                 );
             });
@@ -173,10 +175,16 @@ var ItemHeader = module.exports = {
         typeInfoLabel : function(typeInfo = null){
             if (!typeInfo) typeInfo = this.itemTypeInfo();
             if (!typeInfo || !typeInfo.title) return null;
+
+            var tooltipIcon = null;
+            if (typeInfo.description){
+                tooltipIcon = <i className="icon icon-info-circle inline-block" data-tip={typeInfo.description}/>;
+            }
+
             return (
-                <div className="expset-indicator right type-info" data-tip={ typeInfo.description }>
-                    { typeInfo.title }
-                </div>
+                <span className="type-info inline-block">
+                    { typeInfo.title } { tooltipIcon }
+                </span>
             );
         },
 
@@ -211,23 +219,23 @@ var ItemHeader = module.exports = {
             var typeInfo = ItemHeader.getSchemaForItemType(ItemHeader.itemType(this.props.context), this.props.schemas || null);
             var accessionTooltip = (typeInfo && typeInfo.properties.accession && typeInfo.properties.accession.description) || null;
             if (accessionTooltip){
-                accessionTooltip = <i className="icon icon-info-circle inline-block" data-tip={accessionTooltip} style={{ marginRight : 5 }} />;
+                accessionTooltip = <i className="icon icon-info-circle inline-block" data-tip={accessionTooltip} />;
             }
             return (
                 <div className="row clearfix top-row">
-                    <h4 className="col-sm-4 item-label-title">
+                    <h5 className="col-sm-6 item-label-title">
+                        { this.typeInfoLabel() }
                         { !ItemPageTitle.isDisplayTitleAccession(this.props.context) && this.props.context.accession ? 
                             <span>
-                                <span className="accession-label">Accession { accessionTooltip }</span>
+                                {/* <span className="accession-label">Accession </span> */}
                                 <span className="accession">{ this.props.context.accession }</span>
                             </span>
                         : null }
-                    </h4>
-                    <h5 className="col-sm-8 text-right text-left-xs item-label-extra text-capitalize item-header-indicators clearfix">
+                    </h5>
+                    <h5 className="col-sm-6 text-right text-left-xs item-label-extra text-capitalize item-header-indicators clearfix">
                         { this.viewJSONButton() }
                         { this.itemActions() }
                         { this.wrapChildren() }
-                        { this.typeInfoLabel() }
                         { this.parsedStatus() }
                     </h5>
                 </div>

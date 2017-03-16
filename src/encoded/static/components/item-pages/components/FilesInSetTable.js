@@ -341,7 +341,7 @@ var FilesInSetTable = module.exports = React.createClass({
         return (
             <div className="files-in-set-table">
                 { this.header() }
-                { this.props.files.map((file, i)=> <FilesInSetTable.FileItemRow file={file} />) }
+                { this.props.files.map((file, i)=> <FilesInSetTable.FileItemRow file={file} key={file.link_id || i} />) }
             </div>
         );
     }

@@ -1,6 +1,6 @@
 {
     "title": "Replicate Experiments",
-    "description": "A set of replicate experiments.",
+    "description": "An Experiment Set containing experiment replicates.",
     "id": "/profiles/experiment_set_replicate.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
