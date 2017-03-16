@@ -21,7 +21,7 @@ def fastq_json(award, experiment, lab):
         'award': award['uuid'],
         'lab': lab['uuid'],
         'file_format': 'fastq',
-        'filename': 'test.fastq',
+        'filename': 'test.fastq.gz',
         'md5sum': '0123456789abcdef0123456789abcdef',
         'status': 'uploaded',
     }
@@ -34,7 +34,7 @@ def fasta_json(award, experiment, lab):
         'award': award['uuid'],
         'lab': lab['uuid'],
         'file_format': 'fasta',
-        'filename': 'test.fasta',
+        'filename': 'test.fasta.gz',
         'md5sum': '0123456789abcdef0123456789111111',
         'status': 'uploaded',
     }
@@ -109,7 +109,7 @@ def file(testapp, award, experiment, lab):
         'lab': lab['@id'],
         'file_format': 'fastq',
         'md5sum': '00000000000000000000000000000000',
-        'filename': 'my.tsv',
+        'filename': 'my.fastq.gz',
         'status': 'uploaded',
     }
     res = testapp.post_json('/file_fastq', item)
