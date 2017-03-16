@@ -3,16 +3,6 @@ pytestmark = [pytest.mark.working, pytest.mark.schema]
 
 
 @pytest.fixture
-def basic_genomic_region(testapp, lab, award):
-    item = {
-        "genome_assembly": "GRCh38",
-        'award': award['@id'],
-        'lab': lab['@id'],
-    }
-    return testapp.post_json('/genomic_region', item).json['@graph'][0]
-
-
-@pytest.fixture
 def genomic_region_w_chrloc(testapp, lab, award):
     item = {
         "genome_assembly": "GRCh38",
@@ -59,7 +49,7 @@ def target_w_genes(testapp, lab, award):
 @pytest.fixture
 def target_w_region(testapp, genomic_region_w_chrloc, lab, award):
     item = {
-        "targeted_region": genomic_region_w_chrloc['@id'],
+        "targeted_genome_regions": [genomic_region_w_chrloc['@id']],
         'award': award['@id'],
         'lab': lab['@id'],
     }
@@ -91,7 +81,7 @@ def test_calculated_target_summaries(testapp, targets):
         if name == 'target_w_genes':
             assert summary == 'eeny and meeny'
             assert short == 'eeny and meeny'
-        if name == 'target_w_region' in targets:
+        if name == 'target_w_regions' in targets:
             assert summary == 'GRCh38:X:1-3'
             assert short == 'no target'
         if name == 'target_w_desc':

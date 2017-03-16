@@ -96,7 +96,6 @@
                 {"format": "date"}
             ],
             "serverDefault": "now",
-            "exclude_from" : "submit4dn",
             "permission": "import_items"
         },
         "submitted_by": {
@@ -106,14 +105,13 @@
             "type": "string",
             "linkTo": "User",
             "serverDefault": "userid",
-            "exclude_from" : "submit4dn",
             "permission": "import_items"
         }
     },
     "modified": {
       "lastmodified": {
           "title": "Last modified",
-          "exclude_from" : "submit4dn",
+          "exclude_from": ["submit4dn", "FFedit-create"],
           "type": "array",
           "items": {
               "date_modified": {
@@ -163,7 +161,7 @@
              "type": "string",
              "linkTo": "Lab",
              "linkSubmitsFor": true,
-            "default":""
+             "default":""
         },
         "award": {
             "title": "Grant",

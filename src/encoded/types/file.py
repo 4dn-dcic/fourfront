@@ -30,7 +30,6 @@ import boto
 import datetime
 import json
 import pytz
-from netaddr.core import AddrFormatError
 
 
 def show_upload_credentials(request=None, context=None, status=None):
@@ -102,7 +101,6 @@ def property_closure(request, propname, root_uuid):
 class FileSet(Item):
     """Collection of files stored under fileset."""
     item_type = 'file_set'
-    base_types = ['FileSet'] + Item.base_types
     schema = load_schema('encoded:schemas/file_set.json')
     name_key = 'accession'
     embedded = []
@@ -118,6 +116,7 @@ class FileSet(Item):
 class FileSetCalibration(FileSet):
     """Collection of files stored under fileset."""
 
+    base_types = ['FileSet'] + Item.base_types
     item_type = 'file_set_calibration'
     schema = load_schema('encoded:schemas/file_set_calibration.json')
     name_key = 'accession'
