@@ -18,6 +18,7 @@ var jwt = require('jsonwebtoken');
 var { FacetCharts } = require('./facetcharts');
 var ChartDataController = require('./viz/chart-data-controller');
 var makeTitle = require('./item-pages/item').title;
+var ReactTooltip = require('react-tooltip');
 
 /**
  * The top-level component for this application.
@@ -252,6 +253,8 @@ var App = React.createClass({
                 }, () => {
                     // Let Filters have access to schemas for own functions.
                     Filters.getSchemas = () => this.state.schemas;
+                    // Rebuild tooltips because they likely use descriptions from schemas
+                    ReactTooltip.rebuild();
                     if (typeof callback === 'function') callback(data);
                 });
             }
@@ -395,6 +398,10 @@ var App = React.createClass({
             for (key in this.props) {
                 if (this.props[key] !== prevProps[key]) {
                     console.log('changed props: %s', key);
+                    if (key === 'href'){
+                        // We need to rebuild tooltips after navigation to a different page.
+                        ReactTooltip.rebuild();
+                    }
                 }
             }
         }
@@ -1071,6 +1078,7 @@ var App = React.createClass({
                             <Footer version={this.props.context.app_version} />
                         </div>
                     </div>
+                    <ReactTooltip effect="solid" />
                 </body>
             </html>
         );
