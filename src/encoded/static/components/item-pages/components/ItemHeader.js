@@ -217,19 +217,20 @@ var ItemHeader = module.exports = {
          */
         render : function(){
             var typeInfo = ItemHeader.getSchemaForItemType(ItemHeader.itemType(this.props.context), this.props.schemas || null);
-            var accessionTooltip = (typeInfo && typeInfo.properties.accession && typeInfo.properties.accession.description) || null;
-            if (accessionTooltip){
-                accessionTooltip = <i className="icon icon-info-circle inline-block" data-tip={accessionTooltip} />;
+            var accessionTooltip = "Accession";
+            if (typeInfo && typeInfo.properties.accession && typeInfo.properties.accession.description){
+                accessionTooltip += ': ' + typeInfo.properties.accession.description;
             }
+            
+            //if (accessionTooltip){
+            //    accessionTooltip = <i className="icon icon-info-circle inline-block" data-tip={accessionTooltip} />;
+            //}
             return (
                 <div className="row clearfix top-row">
                     <h5 className="col-sm-6 item-label-title">
                         { this.typeInfoLabel() }
-                        { !ItemPageTitle.isDisplayTitleAccession(this.props.context) && this.props.context.accession ? 
-                            <span>
-                                {/* <span className="accession-label">Accession </span> */}
-                                <span className="accession">{ this.props.context.accession }</span>
-                            </span>
+                        { this.props.context.accession ? 
+                            <span className="accession inline-block" data-tip={accessionTooltip}>{ this.props.context.accession }</span>
                         : null }
                     </h5>
                     <h5 className="col-sm-6 text-right text-left-xs item-label-extra text-capitalize item-header-indicators clearfix">

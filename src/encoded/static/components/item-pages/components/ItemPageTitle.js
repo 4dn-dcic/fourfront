@@ -30,10 +30,12 @@ var ItemPageTitle = module.exports = React.createClass({
          * @static
          * @public
          * @param {Object} context - JSON representation of an Item object.
+         * @param {string} [displayTitle] - Display title of Item object. Gets it from context if not provided.
          * @returns {string} The title.
          */
-        isDisplayTitleAccession : function(context){
-            if (context.accession && context.accession === ItemPageTitle.getTitleStringFromContext(context)) return true;
+        isDisplayTitleAccession : function(context, displayTitle = null){
+            if (!displayTitle) displayTitle = ItemPageTitle.getTitleStringFromContext(context);
+            if (context.accession && context.accession === displayTitle) return true;
             return false;
         },
 
@@ -73,16 +75,18 @@ var ItemPageTitle = module.exports = React.createClass({
     },
 
     /**
-     * The render function.
+     * The render function. If the display title is an accession, we do
      * 
      * @instance
      * @returns {Element} An <h1> element with .page-title class.
      */
     render : function(){
+        var title = ItemPageTitle.getTitleStringFromContext(this.props.context);
+        var titleIsAccession = ItemPageTitle.isDisplayTitleAccession(this.props.context, title);
         return (
             <h1 className="page-title">
                 { ItemPageTitle.getBaseItemTypeTitle(this.props.context, this.props.schemas) } <span className="subtitle prominent">
-                    { ItemPageTitle.getTitleStringFromContext(this.props.context) }
+                    { !titleIsAccession || this.props.showAccessionTitles ? title : null }
                 </span>
             </h1>
         );

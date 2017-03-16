@@ -23,6 +23,7 @@ module.exports.FormattedInfoBlock = require('./FormattedInfoBlock');
  * @memberof module:item-pages/item-view
  * @type {Component}
  * @namespace
+ * @prop {boolean} [showAccessionTitles] - If true, will render title if it is the accession. Otherwise, beyond Item type, the title will be hidden.
  * @prop {Object} context - JSON representation of current Item page/view.
  */
 module.exports.ItemPageTitle = require('./ItemPageTitle');
