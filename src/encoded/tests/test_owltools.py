@@ -117,3 +117,67 @@ def test_splitNameFromNamespace(uri_list):
         else:
             assert name == 'name'
             assert ns == 'test/namespace'
+
+
+@pytest.fixture
+def unsorted_uris():
+    strings = [
+        'test/Z',
+        'test/1',
+        'test#B',
+        'test#a'
+    ]
+    uris = [ot.convert2URIRef(s) for s in strings]
+    return strings + uris
+
+
+def test_sortUriListByName(unsorted_uris):
+    wanted = ['test/1', 'test/1', 'test#B', 'test#B', 'test/Z', 'test/Z', 'test#a', 'test#a']
+    sorted_uris = ot.sortUriListByName(unsorted_uris)
+    sorted_uris = [s.__str__() for s in sorted_uris]
+    assert sorted_uris == wanted
+
+
+@pytest.fixture
+def blank_node():
+    return BNode()
+
+
+def test_isBlankNode_bnode(blank_node):
+    assert ot.isBlankNode(blank_node)
+
+
+def test_isBlankNode_non_bnode(unsorted_uris):
+    assert not ot.isBlankNode(unsorted_uris[4])
+
+
+@pytest.fixture
+def dupe_lists():
+    return [
+        [[1, 2], [1, 3], [1, 4]],
+        [['a', 'b', 'c'], ['a', 'a', 'b', 'b', 'b', 'c']],
+        [[1, 2, 3], [1, 2, 3, 3, 3, 2, 2, 1]],
+        [[None, None]],
+        [None]
+    ]
+
+
+def test_removeDuplicates(dupe_lists):
+    for i, l in enumerate(dupe_lists):
+        if i == 0:
+            def id_func(l):
+                return l[0]
+            result = ot.removeDuplicates(l, id_func)
+            assert len(result) == 1
+            assert result == [[1, 2]]
+        else:
+            for sl in l:
+                result = ot.removeDuplicates(sl)
+                if i == 1:
+                    assert result == ['a', 'b', 'c']
+                elif i == 2:
+                    assert result == [1, 2, 3]
+                elif i == 3:
+                    assert result == [None]
+                else:
+                    assert result == []
