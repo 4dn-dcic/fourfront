@@ -83,7 +83,6 @@ if __name__ == "__main__":
     parser.add_argument('--prod', action="store_true", help="deploy to prod")
     args = parser.parse_args()
     branch = os.environ.get("TRAVIS_BRANCH")
-    print(branch)
 
     if not args.prod:
         print("not production")
@@ -99,3 +98,5 @@ if __name__ == "__main__":
             print("I don't have a message")
         if "tibanna-deploy" in msg:
             deploy()
+        else:
+            print("not deploying you didn't say the magic words...")
