@@ -996,7 +996,7 @@ var App = React.createClass({
                         href={this.props.href}
                     />
                 );
-                title = context.title || context.name || context.accession || context['@id'];
+                title = context.display_title || context.title || context.name || context.accession || context['@id'];
                 if (title && title != 'Home') {
                     title = title + ' – ' + portal.portal_title;
                 } else {
