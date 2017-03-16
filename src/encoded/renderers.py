@@ -90,6 +90,20 @@ def security_tween_factory(handler, registry):
                 detail = 'X-If-Match-User does not match'
                 raise HTTPPreconditionFailed(detail)
 
+        if hasattr(request, 'auth0_expired') and request.auth0_expired:
+            if request.is_xhr or request.content_type == 'application/json':
+                # If have an auth0 token, and have determined it is expired, and the request is a JSON request (not browser)
+                # then send a HTTP 403 error JSON response to inform clients to log user out.
+                #
+                # This is necessary because browsers do not yet universally support getting response headers from AJAX requests.
+                #
+                #
+                # Do not change HTTPForbidden error detail ("Bad or expired token.") below unless want bad things to happen on the front-end 
+                # (or find/replace in /src/encoded/static accordingly, incl browser.js & components/app.js).
+                # Could also remove this raise HTTPForbidden when all browsers consistently support XMLHttpRequest.getResponseHeaders() (a living standard)
+                # to ID an expired token using X-Request-JWT header set below.
+                raise HTTPForbidden("Bad or expired token.")
+
         # Older stuff (pre-Auth0)
         elif request.authorization is not None or asbool(request.headers.get('X-Auth-Challenge', False)):
             login = request.authenticated_userid
@@ -191,12 +205,7 @@ def set_response_headers_tween_factory(handler, registry):
             elif request.auth0_expired:
                 # Inform libs/react-middleware.js of expired token to set logout state in front-end in response to
                 # either doc request or xhr request & set appropriate alerts
-                if request.is_xhr or request.content_type == 'application/json':
-                    # Do not change HTTPForbidden error detail ("Bad or expired token.") below unless want bad things to happen on the front-end 
-                    # (or find/replace in /src/encoded/static accordingly, incl browser.js & components/app.js).
-                    # Could also remove this raise HTTPForbidden when all browsers consistently support XMLHttpRequest.getResponseHeaders() (a living standard)
-                    # to ID an expired token using X-Request-JWT header set below.
-                    raise HTTPForbidden("Bad or expired token.")
+                
                 #response = handler(request)
                 response.headers['X-Request-JWT'] = "expired"
                 # Especially for initial document requests by browser, unset jwtToken cookie so initial client-side
