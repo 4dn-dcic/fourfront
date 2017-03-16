@@ -623,6 +623,7 @@ var LinkedObj = React.createClass({
     contextTypes: {
         contentTypeIsJSON: React.PropTypes.func
     },
+    
     getInitialState: function(){
         return{
             'open': false,
