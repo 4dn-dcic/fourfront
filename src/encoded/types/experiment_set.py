@@ -70,7 +70,6 @@ class ExperimentSet(Item):
     """The experiment set class."""
 
     item_type = 'experiment_set'
-    base_types = ['ExperimentSet'] + Item.base_types
     schema = load_schema('encoded:schemas/experiment_set.json')
     name_key = "accession"
     embedded = ["award",
@@ -164,7 +163,7 @@ class ExperimentSet(Item):
     })
 class ExperimentSetReplicate(ExperimentSet):
     """The experiment set class for replicate experiments."""
-
+    base_types = ['ExperimentSet'] + Item.base_types
     item_type = 'experiment_set_replicate'
     schema = load_schema('encoded:schemas/experiment_set_replicate.json')
     name_key = "accession"
