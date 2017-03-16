@@ -95,7 +95,7 @@ def security_tween_factory(handler, registry):
                 # If have an auth0 token, and have determined it is expired, and the request is a JSON request (not browser)
                 # then send a HTTP 403 error JSON response to inform clients to log user out.
                 #
-                # This is necessary because browsers do not yet universally support getting response headers from AJAX requests.
+                # This is necessary because browsers do not yet universally support getting response headers from AJAX responses.
                 #
                 #
                 # Do not change HTTPForbidden error detail ("Bad or expired token.") below unless want bad things to happen on the front-end 
@@ -205,7 +205,7 @@ def set_response_headers_tween_factory(handler, registry):
             elif request.auth0_expired:
                 # Inform libs/react-middleware.js of expired token to set logout state in front-end in response to
                 # either doc request or xhr request & set appropriate alerts
-                
+
                 #response = handler(request)
                 response.headers['X-Request-JWT'] = "expired"
                 # Especially for initial document requests by browser, unset jwtToken cookie so initial client-side

@@ -23,8 +23,7 @@ from pyramid.security import (
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
-    HTTPFound,
-    HTTPNotFound
+    HTTPFound
 )
 from pyramid.view import (
     view_config,
@@ -230,36 +229,6 @@ def get_jwt(request):
         token = request.cookies.get('jwtToken')
 
     return token
-
-
-
-#from pyramid.view import notfound_view_config
-#import json
-#@notfound_view_config(request_method=['GET'])
-#def ensure_user_info_on_not_found_requests(exc, request):
-#
-#    # exc should be the 404 response
-#    if hasattr(request, '_auth0_authenticated'):
-#        # at this point we have lost our user info headers lets rebuild them
-#        auth = Auth0AuthenticationPolicy()
-#        email = auth.unauthenticated_userid(request)
-#        exc.headers['X-User-Info'] = json.dumps(request.user_info)
-#    #print(exc)
-#    #import pdb
-#    #pdb.set_trace()
-#    exc.json = { "test1" : "tesr5" }
-#    resp = Response(
-#        headers = [
-#            ("X-User-Info", json.dumps(request.user_info)),
-#            ("Content-Type", "text/html; charset=utf-8")
-#        ],
-#        json = {
-#            "status" : 404,
-#            "error" : "You gots an error",
-#            "message" : "Test"
-#        }
-#    )
-#    return resp
 
 
 @view_config(route_name='login', request_method='POST',
