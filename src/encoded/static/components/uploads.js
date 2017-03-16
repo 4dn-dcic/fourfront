@@ -5,6 +5,11 @@ var _ = require('underscore');
 var { ajax, console, object, isServerSide } = require('./util');
 var ProgressBar = require('rc-progress').Line;
 
+/*
+Uploads component holds the s3 file upload managers generated in action.js.
+State works where key is object ID of file, values are important object context and
+upload info.
+*/
 var Uploads = module.exports = React.createClass({
 
     getInitialState: function(){
@@ -43,6 +48,7 @@ var Uploads = module.exports = React.createClass({
                 if(err){
                     alert("File upload failed for " + upload_key);
                 }else{
+                    // percentage = 101 means upload is complete
                     if(this._isMounted){
                         this.modifyRunningUploads(upload_key, 101, null);
                     }
@@ -74,6 +80,9 @@ var Uploads = module.exports = React.createClass({
         return upload_info;
     },
 
+    /*
+    Remove an upload from state and also from app state
+    */
     abortUpload: function(abort_key){
         var upload_keys = Object.keys(this.props.uploads);
         for(var i=0; i<upload_keys.length; i++){
@@ -158,6 +167,10 @@ var Uploads = module.exports = React.createClass({
         );
     },
 
+    /*
+    Check percent done for an upload, return status. 101 means upload complete, -1 meanst
+    that the upload is initializing.
+    */
     checkUploadStatus: function(upload){
         if(upload.percent_done && upload.percent_done == 101){
             return 'complete';

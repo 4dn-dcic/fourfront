@@ -145,7 +145,7 @@ var Action = module.exports = React.createClass({
         if(this.state.validated == 1){
             return(
                 <Button bsStyle="info" style={style} disabled>
-                    {'Validated!'}
+                    {'Validated'}
                 </Button>
             );
         }else if (this.state.validated == 0){
@@ -260,8 +260,9 @@ var Action = module.exports = React.createClass({
                         console.log('OBJECT SUCCESSFULLY TESTED!');
                         stateToSet.validated = 1;
                         this.setState(stateToSet);
+                    // handle file upload if this is a file
                     }else if(this.state.file && _.contains(response['@graph'][0]['@type'],'File')){
-                        // handle file upload if this is a file
+                        // if editing, use get_upload. if posting, use post_upload (file.py)
                         if(this.props.edit){
                             this.context.fetch(destination + 'upload', {
                                 method: 'GET',
@@ -275,6 +276,8 @@ var Action = module.exports = React.createClass({
                                 return response;
                             })
                             .then(response => {
+                                // add important info to result from finalizedContext
+                                // that is not added from /types/file.py get_upload
                                 var creds = response['@graph'][0]['upload_credentials'];
                                 finalizedContext['upload_credentials'] = creds;
                                 finalizedContext['@id'] = destination;
@@ -289,7 +292,7 @@ var Action = module.exports = React.createClass({
                                 this.context.navigate('/uploads');
                             }, error => {
                                 console.log('Error getting credentials');
-                                alert('File upload failed! Please try again using edit.')
+                                alert('File upload failed! This is probably an s3 credentials issue.');
                                 this.context.navigate(destination);
                             });
                         }else{
@@ -318,18 +321,18 @@ var Action = module.exports = React.createClass({
                                 this.context.navigate('/uploads');
                             }, error => {
                                 console.log('Error getting credentials');
-                                alert('File upload failed! Please try again using edit.')
+                                alert('File upload failed! This is probably an s3 credentials issue.');
                                 this.context.navigate(destination);
                             });
                         }
                     }else{
                         console.log('ACTION SUCCESSFUL!');
+                        alert('Success! Navigating to the object page.');
                         this.context.navigate(destination);
                     }
                 }, error => {
                     stateToSet.validated = 0;
                     console.log('ERROR IN OBJECT VALIDATION!');
-                    console.log(error);
                     var errorList = error.errors || [error.detail] || [];
                     // make an alert for each error description
                     stateToSet.errorCount = errorList.length;
@@ -383,9 +386,8 @@ var Action = module.exports = React.createClass({
     }
 });
 
-// Based off EditPanel in edit.js
+// Container for BuildField that passes them the appropriate information
 var FieldPanel = React.createClass({
-
     includeField : function(schema, field){
         if (!schema) return null;
         var schemaVal = object.getNestedProperty(schema, ['properties', field], true);
@@ -1025,12 +1027,11 @@ local value of the filename. Also updates this.state.file for the overall compon
 */
 var S3FileInput = React.createClass({
     handleChange: function(e){
-        // var req_type = this.props.schema.file_format_file_extension || null;
-        // WHAT SHOULD FILENAME BE? HOW DO I GET ACCESSION AND @ID?
         var req_type = null;
         var file = e.target.files[0];
         var filename = file.name ? file.name : "unknown";
         this.props.modifyNewContext(this.props.field, filename);
+        // calling modifyFile changes the 'file' state of top level component
         this.props.modifyFile(file);
     },
 
