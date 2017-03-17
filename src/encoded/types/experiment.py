@@ -245,3 +245,39 @@ class ExperimentRepliseq(Experiment):
     })
     def display_title(self, request, experiment_type='Undefined', cell_cycle_stage=None, biosample=None):
         return self.experiment_summary(request, experiment_type, cell_cycle_stage, biosample)
+
+
+@collection(
+    name='experiments-mic',
+    unique_key='accession',
+    properties={
+        'title': 'Microscopy Experiments',
+        'description': 'Listing of Microscopy Experiments',
+    })
+class ExperimentMic(Experiment):
+    """The experiment class for Microscopy experiments."""
+    item_type = 'experiment_mic'
+    schema = load_schema('encoded:schemas/experiment_mic.json')
+    embedded = Experiment.embedded + ["submitted_by"]
+    name_key = 'accession'
+
+    @calculated_property(schema={
+        "title": "Experiment summary",
+        "description": "Summary of the experiment, including type, enzyme and biosource.",
+        "type": "string",
+    })
+    def experiment_summary(self, request, experiment_type='Undefined', biosample=None):
+        sum_str = experiment_type
+        if biosample:
+            biosamp_props = request.embed(biosample, '@@object')
+            biosource = biosamp_props['biosource_summary']
+            sum_str += (' on ' + biosource)
+        return sum_str
+
+    @calculated_property(schema={
+        "title": "Display Title",
+        "description": "A calculated title for every object in 4DN",
+        "type": "string"
+    })
+    def display_title(self, request, experiment_type='Undefined', biosample=None):
+        return self.experiment_summary(request, experiment_type, biosample)

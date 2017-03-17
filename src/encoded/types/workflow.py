@@ -35,7 +35,6 @@ class WorkflowRun(Item):
     """The WorkflowRun class that describes execution of a workflow."""
 
     item_type = 'workflow_run'
-    base_types = ['WorkflowRun'] + Item.base_types
     schema = load_schema('encoded:schemas/workflow_run.json')
     embedded = ['workflow',
                 'input_files.workflow_argument_name',
@@ -56,7 +55,7 @@ class WorkflowRun(Item):
     })
 class WorkflowRunSbg(WorkflowRun):
     """The WorkflowRun class that describes execution of a workflow on SBG platform."""
-
+    base_types = ['WorkflowRun'] + Item.base_types
     item_type = 'workflow_run_sbg'
     schema = load_schema('encoded:schemas/workflow_run_sbg.json')
     embedded = WorkflowRun.embedded

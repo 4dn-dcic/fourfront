@@ -1,4 +1,4 @@
-"""Modifications types file."""
+"""Targets types file."""
 from snovault import (
     calculated_property,
     collection,
@@ -27,21 +27,36 @@ class Target(Item):
         "description": "Summary of target information, either specific genes or genomic coordinates.",
         "type": "string",
     })
-    def target_summary(self, request, targeted_genes=None, targeted_region=None):
+    def target_summary(self, request, targeted_genes=None, targeted_genome_regions=None,
+                       targeted_proteins=None, targeted_rnas=None, targeted_structure=None):
         if targeted_genes:
             value = ""
             value += ' and '.join(targeted_genes)
             return value
-        elif targeted_region:
+        elif targeted_proteins:
             value = ""
-            genomic_region = request.embed(targeted_region, '@@object')
-            value += genomic_region['genome_assembly']
-            if genomic_region['chromosome']:
-                value += ':'
-                value += genomic_region['chromosome']
-            if genomic_region['start_coordinate'] and genomic_region['end_coordinate']:
-                value += ':' + str(genomic_region['start_coordinate']) + '-' + str(genomic_region['end_coordinate'])
+            value += ' and '.join(targeted_proteins)
             return value
+        elif targeted_rnas:
+            value = ""
+            value += ' and '.join(targeted_rnas)
+            return value
+        elif targeted_structure:
+            return targeted_structure
+        elif targeted_genome_regions:
+            values = []
+            # since targetted region is a list, go through each item and get summary elements
+            for each_target in targeted_genome_regions:
+                genomic_region = request.embed(each_target, '@@object')
+                value = ""
+                value += genomic_region['genome_assembly']
+                if genomic_region['chromosome']:
+                    value += ':'
+                    value += genomic_region['chromosome']
+                if genomic_region['start_coordinate'] and genomic_region['end_coordinate']:
+                    value += ':' + str(genomic_region['start_coordinate']) + '-' + str(genomic_region['end_coordinate'])
+                values.append(value)
+            return ", ".join(filter(None, values))
         return "no target"
 
     @calculated_property(schema={
