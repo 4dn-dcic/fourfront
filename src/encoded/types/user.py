@@ -184,3 +184,13 @@ def profile(context, request):
         'title': 'Profile',
         'href': request.resource_path(context),
     }
+
+
+@calculated_property(context=User, category='user_action')
+def uploads(request):
+    """smth."""
+    return {
+        'id': 'uploads',
+        'title': 'Uploads',
+        'href': '/uploads',
+    }

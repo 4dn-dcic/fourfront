@@ -3,14 +3,16 @@ var React = require('react');
 var globals = require('./globals');
 var _ = require('underscore');
 var { ajax, console, object, isServerSide } = require('./util');
+var {getS3UploadUrl, s3UploadFile} = require('./util/aws');
 var { DropdownButton, Button, MenuItem, Panel, Table} = require('react-bootstrap');
 var makeTitle = require('./item-pages/item').title;
 var Alerts = require('./alerts');
 var d3 = require('d3');
+var store = require('../store');
 
 // Master component used for user actions: create and edit
 // create is considered default mode, but by simply switching the behavior
-// from POST to PATCH, this can be used for editing by providing a value
+// from POST to PUT, this can be used for editing by providing a value
 // of true to the edit prop.
 // This component initiates and hold the new context and coordinated
 // submission/validation
@@ -32,7 +34,8 @@ var Action = module.exports = React.createClass({
             'validated': 0, // 0 = not validated, 1 = validated, 2 = error
             'thisType': contType[0],
             'thisSchema': thisSchema,
-            'errorCount': 0
+            'errorCount': 0,
+            'file': null
         };
     },
 
@@ -61,7 +64,7 @@ var Action = module.exports = React.createClass({
             return response;
         })
         .then(response => {
-            this.clearFields(response, this.state.schema);
+            response = this.clearFields(response, this.state.thisSchema);
             this.setState({'newContext': response});
         }, error => {
             // something went wrong with fetch context. Just use an empty object
@@ -77,7 +80,7 @@ var Action = module.exports = React.createClass({
             if(schema.properties[contextKeys[i]]){
                 var fieldSchema = schema.properties[contextKeys[i]];
                 if (fieldSchema.clear_create && fieldSchema.clear_create == "clear"){
-                    context[contextKeys[i]] = null;
+                    delete context[contextKeys[i]];
                 }
             }
         }
@@ -131,23 +134,47 @@ var Action = module.exports = React.createClass({
         this.setState({'newContext': contextCopy, 'validated': 0});
     },
 
-    generatePostButton: function(){
+    modifyFile: function(file){
+        // function that updates state to contain a file upload
+        // not used for all object types
+        this.setState({'file':file});
+    },
+
+    generateValidationButton: function(){
+        var style={'width':'160px'};
         if(this.state.validated == 1){
             return(
-                <Button bsStyle="success" onClick={this.realPostNewContext}>
-                    {this.props.edit ? 'Edit object' : 'Create object'}
+                <Button bsStyle="info" style={style} disabled>
+                    {'Validated'}
                 </Button>
             );
         }else if (this.state.validated == 0){
             return(
-                <Button bsStyle="warning" onClick={this.testPostNewContext}>
+                <Button bsStyle="info" style={style} onClick={this.testPostNewContext}>
                     {'Test object validity'}
                 </Button>
             );
         }else{
             return(
-                <Button bsStyle="danger" onClick={this.testPostNewContext}>
-                    {'Failed user permissions'}
+                <Button bsStyle="danger" style={style} onClick={this.testPostNewContext}>
+                    {'Failed permissions'}
+                </Button>
+            );
+        }
+    },
+
+    generatePostButton: function(){
+        var style={'marginLeft':'30px','width':'160px'};
+        if(this.state.validated == 1){
+            return(
+                <Button bsStyle="success" style={style} onClick={this.realPostNewContext}>
+                    {this.props.edit ? 'Edit object' : 'Create object'}
+                </Button>
+            );
+        }else{
+            return(
+                <Button bsStyle="success" style={style} disabled>
+                    {this.props.edit ? 'Edit object' : 'Create object'}
                 </Button>
             );
         }
@@ -176,6 +203,7 @@ var Action = module.exports = React.createClass({
         var lab;
         var award;
         var finalizedContext = this.contextSift(this.state.newContext, this.state.thisSchema);
+        console.log('contextToPOST:', finalizedContext);
         // get award and lab info from the /me endpoint
         ajax.promise('/me?frame=embedded').then(data => {
             if (this.context.contentTypeIsJSON(data)){
@@ -209,8 +237,14 @@ var Action = module.exports = React.createClass({
                 var actionMethod = 'POST';
                 // see if this is not a test and we're editing
                 if(!test && this.props.edit){
-                    actionMethod = 'PATCH';
+                    actionMethod = 'PUT';
                     destination = this.state.newContext['@id'];
+                    // must add uuid (and accession, if available) to PUT body
+                    finalizedContext.uuid = this.state.newContext.uuid;
+                    // not all objects have accessions
+                    if(this.state.newContext.accession){
+                        finalizedContext.accession = this.state.newContext.accession;
+                    }
                 }
                 this.context.fetch(destination, {
                     method: actionMethod,
@@ -225,27 +259,96 @@ var Action = module.exports = React.createClass({
                     return response;
                 })
                 .then(response => {
+                    if(!test && !this.props.edit){
+                        destination = response['@graph'][0]['@id'];
+                    }
                     if(test){
                         console.log('OBJECT SUCCESSFULLY TESTED!');
                         stateToSet.validated = 1;
                         this.setState(stateToSet);
-                    }else if(this.props.edit){
-                        console.log('OBJECT SUCCESSFULLY PATCHED!');
-                        alert('Success! Navigating to the patched object page.');
-                        this.context.navigate(destination);
-                    }else{
-                        console.log('OBJECT SUCCESSFULLY POSTED!');
-                        var newID = response['@graph'][0]['@id'];
-                        if(typeof newID !== 'string'){
-                            newID = '/';
+                    // handle file upload if this is a file
+                    }else if(this.state.file && _.contains(response['@graph'][0]['@type'],'File')){
+                        // if editing, use get_upload. if posting, use post_upload (file.py)
+                        if(this.props.edit){
+                            this.context.fetch(destination + 'upload', {
+                                method: 'GET',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json'
+                                }
+                            })
+                            .then(response => {
+                                if (!this.context.contentTypeIsJSON(response) || !response['@graph'] || !response['@graph'][0]['upload_credentials'] || !this.state.file) throw response;
+                                return response;
+                            })
+                            .then(response => {
+                                // add important info to result from finalizedContext
+                                // that is not added from /types/file.py get_upload
+                                var creds = response['@graph'][0]['upload_credentials'];
+                                finalizedContext['upload_credentials'] = creds;
+                                finalizedContext['@id'] = destination;
+                                var upload_manager = s3UploadFile(this.state.file, creds);
+                                var orig_filename = null;
+                                if(this.props.context.filename){
+                                    orig_filename = this.props.context.filename;
+                                }
+                                var upload_info = {
+                                    'context': finalizedContext,
+                                    'manager': upload_manager,
+                                    'original_filename': orig_filename
+                                };
+                                // Passes upload_manager to uploads.js through app.js
+                                this.props.updateUploads(destination, upload_info);
+                                alert('Success! Navigating to the uploads page.');
+                                this.context.navigate('/uploads');
+                            }, error => {
+                                console.log('Error getting credentials');
+                                alert('File upload failed! This is probably an s3 credentials issue.');
+                                this.context.navigate(destination);
+                            });
+                        }else{
+                            this.context.fetch(destination + 'upload', {
+                                method: 'POST',
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify(response['@graph'][0])
+                            })
+                            .then(response => {
+                                if (!this.context.contentTypeIsJSON(response) || !response['@graph'] || !response['@graph'][0]['upload_credentials'] || !this.state.file) throw response;
+                                return response;
+                            })
+                            .then(response => {
+                                var creds = response['@graph'][0]['upload_credentials'];
+                                var upload_manager = s3UploadFile(this.state.file, creds);
+                                var orig_filename = null;
+                                if(this.props.context.filename){
+                                    orig_filename = this.props.context.filename;
+                                }
+                                var upload_info = {
+                                    'context': response['@graph'][0],
+                                    'manager': upload_manager,
+                                    'original_filename': orig_filename
+                                };
+                                // Passes upload_manager to uploads.js through app.js
+                                this.props.updateUploads(destination, upload_info);
+                                alert('Success! Navigating to the uploads page.');
+                                this.context.navigate('/uploads');
+                            }, error => {
+                                console.log('Error getting credentials');
+                                alert('File upload failed! This is probably an s3 credentials issue.');
+                                this.context.navigate(destination);
+                            });
                         }
-                        alert('Success! Navigating to the new object page.');
-                        this.context.navigate(newID);
+                    }else{
+                        console.log('ACTION SUCCESSFUL!');
+                        alert('Success! Navigating to the object page.');
+                        this.context.navigate(destination);
                     }
                 }, error => {
                     stateToSet.validated = 0;
                     console.log('ERROR IN OBJECT VALIDATION!');
-                    console.log(error);
                     var errorList = error.errors || [error.detail] || [];
                     // make an alert for each error description
                     stateToSet.errorCount = errorList.length;
@@ -278,6 +381,7 @@ var Action = module.exports = React.createClass({
     render: function() {
         var title = makeTitle({'context': this.props.context});
         var context = this.state.newContext;
+        var baseContext = this.props.context; // includes calc props and the like
         var thisType = this.state.thisType;
         var itemClass = globals.itemClass(context, 'view-item');
         var schema = this.state.thisSchema;
@@ -288,16 +392,18 @@ var Action = module.exports = React.createClass({
             <div className={itemClass}>
                 <h2>{this.props.edit ? editTitle : createTitle}</h2>
                 <h4 style={{'color':'#808080', 'paddingBottom': '10px'}}>Add, edit, and remove field values. Submit at the bottom of the form.</h4>
-                <FieldPanel thisType={thisType} context={context} schema={schema} modifyNewContext={this.modifyNewContext} reqFields={reqFields}/>
-                <div>{this.generatePostButton()}</div>
+                <FieldPanel thisType={thisType} context={context} baseContext={baseContext} schema={schema} modifyNewContext={this.modifyNewContext} modifyFile={this.modifyFile} reqFields={reqFields}/>
+                <div>
+                    {this.generateValidationButton()}
+                    {this.generatePostButton()}
+                </div>
             </div>
         );
     }
 });
 
-// Based off EditPanel in edit.js
+// Container for BuildField that passes them the appropriate information
 var FieldPanel = React.createClass({
-
     includeField : function(schema, field){
         if (!schema) return null;
         var schemaVal = object.getNestedProperty(schema, ['properties', field], true);
@@ -337,11 +443,19 @@ var FieldPanel = React.createClass({
         // set a required flag if this field is required
         var required = _.contains(this.props.reqFields, field);
         // handle a linkTo object on the the top level
+
+        // check if any schema-specific adjustments need to made:
         if(fieldSchema.linkTo){
             fieldType = 'linked object';
+        } else if (fieldSchema.attachment && fieldSchema.attachment === true){
+            fieldType = 'attachment';
+        } else if (fieldSchema.s3Upload && fieldSchema.s3Upload === true){
+            fieldType = 'file upload';
         }
+        // @id of the whole object, may be useful down the line
+        var masterID = this.props.baseContext['@id'] || this.props.baseContext.link_id.replace(/~/g, "/");
         return(
-            <BuildField value={fieldValue} key={field} schema={fieldSchema} label={field} fieldType={fieldType} fieldTip={fieldTip} enumValues={enumValues} disabled={false} modifyNewContext={this.props.modifyNewContext} required={required}/>
+            <BuildField value={fieldValue} key={field} schema={fieldSchema} label={field} fieldType={fieldType} fieldTip={fieldTip} enumValues={enumValues} disabled={false} modifyNewContext={this.props.modifyNewContext} modifyFile={this.props.modifyFile} required={required} masterID={masterID}/>
         );
     },
 
@@ -433,7 +547,10 @@ var BuildField = React.createClass({
                 <ObjectField field={this.props.label} value={this.props.value} schema={this.props.schema} modifyNewContext={this.props.modifyNewContext}/>
             );
             case 'attachment' : return (
-                <FileInput {...inputProps} field={this.props.label} modifyNewContext={this.props.modifyNewContext}/>
+                <AttachmentInput {...inputProps} field={this.props.label} modifyNewContext={this.props.modifyNewContext}/>
+            );
+            case 'file upload' : return (
+                <S3FileInput {...inputProps} masterID={this.props.masterID} field={this.props.label} modifyNewContext={this.props.modifyNewContext} modifyFile={this.props.modifyFile} schema={this.props.schema}/>
             );
         }
         // Fallback
@@ -477,32 +594,34 @@ var BuildField = React.createClass({
     },
 
     render: function(){
-        // check if any schema-specific adjustments need to made:
-        var field_case = this.props.fieldType;
-        if (this.props.schema.attachment && this.props.schema.attachment === true){
-            field_case = 'attachment';
-        }
         var isArray = this.props.isArray || false;
         // array entries don't need dt/dd rows
         if(isArray){
             return(
                 <div>
-                    {this.displayField(field_case)}
+                    {this.displayField(this.props.fieldType)}
                 </div>
             );
         }
+        var field_title = this.props.label;
+        if(this.props.schema.title && this.props.schema.title.length > 0){
+            field_title = this.props.schema.title;
+        }
+
         return(
             <dl className="key-value row extra-footspace">
                 <dt className="col-sm-3">
-                        <span>{this.props.label}</span>
+                        <span style={{'display':'inlineBlock', 'width':'80px'}}>
+                            {field_title}
+                        </span>
                         <a href="#" className="cancel-button" onClick={this.deleteField} title="Delete">
                             <i className="icon icon-times-circle-o icon-fw"></i>
                         </a>
                 </dt>
                 <dd className="col-sm-9">
-                    {this.displayField(field_case)}
+                    {this.displayField(this.props.fieldType)}
                     <div className="display-tip">{this.props.fieldTip}</div>
-                    {this.displayMessage(field_case)}
+                    {this.displayMessage(this.props.fieldType)}
                 </dd>
 
             </dl>
@@ -518,6 +637,7 @@ var LinkedObj = React.createClass({
     contextTypes: {
         contentTypeIsJSON: React.PropTypes.func
     },
+
     getInitialState: function(){
         return{
             'open': false,
@@ -868,9 +988,10 @@ var ObjectField = React.createClass({
 /* For version 1. A simple local file upload that gets the name, type,
 size, and b64 encoded stream in the form of a data url. Upon successful
 upload, adds this information to NewContext*/
-var FileInput = React.createClass({
-    handleChange: function(e){
-        var acceptedTypes = [
+var AttachmentInput = React.createClass({
+
+    acceptedTypes: function(){
+        var types = [
             "application/pdf",
             "application/zip",
             "text/plain",
@@ -883,15 +1004,13 @@ var FileInput = React.createClass({
             "image/svs",
             "text/autosql"
         ];
+        return(types.toString());
+    },
+
+    handleChange: function(e){
         var attachment_props = {};
         var file = e.target.files[0];
-        if ((!file.type || !_.contains(acceptedTypes, file.type))){
-            this.refs.fileInput.value = '';
-            alert('File upload failed! File must of one of the following types: ' + acceptedTypes.toString());
-            return;
-        }else{
-            attachment_props.type = file.type;
-        }
+        attachment_props.type = file.type;
         if(file.size) {attachment_props.size = file.size;}
         if(file.name) {attachment_props.download = file.name;}
         var fileReader = new window.FileReader();
@@ -906,6 +1025,26 @@ var FileInput = React.createClass({
 
         }.bind(this);
         this.props.modifyNewContext(this.props.field, attachment_props);
+    },
+
+    render: function(){
+        return(
+            <input id={this.props.field} type='file' onChange={this.handleChange} ref="fileInput" accept={this.acceptedTypes()}/>
+        );
+    }
+});
+
+/* Input for an s3 file upload. Context value set is local value of the filename.
+Also updates this.state.file for the overall component.
+*/
+var S3FileInput = React.createClass({
+    handleChange: function(e){
+        var req_type = null;
+        var file = e.target.files[0];
+        var filename = file.name ? file.name : "unknown";
+        this.props.modifyNewContext(this.props.field, filename);
+        // calling modifyFile changes the 'file' state of top level component
+        this.props.modifyFile(file);
     },
 
     render: function(){

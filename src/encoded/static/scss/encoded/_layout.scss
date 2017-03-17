@@ -70,6 +70,9 @@
 
 	> .alerts {
 		margin-top: 20px;
+		.alert.no-close-button > button.close {
+			display: none;
+		}
 	}
 
 }
