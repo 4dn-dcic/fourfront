@@ -9,7 +9,8 @@
     "accession": "4DNFIFYGN09R",
     "lab": "4dn-dcic-lab",
     "filename": "s3://4dn-tool-evaluation-files/_6_out_pair1.bam"
-},{
+},
+{
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
     "uuid": "ccf48ccd-49e5-4c33-afab-9ec90d65faf3",
