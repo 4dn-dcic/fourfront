@@ -65,7 +65,7 @@ def auth0_4dn_user_profile():
 
 @pytest.fixture(scope='session')
 def headers(auth0_access_token):
-    return {'Accept': 'applicatin/json', 'Content-Type': 'application/json', 'Authorization': 'Bearer ' +
+    return {'Accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'Bearer ' +
      auth0_access_token}
 
 
@@ -160,9 +160,15 @@ def test_404_keeps_auth_info(testapp, anontestapp, headers,
         'last_name': 'Test User',
     }
     testapp.post_json(url, item, status=201)
+    page_view_headers = headers.copy()
 
+    # X-User-Info header is only set for text/html -formatted Responses.
+    page_view_headers.update({
+        "Accept" : "text/html",
+        "Content-Type" : "text/html"
+    })
     # Log in
-    res = anontestapp.get('/not_found_url', headers=headers, status=404)
+    res = anontestapp.get('/not_found_url', headers=page_view_headers, status=404)
 
     assert res.headers['X-User-Info']
 
