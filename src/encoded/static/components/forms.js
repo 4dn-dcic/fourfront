@@ -494,7 +494,7 @@ var EditableField = module.exports.EditableField = React.createClass({
                 if (!this.isValid(false)) return null;
                 return (
                     <a href={ "#save-" + this.props.labelID } className={extClass + " save-button"} onClick={this.saveEditState} title="Save">
-                        <i className="icon icon-save icon-fw"></i>
+                        <i className="icon icon-check icon-fw"></i>
                     </a>
                 );
             case 'cancel': return (

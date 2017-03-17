@@ -9,11 +9,6 @@ var { console, isServerSide, Filters, object } = require('./../../util');
 
 var Legend = module.exports = React.createClass({
 
-    /**
-     * @memberof module:viz/components.Legend
-     * @namespace
-     * @type {Object}
-     */
     statics : {
 
         /**
