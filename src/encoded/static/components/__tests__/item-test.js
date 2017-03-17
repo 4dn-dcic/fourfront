@@ -76,8 +76,8 @@ describe('Testing item-view.js', function() {
         expect(defDescs.length).toBeLessThan(19);
     });
 
-    it('has a good title', function() {
-        var titleLine = TestUtils.findRenderedDOMComponentWithClass(testItem, 'subtitle');
+    it('has an accession', function() {
+        var titleLine = TestUtils.findRenderedDOMComponentWithClass(testItem, 'accession');
         var exptHeading = titleLine;
         expect(exptHeading.textContent).toEqual('ENCLB055ZZZ');
     });

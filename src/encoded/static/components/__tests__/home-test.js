@@ -48,7 +48,9 @@ describe('Testing home.js', function() {
             </Wrapper>
         );
     });
-
+    
+    /*
+    Banner not on homepage at moment.
     it('has one banner with three entries. Entry links are correct', function() {
         var banners = TestUtils.scryRenderedDOMComponentsWithClass(page, 'fourDN-banner');
         var bannerEntries = TestUtils.scryRenderedDOMComponentsWithClass(page, 'banner-entry');
@@ -58,6 +60,7 @@ describe('Testing home.js', function() {
         expect(bannerEntries[1].getAttribute('href')).toEqual('/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all');
         expect(bannerEntries[2].getAttribute('href')).toEqual('/search/?type=Biosource');
     });
+    */
 
     it('has welcome, announcements, and links headers', function() {
         var newsHeaders = TestUtils.scryRenderedDOMComponentsWithClass(page, "fourDN-header");

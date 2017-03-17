@@ -1,5 +1,5 @@
 {
-    "title": "Data file",
+    "title": "Data File",
     "description": "Schema for submitting metadata for a data file.",
     "id": "/profiles/file.json",
     "$schema": "http://json-schema.org/draft-04/schema#",

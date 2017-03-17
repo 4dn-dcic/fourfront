@@ -65,6 +65,7 @@
 
     @media (min-width: $navbar-fixed-breakpoint) {
         padding-top: 81px; /* Navbar (80px inner height) + its bottom border (1px) */
+		padding-bottom: 20px;
     }
 
 	> .alerts {
@@ -125,9 +126,7 @@ h1.page-title + .page-subtitle {
 ********************************************************** */
 
 .page-footer {
-	color: rgb(255, 255, 255);
-	background-color: #ffffff; // for IE8
-	background-color: $footerBackground; // overwrite previous line for CSS3 browsers
+	background-color: #f8f8f8;
 	//height: $footerHeight;
 	// @include text-shadow(0 1px rgba(0, 0, 0, 0.3));
 	//line-height: 0;
@@ -136,49 +135,44 @@ h1.page-title + .page-subtitle {
 	font-family: 'Work Sans', sans-serif;
 	a{
 		color: #bfbfbf;
-		font-weight: bold;
 	}
 	ul {
 	    list-style: none;
 	    list-style-position: outside;
 	    padding: 0;
 	}
+
+	.footer-section {
+		display: block;
+		text-align: center;
+		color: #bfbfbf;
+		padding: 16px 0px 14px;
+		@media (min-width: $screen-md-min) {
+
+			text-align: right;
+			&.copy-notice {
+				text-align: left;
+			}
+
+			li:last-child {
+				padding-right: 0;
+			}
+		}
+
+		a {
+			color : #b0b0b0;
+		}
+
+		a:hover, a:active {
+			text-decoration: none !important;
+			color: #000000;
+		}
+	}
+
+
 }
 
-.footer-links {
-    margin: 15px 0;
-    text-align: center;
-	color: #bfbfbf;
-    @media (min-width: $screen-sm-min) {
-        text-align: right;
 
-        li:last-child {
-            padding-right: 0;
-        }
-    }
-
-    a {
-        display: block;
-        margin: 0 0 8px;
-        padding: 10px 15px;
-    }
-    a:hover, a:active {
-        text-decoration: none !important;
-        color: #000000;
-    }
-}
-
-
-.copy-notice {
-	margin: 0 0 8px;
-	text-align: center;
-	display: block;
-	padding: 15px 15px;
-	color: #bfbfbf;
-	@media (min-width: $screen-sm-min) {
-		text-align: left;
-    }
-}
 
 
 /**********************************************************/

@@ -1,5 +1,6 @@
 'use strict';
 var React = require('react');
+var ReactDOM = require('react-dom');
 var jsonScriptEscape = require('../libs/jsonScriptEscape');
 var globals = require('./globals');
 var ErrorPage = require('./error');
@@ -420,7 +421,10 @@ var App = React.createClass({
         }
         if (this.state) {
             if (prevState.session !== this.state.session && ChartDataController.isInitialized()){
-                ChartDataController.sync();
+                setTimeout(function(){
+                    // Delay 5s.
+                    ChartDataController.sync();
+                }, 5000);   
             }
             for (key in this.state) {
                 if (this.state[key] !== prevState[key]) {
@@ -1009,7 +1013,7 @@ var App = React.createClass({
                         href={this.props.href}
                     />
                 );
-                title = context.title || context.name || context.accession || context['@id'];
+                title = context.display_title || context.title || context.name || context.accession || context['@id'];
                 if (title && title != 'Home') {
                     title = title + ' – ' + portal.portal_title;
                 } else {
@@ -1095,7 +1099,13 @@ var App = React.createClass({
                             <Footer version={this.props.context.app_version} />
                         </div>
                     </div>
-                    <ReactTooltip effect="solid" />
+                    <ReactTooltip effect="solid" ref="tooltipComponent" afterHide={()=>{
+                        var _tooltip = this.refs && this.refs.tooltipComponent;
+                        // Grab tip & unset style.left and style.top using same method tooltip does internally.
+                        var node = ReactDOM.findDOMNode(_tooltip);
+                        node.style.left = null;
+                        node.style.top = null;
+                    }} />
                 </body>
             </html>
         );

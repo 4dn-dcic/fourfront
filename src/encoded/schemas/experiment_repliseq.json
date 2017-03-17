@@ -1,5 +1,5 @@
 {
-    "title": "Repliseq Experiment Variables",
+    "title": "Repliseq Experiment",
     "description": "Experimental variables for a Repliseq experiment.",
     "id": "/profiles/experiment_repliseq.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
