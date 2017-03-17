@@ -8,6 +8,10 @@ var { expFxn, Filters, console, object, isServerSide } = require('./../util');
 var { highlightTerm, unhighlightTerms } = require('./../facetlist');
 var { CursorComponent } = require('./components');
 
+/**
+ * @module {Component} viz/ChartDetailCursor
+ */
+
 var ChartDetailCursor = module.exports = React.createClass({
 
     getDefaultProps : function(){
@@ -63,6 +67,15 @@ var ChartDetailCursor = module.exports = React.createClass({
         console.log('Mounted MouseDetailCursor');
     },
 
+    /**
+     * Call this function to update component state with the new "path" and other properties, if applicable.
+     * 
+     * @instance
+     * @public
+     * @param {Object} state - New state to set. Should contain a 'path' property.
+     * @param {function} [cb] - Optional callback function. Takes updated state as argument.
+     * @returns {undefined} Nothing
+     */
     update : function(state = {}, cb = null){
         if (state.field) state.field = Filters.Field.toName(state.field);
         else if (Array.isArray(state.path) && state.path.length > 0 && state.path[state.path.length - 1].field){

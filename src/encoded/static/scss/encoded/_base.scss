@@ -20,6 +20,8 @@ $navbar-link-active-background-color: #eee;
 
 $modal-backdrop-opacity : 0.8;
 
+$facetlist-selected-term-color : #248bac;
+
 // Pass value with CSS units and get just the value back
 @function strip-units($value) {
     @return $value / ($value * 0 + 1);
