@@ -115,6 +115,7 @@ after_success:
 - echo $MSG_NO_WHITESPACE
 - echo $TRAVIS_PULL_REQUEST
 - echo $TRAVIS_BRANCH
+- echo $tibanna-deploy
 - |
   if [ "$BUILD_LEADER" = "YES" ]; then
     if [ "$BUILD_AGGREGATE_STATUS" = "others_succeeded" ]; then
