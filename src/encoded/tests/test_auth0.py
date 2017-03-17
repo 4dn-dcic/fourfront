@@ -160,16 +160,22 @@ def test_404_keeps_auth_info(testapp, anontestapp, headers,
         'last_name': 'Test User',
     }
     testapp.post_json(url, item, status=201)
-    page_view_headers = headers.copy()
+    page_view_request_headers = headers.copy()
 
     # X-User-Info header is only set for text/html -formatted Responses.
-    page_view_headers.update({
+    page_view_request_headers.update({
         "Accept" : "text/html",
-        "Content-Type" : "text/html"
+        "Content-Type" : "text/html",
+        "Cookie" : "jwtToken=" + headers['Authorization'][7:]
     })
     # Log in
-    res = anontestapp.get('/not_found_url', headers=page_view_headers, status=404)
+    res = anontestapp.get(
+        '/not_found_url',
+        headers=page_view_request_headers,
+        status = 404
+    )
 
+    assert str(res.status_int) == "404"
     assert res.headers.get('X-Request-JWT', None) is not None
     assert res.headers.get('X-User-Info', None) is not None
 
