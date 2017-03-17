@@ -18,6 +18,17 @@
 module.exports.FormattedInfoBlock = require('./FormattedInfoBlock');
 
 /**
+ * Renders page title appropriately for a provided props.context.
+ * 
+ * @memberof module:item-pages/item-view
+ * @type {Component}
+ * @namespace
+ * @prop {boolean} [showAccessionTitles] - If true, will render title if it is the accession. Otherwise, beyond Item type, the title will be hidden.
+ * @prop {Object} context - JSON representation of current Item page/view.
+ */
+module.exports.ItemPageTitle = require('./ItemPageTitle');
+
+/**
  * Object containing components required to build header shown on Item pages.
  * Includes title, description, date created, status, action buttons, [...].
  * 

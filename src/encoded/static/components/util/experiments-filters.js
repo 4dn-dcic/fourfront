@@ -161,8 +161,6 @@ var expFilters = module.exports = {
             return expFilters.saveChangedFilters(newObj, useAjax, href, callback, expSetFilters);
         }
     },
-
-
     
     /**
      * Update expSetFilters in redux store and, if using AJAX, update context and href as well after fetching.
