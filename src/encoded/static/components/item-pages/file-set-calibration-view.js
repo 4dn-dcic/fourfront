@@ -3,7 +3,7 @@
 var React = require('react');
 var _ = require('underscore');
 var globals = require('./../globals');
-var { ItemHeader, PartialList, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } = require('./components');
+var { ItemHeader, ItemPageTitle, PartialList, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } = require('./components');
 
 // TODO: Rename to FileSetCalibrationView?
 
@@ -25,11 +25,9 @@ var FileSetCalibrationView = module.exports = React.createClass({
         return (
             <div className={itemClass}>
 
-                <h1 className="page-title">
-                    {context['@type'][0]} <span className="subtitle prominent">{ title }</span>
-                </h1>
+                <ItemPageTitle context={context} schemas={schemas} />
 
-                <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href}>
+                <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={schemas}>
                     <ItemHeader.TopRow />
                     <ItemHeader.MiddleRow />
                     <ItemHeader.BottomRow />

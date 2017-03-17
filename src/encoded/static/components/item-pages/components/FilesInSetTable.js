@@ -17,13 +17,7 @@ var propTypes = {
     })).isRequired
 };
 
-/**
- * Component for displaying Files in a set.
- * 
- * @memberof module:item-pages/components
- * @namespace FilesInSetTable
- * @type {Component}
- */
+
 var FilesInSetTable = module.exports = React.createClass({
 
     statics : {
@@ -147,6 +141,13 @@ var FilesInSetTable = module.exports = React.createClass({
          */
         LabIcon : React.createClass({
 
+            getDefaultProps : function(){
+                return {
+                    onMouseEnter : null,
+                    onMouseLeave : null
+                };
+            },
+
             noLab : function(){
                 return (
                     <span className="lab-icon no-lab">
@@ -166,9 +167,10 @@ var FilesInSetTable = module.exports = React.createClass({
                 return (
                     <a 
                         href={atId}
-                        className="lab-icon"
+                        className="lab-icon inline-block"
                         onMouseEnter={this.props.onMouseEnter}
                         onMouseLeave={this.props.onMouseLeave}
+                        data-tip={lab.display_title}
                     >
                         <i className="icon icon-users"/>
                     </a>
@@ -220,16 +222,16 @@ var FilesInSetTable = module.exports = React.createClass({
                         <div className="col-xs-1 col-md-1 lab">
                             <FilesInSetTable.LabIcon
                                 lab={file && file.lab}
-                                onMouseEnter={ ()=> this.setState({ showLabName : true }) }
-                                onMouseLeave={ ()=> this.setState({ showLabName : false }) }
+                                //onMouseEnter={ ()=> this.setState({ showLabName : true }) }
+                                //onMouseLeave={ ()=> this.setState({ showLabName : false }) }
                             />
                         </div>
 
                         <div className="col-xs-11 col-md-3 col-lg-2 submitter">
                             <FilesInSetTable.SubmitterLink 
                                 user={file && file.submitted_by}
-                                labName={file && file.lab && file.lab.display_title}
-                                showLabName={this.state.showLabName}
+                                //labName={file && file.lab && file.lab.display_title}
+                                //showLabName={this.state.showLabName}
                             />
                         </div>
                         
@@ -333,7 +335,7 @@ var FilesInSetTable = module.exports = React.createClass({
         return (
             <div className="files-in-set-table">
                 { this.header() }
-                { this.props.files.map((file, i)=> <FilesInSetTable.FileItemRow file={file} />) }
+                { this.props.files.map((file, i)=> <FilesInSetTable.FileItemRow file={file} key={file.link_id || i} />) }
             </div>
         );
     }

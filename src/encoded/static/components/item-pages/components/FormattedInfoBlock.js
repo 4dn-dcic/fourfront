@@ -9,12 +9,15 @@ var { ajax, console, isServerSide } = require('./../../util');
  * Encapsulates all required ajax/aggregation for fetching array of fields/data.
  * Available via FormattedInfoBlock.List
  * 
- * @param details (optional) - Array of complete details to display.
- * @param endpoints (required if details is blank) - Array of endpoints to AJAX details from.
- * @param renderItem (required) - Render function for items. Should return a FormattedInfoBlock component.
- * @param fallbackMsg (optional) - What to display if both details and endpoints don't exist or are empty.
- * @param propertyName (optional) - Descriptive unique ID of property/ies displayed.
- * @param ajaxCallback (optional) - Callback to execute with details, if/after they are fetched w/ AJAX. 
+ * @namespace
+ * @type {Component}
+ * @memberof module:item-pages/components.FormattedInfoBlock
+ * @prop {Object[]} details         - Array of complete details to display.
+ * @prop {string[]} endpoints       - Array of endpoints to AJAX details from.
+ * @prop {function} renderItem      - Render function for items. Should return a FormattedInfoBlock component.
+ * @prop {Component|Element|string} fallbackMsg - What to display if both details and endpoints don't exist or are empty.
+ * @prop {string} [propertyName]    - Descriptive unique ID of property/ies displayed.
+ * @prop {function} [ajaxCallback]  - Callback to execute with details, if/after they are fetched w/ AJAX. 
  */
 var FormattedInfoBlockList = React.createClass({
 

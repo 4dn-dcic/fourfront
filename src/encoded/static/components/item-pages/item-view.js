@@ -4,7 +4,7 @@ var React = require('react');
 var globals = require('./../globals');
 var Collapse = require('react-bootstrap').Collapse;
 var _ = require('underscore');
-var { ItemHeader, PartialList, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } = require('./components');
+var { ItemPageTitle, ItemHeader, PartialList, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } = require('./components');
 var { AuditIndicators, AuditDetail, AuditMixin } = require('./../audit');
 var { console, object, DateUtility, Filters } = require('./../util');
 var itemTitle = require('./item').title;
@@ -39,7 +39,7 @@ var Detail = React.createClass({
          * @returns {Element} <div> element with a tooltip and info-circle icon.
          */
         formKey : function(tips, key){
-            var tooltip = '';
+            var tooltip = null;
             var title = null;
             if (tips[key]){
                 var info = tips[key];
@@ -50,11 +50,12 @@ var Detail = React.createClass({
                     title = info.title;
                 }
             }
-
             
             return (
                 <div className="tooltip-info-container">
-                    <span>{ title || key } <i data-tip={tooltip} className="icon icon-info-circle"/></span>
+                    <span>{ title || key } { tooltip !== null ?
+                        <i data-tip={tooltip} className="icon icon-info-circle"/>
+                    : null }</span>
                 </div>
             );
 
@@ -395,25 +396,7 @@ var ItemView = module.exports = React.createClass({
             }
         }),
 
-        Detail : Detail,
-
-        /**
-         * Renders page title appropriately for a provided props.context.
-         * 
-         * @memberof module:item-pages/item-view
-         * @type {Component}
-         */
-        Title : React.createClass({
-            /** @ignore */
-            render : function(){
-                var title = globals.listing_titles.lookup(this.props.context)({context: this.props.context});
-                return (
-                    <h1 className="page-title">
-                        {this.props.context['@type'][0]} <span className="subtitle prominent">{ title }</span>
-                    </h1>
-                );
-            }
-        })
+        Detail : Detail
 
     },
 
@@ -451,9 +434,8 @@ var ItemView = module.exports = React.createClass({
         return (
             <div className={itemClass}>
 
-                <ItemView.Title context={context} />
-
-                <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href}>
+                <ItemPageTitle context={context} />
+                <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
                     <ItemHeader.TopRow>{ this.topRightHeaderSection() || null }</ItemHeader.TopRow>
                     <ItemHeader.MiddleRow />
                     <ItemHeader.BottomRow />
