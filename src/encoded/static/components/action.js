@@ -590,6 +590,10 @@ var BuildField = React.createClass({
     // call modifyNewContext from parent to delete the value in the field
     deleteField : function(e){
         e.preventDefault();
+        // hard check for filename field, for setting this.state.file to null
+        if(this.props.label == 'filename'){
+            this.props.modifyFile(null);
+        }
         this.props.modifyNewContext(this.props.label, null, true);
     },
 
@@ -1010,6 +1014,10 @@ var AttachmentInput = React.createClass({
     handleChange: function(e){
         var attachment_props = {};
         var file = e.target.files[0];
+        if(!file){
+            this.props.modifyNewContext(this.props.field, null, true);
+            return;
+        }
         attachment_props.type = file.type;
         if(file.size) {attachment_props.size = file.size;}
         if(file.name) {attachment_props.download = file.name;}
@@ -1028,9 +1036,15 @@ var AttachmentInput = React.createClass({
     },
 
     render: function(){
-        return(
-            <input id={this.props.field} type='file' onChange={this.handleChange} ref="fileInput" accept={this.acceptedTypes()}/>
-        );
+        if(!this.props.value){
+            return(
+                <input id={this.props.field} type='file' onChange={this.handleChange} ref="fileInput" value='' accept={this.acceptedTypes()}/>
+            );
+        }else{
+            return(
+                <input id={this.props.field} type='file' onChange={this.handleChange} ref="fileInput" accept={this.acceptedTypes()}/>
+            );
+        }
     }
 });
 
@@ -1041,15 +1055,29 @@ var S3FileInput = React.createClass({
     handleChange: function(e){
         var req_type = null;
         var file = e.target.files[0];
-        var filename = file.name ? file.name : "unknown";
-        this.props.modifyNewContext(this.props.field, filename);
-        // calling modifyFile changes the 'file' state of top level component
-        this.props.modifyFile(file);
+        // file was not chosen. clear filename and
+        if(!file){
+            this.props.modifyNewContext(this.props.field, null, true);
+            // remove file from state
+            this.props.modifyFile(null);
+        }else{
+            var filename = file.name ? file.name : "unknown";
+            this.props.modifyNewContext(this.props.field, filename);
+            // calling modifyFile changes the 'file' state of top level component
+            this.props.modifyFile(file);
+        }
     },
 
     render: function(){
-        return(
-            <input id={this.props.field} type='file' onChange={this.handleChange} ref="fileInput"/>
-        );
+        if(!this.props.value){
+            return(
+                <input id={this.props.field} type='file' onChange={this.handleChange} ref="fileInput" value=''/>
+            );
+        }else{
+            return(
+                <input id={this.props.field} type='file' onChange={this.handleChange} ref="fileInput"/>
+            );
+        }
+
     }
 });
