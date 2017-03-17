@@ -90,6 +90,7 @@ def security_tween_factory(handler, registry):
                 detail = 'X-If-Match-User does not match'
                 raise HTTPPreconditionFailed(detail)
 
+        # Inform App.prototype.navigate() request response handler that JWT is not longer valid (expired session) by returning a 403 error to application/json request.
         if hasattr(request, 'auth0_expired') and request.auth0_expired:
             if request.is_xhr or request.content_type == 'application/json':
                 # If have an auth0 token, and have determined it is expired, and the request is a JSON request (not browser)
@@ -184,7 +185,7 @@ def set_response_headers_tween_factory(handler, registry):
         response.headers['X-Request-URL'] = request.url
 
         # Check if user logged in via Auth0 and set headers accordingly to inform React 
-        # server-side/client-side render & App.prototype.navigate() request response handling
+        # server-side/client-side render.
         if hasattr(request, 'auth0_expired'):
 
             if not request.auth0_expired:
@@ -192,7 +193,6 @@ def set_response_headers_tween_factory(handler, registry):
                 if login:
                     authtype, email = login.split('.', 1)
                     if (authtype == 'auth0' and request.content_type != 'application/json'):
-                        print()
                         # If successfully authenticated by Auth0, add JWT token and basic user details to response headers for server-side React to consume.
                         # Do not add if returning JSON, as will bypass server-side React which will be unable to unset/delete them before sending response.
                         #response = handler(request)
