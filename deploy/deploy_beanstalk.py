@@ -62,8 +62,6 @@ def deploy():
     run eb deploy and show the output
     '''
     print("start deployment to elastic beanstalk")
-    print("not today")
-    return
 
     p = subprocess.Popen(['eb', 'deploy'], stderr=subprocess.PIPE)
     while True:
