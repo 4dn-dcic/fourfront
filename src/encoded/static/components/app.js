@@ -1,5 +1,6 @@
 'use strict';
 var React = require('react');
+var ReactDOM = require('react-dom');
 var jsonScriptEscape = require('../libs/jsonScriptEscape');
 var globals = require('./globals');
 var ErrorPage = require('./error');
@@ -22,20 +23,20 @@ var ReactTooltip = require('react-tooltip');
 
 /**
  * The top-level component for this application.
- * 
+ *
  * @module {Component} app
  */
 
-/** 
+/**
  * Used to temporarily store Redux store values for simultaneous dispatch.
- * 
+ *
  * @memberof module:app
  */
 var dispatch_dict = {};
 
 /**
  * Top bar navigation & link schema definition.
- * 
+ *
  * @memberof module:app
  */
 var portal = {
@@ -91,7 +92,7 @@ var Title = React.createClass({
 
 /**
  * Creates a promise which completes after a delay, performing no network request.
- * Used to perform a promise.race to see if this timeout or a network requests completes first, which 
+ * Used to perform a promise.race to see if this timeout or a network requests completes first, which
  * then allows us to set app.state.slow and render a loading icon until long-running network request completes.
  */
 class Timeout {
@@ -155,7 +156,8 @@ var App = React.createClass({
             'content': undefined,
             'session': session,
             'user_actions': user_actions,
-            'schemas': null
+            'schemas': null,
+            'uploads': {}
         };
     },
 
@@ -321,6 +323,18 @@ var App = React.createClass({
         }
     },
 
+    /* Handle updating of info used on the /uploads page. Contains relevant
+    item context and AWS UploadManager*/
+    updateUploads: function(key, upload_info, del_key=false){
+        var new_uploads = _.extend({}, this.state.uploads);
+        if (del_key){
+            delete new_uploads[key];
+        }else{
+            new_uploads[key] = upload_info;
+        }
+        this.setState({'uploads': new_uploads});
+    },
+
     authenticateUser : function(callback = null){
         // check existing user_info in local storage and authenticate
         var idToken = JWT.get();
@@ -407,7 +421,10 @@ var App = React.createClass({
         }
         if (this.state) {
             if (prevState.session !== this.state.session && ChartDataController.isInitialized()){
-                ChartDataController.sync();
+                setTimeout(function(){
+                    // Delay 5s.
+                    ChartDataController.sync();
+                }, 5000);   
             }
             for (key in this.state) {
                 if (this.state[key] !== prevState[key]) {
@@ -784,7 +801,7 @@ var App = React.createClass({
                 if (
                     typeof err.status === 'number' &&
                     [502, 503, 504, 505, 598, 599, 444, 499, 522, 524].indexOf(err.status) > -1
-                ) { 
+                ) {
                     // Bad connection
                     Alerts.queue(Alerts.ConnectionError);
                 } else if (err.message !== 'HTTPForbidden'){
@@ -921,7 +938,7 @@ var App = React.createClass({
         if(context.code && context.code == 404){
             // check to ensure we're not looking at a static page
             var route = currRoute[currRoute.length-1];
-            if(route != 'help' && route != 'about' && route != 'home'){
+            if(route != 'help' && route != 'about' && route != 'home' && route != 'uploads'){
                 status = 'not_found';
             }
         }else if(context.code && context.code == 403){
@@ -957,6 +974,8 @@ var App = React.createClass({
                             context={context}
                             schemas={this.state.schemas}
                             expSetFilters={this.props.expSetFilters}
+                            uploads={this.state.uploads}
+                            updateUploads={this.updateUploads}
                             expIncompleteFacets={this.props.expIncompleteFacets}
                             session={this.state.session}
                             key={key}
@@ -986,13 +1005,15 @@ var App = React.createClass({
                         schemas={this.state.schemas}
                         expSetFilters={this.props.expSetFilters}
                         expIncompleteFacets={this.props.expIncompleteFacets}
+                        uploads={this.state.uploads}
+                        updateUploads={this.updateUploads}
                         session={this.state.session}
                         key={key}
                         navigate={this.navigate}
                         href={this.props.href}
                     />
                 );
-                title = context.title || context.name || context.accession || context['@id'];
+                title = context.display_title || context.title || context.name || context.accession || context['@id'];
                 if (title && title != 'Home') {
                     title = title + ' – ' + portal.portal_title;
                 } else {
@@ -1078,7 +1099,13 @@ var App = React.createClass({
                             <Footer version={this.props.context.app_version} />
                         </div>
                     </div>
-                    <ReactTooltip effect="solid" />
+                    <ReactTooltip effect="solid" ref="tooltipComponent" afterHide={()=>{
+                        var _tooltip = this.refs && this.refs.tooltipComponent;
+                        // Grab tip & unset style.left and style.top using same method tooltip does internally.
+                        var node = ReactDOM.findDOMNode(_tooltip);
+                        node.style.left = null;
+                        node.style.top = null;
+                    }} />
                 </body>
             </html>
         );

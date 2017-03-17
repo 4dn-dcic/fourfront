@@ -214,6 +214,7 @@
             "additionalProperties": false,
             "formInput": "file",
             "attachment": true,
+            "clear_create": "clear",
             "properties": {
                 "download": {
                     "title": "File Name",

@@ -14,6 +14,7 @@ var PartialList = module.exports = React.createClass({
          * 
          * @memberof module:item-pages/components.PartialList
          * @namespace
+         * @type {Component}
          * @prop {Component|Element|string} label - Label to use in left column.
          * @prop {Component|Element|string} value - Value to use in right column.
          * @prop {string} className - Classname to add to '.row.list-item'.

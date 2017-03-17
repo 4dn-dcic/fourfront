@@ -4,7 +4,7 @@ var React = require('react');
 var globals = require('./../globals');
 var Collapse = require('react-bootstrap').Collapse;
 var _ = require('underscore');
-var { ItemHeader, PartialList, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } = require('./components');
+var { ItemPageTitle, ItemHeader, PartialList, ExternalReferenceLink, FilesInSetTable, FormattedInfoBlock, ItemFooterRow } = require('./components');
 var { AuditIndicators, AuditDetail, AuditMixin } = require('./../audit');
 var { console, object, DateUtility, Filters } = require('./../util');
 var itemTitle = require('./item').title;
@@ -12,7 +12,7 @@ var itemTitle = require('./item').title;
 /**
  * This Component renders out the default Item page view for Item objects/contexts which do not have a more specific
  * Item page template associated with them.
- * 
+ *
  * @module {Component} item-pages/item-view
  */
 
@@ -20,7 +20,7 @@ var itemTitle = require('./item').title;
  * A list of properties which belong to Item shown by ItemView.
  * Shows 'persistentKeys' fields & values stickied near top of list,
  * 'excludedKeys' never, and 'hiddenKeys' only when "See More Info" button is clicked.
- * 
+ *
  * @memberof module:item-pages/item-view
  * @namespace
  * @type {Component}
@@ -31,7 +31,7 @@ var Detail = React.createClass({
 
         /**
          * Formats the correct display for each metadata field.
-         * 
+         *
          * @memberof module:item-pages/item-view.Detail
          * @static
          * @param {Object} tips - Mapping of field property names (1 level deep) to schema properties.
@@ -39,7 +39,7 @@ var Detail = React.createClass({
          * @returns {Element} <div> element with a tooltip and info-circle icon.
          */
         formKey : function(tips, key){
-            var tooltip = '';
+            var tooltip = null;
             var title = null;
             if (tips[key]){
                 var info = tips[key];
@@ -51,10 +51,12 @@ var Detail = React.createClass({
                 }
             }
 
-            
+
             return (
                 <div className="tooltip-info-container">
-                    <span>{ title || key } <i data-tip={tooltip} className="icon icon-info-circle"/></span>
+                    <span>{ title || key } { tooltip !== null ?
+                        <i data-tip={tooltip} className="icon icon-info-circle"/>
+                    : null }</span>
                 </div>
             );
 
@@ -109,7 +111,16 @@ var Detail = React.createClass({
                     );
                 }
             } else if (typeof item === 'string'){
-                if (item.charAt(0) === '/') {
+                if(item.indexOf('@@download') > -1 || item.charAt(0) === '/'){
+                    // this is a download link. Format appropriately
+                    var split_item = item.split('/');
+                    var attach_title = decodeURIComponent(split_item[split_item.length-1]);
+                    return (
+                        <a key={item} href={item} target="_blank" download>
+                            {attach_title}
+                        </a>
+                    );
+                } else if (item.charAt(0) === '/') {
                     return (
                         <a key={item} href={item}>
                             {item}
@@ -129,15 +140,6 @@ var Detail = React.createClass({
                             </a>
                         );
                     }
-                } else if(item.slice(0,10) === '@@download'){
-                    // this is a download link. Format appropriately
-                    var split_item = item.split('/');
-                    var attach_title = decodeURIComponent(split_item[split_item.length-1]);
-                    return (
-                        <a key={item} href={item} target="_blank" download>
-                            {attach_title}
-                        </a>
-                    );
                 }
             }
             return(<span>{ item }</span>); // Fallback
@@ -219,7 +221,7 @@ var Detail = React.createClass({
 });
 
 
-/** 
+/**
  * @alias module:item-pages/item-view
  */
 var ItemView = module.exports = React.createClass({
@@ -231,7 +233,7 @@ var ItemView = module.exports = React.createClass({
          * Deprecated.
          * Display the item field with a tooltip showing the field description from
          * schema, if available.
-         * 
+         *
          * @memberof module:item-pages/item-view
          * @namespace
          * @deprecated
@@ -243,7 +245,7 @@ var ItemView = module.exports = React.createClass({
                 field: React.PropTypes.string.isRequired,
                 description: React.PropTypes.string.isRequired
             },
-            
+
             /**
              * @memberof module:item-pages/item-view.DescriptorField
              * @private
@@ -255,9 +257,9 @@ var ItemView = module.exports = React.createClass({
                     active: false
                 };
             },
-            /** 
+            /**
              * An onHover callback for outer <div> element.
-             * 
+             *
              * @memberof module:item-pages/item-view.DescriptorField
              * @private
              * @instance
@@ -300,7 +302,7 @@ var ItemView = module.exports = React.createClass({
          * @type {Component}
          */
         SubIPanel : React.createClass({
-            /** 
+            /**
              * @memberof module:item-pages/item-view.SubIPanel
              * @private
              * @instance
@@ -312,7 +314,7 @@ var ItemView = module.exports = React.createClass({
 
             /**
              * Handler for rendered title element. Toggles visiblity of ItemView.Subview.
-             * 
+             *
              * @memberof module:item-pages/item-view.SubIPanel
              * @private
              * @instance
@@ -328,12 +330,12 @@ var ItemView = module.exports = React.createClass({
 
             /**
              * Renders title for the ItemView.Subview.
-             * 
+             *
              * @memberof module:item-pages/item-view.SubIPanel
              * @private
              * @instance
              * @param {string} title - Title of panel, e.g. display_title of object for which SubIPanel is being used.
-             * @param {boolean} isOpen - Whether state.isOpen is true or not. Used for if plus or minus icon. 
+             * @param {boolean} isOpen - Whether state.isOpen is true or not. Used for if plus or minus icon.
              * @returns {Element} <span> element.
              */
             toggleLink : function(title = this.props.title, isOpen = this.state.isOpen){
@@ -366,7 +368,7 @@ var ItemView = module.exports = React.createClass({
 
         /**
          * Renders a panel <div> element containing a list.
-         * 
+         *
          * @memberof module:item-pages/item-view
          * @namespace
          * @type {Component}
@@ -395,25 +397,8 @@ var ItemView = module.exports = React.createClass({
             }
         }),
 
-        Detail : Detail,
 
-        /**
-         * Renders page title appropriately for a provided props.context.
-         * 
-         * @memberof module:item-pages/item-view
-         * @type {Component}
-         */
-        Title : React.createClass({
-            /** @ignore */
-            render : function(){
-                var title = globals.listing_titles.lookup(this.props.context)({context: this.props.context});
-                return (
-                    <h1 className="page-title">
-                        {this.props.context['@type'][0]} <span className="subtitle prominent">{ title }</span>
-                    </h1>
-                );
-            }
-        })
+        Detail : Detail
 
     },
 
@@ -451,9 +436,8 @@ var ItemView = module.exports = React.createClass({
         return (
             <div className={itemClass}>
 
-                <ItemView.Title context={context} />
-
-                <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href}>
+                <ItemPageTitle context={context} />
+                <ItemHeader.Wrapper context={context} className="exp-set-header-area" href={this.props.href} schemas={this.props.schemas}>
                     <ItemHeader.TopRow>{ this.topRightHeaderSection() || null }</ItemHeader.TopRow>
                     <ItemHeader.MiddleRow />
                     <ItemHeader.BottomRow />

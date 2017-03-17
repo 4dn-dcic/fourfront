@@ -1,6 +1,6 @@
 {
-    "title": "Hi-C Experiment Variables",
-    "description": "Experimental variables specific for a Hi-C experiment.",
+    "title": "Hi-C Experiment",
+    "description": "A Hi-C experiment",
     "id": "/profiles/experiment_hi_c.json",
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
