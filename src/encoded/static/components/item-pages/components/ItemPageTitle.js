@@ -43,7 +43,6 @@ var ItemPageTitle = module.exports = React.createClass({
             var types = context['@type'];
             if (!Array.isArray(types) || types.length === 0) return "Unknown";
             var i = 0;
-            console.log(types);
             while (i < types.length){
                 if (types[i + 1] === 'Item'){
                     return types[i]; // Last type before 'Item'.
