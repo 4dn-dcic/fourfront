@@ -125,7 +125,7 @@ def security_tween_factory(handler, registry):
         # Inform App.prototype.navigate() request response handler that JWT is not longer valid (expired session) by returning a 403 error to application/json request.
         if hasattr(request, 'auth0_expired'):
             response = handler(request)
-            if hasattr(request, 'auth0_expired') and not response.headers.get('X-Request-JWT', None):
+            if not response.headers.get('X-Request-JWT', None):
                 return add_x_user_info_header(response, request)
             if request.auth0_expired and (request.is_xhr or request.content_type == 'application/json'):
                 # If have an auth0 token, and have determined it is expired, and the request is a JSON request (not browser)
