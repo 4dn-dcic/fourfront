@@ -5,6 +5,23 @@ var _ = require('underscore');
 
 module.exports = {
 
+    /**
+     * Convert a link_id, if one exists on param 'object', to an '@id' link.
+     * If an '@id' exists already, gets that.
+     * 
+     * @memberof module:item-pages/components.FilesInSetTable
+     * @static
+     * @public
+     * @param {Object} object - Must have a 'link_id' or '@id' property. Else will return null.
+     * @returns {string|null} The Item's '@id'.
+     */
+    atIdFromObject : function(o){
+        return (
+            o && typeof o === 'object' &&
+                ((o.link_id && o.link_id.replace(/~/g, "/")) || o['@id']) 
+            ) || null;
+    },
+
     /** Return the properties dictionary from a schema for use as tooltips */
     tipsFromSchema : function(schemas, content){
         var tips = {};

@@ -113,7 +113,9 @@ describe('Testing item-view.js', function() {
         // there should be 25 entries within the biosample object subview
         //expect(objEntries.length).toEqual(25);
     });
-
+    
+    /*
+    DEPRECATED. TODO: Create new version for new tooltips.
     it('opens and closes tooltips correctly', function(){
         var objTriggers = TestUtils.scryRenderedDOMComponentsWithClass(testItem, 'tooltip-trigger');
         TestUtils.SimulateNative.mouseOver(objTriggers[0]);
@@ -123,4 +125,5 @@ describe('Testing item-view.js', function() {
         var openTooltips = TestUtils.scryRenderedDOMComponentsWithClass(testItem, 'tooltip-open');
         expect(openTooltips.length).toEqual(0);
     });
+    */
 });
