@@ -170,7 +170,8 @@ def test_404_keeps_auth_info(testapp, anontestapp, headers,
     # Log in
     res = anontestapp.get('/not_found_url', headers=page_view_headers, status=404)
 
-    assert res.headers['X-User-Info']
+    assert res.headers.get('X-Request-JWT', None) is not None
+    assert res.headers.get('X-User-Info', None) is not None
 
 
 def test_login_logout_redirect(testapp, anontestapp, headers,
