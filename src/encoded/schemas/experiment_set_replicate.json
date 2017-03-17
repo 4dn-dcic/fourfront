@@ -68,6 +68,9 @@
         "experiments_in_set.award.project": {
             "title": "Project"
         },
+        "experiments_in_set.experiment_type": {
+            "title": "Experiment Type"
+        },
         "experiments_in_set.biosample.biosource.individual.organism.name": {
             "title": "Organism"
         },
