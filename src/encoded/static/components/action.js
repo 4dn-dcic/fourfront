@@ -239,8 +239,12 @@ var Action = module.exports = React.createClass({
                 if(!test && this.props.edit){
                     actionMethod = 'PUT';
                     destination = this.state.newContext['@id'];
+                    // must add uuid (and accession, if available) to PUT body
                     finalizedContext.uuid = this.state.newContext.uuid;
-                    finalizedContext.accession = this.state.newContext.accession;
+                    // not all objects have accessions
+                    if(this.state.newContext.accession){
+                        finalizedContext.accession = this.state.newContext.accession;
+                    }
                 }
                 this.context.fetch(destination, {
                     method: actionMethod,
@@ -284,9 +288,14 @@ var Action = module.exports = React.createClass({
                                 finalizedContext['upload_credentials'] = creds;
                                 finalizedContext['@id'] = destination;
                                 var upload_manager = s3UploadFile(this.state.file, creds);
+                                var orig_filename = null;
+                                if(this.props.context.filename){
+                                    orig_filename = this.props.context.filename;
+                                }
                                 var upload_info = {
                                     'context': finalizedContext,
-                                    'manager': upload_manager
+                                    'manager': upload_manager,
+                                    'original_filename': orig_filename
                                 };
                                 // Passes upload_manager to uploads.js through app.js
                                 this.props.updateUploads(destination, upload_info);
@@ -313,9 +322,14 @@ var Action = module.exports = React.createClass({
                             .then(response => {
                                 var creds = response['@graph'][0]['upload_credentials'];
                                 var upload_manager = s3UploadFile(this.state.file, creds);
+                                var orig_filename = null;
+                                if(this.props.context.filename){
+                                    orig_filename = this.props.context.filename;
+                                }
                                 var upload_info = {
                                     'context': response['@graph'][0],
-                                    'manager': upload_manager
+                                    'manager': upload_manager,
+                                    'original_filename': orig_filename
                                 };
                                 // Passes upload_manager to uploads.js through app.js
                                 this.props.updateUploads(destination, upload_info);
@@ -623,7 +637,7 @@ var LinkedObj = React.createClass({
     contextTypes: {
         contentTypeIsJSON: React.PropTypes.func
     },
-    
+
     getInitialState: function(){
         return{
             'open': false,

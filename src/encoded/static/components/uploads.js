@@ -12,15 +12,19 @@ upload info.
 */
 var Uploads = module.exports = React.createClass({
 
+    contextTypes: {
+        fetch: React.PropTypes.func
+    },
+
     getInitialState: function(){
         var initial_uploads = {};
         var upload_keys = Object.keys(this.props.uploads);
         for(var i=0; i<upload_keys.length; i++){
             var this_upload = this.props.uploads[upload_keys[i]];
             var context_key = this_upload.context['@id'];
-            var upload_info = this.buildUploadInfo(this_upload.context);
+            var upload_info = this.buildUploadInfo(this_upload.context, this_upload.original_filename);
             initial_uploads[context_key] = upload_info;
-            this.handleAsyncUpload(context_key, this_upload.manager)
+            this.handleAsyncUpload(context_key, this_upload.manager);
         }
         return {'uploads': initial_uploads};
     },
@@ -46,6 +50,38 @@ var Uploads = module.exports = React.createClass({
             }.bind(this))
             .send(function(err, data) {
                 if(err){
+                    // PATCH original filename back to metadata
+                    var orig_filename = this.state.uploads[upload_key]['original_filename'];
+                    var props_uuid = this.props.uploads[upload_key]['context']['uuid'];
+                    var put_body = {
+                        'filename': orig_filename,
+                        'uuid': props_uuid
+                    };
+                    if(this.props.uploads[upload_key]['context']['accession']){
+                        put_body['accession'] = this.props.uploads[upload_key]['context']['accession'];
+                    }
+                    this.context.fetch(upload_key, {
+                        method: 'PATCH',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(put_body)
+                    })
+                    .then(response => {
+                        if (response.status && response.status !== 'success') throw response;
+                        console.log('Filename reverted for ', upload_key);
+                        return response;
+                    },
+                    error => {
+                        console.log('Error reverting filename for ', upload_key);
+                    });
+                    var new_uploads = _.extend({}, this.state.uploads);
+                    delete new_uploads[upload_key];
+                    // update state
+                    this.setState({'uploads': new_uploads});
+                    // delete upload from app state
+                    this.props.updateUploads(upload_key, null, true);
                     alert("File upload failed for " + upload_key);
                 }else{
                     // percentage = 101 means upload is complete
@@ -69,13 +105,14 @@ var Uploads = module.exports = React.createClass({
         this.setState({'uploads': new_uploads});
     },
 
-    buildUploadInfo: function(context){
+    buildUploadInfo: function(context, orig_filename){
         var file_title = context.filename ? context.filename : context.display_title;
         var upload_info = {
             'id': context['@id'],
             'display_title': file_title,
             'total_size': 0,
-            'percent_done': -1
+            'percent_done': -1,
+            'original_filename': orig_filename
         };
         return upload_info;
     },
@@ -89,12 +126,6 @@ var Uploads = module.exports = React.createClass({
             var this_upload = this.props.uploads[upload_keys[i]];
             if(abort_key == this_upload.context['@id'] && abort_key == upload_keys[i]){
                 this_upload.manager.abort();
-                var new_uploads = _.extend({}, this.state.uploads);
-                delete new_uploads[abort_key];
-                // update state
-                this.setState({'uploads': new_uploads});
-                // delete upload from app state
-                this.props.updateUploads(abort_key, null, true);
                 break;
             }
         }
@@ -115,9 +146,9 @@ var Uploads = module.exports = React.createClass({
                     <a href={info.id}>{info.display_title}</a>
                     {info.percent_done !== 101 ?
                         <a href="#" style={{'color':'#a94442','paddingLeft':'10px'}} onClick={function(e){
-                                e.preventDefault();
-                                this.abortUpload(key);
-                            }.bind(this)} title="Cancel">
+                            e.preventDefault();
+                            this.abortUpload(key);
+                        }.bind(this)} title="Cancel">
                             <i className="icon icon-times-circle-o icon-fw"></i>
                         </a>
                     :
@@ -139,7 +170,7 @@ var Uploads = module.exports = React.createClass({
     */
     uploadPageInfo: function(){
         var upload_message = 'Your running uploads appear here. Currently there are none.';
-        var upload_style = {'backgroundColor':'#f4f4f4'}
+        var upload_style = {'backgroundColor':'#f4f4f4'};
         if(Object.keys(this.state.uploads).length > 0){
             var upload_statuses = Object.keys(this.state.uploads).map((key) => this.checkUploadStatus(this.state.uploads[key]));
             var completed = 0;
@@ -147,7 +178,7 @@ var Uploads = module.exports = React.createClass({
             for(var i=0; i<upload_statuses.length; i++){
                 if(upload_statuses[i] == 'running'){
                     upload_message = 'You having running uploads. Please do not refresh or close this page, or navigate to a manually typed URL.';
-                    upload_style = {'backgroundColor':'#ebccd1'} //red
+                    upload_style = {'backgroundColor':'#ebccd1'}; //red
                     break;
                 }else if(upload_statuses[i] == 'complete'){
                     completed += 1;
@@ -157,7 +188,7 @@ var Uploads = module.exports = React.createClass({
             }
             if(completed > 0 && (initialized + completed) == upload_statuses.length){
                 upload_message = 'Your uploads are complete! You may safely refresh or close this page.';
-                upload_style = {'backgroundColor':'#dff0d8'} //green
+                upload_style = {'backgroundColor':'#dff0d8'}; //green
             }
         }
         return(

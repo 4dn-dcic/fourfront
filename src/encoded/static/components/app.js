@@ -327,7 +327,7 @@ var App = React.createClass({
     updateUploads: function(key, upload_info, del_key=false){
         var new_uploads = _.extend({}, this.state.uploads);
         if (del_key){
-            delete new_uploads[key]
+            delete new_uploads[key];
         }else{
             new_uploads[key] = upload_info;
         }
