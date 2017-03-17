@@ -181,3 +181,8 @@ def test_removeDuplicates(dupe_lists):
                     assert result == [None]
                 else:
                     assert result == []
+
+
+@pytest.fixture
+def owler():
+    pass
