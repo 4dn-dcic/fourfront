@@ -30,7 +30,7 @@
             "description": "List of data files to be associated with the experiment.",
             "type": "array",
             "default": [],
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "exclude_from": ["submit4dn"],
             "uniqueItems": true,
             "items": {
                 "title": "Data file",

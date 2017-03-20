@@ -117,7 +117,11 @@ var Alerts = module.exports = React.createClass({
                             unmountOnExit={true}
                         >
                             <div>
-                                <Alert bsStyle={alert.style || 'danger'} onDismiss={dismiss.bind(this, i)}>
+                                <Alert
+                                    bsStyle={alert.style || 'danger'}
+                                    onDismiss={alert.noCloseButton === true ? null : dismiss.bind(this, i)}
+                                    className={alert.noCloseButton === true ? 'no-close-button' : null}
+                                >
                                     <h4>{ alert.title }</h4>
                                     <p>{ alert.message }</p>
                                 </Alert>

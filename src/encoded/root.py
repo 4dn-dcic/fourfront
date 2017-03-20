@@ -19,6 +19,7 @@ from pyramid.security import (
 
 def includeme(config):
     config.include(static_pages)
+    config.include(uploads_page)
     config.scan(__name__)
 
 
@@ -60,18 +61,18 @@ def static_pages(config):
         page = request.matchdict.get('page','none')
         content = None
         contentFilesLocation = os.path.dirname(os.path.realpath(__file__))
-        
+
         pageMeta = pageLocations.get(page, None)
 
         if isinstance(pageMeta, dict) and pageMeta.get('directory', None) is not None:
             contentFilesLocation += "/../.." # get us to root of Git repo.
             contentFilesLocation += pageMeta['directory']
-            
+
             if pageMeta.get('sections', None) is not None:
                 sections = pageMeta['sections']
             else:
                 sections = [ { 'filename' : fn } for fn in listFilesInInDirectory(contentFilesLocation) ]
-            
+
             # Set order (as py dicts don't maintain order)
             i = 0
             for s in sections:
@@ -133,6 +134,32 @@ def static_pages(config):
         return responseDict
 
     config.add_view(static_page, route_name='static-page')
+
+
+def uploads_page(config):
+    """
+    Emulate a lite form of Alex's static page routing
+    """
+    config.add_route(
+        'uploads-page',
+        '/uploads'
+    )
+    def upload_page_view(request):
+        response = request.response
+        response.content_type = 'application/json; charset=utf-8'
+
+        responseDict = {
+            "title" : "Uploads",
+            "notification" : "success",
+            "@type" : [ "Uploads", "Portal" ],
+            "@context" : "/uploads",
+            "@id" : "/uploads",
+            "content" : None
+        }
+
+        return responseDict
+
+    config.add_view(upload_page_view, route_name='uploads-page')
 
 
 def acl_from_settings(settings):
