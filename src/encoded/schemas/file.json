@@ -13,7 +13,7 @@
         },
         "filename": {
             "title": "File Name",
-            "description": "The local file name used at time of submission.",
+            "description": "The local file name used at time of submission. Must be alphanumeric, with the exception of the following special characters: '+=,.@-_'",
             "s3Upload": true,
             "type": "string",
             "pattern": "^[\\w+=,.@-]*$",
@@ -145,6 +145,7 @@
         },
         "quality_metric": {
           "type": "string",
+          "title": "Quality metric",
           "description": "The associated qc reports",
           "linkTo": "QualityMetric"
         }
