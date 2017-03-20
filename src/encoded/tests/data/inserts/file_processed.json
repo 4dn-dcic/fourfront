@@ -6,20 +6,21 @@
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNFIFYGN09R",
+    "accession": "4DNFHFYGN09R",
     "lab": "4dn-dcic-lab",
-    "filename": "s3://4dn-tool-evaluation-files/_6_out_pair1.bam"
-},
-{
+    "filename": "_6_out_pair1.bam"
+},{
+
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
     "uuid": "ccf48ccd-49e5-4c33-afab-9ec90d65faf3",
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNFIEOP3UA0",
+    "accession": "4DNFOEOP3UA0",
     "lab": "4dn-dcic-lab",
-    "filename": "s3://4dn-tool-evaluation-files/_6_HiC_norm_binning.hdf5"
+    "filename": "_6_HiC_norm_binning.hdf5"
+
 },{
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
@@ -27,9 +28,10 @@
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNFIM172I2T",
+    "accession": "4DNFPM172I2T",
     "lab": "4dn-dcic-lab",
-    "filename": "s3://4dn-tool-evaluation-files/_6_out_pair2.bam"
+    "filename": "_6_out_pair2.bam"
+
 },{
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
@@ -37,9 +39,10 @@
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNFI03QGVR4",
+    "accession": "4DNFJ03QGVR4",
     "lab": "4dn-dcic-lab",
-    "filename": "s3://4dn-tool-evaluation-files/_6_HiCtool_expected_enrich_contact_matrix_chr21_0.05mb_0.0mb_48.0mb.txt"
+    "filename": "_6_HiCtool_expected_enrich_contact_matrix_chr21_0.05mb_0.0mb_48.0mb.txt"
+
 },{
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
@@ -47,9 +50,10 @@
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNFIYWQ59JI",
+    "accession": "4DNFSYWQ59JI",
     "lab": "4dn-dcic-lab",
-    "filename": "s3://4dn-tool-evaluation-files/_5_HiCtool_expected_enrich_contact_matrix_chr22_0.05mb_0.0mb_51.0mb.txt"
+    "filename": "_5_HiCtool_expected_enrich_contact_matrix_chr22_0.05mb_0.0mb_51.0mb.txt"
+
 },{
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
@@ -57,9 +61,10 @@
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNFIMLPZK1F",
+    "accession": "4DNFQMLPZK1F",
     "lab": "4dn-dcic-lab",
-    "filename": "s3://4dn-tool-evaluation-files/_13_HiC_distance_function.hdf5"
+    "filename": "_13_HiC_distance_function.hdf5"
+
 },{
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
@@ -67,9 +72,10 @@
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNFIUAGRP16",
+    "accession": "4DNFEUAGRP16",
     "lab": "4dn-dcic-lab",
-    "filename": "s3://4dn-tool-evaluation-files/_6_fend_object.hdf5"
+    "filename": "_6_fend_object.hdf5"
+
 },{
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
@@ -77,9 +83,10 @@
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNFIJDTPNYS",
+    "accession": "4DNF8JDTPNYS",
     "lab": "4dn-dcic-lab",
-    "filename": "s3://4dn-tool-evaluation-files/_6_HiCtool_expected_fend_contact_matrix_chr21_0.05mb_0.0mb_48.0mb.txt"
+    "filename": "_6_HiCtool_expected_fend_contact_matrix_chr21_0.05mb_0.0mb_48.0mb.txt"
+
 },{
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
@@ -87,9 +94,10 @@
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNFI7DTDHCP",
+    "accession": "4DNF27DTDHCP",
     "lab": "4dn-dcic-lab",
-    "filename": "s3://4dn-tool-evaluation-files/_5_HiCtool_expected_fend_contact_matrix_chr22_0.05mb_0.0mb_51.0mb.txt"
+    "filename": "_5_HiCtool_expected_fend_contact_matrix_chr22_0.05mb_0.0mb_51.0mb.txt"
+
 },{
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
@@ -97,9 +105,10 @@
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNFIVDR5QTI",
+    "accession": "4DNFVVDR5QTI",
     "lab": "4dn-dcic-lab",
-    "filename": "s3://4dn-tool-evaluation-files/_6_HiC_data_object.hdf5"
+    "filename": "_6_HiC_data_object.hdf5"
+
 },{
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
@@ -107,9 +116,10 @@
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNFIW8Z9N1S",
+    "accession": "4DNFZW8Z9N1S",
     "lab": "4dn-dcic-lab",
-    "filename": "s3://4dn-tool-evaluation-files/_6_out_noDup.sort.bam"
+    "filename": "_6_out_noDup.sort.bam"
+
 },{
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
@@ -117,9 +127,10 @@
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNFI11MKX6K",
+    "accession": "4DNFQ11MKX6K",
     "lab": "4dn-dcic-lab",
-    "filename": "s3://4dn-tool-evaluation-files/_13_HiC_project_object.hdf5"
+    "filename": "_13_HiC_project_object.hdf5"
+
 },{
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
@@ -127,9 +138,10 @@
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNFIHMGZVQB",
+    "accession": "4DNFWHMGZVQB",
     "lab": "4dn-dcic-lab",
-    "filename": "s3://4dn-tool-evaluation-files/_6_HiCtool_observed_contact_matrix_chr21_0.05mb_0.0mb_48.0mb.txt"
+    "filename": "_6_HiCtool_observed_contact_matrix_chr21_0.05mb_0.0mb_48.0mb.txt"
+
 },{
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
@@ -137,9 +149,10 @@
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNFILW5YPK0",
+    "accession": "4DNF1LW5YPK0",
     "lab": "4dn-dcic-lab",
-    "filename": "s3://4dn-tool-evaluation-files/_5_HiCtool_observed_contact_matrix_chr22_0.05mb_0.0mb_51.0mb.txt"
+    "filename": "_5_HiCtool_observed_contact_matrix_chr22_0.05mb_0.0mb_51.0mb.txt"
+
 },{
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
@@ -147,9 +160,10 @@
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNFI8ICRHEN",
+    "accession": "4DNFN8ICRHEN",
     "lab": "4dn-dcic-lab",
-    "filename": "s3://4dn-tool-evaluation-files/_6_HiCtool_normalized_enrich_contact_matrix_chr21_0.05mb_0.0mb_48.0mb.txt"
+    "filename": "_6_HiCtool_normalized_enrich_contact_matrix_chr21_0.05mb_0.0mb_48.0mb.txt"
+
 },{
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
@@ -157,9 +171,10 @@
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNFIOZAY8O8",
+    "accession": "4DNFQOZAY8O8",
     "lab": "4dn-dcic-lab",
-    "filename": "s3://4dn-tool-evaluation-files/_5_HiCtool_normalized_enrich_contact_matrix_chr22_0.05mb_0.0mb_51.0mb.txt"
+    "filename": "_5_HiCtool_normalized_enrich_contact_matrix_chr22_0.05mb_0.0mb_51.0mb.txt"
+
 },{
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
@@ -167,9 +182,10 @@
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNFITJ7T7QW",
+    "accession": "4DNFWTJ7T7QW",
     "lab": "4dn-dcic-lab",
-    "filename": "s3://4dn-tool-evaluation-files/_6_HiCtool_normalized_fend_contact_matrix_chr21_0.05mb_0.0mb_48.0mb.txt"
+    "filename": "_6_HiCtool_normalized_fend_contact_matrix_chr21_0.05mb_0.0mb_48.0mb.txt"
+
 },{
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
@@ -177,18 +193,19 @@
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNFIH6Z2ZD5",
+    "accession": "4DNFMH6Z2ZD5",
     "lab": "4dn-dcic-lab",
-    "filename": "s3://4dn-tool-evaluation-files/_5_HiCtool_normalized_fend_contact_matrix_chr22_0.05mb_0.0mb_51.0mb.txt"
+    "filename": "_5_HiCtool_normalized_fend_contact_matrix_chr22_0.05mb_0.0mb_51.0mb.txt"
 },{
     "status": "uploaded",
     "submitted_by": "4dndcic@gmail.com",
-    "uuid": "fbdbe727-49e5-4c33-afab-9ec90d65faf3",
+    "uuid": "fbdbe727-49e5-4c33-afab-9ec90d65faf3", 
     "award": "1U01CA200059-01",
     "file_format": "other",
     "notes": "sample dcic notes",
-    "accession": "4DNFIL631LOS",
+    "accession": "4DNFFL631LOS",
     "lab": "4dn-dcic-lab",
-    "filename": "s3://4dn-tool-evaluation-files/GM12878_SRR1658581_1pc_1_R1_fastqc.zip"
+    "filename": "GM12878_SRR1658581_1pc_1_R1_fastqc.zip"
+
 }
 ]
