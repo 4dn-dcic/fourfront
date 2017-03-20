@@ -8,9 +8,11 @@ from snovault import (
     abstract_collection,
 )
 from snovault.schema_utils import schema_validator
+from snovault.validators import validate_item_content_post
 from snovault.attachment import ItemWithAttachment
 from .base import (
-    Item
+    Item,
+    collection_add
 )
 from pyramid.httpexceptions import (
     HTTPForbidden,
@@ -28,7 +30,6 @@ import boto
 import datetime
 import json
 import pytz
-from netaddr.core import AddrFormatError
 
 
 def show_upload_credentials(request=None, context=None, status=None):
@@ -65,6 +66,7 @@ def external_creds(bucket, key, name=None, profile_name=None):
             'federated_user_arn': token.federated_user_arn,
             'federated_user_id': token.federated_user_id,
             'request_id': token.request_id,
+            'key': key
         })
     return {
         'service': 's3',
@@ -99,7 +101,6 @@ def property_closure(request, propname, root_uuid):
 class FileSet(Item):
     """Collection of files stored under fileset."""
     item_type = 'file_set'
-    base_types = ['FileSet'] + Item.base_types
     schema = load_schema('encoded:schemas/file_set.json')
     name_key = 'accession'
     embedded = []
@@ -115,6 +116,7 @@ class FileSet(Item):
 class FileSetCalibration(FileSet):
     """Collection of files stored under fileset."""
 
+    base_types = ['FileSet'] + Item.base_types
     item_type = 'file_set_calibration'
     schema = load_schema('encoded:schemas/file_set_calibration.json')
     name_key = 'accession'
@@ -219,7 +221,7 @@ class File(Item):
         accession = accession or external_accession
         file_extension = self.schema['file_format_file_extension'][file_format]
         filename = '{}{}'.format(accession, file_extension)
-        return request.resource_path(self, '@@download', filename)
+        return request.resource_path(self) + '@@download/' + filename
 
     @calculated_property(condition=show_upload_credentials, schema={
         "type": "object",
@@ -263,6 +265,9 @@ class File(Item):
             sheets = {} if sheets is None else sheets.copy()
             sheets['external'] = cls.build_external_creds(registry, uuid, properties)
         return super(File, cls).create(registry, uuid, properties, sheets)
+
+    class Collection(Item.Collection):
+        pass
 
 
 @collection(
@@ -361,7 +366,6 @@ def get_upload(context, request):
 @view_config(name='upload', context=File, request_method='POST',
              permission='edit', validators=[schema_validator({"type": "object"})])
 def post_upload(context, request):
-
     properties = context.upgrade_properties()
     if properties['status'] not in ('uploading', 'upload failed'):
         raise HTTPForbidden('status must be "uploading" to issue new credentials')
@@ -395,9 +399,8 @@ def post_upload(context, request):
     # in case we haven't uploaded a file before
     context.propsheets['external'] = creds
 
-    new_properties = None
+    new_properties = properties.copy()
     if properties['status'] == 'upload failed':
-        new_properties = properties.copy()
         new_properties['status'] = 'uploading'
 
     registry = request.registry
@@ -438,6 +441,7 @@ def download(context, request):
     external = context.propsheets.get('external', {})
     if not external:
         profile_name = request.registry.settings.get('file_upload_profile_name')
+        bucket = request.registry.settings['file_upload_bucket']
         sheets['external'] = external_creds(bucket, key, name, profile_name)
     elif external.get('service') == 's3':
         conn = boto.connect_s3()
@@ -466,3 +470,36 @@ def download(context, request):
 
     # 307 redirect specifies to keep original method
     raise HTTPTemporaryRedirect(location=location)
+
+# validator for filename field
+def validate_file_filename(context, request):
+    data = request.json
+    if 'filename' not in data or 'file_format' not in data:
+        return
+    filename = data['filename']
+    file_format = data['file_format']
+    valid_schema = context.type_info.schema
+    file_extensions = valid_schema['file_format_file_extension'][file_format]
+    if not isinstance(file_extensions, list):
+        file_extensions = [file_extensions]
+    found_match = False
+    for extension in file_extensions:
+        if extension == "":
+            found_match = True
+            break
+        elif filename[-len(extension):] == extension:
+            found_match = True
+            break
+    if not found_match:
+        file_extensions_msg = ["'"+ext+"'" for ext in file_extensions]
+        file_extensions_msg = ', '.join(file_extensions_msg)
+        request.errors.add('body', None, 'Filename extension does not '
+         'agree with specified file format. Valid extension(s):  ' + file_extensions_msg)
+    else:
+        request.validated.update({})
+
+
+@view_config(context=File.Collection, permission='add', request_method='POST',
+             validators=[validate_item_content_post,validate_file_filename])
+def file_add(context, request, render=None):
+    return collection_add(context, request, render)

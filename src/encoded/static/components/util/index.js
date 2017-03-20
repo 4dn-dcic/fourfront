@@ -28,4 +28,3 @@ module.exports.Filters      = require('./experiments-filters');
 // Misc functions are top-level
 var misc                    = require('./misc');
 module.exports.isServerSide = misc.isServerSide;
-

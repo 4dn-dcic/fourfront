@@ -6,14 +6,28 @@ var Panel = require('react-bootstrap').Panel;
 var { ExperimentsTable } = require('./../experiments-table');
 var _ = require('underscore');
 var { DescriptorField, Detail } = require('./item-view');
-var { ItemHeader, FormattedInfoBlock } = require('./components');
+var { ItemPageTitle, ItemHeader, FormattedInfoBlock, ItemFooterRow, PublicationsBlock } = require('./components');
 var FacetList = require('./../facetlist');
 var { ajax, console, DateUtility, object } = require('./../util');
 
 /**
- * Entire ExperimentSet page view.
+ * Contains the ExperimentSetView component, which renders out the ExperimentSet view/page.
+ *
+ * @module item-pages/experiment-set-view
  */
 
+
+/**
+ * ExperimentSet Item view/page.
+ * 
+ * @memberof module:item-pages/experiment-set-view
+ * @namespace
+ * @type {Component}
+ * @prop {Object} schemas - state.schemas passed down from app Component.
+ * @prop {Object} context - JSON representation of current ExperimentSet item.
+ * @prop {Object} expSetFilters - Currently-set expSetFilters from Redux store. Used for FacetList.
+ * @prop {Object[]} expIncompleteFacets - Facets to aggregate counts for and display in the form of objects containing at least a title and field property.
+ */
 var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
 
     propTypes : {
@@ -198,8 +212,7 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
         return (
             <div className={itemClass}>
 
-                <h1 className="page-title">Experiment Set <span className="subtitle prominent">{ title }</span></h1>
-
+                <ItemPageTitle context={this.props.context} />
                 <ExperimentSetHeader {...this.props} />
 
                 <div className="row">
@@ -217,17 +230,14 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                             expIncompleteFacets={ this.props.expIncompleteFacets }
                             className="with-header-bg"
                             useAjax={false}
+                            schemas={this.props.schemas}
                         />
                         : <div>&nbsp;</div> }
                     </div>
 
                     <div className="col-sm-7 col-md-8 col-lg-9">
 
-                        <ExperimentSetInfoArea
-                            labInfo={ this.state.details_lab }
-                            awardInfo={ this.state.details_award }
-                            {...this.props}
-                        />
+                        <PublicationsBlock publications={this.props.context.publications_of_set} />
 
                         <div className="exp-table-section">
                             { this.props.context.experiments_in_set && this.props.context.experiments_in_set.length ? 
@@ -257,9 +267,17 @@ var ExperimentSetView = module.exports.ExperimentSetView = React.createClass({
                             </div>
                         </div>
 
+                        <ExperimentSetLabAwardInfo
+                            labInfo={ this.state.details_lab }
+                            awardInfo={ this.state.details_award }
+                            {...this.props}
+                        />
+
                     </div>
 
                 </div>
+
+                <ItemFooterRow context={this.props.context} schemas={this.props.schemas} />
 
             </div>
         );
@@ -271,14 +289,21 @@ globals.panel_views.register(ExperimentSetView, 'ExperimentSet');
 globals.panel_views.register(ExperimentSetView, 'ExperimentSetReplicate');
 
 
-
+/**
+ * Renders ItemHeader parts wrapped in ItemHeader.Wrapper, with appropriate values.
+ * 
+ * @memberof module:item-pages/experiment-set-view
+ * @private
+ * @prop {Object} context - Same context prop as available on parent component.
+ * @prop {string} href - Current page href, passed down from app or Redux store.
+ */
 var ExperimentSetHeader = React.createClass({
 
     render: function() {
-        console.log('render ExperimentSetHeader')
+        console.log('render ExperimentSetHeader');
         return (
-            <ItemHeader.Wrapper className="exp-set-header-area" context={this.props.context} href={this.props.href}>
-                <ItemHeader.TopRow>{ this.props.context.experimentset_type }</ItemHeader.TopRow>
+            <ItemHeader.Wrapper className="exp-set-header-area" context={this.props.context} href={this.props.href} schemas={this.props.schemas}>
+                <ItemHeader.TopRow />
                 <ItemHeader.MiddleRow />
                 <ItemHeader.BottomRow />
             </ItemHeader.Wrapper>
@@ -287,7 +312,7 @@ var ExperimentSetHeader = React.createClass({
 });
 
 
-var ExperimentSetInfoArea = React.createClass({
+var ExperimentSetLabAwardInfo = React.createClass({
 
     render : function(){
         return (
@@ -295,10 +320,10 @@ var ExperimentSetInfoArea = React.createClass({
                 <div className="col-sm-12">
                     <div className="row">
 
-                        <div className="col-sm-6 col-sm-float-right">
+                        <div className="col-sm-12 col-md-6 col-sm-float-right">
                             { FormattedInfoBlock.Lab(this.props.labInfo) }
                         </div>
-                        <div className="col-sm-6 col-sm-float-right">
+                        <div className="col-sm-12 col-md-6 col-sm-float-right">
                             { FormattedInfoBlock.Award(this.props.awardInfo) }
                         </div>
 

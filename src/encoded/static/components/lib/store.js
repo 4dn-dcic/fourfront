@@ -1,25 +1,34 @@
-/** @preventMunge */
+'use strict';
+
+/** @preventMungle */
 /* ^ see http://stackoverflow.com/questions/30110437/leading-underscore-transpiled-wrong-with-es6-classes */
 
-'use strict';
+/** @ignore */
 var _ = require('underscore');
 
+/**
+ * @module lib/store
+ */
 
-module.exports.ItemStore = class ItemStore {
-    /*
-    * Store for a collection of items persisted via the backend REST API
-    *
-    * items: initial collection of items
-    * view: view that should be notified of changes
-    * stateKey: name in the view's state that should be updated with the changed collection
-    */
+/**
+ * Store for a collection of items persisted via the backend REST API
+ *
+ * @param {Array} items - Initial collection of items
+ * @param view - View that should be notified of changes
+ * @param {string} stateKey - Name in the view's state that should be updated with the changed collection
+ */
+class ItemStore {
+    
+    /** @ignore */
     constructor(items, view, stateKey) {
         this._fetch = view.context ? view.context.fetch : undefined;
         this._items = items;
         this._listeners = [{view: view, stateKey: stateKey}];
     }
 
-    /* create an item */
+    /**
+     * Create an item
+     */
     create(collection, data) {
         return this.fetch(collection, {
             method: 'POST',
@@ -31,7 +40,9 @@ module.exports.ItemStore = class ItemStore {
         });
     }
 
-    /* update an item */
+    /**
+     * Update an item
+     */
     update(data) {
         return this.fetch(data['@id'], {
             method: 'PUT',
@@ -43,7 +54,9 @@ module.exports.ItemStore = class ItemStore {
         });
     }
 
-    /* delete an item (set its status to deleted) */
+    /**
+     * Delete an item (set its status to deleted)
+     */
     delete(id) {
         return this.fetch(id + '?render=false', {
             method: 'PATCH',
@@ -55,7 +68,9 @@ module.exports.ItemStore = class ItemStore {
         });
     }
 
-    /* call the backend */
+    /**
+     * Call the backend
+     */
     fetch(url, options, callback) {
         options.headers = _.extend(options.headers || {}, {
             'Accept': 'application/json',
@@ -71,9 +86,12 @@ module.exports.ItemStore = class ItemStore {
         });
     }
 
-    /* notify listening views of actions and update their state
-    *  (should we update state optimistically?)
-    */
+    /** 
+     * Notify listening views of actions and update their state
+     * (should we update state optimistically?)
+     * @param {string} method - Method
+     * @param arg - Argument
+     */
     dispatch(method, arg) {
         this._listeners.forEach(listener => {
             var view = listener.view;
@@ -86,3 +104,5 @@ module.exports.ItemStore = class ItemStore {
         });
     }
 };
+
+module.exports.ItemStore = ItemStore;

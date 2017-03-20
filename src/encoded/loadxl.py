@@ -24,6 +24,7 @@ ORDER = [
     'organism',
     'genomic_region',
     'target',
+    'imaging_path',
     'publication',
     'publication_tracking',
     'document',
@@ -54,12 +55,14 @@ ORDER = [
     'experiment_hi_c',
     'experiment_capture_c',
     'experiment_repliseq',
+    'experiment_mic',
     'experiment_set',
     'experiment_set_replicate',
     'software',
     'analysis_step',
     'workflow',
     'workflow_mapping',
+    'workflow_run',
     'workflow_run_sbg'
 ]
 
@@ -449,7 +452,7 @@ def attachment(path):
             'href': 'data:%s;base64,%s' % (mime_type, b64encode(stream.read()).decode('ascii'))
         }
 
-        if mime_type in ('application/pdf', "application/zip",'text/plain', 'text/tab-separated-values', 'text/html'):
+        if mime_type in ('application/pdf', "application/zip", 'text/plain', 'text/tab-separated-values', 'text/html'):
             # XXX Should use chardet to detect charset for text files here.
             return attach
 

@@ -7,12 +7,6 @@ var { highlightTerm, unhighlightTerms } = require('./../../facetlist');
 var { console, isServerSide, Filters, object } = require('./../../util');
 
 
-/**
- * @prop {Object[]} fields - List of objects containing at least 'field', in object dot notation. Ideally should also have 'name'.
- * @prop {boolean} includeFieldTitle - Whether to show field title at top of terms.
- * @prop {string} className - Optional className to add to Legend's outermost div container.
- * @prop {string|Element|Component} title - Optional title to display at top of fields.
- */
 var Legend = module.exports = React.createClass({
 
     statics : {
@@ -23,17 +17,28 @@ var Legend = module.exports = React.createClass({
          * @namespace
          * @memberof module:viz/components.Legend
          * @prop {string} field - Field name, in object-dot-notation.
-         * @prop {boolean} includeFieldTitles - Whether field title should be included at the top of list of terms.
+         * @prop {boolean} includeFieldTitle - Whether field title should be included at the top of list of terms.
          * @prop {Object[]} terms - Terms which belong to this field, in the form of objects. 
          * @type {Component}
          */
         Field : React.createClass({
 
+            /** 
+             * @memberof module:viz/components.Legend.Field
+             * @returns {Object} 'includeFieldTitle' : true
+             * @instance
+             * @private
+             */
             getDefaultProps : function(){
                 return { 'includeFieldTitle' : true };
             },
 
-            /** @ignore */
+            /**
+             * @memberof module:viz/components.Legend.Field
+             * @returns {Element} Div element containing props.title, .name, or .field if supplied along with props.includeFieldTitle == true, and list of terms & their colors.
+             * @instance
+             * @private
+             */
             render : function(){
                 return (
                     <div className="field" data-field={this.props.field} onMouseLeave={unhighlightTerms.bind(this, this.props.field)}>
@@ -60,6 +65,12 @@ var Legend = module.exports = React.createClass({
          */
         Term : React.createClass({
 
+            /**
+             * @memberof module:viz/components.Legend.Term
+             * @returns {Element} A div element containing term name & color patch.
+             * @instance
+             * @private
+             */
             render : function(){
                 return (
                     <div
@@ -77,12 +88,20 @@ var Legend = module.exports = React.createClass({
             }
         }),
 
+        /**
+         * @memberof module:viz/components.Legend
+         * @static
+         */
         experimentsAndFieldsToLegendData : function(experiments, fields, schemas = null){
             return fields.map(function(field){
                 return Legend.experimentsAndFieldToLegendDataItem(experiments, field, schemas);
             });
         },
 
+        /**
+         * @memberof module:viz/components.Legend
+         * @static
+         */
         experimentsAndFieldToLegendDataItem : function(experiments, field, schemas = null){
 
             var legendFieldItem = {
@@ -118,6 +137,13 @@ var Legend = module.exports = React.createClass({
             
         },
 
+        /**
+         * @memberof module:viz/components.Legend
+         * @static
+         * @param {Object[]} fields - List of field objects, each containing at least a title, name, or field.
+         * @param {{Object}} schemas - Schemas object passed down from app.state. 
+         * @returns {Object[]} Modified field objects.
+         */
         parseFieldNames : function(fields, schemas){
             return fields.map(function(field){
                 if (!field.title && !field.name) {
@@ -131,6 +157,12 @@ var Legend = module.exports = React.createClass({
 
     },
 
+    /**
+     * @memberof module:viz/components.Legend
+     * @private
+     * @instance
+     * @returns {String} Default props: `{ 'position' : 'absolute', 'fields' : [], 'className' : string, 'width' : null, 'title' : null, 'id' : null }`
+     */
     getDefaultProps : function(){
         return {
             'position' : 'absolute',
@@ -142,6 +174,12 @@ var Legend = module.exports = React.createClass({
         };
     },
 
+    /**
+     * @memberof module:viz/components.Legend
+     * @private
+     * @instance
+     * @returns {Element} Div element containing props.title and list of {@link module:viz/components.Legend.Field} components.
+     */
     render : function(){
         if (!this.props.fields) return null;
         return (

@@ -25,11 +25,22 @@
         "accession": {
             "accessionType": "ES"
         },
+        "date_released": {
+            "title": "Date released",
+            "comment": "Do not submit, value is assigned when released.",
+            "type": "string",
+            "anyOf": [
+                {"format": "date-time"},
+                {"format": "date"}
+            ],
+            "exclude_from": ["submit4dn", "FFedit-create"],
+            "permission": "import_items"
+        },
         "experiments_in_set": {
             "title": "Set of experiments",
             "description": "List of experiments to be associatedas a set.",
             "type": "array",
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "exclude_from": ["submit4dn"],
             "default": [],
             "uniqueItems": true,
             "items": {

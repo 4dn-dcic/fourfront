@@ -29,11 +29,6 @@ var { ButtonToolbar, ButtonGroup, Button, DropdownButton, MenuItem } = require('
  */
 var BarPlot = React.createClass({
 
-    /**
-     * @namespace
-     * @type {Object}
-     * @memberof module:viz/BarPlotChart
-     */
     statics : {
 
 
@@ -50,6 +45,7 @@ var BarPlot = React.createClass({
             /**
              * Default props for the UIControlsWrapper.
              * @memberof module:viz/BarPlotChart.UIControlsWrapper
+             * @instance
              */
             getDefaultProps : function(){
                 return {
@@ -132,6 +128,7 @@ var BarPlot = React.createClass({
 
             /**
              * Clones props.children, expecting a Chart React Component as the sole child, and extends Chart props with 'fields', 'showType', and 'aggregateType'.
+             * @instance
              * @returns {React.Component} Cloned & extended props.children.
              * @memberof module:viz/BarPlotChart.UIControlsWrapper
              */
@@ -304,11 +301,11 @@ var BarPlot = React.createClass({
                         </div>
 
                         <div className="row">
-                            <div className="col-md-9">
+                            <div className="col-sm-9">
                                 { this.adjustedChildChart() }
                             </div>
-                            <div className="col-md-3 chart-aside" style={{ height : this.props.chartHeight }}>
-                                <div className="legend-container" style={{ minHeight : windowGridSize !== 'xs' ? 
+                            <div className="col-sm-3 chart-aside" style={{ height : this.props.chartHeight }}>
+                                <div className="legend-container" style={{ height : windowGridSize !== 'xs' ? 
                                     this.props.chartHeight - 49 : null
                                 }}>
                                     <DropdownButton
@@ -403,6 +400,8 @@ var BarPlot = React.createClass({
          * second field with multiple terms to use as the secondary field.
          * 
          * @static
+         * @public
+         * @memberof module:viz/BarPlotChart
          * @param {Array} experiments - List of experiments which are to be aggregated or counted by their term(s).
          * @param {Array} fields - List of fields containing at least 'field' property (as object-dot-notated string).
          * @param {string} [aggregate="experiments"] - What to aggregate. Can be 'experiments', 'experiment_sets', or 'files'.
@@ -438,7 +437,11 @@ var BarPlot = React.createClass({
             return BarPlot.partitionFields(fields, experiments, aggregate, useOnlyPopulatedFields);
         },
 
-        /** @ignore */
+        /**
+         * @memberof module:viz/BarPlotChart
+         * @static
+         * @ignore
+         */
         countTermForFieldFromExperimentByAggregateType : function(fieldObj, experiment, term, aggregate){
             if (!aggregate || aggregate === 'experiments'){
                 BarPlot.countFieldTerm(fieldObj, term);
@@ -451,7 +454,11 @@ var BarPlot = React.createClass({
             }
         },
 
-        /** @ignore */
+        /**
+         * @memberof module:viz/BarPlotChart
+         * @static
+         * @ignore
+         */
         aggregateByType : function(fields, experiments, aggregate){
             if (!aggregate || aggregate === 'experiments'){
                 experiments.forEach(function(exp){
@@ -491,7 +498,12 @@ var BarPlot = React.createClass({
                 });
             }
         },
-        /** @ignore */
+
+        /**
+         * @memberof module:viz/BarPlotChart
+         * @static
+         * @ignore
+         */
         partitionFields : function(fields, experiments, aggregate, useOnlyPopulatedFields = false){
             var topIndex, nextIndex;
             if (!Array.isArray(fields) || fields.length < 2) throw new Error("Need at least 2 fields.");
@@ -512,6 +524,9 @@ var BarPlot = React.createClass({
 
 
         /**
+         * @memberof module:viz/BarPlotChart
+         * @static
+         * @public
          * @param {Object} fieldObj - A field object with present but incomplete 'terms' & 'total'.
          * @param {string|string[]} term - A string or array of strings denoting terms.
          * @param {boolean} [updateTotal=true] - Whether to update fieldObj.total property as well.
@@ -549,6 +564,9 @@ var BarPlot = React.createClass({
         },
 
         /**
+         * @memberof module:viz/BarPlotChart
+         * @static
+         * @public
          * @param {Array} fields - List of field objects.
          * @param {Object} exp - Experiment to get terms (field values) from to pair with fields.
          * @returns {Array} Array of pairs containing field key (index 0) and term (index 1) 
@@ -567,7 +585,11 @@ var BarPlot = React.createClass({
             return fields;
         },
 */
-        /** @ignore */
+        /**
+         * @memberof module:viz/BarPlotChart
+         * @static
+         * @ignore
+         */
         combinedFieldTermsForExperiments : function(fields, experiments, aggregate){
             var field;
             var fieldIndex;
@@ -662,7 +684,16 @@ var BarPlot = React.createClass({
             return fields;
 
         },
-        /** @ignore */
+        /**
+         * Find first field from param 'fields', starting from param 'start', which has more counts for more than 1 term.
+         * 
+         * @memberof module:viz/BarPlotChart
+         * @static
+         * @public
+         * @param {Object[]} fields - List of field objects.
+         * @param {number} start - Start index.
+         * @returns {number} - Index of first populated field.
+         */
         firstPopulatedFieldIndex : function(fields, start = 0){
             var topIndex = start;
             var numberOfTerms;
@@ -679,6 +710,9 @@ var BarPlot = React.createClass({
         /** 
          * Return an object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally. 
          *
+         * @memberof module:viz/BarPlotChart
+         * @static
+         * @public
          * @param {Object[]} fields - Array of fields (i.e. from props.fields) which contain counts by term and total added through @see BarPlot.genChartData().
          * @param {Object} fields.terms - Object keyed by possible term for field, with value being count of term occurences in [props.]experiments passed to genChartData.
          * @param {number} fields.total - Count of total experiments for which this field is applicable.
@@ -862,10 +896,17 @@ var BarPlot = React.createClass({
         };
     },
 
-    /** @ignore */
+    /** 
+     * Gets style options for BarPlotChart instance. Internally, extends BarPlotChart.getDefaultStyleOpts() with props.styleOptions.
+     * @instance
+     * @returns {Object} Style options object.
+     */
     styleOptions : function(){ return vizUtil.extendStyleOptions(this.props.styleOptions, BarPlot.getDefaultStyleOpts()); },
   
-    /** @returns props.width or width of refs.container, if mounted. */
+    /**
+     * @instance
+     * @returns props.width or width of refs.container, if mounted.
+     */
     width : function(){
         if (this.props.width) return this.props.width;
         if (!this.refs.container) return null;
@@ -877,7 +918,10 @@ var BarPlot = React.createClass({
         return width;
     },
 
-    /** @returns props.height or height of refs.container, if mounted. */
+    /**
+     * @instance
+     * @returns props.height or height of refs.container, if mounted.
+     */
     height : function(){
         if (this.props.height) return this.props.height;
         if (!this.refs.container) return null;
@@ -893,7 +937,11 @@ var BarPlot = React.createClass({
         );
     },
 
-    /** @ignore */
+    /**
+     * @deprecated
+     * @instance
+     * @ignore
+     */
     componentWillReceiveProps : function(nextProps){
         /*
         if (this.shouldPerformManualTransitions(nextProps, this.props)){
@@ -903,7 +951,11 @@ var BarPlot = React.createClass({
         */
     },
 
-    /** @ignore */
+    /**
+     * @deprecated
+     * @instance
+     * @ignore
+     */
     componentDidUpdate : function(pastProps){
 
         /*
@@ -969,6 +1021,8 @@ var BarPlot = React.createClass({
      * Call this function, e.g. through refs, to grab fields and terms for a/the Legend component.
      * Internally, runs BarPlotChart.barDataToLegendData().
      * 
+     * @deprecated
+     * @instance
      * @see module:viz/BarPlotChart.barDataToLegendData
      * @returns {Array|null} List of fields containing terms. For use by legend component.
      */
@@ -980,6 +1034,7 @@ var BarPlot = React.createClass({
     /**
      * Get the for-bar-filled field object used for the X axis.
      * 
+     * @instance
      * @returns {Object} Top-level field containing terms.
      */
     getTopLevelField : function(){
@@ -1311,6 +1366,7 @@ var BarPlot = React.createClass({
      * Used conditionally in BarPlotChart.render to render clones of the BarChart behind the primary bars,
      * using 'all experiments' data instead of the 'filtered' or 'selected' experiments.
      * 
+     * @instance
      * @param {number} width - Width of available chart drawing area.
      * @param {number} height - Height of available chart drawing area.
      * @param {Object} [styleOpts] - Style options for the chart, including gap between bars, maximum bar width, etc.
@@ -1361,6 +1417,7 @@ var BarPlot = React.createClass({
      * Parses props.experiments and/or props.filterExperiments, depending on props.showType, aggregates experiments into fields,
      * generates data for chart bars, and then draws and returns chart wrapped in a div React element.
      * 
+     * @instance
      * @returns {React.Element} - Chart markup wrapped in a div.
      */
     render : function(){

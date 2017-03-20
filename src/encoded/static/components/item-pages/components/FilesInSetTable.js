@@ -3,6 +3,7 @@
 var React = require('react');
 var { Button } = require('react-bootstrap');
 var url = require('url');
+var { object } = require('./../../util');
 
 /** These props are shared between FilesInSetTable and FilesInSetTable.Small */
 var propTypes = {
@@ -19,35 +20,19 @@ var propTypes = {
 
 var FilesInSetTable = module.exports = React.createClass({
 
-    /**
-     * Static functions which help to render or parse File objects.
-     * 
-     * @memberof module:item-pages/components.FilesInSetTable
-     * @namespace
-     */
     statics : {
-
-        /**
-         * Convert a link_id, if one exists on param 'object', to an '@id' link.
-         * @param {Object} object - Must have a 'link_id' or '@id' property. Else will return null.
-         * @returns {string|null} The Item's '@id'.
-         */
-        atIdFromObject : function(object){
-            return (
-                object && typeof object === 'object' &&
-                    ((object.link_id && object.link_id.replace(/~/g, "/")) || object['@id']) 
-                ) || null;
-        },
 
         /** 
          * Generate a download link for a file attachment from a fileObject, which should represent a (partial) JSON of a file Item.
          * 
+         * @static
+         * @public
          * @param {Object} fileObject - Object must have a link_id or an @id property, as well as an 'attachment' property containing 'href'.
          * @returns {string} URL to download file attachment from.
          */
         attachmentDownloadLinkFromFile : function(fileObject){
             var downloadLinkExists = true;
-            var atId = FilesInSetTable.atIdFromObject(fileObject);
+            var atId = object.atIdFromObject(fileObject);
             var downloadHref = (fileObject && fileObject.attachment && fileObject.attachment.href) || null;
             if (!downloadHref) return null;
 
@@ -68,6 +53,9 @@ var FilesInSetTable = module.exports = React.createClass({
 
         /**
          * Converts a file-type or mime-type string into a FontAwesome icon className suffix.
+         * 
+         * @static
+         * @public
          * @param {string} fileType - MIMEType to get icon className suffix for.
          * @returns {string|null} The suffix to append to "fa-" or "icon-" CSS class.
          */
@@ -107,10 +95,14 @@ var FilesInSetTable = module.exports = React.createClass({
          * @memberof module:item-pages/components.FilesInSetTable
          * @namespace
          * @type {Component}
-         * @prop {Object} user
+         * @prop {Object} user - User object.
+         * @prop {Object} user.display_title - User's name to display.
+         * @prop {string} labName - Name of Lab to show if props.showLabName is true.
+         * @prop {boolean} [showLabName=false] - Show lab name instead of props.user.display_title if true.
          */
         SubmitterLink : React.createClass({
 
+            /** @ignore */
             render : function(){
                 var user = this.props.user;
                 var labName = this.props.labName;
@@ -123,7 +115,7 @@ var FilesInSetTable = module.exports = React.createClass({
                     ;
                 }
 
-                var atId = FilesInSetTable.atIdFromObject(user);
+                var atId = object.atIdFromObject(user);
                 var title = user.display_title || user.title || (typeof user === 'string' ? user : null) || "Submitter";
                 if (!atId && title === 'Submitter') return null;
                 else if (!atId) return title;
@@ -138,14 +130,23 @@ var FilesInSetTable = module.exports = React.createClass({
         }),
 
         /**
+         * Renders a "users group" icon which links to submitter's lab.
+         * 
          * @memberof module:item-pages/components.FilesInSetTable
          * @namespace
          * @type {Component}
          * @prop {Object} lab - Lab object.
          * @prop {function} onMouseEnter - Callback for cursor entering icon.
-         * @prop {function} onMouseLeave - Callback for cursor leaving icon.
+         * @property {function} onMouseLeave - Callback for cursor leaving icon.
          */
         LabIcon : React.createClass({
+
+            getDefaultProps : function(){
+                return {
+                    onMouseEnter : null,
+                    onMouseLeave : null
+                };
+            },
 
             noLab : function(){
                 return (
@@ -158,7 +159,7 @@ var FilesInSetTable = module.exports = React.createClass({
             render : function(){
                 var lab = this.props.lab;
                 if (!lab) return this.noLab();
-                var atId = FilesInSetTable.atIdFromObject(lab);
+                var atId = object.atIdFromObject(lab);
                 if (!atId) {
                     console.error("We need lab with link_id or @id.");
                     return this.noLab();
@@ -166,9 +167,10 @@ var FilesInSetTable = module.exports = React.createClass({
                 return (
                     <a 
                         href={atId}
-                        className="lab-icon"
+                        className="lab-icon inline-block"
                         onMouseEnter={this.props.onMouseEnter}
                         onMouseLeave={this.props.onMouseLeave}
+                        data-tip={lab.display_title}
                     >
                         <i className="icon icon-users"/>
                     </a>
@@ -195,7 +197,7 @@ var FilesInSetTable = module.exports = React.createClass({
 
             render : function(){
                 var file = this.props.file;
-                var atId = FilesInSetTable.atIdFromObject(file);
+                var atId = object.atIdFromObject(file);
                 var title = file.display_title || file.accession;
                 var downloadHref = FilesInSetTable.attachmentDownloadLinkFromFile(file);
                 var iconClass = FilesInSetTable.iconClassFromFileType(file && file.attachment && file.attachment.type);
@@ -220,16 +222,16 @@ var FilesInSetTable = module.exports = React.createClass({
                         <div className="col-xs-1 col-md-1 lab">
                             <FilesInSetTable.LabIcon
                                 lab={file && file.lab}
-                                onMouseEnter={ ()=> this.setState({ showLabName : true }) }
-                                onMouseLeave={ ()=> this.setState({ showLabName : false }) }
+                                //onMouseEnter={ ()=> this.setState({ showLabName : true }) }
+                                //onMouseLeave={ ()=> this.setState({ showLabName : false }) }
                             />
                         </div>
 
                         <div className="col-xs-11 col-md-3 col-lg-2 submitter">
                             <FilesInSetTable.SubmitterLink 
                                 user={file && file.submitted_by}
-                                labName={file && file.lab && file.lab.display_title}
-                                showLabName={this.state.showLabName}
+                                //labName={file && file.lab && file.lab.display_title}
+                                //showLabName={this.state.showLabName}
                             />
                         </div>
                         
@@ -242,20 +244,23 @@ var FilesInSetTable = module.exports = React.createClass({
         }),
 
         /**
+         * Small version of the full-width FilesInSetTable. Used for default item view page SubIPanels.
          * @memberof module:item-pages/components.FilesInSetTable
          * @namespace
          * @type {Component}
          */
         Small : React.createClass({
 
+            /** @ignore */
             propTypes : propTypes,
 
+            /** @ignore */
             render : function(){
                 return (
                     <div className="files-in-set-table">
                         { 
                             this.props.files.map(function(file, i){
-                                var atId = FilesInSetTable.atIdFromObject(file);
+                                var atId = object.atIdFromObject(file);
                                 var title = file.display_title || file.accession;
                                 var downloadHref = FilesInSetTable.attachmentDownloadLinkFromFile(file);
                                 return (
@@ -284,8 +289,17 @@ var FilesInSetTable = module.exports = React.createClass({
 
     },
 
+    /** @ignore */
     propTypes : propTypes,
 
+    /**
+     * Renders heading with titles for table on medium and large width screens.
+     * 
+     * @memberof module:item-pages/components.FilesInSetTable
+     * @private
+     * @instance
+     * @returns {Element} <div> element
+    */
     header : function(){
         return (
             <div className="row hidden-xs hidden-sm header-row">
@@ -316,11 +330,12 @@ var FilesInSetTable = module.exports = React.createClass({
         );
     },
 
+    /** @ignore */
     render : function(){
         return (
             <div className="files-in-set-table">
                 { this.header() }
-                { this.props.files.map((file, i)=> <FilesInSetTable.FileItemRow file={file} />) }
+                { this.props.files.map((file, i)=> <FilesInSetTable.FileItemRow file={file} key={file.link_id || i} />) }
             </div>
         );
     }
