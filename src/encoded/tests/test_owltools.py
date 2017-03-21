@@ -78,8 +78,9 @@ def test_get_rdfobjects_two_types_three_rdfobj(mocker, owler, rdf_objects_2_3):
 
 
 def test_get_rdfobjects_none_there(mocker, owler):
-    with mocker.patch('encoded.commands.owltools.Owler.rdfGraph.objects',
-                      side_effect=emptygen):
+    with mocker.patch('encoded.commands.owltools.ConjunctiveGraph') as graph:
+        graph.objects = '1'
+        owler = ot.Owler('http://test.com')
         class_ = 'test_class'
         rdfobject_terms = ['1']
         rdfobjects = ot.getObjectLiteralsOfType(class_, owler, rdfobject_terms)
