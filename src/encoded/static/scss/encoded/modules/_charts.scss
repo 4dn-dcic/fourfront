@@ -452,7 +452,8 @@
                 border-bottom-right-radius: 3px;
             }
             */
-            &:hover {
+            &:hover,
+            &.selected {
                 outline-color: rgba(0,0,0,0.75) !important;
             }
         }
@@ -988,7 +989,7 @@
     //display: none !important;
     opacity: 1;
     transition: opacity .25s, transform .05s linear, margin-left .25s ease-out;
-    pointer-events: none;
+    //pointer-events: none;
 
     .mosaic-cursor-body {
         background-color: #fff;

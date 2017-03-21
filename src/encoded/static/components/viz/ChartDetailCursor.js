@@ -122,8 +122,9 @@ var ChartDetailCursor = module.exports = React.createClass({
      * @param {function} [cb] - Optional callback function. Takes updated state as argument.
      * @returns {boolean} True if reset, false if not.
      */
-    reset : function(cb = null){
-        if (this.state.sticky) {
+    reset : function(overrideSticky = true, cb = null){
+        if (this.state.sticky && !overrideSticky) {
+            // Cancel out
             return false;
         }
         this.setState(_.omit(this.getInitialState(), 'mounted'), cb);
@@ -216,15 +217,25 @@ var ChartDetailCursor = module.exports = React.createClass({
          * 
          * @public
          * @static
+         * @param {boolean} [overrideSticky=true] - If false, will cancel out if stickied.
          * @param {string} [id] - ID of ChartDetailCursor to update, if there are multiple mounted. Defaults to 'default'.
          * @param {function} [cb] - Optional callback function.
          */
-        reset : function(id = "default", cb = null){
+        reset : function(overrideSticky = true, id = "default", cb = null){
             if (typeof resetFxns[id] === 'function'){
-                return resetFxns[id](cb);
+                return resetFxns[id](overrideSticky, cb);
             } else {
                 throw new Error("No ChartDetailCursor with ID '" + id + "' is currently mounted.");
             }
+        },
+
+        isTargetDetailCursor : function(elem){
+            // Get to top-level element before document.body.
+            while (elem.parentElement && elem.parentElement.tagName.toLowerCase() !== 'body'){
+                elem = elem.parentElement;
+            }
+            if (elem && elem.classList && elem.classList.contains('cursor-component-root')) return true;
+            return false;
         },
 
         Body : React.createClass({

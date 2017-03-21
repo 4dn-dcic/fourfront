@@ -6,37 +6,295 @@ var _ = require('underscore');
 var d3 = require('d3');
 var vizUtil = require('./../utilities');
 var { RotatedLabel } = require('./../components');
+var ChartDetailCursor = require('./../ChartDetailCursor');
 var { console, object, isServerSide, expFxn, Filters, layout } = require('./../../util');
-var { unhighlightTerms } = require('./../../facetlist');
+var { unhighlightTerms, highlightTerm } = require('./../../facetlist');
 var aggregationFxn = require('./aggregation-functions');
 
-/**
- * Visualization component for the BarPlot. 
- * Contains chart and labels only -- no controls.
- * To add controls, wrap the chart in BarPlotChart.UIControlsWrapper, which will feed its state as props to BarPlotChart and has UI components
- * for adjusting its state to select Charting options.
- * Use BarPlotChart (or UIControlsWrapper, if is wrapping BarPlotChart) as child of ChartDataController.provider, which will feed props.experiments and props.filteredExperiments.
- * 
- * @module {Component} viz/BarPlotChart
- * @see module:viz/chart-data-controller.Provider
- * @see module:viz/BarPlotChart.UIControlsWrapper
- * 
- * @prop {Object[]} experiments - List of all experiments as stored in and provided by ChartDataController.
- * @prop {Object[]} filteredExperiments - List of experiments which match current filters. Stored in and provided by ChartDataController[.Provider].
- * @prop {function} onBarPartMouseEnter - A callback function for when someone's cursor enters a bar part. Takes the node/datum of the bar part (0) and MouseEvent (1) as arguments.
- * @prop {function} onBarPartMouseLeave - Counterpart for props.onBarPartMouseEnter.
- * @prop {Object[]} fields - List of field objects containing 'field'[, 'name'][, 'description'][, 'title']. If length === 1, only plots bars (no bar parts), if length === 2, plots 2nd field as subdivision. Provide more along with props.useOnlyPopulatedFields = true to have chart auto-select the fields to plot based on which has than 1 term.
- * @prop {boolean} useOnlyPopulatedFields - Defaults to false. If true, and list of fields is longer than 2, will visualize first field(s) found in list with more than 1 term.
- * @prop {number} width - Self explanatory.
- * @prop {number} height - Self explanatory.
- * @prop {string} aggregateType - Set by UIControlsWrapper. Controls whether Y-Axis has 'experiment_sets', 'experiments', or 'files'.
- * @prop {string} showType - Set by UIControlsWrapper. Controls whether showing "all" experiments or only the selected or "filtered"-in experiments.
- */
+
 var Chart = module.exports = React.createClass({
 
     statics : {
 
+        /**
+         * Outputs a section of a bar.
+         * 
+         * @memberof module:viz/BarPlot.Chart
+         * @namespace
+         * @type {Component}
+         */
+        BarSection : React.createClass({
 
+            statics : {
+
+                /**
+                 * Check if 'node' is currently selected.
+                 * 
+                 * @memberof module:viz/BarPlot.Chart.BarSection
+                 * @public
+                 * @static
+                 * @param {Object} node - A 'node' containing at least 'field', 'term', and 'parent' if applicable.
+                 * @param {string} selectedBarSectionTerm - Currently selected subdivision field term.
+                 * @param {string} selectedBarSectionParentTerm - Currently selected X-Axis field term.
+                 * @returns {boolean} True if node (and node.parent, if applicable) matches selectedBarSectionTerm & selectedBarSectionParentTerm.
+                 */
+                isSelected : function(node, selectedBarSectionTerm, selectedBarSectionParentTerm){
+                    if (
+                        node.term === selectedBarSectionTerm && (
+                            ((node.parent && node.parent.term) || null) === (selectedBarSectionParentTerm || null)
+                        )
+                    ) return true;
+                    return false;
+                },
+
+            },
+
+            /**
+             * Check if component (aka props.node) is selected.
+             * Calls Chart.BarSection.isSelected(..) internally.
+             * 
+             * @instance
+             * @memberof module:viz/BarPlot.Chart.BarSection
+             * @returns {boolean} - True if selected.
+             */
+            isSelected : function(){
+                return Chart.BarSection.isSelected(this.props.node, this.props.selectedBarSectionTerm, this.props.selectedBarSectionParentTerm);
+            },
+
+            /**
+             * @instance
+             * @memberof module:viz/BarPlot.Chart.BarSection
+             * @returns {Element} - A div element representing a bar section.
+             */
+            render : function(){
+                var d = this.props.node;
+                var color = vizUtil.colorForNode(d);
+                
+                return (
+                    <div
+                        className={
+                            "bar-part no-highlight-color" + (d.parent ? ' multiple-parts' : '')
+                            + (this.isSelected() ? ' selected' : '')
+                        }
+                        style={{
+                            //top : rectY.call(this),
+                            height : d.attr.height,
+                            width: (d.parent || d).attr.width,
+                            backgroundColor : color
+                        }}
+                        data-color={color}
+                        data-target-height={d.attr.height}
+                        key={'bar-part-' + (d.parent ? d.parent.term + '~' + d.term : d.term)}
+                        data-term={d.parent ? d.term : null}
+                        onMouseEnter={this.props.onMouseEnter && this.props.onMouseEnter.bind(this.props.onMouseEnter, d)}
+                        onMouseLeave={this.props.onMouseLeave && this.props.onMouseLeave.bind(this.props.onMouseLeave, d)}
+                        onClick={this.props.onClick && this.props.onClick.bind(this.props.onClick, d)}
+                    />
+                );
+            },
+
+        }),
+
+        /**
+         * Outputs a vertical bar containing bar sections.
+         * 
+         * @memberof module:viz/BarPlot.Chart
+         * @namespace
+         * @type {Component}
+         */
+        Bar : React.createClass({
+
+            barStyle : function(){
+                var style = {};
+                var d = this.props.node;
+                var styleOpts = this.props.styleOptions;
+
+                // Position bar's x coord via translate3d CSS property for CSS3 transitioning.
+                if ((d.removing || !d.existing) && this.props.transitioning){
+                    style.opacity = 0;
+                    style.transform = vizUtil.style.translate3d(d.attr.x, Math.max(d.attr.height / 5, 10) + 10, 0);
+                } else {
+                    // 'Default' (no transitioning) style
+                    style.opacity = 1;
+                    style.transform = vizUtil.style.translate3d(d.attr.x,0,0);
+                }
+                style.left = styleOpts.offset.left;
+                style.bottom = styleOpts.offset.bottom;
+                style.width = d.attr.width;
+                return style;
+            },
+
+            renderBarSection : function(d,i){
+                return (
+                    <Chart.BarSection
+                        key={d.term || i}
+                        node={d}
+                        onClick={this.props.onBarPartClick}
+                        onMouseEnter={this.props.onBarPartMouseEnter}
+                        onMouseLeave={this.props.onBarPartMouseLeave}
+                        aggregateType={this.props.aggregateType}
+                        selectedBarSectionParentTerm={this.props.selectedBarSectionParentTerm}
+                        selectedBarSectionTerm={this.props.selectedBarSectionTerm}
+                    />
+                );
+            },
+
+            render : function(){
+                var d = this.props.node;
+
+                var transitioning = this.props.transitioning; // Cache state.transitioning to avoid risk of race condition in ref function.
+                var styleOpts = this.props.styleOptions;
+
+                var prevBarData = null;
+                if (d.existing && transitioning) prevBarData = this.props.existingBars[d.term].__data__;
+
+                return (
+                    <div
+                        className="chart-bar no-highlight-color"
+                        onMouseLeave={
+                            Array.isArray(d.bars) && d.bars.length > 0 ?
+                            function(e){
+                                unhighlightTerms(d.bars[0].field);
+                            } : null
+                        }
+                        data-term={d.term}
+                        data-field={Array.isArray(d.bars) && d.bars.length > 0 ? d.bars[0].field : null}
+                        key={"bar-" + d.term}
+                        style={this.barStyle()}
+                        ref={(r) => {
+                            if (typeof this.bars !== 'undefined' && r !== null){
+                                // Save bar element; set its data w/ D3 but don't save D3 wrapped-version
+                                d3.select(r).datum(d);
+                                if (!(d.removing && !transitioning)) this.bars[d.term] = r;
+                            }
+                        }}
+                    >
+                        { !this.props.isFilteredExperiments ?
+                        <span className="bar-top-label" key="text-label">
+                            { d.count }
+                        </span>
+                        : null }
+                        {
+                            Array.isArray(d.bars) ? 
+                                _.sortBy(d.bars, 'term').map(this.renderBarSection)
+                                :
+                                this.renderBarSection(_.extend({}, d, { color : 'rgb(139, 114, 142)' }))
+                        }
+                    </div>
+                );
+            }
+
+        }),
+
+        /**
+         * Encapsulates the chart output and provides state for selected node.
+         * 
+         * @memberof module:viz/BarPlot.Chart
+         * @namespace
+         * @type {Component}
+         */
+        ViewContainer : React.createClass({
+
+            getInitialState : function(){
+                return {
+                    'selectedBarSectionParentTerm' : null,
+                    'selectedBarSectionTerm' : null
+                };
+            },
+
+            componentDidUpdate : function(pastProps, pastState){
+                if (pastState.selectedBarSectionTerm !== this.state.selectedBarSectionTerm){
+                    ChartDetailCursor.update({
+                        'sticky' : typeof this.state.selectedBarSectionTerm === 'string'
+                    });
+                }
+            },
+
+            adjustedChildren : function(){
+                return React.Children.map(this.props.children, (child)=>{
+                    var oldOnClickFxn = child && child.props && child.props.onBarPartClick;
+                    var oldOnMouseEnterFxn = child && child.props && child.props.onBarPartMouseEnter;
+                    var oldOnMouseLeaveFxn = child && child.props && child.props.onBarPartMouseLeave;
+                    return React.cloneElement(child, {
+                        'styleOptions' : this.props.styleOptions,
+                        'selectedBarSectionParentTerm' : this.state.selectedBarSectionParentTerm,
+                        'selectedBarSectionTerm' : this.state.selectedBarSectionTerm,
+                        'onBarPartMouseEnter' : (node, evt)=>{
+                            if (Chart.BarSection.isSelected(node, this.state.selectedBarSectionTerm, this.state.selectedBarSectionParentTerm)){
+                                // Cancel if same node as selected.
+                                return false;
+                            }
+
+                            console.log('MOUSEENT', node);
+
+                            function updateCursorState(){
+                                var updatedState = {
+                                    'path' : [],
+                                    'includeTitleDescendentPrefix' : false,
+                                };
+                                if (node.parent) updatedState.path.push(node.parent);
+                                if (typeof this.props.aggregateType === 'string') {
+                                    updatedState.primaryCount = this.props.aggregateType;
+                                }
+                                updatedState.path.push(node);
+                                ChartDetailCursor.update(updatedState);
+                            }
+                            
+                            updateCursorState.call(this);
+
+                            // Unset selected nodes.
+                            if (this.state.selectedBarSectionTerm !== null){
+                                this.setState({
+                                    'selectedBarSectionTerm' : null,
+                                    'selectedBarSectionParentTerm' : null
+                                });
+                            }
+
+                            highlightTerm(node.field, node.term, node.color || vizUtil.colorForNode(node));
+
+                            if (typeof oldOnMouseEnterFxn === 'function') return oldOnMouseEnterFxn(node, evt);
+                        },
+                        'onBarPartMouseLeave' : (node, evt)=>{
+                            if (ChartDetailCursor.isTargetDetailCursor(evt.relatedTarget)) return false;
+                            console.log('MOUSELV', ChartDetailCursor.isTargetDetailCursor(evt.relatedTarget), node, evt);
+                            ChartDetailCursor.reset(false);
+                            if (typeof oldOnMouseLeaveFxn === 'function') return oldOnMouseLeaveFxn(node, evt);
+                        },
+                        'onBarPartClick' : (node, evt)=>{
+                            if (Chart.BarSection.isSelected(node, this.state.selectedBarSectionTerm, this.state.selectedBarSectionParentTerm)){
+                                this.setState({
+                                    'selectedBarSectionTerm' : null,
+                                    'selectedBarSectionParentTerm' : null
+                                });
+                            } else {
+                                this.setState({
+                                    'selectedBarSectionTerm' : node.term || null,
+                                    'selectedBarSectionParentTerm' : (node.parent && node.parent.term) || null
+                                });
+                            }
+                            if (typeof oldOnClickFxn === 'function') return oldOnClickFxn(node, evt);
+                        } 
+                    });
+                });
+            },
+
+            render: function(){
+                return (
+                    <div
+                        className="bar-plot-chart chart-container"
+                        data-field={this.props.topLevelField}
+                        style={{ height : this.props.height, width: this.props.width }}
+                    >
+                        { this.props.leftAxis }
+                        {/* allExpsBarDataContainer && allExpsBarDataContainer.component */}
+                        { this.adjustedChildren() }
+                        { this.props.bottomAxis }
+                    </div>
+                );
+
+            }
+            
+        }),
 
         /** 
          * Return an object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally. 
@@ -141,6 +399,7 @@ var Chart = module.exports = React.createClass({
          * Deprecated. Convert barData to array of field objects to be consumed by Legend React component.
          * 
          * @static
+         * @deprecated
          * @param {Object} barData - Data representing bars and their subdivisions.
          * @param {Object} [schemas=null] - Schemas to get field names from.
          * @returns {Array} - Fields with terms and colors for those terms.
@@ -517,103 +776,6 @@ var Chart = module.exports = React.createClass({
 
         },
 
-        bar : function(d, index, all, styleOpts = null, existingBars = this.pastBars, isFilteredExperiments = false){
-
-            var transitioning = this.state.transitioning; // Cache state.transitioning to avoid risk of race condition in ref function.
-            if (!styleOpts) styleOpts = this.styleOptions();
-
-            var prevBarData = null;
-            if (d.existing && transitioning) prevBarData = existingBars[d.term].__data__;
-
-            function barStyle(){
-                var style = {};
-
-                // Position bar's x coord via translate3d CSS property for CSS3 transitioning.
-                if ((d.removing || !d.existing) && transitioning){
-                    style.opacity = 0;
-                    style.transform = vizUtil.style.translate3d(d.attr.x, Math.max(d.attr.height / 5, 10) + 10, 0);
-                } else {
-                    // 'Default' (no transitioning) style
-                    style.opacity = 1;
-                    style.transform = vizUtil.style.translate3d(d.attr.x,0,0);
-                }
-                style.left = styleOpts.offset.left;
-                style.bottom = styleOpts.offset.bottom;
-                style.width = d.attr.width;
-                return style;
-            }
-
-            var barParts = Array.isArray(d.bars) ? 
-                _.sortBy(d.bars, 'term').map(this.renderParts.barPart.bind(this))
-                :
-                this.renderParts.barPart.call(this, _.extend({}, d, { color : 'rgb(139, 114, 142)' }));
-
-            return (
-                <div
-                    className={
-                        "chart-bar no-highlight-color" + 
-                        (
-                            //d.attr.height > Math.max((this.height() - styleOpts.offset.bottom - styleOpts.offset.top) / 2, 30) ?
-                            //' larger-height' : ''
-                            ''
-                        )
-                    }
-                    onMouseLeave={
-                        Array.isArray(d.bars) && d.bars.length > 0 ?
-                        function(e){
-                            unhighlightTerms(d.bars[0].field);
-                        } : null
-                    }
-                    data-term={d.term}
-                    data-field={Array.isArray(d.bars) && d.bars.length > 0 ? d.bars[0].field : null}
-                    key={"bar-" + d.term}
-                    style={barStyle.call(this)}
-                    ref={(r) => {
-                        if (typeof this.bars !== 'undefined' && r !== null){
-                            // Save bar element; set its data w/ D3 but don't save D3 wrapped-version
-                            d3.select(r).datum(d);
-                            if (!(d.removing && !transitioning)) this.bars[d.term] = r;
-                        }
-                    }}
-                >
-                    { !isFilteredExperiments ?
-                    <span className="bar-top-label" key="text-label">
-                        { d.count }
-                    </span>
-                    : null }
-                    { barParts }
-                </div>
-            );
-        },
-
-        barPart : function(d){
-            
-            var color = vizUtil.colorForNode(d);
-
-            return (
-                <div
-                    className={"bar-part no-highlight-color" + (d.parent ? ' multiple-parts' : '')}
-                    style={{
-                        //top : rectY.call(this),
-                        height : d.attr.height,
-                        width: (d.parent || d).attr.width,
-                        backgroundColor : color
-                    }}
-                    data-color={color}
-                    data-target-height={d.attr.height}
-                    key={'bar-part-' + (d.parent ? d.parent.term + '~' + d.term : d.term)}
-                    data-term={d.parent ? d.term : null}
-                    onMouseEnter={this.props.onBarPartMouseEnter.bind(this.props.onBarPartMouseEnter, d)}
-                    onMouseLeave={this.props.onBarPartMouseLeave.bind(this.props.onBarPartMouseLeave, d)}
-                    onClick={(e)=>{
-                        this.props.onBarPartClick.call(this.props.onBarPartClick, d, e)
-                    }}
-                >
-
-                </div>
-            );
-        },
-
         bottomXAxis : function(availWidth, availHeight, currentBars, styleOpts){
             var _this = this;
 
@@ -850,23 +1012,22 @@ var Chart = module.exports = React.createClass({
             );
         }
 
-        var barComponents = allBars.map((d,i,a) => 
-            this.renderParts.bar.call(this, d, i, a, styleOpts, this.pastBars, allExpsBarDataContainer)
-        );
-
         return (
-            <div
-                className="bar-plot-chart chart-container"
-                key="container"
-                ref="container"
-                data-field={this.props.fields[this.barData.fieldIndex].field}
-                style={{ height : availHeight, width: availWidth }}
-            >
-                { this.renderParts.leftAxis.call(this, availWidth, availHeight, this.barData, styleOpts) }
-                { allExpsBarDataContainer && allExpsBarDataContainer.component }
-                { barComponents }
-                { this.renderParts.bottomXAxis.call(this, availWidth, availHeight, allBars, styleOpts) }
-            </div>
+            <Chart.ViewContainer
+                leftAxis={this.renderParts.leftAxis.call(this, availWidth, availHeight, this.barData, styleOpts)}
+                bottomAxis={this.renderParts.bottomXAxis.call(this, availWidth, availHeight, allBars, styleOpts)}
+                topLevelField={this.props.fields[this.barData.fieldIndex].field}
+                width={availWidth} height={availHeight}
+                styleOptions={styleOpts}
+            >{ allBars.map((d,i,a) => 
+                <Chart.Bar
+                    key={d.term || i}
+                    node={d}
+                    isFilteredExperiments={!!allExpsBarDataContainer}
+                    existingBars={this.pastBars}
+                    transitioning={this.state.transitioning}
+                />
+            )}</Chart.ViewContainer>
         );
 
     }

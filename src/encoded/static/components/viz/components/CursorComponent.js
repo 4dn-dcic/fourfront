@@ -65,6 +65,7 @@ var CursorComponent = module.exports = React.createClass({
         if (this.props.debug) console.log('Mounted CursorComponent');
         if (!this.portalElement) {
             this.portalElement = document.createElement('div');
+            this.portalElement.classList && this.portalElement.classList.add('cursor-component-root');
             document.body.appendChild(this.portalElement);
         }
         document.addEventListener('mousemove', this._onMouseMove);
