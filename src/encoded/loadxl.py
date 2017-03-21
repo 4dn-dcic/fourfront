@@ -671,7 +671,7 @@ def generate_access_key(testapp, store_access_key=None,
         return json.dumps(akey)
 
 
-def store_keys(app, store_access_key, keys):
+def store_keys(app, store_access_key, keys, s3_file_name='illnevertell'):
         if (not keys):
             return
         # write to ~/keypairs.json
@@ -718,7 +718,7 @@ def load_test_data(app, access_key_loc=None):
     docsdir = [resource_filename('encoded', 'tests/data/documents/')]
     load_all(testapp, inserts, docsdir)
     keys = generate_access_key(testapp, access_key_loc,
-                               server="https://testportal.4dnucleome.org")
+                               server="https://data.4dnucleome.org")
     store_keys(app, access_key_loc, keys)
 
 
@@ -736,5 +736,5 @@ def load_prod_data(app, access_key_loc=None):
     docsdir = []
     load_all(testapp, inserts, docsdir)
     keys = generate_access_key(testapp, access_key_loc,
-                               server="https://data.4dnucleome.org")
-    store_keys(app, access_key_loc, keys)
+                               server="https://testportal.4dnucleome.org")
+    store_keys(app, access_key_loc, keys, s3_file_name='illnevertell_prod')
