@@ -40,7 +40,19 @@ var s3UploadFile = module.exports.s3UploadFile = function(file, upload_credentia
         sessionToken: upload_credentials.session_token
     });
 
+    // get s3 bucket identity from upload url
+    // should be in form: "s3://<bucket>/<extra stuff>"
+    var upload_url = upload_credentials.upload_url;
+    var bucket = null;
+    if(upload_url.slice(0,5) === 's3://'){
+        upload_url = upload_url.slice(5, upload_url.length);
+        bucket = upload_url.split('/')[0];
+    }
+    // back up
+    if(!bucket){
+        bucket = "encoded-4dn-files";
+    }
     var s3 = new aws.S3();
     // this function returns an uploadManager
-    return s3.upload({Bucket: "encoded-4dn-files", Key: upload_credentials.key, Body: file });
+    return s3.upload({Bucket: bucket, Key: upload_credentials.key, Body: file });
 };

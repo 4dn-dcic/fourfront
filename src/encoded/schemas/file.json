@@ -13,9 +13,10 @@
         },
         "filename": {
             "title": "File Name",
-            "description": "The local file name used at time of submission.",
+            "description": "The local file name used at time of submission. Must be alphanumeric, with the exception of the following special characters: '+=,.@-_'",
             "s3Upload": true,
             "type": "string",
+            "pattern": "^[\\w+=,.@-]*$",
             "exclude_from": ["submit4dn"],
             "comment": "ultimately uploaded filename will be uuid/accession, but filename with no directory will be store in metadata as passed in"
         },
@@ -144,6 +145,7 @@
         },
         "quality_metric": {
           "type": "string",
+          "title": "Quality metric",
           "description": "The associated qc reports",
           "linkTo": "QualityMetric"
         }
