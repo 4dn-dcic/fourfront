@@ -349,7 +349,9 @@ def get_syndef_terms_as_uri(connection, ontology, termtype, as_rdf=True):
         of RDF Namespace:name pairs by default or simple URI strings
         if as_rdf=False.
     '''
+    import pdb; pdb.set_trace()
     sdterms = ontology.get(termtype)
+    print(sdterms)
     uris = [term['term_url'] for term in sdterms]
     if as_rdf:
         uris = [convert2namespace(uri) for uri in uris]
