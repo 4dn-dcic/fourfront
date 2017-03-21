@@ -373,6 +373,11 @@ var ChartDataController = module.exports = {
 
         }
 
+        // For debugging, e.g. embedded properties of fetched experiments.
+        if (!isServerSide()){
+            window.ChartDataController = ChartDataController;
+        }
+
     },
 
     /**

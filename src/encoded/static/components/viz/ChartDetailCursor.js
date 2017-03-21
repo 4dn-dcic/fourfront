@@ -9,29 +9,37 @@ var { highlightTerm, unhighlightTerms } = require('./../facetlist');
 var { CursorComponent } = require('./components');
 
 /**
+ * @ignore
+ * @private
+ */
+var updateFxns = {
+    'default' : null
+};
+
+/**
  * @module {Component} viz/ChartDetailCursor
  */
-
 var ChartDetailCursor = module.exports = React.createClass({
 
     getDefaultProps : function(){
         return {
             'containingElement' : null,
-            'hideWhenNoContainingElement' : true,
+            'hideWhenNoContainingElement' : false,
             // Default/fallback for when no containingElement
             'cursorContainmentDimensions' : {
                 offsetLeft : 10,
                 offsetTop : 100,
                 containingWidth : 300,
-                containinHeight : 300
+                containingHeight : 300
             },
             'width' : 240,
             'height': 30,
-            'horizontalAlign' : 'left',
-            'horizontalOffset' : 10,
+            'horizontalAlign' : 'auto',
+            'horizontalOffset' : 15,
             'verticalAlign' : 'top',
             'verticalOffset' : 10,
-            'debugStyle' : false
+            'debugStyle' : false,
+            'id' : 'default'
         };
     },
 
@@ -59,12 +67,27 @@ var ChartDetailCursor = module.exports = React.createClass({
             'term' : 'Title',
             'field' : 'Field',
             'filteredOut' : false,
-            'path' : [],
+            'path' : [
+                {
+                    'field' : "Test.Field.Name",
+                    'term' : "OOH A TERM"
+                }
+            ],
+            'mounted' : false
         };
     },
 
     componentDidMount : function(){
         console.log('Mounted MouseDetailCursor');
+        // Alias this.update so we can call it statically.
+        updateFxns[this.props.id] = this.update;
+        this.setState({'mounted' : true});
+    },
+
+    componentWillUnmount : function(){
+        // Cleanup.
+        updateFxns[this.props.id] = null;
+        if (this.props.id !== 'default') delete updateFxns[this.props.id];
     },
 
     /**
@@ -90,8 +113,21 @@ var ChartDetailCursor = module.exports = React.createClass({
         if (!this.props.containingElement){
             if (this.props.hideWhenNoContainingElement) return null;
             containDims = this.props.cursorContainmentDimensions;
+            if (this.state.mounted && !isServerSide()){
+                containDims = {
+                    containingWidth : window.innerWidth,
+                    containingWidth : window.innerHeight,
+                    offsetTop : 80,
+                    offsetLeft : 0
+                };
+            }
         }
 
+        var isVisible = Array.isArray(this.state.path) && this.state.path.length > 0;
+
+        if (!isVisible){
+            return null;
+        }
         
         return (
             <CursorComponent
@@ -100,7 +136,9 @@ var ChartDetailCursor = module.exports = React.createClass({
                 width={this.props.width}
                 height={this.props.height}
                 cursorOffset={this.getCursorOffset()}
+                horizontalAlign={this.props.horizontalAlign}
                 className="mosaic-detail-cursor"
+                isVisible={isVisible}
                 visibilityMargin={this.props.visibilityMargin || {
                     left: 0,
                     right: 0,
@@ -129,6 +167,21 @@ var ChartDetailCursor = module.exports = React.createClass({
                 experiment_sets : d.experiment_sets || 0,
                 files : d.activeFiles || d.files || 0
             };
+        },
+
+        /**
+         * A static alias of the ChartDetailCursor instance's this.update() method.
+         * 
+         * @param {Object} state - State to update ChartDetailCursor with.
+         * @param {string} [id] - ID of ChartDetailCursor to update, if there are multiple mounted. Defaults to 'default'.
+         * @param {function} [cb] - Optional callback function.
+         */
+        update : function(state, id = "default", cb = null){
+            if (typeof updateFxns[id] === 'function'){
+                return updateFxns[id](state, cb);
+            } else {
+                throw new Error("No ChartDetailCursor with ID '" + id + "' is currently mounted.");
+            }
         },
 
         Body : React.createClass({

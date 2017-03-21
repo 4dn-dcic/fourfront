@@ -979,7 +979,7 @@
     left: 0;
     //display: none !important;
     opacity: 1;
-    transition: opacity .25s, transform .05s linear;
+    transition: opacity .25s, transform .05s linear, margin-left .25s ease-out;
     pointer-events: none;
 
     .mosaic-cursor-body {

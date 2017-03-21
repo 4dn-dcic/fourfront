@@ -112,8 +112,9 @@ var CursorComponent = module.exports = React.createClass({
     },
 
     componentDidUpdate : function() {
-        if (!this.state.mounted) return;
+        if (!this.state.mounted || !this.portalElement) return;
         vizUtil.requestAnimationFrame(()=>{
+            if (!this.state.mounted || !this.portalElement) return;
             //console.log('Updated CursorComponent', this.state);
             var hoverComponentDimensions = this.getHoverComponentDimensions();
             var isVisible = this.isVisible();
@@ -139,23 +140,31 @@ var CursorComponent = module.exports = React.createClass({
 
         var scrollX = (typeof window.pageXOffset !== 'undefined') ? window.pageXOffset : (document.documentElement || document.body.parentNode || document.body).scrollLeft;
         var scrollY = (typeof window.pageYOffset !== 'undefined') ? window.pageYOffset : (document.documentElement || document.body.parentNode || document.body).scrollTop;
+        
+        var onRightSide = this.props.horizontalAlign === 'auto' && e.clientX + scrollX > (
+            (this.props.containingElement && this.props.containingElement.clientWidth) || 
+            (document && document.body && document.body.clientWidth) ||
+            (window && window.innerWidth)
+        ) / 2;
 
         if (this.props.debugStyle){
             this.setState({
                 x : offset.left + 100,
                 y : offset.top + 100,
                 offsetX : 100,
-                offsetY : 100
+                offsetY : 100,
+                onRightSide : onRightSide
             });
         } else {
             this.setState({
                 x: e.clientX + scrollX, //(window.scrollX || window.pageXOffset),
                 y: e.clientY + scrollY, //(window.scrollY || window.pageYOffset),
                 offsetX: e.clientX + scrollX - offset.left,
-                offsetY: e.clientY + scrollY - offset.top
+                offsetY: e.clientY + scrollY - offset.top,
+                onRightSide : onRightSide
             });
         }
-    }, 100, { trailing: false }),
+    }, 50, { trailing: false }),
 
     _handleClick : function(e) {
         if (this.props.onClick) {
@@ -193,9 +202,6 @@ var CursorComponent = module.exports = React.createClass({
             render : function(){
                 if (!this.props.isVisible || !this.props.children) return null;
 
-                var halfSizeY = this.props.height / 2;
-                var halfSizeX = this.props.width / 2;
-
                 return (
                     <div
                         className={'cursor-component-container ' + (this.props.className || '')}
@@ -204,8 +210,8 @@ var CursorComponent = module.exports = React.createClass({
                             width: this.props.width,
                             height: this.props.height,
                             transform : vizUtil.style.translate3d(this.props.x, this.props.y),
-                            marginLeft: -halfSizeX + this.props.cursorOffset.x,
-                            marginTop: -halfSizeY + this.props.cursorOffset.y,
+                            marginLeft: -(this.props.width / 2) + ((this.props.onRightSide ? -1 : 1) * this.props.cursorOffset.x),
+                            marginTop: -(this.props.height / 2) + this.props.cursorOffset.y,
                             opacity : 0
                         }}
                         ref={function(r){

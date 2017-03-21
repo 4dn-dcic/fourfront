@@ -18,6 +18,7 @@ var Alerts = require('./alerts');
 var jwt = require('jsonwebtoken');
 var { FacetCharts } = require('./facetcharts');
 var ChartDataController = require('./viz/chart-data-controller');
+var ChartDetailCursor = require('./viz/ChartDetailCursor');
 var makeTitle = require('./item-pages/item').title;
 var ReactTooltip = require('react-tooltip');
 
@@ -875,6 +876,22 @@ var App = React.createClass({
         }
     },
 
+    /**
+     * Use this function, e.g. via passing down through props, to update the ChartDetailCursor component.
+     * 
+     * @public
+     * @instance
+     * @param {Object} d - The state to pass and set on ChartDetailCursor.
+     */
+    updateChartDetailCursor : _.debounce(function(d){
+        return (
+            this.refs &&
+            this.refs.detailCursor &&
+            this.refs.detailCursor.update &&
+            this.refs.detailCursor.update(d)
+        ) || null;
+    }, 100),
+
     render: function() {
         console.log('render app');
         var context = this.props.context;
@@ -1106,6 +1123,13 @@ var App = React.createClass({
                         node.style.left = null;
                         node.style.top = null;
                     }} />
+                    <ChartDetailCursor
+                        containingElement={(this.refs && this.refs.mosaicContainer) || null}
+                        verticalAlign="center" /* cursor position */
+                        visibilityMargin={{ left : -10, right : -10, bottom : -50, top: -18 }}
+                        //debugStyle /* -- keep this Component always visible so we can style it */
+                        ref="detailCursor"
+                    />
                 </body>
             </html>
         );
