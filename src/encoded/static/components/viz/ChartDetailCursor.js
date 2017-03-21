@@ -12,9 +12,8 @@ var { CursorComponent } = require('./components');
  * @ignore
  * @private
  */
-var updateFxns = {
-    'default' : null
-};
+var updateFxns = { 'default' : null },
+    resetFxns  = { 'default' : null };
 
 /**
  * @module {Component} viz/ChartDetailCursor
@@ -33,9 +32,9 @@ var ChartDetailCursor = module.exports = React.createClass({
                 containingHeight : 300
             },
             'width' : 240,
-            'height': 30,
+            'height': 80,
             'horizontalAlign' : 'auto',
-            'horizontalOffset' : 15,
+            'horizontalOffset' : 25,
             'verticalAlign' : 'top',
             'verticalOffset' : 10,
             'debugStyle' : false,
@@ -67,27 +66,34 @@ var ChartDetailCursor = module.exports = React.createClass({
             'term' : 'Title',
             'field' : 'Field',
             'filteredOut' : false,
+            'includeTitleDescendentPrefix' : true,
+            'primaryCount' : 'experiment_sets',
             'path' : [
-                {
-                    'field' : "Test.Field.Name",
-                    'term' : "OOH A TERM"
-                }
+                //{
+                //    'field' : "Test.Field.Name",
+                //    'term' : "OOH A TERM"
+                //}
             ],
-            'mounted' : false
+            'mounted' : false,
+            'sticky' : false
         };
     },
 
     componentDidMount : function(){
         console.log('Mounted MouseDetailCursor');
+
         // Alias this.update so we can call it statically.
         updateFxns[this.props.id] = this.update;
+        resetFxns[this.props.id]  = this.reset;
         this.setState({'mounted' : true});
     },
 
     componentWillUnmount : function(){
         // Cleanup.
         updateFxns[this.props.id] = null;
+        resetFxns[this.props.id] = null;
         if (this.props.id !== 'default') delete updateFxns[this.props.id];
+        if (this.props.id !== 'default') delete resetFxns[this.props.id];
     },
 
     /**
@@ -108,6 +114,22 @@ var ChartDetailCursor = module.exports = React.createClass({
         return this.setState(state, cb);
     },
 
+    /**
+     * Call this function to reset component state. Cancels out if stickied.
+     * 
+     * @instance
+     * @public
+     * @param {function} [cb] - Optional callback function. Takes updated state as argument.
+     * @returns {boolean} True if reset, false if not.
+     */
+    reset : function(cb = null){
+        if (this.state.sticky) {
+            return false;
+        }
+        this.setState(_.omit(this.getInitialState(), 'mounted'), cb);
+        return true;
+    },
+
     render : function(){
         var containDims = {};
         if (!this.props.containingElement){
@@ -123,7 +145,7 @@ var ChartDetailCursor = module.exports = React.createClass({
             }
         }
 
-        var isVisible = Array.isArray(this.state.path) && this.state.path.length > 0;
+        var isVisible = this.state.sticky || (Array.isArray(this.state.path) && this.state.path.length > 0);
 
         if (!isVisible){
             return null;
@@ -146,6 +168,7 @@ var ChartDetailCursor = module.exports = React.createClass({
                     top: -10
                 }}
                 debugStyle={this.props.debugStyle}
+                sticky={this.state.sticky}
             >
                 <ChartDetailCursor.Body
                     path={this.state.path}
@@ -153,6 +176,8 @@ var ChartDetailCursor = module.exports = React.createClass({
                     term={this.state.term}
                     field={this.state.field}
                     filteredOut={this.state.filteredOut}
+                    includeTitleDescendentPrefix={this.state.includeTitleDescendentPrefix}
+                    primaryCount={this.state.primaryCount}
                 />
             </CursorComponent>
         );
@@ -172,6 +197,8 @@ var ChartDetailCursor = module.exports = React.createClass({
         /**
          * A static alias of the ChartDetailCursor instance's this.update() method.
          * 
+         * @public
+         * @static
          * @param {Object} state - State to update ChartDetailCursor with.
          * @param {string} [id] - ID of ChartDetailCursor to update, if there are multiple mounted. Defaults to 'default'.
          * @param {function} [cb] - Optional callback function.
@@ -179,6 +206,22 @@ var ChartDetailCursor = module.exports = React.createClass({
         update : function(state, id = "default", cb = null){
             if (typeof updateFxns[id] === 'function'){
                 return updateFxns[id](state, cb);
+            } else {
+                throw new Error("No ChartDetailCursor with ID '" + id + "' is currently mounted.");
+            }
+        },
+
+        /**
+         * A static alias of the ChartDetailCursor instance's this.reset() method.
+         * 
+         * @public
+         * @static
+         * @param {string} [id] - ID of ChartDetailCursor to update, if there are multiple mounted. Defaults to 'default'.
+         * @param {function} [cb] - Optional callback function.
+         */
+        reset : function(id = "default", cb = null){
+            if (typeof resetFxns[id] === 'function'){
+                return resetFxns[id](cb);
             } else {
                 throw new Error("No ChartDetailCursor with ID '" + id + "' is currently mounted.");
             }
@@ -256,17 +299,48 @@ var ChartDetailCursor = module.exports = React.createClass({
                 if (props.path.length === 0) return null;
                 var currentCounts = this.getCurrentCounts(props.path);
                 if (!currentCounts) return null;
+                var countsToShow = _.omit(currentCounts, this.props.primaryCount, 'experiments_active');
+
+                countsToShow = _.pairs(countsToShow).map(function(countPair, i){
+
+                    var colSize = countPair[0] === 'experiment_sets' ?
+                        6 : countPair[0] === 'experiments' ?
+                            6 : countPair[0] === 'files' ? 4 : 2;
+                    var name = null;
+                    if (countPair[0] === 'experiment_sets') name = "Exp Sets";
+                    if (countPair[0] === 'experiments')     name = "Experiments";
+                    if (countPair[0] === 'files')           name = "Files";
+
+                    return (
+                        <div key={countPair[0] || i} className={"text-right col-sm-" + colSize}>
+                            { countPair[1] }<small> { name }</small>
+                        </div>
+                    );
+                });
+                
                 return (
                     <div className='row'>
-                        <div className="col-sm-2"></div>
-                        <div className="col-sm-6 text-right">
-                            { currentCounts.experiments }<small> Experiments</small>
-                        </div>
-
-                        <div className="col-sm-4 text-right">
-                            { currentCounts.files }<small> Files</small>
-                        </div>
+                        { this.props.primaryCount !== 'files' ? <div className="col-sm-2"></div> : null }
+                        { countsToShow }
                     </div>
+                );
+            },
+
+            primaryCount : function(node){
+                return (
+                    <div className={"primary-count count pull-right count-" + (this.props.primaryCount || "unknown")}>
+                        { node[this.props.primaryCount] }
+                    </div>
+                );
+            },
+
+            primaryCountLabel : function(){
+                var name = null;
+                if (this.props.primaryCount === 'experiment_sets') name = "Exp Sets";
+                if (this.props.primaryCount === 'experiments') name = "Experiments";
+                if (this.props.primaryCount === 'files') name = "Files";
+                return (
+                    <small className="pull-right sets-label">{ name }</small>
                 );
             },
 
@@ -279,9 +353,9 @@ var ChartDetailCursor = module.exports = React.createClass({
                     <div className="mosaic-cursor-body">
                         <ChartDetailCursor.Body.Crumbs path={this.props.path} />
                         <h6 className="field-title">
-                            <small className="pull-right sets-label">Exp Sets</small>
+                            { this.primaryCountLabel() }
                             { 
-                                this.props.path.length > 1 ?
+                                this.props.includeTitleDescendentPrefix && this.props.path.length > 1 ?
                                 <small className="descendent-prefix"> &gt; </small> : null
                             }{ this.props.field || leafNode.field }
                             {/* this.props.filteredOut ?
@@ -293,9 +367,7 @@ var ChartDetailCursor = module.exports = React.createClass({
                                 className="term-color-indicator icon icon-circle"
                                 style={{ color : leafNode.color || vizUtil.colorForNode(leafNode) }}
                             />
-                            <div className="pull-right count">
-                                { leafNode.experiment_sets }
-                            </div>
+                            { this.primaryCount(leafNode) }
                             <span>{ leafNode.name || leafNode.title || leafNode.term || this.props.title }</span>
                             
                         </h3>

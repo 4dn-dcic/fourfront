@@ -29,6 +29,7 @@ var CursorComponent = module.exports = React.createClass({
     },
 
     getInitialState : function(){
+        this.portalElement = null;
         return {
             x : 0,
             y : 0,
@@ -61,7 +62,7 @@ var CursorComponent = module.exports = React.createClass({
 
     componentDidMount : function() {
         if (isServerSide()) return null;
-        console.log('Mounted CursorComponent');
+        if (this.props.debug) console.log('Mounted CursorComponent');
         if (!this.portalElement) {
             this.portalElement = document.createElement('div');
             document.body.appendChild(this.portalElement);
@@ -71,11 +72,17 @@ var CursorComponent = module.exports = React.createClass({
     },
 
     componentWillUnmount : function() {
-        console.log('Will unmount CursorComponent');
+        if (this.props.debug) console.log('Will unmount CursorComponent');
         document.removeEventListener('mousemove', this._onMouseMove);
-        document.body.removeChild(this.portalElement);
-        this.portalElement = null;
+
+        vizUtil.requestAnimationFrame(()=>{
+            document.body.removeChild(this.portalElement);
+            this.portalElement = null;
+        });
+
         this.setState({ 'mounted' : false });
+
+        
     },
 
     getHoverComponentDimensions : function(){
@@ -100,6 +107,7 @@ var CursorComponent = module.exports = React.createClass({
 
     isVisible : function(cursorContainmentDims = null, visibilityMargin = null){
         if (typeof this.props.isVisible === 'boolean') return this.props.isVisible;
+        if (this.props.sticky) return true;
         if (this.props.debugStyle) return true;
         if (!cursorContainmentDims) cursorContainmentDims = this.getCursorContainmentDimensions();
         if (!visibilityMargin) visibilityMargin = this.visibilityMargin();
@@ -136,6 +144,9 @@ var CursorComponent = module.exports = React.createClass({
     },
 
     _onMouseMove : _.throttle(function(e) {
+
+        if (this.props.sticky) return;
+
         var offset = layout.getElementOffset(this.props.containingElement || this.refs.base) || { left : this.props.offsetLeft || 0, top: this.props.offsetRight || 0 };
 
         var scrollX = (typeof window.pageXOffset !== 'undefined') ? window.pageXOffset : (document.documentElement || document.body.parentNode || document.body).scrollLeft;

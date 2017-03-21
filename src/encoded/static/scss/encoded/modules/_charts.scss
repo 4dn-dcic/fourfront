@@ -438,7 +438,9 @@
 
         .bar-part {
             opacity: 1;
-            transition: opacity 0.5s, height .75s ease-out, width .75s;
+            transition: opacity 0.5s, height .75s ease-out, width .75s, border-color .5s ease-out, outline .5s;
+            outline-offset: 5px;
+            outline: 2px solid transparent;
             /*
             &:first-of-type {
                 border-top-left-radius: 3px;
@@ -450,6 +452,9 @@
                 border-bottom-right-radius: 3px;
             }
             */
+            &:hover {
+                outline-color: rgba(0,0,0,0.75) !important;
+            }
         }
 
         > rect {
@@ -489,10 +494,13 @@
         .bar-part {
             opacity: 1;
             &.multiple-parts {
-                opacity : 0.1;
+                //opacity : 0.1;
                 border-radius: 0;
                 &.highlight {
-                    opacity : 1;
+                    //opacity : 1;
+                    outline-color: rgba(0,0,0,0.2);
+                    //outline-offset: 5px;
+                    //border-color: rgba(0,0,0,0.25);
                 }
             }
         }

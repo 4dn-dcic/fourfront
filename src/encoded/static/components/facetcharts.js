@@ -6,14 +6,13 @@ var url = require('url');
 var querystring = require('querystring');
 var d3 = require('d3');
 var MosaicChart = require('./viz/MosaicChart');
-var BarPlotChart = require('./viz/BarPlotChart');
 var ChartDetailCursor = require('./viz/ChartDetailCursor');
 var { expFxn, Filters, ajax, console, layout, isServerSide } = require('./util');
 var FacetList = require('./facetlist');
 var vizUtil = require('./viz/utilities');
 var { SVGFilters, FetchingView, Legend } = require('./viz/components');
 var ChartDataController = require('./viz/chart-data-controller');
-
+var BarPlot = require('./viz/BarPlot');
 
 /**
  * @callback showFunc
@@ -408,37 +407,42 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
 
         console.log('SCHEMAS AT RENDER', this.props.schemas);
 
-        var chartDataState = ChartDataController.getState();
-
         return (
             <div className={"facet-charts show-" + show} key="facet-charts" style={{ height: height }}>
 
                 <ChartDataController.Provider id="barplot1">
-                    <BarPlotChart.UIControlsWrapper legend chartHeight={height}>
-                        <BarPlotChart.Aggregator debug>
-                            <BarPlotChart
+                    <BarPlot.UIControlsWrapper legend chartHeight={height}>
+                        <BarPlot.Aggregator>
+                            <BarPlot.Chart
                                 width={this.width(1) - 20}
                                 height={height}
                                 schemas={this.props.schemas}
-                                updatePopover={this.updatePopover}
                                 ref="barplotChart"
                                 onBarPartMouseEnter={(node, evt)=>{
                                     var updatedState = {
-                                        'path' : []
+                                        'path' : [],
+                                        'includeTitleDescendentPrefix' : false,
+                                        'sticky' : false
                                     };
                                     if (node.parent) updatedState.path.push(node.parent);
+                                    if (this.refs && this.refs.barplotChart && this.refs.barplotChart.props
+                                        && typeof this.refs.barplotChart.props.aggregateType === 'string') {
+                                        updatedState.primaryCount = this.refs.barplotChart.props.aggregateType;
+                                    }
                                     updatedState.path.push(node);
                                     ChartDetailCursor.update(updatedState);
                                     FacetList.highlightTerm(node.field, node.term, node.color || vizUtil.colorForNode(node));
                                 }}
-                                onBarPartMouseLeave={(evt)=>{
+                                onBarPartMouseLeave={ChartDetailCursor.reset.bind(ChartDetailCursor.reset, 'default', null)}
+                                onBarPartClick={(node, evt)=>{
+                                    evt.stopPropogation && evt.stopPropogation();
                                     ChartDetailCursor.update({
-                                        path : []
+                                        'sticky' : true
                                     });
                                 }}
                             />
-                        </BarPlotChart.Aggregator>
-                    </BarPlotChart.UIControlsWrapper>
+                        </BarPlot.Aggregator>
+                    </BarPlot.UIControlsWrapper>
                 </ChartDataController.Provider>
                 <FetchingView display={this.state.fetching} />
 
