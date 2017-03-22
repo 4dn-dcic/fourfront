@@ -18,14 +18,14 @@ var { EditableField, FieldSet } = require('./../forms');
 /**
  * Contains the User profile page view as well as Impersonate User form.
  * Only the User view is exported.
- * 
+ *
  * @module item-pages/user
  */
 
 
 /**
  * Extends ItemStore to help manage collection of Access Keys from back-end.
- * 
+ *
  * @memberof module:item-pages/user
  * @extends module:lib/store.ItemStore
  * @private
@@ -41,7 +41,7 @@ class AccessKeyStore extends ItemStore {
 /**
  * Component which fetches, saves, and show access keys that user may use to submit
  * experiments and other data.
- * 
+ *
  * @memberof module:item-pages/user
  * @namespace
  * @type {Component}
@@ -108,7 +108,7 @@ var AccessKeyTable = React.createClass({
                     <td>{ key.description }</td>
                     <td className="access-key-buttons">
                         <a href="#" className="btn btn-xs btn-success" onClick={this.doAction.bind(this, 'resetSecret', key['@id'])}>Reset</a>
-                        <a href="#" className="btn btn-xs btn-danger" onClick={this.doAction.bind(this, 'delete', key['@id'])}>Delete</a>
+                        <a href="#" className="btn btn-xs btn-danger" onClick={this.doAction.bind(this, 'delete', {'@id':key['@id'],'uuid':key.uuid})}>Delete</a>
                     </td>
                 </tr>
             );
@@ -149,7 +149,7 @@ var AccessKeyTable = React.createClass({
 
     /**
      * Add new access key for user via AJAX.
-     * 
+     *
      * @memberof module:item-pages/user.AccessKeyTable
      * @private
      * @instance
@@ -242,7 +242,7 @@ var AccessKeyTable = React.createClass({
 
 /**
  * Generate a URL to get Gravatar image from Gravatar service.
- * 
+ *
  * @static
  * @public
  * @memberof module:item-pages/user
@@ -264,7 +264,7 @@ var buildGravatarURL = module.exports.buildGravatarURL = function(email, size=nu
 
 /**
  * Generate an <img> element with provided size, className, and Gravatar src.
- * 
+ *
  * @static
  * @public
  * @memberof module:item-pages/user
@@ -287,7 +287,7 @@ var gravatar = module.exports.gravatar = function(email, size=null, className=nu
 
 /**
  * Draws a User Profile page.
- * 
+ *
  * @public
  * @namespace
  * @type {Component}
@@ -412,11 +412,11 @@ var UserView = module.exports.UserView = React.createClass({
 
                     </div>
 
-                    { 
+                    {
                         typeof user.access_keys !== 'undefined' &&
                         Array.isArray(user.submits_for) &&
                         user.submits_for.length > 0 ?
-                        
+
                         <div className="access-keys-container">
                             <h3 className="text-300">Access Keys</h3>
                             <div className="data-display">
@@ -438,7 +438,7 @@ globals.content_views.register(UserView, 'User');
 /**
  * Renders out the contact fields for user, which are editable.
  * Shows Gravatar and User's first and last name at top.
- * 
+ *
  * @private
  * @namespace
  * @type {Component}
@@ -491,7 +491,7 @@ var ProfileContactFields = React.createClass({
 /**
  * Renders out the lab and awards fields for user, which are not editable.
  * Uses AJAX to fetch details for fields which are not embedded.
- * 
+ *
  * @private
  * @namespace
  * @type {Component}
@@ -516,7 +516,7 @@ var ProfileWorkFields = React.createClass({
 
     /**
      * If Lab details are not embedded, fetches them.
-     * 
+     *
      * @memberof module:item-pages/user.ProfileWorkFields
      * @private
      * @instance
@@ -567,7 +567,7 @@ var ProfileWorkFields = React.createClass({
                 }
             }
         }
-        
+
         return awardsList;
     },
 
@@ -742,7 +742,7 @@ var ImpersonateUserForm = React.createClass({
      * Handler for Impersonate User submit button/action.
      * Performs AJAX request to '/impersonate-user' endpoint then saves returned JWT
      * as own and in order to pretend to be impersonated user.
-     * 
+     *
      * @memberof module:item-pages/user.ImpersonateUserForm
      * @private
      * @instance
