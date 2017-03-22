@@ -404,7 +404,7 @@ def get_ontologies(connection, ont_list):
     if ont_list == 'all':
         ontologies = get_FDN(None, connection, None, 'ontologys')
     else:
-        ontologies = [get_FDN('ontologys/' + ontology, connection) for ontology in ont_list]
+        ontologies = [get_FDN('ontologys/' + ontology, connection, frame='embedded') for ontology in ont_list]
 
     # removing item not found cases with reporting
     for i, ontology in enumerate(ontologies):
@@ -432,6 +432,23 @@ def remove_obsoletes_and_unnamed(terms):
              if ('parents' not in term) or ('ObsoleteClass' not in term['parents'])}
     terms = {termid: term for termid, term in terms.items()
              if 'term_name' in term and (term['term_name'] and not term['term_name'].lower().startswith('obsolete'))}
+    return terms
+
+
+def verify_and_update_ontology(terms, ontologies):
+    '''checks to be sure the ontology associated with the term agrees with
+        the term prefix.  If it doesn't it is likely that the term was
+        imported into a previously processed ontology and so the ontlogy
+        of the term should be updated to the one that matches the prefix
+    '''
+    ont_lookup = {o['uuid']: o['ontology_prefix'] for o in ontologies}
+    ont_prefi = {v: k for k, v in ont_lookup.items()}
+    for termid, term in terms.items():
+        if ont_lookup.get(term['source_ontology'], None):
+            prefix = termid.split(':')[0]
+            if prefix in ont_prefi:
+                if prefix != ont_lookup[term['source_ontology']]:
+                    term['source_ontology'] = ont_prefi[prefix]
     return terms
 
 
@@ -482,15 +499,20 @@ def download_and_process_owl(ontology, connection, terms):
     return terms
 
 
-def write_outfile(terms, filename):
+def write_outfile(terms, filename, pretty=False):
+    indent = None
+    lenterms = len(terms)
     with open(filename, 'w') as outfile:
-        outfile.write('[\n')
+        if pretty:
+            indent = 4
+            outfile.write('[\n')
         for i, term in enumerate(terms.values()):
-            json.dump(term, outfile, indent=4)
-            if i != len(terms) - 1:
+            json.dump(term, outfile, indent=indent)
+            if pretty and i != lenterms - 1:
                 outfile.write(',')
             outfile.write('\n')
-        outfile.write(']\n')
+        if pretty:
+            outfile.write(']\n')
 
 
 def parse_args(args):
@@ -508,6 +530,10 @@ def parse_args(args):
                         default='ontology.json',
                         help="The name of the output file.  \
                         Default is --outfile=ontology.json")
+    parser.add_argument('--pretty',
+                        default=False,
+                        action='store_true',
+                        help="Default False - set True if you want json format easy to read, hard to parse")
     parser.add_argument('--key',
                         default='default',
                         help="The keypair identifier from the keyfile.  \
@@ -542,6 +568,7 @@ def main():
     if terms:
         terms = add_slim_terms(terms, slim_terms)
         terms = remove_obsoletes_and_unnamed(terms)
+        terms = verify_and_update_ontology(terms, ontologies)
         # at the moment we're writing json output but consider updating db directly
         # including checks for removal of terms already in db from ontologies
         # and audits for items linked to terms
