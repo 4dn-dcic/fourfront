@@ -65,16 +65,18 @@ def test_get_rdfobjects_two_types_one_rdfobj(mocker, owler, rdf_objects_2_1):
         assert rdfobjects[0] == check
 
 
-def test_get_rdfobjects_two_types_three_rdfobj(mocker, owler, rdf_objects_2_3):
+def test_get_rdfobjects_two_types_three_rdfobj(mocker, rdf_objects_2_3):
     checks = ['testrdfobj1', 'testrdfobj2', 'testrdfobj3']
-    with mocker.patch('encoded.commands.owltools.Owler.rdfGraph.objects',
-                      side_effect=rdf_objects_2_3):
-        class_ = 'test_class'
-        rdfobject_terms = ['1', '2']
-        rdfobjects = ot.getObjectLiteralsOfType(class_, owler, rdfobject_terms)
-        assert len(rdfobjects) == 3
-        for rdfobj in rdfobjects:
-            assert rdfobj in checks
+    with mocker.patch('encoded.commands.owltools.ConjunctiveGraph') as graph:
+        for rdf_obj in rdf_objects_2_3:
+            graph.objects = rdf_obj
+            owler = ot.Owler('http://test.com')
+            class_ = 'test_class'
+            rdfobject_terms = ['1', '2']
+            rdfobjects = ot.getObjectLiteralsOfType(class_, owler, rdfobject_terms)
+            assert len(rdfobjects) == 3
+            for rdfobj in rdfobjects:
+                assert rdfobj in checks
 
 
 def test_get_rdfobjects_none_there(mocker, owler):
