@@ -124,7 +124,9 @@ class FileSetCalibration(FileSet):
                 'files_in_set.accession',
                 'files_in_set.description',
                 'files_in_set.attachment',
-                'files_in_set.lab'
+                'files_in_set.lab',
+                'files_in_set.href'
+                'files_in_set.file_format'
                 ]
 
 
