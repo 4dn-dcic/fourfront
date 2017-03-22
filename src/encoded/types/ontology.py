@@ -10,7 +10,7 @@ from .base import (
 
 @collection(
     name='ontology-terms',
-    unique_key='ontology_term:preferred_name',
+    unique_key='ontology_term:term_id',
     properties={
         'title': 'Ontology Terms',
         'description': 'Listing of Ontology Terms',
@@ -21,6 +21,7 @@ class OntologyTerm(Item):
     item_type = 'ontology_term'
     schema = load_schema('encoded:schemas/ontology_term.json')
     embedded = []
+    name_key = 'term_id'
 
 
 @collection(
