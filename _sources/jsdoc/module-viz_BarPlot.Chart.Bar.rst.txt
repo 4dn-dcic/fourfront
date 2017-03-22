@@ -1,0 +1,32 @@
+.. _undefined.Bar:
+
+==================
+Component: ``Bar``
+==================
+
+
+
+
+Outputs a vertical bar containing bar sections.
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,32 @@
+.. _undefined.ViewContainer:
+
+============================
+Component: ``ViewContainer``
+============================
+
+
+
+
+Encapsulates the chart output and provides state for selected node.
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,44 @@
+.. _module-item-pages_components.FormattedInfoBlock:
+
+=================================
+Component: ``FormattedInfoBlock``
+=================================
+
+
+Member Of :doc:`module-item-pages_components`
+
+
+Formats a lab, award, or potentially other object to appear in a small rectangle that can be included in a sidebar.
+Also offers mix-in functions to help AJAX in the required details to the parent component's state.
+
+Also contains FormattedInfoBlock.List which is meant to display a list of FormattedInfoBlocks, and potentially AJAX in details for them.
+
+
+.. contents:: Local Navigation
+   :local:
+
+1 Children
+==========
+
+.. toctree::
+   :maxdepth: 3
+   
+   module-item-pages_components.FormattedInfoBlock.FormattedInfoBlockList
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,179 @@
+================================
+Component: ``static-pages/home``
+================================
+
+
+
+
+Homepage View component. Gets rendered at '/' and '/home' paths.
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+
+
+Props
+=====
+
+
+
+
+``context``
+-----------
+
+Type: **Object**
+
+.. js:property:: context
+
+Should have properties typically needed for any static page.
+
+Functions
+=========
+
+
+
+.. _module-static-pages_home.summaryHeading:
+
+
+*Deprecated* Inner ``summaryHeading``
+-------------------------------------
+
+Render old subheading
+
+.. js:function:: summaryHeading()
+
+    
+    :returns Element: H4 React Element with quick summary: "The portal currently hosts X from the 4DN network and Y from other sources over Z."
+    
+
+home.js:39
+
+
+
+.. _module-static-pages_home.banner:
+
+
+*Deprecated* Inner ``banner``
+-----------------------------
+
+Render old homepage banner.
+
+.. js:function:: banner()
+
+    
+    :returns Element: A React <div> element.
+    
+
+home.js:60
+
+
+
+.. _module-static-pages_home.render:
+
+
+Inner ``render``
+----------------
+
+The render function. Renders homepage contents.
+
+.. js:function:: render()
+
+    
+    :returns Element: A React <div> element.
+    
+
+home.js:76
+
+
+
+
+Members
+=======
+
+
+.. _module-static-pages_home.HomePage:
+
+``HomePage``
+
+
+
+
+
+
+.. _module-static-pages_home.propTypes:
+
+``propTypes``
+
+
+
+
+
+
+.. _module-static-pages_home.content:
+
+``content``
+
+
+
+
+
+
+.. _module-static-pages_home.description:
+
+``description``
+
+
+
+
+
+
+.. _module-static-pages_home.links:
+
+``links``
+
+
+
+
+
+
+.. _module-static-pages_home.float:
+
+``float``
+
+
+
+
+
+
+.. _module-static-pages_home.padding:
+
+``padding``
+
+
+
+
+
+
+.. _module-static-pages_home.fontSize:
+
+``fontSize``
+
+
+
+
+
+
+.. _module-static-pages_home.__html:
+
+``__html``
+
+
+
+
+
+
+
+

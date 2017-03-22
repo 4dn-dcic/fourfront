@@ -1,0 +1,198 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Component: BarSection &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="component-barsection">
+<span id="undefined-barsection"></span><h1>Component: <code class="docutils literal"><span class="pre">BarSection</span></code><a class="headerlink" href="#component-barsection" title="Permalink to this headline">¶</a></h1>
+<p>Outputs a section of a bar.</p>
+<div class="contents local topic" id="local-navigation">
+<p class="topic-title first">Local Navigation</p>
+<ul class="simple">
+<li><a class="reference internal" href="#functions" id="id2">Functions</a><ul>
+<li><a class="reference internal" href="#public-static-isselected" id="id3">Public Static <code class="docutils literal"><span class="pre">isSelected</span></code></a></li>
+<li><a class="reference internal" href="#instance-isselected" id="id4">Instance <code class="docutils literal"><span class="pre">isSelected</span></code></a></li>
+<li><a class="reference internal" href="#instance-render" id="id5">Instance <code class="docutils literal"><span class="pre">render</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="functions">
+<h2><a class="toc-backref" href="#id2">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="public-static-isselected">
+<span id="module-viz-barplot-chart-barsection-isselected"></span><h3><a class="toc-backref" href="#id3">Public Static <code class="docutils literal"><span class="pre">isSelected</span></code></a><a class="headerlink" href="#public-static-isselected" title="Permalink to this headline">¶</a></h3>
+<p>Check if &#8216;node&#8217; is currently selected.</p>
+<dl class="function">
+<dt id="isSelected">
+<code class="descname">isSelected</code><span class="sig-paren">(</span><em>node</em>, <em>selectedBarSectionTerm</em>, <em>selectedBarSectionParentTerm</em><span class="sig-paren">)</span><a class="headerlink" href="#isSelected" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>node</strong> (<em>Object</em>) &#8211; A &#8216;node&#8217; containing at least &#8216;field&#8217;, &#8216;term&#8217;, and &#8216;parent&#8217; if applicable.</li>
+<li><strong>selectedBarSectionTerm</strong> (<em>string</em>) &#8211; Currently selected subdivision field term.</li>
+<li><strong>selectedBarSectionParentTerm</strong> (<em>string</em>) &#8211; Currently selected X-Axis field term.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns boolean:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">True if node (and node.parent, if applicable) matches selectedBarSectionTerm &amp; selectedBarSectionParentTerm.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Chart.js:41</p>
+</div>
+<div class="section" id="instance-isselected">
+<span id="id1"></span><h3><a class="toc-backref" href="#id4">Instance <code class="docutils literal"><span class="pre">isSelected</span></code></a><a class="headerlink" href="#instance-isselected" title="Permalink to this headline">¶</a></h3>
+<p>Check if component (aka props.node) is selected.
+Calls Chart.BarSection.isSelected(..) internally.</p>
+<dl class="function">
+<dt>
+<code class="descname">isSelected</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Returns boolean:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li>True if selected.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Chart.js:60</p>
+</div>
+<div class="section" id="instance-render">
+<span id="module-viz-barplot-chart-barsection-render"></span><h3><a class="toc-backref" href="#id5">Instance <code class="docutils literal"><span class="pre">render</span></code></a><a class="headerlink" href="#instance-render" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="render">
+<code class="descname">render</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#render" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Returns Element:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first last simple">
+<li>A div element representing a bar section.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Chart.js:69</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Component: <code class="docutils literal"><span class="pre">BarSection</span></code></a><ul>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#public-static-isselected">Public Static <code class="docutils literal"><span class="pre">isSelected</span></code></a></li>
+<li><a class="reference internal" href="#instance-isselected">Instance <code class="docutils literal"><span class="pre">isSelected</span></code></a></li>
+<li><a class="reference internal" href="#instance-render">Instance <code class="docutils literal"><span class="pre">render</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/jsdoc/module-viz_BarPlot.Chart.BarSection.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

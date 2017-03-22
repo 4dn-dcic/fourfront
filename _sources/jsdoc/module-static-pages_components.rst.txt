@@ -1,0 +1,39 @@
+===================================
+Module: ``static-pages/components``
+===================================
+
+
+
+
+A collection of components which are most specific to static pages.
+
+
+.. contents:: Local Navigation
+   :local:
+
+2 Children
+==========
+
+.. toctree::
+   :maxdepth: 3
+   
+   module-static-pages_components.Announcements
+   module-static-pages_components.BannerEntry
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,59 @@
+.. _module-static-pages_components.BannerEntry:
+
+=======================================
+*Deprecated* Component: ``BannerEntry``
+=======================================
+
+
+Member Of :doc:`module-static-pages_components`
+
+
+Generates an inline <span> React element which fetches a count from the back-end.
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Examples
+========
+
+.. code-block:: javascript
+   :caption: Previous usage in View module:static-pages/home
+
+   render : function(){
+   ...
+   var experiment4DNBanner = <BannerEntry session={this.props.session} text='experiments' defaultFilter="4DN" destination="/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all" fetchLoc='/search/?type=Experiment&award.project=4DN&format=json'/>;
+   var experimentExtBanner = <BannerEntry session={this.props.session} text='experiments' defaultFilter="External" destination="/browse/?type=ExperimentSetReplicate&experimentset_type=replicate&limit=all" fetchLoc='/search/?type=Experiment&award.project=External&format=json'/>;
+   var biosourceBanner = <BannerEntry session={this.props.session} text='cell types' destination='/search/?type=Biosource' fetchLoc='/search/?type=Biosource&format=json'/>;
+   
+   return (
+       ...
+       <div>
+           <div className="fourDN-banner text-left">
+               <h1 className="page-title" style=>4DN Data Portal</h1>
+               <h4 className="text-300 col-sm-8" style=>
+                   The portal currently hosts {experiment4DNBanner} from
+                   the 4DN network and {experimentExtBanner} from other
+                   sources over {biosourceBanner}.
+               </h4>
+           </div>
+       </div>
+       ...
+

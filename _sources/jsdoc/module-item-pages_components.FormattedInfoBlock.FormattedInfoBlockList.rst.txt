@@ -1,0 +1,101 @@
+.. _undefined.FormattedInfoBlockList:
+
+=====================================
+Component: ``FormattedInfoBlockList``
+=====================================
+
+
+
+
+Optional container of FormattedInfoBlocks, wrapping them in a <UL> and <LI> elements.
+Encapsulates all required ajax/aggregation for fetching array of fields/data.
+Available via FormattedInfoBlock.List
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+
+
+Props
+=====
+
+
+
+
+``details``
+-----------
+
+Type: **Array.<Object>**
+
+.. js:property:: details
+
+Array of complete details to display.
+
+
+
+``endpoints``
+-------------
+
+Type: **Array.<string>**
+
+.. js:property:: endpoints
+
+Array of endpoints to AJAX details from.
+
+
+
+``renderItem``
+--------------
+
+Type: **function**
+
+.. js:property:: renderItem
+
+Render function for items. Should return a FormattedInfoBlock component.
+
+
+
+``fallbackMsg``
+---------------
+
+Type: **Component** | **Element** | **string**
+
+.. js:property:: fallbackMsg
+
+What to display if both details and endpoints don't exist or are empty.
+
+
+
+``propertyName``
+----------------
+
+Type: **string**
+
+.. js:property:: propertyName
+
+Descriptive unique ID of property/ies displayed.
+
+
+
+``ajaxCallback``
+----------------
+
+Type: **function**
+
+.. js:property:: ajaxCallback
+
+Callback to execute with details, if/after they are fetched w/ AJAX.
+
+
+
+
+
+
+
+
+
+
+

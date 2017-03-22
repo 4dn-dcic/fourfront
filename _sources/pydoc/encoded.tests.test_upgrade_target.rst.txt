@@ -1,0 +1,7 @@
+encoded.tests.test_upgrade_target module
+========================================
+
+.. automodule:: encoded.tests.test_upgrade_target
+    :members:
+    :undoc-members:
+    :show-inheritance:

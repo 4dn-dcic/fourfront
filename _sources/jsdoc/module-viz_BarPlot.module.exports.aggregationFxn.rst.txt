@@ -1,0 +1,34 @@
+.. _module-viz_BarPlot.module.exports.aggregationFxn:
+
+=========================================
+Object: ``module.exports.aggregationFxn``
+=========================================
+
+
+Member Of :doc:`module-viz_BarPlot`
+
+
+Various aggregation functions which are used by BarPlot.Chart and/or BarPlot.Aggregator to convert & aggregate list of experiments
+into a chart-friendly structure.
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

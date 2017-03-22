@@ -1,0 +1,220 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Component: module.exports.Chart &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Component: viz/ChartDetailCursor" href="module-viz_ChartDetailCursor.html" />
+    <link rel="prev" title="Object: module.exports.aggregationFxn" href="module-viz_BarPlot.module.exports.aggregationFxn.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="module-viz_ChartDetailCursor.html" title="Component: viz/ChartDetailCursor"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="module-viz_BarPlot.module.exports.aggregationFxn.html" title="Object: module.exports.aggregationFxn"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="module-viz_BarPlot.html" accesskey="U">Module: <code class="docutils literal"><span class="pre">viz/BarPlot</span></code></a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="component-module-exports-chart">
+<span id="module-viz-barplot-module-exports-chart"></span><h1>Component: <code class="docutils literal"><span class="pre">module.exports.Chart</span></code><a class="headerlink" href="#component-module-exports-chart" title="Permalink to this headline">¶</a></h1>
+<p>Member Of <a class="reference internal" href="module-viz_BarPlot.html"><span class="doc">Module: viz/BarPlot</span></a></p>
+<p>Visualization component for the BarPlot.
+Contains chart and labels only &#8211; no controls.
+To add controls, wrap the chart in BarPlotChart.UIControlsWrapper, which will feed its state as props to BarPlotChart and has UI components
+for adjusting its state to select Charting options.
+Use BarPlotChart (or UIControlsWrapper, if is wrapping BarPlotChart) as child of ChartDataController.provider, which will feed props.experiments and props.filteredExperiments.</p>
+<div class="contents local topic" id="local-navigation">
+<p class="topic-title first">Local Navigation</p>
+<ul class="simple">
+<li><a class="reference internal" href="#props" id="id1">Props</a><ul>
+<li><a class="reference internal" href="#experiments" id="id2"><code class="docutils literal"><span class="pre">experiments</span></code></a></li>
+<li><a class="reference internal" href="#filteredexperiments" id="id3"><code class="docutils literal"><span class="pre">filteredExperiments</span></code></a></li>
+<li><a class="reference internal" href="#onbarpartmouseenter" id="id4"><code class="docutils literal"><span class="pre">onBarPartMouseEnter</span></code></a></li>
+<li><a class="reference internal" href="#onbarpartmouseleave" id="id5"><code class="docutils literal"><span class="pre">onBarPartMouseLeave</span></code></a></li>
+<li><a class="reference internal" href="#fields" id="id6"><code class="docutils literal"><span class="pre">fields</span></code></a></li>
+<li><a class="reference internal" href="#useonlypopulatedfields" id="id7"><code class="docutils literal"><span class="pre">useOnlyPopulatedFields</span></code></a></li>
+<li><a class="reference internal" href="#width" id="id8"><code class="docutils literal"><span class="pre">width</span></code></a></li>
+<li><a class="reference internal" href="#height" id="id9"><code class="docutils literal"><span class="pre">height</span></code></a></li>
+<li><a class="reference internal" href="#aggregatetype" id="id10"><code class="docutils literal"><span class="pre">aggregateType</span></code></a></li>
+<li><a class="reference internal" href="#showtype" id="id11"><code class="docutils literal"><span class="pre">showType</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="props">
+<h2><a class="toc-backref" href="#id1">Props</a><a class="headerlink" href="#props" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="experiments">
+<h3><a class="toc-backref" href="#id2"><code class="docutils literal"><span class="pre">experiments</span></code></a><a class="headerlink" href="#experiments" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>Array.&lt;Object&gt;</strong></p>
+<p>List of all experiments as stored in and provided by ChartDataController.</p>
+</div>
+<div class="section" id="filteredexperiments">
+<h3><a class="toc-backref" href="#id3"><code class="docutils literal"><span class="pre">filteredExperiments</span></code></a><a class="headerlink" href="#filteredexperiments" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>Array.&lt;Object&gt;</strong></p>
+<p>List of experiments which match current filters. Stored in and provided by ChartDataController[.Provider].</p>
+</div>
+<div class="section" id="onbarpartmouseenter">
+<h3><a class="toc-backref" href="#id4"><code class="docutils literal"><span class="pre">onBarPartMouseEnter</span></code></a><a class="headerlink" href="#onbarpartmouseenter" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>function</strong></p>
+<p>A callback function for when someone&#8217;s cursor enters a bar part. Takes the node/datum of the bar part (0) and MouseEvent (1) as arguments.</p>
+</div>
+<div class="section" id="onbarpartmouseleave">
+<h3><a class="toc-backref" href="#id5"><code class="docutils literal"><span class="pre">onBarPartMouseLeave</span></code></a><a class="headerlink" href="#onbarpartmouseleave" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>function</strong></p>
+<p>Counterpart for props.onBarPartMouseEnter.</p>
+</div>
+<div class="section" id="fields">
+<h3><a class="toc-backref" href="#id6"><code class="docutils literal"><span class="pre">fields</span></code></a><a class="headerlink" href="#fields" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>Array.&lt;Object&gt;</strong></p>
+<p>List of field objects containing &#8216;field&#8217;[, &#8216;name&#8217;][, &#8216;description&#8217;][, &#8216;title&#8217;]. If length === 1, only plots bars (no bar parts), if length === 2, plots 2nd field as subdivision. Provide more along with props.useOnlyPopulatedFields = true to have chart auto-select the fields to plot based on which has than 1 term.</p>
+</div>
+<div class="section" id="useonlypopulatedfields">
+<h3><a class="toc-backref" href="#id7"><code class="docutils literal"><span class="pre">useOnlyPopulatedFields</span></code></a><a class="headerlink" href="#useonlypopulatedfields" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>boolean</strong></p>
+<p>Defaults to false. If true, and list of fields is longer than 2, will visualize first field(s) found in list with more than 1 term.</p>
+</div>
+<div class="section" id="width">
+<h3><a class="toc-backref" href="#id8"><code class="docutils literal"><span class="pre">width</span></code></a><a class="headerlink" href="#width" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>number</strong></p>
+<p>Self explanatory.</p>
+</div>
+<div class="section" id="height">
+<h3><a class="toc-backref" href="#id9"><code class="docutils literal"><span class="pre">height</span></code></a><a class="headerlink" href="#height" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>number</strong></p>
+<p>Self explanatory.</p>
+</div>
+<div class="section" id="aggregatetype">
+<h3><a class="toc-backref" href="#id10"><code class="docutils literal"><span class="pre">aggregateType</span></code></a><a class="headerlink" href="#aggregatetype" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>string</strong></p>
+<p>Set by UIControlsWrapper. Controls whether Y-Axis has &#8216;experiment_sets&#8217;, &#8216;experiments&#8217;, or &#8216;files&#8217;.</p>
+</div>
+<div class="section" id="showtype">
+<h3><a class="toc-backref" href="#id11"><code class="docutils literal"><span class="pre">showType</span></code></a><a class="headerlink" href="#showtype" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>string</strong></p>
+<p>Set by UIControlsWrapper. Controls whether showing &#8220;all&#8221; experiments or only the selected or &#8220;filtered&#8221;-in experiments.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Component: <code class="docutils literal"><span class="pre">module.exports.Chart</span></code></a><ul>
+<li><a class="reference internal" href="#props">Props</a><ul>
+<li><a class="reference internal" href="#experiments"><code class="docutils literal"><span class="pre">experiments</span></code></a></li>
+<li><a class="reference internal" href="#filteredexperiments"><code class="docutils literal"><span class="pre">filteredExperiments</span></code></a></li>
+<li><a class="reference internal" href="#onbarpartmouseenter"><code class="docutils literal"><span class="pre">onBarPartMouseEnter</span></code></a></li>
+<li><a class="reference internal" href="#onbarpartmouseleave"><code class="docutils literal"><span class="pre">onBarPartMouseLeave</span></code></a></li>
+<li><a class="reference internal" href="#fields"><code class="docutils literal"><span class="pre">fields</span></code></a></li>
+<li><a class="reference internal" href="#useonlypopulatedfields"><code class="docutils literal"><span class="pre">useOnlyPopulatedFields</span></code></a></li>
+<li><a class="reference internal" href="#width"><code class="docutils literal"><span class="pre">width</span></code></a></li>
+<li><a class="reference internal" href="#height"><code class="docutils literal"><span class="pre">height</span></code></a></li>
+<li><a class="reference internal" href="#aggregatetype"><code class="docutils literal"><span class="pre">aggregateType</span></code></a></li>
+<li><a class="reference internal" href="#showtype"><code class="docutils literal"><span class="pre">showType</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="module-viz_BarPlot.module.exports.aggregationFxn.html"
+                        title="previous chapter">Object: <code class="docutils literal"><span class="pre">module.exports.aggregationFxn</span></code></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="module-viz_ChartDetailCursor.html"
+                        title="next chapter">Component: <code class="docutils literal"><span class="pre">viz/ChartDetailCursor</span></code></a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/jsdoc/module-viz_BarPlot.module.exports.Chart.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="module-viz_ChartDetailCursor.html" title="Component: viz/ChartDetailCursor"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="module-viz_BarPlot.module.exports.aggregationFxn.html" title="Object: module.exports.aggregationFxn"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="module-viz_BarPlot.html" >Module: <code class="docutils literal"><span class="pre">viz/BarPlot</span></code></a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

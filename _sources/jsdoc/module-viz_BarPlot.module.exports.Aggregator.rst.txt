@@ -1,0 +1,104 @@
+.. _module-viz_BarPlot.module.exports.Aggregator:
+
+========================================
+Component: ``module.exports.Aggregator``
+========================================
+
+
+Member Of :doc:`module-viz_BarPlot`
+
+
+This is an optional component which may be placed between BarPlot.Chart and UIControlsWrapper.
+It will store the result of aggregation into state and then pass it as a prop down to BarPlot.Chart.
+Primarily this is to redrawing performance. Utilizes shouldComponentUpdate and componentWillReceiveProps.
+
+Accepts the same props as BarPlot.Chart, save for own 'aggregatedData' and 'aggregatedFilteredData'.
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+
+
+Props
+=====
+
+
+
+
+``experiments``
+---------------
+
+Type: **Array.<Object>**
+
+.. js:property:: experiments
+
+"All" experiments, passed from ChartDataController[.Provider].
+
+
+
+``filteredExperiments``
+-----------------------
+
+Type: **Array.<Object>**
+
+.. js:property:: filteredExperiments
+
+"Selected" experiments, if expSetFilters are set in Redux store. Passed from ChartDataController[.Provider].
+
+
+
+``fields``
+----------
+
+Type: **Array.<Object>**
+
+.. js:property:: fields
+
+Passed from UIControlsWrapper.
+
+
+
+``aggregateType``
+-----------------
+
+Type: **string**
+
+.. js:property:: aggregateType
+
+Passed from UIControlsWrapper.
+
+
+
+``showType``
+------------
+
+Type: **string**
+
+.. js:property:: showType
+
+Passed from UIControlsWrapper.
+
+
+
+``children``
+------------
+
+Type: **BarPlot.Chart**
+
+.. js:property:: children
+
+Must contain a BarPlotChart as the single child element.
+
+
+
+
+
+
+
+
+
+
+

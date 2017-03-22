@@ -1,0 +1,7 @@
+encoded.upgrade.target module
+=============================
+
+.. automodule:: encoded.upgrade.target
+    :members:
+    :undoc-members:
+    :show-inheritance:

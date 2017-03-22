@@ -1,0 +1,91 @@
+.. _undefined.BarSection:
+
+=========================
+Component: ``BarSection``
+=========================
+
+
+
+
+Outputs a section of a bar.
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+
+
+
+
+
+Functions
+=========
+
+
+
+.. _module-viz_BarPlot.Chart.BarSection.isSelected:
+
+
+Public Static ``isSelected``
+----------------------------
+
+Check if 'node' is currently selected.
+
+.. js:function:: isSelected(node, selectedBarSectionTerm, selectedBarSectionParentTerm)
+
+    
+    :param Object node: A 'node' containing at least 'field', 'term', and 'parent' if applicable.
+    :param string selectedBarSectionTerm: Currently selected subdivision field term.
+    :param string selectedBarSectionParentTerm: Currently selected X-Axis field term.
+    :returns boolean: True if node (and node.parent, if applicable) matches selectedBarSectionTerm & selectedBarSectionParentTerm.
+    
+
+Chart.js:41
+
+
+
+.. _module-viz_BarPlot.Chart.BarSection.isSelected:
+
+
+Instance ``isSelected``
+-----------------------
+
+Check if component (aka props.node) is selected.
+Calls Chart.BarSection.isSelected(..) internally.
+
+.. js:function:: isSelected()
+
+    
+    :returns boolean: - True if selected.
+    
+
+Chart.js:60
+
+
+
+.. _module-viz_BarPlot.Chart.BarSection.render:
+
+
+Instance ``render``
+-------------------
+
+
+
+.. js:function:: render()
+
+    
+    :returns Element: - A div element representing a bar section.
+    
+
+Chart.js:69
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,394 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Component: viz/ChartDetailCursor &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Component: viz/QuickInfoBar" href="module-viz_QuickInfoBar.html" />
+    <link rel="prev" title="Component: module.exports.Chart" href="module-viz_BarPlot.module.exports.Chart.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="module-viz_QuickInfoBar.html" title="Component: viz/QuickInfoBar"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="module-viz_BarPlot.module.exports.Chart.html" title="Component: module.exports.Chart"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">JavaScript API Reference</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="component-viz-chartdetailcursor">
+<h1>Component: <code class="docutils literal"><span class="pre">viz/ChartDetailCursor</span></code><a class="headerlink" href="#component-viz-chartdetailcursor" title="Permalink to this headline">¶</a></h1>
+<p>viz/ChartDetailCursor</p>
+<div class="contents local topic" id="local-navigation">
+<p class="topic-title first">Local Navigation</p>
+<ul class="simple">
+<li><a class="reference internal" href="#functions" id="id16">Functions</a><ul>
+<li><a class="reference internal" href="#inner-getdefaultprops" id="id17">Inner <code class="docutils literal"><span class="pre">getDefaultProps</span></code></a></li>
+<li><a class="reference internal" href="#inner-getcursoroffset" id="id18">Inner <code class="docutils literal"><span class="pre">getCursorOffset</span></code></a></li>
+<li><a class="reference internal" href="#inner-getinitialstate" id="id19">Inner <code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
+<li><a class="reference internal" href="#inner-componentdidmount" id="id20">Inner <code class="docutils literal"><span class="pre">componentDidMount</span></code></a></li>
+<li><a class="reference internal" href="#inner-componentwillunmount" id="id21">Inner <code class="docutils literal"><span class="pre">componentWillUnmount</span></code></a></li>
+<li><a class="reference internal" href="#public-instance-update" id="id22">Public Instance <code class="docutils literal"><span class="pre">update</span></code></a></li>
+<li><a class="reference internal" href="#public-instance-reset" id="id23">Public Instance <code class="docutils literal"><span class="pre">reset</span></code></a></li>
+<li><a class="reference internal" href="#inner-render" id="id24">Inner <code class="docutils literal"><span class="pre">render</span></code></a></li>
+<li><a class="reference internal" href="#inner-header" id="id25">Inner <code class="docutils literal"><span class="pre">header</span></code></a></li>
+<li><a class="reference internal" href="#id1" id="id26">Inner <code class="docutils literal"><span class="pre">render</span></code></a></li>
+<li><a class="reference internal" href="#inner-getcurrentcounts" id="id27">Inner <code class="docutils literal"><span class="pre">getCurrentCounts</span></code></a></li>
+<li><a class="reference internal" href="#inner-renderdetailsection" id="id28">Inner <code class="docutils literal"><span class="pre">renderDetailSection</span></code></a></li>
+<li><a class="reference internal" href="#inner-primarycount" id="id29">Inner <code class="docutils literal"><span class="pre">primaryCount</span></code></a></li>
+<li><a class="reference internal" href="#inner-primarycountlabel" id="id30">Inner <code class="docutils literal"><span class="pre">primaryCountLabel</span></code></a></li>
+<li><a class="reference internal" href="#id3" id="id31">Inner <code class="docutils literal"><span class="pre">render</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#members" id="id32">Members</a></li>
+</ul>
+</div>
+<div class="section" id="functions">
+<h2><a class="toc-backref" href="#id16">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="inner-getdefaultprops">
+<span id="module-viz-chartdetailcursor-getdefaultprops"></span><h3><a class="toc-backref" href="#id17">Inner <code class="docutils literal"><span class="pre">getDefaultProps</span></code></a><a class="headerlink" href="#inner-getdefaultprops" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="getDefaultProps">
+<code class="descname">getDefaultProps</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getDefaultProps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>ChartDetailCursor.js:23</p>
+</div>
+<div class="section" id="inner-getcursoroffset">
+<span id="module-viz-chartdetailcursor-getcursoroffset"></span><h3><a class="toc-backref" href="#id18">Inner <code class="docutils literal"><span class="pre">getCursorOffset</span></code></a><a class="headerlink" href="#inner-getcursoroffset" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="getCursorOffset">
+<code class="descname">getCursorOffset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getCursorOffset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>ChartDetailCursor.js:45</p>
+</div>
+<div class="section" id="inner-getinitialstate">
+<span id="module-viz-chartdetailcursor-getinitialstate"></span><h3><a class="toc-backref" href="#id19">Inner <code class="docutils literal"><span class="pre">getInitialState</span></code></a><a class="headerlink" href="#inner-getinitialstate" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="getInitialState">
+<code class="descname">getInitialState</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getInitialState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>ChartDetailCursor.js:63</p>
+</div>
+<div class="section" id="inner-componentdidmount">
+<span id="module-viz-chartdetailcursor-componentdidmount"></span><h3><a class="toc-backref" href="#id20">Inner <code class="docutils literal"><span class="pre">componentDidMount</span></code></a><a class="headerlink" href="#inner-componentdidmount" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="componentDidMount">
+<code class="descname">componentDidMount</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#componentDidMount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>ChartDetailCursor.js:82</p>
+</div>
+<div class="section" id="inner-componentwillunmount">
+<span id="module-viz-chartdetailcursor-componentwillunmount"></span><h3><a class="toc-backref" href="#id21">Inner <code class="docutils literal"><span class="pre">componentWillUnmount</span></code></a><a class="headerlink" href="#inner-componentwillunmount" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="componentWillUnmount">
+<code class="descname">componentWillUnmount</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#componentWillUnmount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>ChartDetailCursor.js:91</p>
+</div>
+<div class="section" id="public-instance-update">
+<span id="module-viz-chartdetailcursor-update"></span><h3><a class="toc-backref" href="#id22">Public Instance <code class="docutils literal"><span class="pre">update</span></code></a><a class="headerlink" href="#public-instance-update" title="Permalink to this headline">¶</a></h3>
+<p>Call this function to update component state with the new &#8220;path&#8221; and other properties, if applicable.</p>
+<dl class="function">
+<dt id="update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>state</em><span class="optional">[</span>, <em>cb</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#update" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>state</strong> (<em>Object</em>) &#8211; New state to set. Should contain a &#8216;path&#8217; property.</li>
+<li><strong>cb</strong> (<em>function</em>) &#8211; Optional callback function. Takes updated state as argument.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns undefined:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">Nothing</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>ChartDetailCursor.js:108</p>
+</div>
+<div class="section" id="public-instance-reset">
+<span id="module-viz-chartdetailcursor-reset"></span><h3><a class="toc-backref" href="#id23">Public Instance <code class="docutils literal"><span class="pre">reset</span></code></a><a class="headerlink" href="#public-instance-reset" title="Permalink to this headline">¶</a></h3>
+<p>Call this function to reset component state. Cancels out if stickied.</p>
+<dl class="function">
+<dt id="reset">
+<code class="descname">reset</code><span class="sig-paren">(</span><span class="optional">[</span><em>cb</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#reset" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>cb</strong> (<em>function</em>) &#8211; Optional callback function. Takes updated state as argument.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns boolean:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">True if reset, false if not.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>ChartDetailCursor.js:125</p>
+</div>
+<div class="section" id="inner-render">
+<span id="module-viz-chartdetailcursor-render"></span><h3><a class="toc-backref" href="#id24">Inner <code class="docutils literal"><span class="pre">render</span></code></a><a class="headerlink" href="#inner-render" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="render">
+<code class="descname">render</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#render" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>ChartDetailCursor.js:134</p>
+</div>
+<div class="section" id="inner-header">
+<span id="module-viz-chartdetailcursor-header"></span><h3><a class="toc-backref" href="#id25">Inner <code class="docutils literal"><span class="pre">header</span></code></a><a class="headerlink" href="#inner-header" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="header">
+<code class="descname">header</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#header" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>ChartDetailCursor.js:247</p>
+</div>
+<div class="section" id="id1">
+<span id="id2"></span><h3><a class="toc-backref" href="#id26">Inner <code class="docutils literal"><span class="pre">render</span></code></a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt>
+<code class="descname">render</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<p>ChartDetailCursor.js:265</p>
+</div>
+<div class="section" id="inner-getcurrentcounts">
+<span id="module-viz-chartdetailcursor-getcurrentcounts"></span><h3><a class="toc-backref" href="#id27">Inner <code class="docutils literal"><span class="pre">getCurrentCounts</span></code></a><a class="headerlink" href="#inner-getcurrentcounts" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="getCurrentCounts">
+<code class="descname">getCurrentCounts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getCurrentCounts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>ChartDetailCursor.js:304</p>
+</div>
+<div class="section" id="inner-renderdetailsection">
+<span id="module-viz-chartdetailcursor-renderdetailsection"></span><h3><a class="toc-backref" href="#id28">Inner <code class="docutils literal"><span class="pre">renderDetailSection</span></code></a><a class="headerlink" href="#inner-renderdetailsection" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="renderDetailSection">
+<code class="descname">renderDetailSection</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#renderDetailSection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>ChartDetailCursor.js:309</p>
+</div>
+<div class="section" id="inner-primarycount">
+<span id="module-viz-chartdetailcursor-primarycount"></span><h3><a class="toc-backref" href="#id29">Inner <code class="docutils literal"><span class="pre">primaryCount</span></code></a><a class="headerlink" href="#inner-primarycount" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="primaryCount">
+<code class="descname">primaryCount</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#primaryCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>ChartDetailCursor.js:340</p>
+</div>
+<div class="section" id="inner-primarycountlabel">
+<span id="module-viz-chartdetailcursor-primarycountlabel"></span><h3><a class="toc-backref" href="#id30">Inner <code class="docutils literal"><span class="pre">primaryCountLabel</span></code></a><a class="headerlink" href="#inner-primarycountlabel" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="primaryCountLabel">
+<code class="descname">primaryCountLabel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#primaryCountLabel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>ChartDetailCursor.js:348</p>
+</div>
+<div class="section" id="id3">
+<span id="id4"></span><h3><a class="toc-backref" href="#id31">Inner <code class="docutils literal"><span class="pre">render</span></code></a><a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt>
+<code class="descname">render</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
+<dd></dd></dl>
+
+<p>ChartDetailCursor.js:358</p>
+</div>
+</div>
+<div class="section" id="members">
+<h2><a class="toc-backref" href="#id32">Members</a><a class="headerlink" href="#members" title="Permalink to this headline">¶</a></h2>
+<p id="module-viz-chartdetailcursor-chartdetailcursor"><code class="docutils literal"><span class="pre">ChartDetailCursor</span></code></p>
+<p id="module-viz-chartdetailcursor-containingelement"><code class="docutils literal"><span class="pre">containingElement</span></code></p>
+<p id="module-viz-chartdetailcursor-hidewhennocontainingelement"><code class="docutils literal"><span class="pre">hideWhenNoContainingElement</span></code></p>
+<p id="module-viz-chartdetailcursor-cursorcontainmentdimensions"><code class="docutils literal"><span class="pre">cursorContainmentDimensions</span></code></p>
+<p id="module-viz-chartdetailcursor-width"><code class="docutils literal"><span class="pre">width</span></code></p>
+<p id="module-viz-chartdetailcursor-height"><code class="docutils literal"><span class="pre">height</span></code></p>
+<p id="module-viz-chartdetailcursor-horizontalalign"><code class="docutils literal"><span class="pre">horizontalAlign</span></code></p>
+<p id="module-viz-chartdetailcursor-horizontaloffset"><code class="docutils literal"><span class="pre">horizontalOffset</span></code></p>
+<p id="module-viz-chartdetailcursor-verticalalign"><code class="docutils literal"><span class="pre">verticalAlign</span></code></p>
+<p id="module-viz-chartdetailcursor-verticaloffset"><code class="docutils literal"><span class="pre">verticalOffset</span></code></p>
+<p id="module-viz-chartdetailcursor-debugstyle"><code class="docutils literal"><span class="pre">debugStyle</span></code></p>
+<p id="module-viz-chartdetailcursor-id"><code class="docutils literal"><span class="pre">id</span></code></p>
+<p id="module-viz-chartdetailcursor-title"><code class="docutils literal"><span class="pre">title</span></code></p>
+<p id="module-viz-chartdetailcursor-term"><code class="docutils literal"><span class="pre">term</span></code></p>
+<p id="module-viz-chartdetailcursor-field"><code class="docutils literal"><span class="pre">field</span></code></p>
+<p id="module-viz-chartdetailcursor-filteredout"><code class="docutils literal"><span class="pre">filteredOut</span></code></p>
+<p id="module-viz-chartdetailcursor-includetitledescendentprefix"><code class="docutils literal"><span class="pre">includeTitleDescendentPrefix</span></code></p>
+<p id="id5"><code class="docutils literal"><span class="pre">primaryCount</span></code></p>
+<p id="module-viz-chartdetailcursor-path"><code class="docutils literal"><span class="pre">path</span></code></p>
+<p id="module-viz-chartdetailcursor-mounted"><code class="docutils literal"><span class="pre">mounted</span></code></p>
+<p id="module-viz-chartdetailcursor-sticky"><code class="docutils literal"><span class="pre">sticky</span></code></p>
+<p id="module-viz-chartdetailcursor-updatefxns-undefined"><code class="docutils literal"><span class="pre">updateFxns[undefined]</span></code></p>
+<p id="module-viz-chartdetailcursor-resetfxns-undefined"><code class="docutils literal"><span class="pre">resetFxns[undefined]</span></code></p>
+<p id="id6"><code class="docutils literal"><span class="pre">mounted</span></code></p>
+<p id="id7"><code class="docutils literal"><span class="pre">updateFxns[undefined]</span></code></p>
+<p id="id8"><code class="docutils literal"><span class="pre">resetFxns[undefined]</span></code></p>
+<p id="module-viz-chartdetailcursor-containdims"><code class="docutils literal"><span class="pre">containDims</span></code></p>
+<p id="id9"><code class="docutils literal"><span class="pre">containDims</span></code></p>
+<p id="module-viz-chartdetailcursor-left"><code class="docutils literal"><span class="pre">left</span></code></p>
+<p id="module-viz-chartdetailcursor-right"><code class="docutils literal"><span class="pre">right</span></code></p>
+<p id="module-viz-chartdetailcursor-bottom"><code class="docutils literal"><span class="pre">bottom</span></code></p>
+<p id="module-viz-chartdetailcursor-top"><code class="docutils literal"><span class="pre">top</span></code></p>
+<p id="module-viz-chartdetailcursor-statics"><code class="docutils literal"><span class="pre">statics</span></code></p>
+<p id="module-viz-chartdetailcursor-experiments"><code class="docutils literal"><span class="pre">experiments</span></code></p>
+<p id="module-viz-chartdetailcursor-experiments-active"><code class="docutils literal"><span class="pre">experiments_active</span></code></p>
+<p id="module-viz-chartdetailcursor-experiment-sets"><code class="docutils literal"><span class="pre">experiment_sets</span></code></p>
+<p id="module-viz-chartdetailcursor-files"><code class="docutils literal"><span class="pre">files</span></code></p>
+<p id="module-viz-chartdetailcursor-elem"><code class="docutils literal"><span class="pre">elem</span></code></p>
+<p id="id10"><code class="docutils literal"><span class="pre">statics</span></code></p>
+<p id="module-viz-chartdetailcursor-paddingleft"><code class="docutils literal"><span class="pre">paddingLeft</span></code></p>
+<p id="module-viz-chartdetailcursor-countstoshow"><code class="docutils literal"><span class="pre">countsToShow</span></code></p>
+<p id="module-viz-chartdetailcursor-name"><code class="docutils literal"><span class="pre">name</span></code></p>
+<p id="id11"><code class="docutils literal"><span class="pre">name</span></code></p>
+<p id="id12"><code class="docutils literal"><span class="pre">name</span></code></p>
+<p id="id13"><code class="docutils literal"><span class="pre">name</span></code></p>
+<p id="id14"><code class="docutils literal"><span class="pre">name</span></code></p>
+<p id="id15"><code class="docutils literal"><span class="pre">name</span></code></p>
+<p id="module-viz-chartdetailcursor-color"><code class="docutils literal"><span class="pre">color</span></code></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Component: <code class="docutils literal"><span class="pre">viz/ChartDetailCursor</span></code></a><ul>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#inner-getdefaultprops">Inner <code class="docutils literal"><span class="pre">getDefaultProps</span></code></a></li>
+<li><a class="reference internal" href="#inner-getcursoroffset">Inner <code class="docutils literal"><span class="pre">getCursorOffset</span></code></a></li>
+<li><a class="reference internal" href="#inner-getinitialstate">Inner <code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
+<li><a class="reference internal" href="#inner-componentdidmount">Inner <code class="docutils literal"><span class="pre">componentDidMount</span></code></a></li>
+<li><a class="reference internal" href="#inner-componentwillunmount">Inner <code class="docutils literal"><span class="pre">componentWillUnmount</span></code></a></li>
+<li><a class="reference internal" href="#public-instance-update">Public Instance <code class="docutils literal"><span class="pre">update</span></code></a></li>
+<li><a class="reference internal" href="#public-instance-reset">Public Instance <code class="docutils literal"><span class="pre">reset</span></code></a></li>
+<li><a class="reference internal" href="#inner-render">Inner <code class="docutils literal"><span class="pre">render</span></code></a></li>
+<li><a class="reference internal" href="#inner-header">Inner <code class="docutils literal"><span class="pre">header</span></code></a></li>
+<li><a class="reference internal" href="#id1">Inner <code class="docutils literal"><span class="pre">render</span></code></a></li>
+<li><a class="reference internal" href="#inner-getcurrentcounts">Inner <code class="docutils literal"><span class="pre">getCurrentCounts</span></code></a></li>
+<li><a class="reference internal" href="#inner-renderdetailsection">Inner <code class="docutils literal"><span class="pre">renderDetailSection</span></code></a></li>
+<li><a class="reference internal" href="#inner-primarycount">Inner <code class="docutils literal"><span class="pre">primaryCount</span></code></a></li>
+<li><a class="reference internal" href="#inner-primarycountlabel">Inner <code class="docutils literal"><span class="pre">primaryCountLabel</span></code></a></li>
+<li><a class="reference internal" href="#id3">Inner <code class="docutils literal"><span class="pre">render</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#members">Members</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="module-viz_BarPlot.module.exports.Chart.html"
+                        title="previous chapter">Component: <code class="docutils literal"><span class="pre">module.exports.Chart</span></code></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="module-viz_QuickInfoBar.html"
+                        title="next chapter">Component: <code class="docutils literal"><span class="pre">viz/QuickInfoBar</span></code></a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/jsdoc/module-viz_ChartDetailCursor.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="module-viz_QuickInfoBar.html" title="Component: viz/QuickInfoBar"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="module-viz_BarPlot.module.exports.Chart.html" title="Component: module.exports.Chart"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

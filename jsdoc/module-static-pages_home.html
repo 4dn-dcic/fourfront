@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Component: static-pages/home &#8212; 4D Nucleome Portal 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/sidebar.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Module: viz/BarPlot" href="module-viz_BarPlot.html" />
+    <link rel="prev" title="Deprecated Component: BannerEntry" href="module-static-pages_components.BannerEntry.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="module-viz_BarPlot.html" title="Module: viz/BarPlot"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="module-static-pages_components.BannerEntry.html" title="Deprecated Component: BannerEntry"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">JavaScript API Reference</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="component-static-pages-home">
+<h1>Component: <code class="docutils literal"><span class="pre">static-pages/home</span></code><a class="headerlink" href="#component-static-pages-home" title="Permalink to this headline">¶</a></h1>
+<p>Homepage View component. Gets rendered at &#8216;/&#8217; and &#8216;/home&#8217; paths.</p>
+<div class="contents local topic" id="local-navigation">
+<p class="topic-title first">Local Navigation</p>
+<ul class="simple">
+<li><a class="reference internal" href="#props" id="id1">Props</a><ul>
+<li><a class="reference internal" href="#context" id="id2"><code class="docutils literal"><span class="pre">context</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#functions" id="id3">Functions</a><ul>
+<li><a class="reference internal" href="#deprecated-inner-summaryheading" id="id4"><em>Deprecated</em> Inner <code class="docutils literal"><span class="pre">summaryHeading</span></code></a></li>
+<li><a class="reference internal" href="#deprecated-inner-banner" id="id5"><em>Deprecated</em> Inner <code class="docutils literal"><span class="pre">banner</span></code></a></li>
+<li><a class="reference internal" href="#inner-render" id="id6">Inner <code class="docutils literal"><span class="pre">render</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#members" id="id7">Members</a></li>
+</ul>
+</div>
+<div class="section" id="props">
+<h2><a class="toc-backref" href="#id1">Props</a><a class="headerlink" href="#props" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="context">
+<h3><a class="toc-backref" href="#id2"><code class="docutils literal"><span class="pre">context</span></code></a><a class="headerlink" href="#context" title="Permalink to this headline">¶</a></h3>
+<p>Type: <strong>Object</strong></p>
+<p>Should have properties typically needed for any static page.</p>
+</div>
+</div>
+<div class="section" id="functions">
+<h2><a class="toc-backref" href="#id3">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="deprecated-inner-summaryheading">
+<span id="module-static-pages-home-summaryheading"></span><h3><a class="toc-backref" href="#id4"><em>Deprecated</em> Inner <code class="docutils literal"><span class="pre">summaryHeading</span></code></a><a class="headerlink" href="#deprecated-inner-summaryheading" title="Permalink to this headline">¶</a></h3>
+<p>Render old subheading</p>
+<dl class="function">
+<dt id="summaryHeading">
+<code class="descname">summaryHeading</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#summaryHeading" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Returns Element:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">H4 React Element with quick summary: &#8220;The portal currently hosts X from the 4DN network and Y from other sources over Z.&#8221;</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>home.js:39</p>
+</div>
+<div class="section" id="deprecated-inner-banner">
+<span id="module-static-pages-home-banner"></span><h3><a class="toc-backref" href="#id5"><em>Deprecated</em> Inner <code class="docutils literal"><span class="pre">banner</span></code></a><a class="headerlink" href="#deprecated-inner-banner" title="Permalink to this headline">¶</a></h3>
+<p>Render old homepage banner.</p>
+<dl class="function">
+<dt id="banner">
+<code class="descname">banner</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#banner" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Returns Element:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">A React &lt;div&gt; element.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>home.js:60</p>
+</div>
+<div class="section" id="inner-render">
+<span id="module-static-pages-home-render"></span><h3><a class="toc-backref" href="#id6">Inner <code class="docutils literal"><span class="pre">render</span></code></a><a class="headerlink" href="#inner-render" title="Permalink to this headline">¶</a></h3>
+<p>The render function. Renders homepage contents.</p>
+<dl class="function">
+<dt id="render">
+<code class="descname">render</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#render" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Returns Element:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">A React &lt;div&gt; element.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>home.js:76</p>
+</div>
+</div>
+<div class="section" id="members">
+<h2><a class="toc-backref" href="#id7">Members</a><a class="headerlink" href="#members" title="Permalink to this headline">¶</a></h2>
+<p id="module-static-pages-home-homepage"><code class="docutils literal"><span class="pre">HomePage</span></code></p>
+<p id="module-static-pages-home-proptypes"><code class="docutils literal"><span class="pre">propTypes</span></code></p>
+<p id="module-static-pages-home-content"><code class="docutils literal"><span class="pre">content</span></code></p>
+<p id="module-static-pages-home-description"><code class="docutils literal"><span class="pre">description</span></code></p>
+<p id="module-static-pages-home-links"><code class="docutils literal"><span class="pre">links</span></code></p>
+<p id="module-static-pages-home-float"><code class="docutils literal"><span class="pre">float</span></code></p>
+<p id="module-static-pages-home-padding"><code class="docutils literal"><span class="pre">padding</span></code></p>
+<p id="module-static-pages-home-fontsize"><code class="docutils literal"><span class="pre">fontSize</span></code></p>
+<p id="module-static-pages-home-html"><code class="docutils literal"><span class="pre">__html</span></code></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Component: <code class="docutils literal"><span class="pre">static-pages/home</span></code></a><ul>
+<li><a class="reference internal" href="#props">Props</a><ul>
+<li><a class="reference internal" href="#context"><code class="docutils literal"><span class="pre">context</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#deprecated-inner-summaryheading"><em>Deprecated</em> Inner <code class="docutils literal"><span class="pre">summaryHeading</span></code></a></li>
+<li><a class="reference internal" href="#deprecated-inner-banner"><em>Deprecated</em> Inner <code class="docutils literal"><span class="pre">banner</span></code></a></li>
+<li><a class="reference internal" href="#inner-render">Inner <code class="docutils literal"><span class="pre">render</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#members">Members</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="module-static-pages_components.BannerEntry.html"
+                        title="previous chapter"><em>Deprecated</em> Component: <code class="docutils literal"><span class="pre">BannerEntry</span></code></a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="module-viz_BarPlot.html"
+                        title="next chapter">Module: <code class="docutils literal"><span class="pre">viz/BarPlot</span></code></a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/jsdoc/module-static-pages_home.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="module-viz_BarPlot.html" title="Module: viz/BarPlot"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="module-static-pages_components.BannerEntry.html" title="Deprecated Component: BannerEntry"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, 4DN-DCIC.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.3.
+    </div>
+  </body>
+</html>

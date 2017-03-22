@@ -1,0 +1,79 @@
+=====================
+Component: ``footer``
+=====================
+
+
+
+
+Page footer which is visible on each page.
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+
+
+Props
+=====
+
+
+
+
+``version``
+-----------
+
+Type: **string**
+
+.. js:property:: version
+
+App version number
+
+Functions
+=========
+
+
+
+.. _module-footer.render:
+
+
+Inner ``render``
+----------------
+
+
+
+.. js:function:: render()
+
+    
+    
+
+footer.js:16
+
+
+
+
+Members
+=======
+
+
+.. _module-footer.Footer:
+
+``Footer``
+
+
+
+
+
+
+.. _module-footer.propTypes:
+
+``propTypes``
+
+
+
+
+
+
+
+

@@ -1,0 +1,724 @@
+====================================
+Component: ``viz/ChartDetailCursor``
+====================================
+
+
+
+
+viz/ChartDetailCursor
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+
+
+
+
+
+Functions
+=========
+
+
+
+.. _module-viz_ChartDetailCursor.getDefaultProps:
+
+
+Inner ``getDefaultProps``
+-------------------------
+
+
+
+.. js:function:: getDefaultProps()
+
+    
+    
+
+ChartDetailCursor.js:23
+
+
+
+.. _module-viz_ChartDetailCursor.getCursorOffset:
+
+
+Inner ``getCursorOffset``
+-------------------------
+
+
+
+.. js:function:: getCursorOffset()
+
+    
+    
+
+ChartDetailCursor.js:45
+
+
+
+.. _module-viz_ChartDetailCursor.getInitialState:
+
+
+Inner ``getInitialState``
+-------------------------
+
+
+
+.. js:function:: getInitialState()
+
+    
+    
+
+ChartDetailCursor.js:63
+
+
+
+.. _module-viz_ChartDetailCursor.componentDidMount:
+
+
+Inner ``componentDidMount``
+---------------------------
+
+
+
+.. js:function:: componentDidMount()
+
+    
+    
+
+ChartDetailCursor.js:82
+
+
+
+.. _module-viz_ChartDetailCursor.componentWillUnmount:
+
+
+Inner ``componentWillUnmount``
+------------------------------
+
+
+
+.. js:function:: componentWillUnmount()
+
+    
+    
+
+ChartDetailCursor.js:91
+
+
+
+.. _module-viz_ChartDetailCursor.update:
+
+
+Public Instance ``update``
+--------------------------
+
+Call this function to update component state with the new "path" and other properties, if applicable.
+
+.. js:function:: update(state[, cb])
+
+    
+    :param Object state: New state to set. Should contain a 'path' property.
+    :param function cb: Optional callback function. Takes updated state as argument.
+    :returns undefined: Nothing
+    
+
+ChartDetailCursor.js:108
+
+
+
+.. _module-viz_ChartDetailCursor.reset:
+
+
+Public Instance ``reset``
+-------------------------
+
+Call this function to reset component state. Cancels out if stickied.
+
+.. js:function:: reset([cb])
+
+    
+    :param function cb: Optional callback function. Takes updated state as argument.
+    :returns boolean: True if reset, false if not.
+    
+
+ChartDetailCursor.js:125
+
+
+
+.. _module-viz_ChartDetailCursor.render:
+
+
+Inner ``render``
+----------------
+
+
+
+.. js:function:: render()
+
+    
+    
+
+ChartDetailCursor.js:134
+
+
+
+.. _module-viz_ChartDetailCursor.header:
+
+
+Inner ``header``
+----------------
+
+
+
+.. js:function:: header()
+
+    
+    
+
+ChartDetailCursor.js:247
+
+
+
+.. _module-viz_ChartDetailCursor.render:
+
+
+Inner ``render``
+----------------
+
+
+
+.. js:function:: render()
+
+    
+    
+
+ChartDetailCursor.js:265
+
+
+
+.. _module-viz_ChartDetailCursor.getCurrentCounts:
+
+
+Inner ``getCurrentCounts``
+--------------------------
+
+
+
+.. js:function:: getCurrentCounts()
+
+    
+    
+
+ChartDetailCursor.js:304
+
+
+
+.. _module-viz_ChartDetailCursor.renderDetailSection:
+
+
+Inner ``renderDetailSection``
+-----------------------------
+
+
+
+.. js:function:: renderDetailSection()
+
+    
+    
+
+ChartDetailCursor.js:309
+
+
+
+.. _module-viz_ChartDetailCursor.primaryCount:
+
+
+Inner ``primaryCount``
+----------------------
+
+
+
+.. js:function:: primaryCount()
+
+    
+    
+
+ChartDetailCursor.js:340
+
+
+
+.. _module-viz_ChartDetailCursor.primaryCountLabel:
+
+
+Inner ``primaryCountLabel``
+---------------------------
+
+
+
+.. js:function:: primaryCountLabel()
+
+    
+    
+
+ChartDetailCursor.js:348
+
+
+
+.. _module-viz_ChartDetailCursor.render:
+
+
+Inner ``render``
+----------------
+
+
+
+.. js:function:: render()
+
+    
+    
+
+ChartDetailCursor.js:358
+
+
+
+
+Members
+=======
+
+
+.. _module-viz_ChartDetailCursor.ChartDetailCursor:
+
+``ChartDetailCursor``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.containingElement:
+
+``containingElement``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.hideWhenNoContainingElement:
+
+``hideWhenNoContainingElement``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.cursorContainmentDimensions:
+
+``cursorContainmentDimensions``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.width:
+
+``width``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.height:
+
+``height``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.horizontalAlign:
+
+``horizontalAlign``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.horizontalOffset:
+
+``horizontalOffset``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.verticalAlign:
+
+``verticalAlign``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.verticalOffset:
+
+``verticalOffset``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.debugStyle:
+
+``debugStyle``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.id:
+
+``id``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.title:
+
+``title``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.term:
+
+``term``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.field:
+
+``field``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.filteredOut:
+
+``filteredOut``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.includeTitleDescendentPrefix:
+
+``includeTitleDescendentPrefix``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.primaryCount:
+
+``primaryCount``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.path:
+
+``path``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.mounted:
+
+``mounted``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.sticky:
+
+``sticky``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.updateFxns[undefined]:
+
+``updateFxns[undefined]``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.resetFxns[undefined]:
+
+``resetFxns[undefined]``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.mounted:
+
+``mounted``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.updateFxns[undefined]:
+
+``updateFxns[undefined]``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.resetFxns[undefined]:
+
+``resetFxns[undefined]``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.containDims:
+
+``containDims``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.containDims:
+
+``containDims``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.left:
+
+``left``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.right:
+
+``right``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.bottom:
+
+``bottom``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.top:
+
+``top``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.statics:
+
+``statics``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.experiments:
+
+``experiments``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.experiments_active:
+
+``experiments_active``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.experiment_sets:
+
+``experiment_sets``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.files:
+
+``files``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.elem:
+
+``elem``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.statics:
+
+``statics``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.paddingLeft:
+
+``paddingLeft``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.countsToShow:
+
+``countsToShow``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.name:
+
+``name``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.name:
+
+``name``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.name:
+
+``name``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.name:
+
+``name``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.name:
+
+``name``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.name:
+
+``name``
+
+
+
+
+
+
+.. _module-viz_ChartDetailCursor.color:
+
+``color``
+
+
+
+
+
+
+
+

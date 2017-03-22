@@ -1,0 +1,55 @@
+.. _undefined.module.exports.ItemPageTitle:
+
+===========================================
+Component: ``module.exports.ItemPageTitle``
+===========================================
+
+
+
+
+Renders page title appropriately for a provided props.context.
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+
+
+Props
+=====
+
+
+
+
+``showAccessionTitles``
+-----------------------
+
+Type: **boolean**
+
+.. js:property:: showAccessionTitles
+
+If true, will render title if it is the accession. Otherwise, beyond Item type, the title will be hidden.
+
+
+
+``context``
+-----------
+
+Type: **Object**
+
+.. js:property:: context
+
+JSON representation of current Item page/view.
+
+
+
+
+
+
+
+
+
+
+

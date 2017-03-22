@@ -1,0 +1,56 @@
+.. _module-item-pages_components.ExternalReferenceLink:
+
+====================================
+Component: ``ExternalReferenceLink``
+====================================
+
+
+Member Of :doc:`module-item-pages_components`
+
+
+Used in Component module:item-pages/components.ItemFooterRow to display an external reference link.
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+
+
+Props
+=====
+
+
+
+
+``children``
+------------
+
+Type: **Array.<Component>** | **Array.<Element>** | **Array.<string>**
+
+.. js:property:: children
+
+Inner contents or title of link.
+
+
+
+``uri``
+-------
+
+Type: **string**
+
+.. js:property:: uri
+
+The href for the link.
+
+
+
+
+
+
+
+
+
+
+

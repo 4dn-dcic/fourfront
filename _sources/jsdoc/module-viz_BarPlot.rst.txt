@@ -1,0 +1,65 @@
+=======================
+Module: ``viz/BarPlot``
+=======================
+
+
+
+
+Components and functions for displaying a BarPlot chart.
+
+
+.. contents:: Local Navigation
+   :local:
+
+4 Children
+==========
+
+.. toctree::
+   :maxdepth: 3
+   
+   module-viz_BarPlot.module.exports.UIControlsWrapper
+   module-viz_BarPlot.module.exports.Aggregator
+   module-viz_BarPlot.module.exports.aggregationFxn
+   module-viz_BarPlot.module.exports.Chart
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Examples
+========
+
+.. code-block:: javascript
+   :caption: Example Usage
+
+   <ChartDataController.Provider id="barplot1">
+       <BarPlot.UIControlsWrapper legend chartHeight={height}>
+           <BarPlot.Aggregator>
+               <BarPlot.Chart
+                   width={this.width(1) - 20}
+                   height={height}
+                   onBarPartMouseEnter={(node, evt)=>{
+                       ...
+                   }}
+                   onBarPartMouseLeave={...}
+                   onBarPartClick={(node, evt)=>{
+                       ...
+                   }}
+               />
+           </BarPlot.Aggregator>
+       </BarPlot.UIControlsWrapper>
+   </ChartDataController.Provider>
+

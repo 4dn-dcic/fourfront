@@ -1,0 +1,42 @@
+================================
+Component: ``static-pages/home``
+================================
+
+
+
+
+Homepage View component. Gets rendered at '/' and '/home' paths.
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+
+
+Props
+=====
+
+
+
+
+``context``
+-----------
+
+Type: **Object**
+
+.. js:property:: context
+
+Should have properties typically needed for any static page.
+
+
+
+
+
+
+
+
+
+
+

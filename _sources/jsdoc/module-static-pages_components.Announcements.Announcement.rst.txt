@@ -1,0 +1,32 @@
+.. _undefined.Announcement:
+
+===========================
+Component: ``Announcement``
+===========================
+
+
+
+
+A single Announcement block/view.
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

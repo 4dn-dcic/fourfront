@@ -1,0 +1,65 @@
+.. _module-static-pages_components.Announcements:
+
+============================
+Component: ``Announcements``
+============================
+
+
+Member Of :doc:`module-static-pages_components`
+
+
+Component which shows currents announcements.
+Announcements are (temporarily) currently stored in src/encoded/static/data/announcements_data.js.
+
+
+.. contents:: Local Navigation
+   :local:
+
+1 Children
+==========
+
+.. toctree::
+   :maxdepth: 3
+   
+   module-static-pages_components.Announcements.Announcement
+   
+
+
+
+
+Props
+=====
+
+
+
+
+``className``
+-------------
+
+Type: **string**
+
+.. js:property:: className
+
+Outer <div> element's className
+
+
+
+``id``
+------
+
+Type: **string**
+
+.. js:property:: id
+
+Outer <div> element's id attribute.
+
+
+
+
+
+
+
+
+
+
+

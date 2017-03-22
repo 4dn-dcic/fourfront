@@ -1,0 +1,34 @@
+.. _module-viz_BarPlot.module.exports.UIControlsWrapper:
+
+===============================================
+Component: ``module.exports.UIControlsWrapper``
+===============================================
+
+
+Member Of :doc:`module-viz_BarPlot`
+
+
+Component which wraps BarPlot.Chart and provides some UI buttons and stuff.
+Passes props to BarPlot.Chart.
+
+
+.. contents:: Local Navigation
+   :local:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

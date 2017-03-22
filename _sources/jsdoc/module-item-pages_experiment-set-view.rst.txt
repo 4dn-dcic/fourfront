@@ -1,0 +1,590 @@
+==========================================
+Module: ``item-pages/experiment-set-view``
+==========================================
+
+
+
+
+Contains the ExperimentSetView component, which renders out the ExperimentSet view/page.
+
+
+.. contents:: Local Navigation
+   :local:
+
+1 Children
+==========
+
+.. toctree::
+   :maxdepth: 3
+   
+   module-item-pages_experiment-set-view.ExperimentSetView
+   
+
+
+
+
+
+
+
+Functions
+=========
+
+
+
+.. _module-item-pages_experiment-set-view.getDefaultProps:
+
+
+Inner ``getDefaultProps``
+-------------------------
+
+
+
+.. js:function:: getDefaultProps()
+
+    
+    
+
+experiment-set-view.js:45
+
+
+
+.. _module-item-pages_experiment-set-view.getInitialState:
+
+
+Inner ``getInitialState``
+-------------------------
+
+
+
+.. js:function:: getInitialState()
+
+    
+    
+
+experiment-set-view.js:51
+
+
+
+.. _module-item-pages_experiment-set-view.componentWillMount:
+
+
+Inner ``componentWillMount``
+----------------------------
+
+
+
+.. js:function:: componentWillMount()
+
+    
+    
+
+experiment-set-view.js:63
+
+
+
+.. _module-item-pages_experiment-set-view.componentDidMount:
+
+
+Inner ``componentDidMount``
+---------------------------
+
+
+
+.. js:function:: componentDidMount()
+
+    
+    
+
+experiment-set-view.js:71
+
+
+
+.. _module-item-pages_experiment-set-view.componentWillReceiveProps:
+
+
+Inner ``componentWillReceiveProps``
+-----------------------------------
+
+
+
+.. js:function:: componentWillReceiveProps()
+
+    
+    
+
+experiment-set-view.js:75
+
+
+
+.. _module-item-pages_experiment-set-view.setLinkedDetails:
+
+
+Inner ``setLinkedDetails``
+--------------------------
+
+Get data for nested properties - Award and Lab. Save to state or use state object in callback.
+
+.. js:function:: setLinkedDetails([fallbackToAjax][, callback][, newState])
+
+    
+    :param boolean fallbackToAjax: Whether to revert to AJAX to fetch info if not in provided ExpSet object.
+    :param function callback: A function ran after execution, before any AJAX fetching, which takes ones parameter - an object representing resulting state change. Used in place of setState if have more state to apply.
+    :param Object newState: State object to use. Defaults to empty object.
+    
+
+experiment-set-view.js:93
+
+
+
+.. _module-item-pages_experiment-set-view.getEmbeddedPropertyDetailsFromExperiments:
+
+
+Inner ``getEmbeddedPropertyDetailsFromExperiments``
+---------------------------------------------------
+
+Using similar approach(es) as browse.js to grab property details from experiments_in_set.
+Grabs property detail object from sub-experiment(s) rather than embedding in own JSON output
+to keep size of ExperimentSets down as can't remove (for example) experiments_in_set.lab
+from encoded/types/experiment.py > ExperimentSet as it'd affect Browse page
+experiment filtering & view.
+
+.. js:function:: getEmbeddedPropertyDetailsFromExperiments(propertyName, allowAjaxFallback)
+
+    
+    :param string propertyName: Name of property/key in schema for which to get details.
+    :param boolean allowAjaxFallback: Whether to start an AJAX request to fetch details if they are not in experiment(s).
+    :returns Object: Details for the property/key supplied, or null if not available or not matched.
+    
+
+experiment-set-view.js:138
+
+
+
+.. _module-item-pages_experiment-set-view.render:
+
+
+Inner ``render``
+----------------
+
+
+
+.. js:function:: render()
+
+    
+    
+
+experiment-set-view.js:196
+
+
+
+.. _module-item-pages_experiment-set-view.render:
+
+
+Inner ``render``
+----------------
+
+
+
+.. js:function:: render()
+
+    
+    
+
+experiment-set-view.js:302
+
+
+
+.. _module-item-pages_experiment-set-view.render:
+
+
+Inner ``render``
+----------------
+
+
+
+.. js:function:: render()
+
+    
+    
+
+experiment-set-view.js:317
+
+
+
+
+Members
+=======
+
+
+.. _module-item-pages_experiment-set-view.React:
+
+``React``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.globals:
+
+``globals``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.Panel:
+
+``Panel``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.ExperimentsTable:
+
+``ExperimentsTable``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view._:
+
+``_``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.DescriptorField:
+
+``DescriptorField``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.Detail:
+
+``Detail``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.ItemPageTitle:
+
+``ItemPageTitle``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.ItemHeader:
+
+``ItemHeader``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.FormattedInfoBlock:
+
+``FormattedInfoBlock``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.ItemFooterRow:
+
+``ItemFooterRow``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.PublicationsBlock:
+
+``PublicationsBlock``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.FacetList:
+
+``FacetList``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.ajax:
+
+``ajax``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.console:
+
+``console``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.DateUtility:
+
+``DateUtility``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.object:
+
+``object``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.ExperimentSetView:
+
+``ExperimentSetView``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.propTypes:
+
+``propTypes``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.contextTypes:
+
+``contextTypes``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.facets:
+
+``facets``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.selectedFiles:
+
+``selectedFiles``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.checked:
+
+``checked``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.details_award:
+
+``details_award``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.details_lab:
+
+``details_lab``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.passExperiments:
+
+``passExperiments``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.tips:
+
+``tips``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.selectedFiles:
+
+``selectedFiles``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.passExperiments:
+
+``passExperiments``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.propertyID:
+
+``propertyID``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.propertyID:
+
+``propertyID``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.propertyInfo:
+
+``propertyInfo``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.propertyInfo:
+
+``propertyInfo``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.context:
+
+``context``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.className:
+
+``className``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.title:
+
+``title``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.className:
+
+``className``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.title:
+
+``title``
+
+
+
+
+
+
+.. _module-item-pages_experiment-set-view.ExperimentSetHeader:
+
+``ExperimentSetHeader``
+
+Renders ItemHeader parts wrapped in ItemHeader.Wrapper, with appropriate values.
+
+
+context
+~~~~~~~
+Same context prop as available on parent component.
+
+
+href
+~~~~
+Current page href, passed down from app or Redux store.
+
+
+
+
+.. _module-item-pages_experiment-set-view.ExperimentSetLabAwardInfo:
+
+``ExperimentSetLabAwardInfo``
+
+
+
+
+
+
+
+
