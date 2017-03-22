@@ -27,6 +27,8 @@ The mechanism for this is roughly diagrammed here:
 
 
 
+
+
 Functions
 =========
 
@@ -39,7 +41,7 @@ Functions
 .. _module-viz_chart-data-controller.initialize:
 
 
-Static Public ``initialize``
+Public Static ``initialize``
 ----------------------------
 
 This function must be called before this component is used anywhere else.
@@ -61,7 +63,7 @@ chart-data-controller.js:310
 .. _module-viz_chart-data-controller.isInitialized:
 
 
-Static Public ``isInitialized``
+Public Static ``isInitialized``
 -------------------------------
 
 Whether component has been initialized and may be used.
@@ -72,14 +74,14 @@ Whether component has been initialized and may be used.
     :returns boolean: True if initialized.
     
 
-chart-data-controller.js:385
+chart-data-controller.js:390
 
 
 
 .. _module-viz_chart-data-controller.registerUpdateCallback:
 
 
-Static Public ``registerUpdateCallback``
+Public Static ``registerUpdateCallback``
 ----------------------------------------
 
 For React components to register an "update me" function, i.e. forceUpdate,
@@ -93,14 +95,14 @@ to be called when new experiments/filteredExperiments has finished loading from 
     :returns function: A function which may be called to unregister the callback, in lieu of ChartDataController.unregisterUpdateCallback.
     
 
-chart-data-controller.js:399
+chart-data-controller.js:404
 
 
 
 .. _module-viz_chart-data-controller.unregisterUpdateCallback:
 
 
-Static Public ``unregisterUpdateCallback``
+Public Static ``unregisterUpdateCallback``
 ------------------------------------------
 
 The opposite of registerUpdateCallback.
@@ -112,14 +114,14 @@ The opposite of registerUpdateCallback.
     :returns undefined: The opposite of registerUpdateCallback.
     
 
-chart-data-controller.js:417
+chart-data-controller.js:422
 
 
 
 .. _module-viz_chart-data-controller.registerLoadStartCallback:
 
 
-Static Public ``registerLoadStartCallback``
+Public Static ``registerLoadStartCallback``
 -------------------------------------------
 
 Same as registerUpdateCallback but for when starting AJAX fetch of data.
@@ -132,14 +134,14 @@ Same as registerUpdateCallback but for when starting AJAX fetch of data.
     :returns function: Function for unregistering callback which may be used in lieu of @see ChartDataController.unregisterUpdateCallback().
     
 
-chart-data-controller.js:431
+chart-data-controller.js:436
 
 
 
 .. _module-viz_chart-data-controller.unregisterLoadStartCallback:
 
 
-Static Public ``unregisterLoadStartCallback``
+Public Static ``unregisterLoadStartCallback``
 ---------------------------------------------
 
 The opposite of registerLoadStartCallback.
@@ -151,14 +153,14 @@ The opposite of registerLoadStartCallback.
     :returns undefined: The opposite of registerLoadStartCallback.
     
 
-chart-data-controller.js:448
+chart-data-controller.js:453
 
 
 
 .. _module-viz_chart-data-controller.getState:
 
 
-Static Public ``getState``
+Public Static ``getState``
 --------------------------
 
 Get current state. Similar to Redux's store.getState().
@@ -169,15 +171,15 @@ Get current state. Similar to Redux's store.getState().
     :returns Object: Get current state. Similar to Redux's store.getState().
     
 
-chart-data-controller.js:460
+chart-data-controller.js:465
 
 
 
 .. _module-viz_chart-data-controller.setState:
 
 
-Static Private ``setState``
----------------------------
+Static ``setState``
+-------------------
 
 Analogous to a component's setState. Updates the private state of
 ChartDataController and notifies update callbacks if experiments or filtered
@@ -191,14 +193,14 @@ experiments have changed.
     :returns *: Result of callback, or undefined.
     
 
-chart-data-controller.js:473
+chart-data-controller.js:477
 
 
 
 .. _module-viz_chart-data-controller.sync:
 
 
-Static Public ``sync``
+Public Static ``sync``
 ----------------------
 
 Fetch new data from back-end regardless of expSetFilters state, e.g. for when session has changed (@see App.prototype.componentDidUpdate()).
@@ -210,15 +212,15 @@ Fetch new data from back-end regardless of expSetFilters state, e.g. for when se
     :returns undefined: Fetch new data from back-end regardless of expSetFilters state, e.g. for when session has changed (@see App.prototype.componentDidUpdate()).
     
 
-chart-data-controller.js:499
+chart-data-controller.js:503
 
 
 
 .. _module-viz_chart-data-controller.handleUpdatedFilters:
 
 
-Static Private ``handleUpdatedFilters``
----------------------------------------
+Static ``handleUpdatedFilters``
+-------------------------------
 
 Internally used to either fetch new filtered experiments or clear them, according to state of expSetFilters from Redux store.
 Called by listener to Redux store.
@@ -231,7 +233,7 @@ Called by listener to Redux store.
     :returns undefined: Nothing
     
 
-chart-data-controller.js:516
+chart-data-controller.js:519
 
 
 
@@ -239,7 +241,7 @@ chart-data-controller.js:516
 .. _module-viz_chart-data-controller.fetchUnfilteredAndFilteredExperiments:
 
 
-Static Private ``fetchUnfilteredAndFilteredExperiments``
+Private Static ``fetchUnfilteredAndFilteredExperiments``
 --------------------------------------------------------
 
 Used internally to fetch both all & filtered experiments then calls ChartDataController.setState({ experiments, filteredExperiments }, callback).
@@ -253,14 +255,14 @@ Called by ChartDataController.sync() internally.
     :returns undefined: Nothing
     
 
-chart-data-controller.js:578
+chart-data-controller.js:580
 
 
 
 .. _module-viz_chart-data-controller.fetchAndSetUnfilteredExperiments:
 
 
-Static Private ``fetchAndSetUnfilteredExperiments``
+Private Static ``fetchAndSetUnfilteredExperiments``
 ---------------------------------------------------
 
 Like ChartDataController.fetchUnfilteredAndFilteredExperiments(), but only to get all experiments.
@@ -273,14 +275,14 @@ Not actually used, but could be, for something.
     :returns undefined: Nothing
     
 
-chart-data-controller.js:633
+chart-data-controller.js:635
 
 
 
 .. _module-viz_chart-data-controller.fetchAndSetFilteredExperiments:
 
 
-Static Private ``fetchAndSetFilteredExperiments``
+Private Static ``fetchAndSetFilteredExperiments``
 -------------------------------------------------
 
 Like ChartDataController.fetchUnfilteredAndFilteredExperiments(), but only to get filtered/selected experiments according to expSetFilters from Redux store.
@@ -292,15 +294,15 @@ Like ChartDataController.fetchUnfilteredAndFilteredExperiments(), but only to ge
     :returns undefined: Nothing
     
 
-chart-data-controller.js:654
+chart-data-controller.js:656
 
 
 
 .. _module-viz_chart-data-controller.getFieldsRequiredURLQueryPart:
 
 
-Static Private ``getFieldsRequiredURLQueryPart``
-------------------------------------------------
+Static ``getFieldsRequiredURLQueryPart``
+----------------------------------------
 
 Internally used to help form query part of URL.
 Adds 'field=<field.name.1>&...<field.name.n>' for each field required for chart(s).
@@ -312,15 +314,15 @@ Adds 'field=<field.name.1>&...<field.name.n>' for each field required for chart(
     :returns string: Part of URL query.
     
 
-chart-data-controller.js:680
+chart-data-controller.js:681
 
 
 
 .. _module-viz_chart-data-controller.getFilteredContextHref:
 
 
-Static Private ``getFilteredContextHref``
------------------------------------------
+Static ``getFilteredContextHref``
+---------------------------------
 
 Internally used to generate a URL from current href and expSetFilters from Redux store to fetch filtered/selected experiments from back-end.
 If no 'search'-compatible href is set in Redux store, '/browse/' is used.

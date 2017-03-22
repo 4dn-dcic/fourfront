@@ -19,6 +19,8 @@ title for alert that was queued.
 
 
 
+
+
 Functions
 =========
 
@@ -27,7 +29,7 @@ Functions
 .. _module-alerts.queue:
 
 
-Static Public ``queue``
+Public Static ``queue``
 -----------------------
 
 Open an alert box.
@@ -38,16 +40,17 @@ More specifically, saves a new alert to Redux store 'alerts' field.
 
     
     :param Object alert: Object with 'title', 'message', and 'style' properties. Used for alert message element at top of page.
+    :returns undefined: Nothing
     
 
-alerts.js:31
+alerts.js:32
 
 
 
 .. _module-alerts.deQueue:
 
 
-Static Public ``deQueue``
+Public Static ``deQueue``
 -------------------------
 
 Close an alert box.
@@ -56,17 +59,18 @@ Close an alert box.
 
     
     :param Object alert: Object with at least 'title'.
+    :returns undefined: Nothing
     
 
-alerts.js:47
+alerts.js:49
 
 
 
 .. _module-alerts.getInitialState:
 
 
-Inner  ``getInitialState``
---------------------------
+Inner ``getInitialState``
+-------------------------
 
 
 
@@ -75,14 +79,14 @@ Inner  ``getInitialState``
     
     
 
-alerts.js:73
+alerts.js:75
 
 
 
 .. _module-alerts.render:
 
 
-Instance Private ``render``
+Private Instance ``render``
 ---------------------------
 
 Renders out Bootstrap Alerts for any queued alerts.
@@ -93,7 +97,7 @@ Renders out Bootstrap Alerts for any queued alerts.
     :returns Element: A <div> element.
     
 
-alerts.js:87
+alerts.js:89
 
 
 

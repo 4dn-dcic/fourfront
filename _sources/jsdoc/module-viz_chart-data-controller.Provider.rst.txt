@@ -17,6 +17,8 @@ their props.experiments and props.filteredExperiments. Also provides props.expSe
 
 
 
+
+
 Props
 =====
 
@@ -51,7 +53,7 @@ Functions
 .. _module-viz_chart-data-controller.Provider.componentWillMount:
 
 
-Instance Private ``componentWillMount``
+Private Instance ``componentWillMount``
 ---------------------------------------
 
 Registers a callback function, which itself calls this.forceUpdate(), with module-viz_chart-data-controller_
@@ -70,7 +72,7 @@ chart-data-controller.js:260
 .. _module-viz_chart-data-controller.Provider.componentWillUnmount:
 
 
-Instance Private ``componentWillUnmount``
+Private Instance ``componentWillUnmount``
 -----------------------------------------
 
 Unregisters itself using ChartDataController.unregisterUpdateCallback(this.props.id).
@@ -88,7 +90,7 @@ chart-data-controller.js:275
 .. _module-viz_chart-data-controller.Provider.render:
 
 
-Instance Private ``render``
+Private Instance ``render``
 ---------------------------
 
 Sets 'experiments' and 'filteredExperiments' props on props.children.

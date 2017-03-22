@@ -16,6 +16,8 @@ Top right area also includes action buttions such as edit button or link, view j
 
 
 
+
+
 Props
 =====
 
@@ -50,7 +52,7 @@ Functions
 .. _module-item-pages_components.ItemHeader.TopRow.parsedStatus:
 
 
-Instance Private ``parsedStatus``
+Private Instance ``parsedStatus``
 ---------------------------------
 
 Renders Item status and color indicator.
@@ -60,14 +62,14 @@ Renders Item status and color indicator.
     
     
 
-ItemHeader.js:31
+ItemHeader.js:88
 
 
 
 .. _module-item-pages_components.ItemHeader.TopRow.viewJSONButton:
 
 
-Instance Private ``viewJSONButton``
+Private Instance ``viewJSONButton``
 -----------------------------------
 
 Renders view JSON button.
@@ -75,17 +77,17 @@ Renders view JSON button.
 .. js:function:: viewJSONButton()
 
     
-    :returns Element: <span> element, or null if no props.href.
+    :returns Element|null: <span> element, or null if no props.href.
     
 
-ItemHeader.js:64
+ItemHeader.js:121
 
 
 
 .. _module-item-pages_components.ItemHeader.TopRow.itemActions:
 
 
-Instance Private ``itemActions``
+Private Instance ``itemActions``
 --------------------------------
 
 Renders Item actions for admins and submitter.
@@ -95,14 +97,31 @@ Renders Item actions for admins and submitter.
     
     
 
-ItemHeader.js:90
+ItemHeader.js:147
+
+
+
+.. _module-item-pages_components.ItemHeader.TopRow.itemTypeInfo:
+
+
+Private Instance ``itemTypeInfo``
+---------------------------------
+
+Wraps props.children in a <div> element.
+
+.. js:function:: itemTypeInfo()
+
+    
+    
+
+ItemHeader.js:168
 
 
 
 .. _module-item-pages_components.ItemHeader.TopRow.wrapChildren:
 
 
-Instance Private ``wrapChildren``
+Private Instance ``wrapChildren``
 ---------------------------------
 
 Wraps props.children in a <div> element.
@@ -112,14 +131,14 @@ Wraps props.children in a <div> element.
     
     
 
-ItemHeader.js:107
+ItemHeader.js:198
 
 
 
 .. _module-item-pages_components.ItemHeader.TopRow.render:
 
 
-Instance Private ``render``
+Private Instance ``render``
 ---------------------------
 
 Render function.
@@ -130,7 +149,7 @@ Render function.
     :returns Element: Div element with .row Bootstrap class and items in top-right section.
     
 
-ItemHeader.js:127
+ItemHeader.js:218
 
 
 

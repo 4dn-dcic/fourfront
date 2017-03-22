@@ -15,6 +15,8 @@ React component which represents a "Field", which might have multiple terms.
 
 
 
+
+
 Props
 =====
 
@@ -60,7 +62,7 @@ Functions
 .. _module-viz_components.Legend.Field.getDefaultProps:
 
 
-Instance Private ``getDefaultProps``
+Private Instance ``getDefaultProps``
 ------------------------------------
 
 
@@ -78,7 +80,7 @@ Legend.js:32
 .. _module-viz_components.Legend.Field.render:
 
 
-Instance Private ``render``
+Private Instance ``render``
 ---------------------------
 
 

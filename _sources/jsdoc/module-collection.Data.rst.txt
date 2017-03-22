@@ -27,6 +27,8 @@ Member Of :doc:`module-collection`
 
 
 
+
+
 Functions
 =========
 
@@ -35,8 +37,8 @@ Functions
 .. _module-collection.Data.sort:
 
 
-Instance  ``sort``
-------------------
+Instance ``sort``
+-----------------
 
 
 
@@ -45,7 +47,7 @@ Instance  ``sort``
     
     
 
-collection.js:92
+collection.js:93
 
 
 

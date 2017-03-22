@@ -52,7 +52,7 @@
           <div class="body" role="main">
             
   <h1>Source code for encoded.types.target</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Modifications types file.&quot;&quot;&quot;</span>
+<span></span><span class="sd">&quot;&quot;&quot;Targets types file.&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">snovault</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">calculated_property</span><span class="p">,</span>
     <span class="n">collection</span><span class="p">,</span>
@@ -81,21 +81,36 @@
         <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Summary of target information, either specific genes or genomic coordinates.&quot;</span><span class="p">,</span>
         <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
     <span class="p">})</span>
-<div class="viewcode-block" id="Target.target_summary"><a class="viewcode-back" href="../../../pydoc/encoded.types.target.html#encoded.types.target.Target.target_summary">[docs]</a>    <span class="k">def</span> <span class="nf">target_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">targeted_genes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">targeted_region</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Target.target_summary"><a class="viewcode-back" href="../../../pydoc/encoded.types.target.html#encoded.types.target.Target.target_summary">[docs]</a>    <span class="k">def</span> <span class="nf">target_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">targeted_genes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">targeted_genome_regions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                       <span class="n">targeted_proteins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">targeted_rnas</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">targeted_structure</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">targeted_genes</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
             <span class="n">value</span> <span class="o">+=</span> <span class="s1">&#39; and &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">targeted_genes</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">value</span>
-        <span class="k">elif</span> <span class="n">targeted_region</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">targeted_proteins</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-            <span class="n">genomic_region</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">targeted_region</span><span class="p">,</span> <span class="s1">&#39;@@object&#39;</span><span class="p">)</span>
-            <span class="n">value</span> <span class="o">+=</span> <span class="n">genomic_region</span><span class="p">[</span><span class="s1">&#39;genome_assembly&#39;</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">genomic_region</span><span class="p">[</span><span class="s1">&#39;chromosome&#39;</span><span class="p">]:</span>
-                <span class="n">value</span> <span class="o">+=</span> <span class="s1">&#39;:&#39;</span>
-                <span class="n">value</span> <span class="o">+=</span> <span class="n">genomic_region</span><span class="p">[</span><span class="s1">&#39;chromosome&#39;</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">genomic_region</span><span class="p">[</span><span class="s1">&#39;start_coordinate&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">genomic_region</span><span class="p">[</span><span class="s1">&#39;end_coordinate&#39;</span><span class="p">]:</span>
-                <span class="n">value</span> <span class="o">+=</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">genomic_region</span><span class="p">[</span><span class="s1">&#39;start_coordinate&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">genomic_region</span><span class="p">[</span><span class="s1">&#39;end_coordinate&#39;</span><span class="p">])</span>
+            <span class="n">value</span> <span class="o">+=</span> <span class="s1">&#39; and &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">targeted_proteins</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">value</span>
+        <span class="k">elif</span> <span class="n">targeted_rnas</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="n">value</span> <span class="o">+=</span> <span class="s1">&#39; and &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">targeted_rnas</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">value</span>
+        <span class="k">elif</span> <span class="n">targeted_structure</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">targeted_structure</span>
+        <span class="k">elif</span> <span class="n">targeted_genome_regions</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># since targetted region is a list, go through each item and get summary elements</span>
+            <span class="k">for</span> <span class="n">each_target</span> <span class="ow">in</span> <span class="n">targeted_genome_regions</span><span class="p">:</span>
+                <span class="n">genomic_region</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">each_target</span><span class="p">,</span> <span class="s1">&#39;@@object&#39;</span><span class="p">)</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                <span class="n">value</span> <span class="o">+=</span> <span class="n">genomic_region</span><span class="p">[</span><span class="s1">&#39;genome_assembly&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">genomic_region</span><span class="p">[</span><span class="s1">&#39;chromosome&#39;</span><span class="p">]:</span>
+                    <span class="n">value</span> <span class="o">+=</span> <span class="s1">&#39;:&#39;</span>
+                    <span class="n">value</span> <span class="o">+=</span> <span class="n">genomic_region</span><span class="p">[</span><span class="s1">&#39;chromosome&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">genomic_region</span><span class="p">[</span><span class="s1">&#39;start_coordinate&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">genomic_region</span><span class="p">[</span><span class="s1">&#39;end_coordinate&#39;</span><span class="p">]:</span>
+                    <span class="n">value</span> <span class="o">+=</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">genomic_region</span><span class="p">[</span><span class="s1">&#39;start_coordinate&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">genomic_region</span><span class="p">[</span><span class="s1">&#39;end_coordinate&#39;</span><span class="p">])</span>
+                <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">values</span><span class="p">))</span>
         <span class="k">return</span> <span class="s2">&quot;no target&quot;</span></div>
 
     <span class="nd">@calculated_property</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="p">{</span>

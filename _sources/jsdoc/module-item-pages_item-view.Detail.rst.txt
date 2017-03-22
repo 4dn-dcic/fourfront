@@ -21,6 +21,8 @@ Shows 'persistentKeys' fields & values stickied near top of list,
 
 
 
+
+
 Functions
 =========
 
@@ -29,8 +31,8 @@ Functions
 .. _module-item-pages_item-view.Detail.formKey:
 
 
-Static  ``formKey``
--------------------
+Static ``formKey``
+------------------
 
 Formats the correct display for each metadata field.
 
@@ -49,8 +51,8 @@ item-view.js:41
 .. _module-item-pages_item-view.Detail.formValue:
 
 
-Static  ``formValue``
----------------------
+Static ``formValue``
+--------------------
 
 Recursively render keys/values included in a provided item.
 Wraps URLs/paths in link elements. Sub-panels for objects.
@@ -62,7 +64,7 @@ Wraps URLs/paths in link elements. Sub-panels for objects.
     :param Object|Array|string item: Item(s) to render recursively.
     
 
-item-view.js:72
+item-view.js:74
 
 
 

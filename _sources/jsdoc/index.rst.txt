@@ -14,12 +14,17 @@ JavaScript API Reference
    module-alerts
    module-app
    module-collection
+   module-footer
    module-item-pages_components
+   module-item-pages_experiment-set-view
    module-item-pages_file-set-calibration-view
    module-item-pages_item-view
    module-item-pages_user
    module-lib_store
-   module-viz_BarPlotChart
+   module-static-pages_components
+   module-static-pages_home
+   module-viz_BarPlot
+   module-viz_ChartDetailCursor
    module-viz_QuickInfoBar
    module-viz_chart-data-controller
    module-viz_components

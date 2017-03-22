@@ -27,6 +27,8 @@ Component for displaying Files from a list.
    
 
 
+
+
 Props
 =====
 
@@ -47,29 +49,10 @@ Functions
 
 
 
-.. _undefined.atIdFromObject:
-
-
-Static Public ``atIdFromObject``
---------------------------------
-
-Convert a link_id, if one exists on param 'object', to an '@id' link.
-
-.. js:function:: atIdFromObject(object)
-
-    
-    :param Object object: Must have a 'link_id' or '@id' property. Else will return null.
-    :returns string|null: The Item's '@id'.
-    
-
-FilesInSetTable.js:33
-
-
-
 .. _undefined.header:
 
 
-Instance Private ``header``
+Private Instance ``header``
 ---------------------------
 
 Renders heading with titles for table on medium and large width screens.
@@ -80,7 +63,27 @@ Renders heading with titles for table on medium and large width screens.
     :returns Element: <div> element
     
 
-FilesInSetTable.js:310
+FilesInSetTable.js:303
+
+
+
+.. _module-item-pages_components.FilesInSetTable.atIdFromObject:
+
+
+Public Static ``atIdFromObject``
+--------------------------------
+
+Convert a link_id, if one exists on param 'object', to an '@id' link.
+If an '@id' exists already, gets that.
+
+.. js:function:: atIdFromObject(object)
+
+    
+    :param Object object: Must have a 'link_id' or '@id' property. Else will return null.
+    :returns string|null: The Item's '@id'.
+    
+
+object.js:18
 
 
 

@@ -26,6 +26,8 @@ Optionally adds a directional pointer icon to tail of label.
    
 
 
+
+
 Props
 =====
 
@@ -115,8 +117,8 @@ Functions
 .. _undefined.maxHypotenuse:
 
 
-Static  ``maxHypotenuse``
--------------------------
+Static ``maxHypotenuse``
+------------------------
 
 
 
@@ -135,8 +137,8 @@ RotatedLabel.js:50
 .. _undefined.maxTextHeight:
 
 
-Static  ``maxTextHeight``
--------------------------
+Static ``maxTextHeight``
+------------------------
 
 
 

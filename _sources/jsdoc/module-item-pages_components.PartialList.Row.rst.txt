@@ -1,7 +1,7 @@
 .. _undefined.Row:
 
 ==================
-Namespace: ``Row``
+Component: ``Row``
 ==================
 
 
@@ -13,6 +13,8 @@ Renders two row columns: one for props.label and one for props.value or props.ch
 
 .. contents:: Local Navigation
    :local:
+
+
 
 
 

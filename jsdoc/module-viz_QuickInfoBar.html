@@ -29,7 +29,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Object: viz/chart-data-controller" href="module-viz_chart-data-controller.html" />
-    <link rel="prev" title="Component: UIControlsWrapper" href="module-viz_BarPlotChart.UIControlsWrapper.html" /> 
+    <link rel="prev" title="Component: viz/ChartDetailCursor" href="module-viz_ChartDetailCursor.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -45,7 +45,7 @@
           <a href="module-viz_chart-data-controller.html" title="Object: viz/chart-data-controller"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="module-viz_BarPlotChart.UIControlsWrapper.html" title="Component: UIControlsWrapper"
+          <a href="module-viz_ChartDetailCursor.html" title="Component: viz/ChartDetailCursor"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">JavaScript API Reference</a> &#187;</li> 
@@ -69,13 +69,13 @@ Shows counts of selected experiment_sets, experiments, and files against those p
 </ul>
 </li>
 <li><a class="reference internal" href="#functions" id="id27">Functions</a><ul>
-<li><a class="reference internal" href="#instance-private-getinitialstate" id="id28">Instance Private <code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
-<li><a class="reference internal" href="#instance-public-updatecurrentandtotalcounts" id="id29">Instance Public <code class="docutils literal"><span class="pre">updateCurrentAndTotalCounts</span></code></a></li>
-<li><a class="reference internal" href="#instance-public-updatecurrentcounts" id="id30">Instance Public <code class="docutils literal"><span class="pre">updateCurrentCounts</span></code></a></li>
-<li><a class="reference internal" href="#instance-public-updatetotalcounts" id="id31">Instance Public <code class="docutils literal"><span class="pre">updateTotalCounts</span></code></a></li>
-<li><a class="reference internal" href="#instance-public-isinvisible" id="id32">Instance Public <code class="docutils literal"><span class="pre">isInvisible</span></code></a></li>
-<li><a class="reference internal" href="#instance-private-componentwillreceiveprops" id="id33">Instance Private <code class="docutils literal"><span class="pre">componentWillReceiveProps</span></code></a></li>
-<li><a class="reference internal" href="#instance-private-componentdidmount" id="id34">Instance Private <code class="docutils literal"><span class="pre">componentDidMount</span></code></a></li>
+<li><a class="reference internal" href="#private-instance-getinitialstate" id="id28">Private Instance <code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
+<li><a class="reference internal" href="#public-instance-updatecurrentandtotalcounts" id="id29">Public Instance <code class="docutils literal"><span class="pre">updateCurrentAndTotalCounts</span></code></a></li>
+<li><a class="reference internal" href="#public-instance-updatecurrentcounts" id="id30">Public Instance <code class="docutils literal"><span class="pre">updateCurrentCounts</span></code></a></li>
+<li><a class="reference internal" href="#public-instance-updatetotalcounts" id="id31">Public Instance <code class="docutils literal"><span class="pre">updateTotalCounts</span></code></a></li>
+<li><a class="reference internal" href="#public-instance-isinvisible" id="id32">Public Instance <code class="docutils literal"><span class="pre">isInvisible</span></code></a></li>
+<li><a class="reference internal" href="#private-instance-componentwillreceiveprops" id="id33">Private Instance <code class="docutils literal"><span class="pre">componentWillReceiveProps</span></code></a></li>
+<li><a class="reference internal" href="#private-instance-componentdidmount" id="id34">Private Instance <code class="docutils literal"><span class="pre">componentDidMount</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#members" id="id35">Members</a></li>
@@ -91,8 +91,8 @@ Shows counts of selected experiment_sets, experiments, and files against those p
 </div>
 <div class="section" id="functions">
 <h2><a class="toc-backref" href="#id27">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="instance-private-getinitialstate">
-<span id="module-viz-quickinfobar-getinitialstate"></span><h3><a class="toc-backref" href="#id28">Instance Private <code class="docutils literal"><span class="pre">getInitialState</span></code></a><a class="headerlink" href="#instance-private-getinitialstate" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="private-instance-getinitialstate">
+<span id="module-viz-quickinfobar-getinitialstate"></span><h3><a class="toc-backref" href="#id28">Private Instance <code class="docutils literal"><span class="pre">getInitialState</span></code></a><a class="headerlink" href="#private-instance-getinitialstate" title="Permalink to this headline">¶</a></h3>
 <p>Returns an object containing counts for filtered &amp; total experiments, experiment_sets, and files.
 Counts are set to null by default, and instance&#8217;s updateCurrentAndTotalCounts method must be called
 each time stats are updated from some high-level component.</p>
@@ -116,8 +116,8 @@ which is provided to ChartDataController.</p>
 
 <p>QuickInfoBar.js:49</p>
 </div>
-<div class="section" id="instance-public-updatecurrentandtotalcounts">
-<span id="module-viz-quickinfobar-updatecurrentandtotalcounts"></span><h3><a class="toc-backref" href="#id29">Instance Public <code class="docutils literal"><span class="pre">updateCurrentAndTotalCounts</span></code></a><a class="headerlink" href="#instance-public-updatecurrentandtotalcounts" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="public-instance-updatecurrentandtotalcounts">
+<span id="module-viz-quickinfobar-updatecurrentandtotalcounts"></span><h3><a class="toc-backref" href="#id29">Public Instance <code class="docutils literal"><span class="pre">updateCurrentAndTotalCounts</span></code></a><a class="headerlink" href="#public-instance-updatecurrentandtotalcounts" title="Permalink to this headline">¶</a></h3>
 <p>Publically accessible when QuickInfoBar Component instance has a &#8216;ref&#8217; prop set by parent component.
 Use to update stats when expSetFilters change.</p>
 <p>Currently this is done through ChartDataController, to which an &#8216;updateStats&#8217; callback,
@@ -146,8 +146,8 @@ itself defined in app Component, is provided on initialization.</p>
 
 <p>QuickInfoBar.js:76</p>
 </div>
-<div class="section" id="instance-public-updatecurrentcounts">
-<span id="module-viz-quickinfobar-updatecurrentcounts"></span><h3><a class="toc-backref" href="#id30">Instance Public <code class="docutils literal"><span class="pre">updateCurrentCounts</span></code></a><a class="headerlink" href="#instance-public-updatecurrentcounts" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="public-instance-updatecurrentcounts">
+<span id="module-viz-quickinfobar-updatecurrentcounts"></span><h3><a class="toc-backref" href="#id30">Public Instance <code class="docutils literal"><span class="pre">updateCurrentCounts</span></code></a><a class="headerlink" href="#public-instance-updatecurrentcounts" title="Permalink to this headline">¶</a></h3>
 <p>Same as updateCurrentAndTotalCounts(), but only for current counts.</p>
 <dl class="function">
 <dt id="updateCurrentCounts">
@@ -172,8 +172,8 @@ itself defined in app Component, is provided on initialization.</p>
 
 <p>QuickInfoBar.js:97</p>
 </div>
-<div class="section" id="instance-public-updatetotalcounts">
-<span id="module-viz-quickinfobar-updatetotalcounts"></span><h3><a class="toc-backref" href="#id31">Instance Public <code class="docutils literal"><span class="pre">updateTotalCounts</span></code></a><a class="headerlink" href="#instance-public-updatetotalcounts" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="public-instance-updatetotalcounts">
+<span id="module-viz-quickinfobar-updatetotalcounts"></span><h3><a class="toc-backref" href="#id31">Public Instance <code class="docutils literal"><span class="pre">updateTotalCounts</span></code></a><a class="headerlink" href="#public-instance-updatetotalcounts" title="Permalink to this headline">¶</a></h3>
 <p>Same as updateCurrentAndTotalCounts(), but only for total counts.</p>
 <dl class="function">
 <dt id="updateTotalCounts">
@@ -198,8 +198,8 @@ itself defined in app Component, is provided on initialization.</p>
 
 <p>QuickInfoBar.js:115</p>
 </div>
-<div class="section" id="instance-public-isinvisible">
-<span id="module-viz-quickinfobar-isinvisible"></span><h3><a class="toc-backref" href="#id32">Instance Public <code class="docutils literal"><span class="pre">isInvisible</span></code></a><a class="headerlink" href="#instance-public-isinvisible" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="public-instance-isinvisible">
+<span id="module-viz-quickinfobar-isinvisible"></span><h3><a class="toc-backref" href="#id32">Public Instance <code class="docutils literal"><span class="pre">isInvisible</span></code></a><a class="headerlink" href="#public-instance-isinvisible" title="Permalink to this headline">¶</a></h3>
 <p>Check if QuickInfoBar instance is currently invisible, i.e. according to props.href.</p>
 <dl class="function">
 <dt id="isInvisible">
@@ -217,8 +217,8 @@ itself defined in app Component, is provided on initialization.</p>
 
 <p>QuickInfoBar.js:131</p>
 </div>
-<div class="section" id="instance-private-componentwillreceiveprops">
-<span id="module-viz-quickinfobar-componentwillreceiveprops"></span><h3><a class="toc-backref" href="#id33">Instance Private <code class="docutils literal"><span class="pre">componentWillReceiveProps</span></code></a><a class="headerlink" href="#instance-private-componentwillreceiveprops" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="private-instance-componentwillreceiveprops">
+<span id="module-viz-quickinfobar-componentwillreceiveprops"></span><h3><a class="toc-backref" href="#id33">Private Instance <code class="docutils literal"><span class="pre">componentWillReceiveProps</span></code></a><a class="headerlink" href="#private-instance-componentwillreceiveprops" title="Permalink to this headline">¶</a></h3>
 <p>Updates state.show if no filters are selected.</p>
 <dl class="function">
 <dt id="componentWillReceiveProps">
@@ -242,8 +242,8 @@ itself defined in app Component, is provided on initialization.</p>
 
 <p>QuickInfoBar.js:166</p>
 </div>
-<div class="section" id="instance-private-componentdidmount">
-<span id="module-viz-quickinfobar-componentdidmount"></span><h3><a class="toc-backref" href="#id34">Instance Private <code class="docutils literal"><span class="pre">componentDidMount</span></code></a><a class="headerlink" href="#instance-private-componentdidmount" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="private-instance-componentdidmount">
+<span id="module-viz-quickinfobar-componentdidmount"></span><h3><a class="toc-backref" href="#id34">Private Instance <code class="docutils literal"><span class="pre">componentDidMount</span></code></a><a class="headerlink" href="#private-instance-componentdidmount" title="Permalink to this headline">¶</a></h3>
 <p>Sets state&#8217;s &#8216;mounted&#8217; property to true.</p>
 <dl class="function">
 <dt id="componentDidMount">
@@ -314,13 +314,13 @@ itself defined in app Component, is provided on initialization.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#functions">Functions</a><ul>
-<li><a class="reference internal" href="#instance-private-getinitialstate">Instance Private <code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
-<li><a class="reference internal" href="#instance-public-updatecurrentandtotalcounts">Instance Public <code class="docutils literal"><span class="pre">updateCurrentAndTotalCounts</span></code></a></li>
-<li><a class="reference internal" href="#instance-public-updatecurrentcounts">Instance Public <code class="docutils literal"><span class="pre">updateCurrentCounts</span></code></a></li>
-<li><a class="reference internal" href="#instance-public-updatetotalcounts">Instance Public <code class="docutils literal"><span class="pre">updateTotalCounts</span></code></a></li>
-<li><a class="reference internal" href="#instance-public-isinvisible">Instance Public <code class="docutils literal"><span class="pre">isInvisible</span></code></a></li>
-<li><a class="reference internal" href="#instance-private-componentwillreceiveprops">Instance Private <code class="docutils literal"><span class="pre">componentWillReceiveProps</span></code></a></li>
-<li><a class="reference internal" href="#instance-private-componentdidmount">Instance Private <code class="docutils literal"><span class="pre">componentDidMount</span></code></a></li>
+<li><a class="reference internal" href="#private-instance-getinitialstate">Private Instance <code class="docutils literal"><span class="pre">getInitialState</span></code></a></li>
+<li><a class="reference internal" href="#public-instance-updatecurrentandtotalcounts">Public Instance <code class="docutils literal"><span class="pre">updateCurrentAndTotalCounts</span></code></a></li>
+<li><a class="reference internal" href="#public-instance-updatecurrentcounts">Public Instance <code class="docutils literal"><span class="pre">updateCurrentCounts</span></code></a></li>
+<li><a class="reference internal" href="#public-instance-updatetotalcounts">Public Instance <code class="docutils literal"><span class="pre">updateTotalCounts</span></code></a></li>
+<li><a class="reference internal" href="#public-instance-isinvisible">Public Instance <code class="docutils literal"><span class="pre">isInvisible</span></code></a></li>
+<li><a class="reference internal" href="#private-instance-componentwillreceiveprops">Private Instance <code class="docutils literal"><span class="pre">componentWillReceiveProps</span></code></a></li>
+<li><a class="reference internal" href="#private-instance-componentdidmount">Private Instance <code class="docutils literal"><span class="pre">componentDidMount</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#members">Members</a></li>
@@ -329,8 +329,8 @@ itself defined in app Component, is provided on initialization.</p>
 </ul>
 
   <h4>Previous topic</h4>
-  <p class="topless"><a href="module-viz_BarPlotChart.UIControlsWrapper.html"
-                        title="previous chapter">Component: <code class="docutils literal"><span class="pre">UIControlsWrapper</span></code></a></p>
+  <p class="topless"><a href="module-viz_ChartDetailCursor.html"
+                        title="previous chapter">Component: <code class="docutils literal"><span class="pre">viz/ChartDetailCursor</span></code></a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="module-viz_chart-data-controller.html"
                         title="next chapter">Object: <code class="docutils literal"><span class="pre">viz/chart-data-controller</span></code></a></p>
@@ -368,7 +368,7 @@ itself defined in app Component, is provided on initialization.</p>
           <a href="module-viz_chart-data-controller.html" title="Object: viz/chart-data-controller"
              >next</a> |</li>
         <li class="right" >
-          <a href="module-viz_BarPlotChart.UIControlsWrapper.html" title="Component: UIControlsWrapper"
+          <a href="module-viz_ChartDetailCursor.html" title="Component: viz/ChartDetailCursor"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">4D Nucleome Portal 1.0 documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" >JavaScript API Reference</a> &#187;</li> 

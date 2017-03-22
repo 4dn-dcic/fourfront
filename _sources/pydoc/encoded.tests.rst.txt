@@ -51,6 +51,7 @@ Submodules
    encoded.tests.test_types_init_collections
    encoded.tests.test_types_publication
    encoded.tests.test_types_vendor
+   encoded.tests.test_upgrade_target
    encoded.tests.test_views
    encoded.tests.testing_auditor
    encoded.tests.testing_views

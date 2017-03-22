@@ -31,6 +31,8 @@ Only the User view is exported.
 
 
 
+
+
 Functions
 =========
 
@@ -43,6 +45,40 @@ Functions
 
 
 
+
+
+
+.. _module-item-pages_user.buildGravatarURL:
+
+
+Static ``buildGravatarURL``
+---------------------------
+
+
+
+.. js:function:: buildGravatarURL()
+
+    
+    
+
+user.js:254
+
+
+
+.. _module-item-pages_user.gravatar:
+
+
+Static ``gravatar``
+-------------------
+
+
+
+.. js:function:: gravatar()
+
+    
+    
+
+user.js:277
 
 
 
@@ -345,20 +381,11 @@ Members
 
 
 
-.. _module-item-pages_user.UserView:
+.. _module-item-pages_user.buildGravatarURL:
 
-``UserView``
+``buildGravatarURL``
 
-
-
-
-
-
-.. _module-item-pages_user.statics:
-
-``statics``
-
-
+Generate a URL to get Gravatar image from Gravatar service.
 
 
 
@@ -384,6 +411,24 @@ Members
 .. _module-item-pages_user.url:
 
 ``url``
+
+
+
+
+
+
+.. _module-item-pages_user.gravatar:
+
+``gravatar``
+
+Generate an <img> element with provided size, className, and Gravatar src.
+
+
+
+
+.. _module-item-pages_user.UserView:
+
+``UserView``
 
 
 

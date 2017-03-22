@@ -17,8 +17,10 @@ Module: ``lib/store``
 .. toctree::
    :maxdepth: 3
    
-   module-lib_store.ItemStore
+   module-lib_store-ItemStore
    
+
+
 
 
 
@@ -31,15 +33,6 @@ Module: ``lib/store``
 
 Members
 =======
-
-
-.. _module-lib_store._:
-
-``_``
-
-
-
-
 
 
 .. _module-lib_store.view:

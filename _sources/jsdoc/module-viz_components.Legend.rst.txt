@@ -25,6 +25,8 @@ Legend components to use alongside Charts. Best to include within a UIControlsWr
    
 
 
+
+
 Props
 =====
 
@@ -92,8 +94,8 @@ Functions
 .. _undefined.experimentsAndFieldsToLegendData:
 
 
-Static  ``experimentsAndFieldsToLegendData``
---------------------------------------------
+Static ``experimentsAndFieldsToLegendData``
+-------------------------------------------
 
 
 
@@ -109,8 +111,8 @@ Legend.js:95
 .. _undefined.experimentsAndFieldToLegendDataItem:
 
 
-Static  ``experimentsAndFieldToLegendDataItem``
------------------------------------------------
+Static ``experimentsAndFieldToLegendDataItem``
+----------------------------------------------
 
 
 
@@ -126,8 +128,8 @@ Legend.js:105
 .. _undefined.parseFieldNames:
 
 
-Static  ``parseFieldNames``
----------------------------
+Static ``parseFieldNames``
+--------------------------
 
 
 
@@ -146,7 +148,7 @@ Legend.js:147
 .. _undefined.getDefaultProps:
 
 
-Instance Private ``getDefaultProps``
+Private Instance ``getDefaultProps``
 ------------------------------------
 
 
@@ -164,7 +166,7 @@ Legend.js:166
 .. _undefined.render:
 
 
-Instance Private ``render``
+Private Instance ``render``
 ---------------------------
 
 

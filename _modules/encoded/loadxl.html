@@ -77,6 +77,7 @@
     <span class="s1">&#39;organism&#39;</span><span class="p">,</span>
     <span class="s1">&#39;genomic_region&#39;</span><span class="p">,</span>
     <span class="s1">&#39;target&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;imaging_path&#39;</span><span class="p">,</span>
     <span class="s1">&#39;publication&#39;</span><span class="p">,</span>
     <span class="s1">&#39;publication_tracking&#39;</span><span class="p">,</span>
     <span class="s1">&#39;document&#39;</span><span class="p">,</span>
@@ -107,12 +108,14 @@
     <span class="s1">&#39;experiment_hi_c&#39;</span><span class="p">,</span>
     <span class="s1">&#39;experiment_capture_c&#39;</span><span class="p">,</span>
     <span class="s1">&#39;experiment_repliseq&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;experiment_mic&#39;</span><span class="p">,</span>
     <span class="s1">&#39;experiment_set&#39;</span><span class="p">,</span>
     <span class="s1">&#39;experiment_set_replicate&#39;</span><span class="p">,</span>
     <span class="s1">&#39;software&#39;</span><span class="p">,</span>
     <span class="s1">&#39;analysis_step&#39;</span><span class="p">,</span>
     <span class="s1">&#39;workflow&#39;</span><span class="p">,</span>
     <span class="s1">&#39;workflow_mapping&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;workflow_run&#39;</span><span class="p">,</span>
     <span class="s1">&#39;workflow_run_sbg&#39;</span>
 <span class="p">]</span>
 
@@ -502,7 +505,7 @@
             <span class="s1">&#39;href&#39;</span><span class="p">:</span> <span class="s1">&#39;data:</span><span class="si">%s</span><span class="s1">;base64,</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mime_type</span><span class="p">,</span> <span class="n">b64encode</span><span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">read</span><span class="p">())</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">))</span>
         <span class="p">}</span>
 
-        <span class="k">if</span> <span class="n">mime_type</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;application/pdf&#39;</span><span class="p">,</span> <span class="s2">&quot;application/zip&quot;</span><span class="p">,</span><span class="s1">&#39;text/plain&#39;</span><span class="p">,</span> <span class="s1">&#39;text/tab-separated-values&#39;</span><span class="p">,</span> <span class="s1">&#39;text/html&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">mime_type</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;application/pdf&#39;</span><span class="p">,</span> <span class="s2">&quot;application/zip&quot;</span><span class="p">,</span> <span class="s1">&#39;text/plain&#39;</span><span class="p">,</span> <span class="s1">&#39;text/tab-separated-values&#39;</span><span class="p">,</span> <span class="s1">&#39;text/html&#39;</span><span class="p">):</span>
             <span class="c1"># XXX Should use chardet to detect charset for text files here.</span>
             <span class="k">return</span> <span class="n">attach</span>
 

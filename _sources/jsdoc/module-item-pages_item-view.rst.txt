@@ -12,17 +12,20 @@ Item page template associated with them.
 .. contents:: Local Navigation
    :local:
 
-4 Children
+5 Children
 ==========
 
 .. toctree::
    :maxdepth: 3
    
+   module-item-pages_item-view.module.exports.ItemPageTitle
    module-item-pages_item-view.Detail
    module-item-pages_item-view.DescriptorField
    module-item-pages_item-view.SubIPanel
    module-item-pages_item-view.Subview
    
+
+
 
 
 
@@ -38,11 +41,10 @@ Functions
 
 
 
-
 .. _module-item-pages_item-view.getInitialState:
 
 
-Instance Private ``getInitialState``
+Private Instance ``getInitialState``
 ------------------------------------
 
 
@@ -53,7 +55,7 @@ Instance Private ``getInitialState``
     :returns Object: collapsed : false
     
 
-item-view.js:421
+item-view.js:411
 
 
 
@@ -95,6 +97,15 @@ Members
 .. _module-item-pages_item-view._:
 
 ``_``
+
+
+
+
+
+
+.. _module-item-pages_item-view.ItemPageTitle:
+
+``ItemPageTitle``
 
 
 
@@ -281,9 +292,18 @@ Members
 
 
 
-.. _module-item-pages_item-view.persistentKeys:
+.. _module-item-pages_item-view.stickyKeys:
 
-``persistentKeys``
+``stickyKeys``
+
+
+
+
+
+
+.. _module-item-pages_item-view.alwaysCollapsibleKeys:
+
+``alwaysCollapsibleKeys``
 
 
 
@@ -293,6 +313,15 @@ Members
 .. _module-item-pages_item-view.open:
 
 ``open``
+
+
+
+
+
+
+.. _module-item-pages_item-view.extraKeys:
+
+``extraKeys``
 
 
 
@@ -392,24 +421,6 @@ Members
 .. _module-item-pages_item-view.paddingRight:
 
 ``paddingRight``
-
-
-
-
-
-
-.. _module-item-pages_item-view.Title:
-
-``Title``
-
-Renders page title appropriately for a provided props.context.
-
-
-
-
-.. _module-item-pages_item-view.context:
-
-``context``
 
 
 

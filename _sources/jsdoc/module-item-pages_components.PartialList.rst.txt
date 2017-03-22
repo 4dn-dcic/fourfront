@@ -26,6 +26,8 @@ Persistent items are always visible, while collapsible are only shown if props.o
    
 
 
+
+
 Props
 =====
 
@@ -73,6 +75,17 @@ Type: **string**
 .. js:property:: className
 
 Class name for outermost element.
+
+
+
+``containerType``
+-----------------
+
+Type: **string**
+
+.. js:property:: containerType
+
+Type of element to use as container for the two lists. Defaults to 'div'.
 
 
 

@@ -24,6 +24,8 @@ The top-level component for this application.
 
 
 
+
+
 Functions
 =========
 
@@ -32,8 +34,8 @@ Functions
 .. _module-app.url:
 
 
-Inner  ``url``
---------------
+Inner ``url``
+-------------
 
 
 
@@ -42,15 +44,15 @@ Inner  ``url``
     
     
 
-app.js:49
+app.js:51
 
 
 
 .. _module-app.active:
 
 
-Inner  ``active``
------------------
+Inner ``active``
+----------------
 
 
 
@@ -59,15 +61,15 @@ Inner  ``active``
     
     
 
-app.js:56
+app.js:58
 
 
 
 .. _module-app.render:
 
 
-Inner  ``render``
------------------
+Inner ``render``
+----------------
 
 
 
@@ -76,15 +78,15 @@ Inner  ``render``
     
     
 
-app.js:81
+app.js:83
 
 
 
 .. _module-app.componentDidMount:
 
 
-Inner  ``componentDidMount``
-----------------------------
+Inner ``componentDidMount``
+---------------------------
 
 
 
@@ -93,15 +95,15 @@ Inner  ``componentDidMount``
     
     
 
-app.js:84
+app.js:86
 
 
 
 .. _module-app.getDefaultProps:
 
 
-Inner  ``getDefaultProps``
---------------------------
+Inner ``getDefaultProps``
+-------------------------
 
 
 
@@ -110,15 +112,15 @@ Inner  ``getDefaultProps``
     
     
 
-app.js:119
+app.js:121
 
 
 
 .. _module-app.getInitialState:
 
 
-Inner  ``getInitialState``
---------------------------
+Inner ``getInitialState``
+-------------------------
 
 
 
@@ -127,15 +129,15 @@ Inner  ``getInitialState``
     
     
 
-app.js:125
+app.js:127
 
 
 
 .. _module-app.getChildContext:
 
 
-Inner  ``getChildContext``
---------------------------
+Inner ``getChildContext``
+-------------------------
 
 
 
@@ -144,15 +146,15 @@ Inner  ``getChildContext``
     
     
 
-app.js:180
+app.js:183
 
 
 
 .. _module-app.listActionsFor:
 
 
-Inner  ``listActionsFor``
--------------------------
+Inner ``listActionsFor``
+------------------------
 
 
 
@@ -161,15 +163,15 @@ Inner  ``listActionsFor``
     
     
 
-app.js:198
+app.js:201
 
 
 
 .. _module-app.currentResource:
 
 
-Inner  ``currentResource``
---------------------------
+Inner ``currentResource``
+-------------------------
 
 
 
@@ -178,15 +180,15 @@ Inner  ``currentResource``
     
     
 
-app.js:229
+app.js:232
 
 
 
 .. _module-app.currentAction:
 
 
-Inner  ``currentAction``
-------------------------
+Inner ``currentAction``
+-----------------------
 
 
 
@@ -195,15 +197,15 @@ Inner  ``currentAction``
     
     
 
-app.js:233
+app.js:236
 
 
 
 .. _module-app.loadSchemas:
 
 
-Inner  ``loadSchemas``
-----------------------
+Inner ``loadSchemas``
+---------------------
 
 
 
@@ -212,15 +214,15 @@ Inner  ``loadSchemas``
     
     
 
-app.js:243
+app.js:246
 
 
 
 .. _module-app.getStatsComponent:
 
 
-Inner  ``getStatsComponent``
-----------------------------
+Inner ``getStatsComponent``
+---------------------------
 
 
 
@@ -229,15 +231,15 @@ Inner  ``getStatsComponent``
     
     
 
-app.js:264
+app.js:267
 
 
 
 .. _module-app.updateStats:
 
 
-Inner  ``updateStats``
-----------------------
+Inner ``updateStats``
+---------------------
 
 
 
@@ -246,15 +248,15 @@ Inner  ``updateStats``
     
     
 
-app.js:271
+app.js:274
 
 
 
 .. _module-app.handleDropdownChange:
 
 
-Inner  ``handleDropdownChange``
--------------------------------
+Inner ``handleDropdownChange``
+------------------------------
 
 
 
@@ -263,15 +265,15 @@ Inner  ``handleDropdownChange``
     
     
 
-app.js:284
+app.js:287
 
 
 
 .. _module-app.handleAutocompleteChosenChange:
 
 
-Inner  ``handleAutocompleteChosenChange``
------------------------------------------
+Inner ``handleAutocompleteChosenChange``
+----------------------------------------
 
 
 
@@ -280,15 +282,15 @@ Inner  ``handleAutocompleteChosenChange``
     
     
 
-app.js:290
+app.js:293
 
 
 
 .. _module-app.handleAutocompleteFocusChange:
 
 
-Inner  ``handleAutocompleteFocusChange``
-----------------------------------------
+Inner ``handleAutocompleteFocusChange``
+---------------------------------------
 
 
 
@@ -297,15 +299,15 @@ Inner  ``handleAutocompleteFocusChange``
     
     
 
-app.js:294
+app.js:297
 
 
 
 .. _module-app.handleAutocompleteHiddenChange:
 
 
-Inner  ``handleAutocompleteHiddenChange``
------------------------------------------
+Inner ``handleAutocompleteHiddenChange``
+----------------------------------------
 
 
 
@@ -314,15 +316,15 @@ Inner  ``handleAutocompleteHiddenChange``
     
     
 
-app.js:298
+app.js:301
 
 
 
 .. _module-app.handleLayoutClick:
 
 
-Inner  ``handleLayoutClick``
-----------------------------
+Inner ``handleLayoutClick``
+---------------------------
 
 
 
@@ -331,15 +333,15 @@ Inner  ``handleLayoutClick``
     
     
 
-app.js:303
+app.js:306
 
 
 
 .. _module-app.handleKey:
 
 
-Inner  ``handleKey``
---------------------
+Inner ``handleKey``
+-------------------
 
 
 
@@ -348,15 +350,32 @@ Inner  ``handleKey``
     
     
 
-app.js:310
+app.js:313
+
+
+
+.. _module-app.updateUploads:
+
+
+Inner ``updateUploads``
+-----------------------
+
+
+
+.. js:function:: updateUploads()
+
+    
+    
+
+app.js:329
 
 
 
 .. _module-app.authenticateUser:
 
 
-Inner  ``authenticateUser``
----------------------------
+Inner ``authenticateUser``
+--------------------------
 
 
 
@@ -365,15 +384,15 @@ Inner  ``authenticateUser``
     
     
 
-app.js:324
+app.js:339
 
 
 
 .. _module-app.componentDidMount:
 
 
-Inner  ``componentDidMount``
-----------------------------
+Inner ``componentDidMount``
+---------------------------
 
 
 
@@ -382,15 +401,15 @@ Inner  ``componentDidMount``
     
     
 
-app.js:356
+app.js:371
 
 
 
 .. _module-app.componentDidUpdate:
 
 
-Inner  ``componentDidUpdate``
------------------------------
+Inner ``componentDidUpdate``
+----------------------------
 
 
 
@@ -399,15 +418,15 @@ Inner  ``componentDidUpdate``
     
     
 
-app.js:395
+app.js:410
 
 
 
 .. _module-app.fetch:
 
 
-Inner  ``fetch``
-----------------
+Inner ``fetch``
+---------------
 
 
 
@@ -416,15 +435,15 @@ Inner  ``fetch``
     
     
 
-app.js:421
+app.js:440
 
 
 
 .. _module-app.updateUserInfo:
 
 
-Inner  ``updateUserInfo``
--------------------------
+Inner ``updateUserInfo``
+------------------------
 
 
 
@@ -433,15 +452,15 @@ Inner  ``updateUserInfo``
     
     
 
-app.js:439
+app.js:458
 
 
 
 .. _module-app.onHashChange:
 
 
-Inner  ``onHashChange``
------------------------
+Inner ``onHashChange``
+----------------------
 
 
 
@@ -450,15 +469,15 @@ Inner  ``onHashChange``
     
     
 
-app.js:461
+app.js:480
 
 
 
 .. _module-app.handleClick:
 
 
-Inner  ``handleClick``
-----------------------
+Inner ``handleClick``
+---------------------
 
 
 
@@ -467,15 +486,15 @@ Inner  ``handleClick``
     
     
 
-app.js:468
+app.js:487
 
 
 
 .. _module-app.handleSubmit:
 
 
-Inner  ``handleSubmit``
------------------------
+Inner ``handleSubmit``
+----------------------
 
 
 
@@ -484,15 +503,15 @@ Inner  ``handleSubmit``
     
     
 
-app.js:525
+app.js:544
 
 
 
 .. _module-app.handlePopState:
 
 
-Inner  ``handlePopState``
--------------------------
+Inner ``handlePopState``
+------------------------
 
 
 
@@ -501,15 +520,15 @@ Inner  ``handlePopState``
     
     
 
-app.js:558
+app.js:577
 
 
 
 .. _module-app.confirmNavigation:
 
 
-Inner  ``confirmNavigation``
-----------------------------
+Inner ``confirmNavigation``
+---------------------------
 
 
 
@@ -518,15 +537,15 @@ Inner  ``confirmNavigation``
     
     
 
-app.js:595
+app.js:614
 
 
 
 .. _module-app.navigate:
 
 
-Inner  ``navigate``
--------------------
+Inner ``navigate``
+------------------
 
 
 
@@ -535,15 +554,15 @@ Inner  ``navigate``
     
     
 
-app.js:605
+app.js:624
 
 
 
 .. _module-app.receiveContextResponse:
 
 
-Inner  ``receiveContextResponse``
----------------------------------
+Inner ``receiveContextResponse``
+--------------------------------
 
 
 
@@ -552,15 +571,15 @@ Inner  ``receiveContextResponse``
     
     
 
-app.js:814
+app.js:833
 
 
 
 .. _module-app.contentTypeIsJSON:
 
 
-Inner  ``contentTypeIsJSON``
-----------------------------
+Inner ``contentTypeIsJSON``
+---------------------------
 
 
 
@@ -569,15 +588,15 @@ Inner  ``contentTypeIsJSON``
     
     
 
-app.js:842
+app.js:861
 
 
 
 .. _module-app.scrollTo:
 
 
-Inner  ``scrollTo``
--------------------
+Inner ``scrollTo``
+------------------
 
 
 
@@ -586,15 +605,15 @@ Inner  ``scrollTo``
     
     
 
-app.js:852
+app.js:871
 
 
 
 .. _module-app.render:
 
 
-Inner  ``render``
------------------
+Inner ``render``
+----------------
 
 
 
@@ -603,7 +622,7 @@ Inner  ``render``
     
     
 
-app.js:861
+app.js:880
 
 
 
@@ -615,6 +634,15 @@ Members
 .. _module-app.React:
 
 ``React``
+
+
+
+
+
+
+.. _module-app.ReactDOM:
+
+``ReactDOM``
 
 
 
@@ -804,6 +832,15 @@ Members
 .. _module-app.ChartDataController:
 
 ``ChartDataController``
+
+
+
+
+
+
+.. _module-app.ChartDetailCursor:
+
+``ChartDetailCursor``
 
 
 
@@ -1280,6 +1317,15 @@ Session-related props 'sessionMayBeSet' is meant to provided by server-side only
 
 
 
+.. _module-app.uploads:
+
+``uploads``
+
+
+
+
+
+
 .. _module-app.childContextTypes:
 
 ``childContextTypes``
@@ -1472,6 +1518,15 @@ Session-related props 'sessionMayBeSet' is meant to provided by server-side only
 .. _module-app.dropdownComponent:
 
 ``dropdownComponent``
+
+
+
+
+
+
+.. _module-app.uploads:
+
+``uploads``
 
 
 
@@ -2093,6 +2148,42 @@ Session-related props 'sessionMayBeSet' is meant to provided by server-side only
 .. _module-app.__html:
 
 ``__html``
+
+
+
+
+
+
+.. _module-app.left:
+
+``left``
+
+
+
+
+
+
+.. _module-app.right:
+
+``right``
+
+
+
+
+
+
+.. _module-app.bottom:
+
+``bottom``
+
+
+
+
+
+
+.. _module-app.top:
+
+``top``
 
 
 

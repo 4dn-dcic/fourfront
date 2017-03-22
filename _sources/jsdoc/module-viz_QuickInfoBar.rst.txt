@@ -14,6 +14,8 @@ Shows counts of selected experiment_sets, experiments, and files against those p
 
 
 
+
+
 Props
 =====
 
@@ -38,7 +40,7 @@ Functions
 .. _module-viz_QuickInfoBar.getInitialState:
 
 
-Instance Private ``getInitialState``
+Private Instance ``getInitialState``
 ------------------------------------
 
 Returns an object containing counts for filtered & total experiments, experiment_sets, and files.
@@ -64,7 +66,7 @@ QuickInfoBar.js:49
 .. _module-viz_QuickInfoBar.updateCurrentAndTotalCounts:
 
 
-Instance Public ``updateCurrentAndTotalCounts``
+Public Instance ``updateCurrentAndTotalCounts``
 -----------------------------------------------
 
 Publically accessible when QuickInfoBar Component instance has a 'ref' prop set by parent component.
@@ -89,7 +91,7 @@ QuickInfoBar.js:76
 .. _module-viz_QuickInfoBar.updateCurrentCounts:
 
 
-Instance Public ``updateCurrentCounts``
+Public Instance ``updateCurrentCounts``
 ---------------------------------------
 
 Same as updateCurrentAndTotalCounts(), but only for current counts.
@@ -109,7 +111,7 @@ QuickInfoBar.js:97
 .. _module-viz_QuickInfoBar.updateTotalCounts:
 
 
-Instance Public ``updateTotalCounts``
+Public Instance ``updateTotalCounts``
 -------------------------------------
 
 Same as updateCurrentAndTotalCounts(), but only for total counts.
@@ -129,7 +131,7 @@ QuickInfoBar.js:115
 .. _module-viz_QuickInfoBar.isInvisible:
 
 
-Instance Public ``isInvisible``
+Public Instance ``isInvisible``
 -------------------------------
 
 Check if QuickInfoBar instance is currently invisible, i.e. according to props.href.
@@ -147,7 +149,7 @@ QuickInfoBar.js:131
 .. _module-viz_QuickInfoBar.componentWillReceiveProps:
 
 
-Instance Private ``componentWillReceiveProps``
+Private Instance ``componentWillReceiveProps``
 ----------------------------------------------
 
 Updates state.show if no filters are selected.
@@ -166,7 +168,7 @@ QuickInfoBar.js:166
 .. _module-viz_QuickInfoBar.componentDidMount:
 
 
-Instance Private ``componentDidMount``
+Private Instance ``componentDidMount``
 --------------------------------------
 
 Sets state's 'mounted' property to true.

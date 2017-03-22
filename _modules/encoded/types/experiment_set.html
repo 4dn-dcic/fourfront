@@ -124,7 +124,6 @@
     <span class="sd">&quot;&quot;&quot;The experiment set class.&quot;&quot;&quot;</span>
 
     <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;experiment_set&#39;</span>
-    <span class="n">base_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ExperimentSet&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Item</span><span class="o">.</span><span class="n">base_types</span>
     <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/experiment_set.json&#39;</span><span class="p">)</span>
     <span class="n">name_key</span> <span class="o">=</span> <span class="s2">&quot;accession&quot;</span>
     <span class="n">embedded</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;award&quot;</span><span class="p">,</span>
@@ -151,6 +150,11 @@
                 <span class="s2">&quot;experiments_in_set.digestion_enzyme&quot;</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">sheets</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;date_released&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">status</span> <span class="o">==</span> <span class="s1">&#39;released&#39;</span><span class="p">:</span>
+                <span class="n">release_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;date_released&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">release_date</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ExperimentSet</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_update</span><span class="p">(</span><span class="n">properties</span><span class="p">,</span> <span class="n">sheets</span><span class="p">)</span>
         <span class="k">if</span> <span class="s1">&#39;experiments_in_set&#39;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
             <span class="n">invalidate_linked_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;experiments_in_set&#39;</span><span class="p">)</span>
@@ -213,7 +217,7 @@
     <span class="p">})</span>
 <div class="viewcode-block" id="ExperimentSetReplicate"><a class="viewcode-back" href="../../../pydoc/encoded.types.experiment_set.html#encoded.types.experiment_set.ExperimentSetReplicate">[docs]</a><span class="k">class</span> <span class="nc">ExperimentSetReplicate</span><span class="p">(</span><span class="n">ExperimentSet</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;The experiment set class for replicate experiments.&quot;&quot;&quot;</span>
-
+    <span class="n">base_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ExperimentSet&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Item</span><span class="o">.</span><span class="n">base_types</span>
     <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;experiment_set_replicate&#39;</span>
     <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/experiment_set_replicate.json&#39;</span><span class="p">)</span>
     <span class="n">name_key</span> <span class="o">=</span> <span class="s2">&quot;accession&quot;</span>

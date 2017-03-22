@@ -72,6 +72,7 @@
 
 <div class="viewcode-block" id="includeme"><a class="viewcode-back" href="../../pydoc/encoded.root.html#encoded.root.includeme">[docs]</a><span class="k">def</span> <span class="nf">includeme</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
     <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="n">static_pages</span><span class="p">)</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">include</span><span class="p">(</span><span class="n">uploads_page</span><span class="p">)</span>
     <span class="n">config</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span></div>
 
 
@@ -113,18 +114,18 @@
         <span class="n">page</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">matchdict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;page&#39;</span><span class="p">,</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
         <span class="n">content</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">contentFilesLocation</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
-        
+
         <span class="n">pageMeta</span> <span class="o">=</span> <span class="n">pageLocations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pageMeta</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="n">pageMeta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;directory&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">contentFilesLocation</span> <span class="o">+=</span> <span class="s2">&quot;/../..&quot;</span> <span class="c1"># get us to root of Git repo.</span>
             <span class="n">contentFilesLocation</span> <span class="o">+=</span> <span class="n">pageMeta</span><span class="p">[</span><span class="s1">&#39;directory&#39;</span><span class="p">]</span>
-            
+
             <span class="k">if</span> <span class="n">pageMeta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sections&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">sections</span> <span class="o">=</span> <span class="n">pageMeta</span><span class="p">[</span><span class="s1">&#39;sections&#39;</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">sections</span> <span class="o">=</span> <span class="p">[</span> <span class="p">{</span> <span class="s1">&#39;filename&#39;</span> <span class="p">:</span> <span class="n">fn</span> <span class="p">}</span> <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">listFilesInInDirectory</span><span class="p">(</span><span class="n">contentFilesLocation</span><span class="p">)</span> <span class="p">]</span>
-            
+
             <span class="c1"># Set order (as py dicts don&#39;t maintain order)</span>
             <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sections</span><span class="p">:</span>
@@ -186,6 +187,32 @@
         <span class="k">return</span> <span class="n">responseDict</span>
 
     <span class="n">config</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">static_page</span><span class="p">,</span> <span class="n">route_name</span><span class="o">=</span><span class="s1">&#39;static-page&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="uploads_page"><a class="viewcode-back" href="../../pydoc/encoded.root.html#encoded.root.uploads_page">[docs]</a><span class="k">def</span> <span class="nf">uploads_page</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Emulate a lite form of Alex&#39;s static page routing</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_route</span><span class="p">(</span>
+        <span class="s1">&#39;uploads-page&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;/uploads&#39;</span>
+    <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">upload_page_view</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">response</span>
+        <span class="n">response</span><span class="o">.</span><span class="n">content_type</span> <span class="o">=</span> <span class="s1">&#39;application/json; charset=utf-8&#39;</span>
+
+        <span class="n">responseDict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;title&quot;</span> <span class="p">:</span> <span class="s2">&quot;Uploads&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;notification&quot;</span> <span class="p">:</span> <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;@type&quot;</span> <span class="p">:</span> <span class="p">[</span> <span class="s2">&quot;Uploads&quot;</span><span class="p">,</span> <span class="s2">&quot;Portal&quot;</span> <span class="p">],</span>
+            <span class="s2">&quot;@context&quot;</span> <span class="p">:</span> <span class="s2">&quot;/uploads&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;@id&quot;</span> <span class="p">:</span> <span class="s2">&quot;/uploads&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;content&quot;</span> <span class="p">:</span> <span class="kc">None</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">responseDict</span>
+
+    <span class="n">config</span><span class="o">.</span><span class="n">add_view</span><span class="p">(</span><span class="n">upload_page_view</span><span class="p">,</span> <span class="n">route_name</span><span class="o">=</span><span class="s1">&#39;uploads-page&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="acl_from_settings"><a class="viewcode-back" href="../../pydoc/encoded.root.html#encoded.root.acl_from_settings">[docs]</a><span class="k">def</span> <span class="nf">acl_from_settings</span><span class="p">(</span><span class="n">settings</span><span class="p">):</span>

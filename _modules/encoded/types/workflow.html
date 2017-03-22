@@ -89,7 +89,6 @@
     <span class="sd">&quot;&quot;&quot;The WorkflowRun class that describes execution of a workflow.&quot;&quot;&quot;</span>
 
     <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;workflow_run&#39;</span>
-    <span class="n">base_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;WorkflowRun&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Item</span><span class="o">.</span><span class="n">base_types</span>
     <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/workflow_run.json&#39;</span><span class="p">)</span>
     <span class="n">embedded</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;workflow&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;input_files.workflow_argument_name&#39;</span><span class="p">,</span>
@@ -110,7 +109,7 @@
     <span class="p">})</span>
 <div class="viewcode-block" id="WorkflowRunSbg"><a class="viewcode-back" href="../../../pydoc/encoded.types.workflow.html#encoded.types.workflow.WorkflowRunSbg">[docs]</a><span class="k">class</span> <span class="nc">WorkflowRunSbg</span><span class="p">(</span><span class="n">WorkflowRun</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;The WorkflowRun class that describes execution of a workflow on SBG platform.&quot;&quot;&quot;</span>
-
+    <span class="n">base_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;WorkflowRun&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">Item</span><span class="o">.</span><span class="n">base_types</span>
     <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;workflow_run_sbg&#39;</span>
     <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/workflow_run_sbg.json&#39;</span><span class="p">)</span>
     <span class="n">embedded</span> <span class="o">=</span> <span class="n">WorkflowRun</span><span class="o">.</span><span class="n">embedded</span></div>

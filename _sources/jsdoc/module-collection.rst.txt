@@ -28,6 +28,8 @@ Module: ``collection``
 
 
 
+
+
 Functions
 =========
 
@@ -36,7 +38,7 @@ Functions
 .. _module-collection.lookup_column:
 
 
-Static Private ``lookup_column``
+Private Static ``lookup_column``
 --------------------------------
 
 
@@ -44,17 +46,18 @@ Static Private ``lookup_column``
 .. js:function:: lookup_column()
 
     
+    :returns string: Value
     
 
-collection.js:18
+collection.js:19
 
 
 
 .. _module-collection.render:
 
 
-Inner  ``render``
------------------
+Inner ``render``
+----------------
 
 
 
@@ -63,14 +66,14 @@ Inner  ``render``
     
     
 
-collection.js:41
+collection.js:42
 
 
 
 .. _module-collection.RowView:
 
 
-Static Private ``RowView``
+Private Static ``RowView``
 --------------------------
 
 
@@ -80,15 +83,15 @@ Static Private ``RowView``
     
     
 
-collection.js:115
+collection.js:116
 
 
 
 .. _module-collection.getDefaultProps:
 
 
-Inner  ``getDefaultProps``
---------------------------
+Inner ``getDefaultProps``
+-------------------------
 
 
 
@@ -97,15 +100,15 @@ Inner  ``getDefaultProps``
     
     
 
-collection.js:156
+collection.js:157
 
 
 
 .. _module-collection.getInitialState:
 
 
-Inner  ``getInitialState``
---------------------------
+Inner ``getInitialState``
+-------------------------
 
 
 
@@ -114,15 +117,15 @@ Inner  ``getInitialState``
     
     
 
-collection.js:163
+collection.js:164
 
 
 
 .. _module-collection.componentWillReceiveProps:
 
 
-Inner  ``componentWillReceiveProps``
-------------------------------------
+Inner ``componentWillReceiveProps``
+-----------------------------------
 
 
 
@@ -131,15 +134,15 @@ Inner  ``componentWillReceiveProps``
     
     
 
-collection.js:171
+collection.js:172
 
 
 
 .. _module-collection.extractParams:
 
 
-Inner  ``extractParams``
-------------------------
+Inner ``extractParams``
+-----------------------
 
 
 
@@ -148,15 +151,15 @@ Inner  ``extractParams``
     
     
 
-collection.js:192
+collection.js:193
 
 
 
 .. _module-collection.guessColumns:
 
 
-Inner  ``guessColumns``
------------------------
+Inner ``guessColumns``
+----------------------
 
 
 
@@ -165,15 +168,15 @@ Inner  ``guessColumns``
     
     
 
-collection.js:209
+collection.js:210
 
 
 
 .. _module-collection.extractData:
 
 
-Inner  ``extractData``
-----------------------
+Inner ``extractData``
+---------------------
 
 
 
@@ -182,15 +185,15 @@ Inner  ``extractData``
     
     
 
-collection.js:231
+collection.js:232
 
 
 
 .. _module-collection.fetchAll:
 
 
-Inner  ``fetchAll``
--------------------
+Inner ``fetchAll``
+------------------
 
 
 
@@ -199,15 +202,15 @@ Inner  ``fetchAll``
     
     
 
-collection.js:278
+collection.js:279
 
 
 
 .. _module-collection.render:
 
 
-Inner  ``render``
------------------
+Inner ``render``
+----------------
 
 
 
@@ -216,15 +219,15 @@ Inner  ``render``
     
     
 
-collection.js:306
+collection.js:307
 
 
 
 .. _module-collection.componentDidMount:
 
 
-Inner  ``componentDidMount``
-----------------------------
+Inner ``componentDidMount``
+---------------------------
 
 
 
@@ -233,15 +236,15 @@ Inner  ``componentDidMount``
     
     
 
-collection.js:410
+collection.js:411
 
 
 
 .. _module-collection.handleClickHeader:
 
 
-Inner  ``handleClickHeader``
-----------------------------
+Inner ``handleClickHeader``
+---------------------------
 
 
 
@@ -250,15 +253,15 @@ Inner  ``handleClickHeader``
     
     
 
-collection.js:419
+collection.js:420
 
 
 
 .. _module-collection.handleKeyUp:
 
 
-Inner  ``handleKeyUp``
-----------------------
+Inner ``handleKeyUp``
+---------------------
 
 
 
@@ -267,15 +270,15 @@ Inner  ``handleKeyUp``
     
     
 
-collection.js:441
+collection.js:442
 
 
 
 .. _module-collection.submit:
 
 
-Inner  ``submit``
------------------
+Inner ``submit``
+----------------
 
 
 
@@ -284,15 +287,15 @@ Inner  ``submit``
     
     
 
-collection.js:454
+collection.js:455
 
 
 
 .. _module-collection.clearFilter:
 
 
-Inner  ``clearFilter``
-----------------------
+Inner ``clearFilter``
+---------------------
 
 
 
@@ -301,15 +304,15 @@ Inner  ``clearFilter``
     
     
 
-collection.js:468
+collection.js:469
 
 
 
 .. _module-collection.componentWillUnmount:
 
 
-Inner  ``componentWillUnmount``
--------------------------------
+Inner ``componentWillUnmount``
+------------------------------
 
 
 
@@ -318,7 +321,7 @@ Inner  ``componentWillUnmount``
     
     
 
-collection.js:473
+collection.js:474
 
 
 

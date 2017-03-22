@@ -8,19 +8,132 @@ Class: ``ItemStore``
 Member Of :doc:`module-lib_store`
 
 
-Store for a collection of items persisted via the backend REST API
+
 
 
 .. contents:: Local Navigation
    :local:
 
+1 Children
+==========
+
+.. toctree::
+   :maxdepth: 3
+   
+   module-lib_store-ItemStore.ItemStore
+   
+
+Initial Arguments
+=================
+
+    :param Array items: Initial collection of items
+    : View that should be notified of changes
+    :param string stateKey: Name in the view's state that should be updated with the changed collection
 
 
 
 
+Functions
+=========
 
 
 
+.. _module-lib_store-ItemStore.create:
+
+
+Instance ``create``
+-------------------
+
+Create an item
+
+.. js:function:: create()
+
+    
+    
+
+store.js:32
+
+
+
+.. _module-lib_store-ItemStore.update:
+
+
+Instance ``update``
+-------------------
+
+Update an item
+
+.. js:function:: update()
+
+    
+    
+
+store.js:46
+
+
+
+.. _module-lib_store-ItemStore.delete:
+
+
+Instance ``delete``
+-------------------
+
+Delete an item (set its status to deleted)
+
+.. js:function:: delete()
+
+    
+    
+
+store.js:60
+
+
+
+.. _module-lib_store-ItemStore.fetch:
+
+
+Instance ``fetch``
+------------------
+
+Call the backend
+
+.. js:function:: fetch()
+
+    
+    
+
+store.js:74
+
+
+
+.. _module-lib_store-ItemStore.dispatch:
+
+
+Instance ``dispatch``
+---------------------
+
+Notify listening views of actions and update their state
+(should we update state optimistically?)
+
+.. js:function:: dispatch(method)
+
+    
+    :param string method: Method
+    dispatch(method): Argument
+    
+
+store.js:95
+
+
+
+
+Members
+=======
+
+
+.. _module-lib_store-ItemStore._items:
+
+``_items``
 
 
 

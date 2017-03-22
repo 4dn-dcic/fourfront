@@ -16,6 +16,8 @@ Passes own props.context and props.href down to children.
 
 
 
+
+
 Props
 =====
 
@@ -41,6 +43,17 @@ Type: **string**
 .. js:property:: href
 
 Location from Redux store or '@id' of current Item. Used for View JSON button.
+
+
+
+``schemas``
+-----------
+
+Type: **Object**
+
+.. js:property:: schemas
+
+Pass from app.state. Used for tooltips and such.
 
 
 

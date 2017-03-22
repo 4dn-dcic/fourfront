@@ -1,8 +1,8 @@
 .. _module-item-pages_item-view.DescriptorField:
 
-==============================
-Component: ``DescriptorField``
-==============================
+===========================================
+*Deprecated* Component: ``DescriptorField``
+===========================================
 
 
 Member Of :doc:`module-item-pages_item-view`
@@ -21,6 +21,8 @@ schema, if available.
 
 
 
+
+
 Functions
 =========
 
@@ -29,7 +31,7 @@ Functions
 .. _module-item-pages_item-view.DescriptorField.getInitialState:
 
 
-Instance Private ``getInitialState``
+Private Instance ``getInitialState``
 ------------------------------------
 
 
@@ -40,14 +42,14 @@ Instance Private ``getInitialState``
     :returns Object: State object with 'active' : false.
     
 
-item-view.js:248
+item-view.js:255
 
 
 
 .. _module-item-pages_item-view.DescriptorField.handleHover:
 
 
-Instance Private ``handleHover``
+Private Instance ``handleHover``
 --------------------------------
 
 An onHover callback for outer <div> element.
@@ -58,7 +60,7 @@ An onHover callback for outer <div> element.
     :param boolean b: Sets state.active to this value.
     
 
-item-view.js:261
+item-view.js:268
 
 
 

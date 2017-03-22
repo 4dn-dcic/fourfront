@@ -17,6 +17,8 @@ Renders out a {@link module:item-pages/components.FilesInSetTable} Component.
 
 
 
+
+
 Functions
 =========
 
@@ -25,8 +27,8 @@ Functions
 .. _module-item-pages_file-set-calibration-view.render:
 
 
-Inner  ``render``
------------------
+Inner ``render``
+----------------
 
 
 

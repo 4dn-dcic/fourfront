@@ -17,6 +17,8 @@ Shown at bottom of Item pages.
 
 
 
+
+
 Props
 =====
 
@@ -32,7 +34,27 @@ Type: **Object**
 
 JSON representation of current Item object. Should be available through Redux store's context.
 
+Functions
+=========
 
+
+
+.. _undefined.aliases:
+
+
+Private Instance ``aliases``
+----------------------------
+
+Render list of aliases for this item, wrapped in a <div>.
+Only show if (a) any aliases exist AND (b) current user has edit access (e.g. submitter, admin).
+
+.. js:function:: aliases()
+
+    
+    :returns Element|null: Div React element containing aliases list or null.
+    
+
+ItemFooterRow.js:22
 
 
 

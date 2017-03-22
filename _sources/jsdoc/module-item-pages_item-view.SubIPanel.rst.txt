@@ -19,6 +19,8 @@ Member Of :doc:`module-item-pages_item-view`
 
 
 
+
+
 Functions
 =========
 
@@ -27,7 +29,7 @@ Functions
 .. _module-item-pages_item-view.SubIPanel.getInitialState:
 
 
-Instance Private ``getInitialState``
+Private Instance ``getInitialState``
 ------------------------------------
 
 
@@ -38,14 +40,14 @@ Instance Private ``getInitialState``
     :returns Object: 'isOpen' : false
     
 
-item-view.js:304
+item-view.js:311
 
 
 
 .. _module-item-pages_item-view.SubIPanel.handleToggle:
 
 
-Instance Private ``handleToggle``
+Private Instance ``handleToggle``
 ---------------------------------
 
 Handler for rendered title element. Toggles visiblity of ItemView.Subview.
@@ -57,14 +59,14 @@ Handler for rendered title element. Toggles visiblity of ItemView.Subview.
     :returns Object: 'isOpen' : false
     
 
-item-view.js:317
+item-view.js:324
 
 
 
 .. _module-item-pages_item-view.SubIPanel.toggleLink:
 
 
-Instance Private ``toggleLink``
+Private Instance ``toggleLink``
 -------------------------------
 
 Renders title for the ItemView.Subview.
@@ -77,7 +79,7 @@ Renders title for the ItemView.Subview.
     :returns Element: <span> element.
     
 
-item-view.js:334
+item-view.js:341
 
 
 

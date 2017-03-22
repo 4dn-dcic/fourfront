@@ -20,6 +20,8 @@ Uses AJAX to fetch details for fields which are not embedded.
 
 
 
+
+
 Functions
 =========
 
@@ -28,7 +30,7 @@ Functions
 .. _module-item-pages_user.ProfileWorkFields.componentDidMount:
 
 
-Instance Private ``componentDidMount``
+Private Instance ``componentDidMount``
 --------------------------------------
 
 If Lab details are not embedded, fetches them.
@@ -38,14 +40,14 @@ If Lab details are not embedded, fetches them.
     
     
 
-user.js:525
+user.js:524
 
 
 
 .. _module-item-pages_user.ProfileWorkFields.getAwardsList:
 
 
-Instance Private ``getAwardsList``
+Private Instance ``getAwardsList``
 ----------------------------------
 
 Get list of all awards (unique) from list of labs.
@@ -58,14 +60,14 @@ ToDo : Migrate somewhere more static-cy.
     :returns Array.<Object>: List of all unique awards in labs.
     
 
-user.js:554
+user.js:553
 
 
 
 .. _module-item-pages_user.ProfileWorkFields.updateAwardsList:
 
 
-Instance Private ``updateAwardsList``
+Private Instance ``updateAwardsList``
 -------------------------------------
 
 Update state.awards_list with award details from list of lab details.
@@ -77,7 +79,7 @@ Update state.awards_list with award details from list of lab details.
     :returns undefined: Nothing.
     
 
-user.js:584
+user.js:583
 
 
 

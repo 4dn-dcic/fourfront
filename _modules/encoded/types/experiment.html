@@ -299,6 +299,42 @@
     <span class="p">})</span>
 <div class="viewcode-block" id="ExperimentRepliseq.display_title"><a class="viewcode-back" href="../../../pydoc/encoded.types.experiment.html#encoded.types.experiment.ExperimentRepliseq.display_title">[docs]</a>    <span class="k">def</span> <span class="nf">display_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">experiment_type</span><span class="o">=</span><span class="s1">&#39;Undefined&#39;</span><span class="p">,</span> <span class="n">cell_cycle_stage</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">biosample</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_summary</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">experiment_type</span><span class="p">,</span> <span class="n">cell_cycle_stage</span><span class="p">,</span> <span class="n">biosample</span><span class="p">)</span></div></div>
+
+
+<span class="nd">@collection</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;experiments-mic&#39;</span><span class="p">,</span>
+    <span class="n">unique_key</span><span class="o">=</span><span class="s1">&#39;accession&#39;</span><span class="p">,</span>
+    <span class="n">properties</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Microscopy Experiments&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Listing of Microscopy Experiments&#39;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="ExperimentMic"><a class="viewcode-back" href="../../../pydoc/encoded.types.experiment.html#encoded.types.experiment.ExperimentMic">[docs]</a><span class="k">class</span> <span class="nc">ExperimentMic</span><span class="p">(</span><span class="n">Experiment</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The experiment class for Microscopy experiments.&quot;&quot;&quot;</span>
+    <span class="n">item_type</span> <span class="o">=</span> <span class="s1">&#39;experiment_mic&#39;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">load_schema</span><span class="p">(</span><span class="s1">&#39;encoded:schemas/experiment_mic.json&#39;</span><span class="p">)</span>
+    <span class="n">embedded</span> <span class="o">=</span> <span class="n">Experiment</span><span class="o">.</span><span class="n">embedded</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;submitted_by&quot;</span><span class="p">]</span>
+    <span class="n">name_key</span> <span class="o">=</span> <span class="s1">&#39;accession&#39;</span>
+
+    <span class="nd">@calculated_property</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Experiment summary&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Summary of the experiment, including type, enzyme and biosource.&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="ExperimentMic.experiment_summary"><a class="viewcode-back" href="../../../pydoc/encoded.types.experiment.html#encoded.types.experiment.ExperimentMic.experiment_summary">[docs]</a>    <span class="k">def</span> <span class="nf">experiment_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">experiment_type</span><span class="o">=</span><span class="s1">&#39;Undefined&#39;</span><span class="p">,</span> <span class="n">biosample</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">sum_str</span> <span class="o">=</span> <span class="n">experiment_type</span>
+        <span class="k">if</span> <span class="n">biosample</span><span class="p">:</span>
+            <span class="n">biosamp_props</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">embed</span><span class="p">(</span><span class="n">biosample</span><span class="p">,</span> <span class="s1">&#39;@@object&#39;</span><span class="p">)</span>
+            <span class="n">biosource</span> <span class="o">=</span> <span class="n">biosamp_props</span><span class="p">[</span><span class="s1">&#39;biosource_summary&#39;</span><span class="p">]</span>
+            <span class="n">sum_str</span> <span class="o">+=</span> <span class="p">(</span><span class="s1">&#39; on &#39;</span> <span class="o">+</span> <span class="n">biosource</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sum_str</span></div>
+
+    <span class="nd">@calculated_property</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Display Title&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;A calculated title for every object in 4DN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span>
+    <span class="p">})</span>
+<div class="viewcode-block" id="ExperimentMic.display_title"><a class="viewcode-back" href="../../../pydoc/encoded.types.experiment.html#encoded.types.experiment.ExperimentMic.display_title">[docs]</a>    <span class="k">def</span> <span class="nf">display_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">experiment_type</span><span class="o">=</span><span class="s1">&#39;Undefined&#39;</span><span class="p">,</span> <span class="n">biosample</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment_summary</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">experiment_type</span><span class="p">,</span> <span class="n">biosample</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>

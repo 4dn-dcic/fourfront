@@ -28,7 +28,7 @@
     <script type="text/javascript" src="../_static/sidebar.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Component: item-pages/file-set-calibration-view" href="module-item-pages_file-set-calibration-view.html" />
+    <link rel="next" title="Component: PublicationsBlock" href="module-item-pages_components.PublicationsBlock.html" />
     <link rel="prev" title="Component: Small" href="module-item-pages_components.FilesInSetTable.Small.html" /> 
   </head>
   <body role="document">
@@ -42,7 +42,7 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="module-item-pages_file-set-calibration-view.html" title="Component: item-pages/file-set-calibration-view"
+          <a href="module-item-pages_components.PublicationsBlock.html" title="Component: PublicationsBlock"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="module-item-pages_components.FilesInSetTable.Small.html" title="Component: Small"
@@ -70,6 +70,10 @@ Shown at bottom of Item pages.</p>
 <li><a class="reference internal" href="#context" id="id2"><code class="docutils literal"><span class="pre">context</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#functions" id="id3">Functions</a><ul>
+<li><a class="reference internal" href="#private-instance-aliases" id="id4">Private Instance <code class="docutils literal"><span class="pre">aliases</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
 <div class="section" id="props">
@@ -78,6 +82,29 @@ Shown at bottom of Item pages.</p>
 <h3><a class="toc-backref" href="#id2"><code class="docutils literal"><span class="pre">context</span></code></a><a class="headerlink" href="#context" title="Permalink to this headline">¶</a></h3>
 <p>Type: <strong>Object</strong></p>
 <p>JSON representation of current Item object. Should be available through Redux store&#8217;s context.</p>
+</div>
+</div>
+<div class="section" id="functions">
+<h2><a class="toc-backref" href="#id3">Functions</a><a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="private-instance-aliases">
+<span id="undefined-aliases"></span><h3><a class="toc-backref" href="#id4">Private Instance <code class="docutils literal"><span class="pre">aliases</span></code></a><a class="headerlink" href="#private-instance-aliases" title="Permalink to this headline">¶</a></h3>
+<p>Render list of aliases for this item, wrapped in a &lt;div&gt;.
+Only show if (a) any aliases exist AND (b) current user has edit access (e.g. submitter, admin).</p>
+<dl class="function">
+<dt id="aliases">
+<code class="descname">aliases</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#aliases" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Returns Element|null:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">Div React element containing aliases list or null.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>ItemFooterRow.js:22</p>
 </div>
 </div>
 </div>
@@ -95,6 +122,10 @@ Shown at bottom of Item pages.</p>
 <li><a class="reference internal" href="#context"><code class="docutils literal"><span class="pre">context</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#functions">Functions</a><ul>
+<li><a class="reference internal" href="#private-instance-aliases">Private Instance <code class="docutils literal"><span class="pre">aliases</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -103,8 +134,8 @@ Shown at bottom of Item pages.</p>
   <p class="topless"><a href="module-item-pages_components.FilesInSetTable.Small.html"
                         title="previous chapter">Component: <code class="docutils literal"><span class="pre">Small</span></code></a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="module-item-pages_file-set-calibration-view.html"
-                        title="next chapter">Component: <code class="docutils literal"><span class="pre">item-pages/file-set-calibration-view</span></code></a></p>
+  <p class="topless"><a href="module-item-pages_components.PublicationsBlock.html"
+                        title="next chapter">Component: <code class="docutils literal"><span class="pre">PublicationsBlock</span></code></a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -136,7 +167,7 @@ Shown at bottom of Item pages.</p>
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="module-item-pages_file-set-calibration-view.html" title="Component: item-pages/file-set-calibration-view"
+          <a href="module-item-pages_components.PublicationsBlock.html" title="Component: PublicationsBlock"
              >next</a> |</li>
         <li class="right" >
           <a href="module-item-pages_components.FilesInSetTable.Small.html" title="Component: Small"

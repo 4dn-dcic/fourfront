@@ -14,6 +14,7 @@ Submodules
    encoded.types.experiment_set
    encoded.types.file
    encoded.types.image
+   encoded.types.imaging
    encoded.types.individual
    encoded.types.lab
    encoded.types.modification

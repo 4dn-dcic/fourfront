@@ -20,6 +20,8 @@ experiments and other data.
 
 
 
+
+
 Functions
 =========
 
@@ -28,7 +30,7 @@ Functions
 .. _module-item-pages_user.AccessKeyTable.create:
 
 
-Instance Private ``create``
+Private Instance ``create``
 ---------------------------
 
 Add new access key for user via AJAX.

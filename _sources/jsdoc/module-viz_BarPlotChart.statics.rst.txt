@@ -19,6 +19,8 @@ Member Of :doc:`module-viz_BarPlotChart`
 
 
 
+
+
 Functions
 =========
 
@@ -27,8 +29,8 @@ Functions
 .. _module-viz_BarPlotChart.statics.genChartData:
 
 
-Static  ``genChartData``
-------------------------
+Static ``genChartData``
+-----------------------
 
 Entrypoint for aggregation. 
 First, counts up terms per field from experiments for field in supplied 'fields' param array. Count is adjusted depending on if aggregating experiments, experiment_sets, or files.
@@ -58,8 +60,8 @@ BarPlotChart.js:414
 .. _module-viz_BarPlotChart.statics.countFieldTerm:
 
 
-Static  ``countFieldTerm``
---------------------------
+Static ``countFieldTerm``
+-------------------------
 
 
 
@@ -80,8 +82,8 @@ BarPlotChart.js:521
 .. _module-viz_BarPlotChart.statics.getTermsForFieldsFromExperiment:
 
 
-Static  ``getTermsForFieldsFromExperiment``
--------------------------------------------
+Static ``getTermsForFieldsFromExperiment``
+------------------------------------------
 
 
 
@@ -102,8 +104,8 @@ BarPlotChart.js:556
 .. _module-viz_BarPlotChart.statics.genChartBarDims:
 
 
-Static  ``genChartBarDims``
----------------------------
+Static ``genChartBarDims``
+--------------------------
 
 Return an object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally.
 
@@ -128,8 +130,8 @@ BarPlotChart.js:693
 .. _module-viz_BarPlotChart.statics.barDataToLegendData:
 
 
-Static  ``barDataToLegendData``
--------------------------------
+Static ``barDataToLegendData``
+------------------------------
 
 Deprecated. Convert barData to array of field objects to be consumed by Legend React component.
 
@@ -148,8 +150,8 @@ BarPlotChart.js:777
 .. _module-viz_BarPlotChart.statics.getDefaultStyleOpts:
 
 
-Static  ``getDefaultStyleOpts``
--------------------------------
+Static ``getDefaultStyleOpts``
+------------------------------
 
 
 
