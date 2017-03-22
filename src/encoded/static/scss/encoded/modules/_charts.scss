@@ -440,9 +440,10 @@
 
         .bar-part {
             opacity: 1;
-            transition: opacity 0.5s, height .75s ease-out, width .75s, border-color .5s ease-out, outline .5s;
+            transition: opacity 0.5s, height .75s ease-out, width .75s, border-color .5s ease-out, outline .5s, box-shadow .5s;
             outline-offset: 5px;
-            outline: 2px solid transparent;
+            outline: 1px solid transparent;
+            box-shadow : none;
             /*
             &:first-of-type {
                 border-top-left-radius: 3px;
@@ -456,7 +457,8 @@
             */
             &:hover,
             &.selected {
-                outline-color: rgba(0,0,0,0.75);
+                outline-color: rgba(0,0,0,0.25);
+                box-shadow: inset 0 0 0 3px rgba(0,0,0,0.25);
                 //outline-color: transparent !important;
             }
         }

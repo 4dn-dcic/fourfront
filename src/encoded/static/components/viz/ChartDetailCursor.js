@@ -96,6 +96,27 @@ var ChartDetailCursor = module.exports = React.createClass({
         if (this.props.id !== 'default') delete resetFxns[this.props.id];
     },
 
+    handleWindowClick : function(e){
+        //e.persist();
+        console.log(e);
+        if (e.target && !ChartDetailCursor.isTargetDetailCursor(e.target)) {
+            this.setState({ 'sticky' : false });
+        }
+    },
+
+    /**
+     * Create temporary click listener to cancel out state.sticky if state.sticky was set.
+     */
+    componentDidUpdate : function(pastProps, pastState){
+        return null;
+        if (isServerSide()) return null;
+        if (this.state.sticky && !pastState.sticky){
+            window.addEventListener('click', this.handleWindowClick);
+        } else if (pastState.sticky && !this.state.sticky){
+            window.removeEventListener('click', this.handleWindowClick);
+        }
+    },
+
     /**
      * Call this function to update component state with the new "path" and other properties, if applicable.
      * 

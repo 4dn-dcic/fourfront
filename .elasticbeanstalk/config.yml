@@ -8,6 +8,9 @@ branch-defaults:
     environment: 4dn-web-dev
   fix_404_no_auth:
     environment: 4dn-web-alex
+  "FF-593":
+    environment: 4dn-web-alex
+    ec2_keyname: alexb
 global:
   application_name: 4dn-web
   default_ec2_keyname: 4dn-encode

@@ -80,7 +80,7 @@ var Chart = module.exports = React.createClass({
                 return (
                     <div
                         className={
-                            "bar-part no-highlight-color" + (d.parent ? ' multiple-parts' : '')
+                            "bar-part no-highlight" + (d.parent ? ' multiple-parts' : '')
                             + (isSelected ? ' selected' : '')
                         }
                         style={{
@@ -88,7 +88,7 @@ var Chart = module.exports = React.createClass({
                             height : d.attr.height,
                             width: (d.parent || d).attr.width,
                             backgroundColor : color,
-                            outlineColor : this.state.hover || isSelected ? d3.color(color).darker(0.75) : null
+                            //outlineColor : this.state.hover || isSelected ? d3.color(color).darker(1) : null
                         }}
                         data-color={color}
                         data-target-height={d.attr.height}
@@ -309,7 +309,7 @@ var Chart = module.exports = React.createClass({
             render: function(){
                 return (
                     <div
-                        className="bar-plot-chart chart-container"
+                        className="bar-plot-chart chart-container no-highlight"
                         data-field={this.props.topLevelField}
                         style={{ height : this.props.height, width: this.props.width }}
                     >
