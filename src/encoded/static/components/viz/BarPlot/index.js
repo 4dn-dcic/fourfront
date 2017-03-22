@@ -31,7 +31,7 @@
  * Passes props to BarPlot.Chart.
  * 
  * @namespace
- * @memberof module:viz/BarPlot
+ * @member
  * @type {Component}
  */
 module.exports.UIControlsWrapper = require('./UIControlsWrapper');
@@ -46,7 +46,7 @@ module.exports.UIControlsWrapper = require('./UIControlsWrapper');
  * Accepts the same props as BarPlot.Chart, save for own 'aggregatedData' and 'aggregatedFilteredData'.
  * 
  * @namespace
- * @memberof module:viz/BarPlot
+ * @member
  * @type {Component}
  * @prop {Object[]} experiments - "All" experiments, passed from ChartDataController[.Provider].
  * @prop {Object[]} filteredExperiments - "Selected" experiments, if expSetFilters are set in Redux store. Passed from ChartDataController[.Provider].
@@ -62,7 +62,7 @@ module.exports.Aggregator = require('./Aggregator');
  * into a chart-friendly structure.
  * 
  * @namespace
- * @memberof module:viz/BarPlot
+ * @member
  * @type {Object}
  */
 module.exports.aggregationFxn = require('./aggregation-functions');
@@ -76,7 +76,7 @@ module.exports.aggregationFxn = require('./aggregation-functions');
  * Use BarPlotChart (or UIControlsWrapper, if is wrapping BarPlotChart) as child of ChartDataController.provider, which will feed props.experiments and props.filteredExperiments.
  * 
  * @namespace
- * @memberof module:viz/BarPlot
+ * @member
  * @type {Component}
  * @see module:viz/chart-data-controller.Provider
  * @see module:viz/BarPlotChart.UIControlsWrapper

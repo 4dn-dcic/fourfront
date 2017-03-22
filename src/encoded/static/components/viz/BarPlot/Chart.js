@@ -61,6 +61,12 @@ var Chart = module.exports = React.createClass({
                 return Chart.BarSection.isSelected(this.props.node, this.props.selectedBarSectionTerm, this.props.selectedBarSectionParentTerm);
             },
 
+            getInitialState : function(){
+                return {
+                    'hover' : false
+                };
+            },
+
             /**
              * @instance
              * @memberof module:viz/BarPlot.Chart.BarSection
@@ -69,26 +75,36 @@ var Chart = module.exports = React.createClass({
             render : function(){
                 var d = this.props.node;
                 var color = vizUtil.colorForNode(d);
+                var isSelected = this.isSelected();
                 
                 return (
                     <div
                         className={
                             "bar-part no-highlight-color" + (d.parent ? ' multiple-parts' : '')
-                            + (this.isSelected() ? ' selected' : '')
+                            + (isSelected ? ' selected' : '')
                         }
                         style={{
                             //top : rectY.call(this),
                             height : d.attr.height,
                             width: (d.parent || d).attr.width,
-                            backgroundColor : color
+                            backgroundColor : color,
+                            outlineColor : this.state.hover || isSelected ? d3.color(color).darker(0.75) : null
                         }}
                         data-color={color}
                         data-target-height={d.attr.height}
                         key={'bar-part-' + (d.parent ? d.parent.term + '~' + d.term : d.term)}
                         data-term={d.parent ? d.term : null}
-                        onMouseEnter={this.props.onMouseEnter && this.props.onMouseEnter.bind(this.props.onMouseEnter, d)}
-                        onMouseLeave={this.props.onMouseLeave && this.props.onMouseLeave.bind(this.props.onMouseLeave, d)}
-                        onClick={this.props.onClick && this.props.onClick.bind(this.props.onClick, d)}
+                        onMouseEnter={(e)=>{
+                            this.setState({'hover' : true});
+                            if (typeof this.props.onMouseEnter === 'function') this.props.onMouseEnter(d, e);
+                        }}
+                        onMouseLeave={(e)=>{
+                            this.setState({'hover' : false});
+                            if (typeof this.props.onMouseLeave === 'function') this.props.onMouseLeave(d, e);
+                        }}
+                        onClick={(e)=>{
+                            if (typeof this.props.onClick === 'function') this.props.onClick(d, e);
+                        }}
                     />
                 );
             },
@@ -121,6 +137,11 @@ var Chart = module.exports = React.createClass({
                 style.left = styleOpts.offset.left;
                 style.bottom = styleOpts.offset.bottom;
                 style.width = d.attr.width;
+                if (this.state.hover || ( this.props.selectedBarSectionParentTerm || this.props.selectedBarSectionTerm ) === d.term ){
+                    //console.log();
+                    //var node = _.find(d.bars, { 'term' })
+                    //style.outlineColor = ;
+                }
                 return style;
             },
 
@@ -139,6 +160,12 @@ var Chart = module.exports = React.createClass({
                 );
             },
 
+            getInitialState : function(){
+                return {
+                    'hover' : false
+                };
+            },
+
             render : function(){
                 var d = this.props.node;
 
@@ -150,13 +177,14 @@ var Chart = module.exports = React.createClass({
 
                 return (
                     <div
-                        className="chart-bar no-highlight-color"
-                        onMouseLeave={
-                            Array.isArray(d.bars) && d.bars.length > 0 ?
-                            function(e){
-                                unhighlightTerms(d.bars[0].field);
-                            } : null
-                        }
+                        className="chart-bar no-highlight"
+                        onMouseEnter={()=>{
+                            this.setState({ 'hover' : true });
+                        }}
+                        onMouseLeave={()=>{
+                            if (Array.isArray(d.bars) && d.bars.length > 0) unhighlightTerms(d.bars[0].field);
+                            this.setState({ 'hover' : false });
+                        }}
                         data-term={d.term}
                         data-field={Array.isArray(d.bars) && d.bars.length > 0 ? d.bars[0].field : null}
                         key={"bar-" + d.term}
@@ -256,7 +284,7 @@ var Chart = module.exports = React.createClass({
                         },
                         'onBarPartMouseLeave' : (node, evt)=>{
                             if (ChartDetailCursor.isTargetDetailCursor(evt.relatedTarget)) return false;
-                            console.log('MOUSELV', ChartDetailCursor.isTargetDetailCursor(evt.relatedTarget), node, evt);
+                            //console.log('MOUSELV', ChartDetailCursor.isTargetDetailCursor(evt.relatedTarget), node, evt);
                             ChartDetailCursor.reset(false);
                             if (typeof oldOnMouseLeaveFxn === 'function') return oldOnMouseLeaveFxn(node, evt);
                         },

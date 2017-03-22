@@ -179,6 +179,7 @@ var ChartDetailCursor = module.exports = React.createClass({
                     filteredOut={this.state.filteredOut}
                     includeTitleDescendentPrefix={this.state.includeTitleDescendentPrefix}
                     primaryCount={this.state.primaryCount}
+                    sticky={this.state.sticky}
                 />
             </CursorComponent>
         );

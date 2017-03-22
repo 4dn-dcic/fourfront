@@ -421,6 +421,8 @@
     .chart-bar {
         transition: transform .75s ease-out, opacity .5s, width .75s ease-out;
         position: absolute;
+        outline-offset: 5px;
+        outline: 2px solid transparent;
 
         .bar-top-label {
             display: block;
@@ -454,8 +456,14 @@
             */
             &:hover,
             &.selected {
-                outline-color: rgba(0,0,0,0.75) !important;
+                outline-color: rgba(0,0,0,0.75);
+                //outline-color: transparent !important;
             }
+        }
+
+        &:hover,
+        &.selected {
+
         }
 
         > rect {
@@ -990,6 +998,10 @@
     opacity: 1;
     transition: opacity .25s, transform .05s linear, margin-left .25s ease-out;
     //pointer-events: none;
+
+    &:not(.sticky) {
+        pointer-events: none;
+    }
 
     .mosaic-cursor-body {
         background-color: #fff;

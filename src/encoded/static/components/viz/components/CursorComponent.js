@@ -138,7 +138,8 @@ var CursorComponent = module.exports = React.createClass({
                 className : this.props.className,
                 onMouseLeave : this.props.onMouseLeave,
                 style : this.props.style,
-                children : this.props.children
+                children : this.props.children,
+                sticky : this.props.sticky
             }, this.state)), this.portalElement);
 
         });
@@ -216,7 +217,7 @@ var CursorComponent = module.exports = React.createClass({
 
                 return (
                     <div
-                        className={'cursor-component-container ' + (this.props.className || '')}
+                        className={'cursor-component-container ' + (this.props.className || '') + (this.props.sticky ? ' sticky' : '')}
                         style={{
                             display: this.props.isVisible ? 'block' : 'none',
                             width: this.props.width,
