@@ -61,6 +61,10 @@ var Chart = module.exports = React.createClass({
                 return Chart.BarSection.isSelected(this.props.node, this.props.selectedBarSectionTerm, this.props.selectedBarSectionParentTerm);
             },
 
+            isHoveredOver : function(){
+                return Chart.BarSection.isSelected(this.props.node, this.props.hoverBarSectionTerm, this.props.hoverBarSectionParentTerm);
+            },
+
             getInitialState : function(){
                 return {
                     'hover' : false
@@ -73,33 +77,34 @@ var Chart = module.exports = React.createClass({
              * @returns {Element} - A div element representing a bar section.
              */
             render : function(){
-                var d = this.props.node;
-                var color = vizUtil.colorForNode(d);
-                var isSelected = this.isSelected();
+                var d               = this.props.node;
+                var color           = vizUtil.colorForNode(d);
+                var isSelected      = this.isSelected(),
+                    isHoveredOver   = this.isHoveredOver();
                 
                 return (
                     <div
                         className={
                             "bar-part no-highlight" + (d.parent ? ' multiple-parts' : '')
-                            + (isSelected ? ' selected' : '')
+                            + (isSelected ? ' selected' : '') + (isHoveredOver ? ' hover' : '')
                         }
                         style={{
                             //top : rectY.call(this),
                             height : d.attr.height,
                             width: (d.parent || d).attr.width,
                             backgroundColor : color,
-                            //outlineColor : this.state.hover || isSelected ? d3.color(color).darker(1) : null
+                            outlineColor : (this.isHoveredOver() || isSelected) ? d3.color(color).darker(1) : null
                         }}
                         data-color={color}
                         data-target-height={d.attr.height}
                         key={'bar-part-' + (d.parent ? d.parent.term + '~' + d.term : d.term)}
                         data-term={d.parent ? d.term : null}
                         onMouseEnter={(e)=>{
-                            this.setState({'hover' : true});
+                            //this.setState({'hover' : true});
                             if (typeof this.props.onMouseEnter === 'function') this.props.onMouseEnter(d, e);
                         }}
                         onMouseLeave={(e)=>{
-                            this.setState({'hover' : false});
+                            //this.setState({'hover' : false});
                             if (typeof this.props.onMouseLeave === 'function') this.props.onMouseLeave(d, e);
                         }}
                         onClick={(e)=>{
@@ -137,11 +142,13 @@ var Chart = module.exports = React.createClass({
                 style.left = styleOpts.offset.left;
                 style.bottom = styleOpts.offset.bottom;
                 style.width = d.attr.width;
-                if (this.state.hover || ( this.props.selectedBarSectionParentTerm || this.props.selectedBarSectionTerm ) === d.term ){
-                    //console.log();
-                    //var node = _.find(d.bars, { 'term' })
-                    //style.outlineColor = ;
-                }
+
+                //if (
+                //    ( this.props.hoverBarSectionParentTerm    || this.props.hoverBarSectionTerm    ) === d.term ||
+                //    ( this.props.selectedBarSectionParentTerm || this.props.selectedBarSectionTerm ) === d.term
+                //){
+                    // Set style.outlineColor here or something.
+                //}
                 return style;
             },
 
@@ -156,14 +163,10 @@ var Chart = module.exports = React.createClass({
                         aggregateType={this.props.aggregateType}
                         selectedBarSectionParentTerm={this.props.selectedBarSectionParentTerm}
                         selectedBarSectionTerm={this.props.selectedBarSectionTerm}
+                        hoverBarSectionParentTerm={this.props.hoverBarSectionParentTerm}
+                        hoverBarSectionTerm={this.props.hoverBarSectionTerm}
                     />
                 );
-            },
-
-            getInitialState : function(){
-                return {
-                    'hover' : false
-                };
             },
 
             render : function(){
@@ -178,12 +181,8 @@ var Chart = module.exports = React.createClass({
                 return (
                     <div
                         className="chart-bar no-highlight"
-                        onMouseEnter={()=>{
-                            this.setState({ 'hover' : true });
-                        }}
                         onMouseLeave={()=>{
                             if (Array.isArray(d.bars) && d.bars.length > 0) unhighlightTerms(d.bars[0].field);
-                            this.setState({ 'hover' : false });
                         }}
                         data-term={d.term}
                         data-field={Array.isArray(d.bars) && d.bars.length > 0 ? d.bars[0].field : null}
@@ -215,7 +214,7 @@ var Chart = module.exports = React.createClass({
         }),
 
         /**
-         * Encapsulates the chart output and provides state for selected node.
+         * Encapsulates the chart output and provides state for currently- selected and currently- hovered-over node.
          * 
          * @memberof module:viz/BarPlot.Chart
          * @namespace
@@ -226,15 +225,56 @@ var Chart = module.exports = React.createClass({
             getInitialState : function(){
                 return {
                     'selectedBarSectionParentTerm' : null,
-                    'selectedBarSectionTerm' : null
+                    'selectedBarSectionTerm' : null,
+                    'hoverBarSectionTerm' : null,
+                    'hoverBarSectionParentTerm' : null
                 };
             },
 
+            handleClickAnywhere : function(evt){
+                console.log(evt.target);
+                if (ChartDetailCursor.isTargetDetailCursor(evt.target)){
+                    console.log("DETAIL CURSOR WOOO");
+                    return false;
+                }
+
+                this.setState({
+                    'selectedBarSectionParentTerm' : null,
+                    'selectedBarSectionTerm' : null
+                });
+            },
+
+            /**
+             * Important lifecycle method.
+             * Checks if a selected bar section (via state.selectedBarSectionTerm) has been set or unset.
+             * Then passes that to the ChartDetailCursor's 'sticky' state.
+             * 
+             * Also enables or disables a 'click' event listener to cancel out stickiness/selected section.
+             * 
+             * @private
+             * @instance
+             * @param {Object} pastProps - Previous props of this component.
+             * @param {Object} pastState - Previous state of this component.
+             */
             componentDidUpdate : function(pastProps, pastState){
                 if (pastState.selectedBarSectionTerm !== this.state.selectedBarSectionTerm){
-                    ChartDetailCursor.update({
-                        'sticky' : typeof this.state.selectedBarSectionTerm === 'string'
-                    });
+                    
+                    // If we now have a selected bar section, enable click listener.
+                    // Otherwise, disable it.
+                    // And set ChartDetailCursor to be 'stickied'. This is the only place where the ChartDetailCursor state should be updated.
+                    if (typeof this.state.selectedBarSectionTerm === 'string'){
+                        ChartDetailCursor.update({ 'sticky' : true });
+                        setTimeout(window.addEventListener, 100, 'click', this.handleClickAnywhere);
+                        //window.addEventListener('click', this.handleClickAnywhere);
+                    } else {
+                        window.removeEventListener('click', this.handleClickAnywhere);
+                        if (!this.state.hoverBarSectionTerm){
+                            ChartDetailCursor.reset();
+                        } else {
+                            ChartDetailCursor.update({ 'sticky' : false });
+                        }
+                    }
+
                 }
             },
 
@@ -245,37 +285,53 @@ var Chart = module.exports = React.createClass({
                     var oldOnMouseLeaveFxn = child && child.props && child.props.onBarPartMouseLeave;
                     return React.cloneElement(child, {
                         'styleOptions' : this.props.styleOptions,
+
+                        // State
                         'selectedBarSectionParentTerm' : this.state.selectedBarSectionParentTerm,
                         'selectedBarSectionTerm' : this.state.selectedBarSectionTerm,
+                        'hoverBarSectionParentTerm' : this.state.hoverBarSectionParentTerm,
+                        'hoverBarSectionTerm' : this.state.hoverBarSectionTerm,
+
+                        // Add to bar section onMouseEnter/onMouseLeave/onClick functions
                         'onBarPartMouseEnter' : (node, evt)=>{
+
+                            // Cancel if same node as selected.
                             if (Chart.BarSection.isSelected(node, this.state.selectedBarSectionTerm, this.state.selectedBarSectionParentTerm)){
-                                // Cancel if same node as selected.
                                 return false;
                             }
 
-                            console.log('MOUSEENT', node);
 
-                            function updateCursorState(){
-                                var updatedState = {
-                                    'path' : [],
-                                    'includeTitleDescendentPrefix' : false,
-                                };
-                                if (node.parent) updatedState.path.push(node.parent);
-                                if (typeof this.props.aggregateType === 'string') {
-                                    updatedState.primaryCount = this.props.aggregateType;
-                                }
-                                updatedState.path.push(node);
-                                ChartDetailCursor.update(updatedState);
-                            }
+                            var newCursorDetailState = {
+                                'path' : [],
+                                'includeTitleDescendentPrefix' : false,
+                            };
                             
-                            updateCursorState.call(this);
+                            if (node.parent) newCursorDetailState.path.push(node.parent);
+                            if (typeof this.props.aggregateType === 'string') {
+                                newCursorDetailState.primaryCount = this.props.aggregateType;
+                            }
+                            newCursorDetailState.path.push(node);
+                            ChartDetailCursor.update(newCursorDetailState);
+
+
+                            var newOwnState = {};
 
                             // Unset selected nodes.
                             if (this.state.selectedBarSectionTerm !== null){
-                                this.setState({
+                                _.extend(newOwnState, {
                                     'selectedBarSectionTerm' : null,
                                     'selectedBarSectionParentTerm' : null
                                 });
+                            }
+
+                            // Update hover state
+                            _.extend(newOwnState, {
+                                'hoverBarSectionTerm' : node.term || null,
+                                'hoverBarSectionParentTerm' : (node.parent && node.parent.term) || null
+                            });
+
+                            if (_.keys(newOwnState).length > 0){
+                                this.setState(newOwnState);
                             }
 
                             highlightTerm(node.field, node.term, node.color || vizUtil.colorForNode(node));
@@ -283,9 +339,17 @@ var Chart = module.exports = React.createClass({
                             if (typeof oldOnMouseEnterFxn === 'function') return oldOnMouseEnterFxn(node, evt);
                         },
                         'onBarPartMouseLeave' : (node, evt)=>{
-                            if (ChartDetailCursor.isTargetDetailCursor(evt.relatedTarget)) return false;
-                            //console.log('MOUSELV', ChartDetailCursor.isTargetDetailCursor(evt.relatedTarget), node, evt);
-                            ChartDetailCursor.reset(false);
+
+                            // Update hover state
+                            this.setState({
+                                'hoverBarSectionTerm' : null,
+                                'hoverBarSectionParentTerm' : null
+                            });
+
+                            if (!ChartDetailCursor.isTargetDetailCursor(evt.relatedTarget)){
+                                ChartDetailCursor.reset(false);
+                            }
+
                             if (typeof oldOnMouseLeaveFxn === 'function') return oldOnMouseLeaveFxn(node, evt);
                         },
                         'onBarPartClick' : (node, evt)=>{
@@ -301,6 +365,7 @@ var Chart = module.exports = React.createClass({
                                 });
                             }
                             if (typeof oldOnClickFxn === 'function') return oldOnClickFxn(node, evt);
+                            return false;
                         } 
                     });
                 });

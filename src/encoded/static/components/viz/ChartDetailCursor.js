@@ -75,7 +75,8 @@ var ChartDetailCursor = module.exports = React.createClass({
                 //}
             ],
             'mounted' : false,
-            'sticky' : false
+            'sticky' : false,
+            'bodyComponent' : ChartDetailCursor.Body
         };
     },
 
@@ -191,18 +192,20 @@ var ChartDetailCursor = module.exports = React.createClass({
                 }}
                 debugStyle={this.props.debugStyle}
                 sticky={this.state.sticky}
-            >
-                <ChartDetailCursor.Body
-                    path={this.state.path}
-                    title={this.state.title}
-                    term={this.state.term}
-                    field={this.state.field}
-                    filteredOut={this.state.filteredOut}
-                    includeTitleDescendentPrefix={this.state.includeTitleDescendentPrefix}
-                    primaryCount={this.state.primaryCount}
-                    sticky={this.state.sticky}
-                />
-            </CursorComponent>
+                children={React.createElement(
+                    this.state.bodyComponent,
+                    {
+                        'path' : this.state.path,
+                        'title' : this.state.title,
+                        'term' : this.state.term,
+                        'field' : this.state.field,
+                        'filteredOut' : this.state.filteredOut,
+                        'includeTitleDescendentPrefix' : this.state.includeTitleDescendentPrefix,
+                        'primaryCount' : this.state.primaryCount,
+                        'sticky' : this.state.sticky
+                    }
+                )}
+            />
         );
     },
 
