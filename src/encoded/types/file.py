@@ -120,14 +120,7 @@ class FileSetCalibration(FileSet):
     item_type = 'file_set_calibration'
     schema = load_schema('encoded:schemas/file_set_calibration.json')
     name_key = 'accession'
-    embedded = ['files_in_set.submitted_by',
-                'files_in_set.accession',
-                'files_in_set.description',
-                'files_in_set.attachment',
-                'files_in_set.lab',
-                'files_in_set.href'
-                'files_in_set.file_format'
-                ]
+    embedded = ['files_in_set']
 
 
 @abstract_collection(
