@@ -1,6 +1,6 @@
 import pytest
 pytestmark = pytest.mark.working
-from rdflib import RDFS, RDF, BNode, URIRef
+from rdflib import RDFS, BNode, URIRef
 from encoded.commands import owltools as ot
 
 
