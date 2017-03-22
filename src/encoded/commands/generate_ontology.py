@@ -349,9 +349,7 @@ def get_syndef_terms_as_uri(connection, ontology, termtype, as_rdf=True):
         of RDF Namespace:name pairs by default or simple URI strings
         if as_rdf=False.
     '''
-    import pdb; pdb.set_trace()
     sdterms = ontology.get(termtype)
-    print(sdterms)
     uris = [term['term_url'] for term in sdterms]
     if as_rdf:
         uris = [convert2namespace(uri) for uri in uris]
@@ -406,7 +404,7 @@ def get_ontologies(connection, ont_list):
     if ont_list == 'all':
         ontologies = get_FDN(None, connection, None, 'ontologys')
     else:
-        ontologies = [get_FDN('ontologys/' + ontology, connection) for ontology in ont_list]
+        ontologies = [get_FDN('ontologys/' + ontology, connection, frame='embedded') for ontology in ont_list]
 
     # removing item not found cases with reporting
     for i, ontology in enumerate(ontologies):
