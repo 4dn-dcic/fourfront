@@ -880,13 +880,25 @@ def test_add_additional_term_info(mocker, simple_terms):
                         assert 'definition' not in term
 
 
-def test_write_outfile(simple_terms):
+def test_write_outfile_pretty(simple_terms):
     import json
     filename = 'tmp_test_file'
-    go.write_outfile(simple_terms, filename)
+    go.write_outfile(simple_terms, filename, pretty=True)
     infile = open(filename, 'r')
     result = json.load(infile)
     print(result)
     for r in result:
         assert r in simple_terms.values()
+    os.remove(filename)
+
+
+def test_write_outfile_notpretty(simple_terms):
+    print(simple_terms)
+    import json
+    filename = 'tmp_test_file'
+    go.write_outfile(simple_terms, filename)
+    with open(filename, 'r') as infile:
+        for l in infile:
+            result = json.loads(l)
+            assert result in simple_terms.values()
     os.remove(filename)
