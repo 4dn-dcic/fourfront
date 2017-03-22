@@ -30,9 +30,10 @@
         "file_format": {
             "title": "File format",
             "type": "string",
-            "default": "other",
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "default": "zip",
             "enum": [
+                "zip",
+                "tiff",
                 "other"
             ]
         },
@@ -61,13 +62,23 @@
             "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "quality_metric": {
-          "exclude_from": ["submit4dn", "FFedit-create"]
+            "exclude_from": ["submit4dn", "FFedit-create"]
         },
         "dbxrefs": {
-          "exclude_from": ["submit4dn", "FFedit-create"]
+            "exclude_from": ["submit4dn", "FFedit-create"]
+        },
+        "attachment": {
+            "title": "Metadata Document",
+            "description": "Document (PDF/DOC/TXT) with information about the files"
+        },
+        "filename": {
+            "title": "Microscopy Files (Zip/TIFF)",
+            "description": "Single zipped file with microscopy files, or a sigle TIFF file"
         }
     },
     "file_format_file_extension": {
-        "other": ""
+        "other": "",
+        "zip": ".zip",
+        "tiff": ".tiff"
     }
 }
