@@ -550,17 +550,25 @@ var ChartDataController = module.exports = {
             };
         }
 
-        if (state.filteredExperiments !== null){
-            current = getCounts(state.filteredExperiments);
-        } else {
-            current = {
+        function genNullCounts(){
+            return {
                 'experiment_sets' : null,
                 'experiments' : null,
                 'files' : null
             };
         }
 
-        total = getCounts(state.experiments);
+        if (state.filteredExperiments !== null){
+            current = getCounts(state.filteredExperiments);
+        } else {
+            current = genNullCounts();
+        }
+
+        if (state.experiments !== null){
+            total = getCounts(state.experiments);
+        } else {
+            total = genNullCounts();
+        }
 
         refs.updateStats(current, total);
     },
