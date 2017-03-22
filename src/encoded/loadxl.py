@@ -698,7 +698,7 @@ def store_keys(app, store_access_key, keys, s3_file_name='illnevertell'):
 
             print("Uploading S3 object with SSE-C")
             s3.put_object(Bucket=s3bucket,
-                          Key='illnevertell',
+                          Key=s3_file_name,
                           Body=keys,
                           SSECustomerKey=secret,
                           SSECustomerAlgorithm='AES256')
