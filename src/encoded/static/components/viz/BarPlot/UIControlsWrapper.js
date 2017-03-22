@@ -204,6 +204,8 @@ var UIControlsWrapper = module.exports = React.createClass({
      * @memberof module:viz/BarPlot.UIControlsWrapper
      */
     render : function(){
+
+        if (!this.props.experiments) return null;
         
         var filterObjExistsAndNoFiltersSelected = this.filterObjExistsAndNoFiltersSelected();
         var windowGridSize = layout.responsiveGridState();
@@ -311,15 +313,6 @@ var UIControlsWrapper = module.exports = React.createClass({
                                 includeFieldTitles={false}
                                 schemas={this.props.schemas}
                                 width={layout.gridContainerWidth() * (3/12) - 20}
-                                title={null
-                                    /*
-                                    <div>
-                                        <h5 className="text-400 legend-title">
-                                            Legend
-                                        </h5>
-                                    </div>
-                                    */
-                                }
                             />
                         </div>
                         <div className="x-axis-right-label">

@@ -423,10 +423,10 @@ var App = React.createClass({
         if (this.state) {
             if (prevState.session !== this.state.session && ChartDataController.isInitialized()){
                 setTimeout(function(){
-                    // Delay 5s.
+                    // Delay 1s.
                     console.log("SYNCING CHART DATA");
                     ChartDataController.sync();
-                }, 5000);   
+                }, 1000);   
             }
             for (key in this.state) {
                 if (this.state[key] !== prevState[key]) {

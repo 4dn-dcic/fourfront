@@ -605,6 +605,9 @@ var ChartDataController = module.exports = {
             function(allExpsContext){
                 experiments = expFxn.listAllExperimentsFromExperimentSets(allExpsContext['@graph']);
                 cb();
+            }, 'GET', function(){
+                experiments = null;
+                cb();
             }
         );
 
@@ -615,6 +618,9 @@ var ChartDataController = module.exports = {
                 ) + ChartDataController.getFieldsRequiredURLQueryPart(),
                 function(filteredContext){
                     filteredExperiments = expFxn.listAllExperimentsFromExperimentSets(filteredContext['@graph']);
+                    cb();
+                }, 'GET', function(){
+                    filteredExperiments = null;
                     cb();
                 }
             );

@@ -192,7 +192,8 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
             this.props.schemas !== nextProps.schemas ||
             !_.isEqual(this.props.schemas, nextProps.schemas) ||
             this.show(nextProps) !== this.show(this.props) ||
-            (nextState.mounted !== this.state.mounted)
+            (nextState.mounted !== this.state.mounted) ||
+            nextProps.session !== this.props.session
         ){
             if (this.props.debug) console.log('Will Update FacetCharts');
             return true;
@@ -408,7 +409,7 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
         console.log('SCHEMAS AT RENDER', this.props.schemas);
 
         return (
-            <div className={"facet-charts show-" + show} key="facet-charts" style={{ height: height }}>
+            <div className={"facet-charts show-" + show} key="facet-charts">
 
                 <ChartDataController.Provider id="barplot1">
                     <BarPlot.UIControlsWrapper legend chartHeight={height}>
