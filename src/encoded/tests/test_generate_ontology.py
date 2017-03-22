@@ -110,7 +110,7 @@ all_ontology = [{'download_url': 'http://www.ebi.ac.uk/efo/efo_inferred.owl',
                   }]
 
 
-def get_fdn_ontology_side_effect(*args):
+def get_fdn_ontology_side_effect(*args, **kwargs):
     for i, arg in enumerate(args):
         print('ARG', i, ' = ', arg)
     if args[0] is not None:
