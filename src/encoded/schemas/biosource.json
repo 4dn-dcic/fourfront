@@ -114,7 +114,14 @@
           "tissue": {
               "title": "Tissue name",
               "description": "Anatomy (UBERON) Ontology term for the tissue used.",
-              "type":  "string"
+              "type":  "string",
+              "enum": ["UBERON:0001264", "UBERON:0001255", "UBERON:0000165"],
+              "linkTo": "OntologyTerm",
+              "linkEnum": [
+                  "111140bc-8535-4448-903e-854af460a233",
+                  "111141bc-8535-4448-903e-854af460a233",
+                  "111142bc-8535-4448-903e-854af460a233"
+              ]
           },
           "biosource_vendor": {
                 "title": "Biosource Vendor",

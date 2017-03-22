@@ -61,13 +61,13 @@
     },
     {
         "uuid": "111116bc-8535-4448-903e-854af460b254",
-        "description": "brain tissue",
+        "description": "pancreas",
         "biosource_type": "tissue",
         "individual":"4DNIN000AAQ1",
         "award": "1U01CA200059-01",
         "lab": "4dn-dcic-lab",
         "submitted_by": "wrangler@wrangler.com",
-        "tissue": "brain"
+        "tissue": "UBERON:0001264"
     },
     {
         "uuid": "331111bc-8535-4448-903e-854af460b89f",
