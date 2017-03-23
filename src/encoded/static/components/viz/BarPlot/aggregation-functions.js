@@ -1,6 +1,5 @@
 'use strict';
 
-/** @ignore */
 var React = require('react');
 var _ = require('underscore');
 var d3 = require('d3');
@@ -23,6 +22,7 @@ var aggregationFxn = module.exports = {
      * If 'useOnlyPopulatedFields' is set to true, will find the first field which has multiple terms (== multiple bars) to use as the primary field, and find
      * second field with multiple terms to use as the secondary field.
      * 
+     * @memberof module:viz/BarPlot.aggregationFxn
      * @static
      * @public
      * @param {Array} experiments - List of experiments which are to be aggregated or counted by their term(s).
@@ -71,6 +71,7 @@ var aggregationFxn = module.exports = {
 
 
     /**
+     * @memberof module:viz/BarPlot.aggregationFxn
      * @static
      * @ignore
      */
@@ -88,6 +89,9 @@ var aggregationFxn = module.exports = {
 
 
     /**
+     * Performs the INITIAL aggregation (along the X-Axis) for field(s).
+     *  
+     * @memberof module:viz/BarPlot.aggregationFxn
      * @static
      * @ignore
      */
@@ -151,6 +155,9 @@ var aggregationFxn = module.exports = {
      * Get all unique terms to which param field evaluates to for experiments in a set.
      * We need to count +1 exp set to each unique term.
      * 
+     * @memberof module:viz/BarPlot.aggregationFxn
+     * @public
+     * @static
      * @param {Object[]} experiments_in_set - Experiment objects belonging to a single experiment set.
      * @param {string|Object.<string>} field - Field to get matched terms for. Can be string or object with a {string} "field" property.
      */
@@ -169,6 +176,9 @@ var aggregationFxn = module.exports = {
     /**
      * Same as getUniqueMatchedTermsFromExpsInSet BUT only from experiments filtered to match parentField and parentTerm.
      * 
+     * @memberof module:viz/BarPlot.aggregationFxn
+     * @public
+     * @static
      * @param {Object[]} experiments_in_set - Experiment objects belonging to a single experiment set.
      * @param {string|Object.<string>} field - Field to get matched terms for. Can be string or object with a {string} "field" property.
      */
@@ -187,8 +197,17 @@ var aggregationFxn = module.exports = {
 
 
     /**
+     * If useOnlyPopulatedFields is true, will find the first two fields which have more than 1 term and select those for further aggregation and visualization.
+     * Otherwise, will simply select the first two fields from the fields parameter.
+     * 
+     * @memberof module:viz/BarPlot.aggregationFxn
+     * @deprecated
      * @static
-     * @ignore
+     * @public
+     * @param {Object[]} fields - List of field objects.
+     * @param {Object[]} experiments - List of experiment objects.
+     * @param {string} aggregate - Deprecated. What to aggregate by.
+     * @param {boolean} [useOnlyPopulatedFields=false] - Whether to search for populated fields or not.
      */
     partitionFields : function(fields, experiments, aggregate, useOnlyPopulatedFields = false){
         var topIndex, nextIndex;
@@ -210,6 +229,9 @@ var aggregationFxn = module.exports = {
 
 
     /**
+     * Routes an incremental value to the proper fieldObj term count.
+     * 
+     * @memberof module:viz/BarPlot.aggregationFxn
      * @static
      * @public
      * @param {Object} fieldObj - A field object with present but incomplete 'terms' & 'total'.

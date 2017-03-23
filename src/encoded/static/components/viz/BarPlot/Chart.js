@@ -1,9 +1,10 @@
 'use strict';
 
-/** @ignore */
 var React = require('react');
 var _ = require('underscore');
 var d3 = require('d3');
+var url = require('url');
+var store = require('./../../../store');
 var vizUtil = require('./../utilities');
 var { RotatedLabel } = require('./../components');
 var ChartDetailCursor = require('./../ChartDetailCursor');
@@ -215,6 +216,7 @@ var Chart = module.exports = React.createClass({
 
         /**
          * Encapsulates the chart output and provides state for currently- selected and currently- hovered-over node.
+         * Acts as the controller for ChartDetailCursor as it applies to the BarPlot chart. See lifecycle methods.
          * 
          * @memberof module:viz/BarPlot.Chart
          * @namespace
@@ -231,10 +233,47 @@ var Chart = module.exports = React.createClass({
                 };
             },
 
+            cursorDetailActions : function(){
+                return [
+                    {
+                        'title' : function(cursorProps){
+                            var pathName = url.parse(cursorProps.href)
+                            if (cursorProps.href && cursorProps.href.indexOf('browse/') > -1){
+                                //return "Browse " + _.pluck(cursorProps.path, 'term').join(' & ') + " Experiment Sets";
+                                return "Explore these Experiment Sets";
+                            }
+                            return "Browse these Experiment Sets";
+                        },
+                        'function' : function(mouseEvt){
+                            console.log('I got clciked.');
+                        },
+                        'disabled' : (cursorProps)=>{
+                            var expSetFilters = store.getState().expSetFilters;
+
+                            if (expSetFilters && typeof expSetFilters === 'object'){
+                                if (
+                                    Array.isArray(cursorProps.path) &&
+                                    (cursorProps.path[0] && cursorProps.path[0].field) &&
+                                    expSetFilters[cursorProps.path[0].field] instanceof Set &&
+                                    expSetFilters[cursorProps.path[0].field].has(cursorProps.path[0].term) &&
+                                    (
+                                        !cursorProps.path[1] || (
+                                            cursorProps.path[1].field &&
+                                            expSetFilters[cursorProps.path[1].field] instanceof Set &&
+                                            expSetFilters[cursorProps.path[1].field].has(cursorProps.path[1].term)
+                                        )
+                                    )
+                                ) return true;
+                            }
+                            return false;
+                        }
+                    }
+                ];
+            },
+
             handleClickAnywhere : function(evt){
-                console.log(evt.target);
+                // Don't do anything if clicked on DetailCursor.
                 if (ChartDetailCursor.isTargetDetailCursor(evt.target)){
-                    console.log("DETAIL CURSOR WOOO");
                     return false;
                 }
 
@@ -304,6 +343,7 @@ var Chart = module.exports = React.createClass({
                             var newCursorDetailState = {
                                 'path' : [],
                                 'includeTitleDescendentPrefix' : false,
+                                'actions' : this.props.actions || this.cursorDetailActions() || null
                             };
                             
                             if (node.parent) newCursorDetailState.path.push(node.parent);
@@ -1036,7 +1076,9 @@ var Chart = module.exports = React.createClass({
         }
         */
 
-        var chartData = this.props.aggregatedData || aggregationFxn.genChartData( // Get counts by term per field.
+        var chartData = (
+            (this.props.showType === 'all' ? this.props.aggregatedData : this.props.aggregatedFilteredData) || this.props.aggregatedData
+        ) || aggregationFxn.genChartData( // Get counts by term per field.
             (
                 this.props.showType === 'all' ?
                 this.props.experiments : this.props.filteredExperiments || this.props.experiments
@@ -1057,7 +1099,7 @@ var Chart = module.exports = React.createClass({
             allExpsBarDataContainer && allExpsBarDataContainer.data && allExpsBarDataContainer.data.maxY
         );
 
-        console.log('BARDATA', this.props.showType, this.barData);
+        console.log('BARDATA', this.props.showType, this.barData, this.props.aggregatedData, this.props.aggregatedFilteredData);
 
         // Bars from current dataset/filters only.
         var currentBars = this.barData.bars.map((d)=>{

@@ -6,20 +6,14 @@
  * 
  * @module viz/BarPlot
  * @example
- * <caption>Example Usage</caption>
+ * <caption>Example usage to aggregate and visualize 'experiments' and 'filteredExperiments' passed as props from ChartDataController.Provider.</caption>
  * <ChartDataController.Provider id="barplot1">
  *     <BarPlot.UIControlsWrapper legend chartHeight={height}>
  *         <BarPlot.Aggregator>
  *             <BarPlot.Chart
- *                 width={this.width(1) - 20}
+ *                 width={width}
  *                 height={height}
- *                 onBarPartMouseEnter={(node, evt)=>{
- *                     ...
- *                 }}
- *                 onBarPartMouseLeave={...}
- *                 onBarPartClick={(node, evt)=>{
- *                     ...
- *                 }}
+ *                 ...
  *             />
  *         </BarPlot.Aggregator>
  *     </BarPlot.UIControlsWrapper>
@@ -30,8 +24,8 @@
  * Component which wraps BarPlot.Chart and provides some UI buttons and stuff.
  * Passes props to BarPlot.Chart.
  * 
- * @namespace
  * @member
+ * @namespace
  * @type {Component}
  */
 module.exports.UIControlsWrapper = require('./UIControlsWrapper');
@@ -45,8 +39,8 @@ module.exports.UIControlsWrapper = require('./UIControlsWrapper');
  * 
  * Accepts the same props as BarPlot.Chart, save for own 'aggregatedData' and 'aggregatedFilteredData'.
  * 
- * @namespace
  * @member
+ * @namespace
  * @type {Component}
  * @prop {Object[]} experiments - "All" experiments, passed from ChartDataController[.Provider].
  * @prop {Object[]} filteredExperiments - "Selected" experiments, if expSetFilters are set in Redux store. Passed from ChartDataController[.Provider].
@@ -61,8 +55,8 @@ module.exports.Aggregator = require('./Aggregator');
  * Various aggregation functions which are used by BarPlot.Chart and/or BarPlot.Aggregator to convert & aggregate list of experiments
  * into a chart-friendly structure.
  * 
- * @namespace
  * @member
+ * @namespace
  * @type {Object}
  */
 module.exports.aggregationFxn = require('./aggregation-functions');
@@ -75,11 +69,11 @@ module.exports.aggregationFxn = require('./aggregation-functions');
  * for adjusting its state to select Charting options.
  * Use BarPlotChart (or UIControlsWrapper, if is wrapping BarPlotChart) as child of ChartDataController.provider, which will feed props.experiments and props.filteredExperiments.
  * 
- * @namespace
  * @member
+ * @namespace
  * @type {Component}
  * @see module:viz/chart-data-controller.Provider
- * @see module:viz/BarPlotChart.UIControlsWrapper
+ * @see module:viz/BarPlot.UIControlsWrapper
  * 
  * @prop {Object[]} experiments - List of all experiments as stored in and provided by ChartDataController.
  * @prop {Object[]} filteredExperiments - List of experiments which match current filters. Stored in and provided by ChartDataController[.Provider].

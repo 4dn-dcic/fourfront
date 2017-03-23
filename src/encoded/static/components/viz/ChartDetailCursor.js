@@ -7,6 +7,7 @@ var vizUtil = require('./utilities');
 var { expFxn, Filters, console, object, isServerSide } = require('./../util');
 var { highlightTerm, unhighlightTerms } = require('./../facetlist');
 var { CursorComponent } = require('./components');
+var { Button } = require('react-bootstrap');
 
 /**
  * @ignore
@@ -14,6 +15,16 @@ var { CursorComponent } = require('./components');
  */
 var updateFxns = { 'default' : null },
     resetFxns  = { 'default' : null };
+
+/**
+ * A plain JS object which contains at least 'title' and 'function' properties.
+ * These become transformed into buttons.
+ * 
+ * @typedef {Object} Action
+ * @property {string} title - Title or text of the button to be shown.
+ * @property {function} function - A function to be called when the button is pressed.
+ * @property {string} bsStyle - Bootstrap color style to use for button. Optional.
+ */
 
 /**
  * @module {Component} viz/ChartDetailCursor
@@ -76,7 +87,8 @@ var ChartDetailCursor = module.exports = React.createClass({
             ],
             'mounted' : false,
             'sticky' : false,
-            'bodyComponent' : ChartDetailCursor.Body
+            'bodyComponent' : ChartDetailCursor.Body,
+            'actions' : null
         };
     },
 
@@ -194,16 +206,10 @@ var ChartDetailCursor = module.exports = React.createClass({
                 sticky={this.state.sticky}
                 children={React.createElement(
                     this.state.bodyComponent,
-                    {
-                        'path' : this.state.path,
-                        'title' : this.state.title,
-                        'term' : this.state.term,
-                        'field' : this.state.field,
-                        'filteredOut' : this.state.filteredOut,
-                        'includeTitleDescendentPrefix' : this.state.includeTitleDescendentPrefix,
-                        'primaryCount' : this.state.primaryCount,
-                        'sticky' : this.state.sticky
-                    }
+                    _.extend(
+                        _.omit(this.props, 'children'),
+                        this.state
+                    )
                 )}
             />
         );
@@ -331,6 +337,44 @@ var ChartDetailCursor = module.exports = React.createClass({
                 return ChartDetailCursor.getCounts(nodes[nodes.length - 1]);
             },
 
+            /**
+             * Under development.
+             * 
+             * @private
+             * @instance
+             * @returns {Element} React DIV element with .row class.
+             */
+            renderActions : function(){
+                if (!this.props.sticky) return null;
+                if (!Array.isArray(this.props.actions) || !this.props.actions.length === 0) return null;
+                var actions = this.props.actions.map((action, i, a)=>{
+                    var title = typeof action.title === 'function' ? action.title(this.props) : action.title;
+                    var disabled = typeof action.disabled === 'function' ? action.disabled(this.props) : action.disabled;
+                    return (
+                        <Button
+                            bsSize="small"
+                            bsStyle={action.bsStyle || 'primary'}
+                            onClick={action.function}
+                            className={a.length < 2 ? "btn-block" : null}
+                            disabled={disabled || false}
+                        >{ title }</Button>
+                    );
+                });
+                return (
+                    <div className="actions row">
+                        <div className="col-sm-12">
+                            { actions }
+                        </div>
+                    </div>
+                );
+            },
+
+            /**
+             * Renders out a row containing 2 counts out of [Exp Sets, Exps, Files], minus whatever is the primary count.
+             * 
+             * @param {Object} props - Props of this component.
+             * @returns {Element} - A DIV React element with a 'row' className.
+             */
             renderDetailSection : function(props = this.props){
                 if (props.path.length === 0) return null;
                 var currentCounts = this.getCurrentCounts(props.path);
@@ -412,6 +456,7 @@ var ChartDetailCursor = module.exports = React.createClass({
                                 { this.renderDetailSection() }
                             </div>
                         </div>
+                        { this.renderActions() }
                     </div>
                 );
             }

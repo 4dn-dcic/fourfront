@@ -1109,9 +1109,9 @@ var App = React.createClass({
                         node.style.top = null;
                     }} />
                     <ChartDetailCursor
-                        verticalAlign="center" /* cursor position */
-                        visibilityMargin={{ left : -10, right : -10, bottom : -50, top: -18 }}
-                        //debugStyle /* -- keep this Component always visible so we can style it */
+                        href={this.props.href}
+                        verticalAlign="center" /* cursor position relative to popover */
+                        //debugStyle /* -- uncomment to keep this Component always visible so we can style it */
                     />
                 </body>
             </html>

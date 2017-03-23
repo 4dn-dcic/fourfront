@@ -54,8 +54,9 @@ var Aggregator = module.exports = React.createClass({
         if (this.props.debug) console.log("Aggregator Next Props > ", nextProps);
 
         var doFieldsDiffer = aggregationFxn.doFieldsDiffer(nextProps.fields, this.props.fields);
+        console.log('do fields differ', doFieldsDiffer);
         if (
-            (nextProps.showType !== this.props.showType && nextProps.showType == 'all') ||
+            (nextProps.showType !== this.props.showType && nextProps.showType === 'all') ||
             (nextProps.filteredExperiments !== this.props.filteredExperiments && !nextProps.filteredExperiments)
         ){
             state.aggregatedFilteredData = null;
@@ -63,7 +64,8 @@ var Aggregator = module.exports = React.createClass({
             (
                 nextProps.filteredExperiments !== this.props.filteredExperiments ||
                 !_.isEqual(nextProps.filteredExperiments, this.props.filteredExperiments) ||
-                doFieldsDiffer
+                doFieldsDiffer ||
+                (nextProps.showType !== this.props.showType && nextProps.showType !== 'all')
             ) && Array.isArray(nextProps.filteredExperiments)
         ){
             state.aggregatedFilteredData = aggregationFxn.genChartData(
