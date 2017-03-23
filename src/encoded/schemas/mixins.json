@@ -228,6 +228,7 @@
                     "title": "MIME type",
                     "type": "string",
                     "enum": [
+                        "application/msword",
                         "application/pdf",
                         "application/zip",
                         "text/plain",

@@ -96,6 +96,7 @@ setup(
         extract_test_data = encoded.commands.extract_test_data:main
         es-index-data = encoded.commands.es_index_data:main
         generate-ontology = encoded.commands.generate_ontology:main
+        load-ontology = encoded.commands.load_ontology:main
         import-data = encoded.commands.import_data:main
         jsonld-rdf = encoded.commands.jsonld_rdf:main
         migrate-files-aws = encoded.commands.migrate_files_aws:main

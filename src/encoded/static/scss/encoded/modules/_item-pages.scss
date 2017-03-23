@@ -380,6 +380,9 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 
 /*** Files In Set Table ***/
 
+$download-button-width : 100px;
+
+
 .files-in-set-table-title {
 	font-weight: 300;
 	padding-bottom: 10px;
@@ -389,6 +392,8 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 }
 
 .files-in-set-table {
+
+	margin-bottom: 20px;
 
 	.row {
 
@@ -455,6 +460,8 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 		}
 
 		&.header-row {
+			user-select: none;
+
 			> div {
 				font-weight: 500;
 			}
@@ -466,6 +473,17 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 					width: 32px;
 					text-align: center;
 				}
+				> span.file {
+					display: inline-block;
+					min-width: $download-button-width;
+					text-align: left;
+				}
+				> span.docs {
+					width : 33px;
+					margin-left: 6px;
+					display: inline-block;
+					text-align: center;
+				}
 			}
 		}
 
@@ -474,7 +492,14 @@ Custom Classes & Styling for Item Pages (e.g. Experiment Sets)
 			z-index: 10;
 			> a.btn {
 				margin-bottom: -23px;
+				&:not(:first-child){
+					margin-left: 5px;
+				}
+				&.button-dl-file {
+					min-width: $download-button-width;
+				}
 			}
+			
 		}
 
 	}

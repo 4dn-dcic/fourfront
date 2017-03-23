@@ -66,6 +66,13 @@ var FilesInSetTable = module.exports = React.createClass({
                 return 'file-zip-o';
             } else if ( fileType.indexOf('pdf') > -1 ){
                 return 'file-pdf-o';
+            } else if ( fileType.indexOf('doc') > -1 ){
+                return 'file-word-o';
+            } else if (
+                fileType.indexOf('txt') > -1 ||
+                fileType.indexOf('tex') > -1
+            ){
+                return 'file-text-o';
             } else if (
                 fileType.indexOf('xls') > -1 ||
                 fileType.indexOf('csv') > -1 ||
@@ -199,8 +206,13 @@ var FilesInSetTable = module.exports = React.createClass({
                 var file = this.props.file;
                 var atId = object.atIdFromObject(file);
                 var title = file.display_title || file.accession;
-                var downloadHref = FilesInSetTable.attachmentDownloadLinkFromFile(file);
-                var iconClass = FilesInSetTable.iconClassFromFileType(file && file.attachment && file.attachment.type);
+
+                var fileDownloadHref = (file && file.href) || null;
+                var attachmentDownloadHref = FilesInSetTable.attachmentDownloadLinkFromFile(file);
+                
+                var fileItemClass = FilesInSetTable.iconClassFromFileType(file && file.file_format);
+                var attachmentIconClass = FilesInSetTable.iconClassFromFileType(file && file.attachment && file.attachment.type);
+
                 return (
                     <div className="row" key={atId || title}>
                         <div className="col-xs-9 col-md-2 col-lg-2 title">
@@ -209,13 +221,17 @@ var FilesInSetTable = module.exports = React.createClass({
                             </h6>
                         </div>
 
-                        <div className="col-xs-3 col-md-1 text-right download-button pull-right">
-                            <Button bsSize="small" href={ downloadHref } download disabled={!downloadHref}>
-                                <i className={"icon icon-" + (iconClass || 'download')}/>
+                        <div className="col-xs-3 col-md-2 text-right download-button pull-right">
+                            <Button className="button-dl-file" bsStyle="primary" bsSize="small" href={ fileDownloadHref } download disabled={!fileDownloadHref}>
+                                <i className={"icon icon-" + (fileItemClass) }/>
+                                { '\u00A0  Download' }
+                            </Button>
+                            <Button className="button-dl-doc" bsStyle="default" bsSize="small" href={ attachmentDownloadHref } download disabled={!attachmentDownloadHref}>
+                                <i className={"icon icon-" + (attachmentIconClass || 'download')}/>
                             </Button>
                         </div>
 
-                        <div className="col-xs-12 col-md-5 col-lg-6 description">
+                        <div className="col-xs-12 col-md-4 col-lg-5 description">
                             { file.description }
                         </div>
 
@@ -307,16 +323,18 @@ var FilesInSetTable = module.exports = React.createClass({
                     Accession
                 </div>
 
-                <div className="col-xs-3 col-md-1 text-right download-button-title pull-right">
-                    <i className={"icon icon-download"}/>
+                <div className="col-xs-3 col-md-2 text-right download-button-title pull-right">
+                    {/* <i className="icon icon-download"/> */}
+                    <span className="file">Image Files</span>
+                    <span className="docs">Doc</span>
                 </div>
 
-                <div className="col-xs-12 col-md-5 col-lg-6  description">
+                <div className="col-xs-12 col-md-4 col-lg-5  description">
                     Description
                 </div>
 
-                <div className="col-xs-1 col-md-1 lab">
-                    &nbsp;
+                <div className="col-xs-1 col-md-1 lab" style={{ paddingRight : 6 }}>
+                    Lab
                 </div>
 
                 <div className="col-xs-12 col-md-3 col-lg-2 submitter">

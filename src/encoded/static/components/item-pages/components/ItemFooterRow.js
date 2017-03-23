@@ -20,7 +20,11 @@ var ItemFooterRow = module.exports = React.createClass({
      * @returns {Element|null} Div React element containing aliases list or null.
      */
     aliases : function(){
-        if (!this.props.context || !Array.isArray(this.props.context.aliases)) return null;
+        if (
+            !this.props.context
+            || !Array.isArray(this.props.context.aliases)
+            || this.props.context.aliases.length === 0
+        ) return null;
         if (!Array.isArray(this.props.context.actions)) return null;
         if (!_.find(this.props.context.actions, { 'name' : 'edit' })) return null; // No 'Edit' action for this Item.
         
@@ -42,7 +46,11 @@ var ItemFooterRow = module.exports = React.createClass({
     },
 
     alternateAccessions : function(){
-        if (!this.props.context || !Array.isArray(this.props.context.alternate_accessions)) return null;
+        if (
+            !this.props.context
+            || !Array.isArray(this.props.context.alternate_accessions)
+            || this.props.context.alternate_accessions.length === 0
+        ) return null;
         var alternateAccessions = this.props.context.alternate_accessions.length > 0 ? this.props.context.alternate_accessions : [<em>None</em>];
         return (
             <div>
@@ -61,7 +69,11 @@ var ItemFooterRow = module.exports = React.createClass({
     },
 
     externalReferences : function(schemas){
-        if (!this.props.context || !Array.isArray(this.props.context.external_references)) return null;
+        if (
+            !this.props.context
+            || !Array.isArray(this.props.context.external_references)
+            || this.props.context.external_references.length === 0
+        ) return null;
         var externalRefs = this.props.context.external_references.length > 0 ? this.props.context.external_references : [<em>None</em>];
         return (
             <div>
