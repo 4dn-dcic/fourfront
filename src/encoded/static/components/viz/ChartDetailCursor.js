@@ -278,14 +278,14 @@ var ChartDetailCursor = module.exports = React.createClass({
                     header : function(isEmpty = false){
                         return (
                             <div className="crumb-header row">
-                                <div className="field col-sm-5">
+                                <div className="field col-xs-5">
                                     Looking at
                                 </div>
-                                <div className="name col-sm-2">
+                                <div className="name col-xs-2">
                                     
                                 </div>
                                 { isEmpty ? null :
-                                <div className="count col-sm-5 text-right">
+                                <div className="count col-xs-5 text-right">
                                     # Sets
                                 </div>
                                 }
@@ -311,13 +311,13 @@ var ChartDetailCursor = module.exports = React.createClass({
                                                 className={"crumb row" + (i===0 ? ' first' : '')}
                                                 key={i}
                                             >
-                                                <div className="field col-sm-5" style={ i === 0 ? null : { paddingLeft : 10 + offsetPerDescendent }}>
+                                                <div className="field col-xs-5" style={ i === 0 ? null : { paddingLeft : 10 + offsetPerDescendent }}>
                                                     { Filters.Field.toName(n.field) }
                                                 </div>
-                                                <div className="name col-sm-5">
+                                                <div className="name col-xs-5">
                                                     { n.name || n.term }
                                                 </div>
-                                                <div className="count col-sm-2 pull-right text-right">
+                                                <div className="count col-xs-2 pull-right text-right">
                                                     { n.experiment_sets }
                                                 </div>
                                             </div>
@@ -392,7 +392,7 @@ var ChartDetailCursor = module.exports = React.createClass({
                     if (countPair[0] === 'files')           name = "Files";
 
                     return (
-                        <div key={countPair[0] || i} className={"text-right col-sm-" + colSize}>
+                        <div key={countPair[0] || i} className={"text-right col-xs-" + colSize}>
                             { countPair[1] }<small> { name }</small>
                         </div>
                     );
@@ -400,7 +400,7 @@ var ChartDetailCursor = module.exports = React.createClass({
                 
                 return (
                     <div className='row'>
-                        { this.props.primaryCount !== 'files' ? <div className="col-sm-2"></div> : null }
+                        { this.props.primaryCount !== 'files' ? <div className="col-xs-2"></div> : null }
                         { countsToShow }
                     </div>
                 );
