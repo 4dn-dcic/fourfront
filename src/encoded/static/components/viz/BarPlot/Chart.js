@@ -3,12 +3,11 @@
 var React = require('react');
 var _ = require('underscore');
 var d3 = require('d3');
-var url = require('url');
 var store = require('./../../../store');
 var vizUtil = require('./../utilities');
 var { RotatedLabel } = require('./../components');
 var ChartDetailCursor = require('./../ChartDetailCursor');
-var { console, object, isServerSide, expFxn, Filters, layout } = require('./../../util');
+var { console, object, isServerSide, expFxn, Filters, layout, navigate } = require('./../../util');
 var { unhighlightTerms, highlightTerm } = require('./../../facetlist');
 var aggregationFxn = require('./aggregation-functions');
 
@@ -184,6 +183,7 @@ var Chart = module.exports = React.createClass({
                         className="chart-bar no-highlight"
                         onMouseLeave={()=>{
                             if (Array.isArray(d.bars) && d.bars.length > 0) unhighlightTerms(d.bars[0].field);
+                            else unhighlightTerms(d.field);
                         }}
                         data-term={d.term}
                         data-field={Array.isArray(d.bars) && d.bars.length > 0 ? d.bars[0].field : null}
@@ -237,15 +237,63 @@ var Chart = module.exports = React.createClass({
                 return [
                     {
                         'title' : function(cursorProps){
-                            var pathName = url.parse(cursorProps.href)
-                            if (cursorProps.href && cursorProps.href.indexOf('browse/') > -1){
+                            if (navigate.isBrowseHref(cursorProps.href)){
                                 //return "Browse " + _.pluck(cursorProps.path, 'term').join(' & ') + " Experiment Sets";
                                 return "Explore these Experiment Sets";
                             }
                             return "Browse these Experiment Sets";
                         },
-                        'function' : function(mouseEvt){
+                        'function' : (cursorProps, mouseEvt) => {
                             console.log('I got clciked.');
+                            console.log(navigate, cursorProps, this.props);
+
+                            //var node = cursorProps.path.slice(0).pop();
+                            //console.log(node);
+
+                            var href = (cursorProps.href && navigate.getBrowseHref(cursorProps.href)) || null;
+
+                            // Reset existing filters if selecting from 'all' view. Preserve if from filtered view.
+                            var currentExpSetFilters = this.props.showType === 'all' ? {} : Filters.currentExpSetFilters();
+
+                            Filters.saveChangedFilters(
+                                _.reduce(cursorProps.path, function(expSetFilters, node){
+                                    // Do not change filter IF SET ALREADY because we want to strictly enable filters, not disable any.
+                                    if (
+                                        expSetFilters && expSetFilters[node.field] &&
+                                        expSetFilters[node.field].has(node.term)
+                                    ){
+                                        return expSetFilters;
+                                    }
+                                    return Filters.changeFilter(
+                                        node.field,
+                                        node.term,
+                                        'sets',             // If 'sets', skips checking if field starts with 'experiments_in_set' and adding if not.
+                                        expSetFilters,      // Existing expSetFilters, if null they're retrieved from Redux store.
+                                        null,               // Callback
+                                        true,               // Only return new expSetFilters vs saving them == set to TRUE
+                                    );
+                                }, currentExpSetFilters),
+                                true,
+                                href
+                            );
+
+                            //console.log(newExpSetFilters);
+                            
+
+                            /*
+                            return Filters.changeFilter(
+                                field,
+                                term,
+                                this.props.experimentsOrSets,
+                                this.props.expSetFilters,
+                                callback,
+                                false,      // Only return new expSetFilters vs saving them == set to false
+                                this.props.useAjax,
+                                //this.props.href
+                            );
+                            */
+                            
+
                         },
                         'disabled' : (cursorProps)=>{
                             var expSetFilters = store.getState().expSetFilters;
@@ -1154,6 +1202,7 @@ var Chart = module.exports = React.createClass({
                 topLevelField={this.props.fields[this.barData.fieldIndex].field}
                 width={availWidth} height={availHeight}
                 styleOptions={styleOpts}
+                showType={this.props.showType}
             >{ allBars.map((d,i,a) => 
                 <Chart.Bar
                     key={d.term || i}

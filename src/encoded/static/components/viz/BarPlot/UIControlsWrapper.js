@@ -27,7 +27,7 @@ var UIControlsWrapper = module.exports = React.createClass({
                 'both' : 'All & Selected'
             },
             'availableFields1' : [
-                { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
+                { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
                 { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
                 { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' }
             ],
@@ -47,8 +47,8 @@ var UIControlsWrapper = module.exports = React.createClass({
     getInitialState : function(){
         return {
             'fields' : [
-                { title : "Biosample", field : "experiments_in_set.biosample.biosource_summary" },
-                { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
+                this.props.availableFields1[0],
+                this.props.availableFields2[0],
                 //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
             ],
             'aggregateType' : 'experiment_sets',

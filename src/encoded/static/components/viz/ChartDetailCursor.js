@@ -347,25 +347,26 @@ var ChartDetailCursor = module.exports = React.createClass({
             renderActions : function(){
                 if (!this.props.sticky) return null;
                 if (!Array.isArray(this.props.actions) || !this.props.actions.length === 0) return null;
+
+                var colWidth = 12 / Math.min(4, this.props.actions.length);
+
                 var actions = this.props.actions.map((action, i, a)=>{
                     var title = typeof action.title === 'function' ? action.title(this.props) : action.title;
                     var disabled = typeof action.disabled === 'function' ? action.disabled(this.props) : action.disabled;
                     return (
-                        <Button
-                            bsSize="small"
-                            bsStyle={action.bsStyle || 'primary'}
-                            onClick={action.function}
-                            className={a.length < 2 ? "btn-block" : null}
-                            disabled={disabled || false}
-                        >{ title }</Button>
+                        <div className={"col-xs-" + colWidth} key={title || i}>
+                            <Button
+                                bsSize="small"
+                                bsStyle={action.bsStyle || 'primary'}
+                                onClick={action.function.bind(action.function, this.props)}
+                                className={a.length < 2 ? "btn-block" : null}
+                                disabled={disabled || false}
+                            >{ title }</Button>
+                        </div>
                     );
                 });
                 return (
-                    <div className="actions row">
-                        <div className="col-sm-12">
-                            { actions }
-                        </div>
-                    </div>
+                    <div className="actions row">{ actions }</div>
                 );
             },
 

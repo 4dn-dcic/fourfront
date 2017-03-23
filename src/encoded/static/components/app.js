@@ -13,7 +13,7 @@ var store = require('../store');
 var browse = require('./browse');
 var origin = require('../libs/origin');
 var serialize = require('form-serialize');
-var { Filters, ajax, JWT, console, isServerSide } = require('./util');
+var { Filters, ajax, JWT, console, isServerSide, navigate } = require('./util');
 var Alerts = require('./alerts');
 var jwt = require('jsonwebtoken');
 var { FacetCharts } = require('./facetcharts');
@@ -146,8 +146,9 @@ var App = React.createClass({
             user_actions = user_info.user_actions;
         }
 
-        // Save navigate fxn and other req'd stuffs to Filters.
-        Filters.navigate = this.navigate;
+        // Save navigate fxn and other req'd stuffs to GLOBAL navigate obj.
+        // So that we may call it from anywhere if necessary without passing through props.
+        navigate.setNavigateFunction(this.navigate);
 
         console.log("App Initial State: ", session, user_actions);
 
