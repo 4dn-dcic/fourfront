@@ -362,44 +362,44 @@ var aggregationFxn = module.exports = {
             aggregationFxn.countFieldTerm(field.terms[topLevelFieldTerm], nextLevelFieldTerm, true, 'experiments', 1);
         }
 
-            // Aggregate files & experiments for child (subdivision) field
-            experiments.forEach(aggregateExpAndFilesFromExp);
+        // Aggregate files & experiments for child (subdivision) field
+        experiments.forEach(aggregateExpAndFilesFromExp);
 
-            // Aggregate experiment sets for child (subdivision) field
-            // [ [set1exp1, set1exp2, set1exp3], [set2exp1, set2exp2, ...], ...].forEach
-            _.values(expFxn.groupExperimentsIntoExperimentSets(experiments)).forEach(function(expsInSet){
+        // Aggregate experiment sets for child (subdivision) field
+        // [ [set1exp1, set1exp2, set1exp3], [set2exp1, set2exp2, ...], ...].forEach
+        _.values(expFxn.groupExperimentsIntoExperimentSets(experiments)).forEach(function(expsInSet){
 
-                var topLevelFieldTerms = _.uniq(aggregationFxn.getUniqueMatchedTermsFromExpsInSet(
+            var topLevelFieldTerms = _.uniq(aggregationFxn.getUniqueMatchedTermsFromExpsInSet(
+                expsInSet,
+                field.field
+            ).map(function(tlft){
+                if (Array.isArray(tlft)) tlft = tlft[0]; // For now, just use first term per unique set of terms if evaluates to list.
+                if (!tlft){
+                    tlft = "None";
+                    if (typeof field.terms["None"] === 'undefined') createNoneChildField();
+                }
+                return tlft;
+            }));
+
+            topLevelFieldTerms.forEach(function(tlft){
+                var nextLevelFieldTerms = _.uniq(aggregationFxn.getUniqueMatchedTermsFromExpsInSetWhereFieldIsTerm(
                     expsInSet,
-                    field.field
-                ).map(function(tlft){
-                    if (Array.isArray(tlft)) tlft = tlft[0]; // For now, just use first term per unique set of terms if evaluates to list.
-                    if (!tlft){
-                        tlft = "None";
-                        if (typeof field.terms["None"] === 'undefined') createNoneChildField();
-                    }
-                    return tlft;
+                    field.childField.field,
+                    field,
+                    tlft
+                ).map(function(nlft){
+                    if (Array.isArray(nlft)) nlft = nlft[0]; // For now, just use first term per unique set of terms if evaluates to list.
+                    if (!nlft) return "None";
+                    return nlft;
                 }));
-
-                topLevelFieldTerms.forEach(function(tlft){
-                    var nextLevelFieldTerms = _.uniq(aggregationFxn.getUniqueMatchedTermsFromExpsInSetWhereFieldIsTerm(
-                        expsInSet,
-                        field.childField.field,
-                        field,
-                        tlft
-                    ).map(function(nlft){
-                        if (Array.isArray(nlft)) nlft = nlft[0]; // For now, just use first term per unique set of terms if evaluates to list.
-                        if (!nlft) return "None";
-                        return nlft;
-                    }));
-                    
-                    nextLevelFieldTerms.forEach(function(term){
-                        aggregationFxn.countFieldTerm(field.terms[tlft], term, true, 'experiment_sets', 1);
-                    });
-
+                
+                nextLevelFieldTerms.forEach(function(term){
+                    aggregationFxn.countFieldTerm(field.terms[tlft], term, true, 'experiment_sets', 1);
                 });
-            
+
             });
+        
+        });
 
             
 
