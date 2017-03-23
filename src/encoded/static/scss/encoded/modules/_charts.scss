@@ -455,6 +455,11 @@
                 border-bottom-right-radius: 3px;
             }
             */
+
+            &.hover {
+                cursor: pointer;
+            }
+            
             &.hover,
             &.selected {
                 outline-color: rgba(0,0,0,0.25);

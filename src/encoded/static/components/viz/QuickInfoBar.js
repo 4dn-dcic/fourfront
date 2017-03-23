@@ -55,7 +55,8 @@ var QuickInfoBar = module.exports = React.createClass({
             'count_experiment_sets_total' : null,
             'count_files_total'           : null,
             'mounted'               : false,
-            'show'                  : false
+            'show'                  : false,
+            'reallyShow'            : false
         };
     },
 
@@ -180,6 +181,7 @@ var QuickInfoBar = module.exports = React.createClass({
     },
 
     /** @ignore */
+    /*
     shouldComponentUpdate : function(newProps, newState){
         if (this.state.count_experiments !== newState.count_experiments) return true;
         if (this.state.count_experiment_sets !== newState.count_experiment_sets) return true;
@@ -197,6 +199,7 @@ var QuickInfoBar = module.exports = React.createClass({
 
         return false;
     },
+    */
 
     /** @ignore */
     className: function(){
@@ -243,6 +246,7 @@ var QuickInfoBar = module.exports = React.createClass({
         return (
             <div className={className} onMouseLeave={()=>{
                 this.setState({ show : false });
+                setTimeout(this.setState.bind(this), 500, { 'reallyShow' : false });
             }}>
                 <div className="left-side clearfix">
                     <QuickInfoBar.Stat
@@ -273,7 +277,7 @@ var QuickInfoBar = module.exports = React.createClass({
                         className="any-filters glance-label"
                         title={areAnyFiltersSet ? "Filtered" : "No filters set"}
                         onMouseEnter={_.debounce(()=>{
-                            if (areAnyFiltersSet) this.setState({ show : 'activeFilters' });
+                            if (areAnyFiltersSet) this.setState({ show : 'activeFilters', reallyShow : true });
                         },100)}
                     >
                         <i className="icon icon-filter" style={{ opacity : areAnyFiltersSet ? 1 : 0.25 }} />
@@ -286,7 +290,7 @@ var QuickInfoBar = module.exports = React.createClass({
 
     /** @ignore */
     renderHoverBar : function(){
-        if (this.state.show === 'activeFilters') {
+        if (this.state.show === 'activeFilters' || (this.state.show === false && this.state.reallyShow)) {
             return (
                 <div className="bottom-side">
                     <div className="crumbs-label">
