@@ -409,7 +409,7 @@ var Action = module.exports = React.createClass({
         }else if(this.props.create){
             var actionTitle = 'Creating new ' + thisType;
         }else{
-            var actionTitle = 'Creating new ' + thisType + ' with ' + title + ' as template';
+            var actionTitle = 'Creating ' + thisType + ' with ' + title + ' as template';
         }
         var reqFields = this.state.requiredFields;
         return (
