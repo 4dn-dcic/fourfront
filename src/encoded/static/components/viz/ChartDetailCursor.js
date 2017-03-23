@@ -354,7 +354,7 @@ var ChartDetailCursor = module.exports = React.createClass({
                     var title = typeof action.title === 'function' ? action.title(this.props) : action.title;
                     var disabled = typeof action.disabled === 'function' ? action.disabled(this.props) : action.disabled;
                     return (
-                        <div className={"col-xs-" + colWidth} key={title || i}>
+                        <div className={"button-container col-xs-" + colWidth} key={title || i}>
                             <Button
                                 bsSize="small"
                                 bsStyle={action.bsStyle || 'primary'}
@@ -366,7 +366,7 @@ var ChartDetailCursor = module.exports = React.createClass({
                     );
                 });
                 return (
-                    <div className="actions row">{ actions }</div>
+                    <div className="actions buttons-container">{ actions }</div>
                 );
             },
 
