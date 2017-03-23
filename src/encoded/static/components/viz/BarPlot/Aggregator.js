@@ -88,7 +88,7 @@ var Aggregator = module.exports = React.createClass({
                 nextProps.aggregateType,
                 'experiments',
                 nextProps.useOnlyPopulatedFields
-            )
+            );
         }
 
         if (_.keys(state).length > 0){
