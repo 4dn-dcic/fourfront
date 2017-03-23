@@ -356,12 +356,10 @@ var FilesInSetTable = module.exports = React.createClass({
 
     /** @ignore */
     render : function(){
-        var files = this.props.files.slice(0);
-        delete files[0].attachment.href;
         return (
             <div className="files-in-set-table">
                 { this.header() }
-                { files.map((file, i)=> <FilesInSetTable.FileItemRow file={file} key={file.link_id || i} />) }
+                { this.props.files.map((file, i)=> <FilesInSetTable.FileItemRow file={file} key={file.link_id || i} />) }
             </div>
         );
     }
