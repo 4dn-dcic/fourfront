@@ -419,28 +419,6 @@ var FacetCharts = module.exports.FacetCharts = React.createClass({
                                 height={height}
                                 schemas={this.props.schemas}
                                 ref="barplotChart"
-                                onBarPartMouseEnter={(node, evt)=>{
-                                    var updatedState = {
-                                        'path' : [],
-                                        'includeTitleDescendentPrefix' : false,
-                                        'sticky' : false
-                                    };
-                                    if (node.parent) updatedState.path.push(node.parent);
-                                    if (this.refs && this.refs.barplotChart && this.refs.barplotChart.props
-                                        && typeof this.refs.barplotChart.props.aggregateType === 'string') {
-                                        updatedState.primaryCount = this.refs.barplotChart.props.aggregateType;
-                                    }
-                                    updatedState.path.push(node);
-                                    ChartDetailCursor.update(updatedState);
-                                    FacetList.highlightTerm(node.field, node.term, node.color || vizUtil.colorForNode(node));
-                                }}
-                                onBarPartMouseLeave={ChartDetailCursor.reset.bind(ChartDetailCursor.reset, 'default', null)}
-                                onBarPartClick={(node, evt)=>{
-                                    evt.stopPropogation && evt.stopPropogation();
-                                    ChartDetailCursor.update({
-                                        'sticky' : true
-                                    });
-                                }}
                             />
                         </BarPlot.Aggregator>
                     </BarPlot.UIControlsWrapper>
