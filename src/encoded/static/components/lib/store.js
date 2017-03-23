@@ -18,7 +18,7 @@ var _ = require('underscore');
  * @param {string} stateKey - Name in the view's state that should be updated with the changed collection
  */
 class ItemStore {
-    
+
     /** @ignore */
     constructor(items, view, stateKey) {
         this._fetch = view.context ? view.context.fetch : undefined;
@@ -42,6 +42,7 @@ class ItemStore {
 
     /**
      * Update an item
+     * Ensure that data includes uuid and accession, if applicable, for PUT
      */
     update(data) {
         return this.fetch(data['@id'], {
@@ -56,14 +57,22 @@ class ItemStore {
 
     /**
      * Delete an item (set its status to deleted)
+     * del_item should include @id, uuid, and accession if applicable
      */
-    delete(id) {
-        return this.fetch(id + '?render=false', {
+    delete(del_item) {
+        var dispatch_body = {'status': 'deleted'};
+        if(del_item.accession){
+            dispatch_body.accession = del_item.accession;
+        }
+        if(del_item.uuid){
+            dispatch_body.uuid = del_item.uuid;
+        }
+        return this.fetch(del_item['@id'] + '?render=false', {
             method: 'PATCH',
-            body: JSON.stringify({status: 'deleted'}),
+            body: JSON.stringify(dispatch_body),
         }, response => {
-            var item = _.find(this._items, i => i['@id'] == id);
-            this._items = _.reject(this._items, i => i['@id'] == id);
+            var item = _.find(this._items, i => i['@id'] == del_item['@id']);
+            this._items = _.reject(this._items, i => i['@id'] == del_item['@id']);
             this.dispatch('onDelete', item);
         });
     }
@@ -86,7 +95,7 @@ class ItemStore {
         });
     }
 
-    /** 
+    /**
      * Notify listening views of actions and update their state
      * (should we update state optimistically?)
      * @param {string} method - Method
