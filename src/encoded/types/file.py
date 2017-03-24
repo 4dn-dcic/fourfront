@@ -147,9 +147,21 @@ class File(Item):
 
         # ensure we always have s3 links setup
         sheets = {} if sheets is None else sheets.copy()
-        uuid = properties.get('uuid', False)
-        if not sheets.get('external', False) and uuid:
-            sheets['external'] = self.build_external_creds(self.registry, uuid, properties)
+        uuid = self.uuid
+        old_creds = self.propsheets.get('external', None)
+        new_creds = self.build_external_creds(self.registry, uuid, properties)
+        sheets['external'] = new_creds
+
+        if old_creds:
+            if old_creds.get('key') != new_creds.get('key'):
+                try:
+                    # delete the old sumabeach
+                    conn = boto.connect_s3()
+                    bname = old_creds['bucket']
+                    bucket = boto.s3.bucket.Bucket(conn,bname)
+                    bucket.delete_key(old_creds['key'])
+                except Exception as e:
+                    print(e)
 
         # update self first to ensure 'related_files' are stored in self.properties
         super(File, self)._update(properties, sheets)
