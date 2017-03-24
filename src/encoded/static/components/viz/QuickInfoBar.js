@@ -352,7 +352,6 @@ var QuickInfoBar = module.exports = React.createClass({
 
     /** @ignore */
     render : function(){
-        console.log(_.clone(this.state), this);
         return(
             <div id={this.props.id} className={this.className()}>
                 { this.renderStats() }

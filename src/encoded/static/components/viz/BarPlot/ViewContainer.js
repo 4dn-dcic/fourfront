@@ -233,11 +233,6 @@ var ViewContainer = module.exports = React.createClass({
                     return "Browse these Experiment Sets";
                 },
                 'function' : (cursorProps, mouseEvt) => {
-                    console.log('I got clciked.');
-                    console.log(navigate, cursorProps, this.props);
-
-                    //var node = cursorProps.path.slice(0).pop();
-                    //console.log(node);
 
                     var isOnBrowsePage = navigate.isBrowseHref(cursorProps.href);
                     var href = isOnBrowsePage ? cursorProps.href : navigate.getBrowseHref(cursorProps.href) || null;
@@ -270,7 +265,7 @@ var ViewContainer = module.exports = React.createClass({
                         }
                         
                     );
-                    
+
                 },
                 'disabled' : (cursorProps)=>{
                     var expSetFilters = store.getState().expSetFilters;
