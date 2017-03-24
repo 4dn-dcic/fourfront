@@ -77,13 +77,7 @@ def test_files_aws_credentials(testapp, fastq_uploading):
 
     res_put = testapp.put_json(resobj['@id'], fastq_uploading)
 
-    import pdb; pdb.set_trace()
-
     assert resobj['upload_credentials']['key'] == res_put.json['@graph'][0]['upload_credentials']['key']
-    # 307 is redirect to s3 using auto generated download url
-    fastq_res = testapp.get('{href}'
-                            .format(**res.json['@graph'][0]),
-                            status=307)
 
 
 def test_files_aws_credentials_change_filename(testapp, fastq_uploading):
