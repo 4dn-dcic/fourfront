@@ -1,3 +1,4 @@
+
 {
     "title": "Data File",
     "description": "Schema for submitting metadata for a data file.",
@@ -129,8 +130,7 @@
             "title": "Status",
             "type": "string",
             "default": "uploading",
-            "permission": "import_items",
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "exclude_from": ["submit4dn"],
             "enum" : [
                 "uploading",
                 "uploaded",

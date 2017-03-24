@@ -278,88 +278,38 @@ var Action = module.exports = React.createClass({
                     return response;
                 })
                 .then(response => {
-                    if(!test && !this.props.edit){
-                        destination = response['@graph'][0]['@id'];
-                    }
+                    var response_data;
                     if(test){
                         console.log('OBJECT SUCCESSFULLY TESTED!');
                         stateToSet.validated = 1;
                         this.setState(stateToSet);
-                    // handle file upload if this is a file
-                    }else if(this.state.file && _.contains(response['@graph'][0]['@type'],'File')){
-                        // if editing, use get_upload. if posting, use post_upload (file.py)
-                        if(this.props.edit){
-                            this.context.fetch(destination + 'upload', {
-                                method: 'GET',
-                                headers: {
-                                    'Accept': 'application/json',
-                                    'Content-Type': 'application/json'
-                                }
-                            })
-                            .then(response => {
-                                if (!this.context.contentTypeIsJSON(response) || !response['@graph'] || !response['@graph'][0]['upload_credentials'] || !this.state.file) throw response;
-                                return response;
-                            })
-                            .then(response => {
-                                // add important info to result from finalizedContext
-                                // that is not added from /types/file.py get_upload
-                                var creds = response['@graph'][0]['upload_credentials'];
-                                finalizedContext['upload_credentials'] = creds;
-                                finalizedContext['@id'] = destination;
-                                var upload_manager = s3UploadFile(this.state.file, creds);
-                                var orig_filename = null;
-                                if(this.props.context.filename){
-                                    orig_filename = this.props.context.filename;
-                                }
-                                var upload_info = {
-                                    'context': finalizedContext,
-                                    'manager': upload_manager,
-                                    'original_filename': orig_filename
-                                };
-                                // Passes upload_manager to uploads.js through app.js
-                                this.props.updateUploads(destination, upload_info);
-                                alert('Success! Navigating to the uploads page.');
-                                this.context.navigate('/uploads');
-                            }, error => {
-                                console.log('Error getting credentials');
-                                alert('File upload failed! This is probably an s3 credentials issue.');
-                                this.context.navigate(destination);
-                            });
-                        }else{
-                            this.context.fetch(destination + 'upload', {
-                                method: 'POST',
-                                headers: {
-                                    'Accept': 'application/json',
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify(response['@graph'][0])
-                            })
-                            .then(response => {
-                                if (!this.context.contentTypeIsJSON(response) || !response['@graph'] || !response['@graph'][0]['upload_credentials'] || !this.state.file) throw response;
-                                return response;
-                            })
-                            .then(response => {
-                                var creds = response['@graph'][0]['upload_credentials'];
-                                var upload_manager = s3UploadFile(this.state.file, creds);
-                                var orig_filename = null;
-                                if(this.props.context.filename){
-                                    orig_filename = this.props.context.filename;
-                                }
-                                var upload_info = {
-                                    'context': response['@graph'][0],
-                                    'manager': upload_manager,
-                                    'original_filename': orig_filename
-                                };
-                                // Passes upload_manager to uploads.js through app.js
-                                this.props.updateUploads(destination, upload_info);
-                                alert('Success! Navigating to the uploads page.');
-                                this.context.navigate('/uploads');
-                            }, error => {
-                                console.log('Error getting credentials');
-                                alert('File upload failed! This is probably an s3 credentials issue.');
-                                this.context.navigate(destination);
-                            });
+                        return;
+                    }else{
+                        response_data = response['@graph'][0];
+                        console.log('R_DATA:::', response_data);
+                        if(!this.props.edit){
+                            destination = response_data['@id'];
                         }
+                    }
+                    // handle file upload if this is a file
+                    if(this.state.file && response_data['upload_credentials']){
+                        // add important info to result from finalizedContext
+                        // that is not added from /types/file.py get_upload
+                        var creds = response_data['upload_credentials'];
+                        var upload_manager = s3UploadFile(this.state.file, creds);
+                        var orig_filename = null;
+                        if(this.props.context.filename){
+                            orig_filename = this.props.context.filename;
+                        }
+                        var upload_info = {
+                            'context': response_data,
+                            'manager': upload_manager,
+                            'original_filename': orig_filename
+                        };
+                        // Passes upload_manager to uploads.js through app.js
+                        this.props.updateUploads(destination, upload_info);
+                        alert('Success! Navigating to the uploads page.');
+                        this.context.navigate('/uploads');
                     }else{
                         console.log('ACTION SUCCESSFUL!');
                         alert('Success! Navigating to the object page.');
