@@ -309,8 +309,12 @@ var ViewContainer = module.exports = React.createClass({
     },
 
     handleClickAnywhere : function(evt){
-        // Don't do anything if clicked on DetailCursor.
-        if (ChartDetailCursor.isTargetDetailCursor(evt.target)){
+        // Don't do anything if clicked on DetailCursor. UNLESS it's a button.
+        if (
+            evt.target.className &&
+            evt.target.className.split(' ').indexOf('btn') === -1 &&
+            ChartDetailCursor.isTargetDetailCursor(evt.target)
+        ){
             return false;
         }
 

@@ -586,11 +586,17 @@
                 margin-right: 10px;
                 display: inline-block;
                 margin-top: -5px;
-                vertical-align: middle;
+                vertical-align: baseline;
                 text-align: right;
             }
             i.icon {
+                vertical-align: middle;
+                margin-right: 7px;
+                font-size: 15px;
                 transition : transform .75s ease-out, opacity .75s ease-out;
+            }
+            > span.toggle-container {
+                vertical-align: middle;
             }
             &.no-click {
                 cursor: default;
@@ -1158,4 +1164,10 @@
 
     }
 
+}
+
+/*** ToolTip Extend ***/
+
+.__react_component_tooltip {
+    z-index: 9999 !important;
 }

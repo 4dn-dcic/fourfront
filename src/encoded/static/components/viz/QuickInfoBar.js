@@ -10,6 +10,7 @@ var { expFxn, Filters, console, object, isServerSide, layout,  } = require('../u
 var ActiveFiltersBar = require('./components/ActiveFiltersBar');
 var MosaicChart = require('./MosaicChart');
 var ChartDataController = require('./chart-data-controller');
+var ReactTooltip = require('react-tooltip');
 
 /**
  * Bar shown below header on home and browse pages.
@@ -201,6 +202,14 @@ var QuickInfoBar = module.exports = React.createClass({
     },
     */
 
+    anyFiltersSet : function(props = this.props){
+        return (props.expSetFilters && _.keys(props.expSetFilters).length > 0);
+    },
+
+    componentDidUpdate : function(pastProps, pastState){
+        if (this.anyFiltersSet() !== this.anyFiltersSet(pastProps)) ReactTooltip.rebuild();
+    },
+
     /** @ignore */
     className: function(){
         var cn = "explanation";
@@ -211,7 +220,7 @@ var QuickInfoBar = module.exports = React.createClass({
 
     /** @ignore */
     renderStats : function(){
-        var areAnyFiltersSet = (this.props.expSetFilters && _.keys(this.props.expSetFilters).length > 0);
+        var areAnyFiltersSet = this.anyFiltersSet();
         var stats;
         //if (this.props.showCurrent || this.state.showCurrent){
         if (this.state.count_experiment_sets || this.state.count_experiments || this.state.count_files) {
@@ -275,7 +284,7 @@ var QuickInfoBar = module.exports = React.createClass({
                     />
                     <div
                         className="any-filters glance-label"
-                        title={areAnyFiltersSet ? "Filtered" : "No filters set"}
+                        data-tip={areAnyFiltersSet ? "Filtered" : "No Filters Set"}
                         onMouseEnter={_.debounce(()=>{
                             if (areAnyFiltersSet) this.setState({ show : 'activeFilters', reallyShow : true });
                         },100)}

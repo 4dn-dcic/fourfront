@@ -6,6 +6,7 @@ var vizUtil = require('./../utilities');
 var { RotatedLabel, Legend } = require('./../components');
 var { console, object, isServerSide, expFxn, Filters, layout } = require('./../../util');
 var { ButtonToolbar, ButtonGroup, Button, DropdownButton, MenuItem } = require('react-bootstrap');
+var { Toggle } = require('./../../inputs');
 
 var UIControlsWrapper = module.exports = React.createClass({
 
@@ -26,12 +27,12 @@ var UIControlsWrapper = module.exports = React.createClass({
                 'filtered' : 'Selected',
                 'both' : 'All & Selected'
             },
-            'availableFields1' : [
+            'availableFields_XAxis' : [
                 { title : "Biosource", field : "experiments_in_set.biosample.biosource_summary" },
                 { title : "Digestion Enzyme", field : "experiments_in_set.digestion_enzyme.name" },
                 { title : "Biosource Type", field : 'experiments_in_set.biosample.biosource.biosource_type' }
             ],
-            'availableFields2' : [
+            'availableFields_Subdivision' : [
                 { title : "Experiment Type", field : 'experiments_in_set.experiment_type' },
                 { title : "Organism", field : "experiments_in_set.biosample.biosource.individual.organism.name" },
             ],
@@ -47,12 +48,13 @@ var UIControlsWrapper = module.exports = React.createClass({
     getInitialState : function(){
         return {
             'fields' : [
-                this.props.availableFields1[0],
-                this.props.availableFields2[0],
+                this.props.availableFields_XAxis[0],
+                this.props.availableFields_Subdivision[0],
                 //{ title : "Experiment Summary", field : "experiments_in_set.experiment_summary" }
             ],
             'aggregateType' : 'experiment_sets',
-            'showState' : 'all'
+            'showState' : 'all',
+            'openDropdown' : null
         };
     },
 
@@ -61,9 +63,9 @@ var UIControlsWrapper = module.exports = React.createClass({
      * @memberof module:viz/BarPlot.UIControlsWrapper
      */
     componentWillReceiveProps : function(nextProps){
-        if (this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters)){
-            this.setState({ 'showState' : 'all' });
-        }
+        //if (this.filterObjExistsAndNoFiltersSelected(nextProps.expSetFilters)){
+        //    this.setState({ 'showState' : 'all' });
+        //}
     },
 
     /**
@@ -107,7 +109,7 @@ var UIControlsWrapper = module.exports = React.createClass({
             _.extend(
                 _.omit( // Own props minus these.
                     this.props,
-                    'titleMap', 'availableFields1', 'availableFields2', 'legend', 'chartHeight', 'children'
+                    'titleMap', 'availableFields_XAxis', 'availableFields_Subdivision', 'legend', 'chartHeight', 'children'
                 ),
                 {
                     'fields' : this.state.fields,
@@ -147,7 +149,7 @@ var UIControlsWrapper = module.exports = React.createClass({
         }
 
         var newField = _.find(
-            this.props['availableFields' + (fieldIndex + 1)],
+            this.props['availableFields' + (fieldIndex === 0 ? '_XAxis' : '_Subdivision') ],
             { field : newFieldKey }
         );
         var otherFieldIndex = fieldIndex === 0 ? 1 : 0;
@@ -177,26 +179,31 @@ var UIControlsWrapper = module.exports = React.createClass({
      * @ignore
      * @memberof module:viz/BarPlot.UIControlsWrapper
      */
-    renderDropDownMenuItems : function(keys, active = null, noFiltersSet = true, disabledTitle = null){
+    renderDropDownMenuItems : function(keys, active = null){
         return keys.map((key)=>{
             var subtitle = null;
             var title = null;
+            var disabled = null;
             if (Array.isArray(key)){
                 // Assume we have [key, title, subtitle].
                 title = key[1] || null;
                 subtitle = key[2] || null;
+                disabled = key[3] || false;
                 key = key[0];
             }
-            var disabled = noFiltersSet && (key === 'filtered' || key === 'both');
+
             return <MenuItem
                 key={key}
                 eventKey={key}
                 active={key === active}
                 children={title || this.titleMap(key, true)}
                 disabled={disabled}
-                title={(disabled && disabledTitle) || subtitle || null}
             />;
         });
+    },
+
+    handleDropDownToggle : function(id, isOpen, evt, source){
+        this.setState({ 'openDropdown' : isOpen ? id : null });
     },
 
     /**
@@ -224,7 +231,13 @@ var UIControlsWrapper = module.exports = React.createClass({
                             id="select-barplot-aggregate-type"
                             bsSize="xsmall"
                             onSelect={this.handleAggregateTypeSelect}
-                            title={this.titleMap(this.state.aggregateType)}
+                            title={(() => {
+                                if (this.state.openDropdown === 'yAxis'){
+                                    return 'Y-Axis Aggregation';
+                                }
+                                return this.titleMap(this.state.aggregateType);
+                            })()}
+                            onToggle={this.handleDropDownToggle.bind(this, 'yAxis')}
                             children={this.renderDropDownMenuItems(
                                 ['experiment_sets','experiments','files'],
                                 this.state.aggregateType
@@ -232,38 +245,23 @@ var UIControlsWrapper = module.exports = React.createClass({
                         />
                     </div>
 
-                    <div className={"toggle-zoom" + (filterObjExistsAndNoFiltersSelected ? ' no-click' : '')} onClick={()=>
+                    <div className={"toggle-zoom" + (/*filterObjExistsAndNoFiltersSelected ? ' no-click' : */'')} onClick={(e)=>{
+                        e.preventDefault()
                         this.handleExperimentsShowType(this.state.showState === 'all' ? 'filtered' : 'all')
-                    }>
+                    }}>
+                    {/*
                         <div className="text">
                             <small>Viewing</small><br/>
                             {this.state.showState === 'all' ? 'All' : 'Selected'}
                         </div>
-                        <i className={"icon icon-search-" + (this.state.showState === 'all' ? 'plus' : 'minus')}/>
-                    </div>
-                    
-                    <div className="controls" style={{ display : 'none'}}>
-                        <ButtonToolbar>
-                            <ButtonGroup>
-                                <DropdownButton
-                                    id="select-barplot-experiments-type"
-                                    onSelect={this.handleExperimentsShowType}
-                                    title={
-                                        <div className="dropdown-title-container">
-                                            <small>Show</small><br/>
-                                            <h5>{ this.titleMap(!filterObjExistsAndNoFiltersSelected ? this.state.showState : 'all') }</h5>
-                                        </div>
-                                    }
-                                    children={this.renderDropDownMenuItems(
-                                        ['filtered','all'],
-                                        this.state.showState,
-                                        filterObjExistsAndNoFiltersSelected,
-                                        "Please select some filters first."
-                                    )}
-                                />
-                                
-                            </ButtonGroup>
-                        </ButtonToolbar>
+                        */}
+                        
+                        <i className="icon icon-filter"/>
+                        <span className="text">View Selected</span>
+                        <span className="inline-block toggle-container">
+                            <Toggle checked={this.state.showState === 'filtered'} />
+                        </span>
+                       
                     </div>
 
                 </div>
@@ -280,19 +278,24 @@ var UIControlsWrapper = module.exports = React.createClass({
                                 id="select-barplot-field-1"
                                 onSelect={this.handleFieldSelect.bind(this, 1)}
                                 title={(()=>{
+                                    if (this.state.openDropdown === 'subdivisionField'){
+                                        return <span className="text-600">Color Bars by</span>;
+                                    }
                                     var field = this.getFieldAtIndex(1);
                                     if (!field) return "None";
                                     return field.title || Filters.Field.toName(field.field);
                                 })()}
+                                onToggle={this.handleDropDownToggle.bind(this, 'subdivisionField')}
                                 children={this.renderDropDownMenuItems(
-                                    this.props.availableFields2.concat([{
+                                    this.props.availableFields_Subdivision.concat([{
                                         title : <em>None</em>,
                                         field : "none"
                                     }]).map(function(field){
                                         return [
-                                            field.field,
-                                            field.title || Filters.Field.toName(field.field),
-                                            field.description || null
+                                            field.field,                                        // Field
+                                            field.title || Filters.Field.toName(field.field),   // Title
+                                            field.description || null,                          // Description
+                                            false                                               // Disabled
                                         ]; // key, title, subtitle
                                     }),
                                     (this.state.fields[1] && this.state.fields[1].field) || "none"
@@ -320,11 +323,15 @@ var UIControlsWrapper = module.exports = React.createClass({
                                 id="select-barplot-field-0"
                                 onSelect={this.handleFieldSelect.bind(this, 0)}
                                 title={(()=>{
+                                    if (this.state.openDropdown === 'xAxisField'){
+                                        return <span className="text-600">Select X-Axis Field</span>;
+                                    }
                                     var field = this.getFieldAtIndex(0);
                                     return field.title || Filters.Field.toName(field.field);
                                 })()}
+                                onToggle={this.handleDropDownToggle.bind(this, 'xAxisField')}
                                 children={this.renderDropDownMenuItems(
-                                    this.props.availableFields1.map(function(field){
+                                    this.props.availableFields_XAxis.map(function(field){
                                         return [
                                             field.field,
                                             field.title || Filters.Field.toName(field.field),
