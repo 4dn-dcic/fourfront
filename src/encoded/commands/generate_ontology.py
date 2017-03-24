@@ -382,7 +382,7 @@ def get_slim_terms(connection):
     # to search all can add parameters to retrieve all or just the terms in the
     # categories passed as a list
     slim_categories = ['developmental', 'assay', 'organ', 'system']
-    search_suffix = 'search/?type=OntologyTerm&is_slim_for='
+    search_suffix = 'search/?type=OntologyTerm&limit=all&is_slim_for='
     slim_terms = []
     for cat in slim_categories:
         terms = get_FDN(None, connection, None, search_suffix + cat)
@@ -394,6 +394,13 @@ def get_slim_terms(connection):
         except:
             slim_terms.extend(terms)
     return slim_terms
+
+
+def get_existing_ontology_terms(connection):
+    '''Retrieves all existing ontology terms from the db
+    '''
+    search_suffix = 'search/?type=OntologyTerm&limit=all'
+    return get_FDN(None, connection, None, search_suffix)
 
 
 def get_ontologies(connection, ont_list):
@@ -450,6 +457,59 @@ def verify_and_update_ontology(terms, ontologies):
                 if prefix != ont_lookup[term['source_ontology']]:
                     term['source_ontology'] = ont_prefi[prefix]
     return terms
+
+
+def _terms_match(t1, t2):
+    '''check that all the fields in the first term t1 are in t2 and
+        have the same values
+    '''
+    for k, val in t1.items():
+        if k not in t2:
+            return False
+        else:
+            if k == 'parents':
+                if len(val) != len(t2['parents']):
+                    return False
+                for p1 in val:
+                    found = False
+                    print(p1)
+                    for p2 in t2['parents']:
+                        print(p2['link_id'])
+                        # this bit depends on the {link_id: val, display_title: val}
+                        # form of embedded info - may need to make more complex to deal with
+                        # other scenarios like a list of uuids or fully embedded terms
+                        if p1 in p2['link_id']:
+                            found = True
+                    if not found:
+                        return False
+            elif k == 'source_ontology':
+                # same as above comment to potentially deal with different response
+                t2ont = t2['source_ontology']['link_id']
+                if val not in t2ont:
+                    return False
+            else:
+                if val != t2[k]:
+                    return False
+    return True
+
+
+def id_post_and_patch(terms, dbterms):
+    '''compares terms to terms that are already in db - if no change
+        removes them from the list of updates, if new adds to post dict,
+        if changed adds uuid and add to patch dict
+    '''
+    to_post = {}
+    to_patch = {}
+    for tid, term in terms.items():
+        if tid not in dbterms:
+            # new term
+            to_post[tid] = term
+        else:
+            # check to see if contents of term are also in db_term
+            if not _terms_match(term, dbterms[tid]):
+                uuid = dbterms[tid]['uuid']
+                term['uuid'] == uuid
+                to_patch[uuid] = term
 
 
 def add_additional_term_info(terms, data, synonym_terms, definition_terms):
@@ -534,6 +594,10 @@ def parse_args(args):
                         default=False,
                         action='store_true',
                         help="Default False - set True if you want json format easy to read, hard to parse")
+    parser.add_argument('--full',
+                        default=False,
+                        action='store_true',
+                        help="Default False - set True to generate full file to load - do not filter out existing unchanged terms")
     parser.add_argument('--key',
                         default='default',
                         help="The keypair identifier from the keyfile.  \
@@ -555,6 +619,10 @@ def main():
 
     ontologies = get_ontologies(connection, args.ontologies)
     slim_terms = get_slim_terms(connection)
+    db_terms = get_existing_ontology_terms(connection)
+    db_terms = {t['term_id']: t for t in db_terms}
+    print(db_terms)
+    print(len(db_terms))
 
     # start iteratively downloading and processing ontologies
     terms = {}
@@ -569,6 +637,10 @@ def main():
         terms = add_slim_terms(terms, slim_terms)
         terms = remove_obsoletes_and_unnamed(terms)
         terms = verify_and_update_ontology(terms, ontologies)
+        db_terms = get_existing_ontology_terms(connection)
+        db_terms = {t['term_id']: t for t in terms}
+        if not args.full:
+            terms = filter_out_existing_and_unchanged(terms, db_terms)
         # at the moment we're writing json output but consider updating db directly
         # including checks for removal of terms already in db from ontologies
         # and audits for items linked to terms
