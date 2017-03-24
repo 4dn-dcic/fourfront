@@ -96,7 +96,7 @@ def test_files_aws_credentials_change_filename(testapp, fastq_uploading):
     assert res_put.json['@graph'][0]['href'].endswith('tiff')
 
 
-def test_status_change_doesnt_much_with_creds(testapp, fastq_uploading):
+def test_status_change_doesnt_muck_with_creds(testapp, fastq_uploading):
     fastq_uploading['filename'] = 'test.zip'
     fastq_uploading['file_format'] = 'zip'
     res = testapp.post_json('/file_calibration', fastq_uploading, status=201)
@@ -104,10 +104,12 @@ def test_status_change_doesnt_much_with_creds(testapp, fastq_uploading):
 
     fastq_uploading['status'] = 'released'
     res_put = testapp.put_json(resobj['@id'], fastq_uploading)
-    put_obj = res_put.json['@graph'][0]
+    res_upload = testapp.get(resobj['@id'] + '/upload')
+    put_obj = res_upload.json['@graph'][0]
 
-    assert resobj['upload_credentials']['key'] == put_obj['upload_credentials']['keys']
-    assert resobj['href'] == put_obj['href']
+    assert resobj['upload_credentials']['key'] == put_obj['upload_credentials']['key']
+
+    assert resobj['href'] == res_put.json['@graph'][0]['href']
 
 
 def test_files_get_s3_with_no_filename_posted(testapp, fastq_uploading):
