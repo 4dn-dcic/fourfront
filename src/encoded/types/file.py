@@ -44,6 +44,7 @@ def external_creds(bucket, key, name=None, profile_name=None):
     an access token.  This is useful for linking metadata to files that
     already exist on s3.
     '''
+    import pdb; pdb.set_trace()
     credentials = {}
     if name is not None:
         policy = {
@@ -147,7 +148,9 @@ class File(Item):
 
         # ensure we always have s3 links setup
         sheets = {} if sheets is None else sheets.copy()
-        uuid = properties.get('uuid', False)
+        uuid = self.uuid
+        #uuid = properties.get('uuid', None)
+        import pdb; pdb.set_trace()
         if not sheets.get('external', False) and uuid:
             sheets['external'] = self.build_external_creds(self.registry, uuid, properties)
 
@@ -375,6 +378,7 @@ def post_upload(context, request):
         # Handle objects initially posted as another state.
         bucket = request.registry.settings['file_upload_bucket']
         # maybe this should be properties.uuid
+        import pdb; pdb.set_trace()
         uuid = context.uuid
         mapping = context.schema['file_format_file_extension']
         file_extension = mapping[properties['file_format']]
