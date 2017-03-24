@@ -44,7 +44,6 @@ def external_creds(bucket, key, name=None, profile_name=None):
     an access token.  This is useful for linking metadata to files that
     already exist on s3.
     '''
-    import pdb; pdb.set_trace()
     credentials = {}
     if name is not None:
         policy = {
@@ -149,10 +148,20 @@ class File(Item):
         # ensure we always have s3 links setup
         sheets = {} if sheets is None else sheets.copy()
         uuid = self.uuid
-        #uuid = properties.get('uuid', None)
-        import pdb; pdb.set_trace()
-        if not sheets.get('external', False) and uuid:
-            sheets['external'] = self.build_external_creds(self.registry, uuid, properties)
+        old_creds = self.propsheets.get('external', None)
+        new_creds = self.build_external_creds(self.registry, uuid, properties)
+        sheets['external'] = new_creds
+
+        if old_creds:
+            if old_creds.get('key') != new_creds.get('key'):
+                try:
+                    # delete the old sumabeach
+                    conn = boto.connect_s3()
+                    bname = old_creds['bucket']
+                    bucket = boto.s3.bucket.Bucket(conn,bname)
+                    bucket.delete_key(old_creds['key'])
+                except Exception as e:
+                    print(e)
 
         # update self first to ensure 'related_files' are stored in self.properties
         super(File, self)._update(properties, sheets)
@@ -378,7 +387,6 @@ def post_upload(context, request):
         # Handle objects initially posted as another state.
         bucket = request.registry.settings['file_upload_bucket']
         # maybe this should be properties.uuid
-        import pdb; pdb.set_trace()
         uuid = context.uuid
         mapping = context.schema['file_format_file_extension']
         file_extension = mapping[properties['file_format']]
