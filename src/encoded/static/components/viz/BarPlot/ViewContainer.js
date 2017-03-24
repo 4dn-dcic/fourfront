@@ -228,9 +228,9 @@ var ViewContainer = module.exports = React.createClass({
                 'title' : function(cursorProps){
                     if (navigate.isBrowseHref(cursorProps.href)){
                         //return "Browse " + _.pluck(cursorProps.path, 'term').join(' & ') + " Experiment Sets";
-                        return "Explore these Experiment Sets";
+                        return "Explore";
                     }
-                    return "Browse these Experiment Sets";
+                    return "Browse";
                 },
                 'function' : (cursorProps, mouseEvt) => {
 

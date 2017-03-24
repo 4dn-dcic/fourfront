@@ -203,7 +203,12 @@ var UIControlsWrapper = module.exports = React.createClass({
     },
 
     handleDropDownToggle : function(id, isOpen, evt, source){
-        this.setState({ 'openDropdown' : isOpen ? id : null });
+        console.log(id, isOpen, evt);
+        if (isOpen){
+            setTimeout(this.setState.bind(this), 10, { 'openDropdown' : id });
+        } else {
+            this.setState({ 'openDropdown' : null });
+        }
     },
 
     /**
