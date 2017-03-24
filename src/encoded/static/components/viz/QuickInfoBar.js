@@ -255,7 +255,7 @@ var QuickInfoBar = module.exports = React.createClass({
         return (
             <div className={className} onMouseLeave={()=>{
                 this.setState({ show : false });
-                setTimeout(this.setState.bind(this), 500, { 'reallyShow' : false });
+                this.timeout = setTimeout(this.setState.bind(this), 500, { 'reallyShow' : false });
             }}>
                 <div className="left-side clearfix">
                     <QuickInfoBar.Stat
@@ -286,6 +286,7 @@ var QuickInfoBar = module.exports = React.createClass({
                         className="any-filters glance-label"
                         data-tip={areAnyFiltersSet ? "Filtered" : "No Filters Set"}
                         onMouseEnter={_.debounce(()=>{
+                            if (this.timeout) clearTimeout(this.timeout);
                             if (areAnyFiltersSet) this.setState({ show : 'activeFilters', reallyShow : true });
                         },100)}
                     >
@@ -307,7 +308,6 @@ var QuickInfoBar = module.exports = React.createClass({
                     </div>
                     <ActiveFiltersBar
                         expSetFilters={this.props.expSetFilters}
-                        invisible={!this.state.mounted}
                         orderedFieldNames={null}
                         href={this.props.href}
                         showTitle={false}
@@ -352,6 +352,7 @@ var QuickInfoBar = module.exports = React.createClass({
 
     /** @ignore */
     render : function(){
+        console.log(_.clone(this.state), this);
         return(
             <div id={this.props.id} className={this.className()}>
                 { this.renderStats() }

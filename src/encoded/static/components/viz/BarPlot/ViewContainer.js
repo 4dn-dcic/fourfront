@@ -239,7 +239,8 @@ var ViewContainer = module.exports = React.createClass({
                     //var node = cursorProps.path.slice(0).pop();
                     //console.log(node);
 
-                    var href = (cursorProps.href && navigate.getBrowseHref(cursorProps.href)) || null;
+                    var isOnBrowsePage = navigate.isBrowseHref(cursorProps.href);
+                    var href = isOnBrowsePage ? cursorProps.href : navigate.getBrowseHref(cursorProps.href) || null;
 
                     // Reset existing filters if selecting from 'all' view. Preserve if from filtered view.
                     var currentExpSetFilters = this.props.showType === 'all' ? {} : Filters.currentExpSetFilters();
@@ -263,26 +264,13 @@ var ViewContainer = module.exports = React.createClass({
                             );
                         }, currentExpSetFilters),
                         true,
-                        href
+                        href,
+                        function(){
+                            setTimeout(layout.animateScrollTo, 100, 360, Math.abs(document.body.scrollTop - 360) * 2, 0);
+                        }
+                        
                     );
-
-                    //console.log(newExpSetFilters);
                     
-
-                    /*
-                    return Filters.changeFilter(
-                        field,
-                        term,
-                        this.props.experimentsOrSets,
-                        this.props.expSetFilters,
-                        callback,
-                        false,      // Only return new expSetFilters vs saving them == set to false
-                        this.props.useAjax,
-                        //this.props.href
-                    );
-                    */
-                    
-
                 },
                 'disabled' : (cursorProps)=>{
                     var expSetFilters = store.getState().expSetFilters;
@@ -434,11 +422,13 @@ var ViewContainer = module.exports = React.createClass({
                     if (typeof oldOnMouseLeaveFxn === 'function') return oldOnMouseLeaveFxn(node, evt);
                 },
                 'onBarPartClick' : (node, evt)=>{
+                    // If this section already selected:
                     if (ViewContainer.BarSection.isSelected(node, this.state.selectedBarSectionTerm, this.state.selectedBarSectionParentTerm)){
                         this.setState({
                             'selectedBarSectionTerm' : null,
                             'selectedBarSectionParentTerm' : null
                         });
+                    // If not:
                     } else {
                         this.setState({
                             'selectedBarSectionTerm' : node.term || null,

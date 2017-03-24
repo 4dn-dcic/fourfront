@@ -421,8 +421,8 @@
     .chart-bar {
         transition: transform .75s ease-out, opacity .5s, width .75s ease-out;
         position: absolute;
-        outline-offset: 5px;
-        outline: 2px solid transparent;
+        //outline-offset: 5px;
+        //outline: 2px solid transparent;
 
         .bar-top-label {
             display: block;
@@ -441,8 +441,8 @@
         .bar-part {
             opacity: 1;
             transition: opacity 0.5s, height .75s ease-out, width .75s, border-color .5s ease-out, outline .5s, box-shadow .5s;
-            outline-offset: 5px;
-            outline: 1px solid transparent;
+            //outline-offset: 5px;
+            //outline: 1px solid transparent;
             box-shadow : none;
             /*
             &:first-of-type {
@@ -462,7 +462,7 @@
             
             &.hover,
             &.selected {
-                outline-color: rgba(0,0,0,0.25);
+                //outline-color: rgba(0,0,0,0.25);
                 box-shadow: inset 0 0 0 3px rgba(0,0,0,0.25);
                 //outline-color: transparent !important;
             }
@@ -655,6 +655,12 @@
             margin : 0;
             font-weight: 600;
         }
+    }
+
+    .dropdown-open-title {
+        font-weight: 600;
+        line-height: 1rem;
+        font-size: 1.1rem;
     }
 
     .controls {

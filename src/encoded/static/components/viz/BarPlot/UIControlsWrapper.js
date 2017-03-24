@@ -279,7 +279,7 @@ var UIControlsWrapper = module.exports = React.createClass({
                                 onSelect={this.handleFieldSelect.bind(this, 1)}
                                 title={(()=>{
                                     if (this.state.openDropdown === 'subdivisionField'){
-                                        return <span className="text-600">Color Bars by</span>;
+                                        return <em className="dropdown-open-title">Color Bars by</em>;
                                     }
                                     var field = this.getFieldAtIndex(1);
                                     if (!field) return "None";
@@ -324,7 +324,7 @@ var UIControlsWrapper = module.exports = React.createClass({
                                 onSelect={this.handleFieldSelect.bind(this, 0)}
                                 title={(()=>{
                                     if (this.state.openDropdown === 'xAxisField'){
-                                        return <span className="text-600">Select X-Axis Field</span>;
+                                        return <em className="dropdown-open-title">X-Axis Field</em>;
                                     }
                                     var field = this.getFieldAtIndex(0);
                                     return field.title || Filters.Field.toName(field.field);
