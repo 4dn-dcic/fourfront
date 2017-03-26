@@ -240,8 +240,7 @@ var layout = module.exports = {
             var elem = document.getElementById(to);
             if (!elem) throw new Error(to + " not found in document.");
             elementTop = layout.getElementTop(elem);
-        } else if (typeof to === "ELEMENT" /* FIND PROPER TYPEOF */){
-
+        //} else if (typeof to === "ELEMENT" /* FIND PROPER TYPEOF */){
         } else if (typeof to === 'number'){
             elementTop = to;
         } else throw new Error("Invalid argument 'to' supplied.");

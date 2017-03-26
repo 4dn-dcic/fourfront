@@ -159,7 +159,7 @@ var ViewContainer = module.exports = React.createClass({
                 var parentBarTerm = (d.parent || d).term;
                 cachedBarSections[parentBarTerm][d.term] = d;
                 var isNew = false;
-                if (this.props.transitioning && (!cachedPastBarSections[parentBarTerm] || !cachedPastBarSections[parentBarTerm][d.term])){
+                if (this.props.transitioning && (cachedPastBarSections[parentBarTerm] && !cachedPastBarSections[parentBarTerm][d.term])){
                     isNew = true;
                 }
 

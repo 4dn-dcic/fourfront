@@ -251,7 +251,7 @@ var UIControlsWrapper = module.exports = React.createClass({
                     </div>
 
                     <div className={"toggle-zoom" + (/*filterObjExistsAndNoFiltersSelected ? ' no-click' : */'')} onClick={(e)=>{
-                        e.preventDefault()
+                        e.preventDefault();
                         this.handleExperimentsShowType(this.state.showState === 'all' ? 'filtered' : 'all')
                     }}>
                     {/*
