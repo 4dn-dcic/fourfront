@@ -126,7 +126,7 @@ var UIControlsWrapper = module.exports = React.createClass({
      */
     handleAggregateTypeSelect : _.throttle(function(eventKey, event){
         this.setState({ aggregateType : eventKey });
-    }, 300),
+    }, 750),
 
     /**
      * @ignore
@@ -134,7 +134,7 @@ var UIControlsWrapper = module.exports = React.createClass({
      */
     handleExperimentsShowType : _.throttle(function(eventKey, event){
         this.setState({ showState : eventKey });
-    }, 300),
+    }, 750, {trailing : false}),
 
     /**
      * @ignore

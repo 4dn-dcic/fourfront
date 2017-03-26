@@ -92,11 +92,17 @@ var ViewContainer = module.exports = React.createClass({
                             + (isSelected ? ' selected' : '') + (isHoveredOver ? ' hover' : '')
                         }
                         style={{
-                            //top : rectY.call(this),
                             height : this.props.isNew || this.props.isRemoving ? 0 : d.attr.height,
-                            transform: 'translate3d(0,0,0)',
-                            width: (d.parent || d).attr.width,
-                            backgroundColor : color
+                            //width: '100%', //(this.props.isNew && d.pastWidth) || (d.parent || d).attr.width,
+                            backgroundColor : color,
+                            
+                        }}
+                        ref={(r)=>{
+                            if (this.props.isNew) setTimeout(function(){
+                                vizUtil.requestAnimationFrame(function(){
+                                    r.style.height = d.attr.height + 'px';
+                                });
+                            }, 0);
                         }}
                         data-color={color}
                         data-target-height={d.attr.height}
@@ -134,7 +140,7 @@ var ViewContainer = module.exports = React.createClass({
                 var styleOpts = this.props.styleOptions;
 
                 // Position bar's x coord via translate3d CSS property for CSS3 transitioning.
-                if ((d.removing || !d.existing) && this.props.transitioning){
+                if ((d.removing) && this.props.transitioning){
                     style.opacity = 0;
                     style.transform = vizUtil.style.translate3d(d.attr.x, 0, 0);
                 } else {
@@ -159,7 +165,7 @@ var ViewContainer = module.exports = React.createClass({
                 var parentBarTerm = (d.parent || d).term;
                 cachedBarSections[parentBarTerm][d.term] = d;
                 var isNew = false;
-                if (this.props.transitioning && (cachedPastBarSections[parentBarTerm] && !cachedPastBarSections[parentBarTerm][d.term])){
+                if (this.props.transitioning && (!cachedPastBarSections[parentBarTerm] || !cachedPastBarSections[parentBarTerm][d.term])){
                     isNew = true;
                 }
 
@@ -194,15 +200,27 @@ var ViewContainer = module.exports = React.createClass({
 
                 var barSections = Array.isArray(d.bars) ? d.bars : [_.extend({}, d, { color : 'rgb(139, 114, 142)' })];
 
+                // If transitioning, add existing bar sections to fade out.
                 if (this.props.transitioning && cachedPastBarSections[d.term]) barSections = barSections.concat(
                     _.filter(_.pairs(cachedPastBarSections[d.term]), function(pastNodePair){
-                        if (_.pluck(barSections, 'term').indexOf(pastNodePair[0]) === -1) return true;
+                        if (
+                            _.filter(barSections, function(barNode){ // Find existing bars out of current barSections, set them to have existing : true.
+                                //if (typeof barNode.pastWidth !== 'number'){
+                                //    barNode.pastWidth = (pastNodePair[1].parent || pastNodePair[1]).attr.width;
+                                //}
+                                if (barNode.term === pastNodePair[0]){
+                                    barNode.existing = true;
+                                    return true;
+                                }
+                                return false;
+                            })
+                            .length === 0) return true;
                         return false;
                     }).map(function(pastNodePair){
                         var pastNode = pastNodePair[1];
                         pastNode.removing = true;
-                        pastNode.attr.width = d.attr.width;
-                        if (pastNode.parent) pastNode.parent.attr.width = d.attr.width;
+                        //pastNode.attr.width = d.attr.width;
+                        //if (pastNode.parent) pastNode.parent.attr.width = d.attr.width;
                         return pastNode;
                     })
                 )

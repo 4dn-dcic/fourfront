@@ -444,6 +444,8 @@
             //outline-offset: 5px;
             //outline: 1px solid transparent;
             box-shadow : none;
+            width: 100%;
+            transform: translate3d(0,0,0);
             /*
             &:first-of-type {
                 border-top-left-radius: 3px;
