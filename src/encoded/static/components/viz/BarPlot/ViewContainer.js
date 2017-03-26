@@ -9,6 +9,12 @@ var ChartDetailCursor = require('./../ChartDetailCursor');
 var { console, object, isServerSide, expFxn, Filters, layout, navigate } = require('./../../util');
 var { unhighlightTerms, highlightTerm } = require('./../../facetlist');
 
+// Used for transitioning
+var cachedBars = {},
+    cachedPastBars = {},
+    cachedBarSections = {},
+    cachedPastBarSections = {};
+
 var ViewContainer = module.exports = React.createClass({
 
         statics : {
@@ -87,10 +93,10 @@ var ViewContainer = module.exports = React.createClass({
                         }
                         style={{
                             //top : rectY.call(this),
-                            height : d.attr.height,
+                            height : this.props.isNew || this.props.isRemoving ? 0 : d.attr.height,
+                            transform: 'translate3d(0,0,0)',
                             width: (d.parent || d).attr.width,
-                            backgroundColor : color,
-                            outlineColor : (this.isHoveredOver() || isSelected) ? d3.color(color).darker(1) : null
+                            backgroundColor : color
                         }}
                         data-color={color}
                         data-target-height={d.attr.height}
@@ -130,7 +136,7 @@ var ViewContainer = module.exports = React.createClass({
                 // Position bar's x coord via translate3d CSS property for CSS3 transitioning.
                 if ((d.removing || !d.existing) && this.props.transitioning){
                     style.opacity = 0;
-                    style.transform = vizUtil.style.translate3d(d.attr.x, Math.max(d.attr.height / 5, 10) + 10, 0);
+                    style.transform = vizUtil.style.translate3d(d.attr.x, 0, 0);
                 } else {
                     // 'Default' (no transitioning) style
                     style.opacity = 1;
@@ -150,6 +156,13 @@ var ViewContainer = module.exports = React.createClass({
             },
 
             renderBarSection : function(d,i){
+                var parentBarTerm = (d.parent || d).term;
+                cachedBarSections[parentBarTerm][d.term] = d;
+                var isNew = false;
+                if (this.props.transitioning && (!cachedPastBarSections[parentBarTerm] || !cachedPastBarSections[parentBarTerm][d.term])){
+                    isNew = true;
+                }
+
                 return (
                     <ViewContainer.BarSection
                         key={d.term || i}
@@ -162,6 +175,8 @@ var ViewContainer = module.exports = React.createClass({
                         selectedBarSectionTerm={this.props.selectedBarSectionTerm}
                         hoverBarSectionParentTerm={this.props.hoverBarSectionParentTerm}
                         hoverBarSectionTerm={this.props.hoverBarSectionTerm}
+                        isNew={isNew}
+                        isRemoving={d.removing}
                     />
                 );
             },
@@ -173,7 +188,24 @@ var ViewContainer = module.exports = React.createClass({
                 var styleOpts = this.props.styleOptions;
 
                 var prevBarData = null;
-                if (d.existing && transitioning) prevBarData = this.props.existingBars[d.term].__data__;
+                if (d.existing && transitioning && cachedPastBars) prevBarData = cachedPastBars[d.term].__data__;
+
+                if (!cachedBarSections[d.term]) cachedBarSections[d.term] = {};
+
+                var barSections = Array.isArray(d.bars) ? d.bars : [_.extend({}, d, { color : 'rgb(139, 114, 142)' })];
+
+                if (this.props.transitioning && cachedPastBarSections[d.term]) barSections = barSections.concat(
+                    _.filter(_.pairs(cachedPastBarSections[d.term]), function(pastNodePair){
+                        if (_.pluck(barSections, 'term').indexOf(pastNodePair[0]) === -1) return true;
+                        return false;
+                    }).map(function(pastNodePair){
+                        var pastNode = pastNodePair[1];
+                        pastNode.removing = true;
+                        pastNode.attr.width = d.attr.width;
+                        if (pastNode.parent) pastNode.parent.attr.width = d.attr.width;
+                        return pastNode;
+                    })
+                )
 
                 return (
                     <div
@@ -187,23 +219,20 @@ var ViewContainer = module.exports = React.createClass({
                         key={"bar-" + d.term}
                         style={this.barStyle()}
                         ref={(r) => {
-                            if (typeof this.bars !== 'undefined' && r !== null){
+                            if (typeof cachedBars !== 'undefined' && r !== null){
                                 // Save bar element; set its data w/ D3 but don't save D3 wrapped-version
                                 d3.select(r).datum(d);
-                                if (!(d.removing && !transitioning)) this.bars[d.term] = r;
+                                if (!(d.removing && !transitioning)) cachedBars[d.term] = r;
                             }
                         }}
                     >
-                        { !this.props.isFilteredExperiments ?
+                        { this.props.showBarCount ?
                         <span className="bar-top-label" key="text-label">
                             { d.count }
                         </span>
                         : null }
                         {
-                            Array.isArray(d.bars) ? 
-                                _.sortBy(d.bars, 'term').map(this.renderBarSection)
-                                :
-                                this.renderBarSection(_.extend({}, d, { color : 'rgb(139, 114, 142)' }))
+                            _.sortBy(barSections, 'term').map(this.renderBarSection)
                         }
                     </div>
                 );
@@ -341,22 +370,58 @@ var ViewContainer = module.exports = React.createClass({
         }
     },
 
-    adjustedChildren : function(){
-        return React.Children.map(this.props.children, (child)=>{
-            var oldOnClickFxn = child && child.props && child.props.onBarPartClick;
-            var oldOnMouseEnterFxn = child && child.props && child.props.onBarPartMouseEnter;
-            var oldOnMouseLeaveFxn = child && child.props && child.props.onBarPartMouseLeave;
-            return React.cloneElement(child, {
-                'styleOptions' : this.props.styleOptions,
+    /**
+     * Passes props to and renders child 'Bar' Components.
+     * Handles caching of bars for transitioning.
+     * Passes in own state, high-level props if child prop not set, and extends event handlers.
+     * 
+     * @returns {Component[]} Array of 'Bar' React Components.
+     */
 
-                // State
-                'selectedBarSectionParentTerm' : this.state.selectedBarSectionParentTerm,
-                'selectedBarSectionTerm' : this.state.selectedBarSectionTerm,
-                'hoverBarSectionParentTerm' : this.state.hoverBarSectionParentTerm,
-                'hoverBarSectionTerm' : this.state.hoverBarSectionTerm,
+    renderBars : function(){
 
-                // Add to bar section onMouseEnter/onMouseLeave/onClick functions
-                'onBarPartMouseEnter' : (node, evt)=>{
+        cachedPastBars = _.clone(cachedBars);
+        cachedBars = {};
+        cachedPastBarSections = _.clone(cachedBarSections);
+        cachedBarSections = {};
+
+        // Current Bars only.
+        var currentBars = this.props.bars.map((d)=>{
+            // Determine whether bar existed before.
+            return _.extend(d, { 
+                'existing' : typeof cachedPastBars[d.term] !== 'undefined' && cachedPastBars[d.term] !== null
+            });
+        });
+
+        var barsToRender = currentBars;
+
+        // If transitioning, get D3 datums of existing bars which need to transition out and add removing=true property to inform this.renderParts.bar.
+        if (this.props.transitioning){
+            var barsToRemove = _.difference(  _.keys(cachedPastBars),  _.pluck(this.props.bars, 'term')).map((barTerm) => {
+                return _.extend(cachedPastBars[barTerm].__data__, { 'removing' : true });
+            });
+            barsToRender = barsToRemove.concat(currentBars);
+        }
+
+        return barsToRender.sort(function(a,b){
+            return a.term < b.term ? -1 : 1;
+        }).map((d,i,a) =>
+            <ViewContainer.Bar
+                key={d.term || i}
+                node={d}
+                showBarCount={true /*!allExpsBarDataContainer */}
+
+                selectedBarSectionParentTerm={this.state.selectedBarSectionParentTerm}
+                selectedBarSectionTerm={this.state.selectedBarSectionTerm}
+                hoverBarSectionParentTerm={this.state.hoverBarSectionParentTerm}
+                hoverBarSectionTerm={this.state.hoverBarSectionTerm}
+
+                styleOptions={this.props.styleOptions}
+                transitioning={this.props.transitioning}
+                aggregateType={this.props.aggregateType}
+                showType={this.props.showType}
+
+                onBarPartMouseEnter={(node, evt)=>{
 
                     // Cancel if same node as selected.
                     if (ViewContainer.BarSection.isSelected(node, this.state.selectedBarSectionTerm, this.state.selectedBarSectionParentTerm)){
@@ -399,10 +464,8 @@ var ViewContainer = module.exports = React.createClass({
                     }
 
                     highlightTerm(node.field, node.term, node.color || vizUtil.colorForNode(node));
-
-                    if (typeof oldOnMouseEnterFxn === 'function') return oldOnMouseEnterFxn(node, evt);
-                },
-                'onBarPartMouseLeave' : (node, evt)=>{
+                }}
+                onBarPartMouseLeave={(node, evt)=>{
 
                     // Update hover state
                     this.setState({
@@ -413,10 +476,8 @@ var ViewContainer = module.exports = React.createClass({
                     if (!ChartDetailCursor.isTargetDetailCursor(evt.relatedTarget)){
                         ChartDetailCursor.reset(false);
                     }
-
-                    if (typeof oldOnMouseLeaveFxn === 'function') return oldOnMouseLeaveFxn(node, evt);
-                },
-                'onBarPartClick' : (node, evt)=>{
+                }}
+                onBarPartClick={(node, evt)=>{
                     // If this section already selected:
                     if (ViewContainer.BarSection.isSelected(node, this.state.selectedBarSectionTerm, this.state.selectedBarSectionParentTerm)){
                         this.setState({
@@ -432,12 +493,14 @@ var ViewContainer = module.exports = React.createClass({
                     }
                     if (typeof oldOnClickFxn === 'function') return oldOnClickFxn(node, evt);
                     return false;
-                } 
-            });
-        });
+                }}
+
+            />
+        );
     },
 
     render: function(){
+
         return (
             <div
                 className="bar-plot-chart chart-container no-highlight"
@@ -446,7 +509,7 @@ var ViewContainer = module.exports = React.createClass({
             >
                 { this.props.leftAxis }
                 {/* allExpsBarDataContainer && allExpsBarDataContainer.component */}
-                { this.adjustedChildren() }
+                { this.renderBars() }
                 { this.props.bottomAxis }
             </div>
         );

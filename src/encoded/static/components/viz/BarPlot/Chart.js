@@ -30,7 +30,7 @@ var Chart = module.exports = React.createClass({
          * @param {number} [availHeight=400] - Available width, in pixels, for chart.
          * @param {Object} [styleOpts=Chart.getDefaultStyleOpts()] - Style settings for chart which may contain chart offsets (for axes).
          * @param {boolean} [useOnlyPopulatedFields=false] - Determine which fields to show via checking for which fields have multiple terms present.
-         * @param {number} [maxValue] - Maximum y-axis value. Overrides height of bars.
+         * @param {number} [fullHeightCount] - 100% Y-Axis count value. Overrides height of bars.
          * 
          * @return {Object} Object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally.
          */
@@ -41,7 +41,7 @@ var Chart = module.exports = React.createClass({
             styleOpts = Chart.getDefaultStyleOpts(),
             aggregateType = 'experiment_sets',
             useOnlyPopulatedFields = false,
-            maxValue = null
+            fullHeightCount = null
         ){
 
             var topIndex = 0;
@@ -51,8 +51,8 @@ var Chart = module.exports = React.createClass({
             }
             
             var numberOfTerms = _.keys(fields[topIndex].terms).length;
-            var largestExpCountForATerm = typeof maxValue === 'number' ?
-                maxValue
+            var largestExpCountForATerm = typeof fullHeightCount === 'number' ?
+                fullHeightCount
                 : _.reduce(fields[topIndex].terms, function(m,t){
                     return Math.max(m, typeof t[aggregateType] === 'number' ? t[aggregateType] : t.total[aggregateType]);
                 }, 0);
@@ -107,10 +107,10 @@ var Chart = module.exports = React.createClass({
             }
 
             var barData = {
-                'fieldIndex' : topIndex,
-                'bars'       : genBarData(fields[topIndex], insetDims),
-                'fields'     : fields,
-                'maxY'       : largestExpCountForATerm
+                'fieldIndex'      : topIndex,
+                'bars'            : genBarData(fields[topIndex], insetDims),
+                'fields'          : fields,
+                'fullHeightCount' : largestExpCountForATerm
             };
 
             return barData;
@@ -247,7 +247,9 @@ var Chart = module.exports = React.createClass({
 
     /** @ignore */
     shouldPerformManualTransitions : function(nextProps, pastProps){
+        //return false;
         return !!(
+            pastProps.showType !== nextProps.showType ||
             !_.isEqual(pastProps.experiments, nextProps.experiments) ||
             pastProps.height !== nextProps.height ||
             !_.isEqual(pastProps.filteredExperiments, nextProps.filteredExperiments)
@@ -260,12 +262,12 @@ var Chart = module.exports = React.createClass({
      * @ignore
      */
     componentWillReceiveProps : function(nextProps){
-        /*
+        ///*
         if (this.shouldPerformManualTransitions(nextProps, this.props)){
             console.log('WILL DO SLOW TRANSITION');
             this.setState({ transitioning : true });
         }
-        */
+        //*/
     },
 
     /**
@@ -275,63 +277,17 @@ var Chart = module.exports = React.createClass({
      */
     componentDidUpdate : function(pastProps){
 
-        /*
+        ///*
         if (this.shouldPerformManualTransitions(this.props, pastProps)){
             // Cancel out of transitioning state after delay. Delay is to allow new/removing elements to adjust opacity.
             setTimeout(()=>{
                 this.setState({ transitioning : false });
-            },750);
+            }, 750);
         }
-        */
+        //*/
 
         return;
 
-        // THE BELOW IF BLOCK IS NO LONGER NECESSARY AS CONVERTED TO HTML ELEMS, KEEPING FOR IF NEEDED IN FUTURE.
-        /*
-        if (this.shouldPerformManualTransitions(this.props, pastProps)){
-            if (typeof this.pastBars !== 'undefined'){
-
-                var styleOpts = this.styleOptions();
-                var _this = this;
-
-                var existingAndCurrentElements = _.flatten(
-                    _.map(
-                        _.intersection( // Grab all bars which are current & pre-update-existing.
-                            _.values(this.pastBars), // Obj to array
-                            _.values(this.bars)
-                        ),
-                        function(b){ return [b.childNodes[0], b.childNodes[1]]; } // Get children
-                    ),
-                    true
-                );
-
-                console.log('EXISTING', existingAndCurrentElements);
-
-                if (existingAndCurrentElements.length === 0){
-                    console.info("No existing bars to do D3 transitions on, unsetting state.transitioning immediately.");
-                    _this.setState({ transitioning : false });
-                    return;
-                }
-                
-                // Since 'on end' callback is called many times (multiple bars transition), defer until called for each.
-                var transitionCompleteCallback = _.after(existingAndCurrentElements.length, function(){
-                    console.info("Finished D3 transitions on BarPlot.");
-                    _this.setState({ transitioning : false });
-                });
-
-                d3.selectAll(existingAndCurrentElements)
-                .transition().duration(750)
-                .attr('height', function(d){
-                    return this.parentElement.__data__.attr.height;
-                })
-                .attr('y', function(d){
-                    return _this.height() - this.parentElement.__data__.attr.height - styleOpts.offset.bottom;
-                    //return _this.height() - parseFloat(this.getAttribute('data-target-height')) - styleOpts.offset.bottom;
-                })
-                .on('end', transitionCompleteCallback);
-            }
-        }
-        */
     },
 
     /**
@@ -361,141 +317,6 @@ var Chart = module.exports = React.createClass({
 
     /** @ignore */
     renderParts : {
-
-        /** @ignore */
-        svg: {
-
-            bar : function(d, index, all, styleOpts = null, existingBars = this.pastBars){
-                var transitioning = this.state.transitioning; // Cache state.transitioning to avoid risk of race condition in ref function.
-                if (!styleOpts) styleOpts = this.styleOptions();
-
-                var prevBarExists = function(){ return typeof existingBars[d.term] !== 'undefined' && existingBars[d.term] !== null; };
-                var prevBarData = null;
-                if (prevBarExists() && transitioning) prevBarData = existingBars[d.term].__data__;
-
-                function transformStyle(){
-                    var xyCoords;
-                    if ((d.removing || !prevBarExists()) && transitioning){
-                        // Defer to slide in new bar via CSS on state.transitioning = false.
-                        xyCoords = [d.attr.x, d.attr.height];
-                    } else {
-                        // 'Default' (no transitioning) style
-                        xyCoords = [d.attr.x, 0];
-                    }
-                    return vizUtil.style.translate3d.apply(this, xyCoords);
-                }
-
-                function barStyle(){
-                    var style = {};
-
-                    // Position bar's x coord via translate3d CSS property for CSS3 transitioning.
-                    if ((d.removing || !prevBarExists()) && transitioning){
-                        // Defer to slide in new bar via CSS on state.transitioning = false.
-                        style.opacity = 0;
-                    } else {
-                        // 'Default' (no transitioning) style
-                        style.opacity = 1;
-                    }
-                    style.transform = transformStyle.call(this);
-                    return style;
-                }
-
-                function rectHeight(){
-                    // Defer updating rect height so we can use D3 to transition it in componentDidUpdate.
-                    if (prevBarExists() && transitioning){
-                        return prevBarData.attr.height;
-                    }
-                    return d.attr.height;
-                }
-                
-
-                function rectY(){
-                    if (prevBarExists() && transitioning){
-                        return this.height() - prevBarData.attr.height - styleOpts.offset.bottom;
-                    }
-                    return this.height() - d.attr.height - styleOpts.offset.bottom;
-                }
-
-                return (
-                    <g
-                        className="chart-bar"
-                        data-term={d.term}
-                        key={"bar-" + d.term}
-                        style={barStyle.call(this)}
-                        ref={(r) => {
-                            if (typeof this.bars !== 'undefined' && r !== null){
-                                // Save bar element; set its data w/ D3 but don't save D3 wrapped-version
-                                d3.select(r).datum(d);
-                                if (!(d.removing && !transitioning)) this.bars[d.term] = r;
-                            }
-                        }}
-                    >
-                        <text
-                            className="bar-top-label"
-                            x={styleOpts.offset.left}
-                            y={rectY.call(this)}
-                            key="text-label"
-                        >
-                            { d.name }
-                        </text>
-                        <rect
-                            y={rectY.call(this)}
-                            x={styleOpts.offset.left /* Use style.transform for X coord */}
-                            height={rectHeight.call(this)}
-                            data-target-height={d.attr.height}
-                            width={d.attr.width}
-                            key="rect1"
-                            rx={5}
-                            ry={5}
-                            style={{
-                                fill : vizUtil.colorForNode(d)
-                            }}
-                        />
-                    </g>
-                );
-            },
-
-            topYAxis : function(availWidth, styleOpts){
-                return (
-                    <line
-                        key="y-axis-top"
-                        className="y-axis-top"
-                        x1={styleOpts.offset.left}
-                        y1={styleOpts.offset.top}
-                        x2={availWidth - styleOpts.offset.right}
-                        y2={styleOpts.offset.top}
-                    />
-                );
-            },
-
-            bottomXAxis : function(availWidth, availHeight, currentBars, styleOpts){
-                var lineYCoord = availHeight - (styleOpts.offset.bottom * 0.75);
-                return (
-                    <g key="y-axis-bottom">
-                        <line
-                            key="y-axis-bottom-line"
-                            className="y-axis-bottom"
-                            x1={styleOpts.offset.left}
-                            y1={lineYCoord}
-                            x2={availWidth - styleOpts.offset.right}
-                            y2={lineYCoord}
-                        />
-                        { currentBars.map(function(bar){
-                            return (
-                                <text
-                                    key={'count-for-' + bar.term}
-                                    data-term={bar.term}
-                                    className="y-axis-label-count"
-                                    x={bar.attr.x + styleOpts.offset.left + (bar.attr.width / 2)}
-                                    y={lineYCoord + 20}
-                                >{ bar.count }</text>
-                            );
-                        }) }
-                    </g>
-                );
-            }
-
-        },
 
         bottomXAxis : function(availWidth, availHeight, currentBars, styleOpts){
             var _this = this;
@@ -528,7 +349,7 @@ var Chart = module.exports = React.createClass({
                                 name : b.name || b.term,
                                 term : b.term,
                                 x: b.attr.x,
-                                opacity : _this.state.transitioning && (b.removing || !b.existing) ? 0 : '',
+                                opacity : 1, //_this.state.transitioning && (b.removing || !b.existing) ? 0 : '',
                                 color : vizUtil.colorForNode(b, true, null, null, true)
                             }; 
                         })}
@@ -548,7 +369,7 @@ var Chart = module.exports = React.createClass({
         leftAxis : function(availWidth, availHeight, barData, styleOpts){
             var chartHeight = availHeight - styleOpts.offset.top - styleOpts.offset.bottom;
             var chartWidth = availWidth - styleOpts.offset.left - styleOpts.offset.right;
-            var ticks = d3.ticks(0, barData.maxY * ((chartHeight - 10)/chartHeight), Math.min(8, barData.maxY)).concat([barData.maxY]);
+            var ticks = d3.ticks(0, barData.fullHeightCount * ((chartHeight - 10)/chartHeight), Math.min(8, barData.fullHeightCount)).concat([barData.fullHeightCount]);
             var steps = ticks.map(function(v,i){
                 var w = i === 0 ? chartWidth : (
                     Math.min(
@@ -563,7 +384,7 @@ var Chart = module.exports = React.createClass({
                         position : 'absolute',
                         left: 0,
                         right: 0,
-                        bottom : (v / barData.maxY) * chartHeight - 1,
+                        bottom : (v / barData.fullHeightCount) * chartHeight - 1,
                     }} key={v}>
                         <span className="axis-label">
                             { v }
@@ -652,11 +473,8 @@ var Chart = module.exports = React.createClass({
             availWidth = this.width(),
             styleOpts = this.styleOptions();
 
-        // Reset this.bars, cache past ones.
-        this.pastBars = _.clone(this.bars); // Difference between current and pastBars used to determine which bars to do D3 transitions on (if any).
-        this.bars = {}; // ref to 'g' element is stored here.
+        /* For showing FILTERED vs ALL
         var allExpsBarDataContainer = null;
-        /*
         if (
             this.props.filteredExperiments && this.props.showType === 'both'
         ){
@@ -677,40 +495,20 @@ var Chart = module.exports = React.createClass({
             this.props.useOnlyPopulatedFields
         );
 
-        this.barData = Chart.genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
+        var barData = Chart.genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
             chartData,
             availWidth,
             availHeight,
             styleOpts,
             this.props.aggregateType,
             this.props.useOnlyPopulatedFields,
-            allExpsBarDataContainer && allExpsBarDataContainer.data && allExpsBarDataContainer.data.maxY
+            //allExpsBarDataContainer && allExpsBarDataContainer.data && allExpsBarDataContainer.data.fullHeightCount
         );
 
-        console.log('BARDATA', this.props.showType, this.barData, this.props.aggregatedData, this.props.aggregatedFilteredData);
+        console.log('BARDATA', this.props.showType, barData, this.props.aggregatedData, this.props.aggregatedFilteredData);
 
-        // Bars from current dataset/filters only.
-        var currentBars = this.barData.bars.map((d)=>{
-            // Determine whether bar existed before, for this.renderParts.bar render func.
-            return _.extend(d, { 
-                'existing' : typeof this.pastBars[d.term] !== 'undefined' && this.pastBars[d.term] !== null
-            });
-        });
-
-        var allBars = currentBars; // All bars -- current (from barData) and those which now need to be removed if transitioning (see block below).
-
-        // If transitioning, get D3 datums of existing bars which need to transition out and add removing=true property to inform this.renderParts.bar.
-        if (this.state.transitioning){
-            var barsToRemove = _.difference(  _.keys(this.pastBars),  _.pluck(this.barData.bars, 'term')).map((barTerm) => {
-                return _.extend(this.pastBars[barTerm].__data__, { 'removing' : true });
-            });
-            allBars = barsToRemove.concat(currentBars);
-        }
-
-        // The sort below only helps maintain order in which is processed thru renderParts.bar(), not order of bars shown.
-        // This is to help React's keying algo adjust existing bars rather than un/remount them.
-        allBars = allBars.sort(function(a,b){ return a.term < b.term ? -1 : 1; });
-
+        /*
+        /* For showing FILTERED vs ALL
         function overWriteFilteredBarDimsWithAllExpsBarDims(barSet, allExpsBarSet){
             barSet.forEach(function(b){
                 var allExpsBar = _.find(allExpsBarSet, { 'term' : b.term });
@@ -734,24 +532,21 @@ var Chart = module.exports = React.createClass({
                 allBars, allExpsBarDataContainer.data.bars
             );
         }
+        */
 
         return (
             <ViewContainer
-                leftAxis={this.renderParts.leftAxis.call(this, availWidth, availHeight, this.barData, styleOpts)}
-                bottomAxis={this.renderParts.bottomXAxis.call(this, availWidth, availHeight, allBars, styleOpts)}
-                topLevelField={this.props.fields[this.barData.fieldIndex].field}
-                width={availWidth} height={availHeight}
+                leftAxis={this.renderParts.leftAxis.call(this, availWidth, availHeight, barData, styleOpts)}
+                bottomAxis={this.renderParts.bottomXAxis.call(this, availWidth, availHeight, barData.bars, styleOpts)}
+                topLevelField={this.props.fields[barData.fieldIndex].field}
+                width={availWidth}
+                height={availHeight}
                 styleOptions={styleOpts}
                 showType={this.props.showType}
-            >{ allBars.map((d,i,a) => 
-                <ViewContainer.Bar
-                    key={d.term || i}
-                    node={d}
-                    isFilteredExperiments={!!allExpsBarDataContainer}
-                    existingBars={this.pastBars}
-                    transitioning={this.state.transitioning}
-                />
-            )}</ViewContainer>
+                aggregateType={this.props.aggregateType}
+                bars={barData.bars}
+                transitioning={this.state.transitioning}
+            />
         );
 
     }
