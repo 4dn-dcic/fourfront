@@ -54,4 +54,4 @@ var getLargeMD5 = module.exports.getLargeMD5 = function(file, cbProgress) {
             }
         });
     });
-}
+};
