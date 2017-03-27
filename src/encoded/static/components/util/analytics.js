@@ -37,7 +37,7 @@ var analytics = module.exports = {
 
     registerPageView : function(href = null){
         if (isServerSide() || typeof window.ga === 'undefined') {
-            console.error("Google Analytics is not initialized.");
+            console.error("Google Analytics is not initialized. Fine if this appears in a test.");
             return false;
         }
         if (href){
