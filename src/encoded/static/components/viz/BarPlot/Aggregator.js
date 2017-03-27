@@ -78,7 +78,7 @@ var Aggregator = module.exports = React.createClass({
         }
 
         if (
-            nextProps.experiments != this.props.experiments ||
+            nextProps.experiments !== this.props.experiments ||
             !_.isEqual(nextProps.experiments, this.props.experiments) ||
             doFieldsDiffer
         ){

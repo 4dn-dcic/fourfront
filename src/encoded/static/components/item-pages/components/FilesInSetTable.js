@@ -60,7 +60,7 @@ var FilesInSetTable = module.exports = React.createClass({
          * @returns {string|null} The suffix to append to "fa-" or "icon-" CSS class.
          */
         iconClassFromFileType : function(fileType){
-            if (typeof fileType !== 'string') return null;
+            if (typeof fileType !== 'string') return 'file-o';
             fileType = fileType.toLowerCase();
             if (fileType.indexOf('zip') > -1){
                 return 'file-zip-o';
@@ -226,9 +226,15 @@ var FilesInSetTable = module.exports = React.createClass({
                                 <i className={"icon icon-" + (fileItemClass) }/>
                                 { '\u00A0  Download' }
                             </Button>
-                            <Button className="button-dl-doc" bsStyle="default" bsSize="small" href={ attachmentDownloadHref } download disabled={!attachmentDownloadHref}>
-                                <i className={"icon icon-" + (attachmentIconClass || 'download')}/>
-                            </Button>
+                            <Button
+                                className={"button-dl-doc" + (!attachmentDownloadHref ? ' disabled' : '')}
+                                bsStyle="default"
+                                bsSize="small"
+                                href={ attachmentDownloadHref }
+                                download
+                                disabled={!attachmentDownloadHref}
+                                children={<i className={"icon icon-" + (attachmentIconClass || 'file-o')}/>}
+                            />
                         </div>
 
                         <div className="col-xs-12 col-md-4 col-lg-5 description">

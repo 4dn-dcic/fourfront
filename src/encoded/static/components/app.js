@@ -13,7 +13,7 @@ var store = require('../store');
 var browse = require('./browse');
 var origin = require('../libs/origin');
 var serialize = require('form-serialize');
-var { Filters, ajax, JWT, console, isServerSide, navigate } = require('./util');
+var { Filters, ajax, JWT, console, isServerSide, navigate, analytics } = require('./util');
 var Alerts = require('./alerts');
 var jwt = require('jsonwebtoken');
 var { FacetCharts } = require('./facetcharts');
@@ -406,6 +406,9 @@ var App = React.createClass({
             window.onhashchange = this.onHashChange;
         }
         //window.onbeforeunload = this.handleBeforeUnload; // this.handleBeforeUnload is not defined
+
+        // Load up analytics
+        analytics.initializeGoogleAnalytics(analytics.getTrackingId(this.props.href));
     },
 
     componentDidUpdate: function (prevProps, prevState) {
@@ -417,6 +420,9 @@ var App = React.createClass({
                     if (key === 'href'){
                         // We need to rebuild tooltips after navigation to a different page.
                         ReactTooltip.rebuild();
+
+                        // Register google analytics pageview event.
+                        analytics.registerPageView(this.props[key]);
                     }
                 }
             }
