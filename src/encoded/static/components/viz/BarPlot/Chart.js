@@ -10,472 +10,12 @@ var ChartDetailCursor = require('./../ChartDetailCursor');
 var { console, object, isServerSide, expFxn, Filters, layout, navigate } = require('./../../util');
 var { unhighlightTerms, highlightTerm } = require('./../../facetlist');
 var aggregationFxn = require('./aggregation-functions');
+var ViewContainer = require('./ViewContainer');
 
 
 var Chart = module.exports = React.createClass({
 
     statics : {
-
-        /**
-         * Outputs a section of a bar.
-         * 
-         * @memberof module:viz/BarPlot.Chart
-         * @namespace
-         * @type {Component}
-         */
-        BarSection : React.createClass({
-
-            statics : {
-
-                /**
-                 * Check if 'node' is currently selected.
-                 * 
-                 * @memberof module:viz/BarPlot.Chart.BarSection
-                 * @public
-                 * @static
-                 * @param {Object} node - A 'node' containing at least 'field', 'term', and 'parent' if applicable.
-                 * @param {string} selectedBarSectionTerm - Currently selected subdivision field term.
-                 * @param {string} selectedBarSectionParentTerm - Currently selected X-Axis field term.
-                 * @returns {boolean} True if node (and node.parent, if applicable) matches selectedBarSectionTerm & selectedBarSectionParentTerm.
-                 */
-                isSelected : function(node, selectedBarSectionTerm, selectedBarSectionParentTerm){
-                    if (
-                        node.term === selectedBarSectionTerm && (
-                            ((node.parent && node.parent.term) || null) === (selectedBarSectionParentTerm || null)
-                        )
-                    ) return true;
-                    return false;
-                },
-
-            },
-
-            /**
-             * Check if component (aka props.node) is selected.
-             * Calls Chart.BarSection.isSelected(..) internally.
-             * 
-             * @instance
-             * @memberof module:viz/BarPlot.Chart.BarSection
-             * @returns {boolean} - True if selected.
-             */
-            isSelected : function(){
-                return Chart.BarSection.isSelected(this.props.node, this.props.selectedBarSectionTerm, this.props.selectedBarSectionParentTerm);
-            },
-
-            isHoveredOver : function(){
-                return Chart.BarSection.isSelected(this.props.node, this.props.hoverBarSectionTerm, this.props.hoverBarSectionParentTerm);
-            },
-
-            getInitialState : function(){
-                return {
-                    'hover' : false
-                };
-            },
-
-            /**
-             * @instance
-             * @memberof module:viz/BarPlot.Chart.BarSection
-             * @returns {Element} - A div element representing a bar section.
-             */
-            render : function(){
-                var d               = this.props.node;
-                var color           = vizUtil.colorForNode(d);
-                var isSelected      = this.isSelected(),
-                    isHoveredOver   = this.isHoveredOver();
-                
-                return (
-                    <div
-                        className={
-                            "bar-part no-highlight" + (d.parent ? ' multiple-parts' : '')
-                            + (isSelected ? ' selected' : '') + (isHoveredOver ? ' hover' : '')
-                        }
-                        style={{
-                            //top : rectY.call(this),
-                            height : d.attr.height,
-                            width: (d.parent || d).attr.width,
-                            backgroundColor : color,
-                            outlineColor : (this.isHoveredOver() || isSelected) ? d3.color(color).darker(1) : null
-                        }}
-                        data-color={color}
-                        data-target-height={d.attr.height}
-                        key={'bar-part-' + (d.parent ? d.parent.term + '~' + d.term : d.term)}
-                        data-term={d.parent ? d.term : null}
-                        onMouseEnter={(e)=>{
-                            //this.setState({'hover' : true});
-                            if (typeof this.props.onMouseEnter === 'function') this.props.onMouseEnter(d, e);
-                        }}
-                        onMouseLeave={(e)=>{
-                            //this.setState({'hover' : false});
-                            if (typeof this.props.onMouseLeave === 'function') this.props.onMouseLeave(d, e);
-                        }}
-                        onClick={(e)=>{
-                            if (typeof this.props.onClick === 'function') this.props.onClick(d, e);
-                        }}
-                    />
-                );
-            },
-
-        }),
-
-        /**
-         * Outputs a vertical bar containing bar sections.
-         * 
-         * @memberof module:viz/BarPlot.Chart
-         * @namespace
-         * @type {Component}
-         */
-        Bar : React.createClass({
-
-            barStyle : function(){
-                var style = {};
-                var d = this.props.node;
-                var styleOpts = this.props.styleOptions;
-
-                // Position bar's x coord via translate3d CSS property for CSS3 transitioning.
-                if ((d.removing || !d.existing) && this.props.transitioning){
-                    style.opacity = 0;
-                    style.transform = vizUtil.style.translate3d(d.attr.x, Math.max(d.attr.height / 5, 10) + 10, 0);
-                } else {
-                    // 'Default' (no transitioning) style
-                    style.opacity = 1;
-                    style.transform = vizUtil.style.translate3d(d.attr.x,0,0);
-                }
-                style.left = styleOpts.offset.left;
-                style.bottom = styleOpts.offset.bottom;
-                style.width = d.attr.width;
-
-                //if (
-                //    ( this.props.hoverBarSectionParentTerm    || this.props.hoverBarSectionTerm    ) === d.term ||
-                //    ( this.props.selectedBarSectionParentTerm || this.props.selectedBarSectionTerm ) === d.term
-                //){
-                    // Set style.outlineColor here or something.
-                //}
-                return style;
-            },
-
-            renderBarSection : function(d,i){
-                return (
-                    <Chart.BarSection
-                        key={d.term || i}
-                        node={d}
-                        onClick={this.props.onBarPartClick}
-                        onMouseEnter={this.props.onBarPartMouseEnter}
-                        onMouseLeave={this.props.onBarPartMouseLeave}
-                        aggregateType={this.props.aggregateType}
-                        selectedBarSectionParentTerm={this.props.selectedBarSectionParentTerm}
-                        selectedBarSectionTerm={this.props.selectedBarSectionTerm}
-                        hoverBarSectionParentTerm={this.props.hoverBarSectionParentTerm}
-                        hoverBarSectionTerm={this.props.hoverBarSectionTerm}
-                    />
-                );
-            },
-
-            render : function(){
-                var d = this.props.node;
-
-                var transitioning = this.props.transitioning; // Cache state.transitioning to avoid risk of race condition in ref function.
-                var styleOpts = this.props.styleOptions;
-
-                var prevBarData = null;
-                if (d.existing && transitioning) prevBarData = this.props.existingBars[d.term].__data__;
-
-                return (
-                    <div
-                        className="chart-bar no-highlight"
-                        onMouseLeave={()=>{
-                            if (Array.isArray(d.bars) && d.bars.length > 0) unhighlightTerms(d.bars[0].field);
-                            else unhighlightTerms(d.field);
-                        }}
-                        data-term={d.term}
-                        data-field={Array.isArray(d.bars) && d.bars.length > 0 ? d.bars[0].field : null}
-                        key={"bar-" + d.term}
-                        style={this.barStyle()}
-                        ref={(r) => {
-                            if (typeof this.bars !== 'undefined' && r !== null){
-                                // Save bar element; set its data w/ D3 but don't save D3 wrapped-version
-                                d3.select(r).datum(d);
-                                if (!(d.removing && !transitioning)) this.bars[d.term] = r;
-                            }
-                        }}
-                    >
-                        { !this.props.isFilteredExperiments ?
-                        <span className="bar-top-label" key="text-label">
-                            { d.count }
-                        </span>
-                        : null }
-                        {
-                            Array.isArray(d.bars) ? 
-                                _.sortBy(d.bars, 'term').map(this.renderBarSection)
-                                :
-                                this.renderBarSection(_.extend({}, d, { color : 'rgb(139, 114, 142)' }))
-                        }
-                    </div>
-                );
-            }
-
-        }),
-
-        /**
-         * Encapsulates the chart output and provides state for currently- selected and currently- hovered-over node.
-         * Acts as the controller for ChartDetailCursor as it applies to the BarPlot chart. See lifecycle methods.
-         * 
-         * @memberof module:viz/BarPlot.Chart
-         * @namespace
-         * @type {Component}
-         */
-        ViewContainer : React.createClass({
-
-            getInitialState : function(){
-                return {
-                    'selectedBarSectionParentTerm' : null,
-                    'selectedBarSectionTerm' : null,
-                    'hoverBarSectionTerm' : null,
-                    'hoverBarSectionParentTerm' : null
-                };
-            },
-
-            cursorDetailActions : function(){
-                return [
-                    {
-                        'title' : function(cursorProps){
-                            if (navigate.isBrowseHref(cursorProps.href)){
-                                //return "Browse " + _.pluck(cursorProps.path, 'term').join(' & ') + " Experiment Sets";
-                                return "Explore these Experiment Sets";
-                            }
-                            return "Browse these Experiment Sets";
-                        },
-                        'function' : (cursorProps, mouseEvt) => {
-                            console.log('I got clciked.');
-                            console.log(navigate, cursorProps, this.props);
-
-                            //var node = cursorProps.path.slice(0).pop();
-                            //console.log(node);
-
-                            var href = (cursorProps.href && navigate.getBrowseHref(cursorProps.href)) || null;
-
-                            // Reset existing filters if selecting from 'all' view. Preserve if from filtered view.
-                            var currentExpSetFilters = this.props.showType === 'all' ? {} : Filters.currentExpSetFilters();
-
-                            Filters.saveChangedFilters(
-                                _.reduce(cursorProps.path, function(expSetFilters, node){
-                                    // Do not change filter IF SET ALREADY because we want to strictly enable filters, not disable any.
-                                    if (
-                                        expSetFilters && expSetFilters[node.field] &&
-                                        expSetFilters[node.field].has(node.term)
-                                    ){
-                                        return expSetFilters;
-                                    }
-                                    return Filters.changeFilter(
-                                        node.field,
-                                        node.term,
-                                        'sets',             // If 'sets', skips checking if field starts with 'experiments_in_set' and adding if not.
-                                        expSetFilters,      // Existing expSetFilters, if null they're retrieved from Redux store.
-                                        null,               // Callback
-                                        true,               // Only return new expSetFilters vs saving them == set to TRUE
-                                    );
-                                }, currentExpSetFilters),
-                                true,
-                                href
-                            );
-
-                            //console.log(newExpSetFilters);
-                            
-
-                            /*
-                            return Filters.changeFilter(
-                                field,
-                                term,
-                                this.props.experimentsOrSets,
-                                this.props.expSetFilters,
-                                callback,
-                                false,      // Only return new expSetFilters vs saving them == set to false
-                                this.props.useAjax,
-                                //this.props.href
-                            );
-                            */
-                            
-
-                        },
-                        'disabled' : (cursorProps)=>{
-                            var expSetFilters = store.getState().expSetFilters;
-
-                            if (expSetFilters && typeof expSetFilters === 'object'){
-                                if (
-                                    Array.isArray(cursorProps.path) &&
-                                    (cursorProps.path[0] && cursorProps.path[0].field) &&
-                                    expSetFilters[cursorProps.path[0].field] instanceof Set &&
-                                    expSetFilters[cursorProps.path[0].field].has(cursorProps.path[0].term) &&
-                                    (
-                                        !cursorProps.path[1] || (
-                                            cursorProps.path[1].field &&
-                                            expSetFilters[cursorProps.path[1].field] instanceof Set &&
-                                            expSetFilters[cursorProps.path[1].field].has(cursorProps.path[1].term)
-                                        )
-                                    )
-                                ) return true;
-                            }
-                            return false;
-                        }
-                    }
-                ];
-            },
-
-            handleClickAnywhere : function(evt){
-                // Don't do anything if clicked on DetailCursor.
-                if (ChartDetailCursor.isTargetDetailCursor(evt.target)){
-                    return false;
-                }
-
-                this.setState({
-                    'selectedBarSectionParentTerm' : null,
-                    'selectedBarSectionTerm' : null
-                });
-            },
-
-            /**
-             * Important lifecycle method.
-             * Checks if a selected bar section (via state.selectedBarSectionTerm) has been set or unset.
-             * Then passes that to the ChartDetailCursor's 'sticky' state.
-             * 
-             * Also enables or disables a 'click' event listener to cancel out stickiness/selected section.
-             * 
-             * @private
-             * @instance
-             * @param {Object} pastProps - Previous props of this component.
-             * @param {Object} pastState - Previous state of this component.
-             */
-            componentDidUpdate : function(pastProps, pastState){
-                if (pastState.selectedBarSectionTerm !== this.state.selectedBarSectionTerm){
-                    
-                    // If we now have a selected bar section, enable click listener.
-                    // Otherwise, disable it.
-                    // And set ChartDetailCursor to be 'stickied'. This is the only place where the ChartDetailCursor state should be updated.
-                    if (typeof this.state.selectedBarSectionTerm === 'string'){
-                        ChartDetailCursor.update({ 'sticky' : true });
-                        setTimeout(window.addEventListener, 100, 'click', this.handleClickAnywhere);
-                        //window.addEventListener('click', this.handleClickAnywhere);
-                    } else {
-                        window.removeEventListener('click', this.handleClickAnywhere);
-                        if (!this.state.hoverBarSectionTerm){
-                            ChartDetailCursor.reset();
-                        } else {
-                            ChartDetailCursor.update({ 'sticky' : false });
-                        }
-                    }
-
-                }
-            },
-
-            adjustedChildren : function(){
-                return React.Children.map(this.props.children, (child)=>{
-                    var oldOnClickFxn = child && child.props && child.props.onBarPartClick;
-                    var oldOnMouseEnterFxn = child && child.props && child.props.onBarPartMouseEnter;
-                    var oldOnMouseLeaveFxn = child && child.props && child.props.onBarPartMouseLeave;
-                    return React.cloneElement(child, {
-                        'styleOptions' : this.props.styleOptions,
-
-                        // State
-                        'selectedBarSectionParentTerm' : this.state.selectedBarSectionParentTerm,
-                        'selectedBarSectionTerm' : this.state.selectedBarSectionTerm,
-                        'hoverBarSectionParentTerm' : this.state.hoverBarSectionParentTerm,
-                        'hoverBarSectionTerm' : this.state.hoverBarSectionTerm,
-
-                        // Add to bar section onMouseEnter/onMouseLeave/onClick functions
-                        'onBarPartMouseEnter' : (node, evt)=>{
-
-                            // Cancel if same node as selected.
-                            if (Chart.BarSection.isSelected(node, this.state.selectedBarSectionTerm, this.state.selectedBarSectionParentTerm)){
-                                return false;
-                            }
-
-
-                            var newCursorDetailState = {
-                                'path' : [],
-                                'includeTitleDescendentPrefix' : false,
-                                'actions' : this.props.actions || this.cursorDetailActions() || null
-                            };
-                            
-                            if (node.parent) newCursorDetailState.path.push(node.parent);
-                            if (typeof this.props.aggregateType === 'string') {
-                                newCursorDetailState.primaryCount = this.props.aggregateType;
-                            }
-                            newCursorDetailState.path.push(node);
-                            ChartDetailCursor.update(newCursorDetailState);
-
-
-                            var newOwnState = {};
-
-                            // Unset selected nodes.
-                            if (this.state.selectedBarSectionTerm !== null){
-                                _.extend(newOwnState, {
-                                    'selectedBarSectionTerm' : null,
-                                    'selectedBarSectionParentTerm' : null
-                                });
-                            }
-
-                            // Update hover state
-                            _.extend(newOwnState, {
-                                'hoverBarSectionTerm' : node.term || null,
-                                'hoverBarSectionParentTerm' : (node.parent && node.parent.term) || null
-                            });
-
-                            if (_.keys(newOwnState).length > 0){
-                                this.setState(newOwnState);
-                            }
-
-                            highlightTerm(node.field, node.term, node.color || vizUtil.colorForNode(node));
-
-                            if (typeof oldOnMouseEnterFxn === 'function') return oldOnMouseEnterFxn(node, evt);
-                        },
-                        'onBarPartMouseLeave' : (node, evt)=>{
-
-                            // Update hover state
-                            this.setState({
-                                'hoverBarSectionTerm' : null,
-                                'hoverBarSectionParentTerm' : null
-                            });
-
-                            if (!ChartDetailCursor.isTargetDetailCursor(evt.relatedTarget)){
-                                ChartDetailCursor.reset(false);
-                            }
-
-                            if (typeof oldOnMouseLeaveFxn === 'function') return oldOnMouseLeaveFxn(node, evt);
-                        },
-                        'onBarPartClick' : (node, evt)=>{
-                            if (Chart.BarSection.isSelected(node, this.state.selectedBarSectionTerm, this.state.selectedBarSectionParentTerm)){
-                                this.setState({
-                                    'selectedBarSectionTerm' : null,
-                                    'selectedBarSectionParentTerm' : null
-                                });
-                            } else {
-                                this.setState({
-                                    'selectedBarSectionTerm' : node.term || null,
-                                    'selectedBarSectionParentTerm' : (node.parent && node.parent.term) || null
-                                });
-                            }
-                            if (typeof oldOnClickFxn === 'function') return oldOnClickFxn(node, evt);
-                            return false;
-                        } 
-                    });
-                });
-            },
-
-            render: function(){
-                return (
-                    <div
-                        className="bar-plot-chart chart-container no-highlight"
-                        data-field={this.props.topLevelField}
-                        style={{ height : this.props.height, width: this.props.width }}
-                    >
-                        { this.props.leftAxis }
-                        {/* allExpsBarDataContainer && allExpsBarDataContainer.component */}
-                        { this.adjustedChildren() }
-                        { this.props.bottomAxis }
-                    </div>
-                );
-
-            }
-            
-        }),
 
         /** 
          * Return an object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally. 
@@ -490,7 +30,7 @@ var Chart = module.exports = React.createClass({
          * @param {number} [availHeight=400] - Available width, in pixels, for chart.
          * @param {Object} [styleOpts=Chart.getDefaultStyleOpts()] - Style settings for chart which may contain chart offsets (for axes).
          * @param {boolean} [useOnlyPopulatedFields=false] - Determine which fields to show via checking for which fields have multiple terms present.
-         * @param {number} [maxValue] - Maximum y-axis value. Overrides height of bars.
+         * @param {number} [fullHeightCount] - 100% Y-Axis count value. Overrides height of bars.
          * 
          * @return {Object} Object containing bar dimensions for first field which has more than 1 possible term, index of field used, and all fields passed originally.
          */
@@ -501,7 +41,7 @@ var Chart = module.exports = React.createClass({
             styleOpts = Chart.getDefaultStyleOpts(),
             aggregateType = 'experiment_sets',
             useOnlyPopulatedFields = false,
-            maxValue = null
+            fullHeightCount = null
         ){
 
             var topIndex = 0;
@@ -511,8 +51,8 @@ var Chart = module.exports = React.createClass({
             }
             
             var numberOfTerms = _.keys(fields[topIndex].terms).length;
-            var largestExpCountForATerm = typeof maxValue === 'number' ?
-                maxValue
+            var largestExpCountForATerm = typeof fullHeightCount === 'number' ?
+                fullHeightCount
                 : _.reduce(fields[topIndex].terms, function(m,t){
                     return Math.max(m, typeof t[aggregateType] === 'number' ? t[aggregateType] : t.total[aggregateType]);
                 }, 0);
@@ -567,10 +107,10 @@ var Chart = module.exports = React.createClass({
             }
 
             var barData = {
-                'fieldIndex' : topIndex,
-                'bars'       : genBarData(fields[topIndex], insetDims),
-                'fields'     : fields,
-                'maxY'       : largestExpCountForATerm
+                'fieldIndex'      : topIndex,
+                'bars'            : genBarData(fields[topIndex], insetDims),
+                'fields'          : fields,
+                'fullHeightCount' : largestExpCountForATerm
             };
 
             return barData;
@@ -707,7 +247,9 @@ var Chart = module.exports = React.createClass({
 
     /** @ignore */
     shouldPerformManualTransitions : function(nextProps, pastProps){
+        //return false;
         return !!(
+            pastProps.showType !== nextProps.showType ||
             !_.isEqual(pastProps.experiments, nextProps.experiments) ||
             pastProps.height !== nextProps.height ||
             !_.isEqual(pastProps.filteredExperiments, nextProps.filteredExperiments)
@@ -720,12 +262,12 @@ var Chart = module.exports = React.createClass({
      * @ignore
      */
     componentWillReceiveProps : function(nextProps){
-        /*
+        ///*
         if (this.shouldPerformManualTransitions(nextProps, this.props)){
             console.log('WILL DO SLOW TRANSITION');
             this.setState({ transitioning : true });
         }
-        */
+        //*/
     },
 
     /**
@@ -735,63 +277,17 @@ var Chart = module.exports = React.createClass({
      */
     componentDidUpdate : function(pastProps){
 
-        /*
+        ///*
         if (this.shouldPerformManualTransitions(this.props, pastProps)){
             // Cancel out of transitioning state after delay. Delay is to allow new/removing elements to adjust opacity.
             setTimeout(()=>{
                 this.setState({ transitioning : false });
-            },750);
+            }, 750);
         }
-        */
+        //*/
 
         return;
 
-        // THE BELOW IF BLOCK IS NO LONGER NECESSARY AS CONVERTED TO HTML ELEMS, KEEPING FOR IF NEEDED IN FUTURE.
-        /*
-        if (this.shouldPerformManualTransitions(this.props, pastProps)){
-            if (typeof this.pastBars !== 'undefined'){
-
-                var styleOpts = this.styleOptions();
-                var _this = this;
-
-                var existingAndCurrentElements = _.flatten(
-                    _.map(
-                        _.intersection( // Grab all bars which are current & pre-update-existing.
-                            _.values(this.pastBars), // Obj to array
-                            _.values(this.bars)
-                        ),
-                        function(b){ return [b.childNodes[0], b.childNodes[1]]; } // Get children
-                    ),
-                    true
-                );
-
-                console.log('EXISTING', existingAndCurrentElements);
-
-                if (existingAndCurrentElements.length === 0){
-                    console.info("No existing bars to do D3 transitions on, unsetting state.transitioning immediately.");
-                    _this.setState({ transitioning : false });
-                    return;
-                }
-                
-                // Since 'on end' callback is called many times (multiple bars transition), defer until called for each.
-                var transitionCompleteCallback = _.after(existingAndCurrentElements.length, function(){
-                    console.info("Finished D3 transitions on BarPlot.");
-                    _this.setState({ transitioning : false });
-                });
-
-                d3.selectAll(existingAndCurrentElements)
-                .transition().duration(750)
-                .attr('height', function(d){
-                    return this.parentElement.__data__.attr.height;
-                })
-                .attr('y', function(d){
-                    return _this.height() - this.parentElement.__data__.attr.height - styleOpts.offset.bottom;
-                    //return _this.height() - parseFloat(this.getAttribute('data-target-height')) - styleOpts.offset.bottom;
-                })
-                .on('end', transitionCompleteCallback);
-            }
-        }
-        */
     },
 
     /**
@@ -821,141 +317,6 @@ var Chart = module.exports = React.createClass({
 
     /** @ignore */
     renderParts : {
-
-        /** @ignore */
-        svg: {
-
-            bar : function(d, index, all, styleOpts = null, existingBars = this.pastBars){
-                var transitioning = this.state.transitioning; // Cache state.transitioning to avoid risk of race condition in ref function.
-                if (!styleOpts) styleOpts = this.styleOptions();
-
-                var prevBarExists = function(){ return typeof existingBars[d.term] !== 'undefined' && existingBars[d.term] !== null; };
-                var prevBarData = null;
-                if (prevBarExists() && transitioning) prevBarData = existingBars[d.term].__data__;
-
-                function transformStyle(){
-                    var xyCoords;
-                    if ((d.removing || !prevBarExists()) && transitioning){
-                        // Defer to slide in new bar via CSS on state.transitioning = false.
-                        xyCoords = [d.attr.x, d.attr.height];
-                    } else {
-                        // 'Default' (no transitioning) style
-                        xyCoords = [d.attr.x, 0];
-                    }
-                    return vizUtil.style.translate3d.apply(this, xyCoords);
-                }
-
-                function barStyle(){
-                    var style = {};
-
-                    // Position bar's x coord via translate3d CSS property for CSS3 transitioning.
-                    if ((d.removing || !prevBarExists()) && transitioning){
-                        // Defer to slide in new bar via CSS on state.transitioning = false.
-                        style.opacity = 0;
-                    } else {
-                        // 'Default' (no transitioning) style
-                        style.opacity = 1;
-                    }
-                    style.transform = transformStyle.call(this);
-                    return style;
-                }
-
-                function rectHeight(){
-                    // Defer updating rect height so we can use D3 to transition it in componentDidUpdate.
-                    if (prevBarExists() && transitioning){
-                        return prevBarData.attr.height;
-                    }
-                    return d.attr.height;
-                }
-                
-
-                function rectY(){
-                    if (prevBarExists() && transitioning){
-                        return this.height() - prevBarData.attr.height - styleOpts.offset.bottom;
-                    }
-                    return this.height() - d.attr.height - styleOpts.offset.bottom;
-                }
-
-                return (
-                    <g
-                        className="chart-bar"
-                        data-term={d.term}
-                        key={"bar-" + d.term}
-                        style={barStyle.call(this)}
-                        ref={(r) => {
-                            if (typeof this.bars !== 'undefined' && r !== null){
-                                // Save bar element; set its data w/ D3 but don't save D3 wrapped-version
-                                d3.select(r).datum(d);
-                                if (!(d.removing && !transitioning)) this.bars[d.term] = r;
-                            }
-                        }}
-                    >
-                        <text
-                            className="bar-top-label"
-                            x={styleOpts.offset.left}
-                            y={rectY.call(this)}
-                            key="text-label"
-                        >
-                            { d.name }
-                        </text>
-                        <rect
-                            y={rectY.call(this)}
-                            x={styleOpts.offset.left /* Use style.transform for X coord */}
-                            height={rectHeight.call(this)}
-                            data-target-height={d.attr.height}
-                            width={d.attr.width}
-                            key="rect1"
-                            rx={5}
-                            ry={5}
-                            style={{
-                                fill : vizUtil.colorForNode(d)
-                            }}
-                        />
-                    </g>
-                );
-            },
-
-            topYAxis : function(availWidth, styleOpts){
-                return (
-                    <line
-                        key="y-axis-top"
-                        className="y-axis-top"
-                        x1={styleOpts.offset.left}
-                        y1={styleOpts.offset.top}
-                        x2={availWidth - styleOpts.offset.right}
-                        y2={styleOpts.offset.top}
-                    />
-                );
-            },
-
-            bottomXAxis : function(availWidth, availHeight, currentBars, styleOpts){
-                var lineYCoord = availHeight - (styleOpts.offset.bottom * 0.75);
-                return (
-                    <g key="y-axis-bottom">
-                        <line
-                            key="y-axis-bottom-line"
-                            className="y-axis-bottom"
-                            x1={styleOpts.offset.left}
-                            y1={lineYCoord}
-                            x2={availWidth - styleOpts.offset.right}
-                            y2={lineYCoord}
-                        />
-                        { currentBars.map(function(bar){
-                            return (
-                                <text
-                                    key={'count-for-' + bar.term}
-                                    data-term={bar.term}
-                                    className="y-axis-label-count"
-                                    x={bar.attr.x + styleOpts.offset.left + (bar.attr.width / 2)}
-                                    y={lineYCoord + 20}
-                                >{ bar.count }</text>
-                            );
-                        }) }
-                    </g>
-                );
-            }
-
-        },
 
         bottomXAxis : function(availWidth, availHeight, currentBars, styleOpts){
             var _this = this;
@@ -988,7 +349,7 @@ var Chart = module.exports = React.createClass({
                                 name : b.name || b.term,
                                 term : b.term,
                                 x: b.attr.x,
-                                opacity : _this.state.transitioning && (b.removing || !b.existing) ? 0 : '',
+                                opacity : 1, //_this.state.transitioning && (b.removing || !b.existing) ? 0 : '',
                                 color : vizUtil.colorForNode(b, true, null, null, true)
                             }; 
                         })}
@@ -1008,7 +369,7 @@ var Chart = module.exports = React.createClass({
         leftAxis : function(availWidth, availHeight, barData, styleOpts){
             var chartHeight = availHeight - styleOpts.offset.top - styleOpts.offset.bottom;
             var chartWidth = availWidth - styleOpts.offset.left - styleOpts.offset.right;
-            var ticks = d3.ticks(0, barData.maxY * ((chartHeight - 10)/chartHeight), Math.min(8, barData.maxY)).concat([barData.maxY]);
+            var ticks = d3.ticks(0, barData.fullHeightCount * ((chartHeight - 10)/chartHeight), Math.min(8, barData.fullHeightCount)).concat([barData.fullHeightCount]);
             var steps = ticks.map(function(v,i){
                 var w = i === 0 ? chartWidth : (
                     Math.min(
@@ -1023,7 +384,7 @@ var Chart = module.exports = React.createClass({
                         position : 'absolute',
                         left: 0,
                         right: 0,
-                        bottom : (v / barData.maxY) * chartHeight - 1,
+                        bottom : (v / barData.fullHeightCount) * chartHeight - 1,
                     }} key={v}>
                         <span className="axis-label">
                             { v }
@@ -1055,8 +416,8 @@ var Chart = module.exports = React.createClass({
      * @param {number} height - Height of available chart drawing area.
      * @param {Object} [styleOpts] - Style options for the chart, including gap between bars, maximum bar width, etc.
      * @returns {Object} "All Experiments" bars silhouttes, wrapped in an object also containing barData for all experiments.
-     * @see module:viz/BarPlotChart.render
-     * @see module:viz/BarPlotChart.genChartData
+     * @see module:viz/BarPlot.Chart.render
+     * @see module:viz/BarPlot.Chart.genChartData
      */
     renderAllExperimentsSilhouette : function(width, height, styleOpts = null){
         if (!this.props.filteredExperiments) return null;
@@ -1112,11 +473,8 @@ var Chart = module.exports = React.createClass({
             availWidth = this.width(),
             styleOpts = this.styleOptions();
 
-        // Reset this.bars, cache past ones.
-        this.pastBars = _.clone(this.bars); // Difference between current and pastBars used to determine which bars to do D3 transitions on (if any).
-        this.bars = {}; // ref to 'g' element is stored here.
+        /* For showing FILTERED vs ALL
         var allExpsBarDataContainer = null;
-        /*
         if (
             this.props.filteredExperiments && this.props.showType === 'both'
         ){
@@ -1137,40 +495,20 @@ var Chart = module.exports = React.createClass({
             this.props.useOnlyPopulatedFields
         );
 
-        this.barData = Chart.genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
+        var barData = Chart.genChartBarDims( // Gen bar dimensions (width, height, x/y coords). Returns { fieldIndex, bars, fields (first arg supplied) }
             chartData,
             availWidth,
             availHeight,
             styleOpts,
             this.props.aggregateType,
             this.props.useOnlyPopulatedFields,
-            allExpsBarDataContainer && allExpsBarDataContainer.data && allExpsBarDataContainer.data.maxY
+            //allExpsBarDataContainer && allExpsBarDataContainer.data && allExpsBarDataContainer.data.fullHeightCount
         );
 
-        console.log('BARDATA', this.props.showType, this.barData, this.props.aggregatedData, this.props.aggregatedFilteredData);
+        console.log('BARDATA', this.props.showType, barData, this.props.aggregatedData, this.props.aggregatedFilteredData);
 
-        // Bars from current dataset/filters only.
-        var currentBars = this.barData.bars.map((d)=>{
-            // Determine whether bar existed before, for this.renderParts.bar render func.
-            return _.extend(d, { 
-                'existing' : typeof this.pastBars[d.term] !== 'undefined' && this.pastBars[d.term] !== null
-            });
-        });
-
-        var allBars = currentBars; // All bars -- current (from barData) and those which now need to be removed if transitioning (see block below).
-
-        // If transitioning, get D3 datums of existing bars which need to transition out and add removing=true property to inform this.renderParts.bar.
-        if (this.state.transitioning){
-            var barsToRemove = _.difference(  _.keys(this.pastBars),  _.pluck(this.barData.bars, 'term')).map((barTerm) => {
-                return _.extend(this.pastBars[barTerm].__data__, { 'removing' : true });
-            });
-            allBars = barsToRemove.concat(currentBars);
-        }
-
-        // The sort below only helps maintain order in which is processed thru renderParts.bar(), not order of bars shown.
-        // This is to help React's keying algo adjust existing bars rather than un/remount them.
-        allBars = allBars.sort(function(a,b){ return a.term < b.term ? -1 : 1; });
-
+        /*
+        /* For showing FILTERED vs ALL
         function overWriteFilteredBarDimsWithAllExpsBarDims(barSet, allExpsBarSet){
             barSet.forEach(function(b){
                 var allExpsBar = _.find(allExpsBarSet, { 'term' : b.term });
@@ -1194,24 +532,21 @@ var Chart = module.exports = React.createClass({
                 allBars, allExpsBarDataContainer.data.bars
             );
         }
+        */
 
         return (
-            <Chart.ViewContainer
-                leftAxis={this.renderParts.leftAxis.call(this, availWidth, availHeight, this.barData, styleOpts)}
-                bottomAxis={this.renderParts.bottomXAxis.call(this, availWidth, availHeight, allBars, styleOpts)}
-                topLevelField={this.props.fields[this.barData.fieldIndex].field}
-                width={availWidth} height={availHeight}
+            <ViewContainer
+                leftAxis={this.renderParts.leftAxis.call(this, availWidth, availHeight, barData, styleOpts)}
+                bottomAxis={this.renderParts.bottomXAxis.call(this, availWidth, availHeight, barData.bars, styleOpts)}
+                topLevelField={this.props.fields[barData.fieldIndex].field}
+                width={availWidth}
+                height={availHeight}
                 styleOptions={styleOpts}
                 showType={this.props.showType}
-            >{ allBars.map((d,i,a) => 
-                <Chart.Bar
-                    key={d.term || i}
-                    node={d}
-                    isFilteredExperiments={!!allExpsBarDataContainer}
-                    existingBars={this.pastBars}
-                    transitioning={this.state.transitioning}
-                />
-            )}</Chart.ViewContainer>
+                aggregateType={this.props.aggregateType}
+                bars={barData.bars}
+                transitioning={this.state.transitioning}
+            />
         );
 
     }

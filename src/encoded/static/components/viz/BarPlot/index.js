@@ -63,6 +63,20 @@ module.exports.aggregationFxn = require('./aggregation-functions');
 
 
 /**
+ * React Component for wrapping the generated markup of BarPlot.Chart.
+ * Also contains Components Bar and BarSection as static children, for wrapping output bar and bar parts.
+ * 
+ * The top-level ViewContainer component contains state for interactivity of the generated chart mark-up.
+ * The child Bar and BarSection components are stateless and utilize the state passed down from ViewContainer.
+ * 
+ * @member
+ * @namespace
+ * @type {Component}
+ */
+module.exports.ViewContainer = require('./ViewContainer');
+
+
+/**
  * Visualization component for the BarPlot. 
  * Contains chart and labels only -- no controls.
  * To add controls, wrap the chart in BarPlotChart.UIControlsWrapper, which will feed its state as props to BarPlotChart and has UI components
