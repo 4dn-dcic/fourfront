@@ -65,7 +65,7 @@ def auth0_4dn_user_profile():
 
 @pytest.fixture(scope='session')
 def headers(auth0_access_token):
-    return {'Accept': 'applicatin/json', 'Content-Type': 'application/json', 'Authorization': 'Bearer ' +
+    return {'Accept': 'application/json', 'Content-Type': 'application/json', 'Authorization': 'Bearer ' +
      auth0_access_token}
 
 
@@ -141,11 +141,49 @@ def test_login_logout(testapp, anontestapp, headers,
 
     # Log out
     res = anontestapp.get('/logout?redirect=false', status=200)
-    #no more cookies
+    # no more cookies
     assert 'auth.userid' not in res.json
     assert 'id_token' not in res.json
     assert 'user_actions' not in res.json
 
+
+def test_404_keeps_auth_info(testapp, anontestapp, headers,
+                             auth0_4dn_user_profile,
+                             auth0_4dn_user_token):
+
+    # Create a user with the persona email
+    url = '/users/'
+    email = auth0_4dn_user_profile['email']
+    item = {
+        'email': email,
+        'first_name': 'Auth0',
+        'last_name': 'Test User',
+    }
+    testapp.post_json(url, item, status=201)
+    page_view_request_headers = headers.copy()
+
+    # X-User-Info header is only set for text/html -formatted Responses.
+    page_view_request_headers.update({
+        "Accept" : "text/html",
+        "Content-Type" : "text/html",
+        "Cookie" : "jwtToken=" + headers['Authorization'][7:]
+    })
+    # Log in
+    res = anontestapp.get(
+        '/not_found_url',
+        headers=page_view_request_headers,
+        status = 404
+    )
+
+    assert str(res.status_int) == "404"
+    try:
+        assert res.headers.get('X-Request-JWT', None) is not None
+        assert res.headers.get('X-User-Info', None) is not None
+    except Exception as e:
+        if os.environ.get('TRAVIS', False):
+            print("this don't work on travis do to access issues to Auth-0")
+        else:
+            raise e
 
 
 def test_login_logout_redirect(testapp, anontestapp, headers,
