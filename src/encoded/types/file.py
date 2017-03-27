@@ -457,10 +457,8 @@ def download(context, request):
 
     external = context.propsheets.get('external', {})
     if not external:
-        profile_name = request.registry.settings.get('file_upload_profile_name')
-        bucket = request.registry.settings['file_upload_bucket']
-        sheets['external'] = external_creds(bucket, key, name, profile_name)
-    elif external.get('service') == 's3':
+        external = context.build_external_creds(request.registry, context.uuid, properties)
+    if external.get('service') == 's3':
         conn = boto.connect_s3()
         location = conn.generate_url(
             36*60*60, request.method, external['bucket'], external['key'],
