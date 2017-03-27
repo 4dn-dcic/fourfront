@@ -264,6 +264,7 @@ def logout(request):
 
     return {}
 
+
 @view_config(route_name='me', request_method='GET', permission=NO_PERMISSION_REQUIRED)
 def me(request):
     '''Alias /users/<uuid-of-current-user>'''
@@ -280,6 +281,7 @@ def me(request):
     request.response.status_code = 307 # Prevent from creating 301 redirects which are then cached permanently by browser
     properties = request.embed('/users/' + userid, as_user=userid)
     return properties
+
 
 @view_config(route_name='session-properties', request_method='GET',
              permission=NO_PERMISSION_REQUIRED)
