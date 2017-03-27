@@ -149,9 +149,6 @@ class File(Item):
     def _update(self, properties, sheets=None):
         if not properties:
             return
-        if('accession' in properties and properties['accession'] == '4DNFI0TEST04'):
-            import pdb; pdb.set_trace()
-
         # ensure we always have s3 links setup
         sheets = {} if sheets is None else sheets.copy()
         uuid = self.uuid

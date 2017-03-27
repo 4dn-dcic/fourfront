@@ -36,7 +36,7 @@ function readChunked(file, chunkCallback, endCallback) {
 Adapted from http://stackoverflow.com/questions/39112096
 Takes a file object and optional callback progress function
 */
-var getChunkedMD5 = module.exports.getChunkedMD5 = function(file, cbProgress) {
+var getLargeMD5 = module.exports.getLargeMD5 = function(file, cbProgress) {
     return new Promise((resolve, reject) => {
         var md5 = CryptoJS.algo.MD5.create();
         readChunked(file, (chunk, offs, total) => {

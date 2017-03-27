@@ -130,7 +130,8 @@
             "title": "Status",
             "type": "string",
             "default": "uploading",
-            "exclude_from": ["submit4dn"],
+            "permission": "import_items",
+            "exclude_from": ["submit4dn", "FFedit-create"],
             "enum" : [
                 "uploading",
                 "uploaded",

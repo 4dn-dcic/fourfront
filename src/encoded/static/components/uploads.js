@@ -22,7 +22,7 @@ var Uploads = module.exports = React.createClass({
         for(var i=0; i<upload_keys.length; i++){
             var this_upload = this.props.uploads[upload_keys[i]];
             var context_key = this_upload.context['@id'];
-            var upload_info = this.buildUploadInfo(this_upload.context, this_upload.original_filename);
+            var upload_info = this.buildUploadInfo(this_upload.context);
             initial_uploads[context_key] = upload_info;
             this.handleAsyncUpload(context_key, this_upload.manager);
         }
@@ -50,11 +50,10 @@ var Uploads = module.exports = React.createClass({
             }.bind(this))
             .send(function(err, data) {
                 if(err){
-                    // PATCH original filename back to metadata
-                    var orig_filename = this.state.uploads[upload_key]['original_filename'];
+                    // set status = upload_failed on an error
                     var props_uuid = this.props.uploads[upload_key]['context']['uuid'];
                     var put_body = {
-                        'filename': orig_filename,
+                        'status': 'upload failed',
                         'uuid': props_uuid
                     };
                     if(this.props.uploads[upload_key]['context']['accession']){
@@ -70,11 +69,11 @@ var Uploads = module.exports = React.createClass({
                     })
                     .then(response => {
                         if (response.status && response.status !== 'success') throw response;
-                        console.log('Filename reverted for ', upload_key);
+                        console.log('Status set to "upload failed" for ', upload_key);
                         return response;
                     },
                     error => {
-                        console.log('Error reverting filename for ', upload_key);
+                        console.log('Error setting status to "upload failed" for ', upload_key);
                     });
                     var new_uploads = _.extend({}, this.state.uploads);
                     delete new_uploads[upload_key];
@@ -105,14 +104,13 @@ var Uploads = module.exports = React.createClass({
         this.setState({'uploads': new_uploads});
     },
 
-    buildUploadInfo: function(context, orig_filename){
+    buildUploadInfo: function(context){
         var file_title = context.filename ? context.filename : context.display_title;
         var upload_info = {
             'id': context['@id'],
             'display_title': file_title,
             'total_size': 0,
-            'percent_done': -1,
-            'original_filename': orig_filename
+            'percent_done': -1
         };
         return upload_info;
     },
