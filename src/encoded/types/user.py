@@ -194,3 +194,12 @@ def uploads(request):
         'title': 'Uploads',
         'href': '/uploads',
     }
+
+@calculated_property(context=User, category='user_action')
+def submissions(request):
+    """smth."""
+    return {
+        'id': 'submissions',
+        'title': 'Submissions',
+        'href': '/submissions',
+    }

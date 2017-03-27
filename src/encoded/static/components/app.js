@@ -433,7 +433,7 @@ var App = React.createClass({
                     // Delay 100ms.
                     console.log("SYNCING CHART DATA");
                     ChartDataController.sync();
-                }, 100);   
+                }, 100);
             }
             for (key in this.state) {
                 if (this.state[key] !== prevState[key]) {
@@ -947,7 +947,7 @@ var App = React.createClass({
         if(context.code && context.code == 404){
             // check to ensure we're not looking at a static page
             var route = currRoute[currRoute.length-1];
-            if(route != 'help' && route != 'about' && route != 'home' && route != 'uploads'){
+            if(route != 'help' && route != 'about' && route != 'home' && route != 'uploads' && route != 'submissions'){
                 status = 'not_found';
             }
         }else if(context.code && context.code == 403){
