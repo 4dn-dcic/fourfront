@@ -13,11 +13,12 @@ var store = require('../store');
 var browse = require('./browse');
 var origin = require('../libs/origin');
 var serialize = require('form-serialize');
-var { Filters, ajax, JWT, console, isServerSide } = require('./util');
+var { Filters, ajax, JWT, console, isServerSide, navigate } = require('./util');
 var Alerts = require('./alerts');
 var jwt = require('jsonwebtoken');
 var { FacetCharts } = require('./facetcharts');
 var ChartDataController = require('./viz/chart-data-controller');
+var ChartDetailCursor = require('./viz/ChartDetailCursor');
 var makeTitle = require('./item-pages/item').title;
 var ReactTooltip = require('react-tooltip');
 
@@ -145,8 +146,9 @@ var App = React.createClass({
             user_actions = user_info.user_actions;
         }
 
-        // Save navigate fxn and other req'd stuffs to Filters.
-        Filters.navigate = this.navigate;
+        // Save navigate fxn and other req'd stuffs to GLOBAL navigate obj.
+        // So that we may call it from anywhere if necessary without passing through props.
+        navigate.setNavigateFunction(this.navigate);
 
         console.log("App Initial State: ", session, user_actions);
 
@@ -422,9 +424,10 @@ var App = React.createClass({
         if (this.state) {
             if (prevState.session !== this.state.session && ChartDataController.isInitialized()){
                 setTimeout(function(){
-                    // Delay 5s.
+                    // Delay 100ms.
+                    console.log("SYNCING CHART DATA");
                     ChartDataController.sync();
-                }, 5000);
+                }, 100);
             }
             for (key in this.state) {
                 if (this.state[key] !== prevState[key]) {
@@ -1109,6 +1112,11 @@ var App = React.createClass({
                         node.style.left = null;
                         node.style.top = null;
                     }} />
+                    <ChartDetailCursor
+                        href={this.props.href}
+                        verticalAlign="center" /* cursor position relative to popover */
+                        //debugStyle /* -- uncomment to keep this Component always visible so we can style it */
+                    />
                 </body>
             </html>
         );

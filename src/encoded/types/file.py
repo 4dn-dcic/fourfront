@@ -153,9 +153,11 @@ class File(Item):
         sheets = {} if sheets is None else sheets.copy()
         uuid = self.uuid
         old_creds = self.propsheets.get('external', None)
-        new_creds = self.build_external_creds(self.registry, uuid, properties)
+        new_creds = old_creds
+
         # don't get new creds
         if properties.get('status',None) in ('uploading', 'upload failed'):
+            new_creds = self.build_external_creds(self.registry, uuid, properties)
             sheets['external'] = new_creds
 
         if old_creds:
