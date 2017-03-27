@@ -10,7 +10,7 @@ var analytics = module.exports = {
     initializeGoogleAnalytics : function(trackingID = null, isAnalyticsScriptOnPage = true){
 
         if (trackingID === null){
-            trackingID = analytics.getTrackingId()
+            trackingID = analytics.getTrackingId();
         }
         if (typeof trackingID !== 'string') return false;
 
