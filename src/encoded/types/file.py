@@ -31,6 +31,8 @@ import datetime
 import json
 import pytz
 
+import logging
+logging.getLogger('boto').setLevel(logging.CRITICAL)
 
 def show_upload_credentials(request=None, context=None, status=None):
     if request is None or status not in ('uploading', 'upload failed'):
@@ -44,6 +46,9 @@ def external_creds(bucket, key, name=None, profile_name=None):
     an access token.  This is useful for linking metadata to files that
     already exist on s3.
     '''
+
+    import logging
+    logging.getLogger('boto').setLevel(logging.CRITICAL)
     credentials = {}
     if name is not None:
         policy = {
@@ -56,7 +61,7 @@ def external_creds(bucket, key, name=None, profile_name=None):
                 }
             ]
         }
-        boto.set_stream_logger('boto')
+        # boto.set_stream_logger('boto')
         conn = boto.connect_sts(profile_name=profile_name)
         token = conn.get_federation_token(name, policy=json.dumps(policy))
         # 'access_key' 'secret_key' 'expiration' 'session_token'
@@ -147,9 +152,23 @@ class File(Item):
 
         # ensure we always have s3 links setup
         sheets = {} if sheets is None else sheets.copy()
-        uuid = properties.get('uuid', False)
-        if not sheets.get('external', False) and uuid:
-            sheets['external'] = self.build_external_creds(self.registry, uuid, properties)
+        uuid = self.uuid
+        old_creds = self.propsheets.get('external', None)
+        new_creds = self.build_external_creds(self.registry, uuid, properties)
+        # don't get new creds
+        if properties.get('status',None) in ('uploading', 'upload failed'):
+            sheets['external'] = new_creds
+
+        if old_creds:
+            if old_creds.get('key') != new_creds.get('key'):
+                try:
+                    # delete the old sumabeach
+                    conn = boto.connect_s3()
+                    bname = old_creds['bucket']
+                    bucket = boto.s3.bucket.Bucket(conn,bname)
+                    bucket.delete_key(old_creds['key'])
+                except Exception as e:
+                    print(e)
 
         # update self first to ensure 'related_files' are stored in self.properties
         super(File, self)._update(properties, sheets)
@@ -349,6 +368,7 @@ def get_upload(context, request):
     external = context.propsheets.get('external', {})
     upload_credentials = external.get('upload_credentials')
     # Show s3 location info for files originally submitted to EDW.
+
     if upload_credentials is None and external.get('service') == 's3':
         upload_credentials = {
             'upload_url': 's3://{bucket}/{key}'.format(**external),
