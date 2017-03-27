@@ -24,6 +24,11 @@ var analytics = module.exports = {
             })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
         }
 
+        if (typeof window.ga === 'undefined'){
+            console.error("Google Analytics is not initialized. Fine if this appears in a test.");
+            return false;
+        }
+
         ga('create', trackingID, 'auto');
         console.info("Initialized google analytics.");
         analytics.registerPageView();
