@@ -162,6 +162,7 @@
         color: #fff;
         font-weight: 500;
         padding: 0 12px;
+        background-color: $facetlist-selected-term-color;
         > .icon-container {
             padding-left: 7px;
             cursor: pointer;
@@ -420,6 +421,8 @@
     .chart-bar {
         transition: transform .75s ease-out, opacity .5s, width .75s ease-out;
         position: absolute;
+        outline-offset: 5px;
+        outline: 2px solid transparent;
 
         .bar-top-label {
             display: block;
@@ -437,7 +440,10 @@
 
         .bar-part {
             opacity: 1;
-            transition: opacity 0.5s, height .75s ease-out, width .75s;
+            transition: opacity 0.5s, height .75s ease-out, width .75s, border-color .5s ease-out, outline .5s, box-shadow .5s;
+            outline-offset: 5px;
+            outline: 1px solid transparent;
+            box-shadow : none;
             /*
             &:first-of-type {
                 border-top-left-radius: 3px;
@@ -449,6 +455,17 @@
                 border-bottom-right-radius: 3px;
             }
             */
+            &.hover,
+            &.selected {
+                outline-color: rgba(0,0,0,0.25);
+                box-shadow: inset 0 0 0 3px rgba(0,0,0,0.25);
+                //outline-color: transparent !important;
+            }
+        }
+
+        &:hover,
+        &.selected {
+
         }
 
         > rect {
@@ -488,10 +505,13 @@
         .bar-part {
             opacity: 1;
             &.multiple-parts {
-                opacity : 0.1;
+                //opacity : 0.1;
                 border-radius: 0;
                 &.highlight {
-                    opacity : 1;
+                    //opacity : 1;
+                    outline-color: rgba(0,0,0,0.2);
+                    //outline-offset: 5px;
+                    //border-color: rgba(0,0,0,0.25);
                 }
             }
         }
@@ -978,8 +998,12 @@
     left: 0;
     //display: none !important;
     opacity: 1;
-    transition: opacity .25s, transform .05s linear;
-    pointer-events: none;
+    transition: opacity .25s, transform .05s linear, margin-left .25s ease-out;
+    //pointer-events: none;
+
+    &:not(.sticky) {
+        pointer-events: none;
+    }
 
     .mosaic-cursor-body {
         background-color: #fff;
@@ -1069,6 +1093,17 @@
                 padding-right: 6px;
                 padding-left: 2px;
                 transition: color .5s;
+            }
+        }
+
+        .actions.buttons-container {
+            margin-left: 0;
+            margin-right: 0;
+            > .button-container {
+                padding-left: 7px;
+                padding-right: 7px;
+                padding-bottom: 7px;
+                padding-top: 3px;
             }
         }
 
