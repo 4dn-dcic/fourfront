@@ -4,7 +4,7 @@ var React = require('react');
 var d3 = require('d3');
 var _ = require('underscore');
 var globals = require('./../globals');
-var { getElementTop } = require('./../util/layout');
+var { getElementTop, animateScrollTo } = require('./../util/layout');
 
 var TableOfContents = module.exports = React.createClass({
 
@@ -62,6 +62,10 @@ var TableOfContents = module.exports = React.createClass({
             },
 
             handleClick : _.throttle(function(){
+
+
+                
+
                 var elementTop;
                 if (this.props.link === "top") {
                     elementTop = 0;
@@ -70,6 +74,18 @@ var TableOfContents = module.exports = React.createClass({
                 } else {
                     return null;
                 }
+
+                animateScrollTo(elementTop, 750, this.props.offsetBeforeTarget, ()=>{
+                    if (typeof this.props.navigate === 'function'){
+                        var link = this.props.link;
+                        setTimeout(()=>{
+                            if (link === 'top' || link === 'bottom') link = '';
+                            this.props.navigate('#' + link, { 'replace' : true, 'skipRequest' : true });
+                        }, link === 'top' || origScrollTop <= 40  ? 800 : 0);
+                    }
+                });
+
+                return;
 
                 if (elementTop === null || !document || !document.body) return null;
                 elementTop = Math.max(0, elementTop - this.props.offsetBeforeTarget); // - offset re: nav bar header.
