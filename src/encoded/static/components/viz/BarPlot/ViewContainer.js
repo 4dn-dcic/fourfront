@@ -446,11 +446,24 @@ var ViewContainer = module.exports = React.createClass({
                         return false;
                     }
 
+                    var xCoordOverride = null;
+                    /*
+                    if (this.refs && this.refs.container){
+                        xCoordOverride = (
+                            layout.getElementOffset(this.refs.container).left
+                            + this.props.styleOptions.offset.left
+                            + ((node.attr.width / 2)
+                            + (node.parent || node).attr.x)
+                        );
+                    }
+                    */
+
 
                     var newCursorDetailState = {
                         'path' : [],
                         'includeTitleDescendentPrefix' : false,
-                        'actions' : this.props.actions || this.cursorDetailActions() || null
+                        'actions' : this.props.actions || this.cursorDetailActions() || null,
+                        'xCoordOverride' : xCoordOverride
                     };
                     
                     if (node.parent) newCursorDetailState.path.push(node.parent);
@@ -474,7 +487,7 @@ var ViewContainer = module.exports = React.createClass({
                     // Update hover state
                     _.extend(newOwnState, {
                         'hoverBarSectionTerm' : node.term || null,
-                        'hoverBarSectionParentTerm' : (node.parent && node.parent.term) || null
+                        'hoverBarSectionParentTerm' : (node.parent && node.parent.term) || null,
                     });
 
                     if (_.keys(newOwnState).length > 0){
@@ -524,6 +537,7 @@ var ViewContainer = module.exports = React.createClass({
                 className="bar-plot-chart chart-container no-highlight"
                 data-field={this.props.topLevelField}
                 style={{ height : this.props.height, width: this.props.width }}
+                ref="container"
             >
                 { this.props.leftAxis }
                 {/* allExpsBarDataContainer && allExpsBarDataContainer.component */}

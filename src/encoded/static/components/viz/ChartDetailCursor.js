@@ -88,7 +88,8 @@ var ChartDetailCursor = module.exports = React.createClass({
             'mounted' : false,
             'sticky' : false,
             'bodyComponent' : ChartDetailCursor.Body,
-            'actions' : null
+            'actions' : null,
+            'xCoordOverride' : null
         };
     },
 
@@ -172,6 +173,7 @@ var ChartDetailCursor = module.exports = React.createClass({
                 width={this.props.width}
                 height={this.props.height}
                 cursorOffset={this.getCursorOffset()}
+                xCoordOverride={this.state.xCoordOverride}
                 horizontalAlign={this.props.horizontalAlign}
                 className="mosaic-detail-cursor"
                 isVisible={isVisible}
