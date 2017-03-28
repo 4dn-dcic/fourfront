@@ -13,11 +13,12 @@ var store = require('../store');
 var browse = require('./browse');
 var origin = require('../libs/origin');
 var serialize = require('form-serialize');
-var { Filters, ajax, JWT, console, isServerSide } = require('./util');
+var { Filters, ajax, JWT, console, isServerSide, navigate, analytics } = require('./util');
 var Alerts = require('./alerts');
 var jwt = require('jsonwebtoken');
 var { FacetCharts } = require('./facetcharts');
 var ChartDataController = require('./viz/chart-data-controller');
+var ChartDetailCursor = require('./viz/ChartDetailCursor');
 var makeTitle = require('./item-pages/item').title;
 var ReactTooltip = require('react-tooltip');
 
@@ -145,8 +146,9 @@ var App = React.createClass({
             user_actions = user_info.user_actions;
         }
 
-        // Save navigate fxn and other req'd stuffs to Filters.
-        Filters.navigate = this.navigate;
+        // Save navigate fxn and other req'd stuffs to GLOBAL navigate obj.
+        // So that we may call it from anywhere if necessary without passing through props.
+        navigate.setNavigateFunction(this.navigate);
 
         console.log("App Initial State: ", session, user_actions);
 
@@ -404,6 +406,9 @@ var App = React.createClass({
             window.onhashchange = this.onHashChange;
         }
         //window.onbeforeunload = this.handleBeforeUnload; // this.handleBeforeUnload is not defined
+
+        // Load up analytics
+        analytics.initializeGoogleAnalytics(analytics.getTrackingId(this.props.href));
     },
 
     componentDidUpdate: function (prevProps, prevState) {
@@ -415,6 +420,9 @@ var App = React.createClass({
                     if (key === 'href'){
                         // We need to rebuild tooltips after navigation to a different page.
                         ReactTooltip.rebuild();
+
+                        // Register google analytics pageview event.
+                        analytics.registerPageView(this.props[key]);
                     }
                 }
             }
@@ -422,9 +430,10 @@ var App = React.createClass({
         if (this.state) {
             if (prevState.session !== this.state.session && ChartDataController.isInitialized()){
                 setTimeout(function(){
-                    // Delay 5s.
+                    // Delay 100ms.
+                    console.log("SYNCING CHART DATA");
                     ChartDataController.sync();
-                }, 5000);   
+                }, 100);
             }
             for (key in this.state) {
                 if (this.state[key] !== prevState[key]) {
@@ -927,6 +936,8 @@ var App = React.createClass({
                     actionList.push('edit');
                 }else if (value == '#!create'){
                     actionList.push('create');
+                }else if (value == '#!clone'){
+                    actionList.push('clone');
                 }else{
                     lowerList.push(value.toLowerCase());
                 }
@@ -982,6 +993,7 @@ var App = React.createClass({
                             navigate={this.navigate}
                             href={this.props.href}
                             edit={actionList[0] == 'edit'}
+                            create={actionList[0] == 'create'}
                         />
                     );
                     title = makeTitle({'context': context});
@@ -1106,6 +1118,11 @@ var App = React.createClass({
                         node.style.left = null;
                         node.style.top = null;
                     }} />
+                    <ChartDetailCursor
+                        href={this.props.href}
+                        verticalAlign="center" /* cursor position relative to popover */
+                        //debugStyle /* -- uncomment to keep this Component always visible so we can style it */
+                    />
                 </body>
             </html>
         );

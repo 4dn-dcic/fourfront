@@ -109,7 +109,7 @@ var ActiveFiltersBar = module.exports = React.createClass({
                                 expSetFilters={_this.props.expSetFilters}
                                 href={_this.props.href}
                                 key={node.data.term}
-                                color={(node.color ? node.color : vizUtil.colorForNode(node))}
+                                color={node.color || null}
                             />);
                         }) }
                         <div className="field-label">{ Filters.Field.toName(nodeSet[0].data.field) || 'N/A' }</div>

@@ -2,10 +2,32 @@
 
 /**
  * A directory of methods and maybe a mini-component or two for common use.
+ * 
+ * @module util
  */
 
 /** Transforms, manipulations, parsers, etc. re: objects. **/
 module.exports.object       = require('./object');
+
+
+/**
+ * A singleton function, defined the old fashioned way (pre ES6).
+ * Uses the same parameters as app.prototype.navigate(..).
+ * 
+ * Use by importing and calling in the same way app.navigate might be used.
+ * 
+ * @member
+ * @namespace
+ * @type {function}
+ * @see module:app.navigate
+ * @example
+ * var { navigate } = require('./util');
+ * navigate('/a/different/page', options);
+ */
+module.exports.navigate     = require('./navigate');
+
+/** Analytics utilities */
+module.exports.analytics    = require('./analytics');
 
 /** Layout utilities */
 module.exports.layout       = require('./layout');

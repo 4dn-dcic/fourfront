@@ -490,10 +490,12 @@ $download-button-width : 100px;
 		> .download-button{
 			position: relative;
 			z-index: 10;
-			> a.btn {
-				margin-bottom: -23px;
-				&:not(:first-child){
+			> a.btn, > button.btn {
+				&.button-dl-doc {
 					margin-left: 5px;
+					&.disabled {
+						opacity: 0.33;
+					}
 				}
 				&.button-dl-file {
 					min-width: $download-button-width;
@@ -505,6 +507,23 @@ $download-button-width : 100px;
 	}
 }
 
+// Tablet & mobile screen size adjustments
+@media screen and (max-width : $screen-sm-max){
+	.files-in-set-table .row > .download-button {
+		margin-bottom: -50px;
+	}
+}
+
+// Mobile screen size
+@media screen and (max-width : $screen-xs-max){
+	.files-in-set-table .row > .download-button {
+		> .button-dl-file {
+			margin-bottom: 5px;
+		}
+	}
+}
+
+// Large screen adjustments
 @media screen and (min-width : $screen-md-min){
 
 	.files-in-set-table-title {
@@ -541,10 +560,6 @@ $download-button-width : 100px;
 				height: 40px;
                 padding-top: 3px;
                 padding-bottom: 3px;
-				> button, > a.btn {
-					height: 30px;
-					margin-bottom: 0;
-				}
 			}
 
 		}

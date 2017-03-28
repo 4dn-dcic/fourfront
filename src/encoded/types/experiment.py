@@ -281,3 +281,15 @@ class ExperimentMic(Experiment):
     })
     def display_title(self, request, experiment_type='Undefined', biosample=None):
         return self.experiment_summary(request, experiment_type, biosample)
+
+@calculated_property(context=Experiment, category='action')
+def clone(context, request):
+    """If the user submits for any lab, allow them to clone
+    This is like creating, but keeps previous fields"""
+    if request.has_permission('create'):
+        return {
+            'name': 'clone',
+            'title': 'Clone',
+            'profile': '/profiles/{ti.name}.json'.format(ti=context.type_info),
+            'href': '{item_uri}#!clone'.format(item_uri=request.resource_path(context)),
+        }

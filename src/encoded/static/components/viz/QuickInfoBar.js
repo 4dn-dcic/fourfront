@@ -10,6 +10,7 @@ var { expFxn, Filters, console, object, isServerSide, layout,  } = require('../u
 var ActiveFiltersBar = require('./components/ActiveFiltersBar');
 var MosaicChart = require('./MosaicChart');
 var ChartDataController = require('./chart-data-controller');
+var ReactTooltip = require('react-tooltip');
 
 /**
  * Bar shown below header on home and browse pages.
@@ -55,7 +56,8 @@ var QuickInfoBar = module.exports = React.createClass({
             'count_experiment_sets_total' : null,
             'count_files_total'           : null,
             'mounted'               : false,
-            'show'                  : false
+            'show'                  : false,
+            'reallyShow'            : false
         };
     },
 
@@ -180,6 +182,7 @@ var QuickInfoBar = module.exports = React.createClass({
     },
 
     /** @ignore */
+    /*
     shouldComponentUpdate : function(newProps, newState){
         if (this.state.count_experiments !== newState.count_experiments) return true;
         if (this.state.count_experiment_sets !== newState.count_experiment_sets) return true;
@@ -197,6 +200,15 @@ var QuickInfoBar = module.exports = React.createClass({
 
         return false;
     },
+    */
+
+    anyFiltersSet : function(props = this.props){
+        return (props.expSetFilters && _.keys(props.expSetFilters).length > 0);
+    },
+
+    componentDidUpdate : function(pastProps, pastState){
+        if (this.anyFiltersSet() !== this.anyFiltersSet(pastProps)) ReactTooltip.rebuild();
+    },
 
     /** @ignore */
     className: function(){
@@ -208,7 +220,7 @@ var QuickInfoBar = module.exports = React.createClass({
 
     /** @ignore */
     renderStats : function(){
-        var areAnyFiltersSet = (this.props.expSetFilters && _.keys(this.props.expSetFilters).length > 0);
+        var areAnyFiltersSet = this.anyFiltersSet();
         var stats;
         //if (this.props.showCurrent || this.state.showCurrent){
         if (this.state.count_experiment_sets || this.state.count_experiments || this.state.count_files) {
@@ -243,6 +255,7 @@ var QuickInfoBar = module.exports = React.createClass({
         return (
             <div className={className} onMouseLeave={()=>{
                 this.setState({ show : false });
+                this.timeout = setTimeout(this.setState.bind(this), 500, { 'reallyShow' : false });
             }}>
                 <div className="left-side clearfix">
                     <QuickInfoBar.Stat
@@ -271,9 +284,10 @@ var QuickInfoBar = module.exports = React.createClass({
                     />
                     <div
                         className="any-filters glance-label"
-                        title={areAnyFiltersSet ? "Filtered" : "No filters set"}
+                        data-tip={areAnyFiltersSet ? "Filtered" : "No Filters Set"}
                         onMouseEnter={_.debounce(()=>{
-                            if (areAnyFiltersSet) this.setState({ show : 'activeFilters' });
+                            if (this.timeout) clearTimeout(this.timeout);
+                            if (areAnyFiltersSet) this.setState({ show : 'activeFilters', reallyShow : true });
                         },100)}
                     >
                         <i className="icon icon-filter" style={{ opacity : areAnyFiltersSet ? 1 : 0.25 }} />
@@ -286,7 +300,7 @@ var QuickInfoBar = module.exports = React.createClass({
 
     /** @ignore */
     renderHoverBar : function(){
-        if (this.state.show === 'activeFilters') {
+        if (this.state.show === 'activeFilters' || (this.state.show === false && this.state.reallyShow)) {
             return (
                 <div className="bottom-side">
                     <div className="crumbs-label">
@@ -294,7 +308,6 @@ var QuickInfoBar = module.exports = React.createClass({
                     </div>
                     <ActiveFiltersBar
                         expSetFilters={this.props.expSetFilters}
-                        invisible={!this.state.mounted}
                         orderedFieldNames={null}
                         href={this.props.href}
                         showTitle={false}

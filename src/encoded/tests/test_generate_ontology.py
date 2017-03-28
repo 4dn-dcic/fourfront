@@ -526,7 +526,7 @@ def test_combine_all_parents_w_two_parents():
     assert len(term['all_parents']) == 2
     assert 'id2' in term['all_parents']
     assert 'id3' in term['all_parents']
-    assert term['development'] == term['all_parents']
+    assert sorted(term['development']) == sorted(term['all_parents'])
 
 
 def test_combine_all_parents_w_two_same_parents():
@@ -545,7 +545,7 @@ def test_combine_all_parents_w_parent_and_relationship_diff():
     assert len(term['all_parents']) == 2
     assert 'id2' in term['all_parents']
     assert 'id3' in term['all_parents']
-    assert term['development'] == term['all_parents']
+    assert sorted(term['development']) == sorted(term['all_parents'])
 
 
 def test_combine_all_parents_w_parent_and_relationship_same():

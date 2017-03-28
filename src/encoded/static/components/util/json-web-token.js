@@ -44,7 +44,11 @@ var JWT = module.exports = {
     },
 
     maybeValid : function(jwtToken){
-        return (jwtToken && jwtToken.length > 0 && jwtToken !== "null" && jwtToken !== "expired") ? true : false;
+        return (
+            typeof jwtToken === 'string' && jwtToken.length > 0 && 
+            jwtToken !== "null" &&
+            jwtToken !== "expired"
+        ) ? true : false;
     },
 
     getUserInfo : function(){

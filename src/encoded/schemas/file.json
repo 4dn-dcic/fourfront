@@ -1,3 +1,4 @@
+
 {
     "title": "Data File",
     "description": "Schema for submitting metadata for a data file.",
@@ -73,7 +74,7 @@
             "description": "The md5sum of the file being transferred.",
             "comment": "This can vary for files of same content gzipped at different times",
             "type": "string",
-            "exclude_from": ["submit4dn", "FFedit-create"],
+            "exclude_from": ["submit4dn", "FF-calculate"],
             "format": "hex"
         },
         "content_md5sum": {

@@ -373,6 +373,11 @@ var ChartDataController = module.exports = {
 
         }
 
+        // For debugging, e.g. embedded properties of fetched experiments.
+        if (!isServerSide()){
+            window.ChartDataController = ChartDataController;
+        }
+
     },
 
     /**
@@ -545,17 +550,25 @@ var ChartDataController = module.exports = {
             };
         }
 
-        if (state.filteredExperiments !== null){
-            current = getCounts(state.filteredExperiments);
-        } else {
-            current = {
+        function genNullCounts(){
+            return {
                 'experiment_sets' : null,
                 'experiments' : null,
                 'files' : null
             };
         }
 
-        total = getCounts(state.experiments);
+        if (state.filteredExperiments !== null){
+            current = getCounts(state.filteredExperiments);
+        } else {
+            current = genNullCounts();
+        }
+
+        if (state.experiments !== null){
+            total = getCounts(state.experiments);
+        } else {
+            total = genNullCounts();
+        }
 
         refs.updateStats(current, total);
     },
@@ -600,6 +613,9 @@ var ChartDataController = module.exports = {
             function(allExpsContext){
                 experiments = expFxn.listAllExperimentsFromExperimentSets(allExpsContext['@graph']);
                 cb();
+            }, 'GET', function(){
+                experiments = null;
+                cb();
             }
         );
 
@@ -610,6 +626,9 @@ var ChartDataController = module.exports = {
                 ) + ChartDataController.getFieldsRequiredURLQueryPart(),
                 function(filteredContext){
                     filteredExperiments = expFxn.listAllExperimentsFromExperimentSets(filteredContext['@graph']);
+                    cb();
+                }, 'GET', function(){
+                    filteredExperiments = null;
                     cb();
                 }
             );

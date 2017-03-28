@@ -6,13 +6,11 @@ var ajax = require('./ajax');
 var Alerts = null; //require('./../alerts');
 var store = null;
 var object = require('./object');
+var navigate = require('./navigate');
 
 
 var expFilters = module.exports = {
 
-    // navigate should be set by app.js in App.getInitialState(), getSchemas is set in App.componentDidMount() -> App.loadSchemas()
-    // the others (getPage,getLimit) are defaults but should be overwritten by some component, referencing its state.
-    navigate : null,
     getSchemas : null,
     getPage  : function(){ return 1;  },
     getLimit : function(){ return 25; },
@@ -104,6 +102,18 @@ var expFilters = module.exports = {
 
     },
 
+    /**
+     * Get current expSetFilters from store. Utility method to use from other components if don't want to pass expSetFilters down as prop.
+     * Keep in mind to only use from functions or callbacks, because if it is not a prop, will not update components visually when changed.
+     * 
+     * @public
+     * @static
+     */
+    currentExpSetFilters : function(){
+        if (!store) store = require('./../../store');
+        return store.getState().expSetFilters;
+    },
+
 
     /**
      * Given a field/term, add or remove filter from expSetFilters (in redux store) within context of current state of filters.
@@ -127,9 +137,16 @@ var expFilters = module.exports = {
         useAjax=true,
         href=null
     ){
+
+        // If no expSetFilters (and maybe href, which is optional)
+        // are supplied, get them from Redux store.
         if (!expSetFilters){
             if (!store) store = require('./../../store');
-            expSetFilters = store.getState().expSetFilters;
+            var storeState = store.getState();
+            expSetFilters = storeState.expSetFilters;
+            if (!href) {
+                href = storeState.href;
+            }
         }
 
         // store currently selected filters as a dict of sets
@@ -171,45 +188,48 @@ var expFilters = module.exports = {
      * @param {string}  [href]          Base URL to use for AJAX request, with protocol (i.e. http(s)), hostname (i.e. domain name), and path, at minimum. Required if using AJAX.
      * @param {function}[callback]      Callback function.
      */
-    saveChangedFilters : function(expSetFilters, useAjax=true, href=null, callback = null, originalFilters = null){
+    saveChangedFilters : function(newExpSetFilters, useAjax=true, href=null, callback = null, originalFilters = null){
         if (!store)   store = require('./../../store');
         if (!Alerts) Alerts = require('../alerts');
         if (!useAjax) {
             store.dispatch({
-                type : {'expSetFilters' : expSetFilters}
+                type : {'expSetFilters' : newExpSetFilters}
             });
             if (typeof callback === 'function') setTimeout(callback, 0);
             return true;
         }
 
+        var originalReduxState = store.getState();
+
+        if (!href){
+            console.warn("No HREF (3rd param) supplied, using current href from Redux store. This might be wrong depending on where we should be browsing.");
+            href = originalReduxState.href;
+        }
+
         // Else we fetch new experiment_sets (i.e. (props.)context['@graph'] ) via AJAX.
         if (typeof href !== 'string') throw new Error("No valid href (3rd arg) supplied to saveChangedFilters:", href);
 
-        var originalReduxState = store.getState();
-
-        var newHref = expFilters.filtersToHref(expSetFilters, href);
+        var newHref = expFilters.filtersToHref(newExpSetFilters, href);
 
         var navigateFxn = (
-            this.props && typeof this.props.navigate === 'function' ?   this.props.navigate : 
-                typeof expFilters.navigate === 'function' ?     expFilters.navigate : null
+            typeof navigate === 'function' ? navigate : null
         );
 
         store.dispatch({
             type: {
-                'expSetFilters' : expSetFilters,
+                'expSetFilters' : newExpSetFilters,
             }
         });
 
         if (navigateFxn){
             navigateFxn(newHref, { replace : true, skipConfirmCheck: true }, (result)=>{
                 if (result && result.total === 0){
-                    // No results, cancel out.
-                    Alerts.queue(Alerts.NoFilterResults);
+                    // No results, unset new filters.
+                    Alerts.queue(Alerts.NoFilterResults); // Present an alert box informing user that their new selection is now being UNSELECTED because it returned no results.
                     store.dispatch({ 
                         type : {
                             'expSetFilters' : originalReduxState.expSetFilters,
-                            'context' : originalReduxState.context,
-                            //'expSetFilters' : originalReduxState.expSetFilters
+                            'context' : originalReduxState.context
                         } 
                     });
                     navigateFxn(originalReduxState.href, { skipRequest : true });
@@ -222,14 +242,15 @@ var expFilters = module.exports = {
                 // Fallback callback
                 if (err && (err.status === 404 || err.total === 0)) Alerts.queue(Alerts.NoFilterResults);
                 if (typeof callback === 'function') setTimeout(callback, 0);
-            }/*, { 'expSetFilters' : expSetFilters }*/);
+            }/*, { 'expSetFilters' : newExpSetFilters }*/);
         } else {
+            // DEPRECATED SECTION -- MIGHT NOT WORK.
             ajax.load(newHref, (newContext) => {
                 Alerts.deQueue(Alerts.NoFilterResults);
                 store.dispatch({
                     type: {
                         'context'       : newContext,
-                        //'expSetFilters' : expSetFilters,
+                        //'expSetFilters' : newExpSetFilters,
                         'href'          : newHref
                     }
                 });
@@ -398,12 +419,12 @@ var expFilters = module.exports = {
         }
         var baseHref = urlParts.protocol + '//' + urlParts.host + hrefPath;
         var baseQuery = [];
-        if (urlParts.pathname.indexOf('/browse/') > -1){
+        if (hrefPath.indexOf('/browse/') > -1){
             if (typeof urlParts.query.type !== 'string') baseQuery.push(['type','ExperimentSetReplicate']);
             else baseQuery.push(['type', urlParts.query.type]);
             if (typeof urlParts.query.experimentset_type !== 'string') baseQuery.push(['experimentset_type','replicate']);
             else baseQuery.push(['experimentset_type', urlParts.query.experimentset_type]);
-        } else if (urlParts.pathname.indexOf('/search/') > -1){
+        } else if (hrefPath.indexOf('/search/') > -1){
             if (typeof urlParts.query.type !== 'string') baseQuery.push(['type','Item']);
             else baseQuery.push(['type', urlParts.query.type]);
         }

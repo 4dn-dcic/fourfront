@@ -273,7 +273,7 @@
             &.selected > a {
                 text-decoration: none;
                 color: #f8f8f8;
-                background-color: #248bac;
+                background-color: $facetlist-selected-term-color;
                 &:hover {
                     color: #fff;
                     .facet-item, .facet-count {

@@ -2,6 +2,11 @@
 
 var _ = require('underscore');
 
+/**
+ * Used for object.randomId().
+ * @private
+ */
+var randomIdIncrement = 0;
 
 module.exports = {
 
@@ -75,6 +80,10 @@ module.exports = {
             return null;
         }
 
+    },
+
+    randomId : function() {
+        return 'random-id-' + ++randomIdIncrement;
     },
 
     singleTreatment : function(treatment) {
