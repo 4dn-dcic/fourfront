@@ -14,8 +14,8 @@ var ItemHeader = module.exports = {
     /**** Helper Static Functions ****/
 
     /**
-     * Returns the leaf type from the Item's types array. 
-     * 
+     * Returns the leaf type from the Item's types array.
+     *
      * @public
      * @static
      * @throws {Error} Throws error if no types array ('@type') or it is empty.
@@ -29,7 +29,7 @@ var ItemHeader = module.exports = {
 
     /**
      * Returns ItemHeader.itemType() only if it is different from the Item base type.
-     * 
+     *
      * @public
      * @static
      * @param {Object} context - JSON representation of current Item.
@@ -44,7 +44,7 @@ var ItemHeader = module.exports = {
 
     /**
      * Returns schema for the specific type of Item we're on.
-     * 
+     *
      * @public
      * @static
      * @param {string} itemType - The type for which to get schema.
@@ -70,7 +70,7 @@ var ItemHeader = module.exports = {
     /**
      * Use as first child within an ItemHeader component. Its props.children will be included in the top-right area.
      * Top right area also includes action buttions such as edit button or link, view json button, Item status, etc.
-     * 
+     *
      * @memberof module:item-pages/components.ItemHeader
      * @namespace
      * @type {Component}
@@ -80,7 +80,7 @@ var ItemHeader = module.exports = {
     TopRow : React.createClass({
         /**
          * Renders Item status and color indicator.
-         * 
+         *
          * @memberof module:item-pages/components.ItemHeader.TopRow
          * @private
          * @instance
@@ -112,7 +112,7 @@ var ItemHeader = module.exports = {
         },
         /**
          * Renders view JSON button.
-         * 
+         *
          * @memberof module:item-pages/components.ItemHeader.TopRow
          * @private
          * @instance
@@ -139,7 +139,7 @@ var ItemHeader = module.exports = {
         },
         /**
          * Renders Item actions for admins and submitter.
-         * 
+         *
          * @memberof module:item-pages/components.ItemHeader.TopRow
          * @private
          * @instance
@@ -148,8 +148,6 @@ var ItemHeader = module.exports = {
             if (!Array.isArray(this.props.context.actions) || this.props.context.actions.length === 0) return null;
             return this.props.context.actions.map(function(action, i){
                 var title = action.title;
-                // Temp quickfix "Create" -> "Clone"
-                if (title === 'Create') title = "Clone";
                 return (
                     <div className="expset-indicator right action-button" data-action={action.name || null} key={action.name || i}>
                         <a href={action.href}>{ title }</a>
@@ -160,7 +158,7 @@ var ItemHeader = module.exports = {
 
         /**
          * Wraps props.children in a <div> element.
-         * 
+         *
          * @memberof module:item-pages/components.ItemHeader.TopRow
          * @private
          * @instance
@@ -190,7 +188,7 @@ var ItemHeader = module.exports = {
 
         /**
          * Wraps props.children in a <div> element.
-         * 
+         *
          * @memberof module:item-pages/components.ItemHeader.TopRow
          * @private
          * @instance
@@ -209,7 +207,7 @@ var ItemHeader = module.exports = {
         },
         /**
          * Render function.
-         * 
+         *
          * @memberof module:item-pages/components.ItemHeader.TopRow
          * @private
          * @instance
@@ -221,7 +219,7 @@ var ItemHeader = module.exports = {
             if (typeInfo && typeInfo.properties.accession && typeInfo.properties.accession.description){
                 accessionTooltip += ': ' + typeInfo.properties.accession.description;
             }
-            
+
             //if (accessionTooltip){
             //    accessionTooltip = <i className="icon icon-info-circle inline-block" data-tip={accessionTooltip} />;
             //}
@@ -229,7 +227,7 @@ var ItemHeader = module.exports = {
                 <div className="row clearfix top-row">
                     <h5 className="col-sm-6 item-label-title">
                         { this.typeInfoLabel() }
-                        { this.props.context.accession ? 
+                        { this.props.context.accession ?
                             <span className="accession inline-block" data-tip={accessionTooltip}>{ this.props.context.accession }</span>
                         : null }
                     </h5>
@@ -246,7 +244,7 @@ var ItemHeader = module.exports = {
 
     /**
      * Renders a styled FlexibleDescriptionBox component containing props.context.description.
-     * 
+     *
      * @memberof module:item-pages/components.ItemHeader
      * @namespace
      * @type {Component}
@@ -277,7 +275,7 @@ var ItemHeader = module.exports = {
 
     /**
      * Renders props.context.date_created in bottom-right and props.children in bottom-left areas.
-     * 
+     *
      * @memberof module:item-pages/components.ItemHeader
      * @namespace
      * @type {Component}
@@ -288,7 +286,7 @@ var ItemHeader = module.exports = {
             if (!('date_created' in this.props.context)) return <span><i></i></span>;
             return (
                 <span data-tip="Date Created" className="inline-block">
-                    <i className="icon sbt-calendar"></i>&nbsp;&nbsp; 
+                    <i className="icon sbt-calendar"></i>&nbsp;&nbsp;
                     <DateUtility.LocalizedTime timestamp={this.props.context.date_created} formatType='date-time-md' dateTimeSeparator=" at " />
                 </span>
             );
@@ -306,7 +304,7 @@ var ItemHeader = module.exports = {
     /**
      * Use this to wrap ItemHeader.TopRow, .MiddleRow, and .BottomRow to create a complete ItemHeader.
      * Passes own props.context and props.href down to children.
-     * 
+     *
      * @memberof module:item-pages/components.ItemHeader
      * @namespace
      * @type {Component}
