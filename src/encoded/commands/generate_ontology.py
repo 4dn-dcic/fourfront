@@ -173,8 +173,6 @@ def process_intersection_of(class_, intersection, data, terms):
         col_list.append(col.__str__())
     if _has_human(col_list):
         if PART_OF in col_list:
-            # print('COL-0 = ', collection[0])
-            # print('CLASS = ', class_.__str__())
             terms = _add_term_and_info(class_, collection[0], 'relationships', data, terms)
         elif DEVELOPS_FROM in col_list:
             terms = _add_term_and_info(class_, collection[0], 'develops_from', data, terms)
@@ -472,9 +470,7 @@ def _terms_match(t1, t2):
                     return False
                 for p1 in val:
                     found = False
-                    print(p1)
                     for p2 in t2['parents']:
-                        print(p2['link_id'])
                         # this bit depends on the {link_id: val, display_title: val}
                         # form of embedded info - may need to make more complex to deal with
                         # other scenarios like a list of uuids or fully embedded terms
@@ -493,23 +489,78 @@ def _terms_match(t1, t2):
     return True
 
 
-def id_post_and_patch(terms, dbterms):
+def id_post_and_patch(terms, dbterms, rm_unchanged=True):
     '''compares terms to terms that are already in db - if no change
         removes them from the list of updates, if new adds to post dict,
         if changed adds uuid and add to patch dict
     '''
     to_post = {}
     to_patch = {}
+    tid2uuid = {}  # to keep track of existing uuids
     for tid, term in terms.items():
         if tid not in dbterms:
             # new term
             to_post[tid] = term
         else:
-            # check to see if contents of term are also in db_term
-            if not _terms_match(term, dbterms[tid]):
-                uuid = dbterms[tid]['uuid']
-                term['uuid'] == uuid
+            # add uuid to mapping
+            dbterm = dbterms[tid]
+            uuid = dbterm['uuid']
+            tid2uuid[term['term_id']] = uuid
+            if rm_unchanged and _terms_match(term, dbterm):
+                # check to see if contents of term are also in db_term
+                continue
+            else:
+                term['uuid'] = uuid
                 to_patch[uuid] = term
+    return {'post': to_post, 'patch': to_patch, 'idmap': tid2uuid}
+
+
+def add_uuids(partitioned_terms):
+    '''adds new uuids to terms to post and existing uuids to patch terms
+        this function depends on the partitioned term dictionary that
+        contains keys 'post', 'patch' and 'idmap'
+    '''
+    from uuid import uuid4
+    # go through all the new terms and add uuids to them and idmap
+    idmap = partitioned_terms.get('idmap', {})
+    newterms = partitioned_terms.get('post', None)
+    if newterms:
+        for tid, term in newterms.items():
+            uid = str(uuid4())
+            idmap[tid] = uid
+            term['uuid'] = uid
+        # now that we should have all uuids go through again
+        # and switch parent term ids for uuids
+        for term in newterms.values():
+            if term.get('parents'):
+                puuids = []
+                for p in term['parents']:
+                    if p in idmap:
+                        puuids.append(idmap[p])
+                    else:
+                        print('WARNING - ', p, ' MSSING FROM IDMAP')
+                term['parents'] = puuids
+    # and finally do the same for the patches
+    patches = partitioned_terms.get('patch', None)
+    if patches:
+        for term in patches.values():
+            if term['parents']:
+                puuids = []
+                for p in term['parents']:
+                    if p in idmap:
+                        puuids.append(idmap[p])
+                    else:
+                        print('WARNING - ', p, ' MSSING FROM IDMAP')
+                term['parents'] = puuids
+    try:
+        post = list(newterms.values())
+    except AttributeError:
+        post = None
+    try:
+        patch = list(patches.values())
+    except AttributeError:
+        patch = None
+    return [post, patch]
 
 
 def add_additional_term_info(terms, data, synonym_terms, definition_terms):
@@ -560,19 +611,27 @@ def download_and_process_owl(ontology, connection, terms):
 
 
 def write_outfile(terms, filename, pretty=False):
+    '''terms is a list of dicts
+        write to file by default as a json list or if pretty
+        then same with indents and newlines
+    '''
     indent = None
     lenterms = len(terms)
     with open(filename, 'w') as outfile:
         if pretty:
             indent = 4
             outfile.write('[\n')
-        for i, term in enumerate(terms.values()):
+        else:
+            outfile.write('[')
+        for i, term in enumerate(terms):
             json.dump(term, outfile, indent=indent)
-            if pretty and i != lenterms - 1:
+            if i != lenterms - 1:
                 outfile.write(',')
-            outfile.write('\n')
+            if pretty:
+                outfile.write('\n')
+        outfile.write(']')
         if pretty:
-            outfile.write(']\n')
+            outfile.write('\n')
 
 
 def parse_args(args):
@@ -616,13 +675,8 @@ def main():
     # setup
     args = parse_args(sys.argv[1:])  # to facilitate testing
     connection = connect2server(args.keyfile, args.key)
-
     ontologies = get_ontologies(connection, args.ontologies)
     slim_terms = get_slim_terms(connection)
-    db_terms = get_existing_ontology_terms(connection)
-    db_terms = {t['term_id']: t for t in db_terms}
-    print(db_terms)
-    print(len(db_terms))
 
     # start iteratively downloading and processing ontologies
     terms = {}
@@ -638,13 +692,18 @@ def main():
         terms = remove_obsoletes_and_unnamed(terms)
         terms = verify_and_update_ontology(terms, ontologies)
         db_terms = get_existing_ontology_terms(connection)
-        db_terms = {t['term_id']: t for t in terms}
-        if not args.full:
-            terms = filter_out_existing_and_unchanged(terms, db_terms)
-        # at the moment we're writing json output but consider updating db directly
-        # including checks for removal of terms already in db from ontologies
-        # and audits for items linked to terms
-        write_outfile(terms, args.outfile)
+        db_terms = {t['term_id']: t for t in db_terms}
+        filter_unchanged = True
+        if args.full:
+            filter_unchanged = False
+        partitioned_terms = id_post_and_patch(terms, db_terms, filter_unchanged)
+        terms2write = add_uuids(partitioned_terms)
+
+        name, ext = args.outfile.split('.', -1)
+        postfile = name + '_post.' + ext
+        patchfile = name + '_patch.' + ext
+        write_outfile(terms2write[0], postfile)
+        write_outfile(terms2write[1], patchfile)
 
 
 if __name__ == '__main__':

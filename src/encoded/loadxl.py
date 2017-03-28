@@ -7,8 +7,14 @@ import json
 import logging
 import os.path
 import boto3
-# from pyramid.settings import asbool
-# from snovault.storage import User
+
+import argparse
+
+from pyramid.path import DottedNameResolver
+from pyramid.paster import get_app
+from encoded import configure_dbsession
+import sys
+import os
 
 text = type(u'')
 
@@ -199,7 +205,7 @@ def read_single_sheet(path, name=None):
     """
     from zipfile import ZipFile
     from . import xlreader
-
+    # import pdb; pdb.set_trace()
     if name is None:
         root, ext = os.path.splitext(path)
         stream = open(path, 'r')
@@ -508,7 +514,8 @@ def get_pipeline(testapp, docsdir, test_only, item_type, phase=None, method=None
         add_attachments(docsdir),
     ]
     if phase == 1:
-        method = 'POST'
+        if method is None:
+            method = 'POST'
         pipeline.extend(PHASE1_PIPELINES.get(item_type, []))
     elif phase == 2:
         method = 'PUT'
@@ -618,18 +625,24 @@ PHASE2_PIPELINES = {
 }
 
 
-def load_all(testapp, filename, docsdir, test=False):
+def load_all(testapp, filename, docsdir, test=False, method=None, itype=None):
     """smth."""
-    for item_type in ORDER:
+    order = list(ORDER)
+    if itype is not None:
+        order = [itype]
+    for item_type in order:
         try:
-            source = read_single_sheet(filename, item_type)
-        except ValueError:
-            logger.error('Opening %s %s failed.', filename, item_type)
-            continue
-        pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=1)
+            source = read_single_sheet(filename)
+        except:
+            try:
+                source = read_single_sheet(filename, item_type)
+            except ValueError:
+                logger.error('Opening %s %s failed.', filename, item_type)
+                continue
+        pipeline = get_pipeline(testapp, docsdir, test, item_type, phase=1, method=method)
         process(combine(source, pipeline))
 
-    for item_type in ORDER:
+    for item_type in order:
         if item_type not in PHASE2_PIPELINES:
             continue
         try:
@@ -641,7 +654,7 @@ def load_all(testapp, filename, docsdir, test=False):
 
 
 def generate_access_key(testapp, store_access_key=None,
-                        server='http://localhost:8000',  email='4dndcic@gmail.com'):
+                        server='http://localhost:8000', email='4dndcic@gmail.com'):
 
     # get admin user and generate access keys
     if store_access_key:
@@ -712,9 +725,9 @@ def load_test_data(app, access_key_loc=None):
         'REMOTE_USER': 'TEST',
     }
     testapp = TestApp(app, environ)
-
     from pkg_resources import resource_filename
     inserts = resource_filename('encoded', 'tests/data/inserts/')
+    print(inserts)
     docsdir = [resource_filename('encoded', 'tests/data/documents/')]
     load_all(testapp, inserts, docsdir)
     keys = generate_access_key(testapp, access_key_loc,
@@ -738,3 +751,20 @@ def load_prod_data(app, access_key_loc=None):
     keys = generate_access_key(testapp, access_key_loc,
                                server="https://testportal.4dnucleome.org")
     store_keys(app, access_key_loc, keys, s3_file_name='illnevertell_prod')
+
+
+def load_ontology_terms(app):
+    from webtest import TestApp
+    environ = {
+        'HTTP_ACCEPT': 'application/json',
+        'REMOTE_USER': 'TEST',
+    }
+    testapp = TestApp(app, environ)
+    # import pdb; pdb.set_trace()
+
+    from pkg_resources import resource_filename
+    posts = resource_filename('encoded', 'tests/data/ontology-term-inserts/ontology_post.json')
+    patches = resource_filename('encoded', 'tests/data/ontology-term-inserts/ontology_patch.json')
+    docsdir = []
+    load_all(testapp, posts, docsdir, itype='ontology_term')
+    load_all(testapp, patches, docsdir, itype='ontology_term', method='PATCH')
