@@ -358,12 +358,13 @@ var Action = module.exports = React.createClass({
         var thisType = this.state.thisType;
         var itemClass = globals.itemClass(context, 'view-item');
         var schema = this.state.thisSchema;
+        var actionTitle;
         if(this.props.edit){
-            var actionTitle = 'Editing ' + thisType + ' ' + title;
+            actionTitle = 'Editing ' + thisType + ' ' + title;
         }else if(this.props.create){
-            var actionTitle = 'Creating new ' + thisType;
+            actionTitle = 'Creating new ' + thisType;
         }else{
-            var actionTitle = 'Creating ' + thisType + ' with ' + title + ' as template';
+            actionTitle = 'Creating ' + thisType + ' with ' + title + ' as template';
         }
         var reqFields = this.state.requiredFields;
         return (
@@ -1027,10 +1028,11 @@ var AttachmentInput = React.createClass({
     },
 
     render: function(){
+        var attach_title;
         if(this.props.value && this.props.value.download){
-            var attach_title = this.props.value.download;
+            attach_title = this.props.value.download;
         }else{
-            var attach_title = "No file chosen";
+            attach_title = "No file chosen";
         }
         return(
             <div>
