@@ -243,8 +243,10 @@ var ExperimentSetRow = module.exports.ExperimentSetRow = React.createClass({
                 { this.state.open ?
                 <tr className="expset-addinfo-row">
                     <td className={"expsets-table-hidden " + (this.state.open ? "hidden-col-open" : "hidden-col-closed")} colSpan={Object.keys(this.props.columns).length + 2}>
-                        { formattedAdditionaInformation.call(this) }
-                        { experimentsTable.call(this) }
+                        <div className="experiment-set-info-wrapper">
+                            { formattedAdditionaInformation.call(this) }
+                            { experimentsTable.call(this) }
+                        </div>
                     </td>
                 </tr>
                 : null }

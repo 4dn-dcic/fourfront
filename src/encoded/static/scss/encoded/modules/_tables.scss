@@ -476,7 +476,7 @@ table.matrix {
 				box-shadow: 0 -4px 5px -3px rgba(0,0,0,0.25);
 				td {
 					height: 54px;
-					border-top-color: rgba(0,0,0,0.2);
+					border-top-color: #808080;
 					&.dropdown-button-cell {
 						border-bottom-color: #fff;
 						background-color: #fff;
@@ -583,54 +583,64 @@ tr.expset-addinfo-row {
 		border-bottom: none;
 	}
 
-	.expset-addinfo {
-		text-align: left;
-		border-bottom: 1px solid #ccc;
+	.experiment-set-info-wrapper {
+
+		padding-left: 26px;
+		border-bottom: 1px solid #808080;
+		box-shadow : 0 4px 4px -4px rgba(0,0,0,.25);
 		position: relative;
-		overflow: hidden;
+		z-index: 1;
 
-		.addinfo-description-section,
-		.addinfo-properties-section {
-			padding-top: 15px;
-			padding-bottom: 18px;
-			position: static;
-		}
+		.expset-addinfo {
+			text-align: left;
+			border-bottom: 1px solid #ccc;
+			position: relative;
+			overflow: hidden;
 
-		@media screen and (min-width: $screen-sm-min){
-			
-			.addinfo-properties-section.col-sm-6 {
-			//border-left: 1px solid #eee;
-				padding-left : 18px;
+			.addinfo-description-section,
+			.addinfo-properties-section {
+				padding-top: 15px;
+				padding-bottom: 18px;
+				position: static;
 			}
 
-			.row > .addinfo-description-section.col-sm-6:after {
-				content : "";
-				width: 1px;
-				height: 100%;
-				position: absolute;
-				left: 50%;
-				top: 0;
-				margin-left: -1px;
-				border-left: 1px solid #eee;
+			@media screen and (min-width: $screen-sm-min){
+				
+				.addinfo-properties-section.col-sm-6 {
+				//border-left: 1px solid #eee;
+					padding-left : 18px;
+				}
+
+				.row > .addinfo-description-section.col-sm-6:after {
+					content : "";
+					width: 1px;
+					height: 100%;
+					position: absolute;
+					left: 50%;
+					top: 0;
+					margin-left: -1px;
+					border-left: 1px solid #eee;
+				}
+
+				label.description-label {
+					font-weight: 500;
+					margin-bottom: 2px;
+					display: block;
+				}
 			}
 
-			label.description-label {
+			.expset-addinfo-key {
 				font-weight: 500;
-				margin-bottom: 2px;
-				display: block;
+				padding-right: 10px;
+				width: 100px;
+				display: inline-block;
+			}
+
+			.expset-addinfo-val {
+				padding-right: 30px;
 			}
 		}
 
-		.expset-addinfo-key {
-			font-weight: 500;
-			padding-right: 10px;
-			width: 100px;
-			display: inline-block;
-		}
-
-		.expset-addinfo-val {
-			padding-right: 30px;
-		}
 	}
 
 }
@@ -686,7 +696,7 @@ $expset-col-biosample : 115px;
 $expset-col-experiment : 145px;
 $expset-col-file-pair : 40px;
 $expset-col-file : 125px;
-$expset-col-file-detail : 125px;
+$expset-col-file-detail : 100px;
 $expset-full-width : $expset-col-biosample + $expset-col-experiment + $expset-col-file-pair + $expset-col-file + ($expset-col-file-detail * 2);
 
 // Block Colors
@@ -722,7 +732,7 @@ $expset-biosample-bg-even : #f8f9f7;
 			
             text-overflow: ellipsis;
             white-space: nowrap;
-			background: #f8f8f8;
+			//background: #f8f8f8;
             
 			> .heading-block {
 				text-align: center;
@@ -731,14 +741,14 @@ $expset-biosample-bg-even : #f8f9f7;
 				display: inline-block;
                 vertical-align: middle;
                 height: inherit;
-				padding: 12px 12px;
+				padding: 12px 6px;
                 background: inherit;
 				font-weight: 500;
     			font-size: 0.9rem;
 				border-top: 1px solid #e8e8e8;
-				&:not(:last-child){
-					border-right: 1px solid #ddd;
-				}
+				//&:not(:last-child){
+				//	border-right: 1px solid #ddd;
+				//}
 				> i.icon {
 					font-size: 1rem;
 				}
@@ -953,16 +963,14 @@ $expset-biosample-bg-even : #f8f9f7;
 			}
 
 			> .s-block.biosample:first-child {
-				border-top: 2px solid #000;
+				border-top: 1px solid #b5b5b5;
 			}
 
 			> .s-block.biosample,
 			> .collapsible-s-block-ext > .s-block.biosample {
 
-				border-bottom: 2px solid #000;
-
-				&:last-child {
-					//border-bottom: 1px solid #000;
+				&:not(:last-child){
+					border-bottom: 1px solid #000;
 				}
 
 				&:nth-child(2n-1){

@@ -50,7 +50,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                     'experiment' : 145,
                     'file-pair' : 40,
                     'file' : 125,
-                    'file-detail' : 125,
+                    'file-detail' : 100,
                     'default' : 120
                 };
                 // No columnClassName specified.
@@ -193,7 +193,15 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
 
                     statics : {
 
-                        renderBlockLabel : function(title, subtitle = null, inline = false, className = null){
+                        renderBlockLabel : function(labelOptions = {
+                            title       : null,
+                            subtitle    : null,
+                            accession   : null,
+                            inline      : false,
+                            className   : null
+                        }){
+
+                            var { title, subtitle, accession, inline, className } = labelOptions;
 
                             function titleElement(){
                                 return React.createElement(
@@ -289,13 +297,10 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                         return (
                             <div className={"name col-" + this.props.columnClass} style={style}>
                                 { this.props.label ?
-                                    ExperimentsTable.StackedBlock.Name.renderBlockLabel(
-                                        this.props.label.title,
-                                        this.props.label.subtitle,
-                                        false,
-                                        this.props.label.subtitleVisible === true ? 'subtitle-visible' : null
-                                    )
-                                : null }
+                                    ExperimentsTable.StackedBlock.Name.renderBlockLabel(_.extend({}, this.props.label, {
+                                        inline : false,
+                                        className : this.props.label.subtitleVisible === true ? 'subtitle-visible' : null
+                                    })) : null }
                                 { this.adjustedChildren() }
                             </div>
                         );
@@ -590,11 +595,13 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
         if (!this.refs.header) return null;
         if (!this.cache.origColumnWidths){
             origColumnWidths = _.map(this.refs.header.children, function(c){
-                if ( // For tests/server-side
-                    typeof c.offsetWidth !== 'number' ||
-                    Number.isNaN(c.offsetWidth)
-                ) return ExperimentsTable.initialColumnWidths(c.getAttribute('data-column-class'));
-                return c.offsetWidth;
+                //if ( // For tests/server-side
+                //    typeof c.offsetWidth !== 'number' ||
+                //    Number.isNaN(c.offsetWidth)
+                //){
+                    return ExperimentsTable.initialColumnWidths(c.getAttribute('data-column-class'));
+                //}
+                //return c.offsetWidth;
             });
             this.cache.origColumnWidths = origColumnWidths;
         } else {
@@ -730,6 +737,7 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 hideNameOnHover={false}
                 columnClass="experiment"
                 label={{
+                    accession : exp.accession,
                     title : 'Experiment',
                     subtitle : (
                         exp.tec_rep_no ? 'Tech Replicate ' + exp.tec_rep_no :
@@ -741,7 +749,10 @@ var ExperimentsTable = module.exports.ExperimentsTable = React.createClass({
                 id={(exp.bio_rep_no && exp.tec_rep_no) ? 'exp-' + exp.bio_rep_no + '-' + exp.tec_rep_no : exp.accession || exp['@id']}
             >
                 <ExperimentsTable.StackedBlock.Name relativePosition={expFxn.fileCount(exp) > 6}>
-                    <a href={ exp['@id'] || '#' } className="name-title mono-text">{ exp.accession }</a>
+                    <a href={ exp['@id'] || '#' } className="name-title">{
+                        exp.tec_rep_no ? 'Tech Replicate ' + exp.tec_rep_no :
+                            exp.experiment_type ? exp.experiment_type : null
+                    }</a>
                 </ExperimentsTable.StackedBlock.Name>
                 <ExperimentsTable.StackedBlock.List
                     className={contentsClassName}
@@ -1013,9 +1024,12 @@ var FilePairBlock = React.createClass({
 
         function label(){
             if (typeof this.props.label === 'string'){
-                return ExperimentsTable.StackedBlock.Name.renderBlockLabel('Pair', this.props.label)
+                return ExperimentsTable.StackedBlock.Name.renderBlockLabel({
+                    title : 'Pair',
+                    subtitle : this.props.label
+                });
             } else if (typeof this.props.label === 'object' && this.props.label){
-                return ExperimentsTable.StackedBlock.Name.renderBlockLabel(this.props.label.title || null, this.props.label.subtitle || null)
+                return ExperimentsTable.StackedBlock.Name.renderBlockLabel(this.props.label);
             } else return null;
         }
 
@@ -1145,27 +1159,24 @@ var FileEntryBlock  = React.createClass({
 
         function label(){
             if (!this.props.file) return null;
+
+            var commonProperties = {
+                title : 'File',
+                inline : false,
+                className : 'col-file',
+                subtitle : null
+            };
+
             if (this.props.label) {
-                return ExperimentsTable.StackedBlock.Name.renderBlockLabel(
-                    this.props.label.title || null,
-                    this.props.label.subtitle || null,
-                    false,
-                    'col-file'
-                );
+                return ExperimentsTable.StackedBlock.Name.renderBlockLabel(_.extend({}, commonProperties, this.props.label));
             } else if (this.props.type === 'sequence-replicate') {
-                return ExperimentsTable.StackedBlock.Name.renderBlockLabel(
-                    'File',
-                    this.props.sequenceNum ? 'Seq Replicate ' + this.props.sequenceNum : null,
-                    false,
-                    'col-file'
-                );
+                return ExperimentsTable.StackedBlock.Name.renderBlockLabel(_.extend({}, commonProperties, {
+                    subtitle : this.props.sequenceNum ? 'Seq Replicate ' + this.props.sequenceNum : null
+                }));
             } else if (this.props.type === 'paired-end') {
-                return ExperimentsTable.StackedBlock.Name.renderBlockLabel(
-                    'File',
-                    this.props.file.paired_end ? 'Paired End ' + this.props.file.paired_end : null,
-                    false,
-                    'col-file'
-                );
+                return ExperimentsTable.StackedBlock.Name.renderBlockLabel(_.extend({}, commonProperties, {
+                    subtitle : this.props.file.paired_end ? 'Paired End ' + this.props.file.paired_end : null,
+                }));
             }
 
             if (Array.isArray(this.props.columnHeaders)) {
@@ -1174,21 +1185,21 @@ var FileEntryBlock  = React.createClass({
                     (this.props.file.file_type || this.props.file.file_format) &&
                     _.intersection(headerTitles,['File Type', 'File Format']).length === 0
                 ){
-                    return ExperimentsTable.StackedBlock.Name.renderBlockLabel(
-                        'File', this.props.file.file_type || this.props.file.file_format, false, 'col-file'
-                    );
+                    return ExperimentsTable.StackedBlock.Name.renderBlockLabel(_.extend({}, commonProperties, {
+                        subtitle : this.props.file.file_type || this.props.file.file_format,
+                    }));
                 }
                 if (
                     this.props.file.instrument &&
                     _.intersection(headerTitles,['Instrument', 'File Instrument']).length === 0
                 ){
-                    return ExperimentsTable.StackedBlock.Name.renderBlockLabel(
-                        'File', this.props.file.instrument, false, 'col-file'
-                    );
+                    return ExperimentsTable.StackedBlock.Name.renderBlockLabel(_.extend({}, commonProperties, {
+                        subtitle : this.props.file.instrument,
+                    }));
                 }
             }
 
-            return ExperimentsTable.StackedBlock.Name.renderBlockLabel('File', null, false, 'col-file');
+            return ExperimentsTable.StackedBlock.Name.renderBlockLabel(_.extend({}, commonProperties));
         }
 
         return (
