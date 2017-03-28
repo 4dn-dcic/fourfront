@@ -936,6 +936,8 @@ var App = React.createClass({
                     actionList.push('edit');
                 }else if (value == '#!create'){
                     actionList.push('create');
+                }else if (value == '#!clone'){
+                    actionList.push('clone');
                 }else{
                     lowerList.push(value.toLowerCase());
                 }
@@ -991,6 +993,7 @@ var App = React.createClass({
                             navigate={this.navigate}
                             href={this.props.href}
                             edit={actionList[0] == 'edit'}
+                            create={actionList[0] == 'create'}
                         />
                     );
                     title = makeTitle({'context': context});

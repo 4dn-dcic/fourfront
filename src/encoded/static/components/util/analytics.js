@@ -4,6 +4,14 @@ var _ = require('underscore');
 var url = require('url');
 var { isServerSide } = require('./misc');
 var console = require('./patched-console');
+var Filters = require('./experiments-filters');
+var navigate = require('./navigate');
+
+
+var GADimensionMap = {
+    'currentFilters' : 'dimension1'
+};
+
 
 var analytics = module.exports = {
 
@@ -37,17 +45,37 @@ var analytics = module.exports = {
 
     registerPageView : function(href = null){
         if (isServerSide() || typeof window.ga === 'undefined') {
-            console.error("Google Analytics is not initialized.");
+            console.error("Google Analytics is not initialized. Fine if this appears in a test.");
             return false;
         }
+
+        if (!href) href = window.location && window.location.href;
+
+        var opts = {};
+
         if (href){
+            var pastHref = href;
             var parts = url.parse(href);
-            href = parts.pathname + (parts.search || '');
+            href = parts.pathname;// + (parts.search || '');
             ga('set', 'page', href);
+            if (
+                typeof parts.search === 'string' &&
+                parts.search.length > 1 &&
+                navigate.isBrowseHref(href)
+            ){
+                opts[GADimensionMap.currentFilters] = analytics.getStringifiedCurrentFilters(pastHref);
+                //if (opts[GADimensionMap.currentFilters] === "{}") delete opts[GADimensionMap.currentFilters];
+            }
         }
-        ga('send', 'pageview');
-        console.info('Sent pageview event.', href);
+        
+        ga('send', 'pageview', opts);
+        console.info('Sent pageview event.', href, opts);
         return true;
+    },
+
+    getStringifiedCurrentFilters : function(href){
+        var currentFilters = Filters.hrefToFilters(href);
+        return JSON.stringify(currentFilters, _.keys(currentFilters).sort());
     },
 
     getTrackingId : function(href = null){
@@ -71,3 +99,7 @@ var analytics = module.exports = {
     },
 
 };
+
+if (!isServerSide()) {
+    window.analytics = analytics;
+}
