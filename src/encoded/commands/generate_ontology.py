@@ -544,7 +544,7 @@ def add_uuids(partitioned_terms):
     patches = partitioned_terms.get('patch', None)
     if patches:
         for term in patches.values():
-            if term['parents']:
+            if term.get('parents'):
                 puuids = []
                 for p in term['parents']:
                     if p in idmap:
@@ -677,6 +677,8 @@ def main():
     connection = connect2server(args.keyfile, args.key)
     ontologies = get_ontologies(connection, args.ontologies)
     slim_terms = get_slim_terms(connection)
+    db_terms = get_existing_ontology_terms(connection)
+    db_terms = {t['term_id']: t for t in db_terms}
 
     # start iteratively downloading and processing ontologies
     terms = {}
@@ -691,8 +693,6 @@ def main():
         terms = add_slim_terms(terms, slim_terms)
         terms = remove_obsoletes_and_unnamed(terms)
         terms = verify_and_update_ontology(terms, ontologies)
-        db_terms = get_existing_ontology_terms(connection)
-        db_terms = {t['term_id']: t for t in db_terms}
         filter_unchanged = True
         if args.full:
             filter_unchanged = False
