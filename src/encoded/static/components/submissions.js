@@ -12,6 +12,11 @@ var Submissions = module.exports = React.createClass({
         return(
             <div>
                 <h1 className="page-title">Your submissions</h1>
+                    <div className="flexible-description-box item-page-heading">
+                        <p className="text-larger">
+                            Your submissions to 4DN appear here.
+                        </p>
+                    </div>
             </div>
         );
     }
