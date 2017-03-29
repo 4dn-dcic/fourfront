@@ -22,7 +22,7 @@ def main():
     logging.getLogger('encoded').setLevel(logging.DEBUG)
 
     parser = argparse.ArgumentParser(
-        description="Load Test Data", epilog=EPILOG,
+        description="Load Ontology Term Data", epilog=EPILOG,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument('--app-name', help="Pyramid app name in configfile")
